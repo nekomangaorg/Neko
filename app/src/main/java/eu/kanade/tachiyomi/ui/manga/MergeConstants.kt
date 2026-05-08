@@ -1,13 +1,12 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 
 object MergeConstants {
 
     sealed class IsMergedManga {
-        data class Yes(val url: String, val title: String, val mergeType: MergeType) :
-            IsMergedManga()
+        data class Yes(val mergedMangaList: List<MergeMangaImpl>) : IsMergedManga()
 
         object No : IsMergedManga()
     }

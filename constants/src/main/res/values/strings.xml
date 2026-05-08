@@ -1326,6 +1326,8 @@
     <string name="open_merged_in_webview">Open Merged source in WebView</string>
     <string name="merge_source_">Merge Source: %1$s</string>
     <string name="remove_merged_source">Remove merged source</string>
+    <string name="merged_sources">Merged Sources</string>
+    <string name="add_merge_source">Add merge source</string>
     <string name="options">Options</string>
     <string name="pause">Pause</string>
     <string name="picture_saved">Picture saved</string>

@@ -31,9 +31,18 @@ data class SourceMergeManga(
 }
 
 // id 0 was MangaLife, 4 was Comick,
-enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String = "") {
+enum class MergeType(
+    val id: Int,
+    val scanlatorName: String,
+    val baseUrl: String = "",
+    val multiMerge: Boolean = false,
+) {
     Invalid(id = -1, scanlatorName = "Invalid Merge source"),
-    Komga(id = 1, scanlatorName = eu.kanade.tachiyomi.source.online.merged.komga.Komga.name),
+    Komga(
+        id = 1,
+        scanlatorName = eu.kanade.tachiyomi.source.online.merged.komga.Komga.name,
+        multiMerge = true,
+    ),
     Toonily(
         id = 2,
         scanlatorName = eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.name,
@@ -47,6 +56,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
     Suwayomi(
         id = 5,
         scanlatorName = eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi.name,
+        multiMerge = true,
     ),
     MangaBall(
         id = 7,

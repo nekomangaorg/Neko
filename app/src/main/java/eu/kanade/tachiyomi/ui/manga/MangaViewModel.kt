@@ -9,12 +9,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -304,12 +307,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .observeMergeMangaList(mangaId)
             .map { mergeMangaList ->
                 when (mergeMangaList.isNotEmpty()) {
-                    true -> {
-                        val mergeManga = mergeMangaList.first()
-                        val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
-                        val url = source.getMangaUrl(mergeManga.url)
-                        Yes(url, title = mergeManga.title, mergeType = mergeManga.mergeType)
-                    }
+                    true -> Yes(mergeMangaList)
                     false -> No
                 }
             }
@@ -372,6 +370,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                             chapter.toDbChapter(),
                                             dbManga,
                                         ) -> Download.State.DOWNLOADED
+
                                     else -> {
                                         val download = queuedDownloadsById[chapter.id]
                                         when (download == null) {
@@ -718,7 +717,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         }
     }
 
-    fun onRefresh(isMerging: Boolean = false) {
+    fun onRefresh(isMerging: Boolean = false, isUnmerging: Boolean = false) {
         TimberKt.d { "On Refresh called" }
         viewModelScope.launchIO {
             if (!isOnline()) {
@@ -779,26 +778,50 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         }
 
                         is MangaResult.ChaptersRemoved -> {
-                            val removedChapters =
+                            var removedChapters =
                                 mangaDetailScreenState.value.chapters.allChapters.filter {
                                     it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
                                 }
 
                             if (removedChapters.isNotEmpty()) {
-                                when (preferences.deleteRemovedChapters().get()) {
-                                    2 -> deleteChapters(removedChapters)
-                                    1 -> Unit
-                                    else -> {
-                                        _mangaDetailScreenState.update {
-                                            it.copy(
-                                                general =
-                                                    it.general.copy(
-                                                        removedChapters =
-                                                            removedChapters.toPersistentList()
-                                                    )
-                                            )
+                                if (!isUnmerging) {
+                                    when (preferences.deleteRemovedChapters().get()) {
+                                        2 -> deleteChapters(removedChapters)
+                                        1 -> Unit
+                                        else -> {
+                                            _mangaDetailScreenState.update {
+                                                it.copy(
+                                                    general =
+                                                        it.general.copy(
+                                                            removedChapters =
+                                                                removedChapters.toPersistentList()
+                                                        )
+                                                )
+                                            }
                                         }
                                     }
+                                } else if (!libraryPreferences.enableLocalChapters().get()) {
+                                    var mergeRemoved = emptyList<Chapter>()
+                                    removedChapters
+                                        .partition { it.chapter.isMergedChapter() }
+                                        .apply {
+                                            mergeRemoved =
+                                                this.first.map {
+                                                    it.chapter.toSChapter().toChapter()
+                                                }
+                                            removedChapters = this.second
+                                        }
+
+                                    try {
+                                        val dbManga =
+                                            mangaRepository.getMangaById(mangaId) ?: return@collect
+                                        downloadManager.deleteChapters(dbManga, mergeRemoved)
+                                    } catch (e: Exception) {
+                                        TimberKt.e(e) {
+                                            "Failed to delete chapters for merged manga"
+                                        }
+                                    }
+                                    chapterRepository.deleteChapters(mergeRemoved)
                                 }
                             }
                         }
@@ -997,6 +1020,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     addToLibrarySnack()
                     downloadManager.startDownloadNow(chapterItems.first().chapter.toDbChapter())
                 }
+
                 is DownloadAction.DownloadAll -> {
                     addToLibrarySnack()
                     downloadManager.downloadChapters(
@@ -1006,6 +1030,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         },
                     )
                 }
+
                 is DownloadAction.Download -> {
                     addToLibrarySnack()
                     downloadManager.downloadChapters(
@@ -1015,6 +1040,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         },
                     )
                 }
+
                 is DownloadAction.DownloadNextUnread -> {
                     val filteredChapters =
                         mangaDetailScreenState.value.chapters.activeChapters
@@ -1030,6 +1056,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             .toList()
                     downloadManager.downloadChapters(dbManga, filteredChapters)
                 }
+
                 is DownloadAction.DownloadUnread -> {
                     val filteredChapters =
                         mangaDetailScreenState.value.chapters.activeChapters.mapNotNull {
@@ -1039,14 +1066,17 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
                 }
+
                 is DownloadAction.Remove ->
                     deleteChapters(chapterItems, chapterItems.size == allChapterSize)
+
                 is DownloadAction.RemoveAll ->
                     deleteChapters(
                         mangaDetailScreenState.value.chapters.activeChapters,
                         mangaDetailScreenState.value.chapters.activeChapters.size == allChapterSize,
                         true,
                     )
+
                 is DownloadAction.RemoveRead -> {
                     val filteredChapters =
                         mangaDetailScreenState.value.chapters.activeChapters.filter {
@@ -1054,6 +1084,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         }
                     deleteChapters(filteredChapters, filteredChapters.size == allChapterSize, true)
                 }
+
                 is DownloadAction.Cancel ->
                     deleteChapters(chapterItems, chapterItems.size == allChapterSize)
             }
@@ -1097,16 +1128,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         SnackbarState(
                             message = errorMessage,
                             fieldRes = serviceNameRes,
-                            messageRes = org.nekomanga.R.string.error_refreshing_,
+                            messageRes = R.string.error_refreshing_,
                             snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                         )
                     )
                 },
                 onChaptersToMarkRead = { chaptersToMark ->
-                    markChapters(
-                        chaptersToMark,
-                        org.nekomanga.domain.chapter.ChapterMarkActions.Read(),
-                    )
+                    markChapters(chaptersToMark, ChapterMarkActions.Read())
                 },
             )
         }
@@ -1320,11 +1348,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     sourceOrderSort = status,
                     matchesGlobalDefaults = matchesDefaults,
                 )
+
             Manga.CHAPTER_SORTING_UPLOAD_DATE ->
                 MangaConstants.SortFilter(
                     uploadDateSort = status,
                     matchesGlobalDefaults = matchesDefaults,
                 )
+
             else ->
                 MangaConstants.SortFilter(
                     smartOrderSort = status,
@@ -1377,6 +1407,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 it.chapter.name.contains(searchQuery, true)
                         }
                     }
+
                     false -> emptyList()
                 }
 
@@ -1538,17 +1569,24 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     /** Remove merged manga entry */
-    fun removeMergedManga(mergeType: MergeType) {
-        viewModelScope.launchIO { mergeMangaUseCases.removeMergedManga.execute(mangaId, mergeType) }
+    fun removeMergedManga(mergeManga: MergeMangaImpl) {
+        viewModelScope.launchIO {
+            val removed = mergeMangaUseCases.removeMergedManga.execute(mangaId, mergeManga)
+            if (!removed) onRefresh(isUnmerging = true)
+        }
     }
 
-    fun searchMergedManga(query: String, mergeType: MergeType) {
+    fun searchMergedManga(
+        query: String,
+        mergeType: MergeType,
+        mergedUrls: List<String> = emptyList(),
+    ) {
         viewModelScope.launchIO {
             _mangaDetailScreenState.update {
                 it.copy(merge = it.merge.copy(mergeSearchResult = MergeSearchResult.Loading))
             }
 
-            val result = mergeMangaUseCases.searchMergedManga.execute(query, mergeType)
+            val result = mergeMangaUseCases.searchMergedManga.execute(query, mergeType, mergedUrls)
 
             _mangaDetailScreenState.update { state ->
                 result.fold(
@@ -1561,6 +1599,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                             mergeSearchResult = MergeSearchResult.NoResult
                                         )
                                 )
+
                             false ->
                                 state.copy(
                                     merge =
@@ -1642,11 +1681,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             downloadedFilter = Manga.SHOW_ALL,
                             availableFilter = Manga.SHOW_ALL,
                         )
+
                     MangaConstants.ChapterDisplayType.Unread ->
                         base.copy(
                             readFilter =
                                 getTriState(Manga.CHAPTER_SHOW_UNREAD, Manga.CHAPTER_SHOW_READ)
                         )
+
                     MangaConstants.ChapterDisplayType.Bookmarked ->
                         base.copy(
                             bookmarkedFilter =
@@ -1655,6 +1696,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     Manga.CHAPTER_SHOW_NOT_BOOKMARKED,
                                 )
                         )
+
                     MangaConstants.ChapterDisplayType.Downloaded ->
                         base.copy(
                             downloadedFilter =
@@ -1663,6 +1705,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     Manga.CHAPTER_SHOW_NOT_DOWNLOADED,
                                 )
                         )
+
                     MangaConstants.ChapterDisplayType.Available ->
                         base.copy(
                             availableFilter =
@@ -1671,6 +1714,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     Manga.CHAPTER_SHOW_UNAVAILABLE,
                                 )
                         )
+
                     MangaConstants.ChapterDisplayType.HideTitles ->
                         base.copy(
                             hideChapterTitles = filterOption.displayState == ToggleableState.On
@@ -1749,6 +1793,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     mangaDetailsPreferences.chaptersDescAsDefault().set(manga.sortDescending)
                     manga.setSortToGlobal()
                 }
+
                 MangaConstants.SetGlobal.Filter -> {
                     mangaDetailsPreferences.filterChapterByRead().set(manga.readFilter)
                     mangaDetailsPreferences.filterChapterByDownloaded().set(manga.downloadedFilter)
@@ -1809,7 +1854,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             runCatching {
                                     mdList.bind(track)
                                 } // Assumes bind() mutates the 'track' object
-                                .onFailure { exception ->
+                                .onErr { exception ->
                                     TimberKt.e(exception) { "Error binding new MangaDex track" }
                                 }
                         }
@@ -1908,6 +1953,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     }
                                 }
                             }
+
                             is TrackingConstants.TrackSearchResult.Error -> {
                                 // Show a specific error for *this* tracker
                                 launchUI {
@@ -1922,6 +1968,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     )
                                 }
                             }
+
                             else -> Unit
                         }
                     }
@@ -1966,6 +2013,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 true ->
                     coverCache.getCustomCoverFile(dbManga).takeIf { it.exists() }
                         ?: coverCache.getCoverFile(dbManga.thumbnail_url, dbManga.favorite)
+
                 false -> coverCache.getCoverFile(artwork.cover)
             }
 
@@ -2040,6 +2088,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                         )
                     )
+
                 false -> {
                     _mangaDetailScreenState.update {
                         it.copy(general = it.general.copy(isRefreshing = true))
@@ -2047,7 +2096,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     val threadId =
                         sourceManager.mangaDex
                             .getChapterCommentId(chapterId)
-                            .onFailure { TimberKt.e { it.message() } }
+                            .onErr { TimberKt.e { it.message() } }
                             .getOrElse { null }
                     _mangaDetailScreenState.update {
                         it.copy(general = it.general.copy(isRefreshing = false))
@@ -2090,7 +2139,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         }
                     }
                 }
-                .onFailure {
+                .onErr {
                     TimberKt.e(it) { "Error trying to mark chapters read from MangaDex" }
                     viewModelScope.launchIO {
                         delay(3000)
@@ -2245,6 +2294,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     blockedGroups.add(name)
                     mangaDexPreferences.blockedGroups().set(blockedGroups)
                 }
+
                 MangaConstants.BlockType.Uploader -> {
                     val uploaderImpl = uploaderGroupRepository.getUploaderByName(name)
                     if (uploaderImpl == null) {
@@ -2424,12 +2474,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 if (volumes != null) {
                     for ((_, volumeInfo) in volumes) {
                         val chaptersInVolume = volumeInfo.chapters.values
-                        val matchById =
-                            mangaDexChapterId != null &&
-                                chaptersInVolume.any {
-                                    it.id == mangaDexChapterId ||
-                                        it.others.contains(mangaDexChapterId)
-                                }
+                        val matchById = chaptersInVolume.any {
+                            it.id == mangaDexChapterId || it.others.contains(mangaDexChapterId)
+                        }
                         val matchByNumber = chaptersInVolume.any { it.chapter == chapterNumberStr }
 
                         if (matchById || matchByNumber) {
