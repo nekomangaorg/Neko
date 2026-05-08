@@ -23,10 +23,12 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -78,14 +80,14 @@ fun ColumnScope.SearchFooter(
             if (isError) {
                 Icon(
                     imageVector = Icons.Default.Warning,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.warning),
                     tint = MaterialTheme.colorScheme.error,
                 )
             } else if (title.isNotEmpty()) {
                 IconButton(onClick = { textChanged("") }) {
                     Icon(
                         imageVector = Icons.Default.Cancel,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.clear),
                         tint = themeColorState.primaryColor,
                     )
                 }
