@@ -58,7 +58,7 @@ class BackupNotifier(private val context: Context) {
 
         with(completeNotificationBuilder) {
             setContentTitle(context.getString(R.string.backup_failed))
-            setContentText(error)
+            setContentText(error ?: context.getString(R.string.unknown_error))
 
             show(Notifications.ID_BACKUP_COMPLETE)
         }
@@ -129,7 +129,7 @@ class BackupNotifier(private val context: Context) {
 
         with(completeNotificationBuilder) {
             setContentTitle(context.getString(R.string.restore_error))
-            setContentText(error)
+            setContentText(error ?: context.getString(R.string.unknown_error))
 
             show(Notifications.ID_RESTORE_COMPLETE)
         }
