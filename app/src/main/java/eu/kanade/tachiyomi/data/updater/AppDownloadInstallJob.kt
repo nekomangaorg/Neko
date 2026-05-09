@@ -22,6 +22,7 @@ import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.util.lang.orUnknownError
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.connectivityManager
@@ -43,7 +44,6 @@ import okhttp3.Call
 import okhttp3.internal.http2.ErrorCode
 import okhttp3.internal.http2.StreamResetException
 import org.nekomanga.BuildConfig
-import org.nekomanga.R
 import org.nekomanga.core.network.GET
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.ProgressListener
@@ -247,12 +247,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             if (error is CancellationException) throw error
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
-            withContext(Dispatchers.Main) {
-                context.toast(
-                    error.message?.takeUnless(String::isBlank)
-                        ?: context.getString(R.string.unknown_error)
-                )
-            }
+            withContext(Dispatchers.Main) { context.toast(error.message.orUnknownError(context)) }
             notifier.cancelInstallNotification()
             notifier.onDownloadFinished(file.getUriCompat(context))
             PreferenceManager.getDefaultSharedPreferences(context).edit {

@@ -83,6 +83,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.util.lang.orUnknownError
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
@@ -1279,7 +1280,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     fun setInitialChapterError(error: Throwable) {
         TimberKt.e(error) { "Error setting initial chapter" }
         finish()
-        toast(error.message?.takeUnless(String::isBlank) ?: getString(R.string.unknown_error))
+        toast(error.message.orUnknownError(this))
     }
 
     /**

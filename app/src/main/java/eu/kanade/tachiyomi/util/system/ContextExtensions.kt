@@ -36,6 +36,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.util.lang.orUnknownError
 import java.io.File
 import kotlin.math.max
 import org.nekomanga.R
@@ -284,7 +285,7 @@ fun Context.openInFirefox(url: String) {
             }
         startActivity(intent)
     } catch (e: Exception) {
-        toast(e.message?.takeUnless(String::isBlank) ?: getString(R.string.unknown_error))
+        toast(e.message.orUnknownError(this))
         openInBrowser(uri)
     }
 }
@@ -308,7 +309,7 @@ fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
             }
         startActivity(intent)
     } catch (e: Exception) {
-        toast(e.message?.takeUnless(String::isBlank) ?: getString(R.string.unknown_error))
+        toast(e.message.orUnknownError(this))
     }
 }
 
