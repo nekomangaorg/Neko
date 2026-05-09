@@ -284,7 +284,7 @@ fun Context.openInFirefox(url: String) {
             }
         startActivity(intent)
     } catch (e: Exception) {
-        toast(e.message?.takeIf { it.isNotBlank() } ?: getString(R.string.unknown_error))
+        toast(e.message?.takeUnless(String::isBlank) ?: getString(R.string.unknown_error))
         openInBrowser(uri)
     }
 }
@@ -308,7 +308,7 @@ fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
             }
         startActivity(intent)
     } catch (e: Exception) {
-        toast(e.message?.takeIf { it.isNotBlank() } ?: getString(R.string.unknown_error))
+        toast(e.message?.takeUnless(String::isBlank) ?: getString(R.string.unknown_error))
     }
 }
 

@@ -1279,7 +1279,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     fun setInitialChapterError(error: Throwable) {
         TimberKt.e(error) { "Error setting initial chapter" }
         finish()
-        toast(error.message?.takeIf { it.isNotBlank() } ?: getString(R.string.unknown_error))
+        toast(error.message?.takeUnless(String::isBlank) ?: getString(R.string.unknown_error))
     }
 
     /**
