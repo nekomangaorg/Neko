@@ -4,6 +4,7 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.lang.isUUID
@@ -182,15 +183,22 @@ class DownloadCache(
             } ?: return
 
         val mangaRepository: MangaRepository = Injekt.get()
-        // Optimization: Fetch once
         val allManga = mangaRepository.getMangaList()
 
-        // 3. Create lookup map for O(1) access
-        val mangaLookup = allManga.associateBy {
+        // UUID-keyed map for new-format folders ("Title [uuid]")
+        val mangaByUuid = allManga.associateBy { it.uuid().lowercase(Locale.getDefault()) }
+        // Title-keyed map for legacy-format folders ("Title")
+        val mangaByTitle = allManga.associateBy {
             DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
         }
+        // Count per normalised title to detect unambiguous legacy folders eligible for migration
+        val titleCount =
+            allManga
+                .groupBy {
+                    DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
+                }
+                .mapValues { it.value.size }
 
-        // 4. Iterate over the folders on disk
         val newMangaFiles = ConcurrentHashMap<Long, MangaFiles>()
         coroutineScope {
             sourceDir
@@ -199,8 +207,34 @@ class DownloadCache(
                 .map { mangaDir ->
                     async {
                         val dirName = mangaDir.name ?: return@async
+                        val dirLower = dirName.lowercase(Locale.getDefault())
+
+                        val uuidFromSuffix =
+                            dirLower.substringAfterLast("[", "").removeSuffix("]").takeIf {
+                                it.isUUID()
+                            }
+
                         val manga =
-                            mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@async
+                            if (uuidFromSuffix != null) {
+                                mangaByUuid[uuidFromSuffix]
+                            } else {
+                                // Legacy title-only folder: rename to UUID-based name when
+                                // the title is unambiguous so future cache cycles use the new
+                                // format and avoid the same-title collision.
+                                val legacyManga = mangaByTitle[dirLower]
+                                if (legacyManga != null && titleCount[dirLower] == 1) {
+                                    try {
+                                        mangaDir.renameTo(provider.getMangaDirName(legacyManga))
+                                    } catch (e: Exception) {
+                                        TimberKt.e(e) {
+                                            "Failed to migrate download folder for " +
+                                                legacyManga.displayTitle()
+                                        }
+                                    }
+                                }
+                                return@async
+                            } ?: return@async
+
                         val id = manga.id ?: return@async
 
                         val files =
