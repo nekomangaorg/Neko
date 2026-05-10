@@ -358,7 +358,7 @@ suspend fun syncChaptersWithSource(
         }
 
         if (toChange.isNotEmpty()) {
-            chapterRepository.insertChapters(toChange)
+            chapterRepository.updateChapters(toChange)
         }
         val topChapters =
             chapterRepository

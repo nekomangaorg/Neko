@@ -1,10 +1,9 @@
 package org.nekomanga.data.database.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import org.nekomanga.data.database.entity.HistoryEntity
 import org.nekomanga.data.database.model.MangaChapterHistory
@@ -363,8 +362,7 @@ interface HistoryDao {
     @Query("SELECT * FROM history WHERE chapter_id = :chapterId")
     suspend fun getHistoryByChapterId(chapterId: Long): HistoryEntity?
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertHistory(history: HistoryEntity): Long
+    @Upsert suspend fun insertHistory(history: HistoryEntity): Long
 
     @Query(
         "UPDATE history SET last_read = :lastRead, time_read = :timeRead WHERE chapter_id = :chapterId"
