@@ -36,7 +36,7 @@ class Comix : ReducedHttpSource() {
             .build()
 
     override val headers = Headers.Builder().add("Referer", "$baseUrl/").build()
-    private val proxiedHeaders = headers.newBuilder().add(signer.PROXY_HEADER, "1").build()
+    private val proxiedHeaders = headers.newBuilder().add(ComixSigner.PROXY_HEADER, "1").build()
 
     private val json = Json {
         ignoreUnknownKeys = true

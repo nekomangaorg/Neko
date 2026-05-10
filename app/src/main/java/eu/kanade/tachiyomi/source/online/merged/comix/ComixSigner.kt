@@ -12,6 +12,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import java.io.IOException
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -29,7 +30,7 @@ import uy.kohesive.injekt.api.get
  * `/chapters/{cid}`, …).
  *
  * The site ships a Jscrambler-style obfuscated VM bundle (`secure-*.js`) that exposes two pieces of
- * glue on `globalThis.vmf_<id>`:
+ * glue on `globalThis.vm*_<id>`:
  *
  * - a **signer** `fn(path) -> token` used to compute the `_=<token>` query parameter every
  *   protected endpoint requires;
@@ -59,17 +60,6 @@ import uy.kohesive.injekt.api.get
  * OkHttp.
  */
 class ComixSigner {
-    private val BASE_URL = "https://comix.to/"
-    private val PROBE_PATH = "/manga/k78g6/chapters"
-    private val LOAD_TIMEOUT_S = 25L
-    private val FETCH_TIMEOUT_S = 25L
-    private val PROBE_INTERVAL_MS = 250L
-    private val WEBVIEW_WIDTH = 1080
-    private val WEBVIEW_HEIGHT = 1920
-    private val BRIDGE_NAME = "ComixSignerBridge"
-
-    val PROXY_HEADER = "X-Comix-WebView-Proxy"
-
     private val handler by lazy { Handler(Looper.getMainLooper()) }
 
     @Volatile private var webView: WebView? = null
@@ -113,7 +103,7 @@ class ComixSigner {
         val signer = signerExpr ?: throw IOException("Comix: signer not initialized")
         val installer =
             installerExpr ?: throw IOException("Comix: response decryptor not initialized")
-        val token = "t_" + System.nanoTime()
+        val token = UUID.randomUUID().toString()
         val slot = FetchSlot()
         pending[token] = slot
 
@@ -342,64 +332,77 @@ class ComixSigner {
     private fun extractSignablePath(apiPath: String): String =
         apiPath.substringBefore('?').removePrefix("/api/v1")
 
-    /**
-     * Walks `window.vmf_*` namespaces and identifies two functions:
-     * - `sig`: signer — `fn(path) -> ≥40-char base64url token`
-     * - `inst`: axios installer — `fn(axiosInstance)` registers a request interceptor that signs
-     *   URLs *and* a response interceptor that decrypts `{e:"..."}` bodies. Probed by feeding a
-     *   fake axios and checking whether `interceptors.response.use` was called.
-     *
-     * Returns `'sig=window.<ns>.<a>;inst=window.<ns>.<b>'` once both are found, otherwise `''` so
-     * the polling loop tries again.
-     */
-    private val PROBE_JS =
-        """
-        (function() {
-            try {
-                var probe = '$PROBE_PATH';
-                var re = /^[A-Za-z0-9_-]{40,200}$/;
-                var sig = '', inst = '';
-                var keys = Object.keys(window);
-                for (var i = 0; i < keys.length; i++) {
-                    var topName = keys[i];
-                    if (!/^vm[A-Za-z]_\w+$/.test(topName)) continue;
-                    var ns = window[topName];
-                    if (!ns || typeof ns !== 'object') continue;
-                    var fnames = Object.keys(ns);
-                    for (var j = 0; j < fnames.length; j++) {
-                        var fn = ns[fnames[j]];
-                        if (typeof fn !== 'function') continue;
-                        var ref = 'window.' + topName + '.' + fnames[j];
-                        if (!sig) {
-                            try {
-                                var out = fn(probe);
-                                if (typeof out === 'string' && out !== probe && re.test(out)) {
-                                    sig = ref;
-                                }
-                            } catch (e) {}
-                        }
-                        if (!inst) {
-                            try {
-                                var got = false;
-                                var fakeAxios = {
-                                    interceptors: {
-                                        request:  { use: function() {} },
-                                        response: { use: function() { got = true; } }
-                                    },
-                                    defaults: { headers: { common: {} }, transformRequest: [], transformResponse: [] }
-                                };
-                                fn(fakeAxios);
-                                if (got) inst = ref;
-                            } catch (e) {}
+    companion object {
+        /**
+         * Walks `window.vm*_*` namespaces and identifies two functions:
+         * - `sig`: signer — `fn(path) -> ≥40-char base64url token`
+         * - `inst`: axios installer — `fn(axiosInstance)` registers a request interceptor that signs
+         *   URLs *and* a response interceptor that decrypts `{e:"..."}` bodies. Probed by feeding a
+         *   fake axios and checking whether `interceptors.response.use` was called.
+         *
+         * Returns `'sig=window.<ns>.<a>;inst=window.<ns>.<b>'` once both are found, otherwise `''` so
+         * the polling loop tries again.
+         */
+        private val PROBE_JS =
+            """
+            (function() {
+                try {
+                    var probe = '$PROBE_PATH';
+                    var re = /^[A-Za-z0-9_-]{40,200}$/;
+                    var sig = '', inst = '';
+                    var keys = Object.keys(window);
+                    for (var i = 0; i < keys.length; i++) {
+                        var topName = keys[i];
+                        if (!/^vm[A-Za-z]_\w+$/.test(topName)) continue;
+                        var ns = window[topName];
+                        if (!ns || typeof ns !== 'object') continue;
+                        var fnames = Object.keys(ns);
+                        for (var j = 0; j < fnames.length; j++) {
+                            var fn = ns[fnames[j]];
+                            if (typeof fn !== 'function') continue;
+                            var ref = 'window.' + topName + '.' + fnames[j];
+                            if (!sig) {
+                                try {
+                                    var out = fn(probe);
+                                    if (typeof out === 'string' && out !== probe && re.test(out)) {
+                                        sig = ref;
+                                    }
+                                } catch (e) {}
+                            }
+                            if (!inst) {
+                                try {
+                                    var got = false;
+                                    var fakeAxios = {
+                                        interceptors: {
+                                            request:  { use: function() {} },
+                                            response: { use: function() { got = true; } }
+                                        },
+                                        defaults: { headers: { common: {} }, transformRequest: [], transformResponse: [] }
+                                    };
+                                    fn(fakeAxios);
+                                    if (got) inst = ref;
+                                } catch (e) {}
+                            }
                         }
                     }
-                }
-                if (sig && inst) return 'sig=' + sig + ';inst=' + inst;
-            } catch (e) {}
-            return '';
-        })()
-    """
-            .trimIndent()
+                    if (sig && inst) return 'sig=' + sig + ';inst=' + inst;
+                } catch (e) {}
+                return '';
+            })()
+        """
+                .trimIndent()
+
+        private const val BASE_URL = "https://comix.to/"
+        private const val PROBE_PATH = "/manga/k78g6/chapters"
+        private const val LOAD_TIMEOUT_S = 25L
+        private const val FETCH_TIMEOUT_S = 25L
+        private const val PROBE_INTERVAL_MS = 250L
+        private const val WEBVIEW_WIDTH = 1080
+        private const val WEBVIEW_HEIGHT = 1920
+        private const val BRIDGE_NAME = "ComixSignerBridge"
+
+        const val PROXY_HEADER = "X-Comix-WebView-Proxy"
+    }
 }
 
 /**
@@ -414,7 +417,7 @@ class ComixSigner {
 class ComixWebViewProxyInterceptor(private val signer: ComixSigner) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        if (request.header(signer.PROXY_HEADER) != "1") {
+        if (request.header(ComixSigner.PROXY_HEADER) != "1") {
             return chain.proceed(request)
         }
         val apiPath =
