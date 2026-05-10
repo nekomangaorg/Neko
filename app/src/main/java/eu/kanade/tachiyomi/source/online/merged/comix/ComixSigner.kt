@@ -218,6 +218,7 @@ class ComixSigner {
             webView = null
             signerExpr = null
             installerExpr = null
+            ready.countDown()
             ready = CountDownLatch(1)
             pending.values.forEach { it.latch.countDown() }
             pending.clear()
@@ -237,7 +238,7 @@ class ComixSigner {
         if (signerExpr != null && installerExpr != null) return
         synchronized(initLock) {
             if (signerExpr != null && installerExpr != null) return
-            initWebView()
+            webView ?: initWebView()
         }
         if (!ready.await(LOAD_TIMEOUT_S, TimeUnit.SECONDS)) {
             invalidate()
@@ -292,6 +293,7 @@ class ComixSigner {
         val poll =
             object : Runnable {
                 override fun run() {
+                    if (wv != webView) return
                     if (signerExpr != null && installerExpr != null) return
                     wv.evaluateJavascript(PROBE_JS) { raw ->
                         // Returns either '' (not ready) or 'sig=<expr>;inst=<expr>'.
