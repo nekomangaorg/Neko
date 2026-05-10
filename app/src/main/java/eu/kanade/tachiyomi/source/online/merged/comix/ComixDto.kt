@@ -130,9 +130,10 @@ class Chapter(
 
 @Serializable class Group(val id: Int, val name: String)
 
-@Serializable
-class ChapterResponse(val result: Items?) {
-    @Serializable class Items(val id: Int, val pages: List<Page>)
+@Serializable class ChapterResponse(val result: ChapterResult? = null)
 
-    @Serializable class Page(val url: String)
-}
+@Serializable class ChapterResult(val id: Int, val pages: Pages = Pages())
+
+@Serializable class Pages(val baseUrl: String = "", val items: List<PageDto> = emptyList())
+
+@Serializable class PageDto(val url: String = "")
