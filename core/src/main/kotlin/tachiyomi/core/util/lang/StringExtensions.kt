@@ -170,3 +170,8 @@ fun String.htmlDecode(): String {
 }
 
 fun String.toResultError() = ResultError.Generic(errorString = this)
+
+fun String?.orUnknownError(context: Context): String {
+    if (!isNullOrBlank()) return this
+    return context.getString(R.string.unknown_error)
+}
