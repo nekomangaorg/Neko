@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
-import eu.kanade.tachiyomi.source.online.merged.comix.ComixHash.generateHash
 import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
@@ -27,9 +26,17 @@ class Comix : ReducedHttpSource() {
     private val apiUrl = "$baseUrl/api/v1/"
     private val mangaUrl = "$baseUrl/title"
 
-    override val client = network.cloudFlareClient.newBuilder().rateLimit(5).build()
+    private val signer = ComixSigner()
+
+    override val client =
+        network.cloudFlareClient
+            .newBuilder()
+            .rateLimit(5)
+            .apply { interceptors().add(0, ComixWebViewProxyInterceptor(signer)) }
+            .build()
 
     override val headers = Headers.Builder().add("Referer", "$baseUrl/").build()
+    private val proxiedHeaders = headers.newBuilder().add(signer.PROXY_HEADER, "1").build()
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -67,7 +74,6 @@ class Comix : ReducedHttpSource() {
         val mangaHash = mangaUrl.removePrefix("/").substringAfterLast("/")
 
         val path = "/manga/$mangaHash/chapters"
-        val hashToken = generateHash(path)
 
         val chapterList = ArrayList<Chapter>()
         var page = 1
@@ -82,10 +88,9 @@ class Comix : ReducedHttpSource() {
                         .addQueryParameter("order[number]", "desc")
                         .addQueryParameter("limit", "100")
                         .addQueryParameter("page", page.toString())
-                        .addQueryParameter("_", hashToken)
                         .build()
 
-                val response = client.newCall(GET(url.toString(), headers)).await()
+                val response = client.newCall(GET(url.toString(), proxiedHeaders)).await()
                 if (!response.isSuccessful) {
                     response.close()
                     return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
@@ -108,10 +113,9 @@ class Comix : ReducedHttpSource() {
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         val chapterId = chapter.url.substringAfterLast("/")
-        val hashToken = generateHash("/chapters/$chapterId")
-        val url = "${apiUrl}chapters/$chapterId?_=$hashToken"
+        val url = "${apiUrl}chapters/$chapterId"
 
-        val response = client.newCall(GET(url, headers)).await()
+        val response = client.newCall(GET(url, proxiedHeaders)).await()
         if (!response.isSuccessful) {
             response.close()
             throw Exception("HTTP error ${response.code}")
@@ -120,11 +124,13 @@ class Comix : ReducedHttpSource() {
         val res = json.decodeFromString<ChapterResponse>(response.body.string())
         val result = res.result ?: throw Exception("Chapter not found")
 
-        if (result.pages.isEmpty()) {
+        if (result.pages.items.isEmpty()) {
             throw Exception("No images found for chapter ${result.id}")
         }
 
-        return result.pages.mapIndexed { index, img -> Page(index, imageUrl = img.url) }
+        return result.pages.items.mapIndexed { index, img ->
+            Page(index, imageUrl = result.pages.baseUrl + img.url)
+        }
     }
 
     override fun imageRequest(page: Page): Request {
