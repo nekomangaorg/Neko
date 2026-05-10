@@ -32,7 +32,7 @@ class Comix : ReducedHttpSource() {
         network.cloudFlareClient
             .newBuilder()
             .rateLimit(5)
-            .apply { interceptors().add(0, ComixWebViewProxyInterceptor(signer)) }
+            .addInterceptor(ComixWebViewProxyInterceptor(signer))
             .build()
 
     override val headers = Headers.Builder().add("Referer", "$baseUrl/").build()
