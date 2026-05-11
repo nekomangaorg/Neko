@@ -807,7 +807,7 @@ class FeedViewModel() : ViewModel() {
             val (searchHistoryUpdated, searchHistoryFeedMangaList) =
                 updateChapterReadStatus(
                     chapterItem,
-                    _historyScreenPagingState.value.searchHistoryFeedMangaList.map { it }.toList(),
+                    _historyScreenPagingState.value.searchHistoryFeedMangaList,
                 )
             if (searchHistoryUpdated) {
                 _historyScreenPagingState.update {
@@ -821,7 +821,7 @@ class FeedViewModel() : ViewModel() {
             val (searchUpdatesUpdated, searchUpdatesFeedMangaList) =
                 updateChapterReadStatus(
                     chapterItem,
-                    _updatesScreenPagingState.value.searchUpdatesFeedMangaList.map { it }.toList(),
+                    _updatesScreenPagingState.value.searchUpdatesFeedMangaList,
                 )
             if (searchUpdatesUpdated) {
                 _updatesScreenPagingState.update {
@@ -836,7 +836,7 @@ class FeedViewModel() : ViewModel() {
             val (historyFeedUpdated, historyFeedMangaList) =
                 updateChapterReadStatus(
                     chapterItem,
-                    _historyScreenPagingState.value.historyFeedMangaList.map { it }.toList(),
+                    _historyScreenPagingState.value.historyFeedMangaList,
                 )
             if (historyFeedUpdated) {
                 _historyScreenPagingState.update {
@@ -849,7 +849,7 @@ class FeedViewModel() : ViewModel() {
             val (updatesFeedUpdated, updatesFeedMangaList) =
                 updateChapterReadStatus(
                     chapterItem,
-                    _updatesScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+                    _updatesScreenPagingState.value.updatesFeedMangaList,
                 )
             if (updatesFeedUpdated) {
                 _updatesScreenPagingState.update {
@@ -861,7 +861,7 @@ class FeedViewModel() : ViewModel() {
             val (updatesFeedUpdated, updatesFeedMangaList) =
                 updateChapterReadStatus(
                     chapterItem,
-                    _summaryScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+                    _summaryScreenPagingState.value.updatesFeedMangaList,
                 )
             if (updatesFeedUpdated) {
                 _summaryScreenPagingState.update {
@@ -871,7 +871,7 @@ class FeedViewModel() : ViewModel() {
             val (newlyAddedFeedUpdated, newlyAddedFeedMangaList) =
                 updateChapterReadStatus(
                     chapterItem,
-                    _summaryScreenPagingState.value.newlyAddedFeedMangaList.map { it }.toList(),
+                    _summaryScreenPagingState.value.newlyAddedFeedMangaList,
                 )
             if (newlyAddedFeedUpdated) {
                 _summaryScreenPagingState.update {
@@ -882,7 +882,7 @@ class FeedViewModel() : ViewModel() {
             val (continueReadingFeedUpdated, continueReadingList) =
                 updateChapterReadStatus(
                     chapterItem,
-                    _summaryScreenPagingState.value.continueReadingList.map { it }.toList(),
+                    _summaryScreenPagingState.value.continueReadingList,
                 )
             if (continueReadingFeedUpdated) {
                 _summaryScreenPagingState.update {
@@ -904,7 +904,7 @@ class FeedViewModel() : ViewModel() {
                     chapterId,
                     mangaId,
                     download,
-                    _historyScreenPagingState.value.searchHistoryFeedMangaList.map { it }.toList(),
+                    _historyScreenPagingState.value.searchHistoryFeedMangaList,
                 )
             if (searchHistoryFeedUpdated) {
                 _historyScreenPagingState.update {
@@ -920,7 +920,7 @@ class FeedViewModel() : ViewModel() {
                     chapterId,
                     mangaId,
                     download,
-                    _updatesScreenPagingState.value.searchUpdatesFeedMangaList.map { it }.toList(),
+                    _updatesScreenPagingState.value.searchUpdatesFeedMangaList,
                 )
             if (searchUpdatesFeedUpdated) {
                 _updatesScreenPagingState.update {
@@ -937,7 +937,7 @@ class FeedViewModel() : ViewModel() {
                     chapterId,
                     mangaId,
                     download,
-                    _historyScreenPagingState.value.historyFeedMangaList.map { it }.toList(),
+                    _historyScreenPagingState.value.historyFeedMangaList,
                 )
             if (historyFeedUpdated) {
                 _historyScreenPagingState.update {
@@ -952,7 +952,7 @@ class FeedViewModel() : ViewModel() {
                     chapterId,
                     mangaId,
                     download,
-                    _updatesScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+                    _updatesScreenPagingState.value.updatesFeedMangaList,
                 )
             if (updatesFeedUpdated) {
                 _updatesScreenPagingState.update {
@@ -967,7 +967,7 @@ class FeedViewModel() : ViewModel() {
                     chapterId,
                     mangaId,
                     download,
-                    _summaryScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+                    _summaryScreenPagingState.value.updatesFeedMangaList,
                 )
             if (summaryUpdatesFeedUpdated) {
                 _summaryScreenPagingState.update {
@@ -982,7 +982,7 @@ class FeedViewModel() : ViewModel() {
                     chapterId,
                     mangaId,
                     download,
-                    _summaryScreenPagingState.value.newlyAddedFeedMangaList.map { it }.toList(),
+                    _summaryScreenPagingState.value.newlyAddedFeedMangaList,
                 )
             if (newlyAddedFeedUpdated) {
                 _summaryScreenPagingState.update {

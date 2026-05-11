@@ -336,12 +336,12 @@ class ComixSigner {
         /**
          * Walks `window.vm*_*` namespaces and identifies two functions:
          * - `sig`: signer — `fn(path) -> ≥40-char base64url token`
-         * - `inst`: axios installer — `fn(axiosInstance)` registers a request interceptor that signs
-         *   URLs *and* a response interceptor that decrypts `{e:"..."}` bodies. Probed by feeding a
-         *   fake axios and checking whether `interceptors.response.use` was called.
+         * - `inst`: axios installer — `fn(axiosInstance)` registers a request interceptor that
+         *   signs URLs *and* a response interceptor that decrypts `{e:"..."}` bodies. Probed by
+         *   feeding a fake axios and checking whether `interceptors.response.use` was called.
          *
-         * Returns `'sig=window.<ns>.<a>;inst=window.<ns>.<b>'` once both are found, otherwise `''` so
-         * the polling loop tries again.
+         * Returns `'sig=window.<ns>.<a>;inst=window.<ns>.<b>'` once both are found, otherwise `''`
+         * so the polling loop tries again.
          */
         private val PROBE_JS =
             """
