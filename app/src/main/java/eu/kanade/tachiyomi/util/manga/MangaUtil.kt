@@ -40,16 +40,13 @@ class MangaUtil {
         }
 
         fun getGenres(genres: String?, filterOutSafe: Boolean = false): List<String> {
-            return genres
-                ?.split(",")
-                ?.mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
-                ?.filter {
-                    if (filterOutSafe) {
-                        !it.equals("Content rating: safe", true)
-                    } else {
-                        true
-                    }
-                } ?: emptyList()
+            return genres?.split(",")?.mapNotNull { tag ->
+                val trimmed = tag.trim()
+                if (trimmed.isBlank()) return@mapNotNull null
+                if (filterOutSafe && trimmed.equals("Content rating: safe", true))
+                    return@mapNotNull null
+                trimmed
+            } ?: emptyList()
         }
 
         fun genresToString(genres: List<String>, contentRating: String?): String {

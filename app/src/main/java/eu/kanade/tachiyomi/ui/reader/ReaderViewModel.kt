@@ -640,8 +640,13 @@ constructor(
         val chapterSort = ChapterItemSort(chapterItemFilter, preferences)
         return getChapterList()
             .asSequence()
-            .map { DomainChapterItem(it.chapter.toSimpleChapter()!!) }
-            .filter { !it.chapter.read || it.chapter.id == nextChapterId }
+            .mapNotNull {
+                val simpleChapter = it.chapter.toSimpleChapter() ?: return@mapNotNull null
+                val domainChapter = DomainChapterItem(simpleChapter)
+                if (!domainChapter.chapter.read || domainChapter.chapter.id == nextChapterId)
+                    domainChapter
+                else null
+            }
             .distinctBy { it.chapter.name }
             .sortedWith(chapterSort.sortComparator(manga!!, true))
             .toList()
