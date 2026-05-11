@@ -38,7 +38,11 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
 
         fun setupTask(context: Context) {
             val constraints =
-                Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresBatteryNotLow(true)
+                    .setRequiresStorageNotLow(true)
+                    .build()
 
             val request =
                 PeriodicWorkRequestBuilder<AppUpdateJob>(2, TimeUnit.DAYS, 3, TimeUnit.HOURS)
