@@ -638,7 +638,8 @@ constructor(
         return getChapterList()
             .asSequence()
             .mapNotNull {
-                val domainChapter = DomainChapterItem(it.chapter.toSimpleChapter()!!)
+                val simpleChapter = it.chapter.toSimpleChapter() ?: return@mapNotNull null
+                val domainChapter = DomainChapterItem(simpleChapter)
                 if (!domainChapter.chapter.read || domainChapter.chapter.id == nextChapterId)
                     domainChapter
                 else null
