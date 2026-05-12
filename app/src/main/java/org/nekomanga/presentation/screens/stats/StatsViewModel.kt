@@ -256,7 +256,14 @@ class StatsViewModel() : ViewModel() {
     }
 
     private suspend fun getTracks(mangaList: List<LibraryManga>): List<Track> {
-        return trackRepository.getTracksForMangaByIds(mangaList.map { it.id!! })
+        return kotlinx.coroutines.coroutineScope {
+            mangaList
+                .map { it.id!! }
+                .chunked(900)
+                .map { chunk -> async { trackRepository.getTracksForMangaByIds(chunk) } }
+                .awaitAll()
+                .flatten()
+        }
     }
 
     private suspend fun getTracks(mangaList: LibraryManga): List<Track> {
