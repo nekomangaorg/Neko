@@ -11,12 +11,14 @@ class ValidateChapterNotBlockedUseCase {
     ): Boolean {
         if (blockedGroups.isEmpty() && blockedUploaders.isEmpty()) return true
 
-        var hasNoGroup = false
-        for (scanlator in scanlators) {
-            if (scanlator in blockedGroups) return false
-            if (scanlator == Constants.NO_GROUP) hasNoGroup = true
+        val isGroupBlocked = scanlators.any { it in blockedGroups }
+        if (isGroupBlocked) return false
+
+        if (blockedUploaders.isNotEmpty()) {
+            val hasNoGroup = scanlators.any { it == Constants.NO_GROUP }
+            if (hasNoGroup && uploader in blockedUploaders) return false
         }
 
-        return !(hasNoGroup && uploader in blockedUploaders)
+        return true
     }
 }
