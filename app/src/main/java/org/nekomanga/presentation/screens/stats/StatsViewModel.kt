@@ -19,6 +19,7 @@ import java.util.Calendar
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -256,7 +257,16 @@ class StatsViewModel() : ViewModel() {
     }
 
     private suspend fun getTracks(mangaList: List<LibraryManga>): List<Track> {
-        return trackRepository.getTracksForMangaByIds(mangaList.map { it.id!! })
+        return coroutineScope {
+            mangaList
+                .asSequence()
+                .mapNotNull { it.id }
+                .chunked(900)
+                .map { chunk -> async { trackRepository.getTracksForMangaByIds(chunk) } }
+                .toList()
+                .awaitAll()
+                .flatten()
+        }
     }
 
     private suspend fun getTracks(mangaList: LibraryManga): List<Track> {
