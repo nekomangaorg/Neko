@@ -26,7 +26,7 @@ material = { module = "androidx.compose.material:material", version = "1.11.1" }
 material-icons-core = { module = "androidx.compose.material:material-icons-core",  version = "1.7.8" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended",  version = "1.7.8" }
 compose-webview = "io.github.kevinnzou:compose-webview:0.33.6"
-grid-layout = "com.cheonjaeung.compose.grid:grid:2.7.1"
+grid-layout = "com.cheonjaeung.compose.grid:grid:2.7.2"
 
 material-motion = "io.github.fornewid:material-motion-compose-core:1.2.1"
 
