@@ -57,15 +57,17 @@ class FeedRepository(
             chapterHistories
                 .mapNotNull { chpHistory ->
                     val chapter = chpHistory.chapter
-                    if (
-                        !chapterUseCases.validateChapterNotBlocked(
-                            chapter.scanlatorList(),
-                            chapter.uploader,
-                            blockedGroups,
-                            blockedUploaders,
-                        )
-                    ) {
-                        return@mapNotNull null
+                    if (blockedGroups.isNotEmpty() || blockedUploaders.isNotEmpty()) {
+                        if (
+                            !chapterUseCases.validateChapterNotBlocked(
+                                chapter.scanlatorList(),
+                                chapter.uploader,
+                                blockedGroups,
+                                blockedUploaders,
+                            )
+                        ) {
+                            return@mapNotNull null
+                        }
                     }
 
                     chapter.toSimpleChapter(chpHistory.history.last_read)?.toChapterItem()
@@ -492,15 +494,17 @@ class FeedRepository(
                                     false -> it.chapter.date_upload
                                 }
 
-                            if (
-                                !chapterUseCases.validateChapterNotBlocked(
-                                    chapterItem.chapter.scanlatorList(),
-                                    chapterItem.chapter.uploader,
-                                    blockedGroups,
-                                    blockedUploaders,
-                                )
-                            ) {
-                                return@mapNotNull null
+                            if (blockedGroups.isNotEmpty() || blockedUploaders.isNotEmpty()) {
+                                if (
+                                    !chapterUseCases.validateChapterNotBlocked(
+                                        chapterItem.chapter.scanlatorList(),
+                                        chapterItem.chapter.uploader,
+                                        blockedGroups,
+                                        blockedUploaders,
+                                    )
+                                ) {
+                                    return@mapNotNull null
+                                }
                             }
 
                             FeedManga(
