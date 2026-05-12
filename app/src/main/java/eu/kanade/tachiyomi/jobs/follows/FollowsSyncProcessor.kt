@@ -12,9 +12,9 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.data.database.repository.CategoryRepository
@@ -28,21 +28,21 @@ import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.chapters.ChapterUseCases
-import uy.kohesive.injekt.injectLazy
 
-class FollowsSyncProcessor {
-
-    val preferences: PreferencesHelper by injectLazy()
-    val mangaDexPreferences: MangaDexPreferences by injectLazy()
-    val libraryPreference: LibraryPreferences by injectLazy()
-    val mangaRepository: MangaRepository by injectLazy()
-    val categoryRepository: CategoryRepository by injectLazy()
-    val chapterRepository: ChapterRepository by injectLazy()
-    val trackRepository: TrackRepository by injectLazy()
-    val sourceManager: SourceManager by injectLazy()
-    val trackManager: TrackManager by injectLazy()
-    private val chapterUseCases: ChapterUseCases by injectLazy()
-    private val followsHandler: FollowsHandler by injectLazy()
+class FollowsSyncProcessor(
+    private val preferences: PreferencesHelper,
+    private val mangaDexPreferences: MangaDexPreferences,
+    private val libraryPreference: LibraryPreferences,
+    private val mangaRepository: MangaRepository,
+    private val categoryRepository: CategoryRepository,
+    private val chapterRepository: ChapterRepository,
+    private val trackRepository: TrackRepository,
+    private val sourceManager: SourceManager,
+    private val trackManager: TrackManager,
+    private val chapterUseCases: ChapterUseCases,
+    private val followsHandler: FollowsHandler,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) {
 
     /** Syncs follows list manga into library based off the preference */
     suspend fun fromMangaDex(
@@ -51,7 +51,7 @@ class FollowsSyncProcessor {
         completeNotification: () -> Unit,
         updateManga: (List<Long>) -> Unit,
     ): Int {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             TimberKt.d { "Starting from MangaDex sync" }
             val count = AtomicInteger(0)
             val countOfAdded = AtomicInteger(0)
@@ -80,14 +80,23 @@ class FollowsSyncProcessor {
                     val defaultCategoryId = libraryPreference.defaultCategory().get()
                     val defaultCategory = categories.find { it.id == defaultCategoryId }
 
-                    val mangaIdsToUpdate = listManga.mapNotNull { networkManga ->
-                        updateNotification(networkManga.title, count.andIncrement, listManga.size)
+                    val urls = listManga.map { it.url }
+                    val existingMangaMap =
+                        urls
+                            .chunked(500)
+                            .flatMap { chunk -> mangaRepository.getMangaByUrls(chunk) }
+                            .filter { it.source == sourceManager.mangaDex.id }
+                            .associateBy { it.url }
 
-                        var dbManga =
-                            mangaRepository.getMangaByUrlAndSource(
-                                networkManga.url,
-                                sourceManager.mangaDex.id,
-                            )
+                    val mangaIdsToUpdate = listManga.mapNotNull { networkManga ->
+                        updateNotification(
+                            networkManga.title,
+                            count.getAndIncrement(),
+                            listManga.size,
+                        )
+
+                        var dbManga = existingMangaMap[networkManga.url]
+
                         if (dbManga == null) {
                             dbManga =
                                 Manga.create(
@@ -141,7 +150,7 @@ class FollowsSyncProcessor {
         completeNotification: (total: Int) -> Unit,
         ids: String? = null,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             TimberKt.d { "Starting to MangaDex sync" }
             val count = AtomicInteger(0)
             val countNew = AtomicInteger(0)
@@ -153,19 +162,23 @@ class FollowsSyncProcessor {
                     ?.flatMap { chunk -> mangaRepository.getMangaByIds(chunk) }
                     ?.toList() ?: mangaRepository.getLibraryList()
 
+            val mangaIds = listManga.mapNotNull { it.id }
+            val allTracks =
+                mangaIds
+                    .chunked(500)
+                    .flatMap { chunk -> trackRepository.getTracksForMangaByIds(chunk) }
+                    .filter { it.sync_id == TrackManager.MDLIST }
+                    .groupBy { it.manga_id }
+
             // only add if the current tracker is not set to reading
 
             listManga
                 .distinctBy { it.uuid() }
                 .forEach { manga ->
-                    updateNotification(manga.title, count.andIncrement, listManga.size)
+                    updateNotification(manga.title, count.getAndIncrement(), listManga.size)
 
                     // Get this manga's trackers from the database
-                    var mdListTrack =
-                        trackRepository.getTrackByMangaIdAndTrackServiceId(
-                            manga.id!!,
-                            TrackManager.MDLIST,
-                        )
+                    var mdListTrack = allTracks[manga.id]?.firstOrNull()
 
                     // create mdList if missing
                     if (mdListTrack == null) {
@@ -174,16 +187,14 @@ class FollowsSyncProcessor {
                     }
 
                     if (mdListTrack.status == FollowStatus.UNFOLLOWED.int) {
-                        withIOContext {
-                            followsHandler.updateFollowStatus(
-                                MdUtil.getMangaUUID(manga.url),
-                                FollowStatus.READING,
-                            )
+                        followsHandler.updateFollowStatus(
+                            MdUtil.getMangaUUID(manga.url),
+                            FollowStatus.READING,
+                        )
 
-                            mdListTrack.status = FollowStatus.READING.int
-                            val returnedTracker = trackManager.mdList.update(mdListTrack)
-                            trackRepository.insertTrack(returnedTracker)
-                        }
+                        mdListTrack.status = FollowStatus.READING.int
+                        val returnedTracker = trackManager.mdList.update(mdListTrack)
+                        trackRepository.insertTrack(returnedTracker)
                         countNew.incrementAndGet()
                     }
 

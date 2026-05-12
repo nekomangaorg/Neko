@@ -236,7 +236,21 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(StatusHandler())
 
-        addSingleton(FollowsSyncProcessor())
+        addSingletonFactory {
+            FollowsSyncProcessor(
+                preferences = get(),
+                mangaDexPreferences = get(),
+                libraryPreference = get(),
+                mangaRepository = get(),
+                categoryRepository = get(),
+                chapterRepository = get(),
+                trackRepository = get(),
+                sourceManager = get(),
+                trackManager = get(),
+                chapterUseCases = get(),
+                followsHandler = get(),
+            )
+        }
 
         addSingleton(TrackSyncProcessor())
 
