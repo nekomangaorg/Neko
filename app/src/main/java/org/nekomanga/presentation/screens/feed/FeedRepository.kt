@@ -58,11 +58,13 @@ class FeedRepository(
                 .mapNotNull { chpHistory ->
                     val chapter = chpHistory.chapter
                     if (blockedGroups.isNotEmpty() || blockedUploaders.isNotEmpty()) {
-                        val scanlators = chapter.scanlatorList()
                         if (
-                            scanlators.fastAny { scanlator -> scanlator in blockedGroups } ||
-                                (chapter.uploader in blockedUploaders &&
-                                    Constants.NO_GROUP in scanlators)
+                            !chapterUseCases.validateChapterNotBlocked(
+                                chapter.scanlatorList(),
+                                chapter.uploader,
+                                blockedGroups,
+                                blockedUploaders,
+                            )
                         ) {
                             return@mapNotNull null
                         }
@@ -492,13 +494,17 @@ class FeedRepository(
                                     false -> it.chapter.date_upload
                                 }
 
-                            val scanlators = chapterItem.chapter.scanlatorList()
-                            if (
-                                scanlators.fastAny { scanlator -> scanlator in blockedGroups } ||
-                                    (Constants.NO_GROUP in scanlators &&
-                                        chapterItem.chapter.uploader in blockedUploaders)
-                            ) {
-                                return@mapNotNull null
+                            if (blockedGroups.isNotEmpty() || blockedUploaders.isNotEmpty()) {
+                                if (
+                                    !chapterUseCases.validateChapterNotBlocked(
+                                        chapterItem.chapter.scanlatorList(),
+                                        chapterItem.chapter.uploader,
+                                        blockedGroups,
+                                        blockedUploaders,
+                                    )
+                                ) {
+                                    return@mapNotNull null
+                                }
                             }
 
                             FeedManga(

@@ -16,3 +16,6 @@
 ## 2026-04-26 - Extracting Formatted Build Time Logic Refinements
 **Learning:** For consistency with the rest of the codebase, view models use `by injectLazy()` for injecting UseCases rather than directly instantiating them using `Injekt.get()`. In domain logic dealing with standard ISO formats, relying on `Locale.US` rather than `Locale.getDefault()` ensures consistency. Additionally, non-null assertions (`!!`) should be avoided in favor of safe calls (`?.`) and fallback error handling (`?: error()`).
 **Action:** Always prefer `by injectLazy()` for ViewModel DI unless told otherwise. Ensure robust date parsing avoiding `!!` by providing safe calls and error fallbacks, and use `Locale.US` for programmatic parsing.
+## 2026-05-11 - Extracting Blocked Chapter Validation
+**Learning:** Pure domain Use Cases are typically registered as singletons in `AppModule.kt` (using `addSingleton()`) and injected via `Injekt`. However, Use Cases that require an Android `Context` should not be singletons; instead, instantiate them directly where needed or pass the `Context` as a function argument to avoid leaks.
+**Action:** When extracting business logic into Use Cases, keep them pure without Android dependencies to make DI simple and safe.
