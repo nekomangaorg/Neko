@@ -154,7 +154,7 @@ fun VerticalFastScroller(
 
                     LaunchedEffect(listState) {
                         snapshotFlow {
-                                listOf(
+                                FastScrollerState(
                                     listState.firstVisibleItemIndex,
                                     listState.firstVisibleItemScrollOffset,
                                     isThumbDraggedState,
@@ -428,7 +428,7 @@ fun VerticalGridFastScroller(
 
                     LaunchedEffect(state) {
                         snapshotFlow {
-                                listOf(
+                                GridFastScrollerState(
                                     state.firstVisibleItemIndex,
                                     state.firstVisibleItemScrollOffset,
                                     isThumbDraggedGridState,
@@ -563,3 +563,25 @@ private val LazyListItemInfo.top: Int
 
 private val LazyListItemInfo.bottom: Int
     get() = offset + size
+
+private data class FastScrollerState(
+    val firstVisibleItemIndex: Int,
+    val firstVisibleItemScrollOffset: Int,
+    val isThumbDragged: Boolean,
+    val maxRemainingSections: Float,
+    val stableScrollInProgress: Boolean,
+    val trackHeightPx: Float,
+    val thumbTopPadding: Float,
+    val scrollHeightPx: Float,
+)
+
+private data class GridFastScrollerState(
+    val firstVisibleItemIndex: Int,
+    val firstVisibleItemScrollOffset: Int,
+    val isThumbDragged: Boolean,
+    val heightPx: Float,
+    val trackHeightPx: Float,
+    val thumbTopPadding: Float,
+    val scrollRange: Int,
+    val columnCount: Int,
+)
