@@ -154,10 +154,15 @@ fun VerticalFastScroller(
 
                     LaunchedEffect(listState) {
                         snapshotFlow {
-                                Triple(
+                                listOf(
                                     listState.firstVisibleItemIndex,
                                     listState.firstVisibleItemScrollOffset,
                                     isThumbDraggedState,
+                                    maxRemainingSectionsState,
+                                    stableScrollInProgressState,
+                                    trackHeightPxState,
+                                    thumbTopPaddingState,
+                                    scrollHeightPxState,
                                 )
                             }
                             .collectLatest {
@@ -423,10 +428,15 @@ fun VerticalGridFastScroller(
 
                     LaunchedEffect(state) {
                         snapshotFlow {
-                                Triple(
+                                listOf(
                                     state.firstVisibleItemIndex,
                                     state.firstVisibleItemScrollOffset,
                                     isThumbDraggedGridState,
+                                    heightPxState,
+                                    trackHeightPxGridState,
+                                    thumbTopPaddingGridState,
+                                    scrollRangeState,
+                                    columnCountState,
                                 )
                             }
                             .collectLatest {
