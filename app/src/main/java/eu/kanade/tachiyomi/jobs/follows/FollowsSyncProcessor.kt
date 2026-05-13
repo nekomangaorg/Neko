@@ -4,6 +4,7 @@ import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -69,10 +70,12 @@ class FollowsSyncProcessor(
                 .onSuccess { unfilteredManga ->
                     val listManga =
                         unfilteredManga
-                            .groupBy { FollowStatus.fromStringRes(it.displayTextRes).int }
-                            .filter { it.key in syncFollowStatusInts }
-                            .values
-                            .flatten()
+                            .asSequence()
+                            .filter {
+                                FollowStatus.fromStringRes(it.displayTextRes).int in
+                                    syncFollowStatusInts
+                            }
+                            .toList()
 
                     TimberKt.d { "total number from mangadex is ${listManga.size}" }
 
@@ -88,55 +91,72 @@ class FollowsSyncProcessor(
                             .filter { it.source == sourceManager.mangaDex.id }
                             .associateBy { it.url }
 
-                    val mangaIdsToUpdate = listManga.mapNotNull { networkManga ->
-                        updateNotification(
-                            networkManga.title,
-                            count.getAndIncrement(),
-                            listManga.size,
-                        )
+                    val mangaToInsert = mutableListOf<Manga>()
+                    val mangaToUpdate = mutableListOf<Manga>()
+                    val mangaIdsThatWereUpdated = mutableListOf<Long>()
 
-                        var dbManga = existingMangaMap[networkManga.url]
+                    listManga.forEach { networkManga ->
+                        try {
+                            updateNotification(
+                                networkManga.title,
+                                count.getAndIncrement(),
+                                listManga.size,
+                            )
 
-                        if (dbManga == null) {
-                            dbManga =
-                                Manga.create(
-                                    networkManga.url,
-                                    networkManga.title,
-                                    sourceManager.mangaDex.id,
-                                )
-                            dbManga.date_added = Date().time
-                            dbManga.favorite = true
+                            val dbManga = existingMangaMap[networkManga.url]
 
-                            countOfAdded.incrementAndGet()
-                            val id = mangaRepository.insertManga(dbManga)
-                            dbManga.id = id
-
-                            if (defaultCategory != null) {
-                                val mc = MangaCategory.create(dbManga, defaultCategory)
-                                categoryRepository.setMangaCategories(listOf(mc), listOf(id))
+                            if (dbManga == null) {
+                                val newManga =
+                                    Manga.create(
+                                        networkManga.url,
+                                        networkManga.title,
+                                        sourceManager.mangaDex.id,
+                                    )
+                                newManga.date_added = Date().time
+                                newManga.favorite = true
+                                mangaToInsert.add(newManga)
+                            } else if (!dbManga.favorite) {
+                                dbManga.favorite = true
+                                mangaToUpdate.add(dbManga)
+                                dbManga.id?.let { mangaIdsThatWereUpdated.add(it) }
                             }
-                            return@mapNotNull id
+                        } catch (e: Exception) {
+                            TimberKt.e(e) { "Error processing manga ${networkManga.title}" }
                         }
-
-                        // Increment and update if it is not already favorited
-                        if (!dbManga.favorite) {
-                            countOfAdded.incrementAndGet()
-                            dbManga.favorite = true
-
-                            mangaRepository.updateManga(dbManga)
-
-                            val mangaId = dbManga.id ?: return@mapNotNull null
-
-                            if (defaultCategory != null) {
-                                val mc = MangaCategory.create(dbManga, defaultCategory)
-                                categoryRepository.setMangaCategories(listOf(mc), listOf(mangaId))
-                            }
-
-                            return@mapNotNull mangaId
-                        }
-                        return@mapNotNull null
                     }
-                    updateManga(mangaIdsToUpdate)
+
+                    val insertedIds =
+                        if (mangaToInsert.isNotEmpty()) {
+                            val ids = mangaRepository.insertMangaList(mangaToInsert)
+                            countOfAdded.addAndGet(ids.size)
+                            if (defaultCategory != null) {
+                                val mangaCategories =
+                                    mangaToInsert.zip(ids).map { (manga, id) ->
+                                        manga.id = id
+                                        MangaCategory.create(manga, defaultCategory)
+                                    }
+                                categoryRepository.setMangaCategories(mangaCategories, ids)
+                            }
+                            ids
+                        } else {
+                            emptyList()
+                        }
+
+                    if (mangaToUpdate.isNotEmpty()) {
+                        mangaRepository.updateMangaList(mangaToUpdate)
+                        countOfAdded.addAndGet(mangaToUpdate.size)
+                        if (defaultCategory != null) {
+                            val mangaCategories = mangaToUpdate.map { manga ->
+                                MangaCategory.create(manga, defaultCategory)
+                            }
+                            categoryRepository.setMangaCategories(
+                                mangaCategories,
+                                mangaIdsThatWereUpdated,
+                            )
+                        }
+                    }
+
+                    updateManga(insertedIds + mangaIdsThatWereUpdated)
                 }
 
             completeNotification()
@@ -163,62 +183,84 @@ class FollowsSyncProcessor(
                     ?.toList() ?: mangaRepository.getLibraryList()
 
             val mangaIds = listManga.mapNotNull { it.id }
-            val allTracks =
+            val allTracksMap =
                 mangaIds
                     .chunked(500)
                     .flatMap { chunk -> trackRepository.getTracksForMangaByIds(chunk) }
                     .filter { it.sync_id == TrackManager.MDLIST }
                     .groupBy { it.manga_id }
 
-            // only add if the current tracker is not set to reading
+            val tracksToUpsert = mutableListOf<Track>()
 
             listManga
+                .asSequence()
                 .distinctBy { it.uuid() }
                 .forEach { manga ->
-                    updateNotification(manga.title, count.getAndIncrement(), listManga.size)
+                    try {
+                        updateNotification(manga.title, count.getAndIncrement(), listManga.size)
 
-                    // Get this manga's trackers from the database
-                    var mdListTrack = allTracks[manga.id]?.firstOrNull()
+                        // Get this manga's trackers from the database
+                        var mdListTrack = allTracksMap[manga.id]?.firstOrNull()
 
-                    // create mdList if missing
-                    if (mdListTrack == null) {
-                        mdListTrack = trackManager.mdList.createInitialTracker(manga)
-                        trackRepository.insertTrack(mdListTrack)
-                    }
-
-                    if (mdListTrack.status == FollowStatus.UNFOLLOWED.int) {
-                        followsHandler.updateFollowStatus(
-                            MdUtil.getMangaUUID(manga.url),
-                            FollowStatus.READING,
-                        )
-
-                        mdListTrack.status = FollowStatus.READING.int
-                        val returnedTracker = trackManager.mdList.update(mdListTrack)
-                        trackRepository.insertTrack(returnedTracker)
-                        countNew.incrementAndGet()
-                    }
-
-                    if (mangaDexPreferences.readingSync().get()) {
-                        val mangaId = manga.id ?: return@forEach
-                        try {
-                            val readMdChapters =
-                                chapterRepository.getChaptersForManga(mangaId).mapNotNull {
-                                    if (!it.read || it.isMergedChapter()) return@mapNotNull null
-                                    it.toSimpleChapter()?.toChapterItem()
-                                }
-
-                            if (readMdChapters.isNotEmpty()) {
-                                chapterUseCases.markChaptersRemote(
-                                    markAction = ChapterMarkActions.Read(),
-                                    mangaUuid = manga.uuid(),
-                                    chapterItems = readMdChapters,
-                                )
-                            }
-                        } catch (e: Exception) {
-                            TimberKt.e(e) { "Failed to sync read chapters for '${manga.title}'" }
+                        // create mdList if missing
+                        if (mdListTrack == null) {
+                            mdListTrack = trackManager.mdList.createInitialTracker(manga)
+                            tracksToUpsert.add(mdListTrack)
                         }
+
+                        if (mdListTrack.status == FollowStatus.UNFOLLOWED.int) {
+                            try {
+                                followsHandler.updateFollowStatus(
+                                    MdUtil.getMangaUUID(manga.url),
+                                    FollowStatus.READING,
+                                )
+
+                                mdListTrack.status = FollowStatus.READING.int
+                                val returnedTracker = trackManager.mdList.update(mdListTrack)
+                                // Add to upsert list. OnConflictStrategy.REPLACE will handle it
+                                tracksToUpsert.add(returnedTracker)
+                                countNew.incrementAndGet()
+                            } catch (e: Exception) {
+                                TimberKt.e(e) {
+                                    "Failed to update follow status for '${manga.title}'"
+                                }
+                            }
+                        }
+
+                        if (mangaDexPreferences.readingSync().get()) {
+                            val mangaId = manga.id ?: return@forEach
+                            try {
+                                val readMdChapters =
+                                    chapterRepository.getChaptersForManga(mangaId).mapNotNull {
+                                        if (!it.read || it.isMergedChapter()) return@mapNotNull null
+                                        it.toSimpleChapter()?.toChapterItem()
+                                    }
+
+                                if (readMdChapters.isNotEmpty()) {
+                                    chapterUseCases.markChaptersRemote(
+                                        markAction = ChapterMarkActions.Read(),
+                                        mangaUuid = manga.uuid(),
+                                        chapterItems = readMdChapters,
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                TimberKt.e(e) {
+                                    "Failed to sync read chapters for '${manga.title}'"
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        TimberKt.e(e) { "Error processing manga ${manga.title} for toMangaDex" }
                     }
                 }
+
+            if (tracksToUpsert.isNotEmpty()) {
+                // Remove duplicates if any (e.g. if a tracker was created and then updated in the
+                // same loop)
+                val finalTracks = tracksToUpsert.associateBy { it.manga_id }.values.toList()
+                trackRepository.insertTracks(finalTracks)
+            }
+
             completeNotification(countNew.get())
         }
     }
