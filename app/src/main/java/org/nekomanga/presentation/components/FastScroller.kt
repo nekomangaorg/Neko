@@ -154,7 +154,11 @@ fun VerticalFastScroller(
 
                     LaunchedEffect(listState) {
                         snapshotFlow {
-                                Pair(listState.firstVisibleItemScrollOffset, isThumbDraggedState)
+                                Triple(
+                                    listState.firstVisibleItemIndex,
+                                    listState.firstVisibleItemScrollOffset,
+                                    isThumbDraggedState,
+                                )
                             }
                             .collectLatest {
                                 if (
@@ -419,7 +423,11 @@ fun VerticalGridFastScroller(
 
                     LaunchedEffect(state) {
                         snapshotFlow {
-                                Pair(state.firstVisibleItemScrollOffset, isThumbDraggedGridState)
+                                Triple(
+                                    state.firstVisibleItemIndex,
+                                    state.firstVisibleItemScrollOffset,
+                                    isThumbDraggedGridState,
+                                )
                             }
                             .collectLatest {
                                 if (
