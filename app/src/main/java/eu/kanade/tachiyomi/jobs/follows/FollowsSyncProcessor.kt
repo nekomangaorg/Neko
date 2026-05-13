@@ -190,6 +190,16 @@ class FollowsSyncProcessor(
                     .filter { it.sync_id == TrackManager.MDLIST }
                     .groupBy { it.manga_id }
 
+            val allChaptersMap =
+                if (mangaDexPreferences.readingSync().get()) {
+                    mangaIds
+                        .chunked(500)
+                        .flatMap { chunk -> chapterRepository.getChaptersForMangaIds(chunk) }
+                        .groupBy { it.manga_id }
+                } else {
+                    emptyMap()
+                }
+
             val tracksToUpsert = mutableListOf<Track>()
 
             listManga
@@ -201,11 +211,12 @@ class FollowsSyncProcessor(
 
                         // Get this manga's trackers from the database
                         var mdListTrack = allTracksMap[manga.id]?.firstOrNull()
+                        var trackToSave: Track? = null
 
                         // create mdList if missing
                         if (mdListTrack == null) {
                             mdListTrack = trackManager.mdList.createInitialTracker(manga)
-                            tracksToUpsert.add(mdListTrack)
+                            trackToSave = mdListTrack
                         }
 
                         if (mdListTrack.status == FollowStatus.UNFOLLOWED.int) {
@@ -218,20 +229,25 @@ class FollowsSyncProcessor(
                                 mdListTrack.status = FollowStatus.READING.int
                                 val returnedTracker = trackManager.mdList.update(mdListTrack)
                                 // Add to upsert list. OnConflictStrategy.REPLACE will handle it
-                                tracksToUpsert.add(returnedTracker)
+                                trackToSave = returnedTracker
                                 countNew.incrementAndGet()
                             } catch (e: Exception) {
+                                if (trackToSave != null) {
+                                    trackToSave.status = FollowStatus.UNFOLLOWED.int
+                                }
                                 TimberKt.e(e) {
                                     "Failed to update follow status for '${manga.title}'"
                                 }
                             }
                         }
 
+                        trackToSave?.let { tracksToUpsert.add(it) }
+
                         if (mangaDexPreferences.readingSync().get()) {
                             val mangaId = manga.id ?: return@forEach
                             try {
                                 val readMdChapters =
-                                    chapterRepository.getChaptersForManga(mangaId).mapNotNull {
+                                    (allChaptersMap[mangaId] ?: emptyList()).mapNotNull {
                                         if (!it.read || it.isMergedChapter()) return@mapNotNull null
                                         it.toSimpleChapter()?.toChapterItem()
                                     }
