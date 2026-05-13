@@ -16,7 +16,7 @@ photoViewVersion = "2.3.0"
 retrofitVersion = "3.0.0"
 sandwichVersion = "2.2.2"
 sqliteVersion = "2.6.2"
-kspVersion = "2.3.7"
+kspVersion = "2.3.8"
 
 
 [libraries]
