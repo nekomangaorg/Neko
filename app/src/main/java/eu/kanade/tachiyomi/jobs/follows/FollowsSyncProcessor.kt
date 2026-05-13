@@ -201,21 +201,25 @@ class FollowsSyncProcessor(
                 }
 
             val tracksToUpsert = mutableListOf<Track>()
+            val mdList =
+                trackManager.mdList
+                    ?: throw IllegalStateException("MangaDex Track service not found")
 
             listManga
                 .asSequence()
                 .distinctBy { it.uuid() }
                 .forEach { manga ->
+                    val mangaId = manga.id ?: return@forEach
                     try {
                         updateNotification(manga.title, count.getAndIncrement(), listManga.size)
 
                         // Get this manga's trackers from the database
-                        var mdListTrack = allTracksMap[manga.id]?.firstOrNull()
+                        var mdListTrack = allTracksMap[mangaId]?.firstOrNull()
                         var trackToSave: Track? = null
 
                         // create mdList if missing
                         if (mdListTrack == null) {
-                            mdListTrack = trackManager.mdList.createInitialTracker(manga)
+                            mdListTrack = mdList.createInitialTracker(manga)
                             trackToSave = mdListTrack
                         }
 
@@ -227,7 +231,7 @@ class FollowsSyncProcessor(
                                 )
 
                                 mdListTrack.status = FollowStatus.READING.int
-                                val returnedTracker = trackManager.mdList.update(mdListTrack)
+                                val returnedTracker = mdList.update(mdListTrack)
                                 // Add to upsert list. OnConflictStrategy.REPLACE will handle it
                                 trackToSave = returnedTracker
                                 countNew.incrementAndGet()
@@ -244,7 +248,6 @@ class FollowsSyncProcessor(
                         trackToSave?.let { tracksToUpsert.add(it) }
 
                         if (mangaDexPreferences.readingSync().get()) {
-                            val mangaId = manga.id ?: return@forEach
                             try {
                                 val readMdChapters =
                                     (allChaptersMap[mangaId] ?: emptyList()).mapNotNull {
