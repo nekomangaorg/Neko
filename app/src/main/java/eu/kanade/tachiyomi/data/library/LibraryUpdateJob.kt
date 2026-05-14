@@ -94,6 +94,7 @@ import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
+import org.nekomanga.domain.library.ChapterScanlatorFilterOption
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
@@ -591,7 +592,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                             val scanlatorMatchAll =
                                                 libraryPreferences
                                                     .chapterScanlatorFilterOption()
-                                                    .get() == 0
+                                                    .get() == ChapterScanlatorFilterOption.ALL
                                             ChapterUtil.filterByScanlator(
                                                 scanlators,
                                                 it.uploader ?: "",

@@ -22,6 +22,7 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.library.ChapterScanlatorFilterOption
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
@@ -83,15 +84,18 @@ internal class LibrarySettingsScreen(
                         pref = libraryPreferences.chapterScanlatorFilterOption(),
                         title = stringResource(R.string.chapter_scanlator_filter_option),
                         subtitleProvider = { value, options ->
-                            when (value == 0) {
-                                true -> stringResource(R.string.chapter_filter_all_summary)
-                                false -> stringResource(R.string.chapter_filter_any_summary)
+                            if (value == ChapterScanlatorFilterOption.ALL) {
+                                stringResource(R.string.chapter_filter_all_summary)
+                            } else {
+                                stringResource(R.string.chapter_filter_any_summary)
                             }
                         },
                         entries =
                             persistentMapOf(
-                                0 to stringResource(R.string.chapter_filter_all),
-                                1 to stringResource(R.string.chapter_filter_any),
+                                ChapterScanlatorFilterOption.ALL to
+                                    stringResource(R.string.chapter_filter_all),
+                                ChapterScanlatorFilterOption.ANY to
+                                    stringResource(R.string.chapter_filter_any),
                             ),
                     ),
                 ),

@@ -208,7 +208,12 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun removeArticles() = this.preferenceStore.getBoolean("remove_articles")
 
     fun chapterScanlatorFilterOption() =
-        this.preferenceStore.getInt("chapter_scanlator_filter_option", 1)
+        this.preferenceStore.getObjectFromInt(
+            key = "chapter_scanlator_filter_option",
+            defaultValue = ChapterScanlatorFilterOption.ANY,
+            serializer = ChapterScanlatorFilterOption::value,
+            deserializer = ChapterScanlatorFilterOption::fromInt,
+        )
 
     companion object {
 

@@ -8,11 +8,12 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.data.database.dao.LibraryDao
 import org.nekomanga.data.database.model.LibraryMangaRaw
+import org.nekomanga.domain.library.ChapterScanlatorFilterOption
 
 fun LibraryMangaRaw.toLibraryManga(
     blockedGroups: Set<String>,
     blockedUploaders: Set<String>,
-    scanlatorFilterOption: Int,
+    scanlatorFilterOption: ChapterScanlatorFilterOption,
 ): LibraryManga {
     val raw = this
 
@@ -92,13 +93,11 @@ private fun parseChapterCount(
     filteredScanlatorsString: String?,
     blockedGroups: Set<String>,
     blockedUploaders: Set<String>,
-    scanlatorFilterOption: Int,
+    scanlatorFilterOption: ChapterScanlatorFilterOption,
 ): Int {
     if (countString.isNullOrBlank()) return 0
 
-    // TODO switch this to enum
-    // 0 is all 1 is any
-    val scanlatorMatchAll = scanlatorFilterOption == 0
+    val scanlatorMatchAll = scanlatorFilterOption == ChapterScanlatorFilterOption.ALL
     var validChapterCount = 0
     var startIndex = 0
 
