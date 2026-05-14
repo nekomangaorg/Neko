@@ -129,12 +129,6 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
             track.copyPersonalFrom(remoteTrack)
             track.title = remoteTrack.title
             track.media_id = remoteTrack.media_id
-
-            if (track.status != COMPLETED) {
-                val isRereading = track.status == REREADING
-                track.status = if (!isRereading) READING else track.status
-            }
-
             update(track)
         } else {
             // Set default fields if it's not found in the list

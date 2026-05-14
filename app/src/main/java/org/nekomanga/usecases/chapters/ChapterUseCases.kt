@@ -17,4 +17,5 @@ class ChapterUseCases(
     val markChaptersRemote = MarkChaptersRemote(statusHandler, mangaDexPreferences)
     val calculateChapterFilter = calculateChapterFilter
     val markPreviousChapters = MarkPreviousChaptersUseCase()
+    val validateChapterNotBlocked = ValidateChapterNotBlockedUseCase()
 }

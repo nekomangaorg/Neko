@@ -357,10 +357,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     dbChapter
                         .toSimpleChapter()
                         ?.takeIf { chapter ->
-                            val scanlators = chapter.scanlatorList()
-                            scanlators.none { scanlator -> blockedGroups.contains(scanlator) } &&
-                                (Constants.NO_GROUP !in scanlators ||
-                                    chapter.uploader !in blockedUploaders)
+                            (blockedGroups.isEmpty() && blockedUploaders.isEmpty()) ||
+                                chapterUseCases.validateChapterNotBlocked(
+                                    chapter.scanlatorList(),
+                                    chapter.uploader,
+                                    blockedGroups,
+                                    blockedUploaders,
+                                )
                         }
                         ?.let { chapter ->
                             val downloadState =

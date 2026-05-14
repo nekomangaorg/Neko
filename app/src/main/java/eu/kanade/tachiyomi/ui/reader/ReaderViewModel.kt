@@ -382,25 +382,28 @@ constructor(
             tempManga.copyFrom(networkManga)
             tempManga.title = networkManga.title
 
-            mangaRepository.updateManga(tempManga)
+            if (dbManga == null) {
+                val insertedId = mangaRepository.insertManga(tempManga)
+                tempManga.id = insertedId
+            } else {
+                mangaRepository.updateManga(tempManga)
+            }
             val manga = mangaRepository.getMangaByUrl(tempManga.url)!!
 
             TimberKt.d { "tempManga id ${tempManga.id}" }
             TimberKt.d { "Manga id ${manga.id}" }
 
             if (chapters.isNotEmpty()) {
-                val (newChapters, _) =
-                    syncChaptersWithSource(
-                        appDatabase = appDatabase,
-                        chapterRepository = chapterRepository,
-                        mangaRepository = mangaRepository,
-                        manga = manga,
-                        rawSourceChapters = chapters,
-                    )
-                val currentChapter = newChapters.find {
-                    it.url == MdConstants.chapterSuffix + urlChapterId
-                }
-                if (currentChapter?.id != null) {
+                syncChaptersWithSource(
+                    appDatabase = appDatabase,
+                    chapterRepository = chapterRepository,
+                    mangaRepository = mangaRepository,
+                    manga = manga,
+                    rawSourceChapters = chapters,
+                )
+                val currentChapter =
+                    chapterRepository.getChapterByUrl(MdConstants.chapterSuffix + urlChapterId)
+                if (currentChapter?.id != null && !currentChapter.isUnavailable) {
                     withContext(Dispatchers.Main) { init(manga.id!!, currentChapter.id!!) }
                 } else {
                     throw Exception("Chapter not found")
@@ -637,8 +640,13 @@ constructor(
         val chapterSort = ChapterItemSort(chapterItemFilter, preferences)
         return getChapterList()
             .asSequence()
-            .map { DomainChapterItem(it.chapter.toSimpleChapter()!!) }
-            .filter { !it.chapter.read || it.chapter.id == nextChapterId }
+            .mapNotNull {
+                val simpleChapter = it.chapter.toSimpleChapter() ?: return@mapNotNull null
+                val domainChapter = DomainChapterItem(simpleChapter)
+                if (!domainChapter.chapter.read || domainChapter.chapter.id == nextChapterId)
+                    domainChapter
+                else null
+            }
             .distinctBy { it.chapter.name }
             .sortedWith(chapterSort.sortComparator(manga!!, true))
             .toList()

@@ -61,6 +61,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.chapter.isAvailable
+import eu.kanade.tachiyomi.util.lang.orUnknownError
 import eu.kanade.tachiyomi.util.manga.getSlug
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getBestColor
@@ -247,7 +248,7 @@ fun MangaScreen(
                             Intent.createChooser(intent, context.getString(R.string.share))
                         )
                     } catch (e: Exception) {
-                        context.toast(e.message)
+                        context.toast(e.message.orUnknownError(context))
                     }
                 }
             }
@@ -275,7 +276,7 @@ fun MangaScreen(
                                     Intent.createChooser(intent, context.getString(R.string.share))
                                 )
                             } catch (e: Exception) {
-                                context.toast(e.message)
+                                context.toast(e.message.orUnknownError(context))
                             }
                         }
                     }

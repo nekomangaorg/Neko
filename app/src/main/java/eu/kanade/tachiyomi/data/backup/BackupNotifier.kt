@@ -6,6 +6,7 @@ import androidx.core.app.NotificationCompat
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.util.lang.orUnknownError
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.notificationBuilder
@@ -58,7 +59,7 @@ class BackupNotifier(private val context: Context) {
 
         with(completeNotificationBuilder) {
             setContentTitle(context.getString(R.string.backup_failed))
-            setContentText(error)
+            setContentText(error.orUnknownError(context))
 
             show(Notifications.ID_BACKUP_COMPLETE)
         }
@@ -129,7 +130,7 @@ class BackupNotifier(private val context: Context) {
 
         with(completeNotificationBuilder) {
             setContentTitle(context.getString(R.string.restore_error))
-            setContentText(error)
+            setContentText(error.orUnknownError(context))
 
             show(Notifications.ID_RESTORE_COMPLETE)
         }

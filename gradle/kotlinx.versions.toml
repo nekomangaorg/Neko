@@ -1,5 +1,5 @@
 [versions]
-coroutinesVersion = "1.10.2"
+coroutinesVersion = "1.11.0"
 kotlinVersion = "2.2.10"
 serializationVersion = "1.11.0"
 
