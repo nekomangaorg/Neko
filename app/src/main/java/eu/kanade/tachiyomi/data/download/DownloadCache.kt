@@ -183,7 +183,8 @@ class DownloadCache(
             } ?: return
 
         val mangaRepository: MangaRepository = Injekt.get()
-        val allManga = mangaRepository.getMangaList()
+        val mangaDexId = sourceManager.mangaDex.id
+        val allManga = mangaRepository.getMangaList().filter { it.source == mangaDexId }
 
         // UUID-keyed map for new-format folders ("Title [uuid]")
         val mangaByUuid = allManga.associateBy { it.uuid().lowercase(Locale.getDefault()) }
@@ -231,8 +232,10 @@ class DownloadCache(
                                                 legacyManga.displayTitle()
                                         }
                                     }
+                                    legacyManga
+                                } else {
+                                    null
                                 }
-                                return@async
                             } ?: return@async
 
                         val id = manga.id ?: return@async
