@@ -390,10 +390,6 @@ fun VerticalGridFastScroller(
 
                     val columnCount =
                         remember(columns) { slotSizesSums(constraints).size.coerceAtLeast(1) }
-                    val scrollRange =
-                        remember(columns) {
-                            computeGridScrollRange(state = state, columnCount = columnCount)
-                        }
 
                     LaunchedEffect(thumbOffsetY) {
                         if (layoutInfo.totalItemsCount == 0 || !isThumbDragged)
@@ -408,7 +404,10 @@ fun VerticalGridFastScroller(
 
                         val scrollRatio = (thumbOffsetY - thumbTopPadding) / trackHeightPx
                         val scrollAmt =
-                            scrollRatio * (scrollRange.toFloat() - heightPx).coerceAtLeast(1f)
+                            scrollRatio *
+                                (computeGridScrollRange(state = state, columnCount = columnCount)
+                                        .toFloat() - heightPx)
+                                    .coerceAtLeast(1f)
                         val rowNumber = (scrollAmt / avgSizePerRow).toInt()
                         val rowOffset = scrollAmt - rowNumber * avgSizePerRow
 
@@ -424,7 +423,6 @@ fun VerticalGridFastScroller(
                     val heightPxState = rememberUpdatedState(heightPx)
                     val trackHeightPxGridState = rememberUpdatedState(trackHeightPx)
                     val thumbTopPaddingGridState = rememberUpdatedState(thumbTopPadding)
-                    val scrollRangeState = rememberUpdatedState(scrollRange)
                     val columnCountState = rememberUpdatedState(columnCount)
                     val isThumbDraggedGridState = rememberUpdatedState(isThumbDragged)
 
@@ -438,7 +436,8 @@ fun VerticalGridFastScroller(
                                     heightPx = heightPxState.value,
                                     trackHeightPx = trackHeightPxGridState.value,
                                     thumbTopPadding = thumbTopPaddingGridState.value,
-                                    scrollRange = scrollRangeState.value,
+                                    scrollRange =
+                                        computeGridScrollRange(state, columnCountState.value),
                                     columnCount = columnCountState.value,
                                 )
                             }
