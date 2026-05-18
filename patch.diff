@@ -1,0 +1,11 @@
+--- app/src/main/java/org/nekomanga/App.kt
++++ app/src/main/java/org/nekomanga/App.kt
+@@ -111,7 +111,7 @@
+                     withContext(Dispatchers.Main) {
+                         Toast.makeText(
+                                 applicationContext,
+-                                "Error! App requires WebView to be installed",
++                                getString(R.string.information_webview_required),
+                                 Toast.LENGTH_LONG,
+                             )
+                             .show()

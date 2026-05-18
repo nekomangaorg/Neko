@@ -111,7 +111,7 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
                                 applicationContext,
-                                "Error! App requires WebView to be installed",
+                                getString(R.string.information_webview_required),
                                 Toast.LENGTH_LONG,
                             )
                             .show()
