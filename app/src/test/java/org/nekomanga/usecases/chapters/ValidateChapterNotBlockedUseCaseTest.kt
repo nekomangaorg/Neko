@@ -1,8 +1,8 @@
 package org.nekomanga.usecases.chapters
 
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
 import org.nekomanga.constants.Constants
 
 class ValidateChapterNotBlockedUseCaseTest {

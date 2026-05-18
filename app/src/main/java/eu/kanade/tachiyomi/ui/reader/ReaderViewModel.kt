@@ -1041,7 +1041,7 @@ constructor(
             val result =
                 try {
                     if (manga.favorite) {
-                        coverCache.setCustomCoverToCache(manga, stream())
+                        stream().use { coverCache.setCustomCoverToCache(manga, it) }
                         manga.user_cover = "file://chapterPage-" + Random.nextInt(1000)
                         mangaRepository.updateManga(manga)
                         SetAsCoverResult.Success
