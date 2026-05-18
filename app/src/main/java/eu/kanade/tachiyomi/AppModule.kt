@@ -316,5 +316,6 @@ class PreferenceModule(val application: Application) : InjektModule {
         addSingletonFactory { PreferencesHelper(context = application, preferenceStore = get()) }
         addSingletonFactory { GetDateFormatUseCase(get<PreferencesHelper>()) }
         addSingletonFactory { GetFormattedBuildTimeUseCase(get()) }
+        addSingletonFactory { org.nekomanga.usecases.preferences.ToggleDeveloperModeUseCase(get()) }
     }
 }

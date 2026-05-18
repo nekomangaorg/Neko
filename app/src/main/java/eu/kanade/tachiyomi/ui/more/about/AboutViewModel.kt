@@ -17,6 +17,7 @@ import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.usecases.preferences.GetFormattedBuildTimeUseCase
+import org.nekomanga.usecases.preferences.ToggleDeveloperModeUseCase
 import uy.kohesive.injekt.injectLazy
 
 class AboutViewModel : ViewModel() {
@@ -25,6 +26,7 @@ class AboutViewModel : ViewModel() {
 
     private val securityPreferences: SecurityPreferences by injectLazy()
     private val getFormattedBuildTimeUseCase: GetFormattedBuildTimeUseCase by injectLazy()
+    private val toggleDeveloperModeUseCase: ToggleDeveloperModeUseCase by injectLazy()
 
     val appSnackbarManager: AppSnackbarManager by injectLazy()
 
@@ -90,26 +92,14 @@ class AboutViewModel : ViewModel() {
         }
     }
 
-    private var versionClickCount = 0
-    private var lastVersionClickTime = 0L
-
     fun onVersionClicked() {
-        val currentTime = System.currentTimeMillis()
-        if (currentTime - lastVersionClickTime > DEV_MODE_CLICK_TIMEOUT_MS) {
-            versionClickCount = 0
-        }
-        lastVersionClickTime = currentTime
-        versionClickCount++
-
-        if (versionClickCount == DEV_MODE_CLICK_COUNT) {
-            versionClickCount = 0
-            val newValue = !preferences.developerMode().get()
-            preferences.developerMode().set(newValue)
+        val toggledState = toggleDeveloperModeUseCase()
+        if (toggledState != null) {
             viewModelScope.launch {
                 appSnackbarManager.showSnackbar(
                     SnackbarState(
                         messageRes =
-                            if (newValue) R.string.developer_mode_enabled
+                            if (toggledState) R.string.developer_mode_enabled
                             else R.string.developer_mode_disabled
                     )
                 )
@@ -128,10 +118,5 @@ class AboutViewModel : ViewModel() {
                 )
             }
         }
-    }
-
-    companion object {
-        private const val DEV_MODE_CLICK_COUNT = 7
-        private const val DEV_MODE_CLICK_TIMEOUT_MS = 500L
     }
 }
