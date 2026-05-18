@@ -84,7 +84,7 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val process = getProcessName()
             if (packageName != process) {
-                kotlin.runCatching { WebView.setDataDirectorySuffix(process) }
+                runCatching { WebView.setDataDirectorySuffix(process) }
             }
         }
 
@@ -105,8 +105,7 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
             setupNotificationChannels()
             MangaCoverMetadata.load()
 
-            kotlin
-                .runCatching { CookieManager.getInstance() }
+            runCatching { CookieManager.getInstance() }
                 .onFailure {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
