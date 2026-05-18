@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.conscrypt.Conscrypt
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
@@ -73,17 +74,6 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
         super<Application>.onCreate()
 
         GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
-
-        kotlin
-            .runCatching { CookieManager.getInstance() }
-            .onFailure {
-                Toast.makeText(
-                        applicationContext,
-                        "Error! App requires WebView to be installed",
-                        Toast.LENGTH_LONG,
-                    )
-                    .show()
-            }
 
         // TLS 1.3 support for Android < 10
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -114,6 +104,19 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
         ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.Default) {
             setupNotificationChannels()
             MangaCoverMetadata.load()
+
+            kotlin
+                .runCatching { CookieManager.getInstance() }
+                .onFailure {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                                applicationContext,
+                                "Error! App requires WebView to be installed",
+                                Toast.LENGTH_LONG,
+                            )
+                            .show()
+                    }
+                }
         }
 
         preferences
