@@ -32,3 +32,6 @@ Action: Always append `.distinctUntilChanged()` after `combine()` blocks that ag
 ## 2026-05-22 - [Avoid Intermediate Lists with PersistentList mapping]
 **Learning:** [Calling `.map { it }.toList()` on a `PersistentList` is unnecessary since `PersistentList` already implements `List`. This pattern needlessly allocates a new `ArrayList` and copies all elements twice, increasing GC churn and allocations.]
 **Action:** [Pass the `PersistentList` directly to functions expecting a `List` instead of using `.map { it }.toList()` to reduce intermediate memory allocations and CPU overhead, especially within high-frequency UI state update flows.]
+## 2026-05-22 - [Avoid Intermediate Lists with PersistentList mapping]
+**Learning:** [Calling `.map { it }.toList()` on a `PersistentList` is unnecessary since `PersistentList` already implements `List`. This pattern needlessly allocates a new `ArrayList` and copies all elements twice, increasing GC churn and allocations.]
+**Action:** [Pass the `PersistentList` directly to functions expecting a `List` instead of using `.map { it }.toList()` to reduce intermediate memory allocations and CPU overhead, especially within high-frequency UI state update flows.]
