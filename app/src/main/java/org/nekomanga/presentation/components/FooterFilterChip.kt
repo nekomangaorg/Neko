@@ -27,7 +27,7 @@ fun FooterFilterChip(
         shape = RoundedCornerShape(100),
         label = {
             when (icon != null) {
-                true -> Icon(imageVector = icon, contentDescription = null)
+                true -> Icon(imageVector = icon, contentDescription = name)
                 false -> {
                     Text(
                         text = name,
