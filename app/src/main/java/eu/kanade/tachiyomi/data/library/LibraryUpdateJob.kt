@@ -825,7 +825,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 return file
             }
         } catch (e: Exception) {
-            // Empty
+            TimberKt.e(e) { "Error writing error file" }
         }
         return File("")
     }
