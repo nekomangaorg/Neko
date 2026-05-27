@@ -41,6 +41,8 @@ class Atsumaru : ReducedHttpSource() {
 
     private val json: Json by injectLazy()
 
+    override fun getMangaUrl(url: String): String = "$baseUrl/manga/$url"
+
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
         val (slug, name) = simpleChapter.url.split("/")
         return "$baseUrl/read/$slug/$name"
