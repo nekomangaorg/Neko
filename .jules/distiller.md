@@ -19,3 +19,4 @@
 ## 2026-05-11 - Extracting Blocked Chapter Validation
 **Learning:** Pure domain Use Cases are typically registered as singletons in `AppModule.kt` (using `addSingleton()`) and injected via `Injekt`. However, Use Cases that require an Android `Context` should not be singletons; instead, instantiate them directly where needed or pass the `Context` as a function argument to avoid leaks.
 **Action:** When extracting business logic into Use Cases, keep them pure without Android dependencies to make DI simple and safe.
+## 2026-05-28 - Extracting Global Update Manga Filter\n**Learning:** In the Nekomanga project, use JUnit 4 (`org.junit.Test`, `org.junit.Assert`) for unit tests instead of JUnit 5 (Jupiter), as the project's test suite and build configuration are set up for JUnit 4.\n**Action:** When creating new unit tests, ensure you import `org.junit.Test` and `org.junit.Assert.*` to avoid compilation errors.
