@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
@@ -31,19 +30,13 @@ import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_STARTED
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_COMPLETED
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedStatManga
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedState
 import org.nekomanga.presentation.screens.stats.StatsHelper.getReadDuration
+import org.nekomanga.usecases.library.FilterGlobalUpdateMangaUseCase
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -59,6 +52,7 @@ class StatsViewModel() : ViewModel() {
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
     private val downloadManager: DownloadManager = Injekt.get()
+    private val filterGlobalUpdateMangaUseCase: FilterGlobalUpdateMangaUseCase = Injekt.get()
 
     private val _simpleState = MutableStateFlow(StatsConstants.SimpleState())
     val simpleState: StateFlow<StatsConstants.SimpleState> = _simpleState.asStateFlow()
@@ -313,32 +307,19 @@ class StatsViewModel() : ViewModel() {
         val excludedCategories =
             libraryPreferences.whichCategoriesToExclude().get().map(String::toInt)
         val restrictions = libraryPreferences.autoUpdateDeviceRestrictions().get()
-        return libraryManga
-            .groupBy { it.id }
-            .filterNot { it.value.any { manga -> manga.category in excludedCategories } }
-            .filter {
-                includedCategories.isEmpty() ||
-                    it.value.any { manga -> manga.category in includedCategories }
-            }
-            .filter {
-                val manga = it.value.first()
-                when {
-                    MANGA_HAS_UNREAD in restrictions && manga.unread != 0 -> true
-                    MANGA_NOT_STARTED in restrictions &&
-                        manga.totalChapters > 0 &&
-                        !manga.hasStarted -> true
-                    MANGA_NOT_COMPLETED in restrictions && manga.status == SManga.COMPLETED -> true
-                    MANGA_TRACKING_PLAN_TO_READ in restrictions &&
-                        hasTrackWithGivenStatus(manga, R.string.follows_plan_to_read) -> false
-                    MANGA_TRACKING_DROPPED in restrictions &&
-                        hasTrackWithGivenStatus(manga, R.string.follows_dropped) -> false
-                    MANGA_TRACKING_ON_HOLD in restrictions &&
-                        hasTrackWithGivenStatus(manga, R.string.follows_on_hold) -> false
-                    MANGA_TRACKING_COMPLETED in restrictions &&
-                        hasTrackWithGivenStatus(manga, R.string.follows_completed) -> false
-                    else -> true
-                }
-            }
+        val tracksByMangaId = getTracks(libraryManga).groupBy { it.manga_id }
+
+        return filterGlobalUpdateMangaUseCase(
+            libraryManga = libraryManga,
+            includedCategories = includedCategories,
+            excludedCategories = excludedCategories,
+            restrictions = restrictions,
+            tracksByMangaId = tracksByMangaId,
+            planToReadStatus = prefs.context.getString(R.string.follows_plan_to_read),
+            droppedStatus = prefs.context.getString(R.string.follows_dropped),
+            onHoldStatus = prefs.context.getString(R.string.follows_on_hold),
+            completedStatus = prefs.context.getString(R.string.follows_completed),
+        )
     }
 
     private fun getDownloadCount(manga: LibraryManga): Int {

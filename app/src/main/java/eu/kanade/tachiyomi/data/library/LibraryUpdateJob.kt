@@ -1,15 +1,12 @@
 package eu.kanade.tachiyomi.data.library
 
 import android.content.Context
-import android.content.pm.ServiceInfo
-import android.os.Build
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
-import androidx.work.ForegroundInfo
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
@@ -54,8 +51,6 @@ import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.jobIsRunning
-import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.saveTimeTaken
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.File
@@ -81,9 +76,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
@@ -164,6 +157,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val deleteRemoved by lazy { preferences.deleteRemovedChapters().get() != 1 }
 
     private val notifier = LibraryUpdateNotifier(context)
+    private val filterGlobalUpdateMangaUseCase: FilterGlobalUpdateMangaUseCase by injectLazy()
 
     override suspend fun doWork(): Result {
 
@@ -253,169 +247,80 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             libraryPreferences.whichCategoriesToExclude().get().map(String::toInt)
         val restrictions = libraryPreferences.autoUpdateMangaRestrictions().get()
 
-        return libraryMangaList
-            .asSequence()
-            .distinctBy { it.id }
-            .filter { libraryManga ->
-                if (categoryId != -1) {
-                    // Specific category
-                    libraryManga.category == categoryId
-                } else {
-                    // General categories
-                    val included =
-                        if (categoriesToUpdate.isNotEmpty()) {
-                            libraryManga.category in categoriesToUpdate
-                        } else {
-                            true // Included by default
-                        }
-                    val excluded =
-                        if (categoriesToExclude.isNotEmpty()) {
-                            libraryManga.category in categoriesToExclude
-                        } else {
-                            false // Not excluded by default
-                        }
-                    included && !excluded
-                }
-            }
-            .filter { libraryManga ->
-                when {
-                    LibraryPreferences.MANGA_HAS_UNREAD in restrictions &&
-                        libraryManga.unread != 0 -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_has_unread)
-                        false // Filter out
-                    }
-                    LibraryPreferences.MANGA_NOT_STARTED in restrictions &&
-                        libraryManga.totalChapters > 0 &&
-                        !libraryManga.hasStarted -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_not_started)
-                        false
-                    }
-                    LibraryPreferences.MANGA_NOT_COMPLETED in restrictions &&
-                        libraryManga.status == SManga.COMPLETED -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_completed)
-                        false
-                    }
-
-                    // --- Optimized Tracking Checks ---
-                    LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ in restrictions &&
-                        hasTrackWithGivenStatus(
-                            libraryManga,
-                            context.getString(R.string.follows_plan_to_read),
-                            tracksByMangaId,
-                        ) -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_tracking_plan_to_read)
-                        false
-                    }
-                    LibraryPreferences.MANGA_TRACKING_DROPPED in restrictions &&
-                        hasTrackWithGivenStatus(
-                            libraryManga,
-                            context.getString(R.string.follows_dropped),
-                            tracksByMangaId,
-                        ) -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_tracking_dropped)
-                        false
-                    }
-                    LibraryPreferences.MANGA_TRACKING_ON_HOLD in restrictions &&
-                        hasTrackWithGivenStatus(
-                            libraryManga,
-                            context.getString(R.string.follows_on_hold),
-                            tracksByMangaId,
-                        ) -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_tracking_on_hold)
-                        false
-                    }
-                    LibraryPreferences.MANGA_TRACKING_COMPLETED in restrictions &&
-                        hasTrackWithGivenStatus(
-                            libraryManga,
-                            context.getString(R.string.follows_completed),
-                            tracksByMangaId,
-                        ) -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_tracking_completed)
-                        false
-                    }
-
-                    // If no restriction matched, keep the manga
-                    else -> true
-                }
-            }
-            .toList()
-    }
-
-    override suspend fun getForegroundInfo(): ForegroundInfo {
-        return ForegroundInfo(
-            Notifications.Id.Library.Progress,
-            notifier.progressNotificationBuilder.build(),
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            } else {
-                0
-            },
-        )
-    }
-
-    private suspend fun updateMangaJob(mangaToAdd: List<LibraryManga>) {
-        // Initialize the variables holding the progress of the updates.
-        saveTimeTaken(libraryPreferences) {
-            emitScope.launch { mangaToAdd.forEach { mangaToUpdateMutableFlow.emit(it.id!!) } }
-
-            mangaToUpdate.addAll(mangaToAdd)
-
-            coroutineScope {
-                val semaphoreAmount =
-                    when (libraryPreferences.prioritizeLibraryUpdates().get()) {
-                        true -> 20
-                        false -> 5
-                    }
-
-                val requestSemaphore = Semaphore(semaphoreAmount)
-                val downloadResults =
-                    mangaToAdd
-                        .map { manga ->
-                            async {
-                                requestSemaphore.withPermit {
-                                    val shouldDownload =
-                                        manga.shouldDownloadNewChapters(
-                                            categoryRepository,
-                                            preferences,
-                                        )
-                                    updateMangaChapters(manga, shouldDownload)
-                                }
+        val filteredByCategory =
+            libraryMangaList
+                .asSequence()
+                .distinctBy { it.id }
+                .filter { libraryManga ->
+                    if (categoryId != -1) {
+                        // Specific category
+                        libraryManga.category == categoryId
+                    } else {
+                        // General categories
+                        val included =
+                            if (categoriesToUpdate.isNotEmpty()) {
+                                libraryManga.category in categoriesToUpdate
+                            } else {
+                                true // Included by default
                             }
-                        }
-                        .awaitAll()
-
-                if (!hasDownloads) {
-                    hasDownloads = downloadResults.any { it }
+                        val excluded =
+                            if (categoriesToExclude.isNotEmpty()) {
+                                libraryManga.category in categoriesToExclude
+                            } else {
+                                false // Not excluded by default
+                            }
+                        included && !excluded
+                    }
                 }
+                .toList()
 
-                launchIO { updateReadingStatus(mangaToAdd) }
+        // Apply global update filter logic
+        val result =
+            filterGlobalUpdateMangaUseCase(
+                libraryManga = filteredByCategory,
+                includedCategories = emptyList<Int>(), // Category logic already handled above
+                excludedCategories = emptyList<Int>(), // Category logic already handled above
+                restrictions = restrictions,
+                tracksByMangaId = tracksByMangaId,
+                planToReadStatus = context.getString(R.string.follows_plan_to_read),
+                droppedStatus = context.getString(R.string.follows_dropped),
+                onHoldStatus = context.getString(R.string.follows_on_hold),
+                completedStatus = context.getString(R.string.follows_completed),
+            )
 
-                finishUpdates()
+        // Find which ones were filtered out and populate skippedUpdates
+        val resultSet = result.values.flatten().map { it.id }.toSet()
+        filteredByCategory.forEach { manga ->
+            if (!resultSet.contains(manga.id)) {
+                when {
+                    LibraryPreferences.MANGA_HAS_UNREAD in restrictions && manga.unread != 0 ->
+                        skippedUpdates[manga] =
+                            context.getString(R.string.skipped_reason_has_unread)
+                    LibraryPreferences.MANGA_NOT_STARTED in restrictions &&
+                        manga.totalChapters > 0 &&
+                        !manga.hasStarted ->
+                        skippedUpdates[manga] =
+                            context.getString(R.string.skipped_reason_not_started)
+                    LibraryPreferences.MANGA_NOT_COMPLETED in restrictions &&
+                        manga.status == SManga.COMPLETED ->
+                        skippedUpdates[manga] = context.getString(R.string.skipped_reason_completed)
+                    LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ in restrictions ->
+                        skippedUpdates[manga] =
+                            context.getString(R.string.skipped_reason_tracking_plan_to_read)
+                    LibraryPreferences.MANGA_TRACKING_DROPPED in restrictions ->
+                        skippedUpdates[manga] =
+                            context.getString(R.string.skipped_reason_tracking_dropped)
+                    LibraryPreferences.MANGA_TRACKING_ON_HOLD in restrictions ->
+                        skippedUpdates[manga] =
+                            context.getString(R.string.skipped_reason_tracking_on_hold)
+                    LibraryPreferences.MANGA_TRACKING_COMPLETED in restrictions ->
+                        skippedUpdates[manga] =
+                            context.getString(R.string.skipped_reason_tracking_completed)
+                }
             }
         }
-    }
 
-    private fun hasTrackWithGivenStatus(
-        libraryManga: LibraryManga,
-        globalStatus: String,
-        tracksByMangaId: Map<Long, List<Track>>,
-    ): Boolean {
-        val tracks = tracksByMangaId[libraryManga.id] ?: return false
-        return tracks.any { track ->
-            val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
-            if (status.isNullOrBlank()) {
-                false
-            } else {
-                status == globalStatus
-            }
-        }
+        return result.values.flatten()
     }
 
     private suspend fun updateMangaChapters(manga: LibraryManga, shouldDownload: Boolean): Boolean =
