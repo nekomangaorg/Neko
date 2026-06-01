@@ -81,12 +81,8 @@ suspend fun Iterable<SourceManga>.toDisplayManga(
     val sourceMangas = this.toList()
     val urls = sourceMangas.map { it.url }.distinct()
 
-    // Fetch existing mangas from database by URLs in chunks to avoid SQLite parameter limit
-    val existingMangas =
-        urls
-            .chunked(900)
-            .flatMap { chunk -> mangaRepository.getMangaByUrls(chunk) }
-            .associateBy { it.url }
+    // The repository chunks internally to respect the SQLite bind-variable limit.
+    val existingMangas = mangaRepository.getMangaByUrls(urls).associateBy { it.url }
 
     val newMangasList = mutableListOf<Manga>()
     val updateMangasList = mutableListOf<Manga>()
@@ -289,13 +285,9 @@ suspend fun List<DisplayManga>.resyncDisplayManga(
 ): List<DisplayManga> {
     if (this.isEmpty()) return emptyList()
 
-    // Fetch existing mangas from database by IDs in chunks to avoid SQLite parameter limit
+    // The repository chunks internally to respect the SQLite bind-variable limit.
     val mangaIds = this.map { it.mangaId }.distinct()
-    val existingMangas =
-        mangaIds
-            .chunked(900)
-            .flatMap { chunk -> mangaRepository.getMangaByIds(chunk) }
-            .associateBy { it.id }
+    val existingMangas = mangaRepository.getMangaByIds(mangaIds).associateBy { it.id }
 
     return this.mapNotNull { displayManga ->
         val dbManga = existingMangas[displayManga.mangaId]
