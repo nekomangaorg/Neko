@@ -62,7 +62,7 @@ class UpdateTrackingServiceTest {
             val useCase = UpdateTrackingService(trackRepository, trackManager)
 
             every { trackManager.getService(3) } returns trackService
-            coEvery { trackService.update(any()) } returns mockk<Track>()
+            coEvery { trackService.update(any(), any()) } returns mockk<Track>()
             coEvery { trackRepository.insertTrack(any()) } returns 1L
 
             // Act
@@ -103,7 +103,7 @@ class UpdateTrackingServiceTest {
         val expectedException = RuntimeException("Network error")
 
         every { trackManager.getService(3) } returns trackService
-        coEvery { trackService.update(any()) } throws expectedException
+        coEvery { trackService.update(any(), any()) } throws expectedException
 
         // Act
         val result = useCase.await(trackItem, serviceItem)
