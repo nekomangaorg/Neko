@@ -932,10 +932,10 @@ class LibraryViewModel() : ViewModel() {
 
     fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {
         viewModelScope.launchIO {
+            val categoryItemIds = libraryMangaItems.map { it.displayManga.mangaId }.toSet()
             _internalLibraryScreenState.update { state ->
                 val currentSelected = state.selectedItems
 
-                val categoryItemIds = libraryMangaItems.map { it.displayManga.mangaId }.toSet()
                 val selectedItemIds = currentSelected.map { it.displayManga.mangaId }.toSet()
 
                 val allSelected = selectedItemIds.containsAll(categoryItemIds)
@@ -943,16 +943,16 @@ class LibraryViewModel() : ViewModel() {
                 val newSelectedItems =
                     if (allSelected) {
                         // Unselect all
-                        currentSelected.filter { it.displayManga.mangaId !in categoryItemIds }
+                        currentSelected.removeAll { it.displayManga.mangaId in categoryItemIds }
                     } else {
                         // Select all
                         val itemsToAdd = libraryMangaItems.filter {
                             it.displayManga.mangaId !in selectedItemIds
                         }
-                        currentSelected + itemsToAdd
+                        currentSelected.addAll(itemsToAdd)
                     }
 
-                state.copy(selectedItems = newSelectedItems.toPersistentList())
+                state.copy(selectedItems = newSelectedItems)
             }
         }
     }
