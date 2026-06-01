@@ -932,7 +932,7 @@ class LibraryViewModel() : ViewModel() {
 
     fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {
         viewModelScope.launchIO {
-            val currentSelected = libraryScreenState.value.selectedItems.toList()
+            val currentSelected = libraryScreenState.value.selectedItems
 
             val categoryItemIds = libraryMangaItems.map { it.displayManga.mangaId }.toSet()
             val selectedItemIds = currentSelected.map { it.displayManga.mangaId }.toSet()
@@ -963,7 +963,7 @@ class LibraryViewModel() : ViewModel() {
 
     fun deleteSelectedLibraryMangaItems() {
         viewModelScope.launchNonCancellable {
-            val currentSelected = libraryScreenState.value.selectedItems.toList()
+            val currentSelected = libraryScreenState.value.selectedItems
             clearSelectedManga()
 
             val mangaIds = currentSelected.map { it.displayManga.mangaId }
