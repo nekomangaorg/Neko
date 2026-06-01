@@ -527,7 +527,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 )
 
                             if (
-                                staticChapterData.allScanlators.size == 1 &&
+                                (staticChapterData.allScanlators.size +
+                                    staticChapterData.allUploaders.size +
+                                    staticChapterData.allSources.size) <= 1 &&
                                     !effectiveManga.filteredScanlators.isEmpty()
                             ) {
                                 val manga =

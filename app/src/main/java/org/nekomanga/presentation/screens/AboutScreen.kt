@@ -40,8 +40,6 @@ import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.data.updater.REPO_URL
 import eu.kanade.tachiyomi.data.updater.Release
 import eu.kanade.tachiyomi.ui.main.ObserveAsEvents
-import eu.kanade.tachiyomi.ui.more.about.AboutScreenState
-import eu.kanade.tachiyomi.ui.more.about.AboutViewModel
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.isOnline
 import kotlinx.coroutines.launch
@@ -57,7 +55,9 @@ import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
+import org.nekomanga.presentation.screens.about.AboutScreenState
 import org.nekomanga.presentation.screens.about.AboutTopAppBar
+import org.nekomanga.presentation.screens.about.AboutViewModel
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 import org.nekomanga.presentation.theme.Size
 
