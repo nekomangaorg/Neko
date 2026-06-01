@@ -932,31 +932,27 @@ class LibraryViewModel() : ViewModel() {
 
     fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {
         viewModelScope.launchIO {
-            val currentSelected = libraryScreenState.value.selectedItems
+            _internalLibraryScreenState.update { state ->
+                val currentSelected = state.selectedItems
 
-            val categoryItemIds = libraryMangaItems.map { it.displayManga.mangaId }.toSet()
-            val selectedItemIds = currentSelected.map { it.displayManga.mangaId }.toSet()
+                val categoryItemIds = libraryMangaItems.map { it.displayManga.mangaId }.toSet()
+                val selectedItemIds = currentSelected.map { it.displayManga.mangaId }.toSet()
 
-            val allSelected = selectedItemIds.containsAll(categoryItemIds)
+                val allSelected = selectedItemIds.containsAll(categoryItemIds)
 
-            val newSelectedItems: List<LibraryMangaItem>
+                val newSelectedItems =
+                    if (allSelected) {
+                        // Unselect all
+                        currentSelected.filter { it.displayManga.mangaId !in categoryItemIds }
+                    } else {
+                        // Select all
+                        val itemsToAdd = libraryMangaItems.filter {
+                            it.displayManga.mangaId !in selectedItemIds
+                        }
+                        currentSelected + itemsToAdd
+                    }
 
-            if (allSelected) {
-                // Unselect all
-                newSelectedItems = currentSelected.filter {
-                    it.displayManga.mangaId !in categoryItemIds
-                }
-            } else {
-                // Select all
-                val itemsToAdd = libraryMangaItems.filter {
-                    it.displayManga.mangaId !in selectedItemIds
-                }
-
-                newSelectedItems = currentSelected + itemsToAdd
-            }
-
-            _internalLibraryScreenState.update {
-                it.copy(selectedItems = newSelectedItems.toPersistentList())
+                state.copy(selectedItems = newSelectedItems.toPersistentList())
             }
         }
     }
