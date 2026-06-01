@@ -932,38 +932,34 @@ class LibraryViewModel() : ViewModel() {
 
     fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {
         viewModelScope.launchIO {
-            val currentSelected = libraryScreenState.value.selectedItems.toList()
-
             val categoryItemIds = libraryMangaItems.map { it.displayManga.mangaId }.toSet()
-            val selectedItemIds = currentSelected.map { it.displayManga.mangaId }.toSet()
+            _internalLibraryScreenState.update { state ->
+                val currentSelected = state.selectedItems
 
-            val allSelected = selectedItemIds.containsAll(categoryItemIds)
+                val selectedItemIds = currentSelected.map { it.displayManga.mangaId }.toSet()
 
-            val newSelectedItems: List<LibraryMangaItem>
+                val allSelected = selectedItemIds.containsAll(categoryItemIds)
 
-            if (allSelected) {
-                // Unselect all
-                newSelectedItems = currentSelected.filter {
-                    it.displayManga.mangaId !in categoryItemIds
-                }
-            } else {
-                // Select all
-                val itemsToAdd = libraryMangaItems.filter {
-                    it.displayManga.mangaId !in selectedItemIds
-                }
+                val newSelectedItems =
+                    if (allSelected) {
+                        // Unselect all
+                        currentSelected.removeAll { it.displayManga.mangaId in categoryItemIds }
+                    } else {
+                        // Select all
+                        val itemsToAdd = libraryMangaItems.filter {
+                            it.displayManga.mangaId !in selectedItemIds
+                        }
+                        currentSelected.addAll(itemsToAdd)
+                    }
 
-                newSelectedItems = currentSelected + itemsToAdd
-            }
-
-            _internalLibraryScreenState.update {
-                it.copy(selectedItems = newSelectedItems.toPersistentList())
+                state.copy(selectedItems = newSelectedItems)
             }
         }
     }
 
     fun deleteSelectedLibraryMangaItems() {
         viewModelScope.launchNonCancellable {
-            val currentSelected = libraryScreenState.value.selectedItems.toList()
+            val currentSelected = libraryScreenState.value.selectedItems
             clearSelectedManga()
 
             val mangaIds = currentSelected.map { it.displayManga.mangaId }
