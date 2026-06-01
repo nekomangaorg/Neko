@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.more.about
+package org.nekomanga.presentation.screens.about
 
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 
