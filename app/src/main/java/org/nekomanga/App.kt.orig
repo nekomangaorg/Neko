@@ -102,6 +102,9 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.Default) {
+            setupNotificationChannels()
+            MangaCoverMetadata.load()
+
             runCatching { CookieManager.getInstance() }
                 .onFailure {
                     withContext(Dispatchers.Main) {
@@ -113,9 +116,6 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
                             .show()
                     }
                 }
-
-            setupNotificationChannels()
-            MangaCoverMetadata.load()
         }
 
         preferences
