@@ -351,6 +351,35 @@ class GroupLibraryMangaUseCaseTest {
     }
 
     @Test
+    fun `groupByCategory includes empty system category when showEmptyCategories is true`() {
+        val manga1 = createMockManga(1, category = 1)
+        val category1 = CategoryItem(id = 1, name = "Category 1", sortOrder = LibrarySort.Title)
+        val systemCategory =
+            CategoryItem(id = 0, name = CategoryItem.SYSTEM_CATEGORY, sortOrder = LibrarySort.Title)
+
+        val result =
+            useCase.groupByCategory(
+                libraryMangaList = listOf(manga1),
+                categoryList = listOf(category1, systemCategory),
+                showEmptyCategories = true,
+            )
+
+        val expected =
+            listOf(
+                LibraryCategoryItem(
+                    categoryItem = category1,
+                    libraryItems = persistentListOf(manga1),
+                ),
+                LibraryCategoryItem(
+                    categoryItem = systemCategory,
+                    libraryItems = persistentListOf(),
+                ),
+            )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
     fun `groupByCategory includes non-empty system categories`() {
         val manga1 = createMockManga(1, category = 0)
         val systemCategory =
@@ -383,6 +412,22 @@ class GroupLibraryMangaUseCaseTest {
             )
 
         assertEquals(emptyList<LibraryCategoryItem>(), result)
+    }
+
+    @Test
+    fun `groupByCategory returns categories when library is empty but showEmptyCategories is true`() {
+        val category1 = CategoryItem(id = 1, name = "Cat", sortOrder = LibrarySort.Title)
+        val result =
+            useCase.groupByCategory(
+                libraryMangaList = emptyList(),
+                categoryList = listOf(category1),
+                showEmptyCategories = true,
+            )
+
+        val expected =
+            listOf(LibraryCategoryItem(categoryItem = category1, libraryItems = persistentListOf()))
+
+        assertEquals(expected, result)
     }
 
     @Test

@@ -413,15 +413,24 @@ class LibraryViewModel() : ViewModel() {
 
     // 2. GROUP FLOW: Groups the filtered items (By Category, Status, etc.)
     private val groupedMangaFlow =
-        combine(activeMangaFlow, libraryViewFlow, categoryListFlow, trackMapFlow) {
-                activeMangaList,
-                libraryViewPreferences,
-                categoryList,
-                trackMap ->
+        combine(
+                activeMangaFlow,
+                libraryViewFlow,
+                categoryListFlow,
+                trackMapFlow,
+                libraryMangaListFlow,
+            ) { activeMangaList, libraryViewPreferences, categoryList, trackMap, rawLibraryList ->
                 withContext(Dispatchers.Default) {
+                    val showEmptyCategories =
+                        rawLibraryList.isNotEmpty() &&
+                            _internalLibraryScreenState.value.searchQuery.isNullOrBlank()
                     when (libraryViewPreferences.groupBy) {
                         LibraryGroup.ByCategory -> {
-                            groupLibraryManga.groupByCategory(activeMangaList, categoryList)
+                            groupLibraryManga.groupByCategory(
+                                activeMangaList,
+                                categoryList,
+                                showEmptyCategories,
+                            )
                         }
                         LibraryGroup.ByAuthor,
                         LibraryGroup.ByContent,

@@ -93,8 +93,9 @@ class GroupLibraryMangaUseCase {
     fun groupByCategory(
         libraryMangaList: List<LibraryMangaItem>,
         categoryList: List<CategoryItem>,
+        showEmptyCategories: Boolean = false,
     ): List<LibraryCategoryItem> {
-        if (libraryMangaList.isEmpty()) {
+        if (libraryMangaList.isEmpty() && !showEmptyCategories) {
             return emptyList()
         }
 
@@ -103,7 +104,9 @@ class GroupLibraryMangaUseCase {
         return categoryList.mapNotNull { categoryItem ->
             val unsortedMangaList = mangaMap[categoryItem.id] ?: emptyList()
 
-            if (categoryItem.isSystemCategory && unsortedMangaList.isEmpty()) {
+            if (
+                categoryItem.isSystemCategory && unsortedMangaList.isEmpty() && !showEmptyCategories
+            ) {
                 return@mapNotNull null
             }
 
