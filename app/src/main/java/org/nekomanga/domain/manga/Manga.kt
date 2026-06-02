@@ -2,7 +2,6 @@ package org.nekomanga.domain.manga
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
@@ -62,24 +61,42 @@ data class LibraryMangaItem(
                 this.altTitles.fastAny { altTitle -> altTitle.contains(searchQuery, true) } ||
                 this.author.fastAny { author -> author.contains(searchQuery, true) } ||
                 if (searchQuery.contains(",")) {
-                    this.genre.fastAll { genre -> genre.contains(searchQuery) }
                     val split = searchQuerySplit ?: searchQuery.split(",")
                     split.all { splitQuery ->
-                        this.genre.fastAny { genre ->
-                            if (splitQuery.startsWith("-")) {
-                                !genre.contains(splitQuery.substringAfter("-"), true)
-                            } else {
-                                genre.contains(splitQuery, true)
+                        val cleanQuery = splitQuery.trim()
+                        val isExclude = cleanQuery.startsWith("-")
+                        val query = if (isExclude) cleanQuery.substringAfter("-") else cleanQuery
+
+                        val matchesGenre =
+                            this.genre.fastAny { genre -> genre.contains(query, true) }
+                        val matchesContentRating =
+                            this.contentRating.fastAny { rating ->
+                                rating.contains(query, true) ||
+                                    ("Content rating: $rating").contains(query, true)
                             }
+
+                        if (isExclude) {
+                            !matchesGenre && !matchesContentRating
+                        } else {
+                            matchesGenre || matchesContentRating
                         }
                     }
                 } else {
-                    this.genre.fastAny { genre ->
-                        if (searchQuery.startsWith("-")) {
-                            !genre.contains(searchQuery.substringAfter("-"), true)
-                        } else {
-                            genre.contains(searchQuery, true)
+                    val cleanQuery = searchQuery.trim()
+                    val isExclude = cleanQuery.startsWith("-")
+                    val query = if (isExclude) cleanQuery.substringAfter("-") else cleanQuery
+
+                    val matchesGenre = this.genre.fastAny { genre -> genre.contains(query, true) }
+                    val matchesContentRating =
+                        this.contentRating.fastAny { rating ->
+                            rating.contains(query, true) ||
+                                ("Content rating: $rating").contains(query, true)
                         }
+
+                    if (isExclude) {
+                        !matchesGenre && !matchesContentRating
+                    } else {
+                        matchesGenre || matchesContentRating
                     }
                 }
         }
