@@ -81,10 +81,8 @@ interface ChapterDao {
         WHERE manga.favorite = 1
         AND chapters.date_fetch > manga.date_added
         AND LOWER(manga.title) LIKE :search
-        AND (
-          chapters.unavailable = 0
-          OR (chapters.unavailable = 1 AND chapters.scanlator = 'Local')
-        )
+        AND chapters.unavailable = 0
+        AND (chapters.scanlator IS NULL OR chapters.scanlator != 'Local')
         ORDER BY
             CASE WHEN :sortByFetched = 1 THEN chapters.date_fetch ELSE chapters.date_upload END DESC
         LIMIT :limit OFFSET :offset
@@ -112,10 +110,8 @@ interface ChapterDao {
         WHERE manga.favorite = 1
         AND chapters.date_fetch > manga.date_added
         AND LOWER(manga.title) LIKE :search
-        AND (
-          chapters.unavailable = 0
-          OR (chapters.unavailable = 1 AND chapters.scanlator = 'Local')
-        )
+        AND chapters.unavailable = 0
+        AND (chapters.scanlator IS NULL OR chapters.scanlator != 'Local')
         ORDER BY
             CASE WHEN :sortByFetched = 1 THEN chapters.date_fetch ELSE chapters.date_upload END DESC
         LIMIT :limit OFFSET :offset
