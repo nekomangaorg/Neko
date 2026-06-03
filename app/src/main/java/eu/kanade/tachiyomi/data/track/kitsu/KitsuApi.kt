@@ -158,11 +158,12 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         manga: Manga,
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
-        if (!wasPreviouslyTracked && !manga.kitsu_id.isNullOrBlank()) {
+        val kitsuId = manga.kitsu_id
+        if (!wasPreviouslyTracked && !kitsuId.isNullOrBlank()) {
             try {
                 with(json) {
                     authClient
-                        .newCall(org.nekomanga.core.network.GET(apiMangaUrl(manga.kitsu_id!!)))
+                        .newCall(org.nekomanga.core.network.GET(apiMangaUrl(kitsuId)))
                         .await()
                         .parseAs<JsonObject>()
                         .let {

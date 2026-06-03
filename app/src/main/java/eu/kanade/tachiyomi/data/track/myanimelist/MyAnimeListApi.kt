@@ -74,9 +74,10 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         return withIOContext {
-            if (manga.my_anime_list_id != null && !wasPreviouslyTracked) {
+            val myAnimeListId = manga.my_anime_list_id?.toLongOrNull()
+            if (myAnimeListId != null && !wasPreviouslyTracked) {
                 try {
-                    val trackSearch = getMangaDetails(manga.my_anime_list_id!!.toLong())
+                    val trackSearch = getMangaDetails(myAnimeListId)
                     if (!trackSearch.publishing_type.contains("novel")) {
                         return@withIOContext listOf(trackSearch)
                     }

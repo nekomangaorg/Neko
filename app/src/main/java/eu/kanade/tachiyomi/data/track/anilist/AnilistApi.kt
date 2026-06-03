@@ -120,11 +120,12 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         return withIOContext {
-            if (manga.anilist_id != null && !wasPreviouslyTracked) {
+            val anilistId = manga.anilist_id?.toIntOrNull()
+            if (anilistId != null && !wasPreviouslyTracked) {
                 try {
                     val payload = buildJsonObject {
                         put("query", findQuery())
-                        putJsonObject("variables") { put("query", manga.anilist_id) }
+                        putJsonObject("variables") { put("query", anilistId) }
                     }
                     val list =
                         with(json) {
