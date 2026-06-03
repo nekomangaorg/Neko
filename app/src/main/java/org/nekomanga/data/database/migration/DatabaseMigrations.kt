@@ -30,20 +30,39 @@ object DatabaseMigrations {
             }
         }
 
+    private fun tableExists(db: SupportSQLiteDatabase, tableName: String): Boolean {
+        db.query("SELECT name FROM sqlite_master WHERE type='table' AND name=?", arrayOf(tableName))
+            .use { cursor ->
+                return cursor.count > 0
+            }
+    }
+
+    private fun backupTable(db: SupportSQLiteDatabase, originalName: String, tempName: String) {
+        if (tableExists(db, originalName)) {
+            db.execSQL("CREATE TABLE `$tempName` AS SELECT * FROM `$originalName`")
+        }
+    }
+
+    private fun restoreTable(db: SupportSQLiteDatabase, tempName: String, restoreSql: String) {
+        if (tableExists(db, tempName)) {
+            db.execSQL(restoreSql)
+        }
+    }
+
     private fun backupDataToTempTables(db: SupportSQLiteDatabase) {
-        db.execSQL("CREATE TABLE `temp_mangas` AS SELECT * FROM `mangas`")
-        db.execSQL("CREATE TABLE `temp_chapters` AS SELECT * FROM `chapters`")
-        db.execSQL("CREATE TABLE `temp_history` AS SELECT * FROM `history`")
-        db.execSQL("CREATE TABLE `temp_categories` AS SELECT * FROM `categories`")
-        db.execSQL("CREATE TABLE `temp_mangas_categories` AS SELECT * FROM `mangas_categories`")
-        db.execSQL("CREATE TABLE `temp_manga_aggregate` AS SELECT * FROM `manga_aggregate`")
-        db.execSQL("CREATE TABLE `temp_manga_sync` AS SELECT * FROM `manga_sync`")
-        db.execSQL("CREATE TABLE `temp_artwork` AS SELECT * FROM `artwork`")
-        db.execSQL("CREATE TABLE `temp_browse_filter` AS SELECT * FROM `browse_filter`")
-        db.execSQL("CREATE TABLE `temp_manga_related` AS SELECT * FROM `manga_related`")
-        db.execSQL("CREATE TABLE `temp_scanlator_group` AS SELECT * FROM `scanlator_group`")
-        db.execSQL("CREATE TABLE `temp_uploader` AS SELECT * FROM `uploader`")
-        db.execSQL("CREATE TABLE `temp_merge_manga` AS SELECT * FROM `merge_manga`")
+        backupTable(db, "mangas", "temp_mangas")
+        backupTable(db, "chapters", "temp_chapters")
+        backupTable(db, "history", "temp_history")
+        backupTable(db, "categories", "temp_categories")
+        backupTable(db, "mangas_categories", "temp_mangas_categories")
+        backupTable(db, "manga_aggregate", "temp_manga_aggregate")
+        backupTable(db, "manga_sync", "temp_manga_sync")
+        backupTable(db, "artwork", "temp_artwork")
+        backupTable(db, "browse_filter", "temp_browse_filter")
+        backupTable(db, "manga_related", "temp_manga_related")
+        backupTable(db, "scanlator_group", "temp_scanlator_group")
+        backupTable(db, "uploader", "temp_uploader")
+        backupTable(db, "merge_manga", "temp_merge_manga")
     }
 
     private fun dropOldTables(db: SupportSQLiteDatabase) {
@@ -201,7 +220,9 @@ object DatabaseMigrations {
     private fun restoreDataFromTempTables(db: SupportSQLiteDatabase) {
         // Insert order matters for Foreign Keys: Parents first, then children
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_mangas",
             """
             INSERT INTO `manga` (
                 `id`, `source`, `url`, `artist`, `author`, `description`, `genre`, `title`, `status`, `thumbnail_url`,
@@ -220,19 +241,23 @@ object DatabaseMigrations {
                 `manga_last_chapter`, `merge_manga_image_url`, `alt_titles`, `user_cover`, `user_title`, `language_filter_flag`, `dynamic_cover`
             FROM `temp_mangas`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_categories",
             """
             INSERT INTO `categories` (`id`, `name`, `sort`, `flags`, `manga_order`)
             SELECT `_id`, `name`, `sort`, `flags`, COALESCE(`manga_order`, '')
             FROM `temp_categories`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_chapters",
             """
             INSERT INTO `chapters` (
                 `id`, `manga_id`, `url`, `name`, `chapter_txt`, `chapter_title`, `vol`, `scanlator`, `uploader`,
@@ -247,37 +272,45 @@ object DatabaseMigrations {
                 COALESCE(`date_upload`, 0), `mangadex_chapter_id`, `language`
             FROM `temp_chapters`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_history",
             """
             INSERT INTO `history` (`id`, `chapter_id`, `last_read`, `time_read`)
             SELECT `history_id`, `history_chapter_id`, COALESCE(`history_last_read`, 0), COALESCE(`history_time_read`, 0)
             FROM `temp_history`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_mangas_categories",
             """
             INSERT INTO `manga_categories` (`id`, `manga_id`, `category_id`)
             SELECT `_id`, `manga_id`, `category_id`
             FROM `temp_mangas_categories`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_manga_aggregate",
             """
             INSERT INTO `manga_aggregate` (`manga_id`, `volumes`)
             SELECT `manga_id`, COALESCE(`volumes`, '')
             FROM `temp_manga_aggregate`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_manga_sync",
             """
             INSERT INTO `track` (
                 `id`, `manga_id`, `track_service_id`, `media_id`, `library_id`, `title`, `last_chapter_read`,
@@ -289,61 +322,73 @@ object DatabaseMigrations {
                 COALESCE(`remote_url`, ''), COALESCE(`start_date`, 0), COALESCE(`finish_date`, 0)
             FROM `temp_manga_sync`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_artwork",
             """
             INSERT INTO `artwork` (`id`, `manga_id`, `file_name`, `volume`, `locale`, `description`)
             SELECT `_id`, `manga_id`, `filename`, `volume`, `locale`, `description`
             FROM `temp_artwork`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_merge_manga",
             """
             INSERT INTO `merge_manga` (`id`, `manga_id`, `cover_url`, `title`, `url`, `merge_type`)
             SELECT `_id`, COALESCE(`manga_id`, 0), COALESCE(`cover_url`, ''), COALESCE(`title`, ''), COALESCE(`url`, ''), COALESCE(`mergeType`, 0)
             FROM `temp_merge_manga`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_browse_filter",
             """
             INSERT INTO `browse_filter` (`id`, `name`, `filters`, `is_default`)
             SELECT `_id`, `name`, `filters`, `is_default`
             FROM `temp_browse_filter`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_manga_related",
             """
             INSERT INTO `manga_similar` (`id`, `manga_id`, `matched_ids`)
             SELECT `_id`, COALESCE(`manga_id`, ''), COALESCE(`matched_ids`, '')
             FROM `temp_manga_related`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_scanlator_group",
             """
             INSERT INTO `scanlator_group` (`id`, `name`, `uuid`, `description`)
             SELECT `_id`, COALESCE(`name`, ''), COALESCE(`uuid`, ''), `description`
             FROM `temp_scanlator_group`
             """
-                .trimIndent()
+                .trimIndent(),
         )
 
-        db.execSQL(
+        restoreTable(
+            db,
+            "temp_uploader",
             """
             INSERT INTO `uploader` (`id`, `username`, `uuid`)
             SELECT `_id`, COALESCE(`username`, ''), COALESCE(`uuid`, '')
             FROM `temp_uploader`
             """
-                .trimIndent()
+                .trimIndent(),
         )
     }
 
