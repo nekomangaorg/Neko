@@ -626,6 +626,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 viewer?.moveToPrevious()
                 return true
             }
+            KeyEvent.KEYCODE_C -> {
+                openWebView(isComments = true)
+                return true
+            }
             else -> return super.onKeyUp(keyCode, event)
         }
     }

@@ -33,7 +33,7 @@
         trigger_key="BACK">
         <preference
             name="gesture"
-            value="circle_ccw" />
+            value="swipe_down" />
     </action>
     <action
         id="neko_next_chapter"
@@ -56,5 +56,15 @@
         <preference
             name="gesture"
             value="swipe_left" />
+    </action>
+    <action
+        id="neko_open_comments"
+        label="@string/spen_open_comments"
+        priority="6"
+        repeatable="false"
+        trigger_key="C">
+        <preference
+            name="gesture"
+            value="swipe_up" />
     </action>
 </remote-actions>
