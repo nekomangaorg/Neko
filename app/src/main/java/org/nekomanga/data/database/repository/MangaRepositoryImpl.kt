@@ -92,7 +92,10 @@ class MangaRepositoryImpl(
     }
 
     override suspend fun getMangaByUrls(urls: List<String>): List<Manga> {
-        val allUrls = urls.flatMap { url -> listOfNotNull(url, getAltUrl(url)) }
+        // Distinct guards against the input containing both a "/title/x" and its
+        // "/manga/x" counterpart: each expands into the same pair, which would otherwise
+        // be queried twice and waste bind variables.
+        val allUrls = urls.flatMap { url -> listOfNotNull(url, getAltUrl(url)) }.distinct()
         return allUrls
             .chunked(MAX_DB_QUERY_VARIABLES)
             .flatMap { chunk -> mangaDao.getMangaByUrls(chunk) }

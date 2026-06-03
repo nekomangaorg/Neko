@@ -55,6 +55,22 @@ class MangaRepositoryImplTest {
         }
 
     @Test
+    fun `getMangaByUrls deduplicates urls so the same manga is not queried twice`() = runTest {
+        // Input contains both forms of the SAME manga. Without distinct(), the alt-url
+        // expansion would query ["/title/uuid-1", "/manga/uuid-1", "/manga/uuid-1",
+        // "/title/uuid-1"], doubling the bind variables and repeating the lookup.
+        val inputUrls = listOf("/title/uuid-1", "/manga/uuid-1")
+
+        val capturedQueries = mutableListOf<List<String>>()
+        coEvery { mangaDao.getMangaByUrls(capture(capturedQueries)) } returns emptyList()
+
+        repository.getMangaByUrls(inputUrls)
+
+        capturedQueries.flatten() shouldContainExactlyInAnyOrder
+            listOf("/title/uuid-1", "/manga/uuid-1")
+    }
+
+    @Test
     fun `getMangaByIds splits id list so no query exceeds the SQLite variable limit`() = runTest {
         val inputIds = (1L..1500L).toList()
 
