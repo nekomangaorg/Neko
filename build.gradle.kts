@@ -1,5 +1,6 @@
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.BasePlugin
+import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
 import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -105,3 +106,12 @@ afterEvaluate {
 }
 
 tasks.register<KtfmtFormatTask>("ktfmtPrecommit")
+
+allprojects {
+  tasks.withType<KtfmtFormatTask>().configureEach {
+    exclude("**/build/**")
+  }
+  tasks.withType<KtfmtCheckTask>().configureEach {
+    exclude("**/build/**")
+  }
+}
