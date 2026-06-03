@@ -65,11 +65,13 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     .parseAs<JsonObject>()
                     .let {
                         track.library_id =
-                            it["data"]!!
-                                .jsonObject["SaveMediaListEntry"]!!
-                                .jsonObject["id"]!!
-                                .jsonPrimitive
-                                .long
+                            it["data"]
+                                ?.jsonObject
+                                ?.get("SaveMediaListEntry")
+                                ?.jsonObject
+                                ?.get("id")
+                                ?.jsonPrimitive
+                                ?.long ?: 0L
                         track
                     }
             }
@@ -99,14 +101,17 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     .await()
                     .parseAs<JsonObject>()
                     .let { response ->
-                        val media = response["data"]!!.jsonObject["SaveMediaListEntry"]!!.jsonObject
-                        val startedDate = parseDate(media, "startedAt")
-                        if (track.started_reading_date <= 0L || startedDate > 0) {
-                            track.started_reading_date = startedDate
-                        }
-                        val finishedDate = parseDate(media, "completedAt")
-                        if (track.finished_reading_date <= 0L || finishedDate > 0) {
-                            track.finished_reading_date = finishedDate
+                        val media =
+                            response["data"]?.jsonObject?.get("SaveMediaListEntry")?.jsonObject
+                        if (media != null) {
+                            val startedDate = parseDate(media, "startedAt")
+                            if (track.started_reading_date <= 0L || startedDate > 0) {
+                                track.started_reading_date = startedDate
+                            }
+                            val finishedDate = parseDate(media, "completedAt")
+                            if (track.finished_reading_date <= 0L || finishedDate > 0) {
+                                track.finished_reading_date = finishedDate
+                            }
                         }
                         track
                     }
@@ -136,10 +141,13 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                                 .await()
                                 .parseAs<JsonObject>()
                                 .let { response ->
-                                    val data = response["data"]!!.jsonObject
-                                    val page = data["Page"]!!.jsonObject
-                                    val media = page["media"]!!.jsonArray
-                                    val entries = media.map { jsonToALManga(it.jsonObject) }
+                                    val data =
+                                        response["data"]?.jsonObject ?: return@let emptyList()
+                                    val page = data["Page"]?.jsonObject ?: return@let emptyList()
+                                    val media = page["media"]?.jsonArray ?: return@let emptyList()
+                                    val entries = media.mapNotNull {
+                                        runCatching { jsonToALManga(it.jsonObject) }.getOrNull()
+                                    }
                                     entries.map { it.toTrack() }
                                 }
                         }
@@ -162,10 +170,12 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     .await()
                     .parseAs<JsonObject>()
                     .let { response ->
-                        val data = response["data"]!!.jsonObject
-                        val page = data["Page"]!!.jsonObject
-                        val media = page["media"]!!.jsonArray
-                        val entries = media.map { jsonToALManga(it.jsonObject) }
+                        val data = response["data"]?.jsonObject ?: return@let emptyList()
+                        val page = data["Page"]?.jsonObject ?: return@let emptyList()
+                        val media = page["media"]?.jsonArray ?: return@let emptyList()
+                        val entries = media.mapNotNull {
+                            runCatching { jsonToALManga(it.jsonObject) }.getOrNull()
+                        }
                         entries.map { it.toTrack() }
                     }
             }
@@ -187,10 +197,12 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     .await()
                     .parseAs<JsonObject>()
                     .let { response ->
-                        val data = response["data"]!!.jsonObject
-                        val page = data["Page"]!!.jsonObject
-                        val media = page["mediaList"]!!.jsonArray
-                        val entries = media.map { jsonToALUserManga(it.jsonObject) }
+                        val data = response["data"]?.jsonObject ?: return@let null
+                        val page = data["Page"]?.jsonObject ?: return@let null
+                        val media = page["mediaList"]?.jsonArray ?: return@let null
+                        val entries = media.mapNotNull {
+                            runCatching { jsonToALUserManga(it.jsonObject) }.getOrNull()
+                        }
                         entries.firstOrNull()?.toTrack()
                     }
             }
@@ -228,17 +240,22 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     .await()
                     .parseAs<JsonObject>()
                     .let {
-                        val data = it["data"]!!.jsonObject
-                        val viewer = data["Viewer"]!!.jsonObject
-                        val id = viewer["id"]!!.jsonPrimitive.int.toString()
-                        val user = viewer["name"]!!.jsonPrimitive.content
-                        Pair(
-                            user + Constants.SEPARATOR + id,
-                            viewer["mediaListOptions"]!!
-                                .jsonObject["scoreFormat"]!!
-                                .jsonPrimitive
-                                .content,
-                        )
+                        val data = it["data"]?.jsonObject ?: throw Exception("Invalid response")
+                        val viewer =
+                            data["Viewer"]?.jsonObject ?: throw Exception("Viewer data not found")
+                        val id =
+                            viewer["id"]?.jsonPrimitive?.int?.toString()
+                                ?: throw Exception("User ID not found")
+                        val user =
+                            viewer["name"]?.jsonPrimitive?.content
+                                ?: throw Exception("Username not found")
+                        val scoreFormat =
+                            viewer["mediaListOptions"]
+                                ?.jsonObject
+                                ?.get("scoreFormat")
+                                ?.jsonPrimitive
+                                ?.content ?: throw Exception("Score format not found")
+                        Pair(user + Constants.SEPARATOR + id, scoreFormat)
                     }
             }
         }
@@ -246,35 +263,37 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
     private fun jsonToALManga(struct: JsonObject): ALManga {
         return ALManga(
-            struct["id"]!!.jsonPrimitive.long,
-            struct["title"]!!.jsonObject["userPreferred"]!!.jsonPrimitive.content,
-            struct["coverImage"]!!.jsonObject["large"]!!.jsonPrimitive.content,
-            struct["description"]!!.jsonPrimitive.contentOrNull,
-            struct["format"]!!.jsonPrimitive.content.replace("_", "-"),
-            struct["status"]!!.jsonPrimitive.contentOrNull ?: "",
+            struct["id"]?.jsonPrimitive?.long ?: 0L,
+            struct["title"]?.jsonObject?.get("userPreferred")?.jsonPrimitive?.content ?: "",
+            struct["coverImage"]?.jsonObject?.get("large")?.jsonPrimitive?.content ?: "",
+            struct["description"]?.jsonPrimitive?.contentOrNull,
+            struct["format"]?.jsonPrimitive?.content?.replace("_", "-") ?: "",
+            struct["status"]?.jsonPrimitive?.contentOrNull ?: "",
             parseDate(struct, "startDate"),
-            struct["chapters"]!!.jsonPrimitive.intOrNull ?: 0,
+            struct["chapters"]?.jsonPrimitive?.intOrNull ?: 0,
         )
     }
 
     private fun jsonToALUserManga(struct: JsonObject): ALUserManga {
         return ALUserManga(
-            struct["id"]!!.jsonPrimitive.long,
-            struct["status"]!!.jsonPrimitive.content,
-            struct["scoreRaw"]!!.jsonPrimitive.int,
-            struct["progress"]!!.jsonPrimitive.int,
+            struct["id"]?.jsonPrimitive?.long ?: 0L,
+            struct["status"]?.jsonPrimitive?.content ?: "",
+            struct["scoreRaw"]?.jsonPrimitive?.int ?: 0,
+            struct["progress"]?.jsonPrimitive?.int ?: 0,
             parseDate(struct, "startedAt"),
             parseDate(struct, "completedAt"),
-            jsonToALManga(struct["media"]!!.jsonObject),
+            struct["media"]?.jsonObject?.let { jsonToALManga(it) }
+                ?: ALManga(0L, "", "", null, "", "", 0L, 0),
         )
     }
 
     private fun parseDate(struct: JsonObject, dateKey: String): Long {
         return try {
             val date = Calendar.getInstance()
-            val year = struct[dateKey]!!.jsonObject["year"]!!.jsonPrimitive.int
-            val month = struct[dateKey]!!.jsonObject["month"]!!.jsonPrimitive.int - 1
-            val day = struct[dateKey]!!.jsonObject["day"]!!.jsonPrimitive.int
+            val dateObj = struct[dateKey]?.jsonObject ?: return 0L
+            val year = dateObj["year"]?.jsonPrimitive?.int ?: return 0L
+            val month = dateObj["month"]?.jsonPrimitive?.int?.minus(1) ?: return 0L
+            val day = dateObj["day"]?.jsonPrimitive?.int ?: return 0L
             date.set(year, month, day)
             date.timeInMillis
         } catch (_: Exception) {

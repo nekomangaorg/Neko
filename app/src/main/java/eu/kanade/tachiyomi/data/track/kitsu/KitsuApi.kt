@@ -97,7 +97,9 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
 
         val result = rest.addLibManga(data)
 
-        track.media_id = result["data"]!!.jsonObject["id"]!!.jsonPrimitive.long
+        track.media_id =
+            result["data"]?.jsonObject?.get("id")?.jsonPrimitive?.long
+                ?: throw Exception("Invalid response ID")
         return track
     }
 
@@ -126,10 +128,9 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         rest.updateLibManga(track.media_id, data).let {
             val manga = it["data"]?.jsonObject
             if (manga != null) {
-                val startedAt =
-                    manga["attributes"]!!.jsonObject["startedAt"]?.jsonPrimitive?.contentOrNull
-                val finishedAt =
-                    manga["attributes"]!!.jsonObject["finishedAt"]?.jsonPrimitive?.contentOrNull
+                val attributes = manga["attributes"]?.jsonObject
+                val startedAt = attributes?.get("startedAt")?.jsonPrimitive?.contentOrNull
+                val finishedAt = attributes?.get("finishedAt")?.jsonPrimitive?.contentOrNull
                 val startedDate = KitsuDateHelper.parse(startedAt)
                 if (track.started_reading_date <= 0L || startedDate > 0) {
                     track.started_reading_date = startedDate
@@ -167,14 +168,14 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                         .await()
                         .parseAs<JsonObject>()
                         .let {
-                            val dataArray = it["data"]!!.jsonArray
+                            val dataArray = it["data"]?.jsonArray ?: return@let
                             if (dataArray.isNotEmpty()) {
-                                val id = dataArray[0].jsonObject["id"]!!.jsonPrimitive
+                                val id = dataArray[0].jsonObject["id"]?.jsonPrimitive ?: return@let
                                 val map =
                                     dataArray[0]
-                                        .jsonObject["attributes"]!!
-                                        .jsonObject
-                                        .toMutableMap()
+                                        .jsonObject["attributes"]
+                                        ?.jsonObject
+                                        ?.toMutableMap() ?: return@let
                                 map["id"] = id
                                 val kitsuManga = KitsuSearchManga(JsonObject(map), true)
                                 if (kitsuManga.subType != "novel") {
@@ -189,27 +190,30 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         }
 
         searchRest.getKey().let {
-            val key = it["media"]!!.jsonObject["key"]!!.jsonPrimitive.content
+            val key =
+                it["media"]?.jsonObject?.get("key")?.jsonPrimitive?.content
+                    ?: throw Exception("Algolia key not found")
             return algoliaSearch(key, query)
         }
     }
 
     private suspend fun algoliaSearch(key: String, query: String): List<TrackSearch> {
         val jsonObject = buildJsonObject { put("params", "query=$query$algoliaFilter") }
-        return algoliaRest.getSearchQuery(algoliaAppId, key, jsonObject).let {
-            it["hits"]!!.jsonArray.mapNotNull {
+        return algoliaRest.getSearchQuery(algoliaAppId, key, jsonObject).let { response ->
+            response["hits"]?.jsonArray?.mapNotNull {
                 val manga = KitsuSearchManga(it.jsonObject)
                 if (manga.subType == "novel") return@mapNotNull null
                 manga.toTrack()
-            }
+            } ?: emptyList()
         }
     }
 
     suspend fun findLibManga(track: Track, userId: String): Track? {
-        return rest.findLibManga(track.media_id, userId).let {
-            val data = it["data"]!!.jsonArray
-            if (data.size > 0) {
-                val manga = it["included"]!!.jsonArray[0].jsonObject
+        return rest.findLibManga(track.media_id, userId).let { response ->
+            val data = response["data"]?.jsonArray
+            val included = response["included"]?.jsonArray
+            if (data != null && data.isNotEmpty() && included != null && included.isNotEmpty()) {
+                val manga = included[0].jsonObject
                 KitsuLibManga(data[0].jsonObject, manga).toTrack()
             } else {
                 null
@@ -218,10 +222,11 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     }
 
     suspend fun getLibManga(track: Track): Track {
-        return rest.getLibManga(track.media_id).let {
-            val data = it["data"]!!.jsonArray
-            if (data.isNotEmpty()) {
-                val manga = it["included"]!!.jsonArray[0].jsonObject
+        return rest.getLibManga(track.media_id).let { response ->
+            val data = response["data"]?.jsonArray
+            val included = response["included"]?.jsonArray
+            if (data != null && data.isNotEmpty() && included != null && included.isNotEmpty()) {
+                val manga = included[0].jsonObject
                 KitsuLibManga(data[0].jsonObject, manga).toTrack()
             } else {
                 throw Exception("Could not find manga kitsu tracking")
@@ -240,8 +245,14 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     }
 
     suspend fun getCurrentUser(): String {
-        return rest.getCurrentUser().let {
-            it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive.content
+        return rest.getCurrentUser().let { response ->
+            response["data"]
+                ?.jsonArray
+                ?.firstOrNull()
+                ?.jsonObject
+                ?.get("id")
+                ?.jsonPrimitive
+                ?.content ?: throw Exception("Could not find current user ID")
         }
     }
 
