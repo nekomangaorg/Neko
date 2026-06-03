@@ -134,13 +134,17 @@ class MangaUpdatesApi(interceptor: MangaUpdatesInterceptor, private val client: 
             val muId = getMangaUpdatesApiId(manga)
 
             if (muId != null) {
-                with(json) {
-                    return client
-                        .newCall(GET("$baseUrl/v1/series/$muId"))
-                        .await()
-                        .parseAs<JsonObject>()
-                        .let { obj -> listOf(json.decodeFromJsonElement<Record>(obj)) }
-                        .orEmpty()
+                try {
+                    with(json) {
+                        return client
+                            .newCall(GET("$baseUrl/v1/series/$muId"))
+                            .await()
+                            .parseAs<JsonObject>()
+                            .let { obj -> listOf(json.decodeFromJsonElement<Record>(obj)) }
+                            .orEmpty()
+                    }
+                } catch (e: Exception) {
+                    TimberKt.e(e) { "Error searching by MangaUpdates ID" }
                 }
             }
         }
