@@ -17,6 +17,11 @@ import org.nekomanga.data.database.mapper.toManga
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 
+// SQLite caps a statement at 999 bind variables (SQLITE_MAX_VARIABLE_NUMBER) on older Android.
+// Exceeding it throws "too many SQL variables"; 900 leaves margin. getMangaByUrls expands each
+// url into url + alt url, so the EXPANDED list is what must be chunked, not the caller's input.
+private const val MAX_DB_QUERY_VARIABLES = 900
+
 class MangaRepositoryImpl(
     private val libraryDao: LibraryDao,
     private val mangaDao: MangaDao,
@@ -74,7 +79,9 @@ class MangaRepositoryImpl(
         mangaDao.getFavoriteMangaList().map { it.toManga() }
 
     override suspend fun getMangaByIds(ids: List<Long>): List<Manga> =
-        mangaDao.getMangaByIds(ids).map { it.toManga() }
+        ids.chunked(MAX_DB_QUERY_VARIABLES)
+            .flatMap { chunk -> mangaDao.getMangaByIds(chunk) }
+            .map { it.toManga() }
 
     override suspend fun getMangaByUrlAndSource(url: String, sourceId: Long): Manga? {
         val altUrl = getAltUrl(url)
@@ -85,8 +92,14 @@ class MangaRepositoryImpl(
     }
 
     override suspend fun getMangaByUrls(urls: List<String>): List<Manga> {
-        val allUrls = urls.flatMap { url -> listOfNotNull(url, getAltUrl(url)) }
-        return mangaDao.getMangaByUrls(allUrls).map { it.toManga() }
+        // Distinct guards against the input containing both a "/title/x" and its
+        // "/manga/x" counterpart: each expands into the same pair, which would otherwise
+        // be queried twice and waste bind variables.
+        val allUrls = urls.flatMap { url -> listOfNotNull(url, getAltUrl(url)) }.distinct()
+        return allUrls
+            .chunked(MAX_DB_QUERY_VARIABLES)
+            .flatMap { chunk -> mangaDao.getMangaByUrls(chunk) }
+            .map { it.toManga() }
     }
 
     override suspend fun getMangaByUrl(url: String): Manga? {
