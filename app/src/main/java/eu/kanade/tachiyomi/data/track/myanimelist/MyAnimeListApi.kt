@@ -74,35 +74,36 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         return withIOContext {
-            if (manga.my_anime_list_id !== null && !wasPreviouslyTracked) {
-                listOf(getMangaDetails(manga.my_anime_list_id!!.toLong()))
-            } else {
-                val url =
-                    "$baseApiUrl/manga"
-                        .toUri()
-                        .buildUpon()
-                        // MAL API throws a 400 when the query is over 64 characters...
-                        .appendQueryParameter("q", query.take(64))
-                        .appendQueryParameter("nsfw", "true")
-                        .build()
-                with(json) {
-                    authClient
-                        .newCall(GET(url.toString()))
-                        .awaitSuccess()
-                        .parseAs<JsonObject>()
-                        .let {
-                            it["data"]!!
-                                .jsonArray
-                                .map { data -> data.jsonObject["node"]!!.jsonObject }
-                                .map { node ->
-                                    val id = node["id"]!!.jsonPrimitive.long
-                                    async { getMangaDetails(id) }
-                                }
-                                .awaitAll()
-                                .filter { trackSearch ->
-                                    !trackSearch.publishing_type.contains("novel")
-                                }
+            if (manga.my_anime_list_id != null && !wasPreviouslyTracked) {
+                try {
+                    val trackSearch = getMangaDetails(manga.my_anime_list_id!!.toLong())
+                    if (!trackSearch.publishing_type.contains("novel")) {
+                        return@withIOContext listOf(trackSearch)
+                    }
+                } catch (e: Exception) {
+                    TimberKt.e(e) { "Error searching by MAL ID" }
+                }
+            }
+
+            val url =
+                "$baseApiUrl/manga"
+                    .toUri()
+                    .buildUpon()
+                    // MAL API throws a 400 when the query is over 64 characters...
+                    .appendQueryParameter("q", query.take(64))
+                    .appendQueryParameter("nsfw", "true")
+                    .build()
+            with(json) {
+                authClient.newCall(GET(url.toString())).awaitSuccess().parseAs<JsonObject>().let {
+                    it["data"]!!
+                        .jsonArray
+                        .map { data -> data.jsonObject["node"]!!.jsonObject }
+                        .map { node ->
+                            val id = node["id"]!!.jsonPrimitive.long
+                            async { getMangaDetails(id) }
                         }
+                        .awaitAll()
+                        .filter { trackSearch -> !trackSearch.publishing_type.contains("novel") }
                 }
             }
         }

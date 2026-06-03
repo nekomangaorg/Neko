@@ -159,28 +159,37 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         if (!wasPreviouslyTracked && !manga.kitsu_id.isNullOrBlank()) {
-            with(json) {
-                authClient
-                    .newCall(org.nekomanga.core.network.GET(apiMangaUrl(manga.kitsu_id!!)))
-                    .await()
-                    .parseAs<JsonObject>()
-                    .let {
-                        val id = it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive
-                        val map =
-                            it["data"]!!
-                                .jsonArray[0]
-                                .jsonObject["attributes"]!!
-                                .jsonObject
-                                .toMutableMap()
-                        map["id"] = id
-                        return listOf(KitsuSearchManga(JsonObject(map), true).toTrack())
-                    }
+            try {
+                with(json) {
+                    authClient
+                        .newCall(org.nekomanga.core.network.GET(apiMangaUrl(manga.kitsu_id!!)))
+                        .await()
+                        .parseAs<JsonObject>()
+                        .let {
+                            val dataArray = it["data"]!!.jsonArray
+                            if (dataArray.isNotEmpty()) {
+                                val id = dataArray[0].jsonObject["id"]!!.jsonPrimitive
+                                val map =
+                                    dataArray[0]
+                                        .jsonObject["attributes"]!!
+                                        .jsonObject
+                                        .toMutableMap()
+                                map["id"] = id
+                                val kitsuManga = KitsuSearchManga(JsonObject(map), true)
+                                if (kitsuManga.subType != "novel") {
+                                    return listOf(kitsuManga.toTrack())
+                                }
+                            }
+                        }
+                }
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Error searching by Kitsu ID" }
             }
-        } else {
-            searchRest.getKey().let {
-                val key = it["media"]!!.jsonObject["key"]!!.jsonPrimitive.content
-                return algoliaSearch(key, query)
-            }
+        }
+
+        searchRest.getKey().let {
+            val key = it["media"]!!.jsonObject["key"]!!.jsonPrimitive.content
+            return algoliaSearch(key, query)
         }
     }
 

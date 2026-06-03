@@ -26,6 +26,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.nekomanga.constants.Constants
 import org.nekomanga.core.network.POST
 import org.nekomanga.core.network.interceptor.rateLimit
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import tachiyomi.core.network.jsonMime
 import tachiyomi.core.network.parseAs
@@ -119,19 +120,40 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         return withIOContext {
-            val payload = buildJsonObject {
-                put(
-                    "query",
-                    if (manga.anilist_id != null && !wasPreviouslyTracked) findQuery()
-                    else searchQuery(),
-                )
-                putJsonObject("variables") {
-                    put(
-                        "query",
-                        if (manga.anilist_id != null && !wasPreviouslyTracked) manga.anilist_id
-                        else search,
-                    )
+            if (manga.anilist_id != null && !wasPreviouslyTracked) {
+                try {
+                    val payload = buildJsonObject {
+                        put("query", findQuery())
+                        putJsonObject("variables") { put("query", manga.anilist_id) }
+                    }
+                    val list =
+                        with(json) {
+                            authClient
+                                .newCall(
+                                    POST(apiUrl, body = payload.toString().toRequestBody(jsonMime))
+                                )
+                                .await()
+                                .parseAs<JsonObject>()
+                                .let { response ->
+                                    val data = response["data"]!!.jsonObject
+                                    val page = data["Page"]!!.jsonObject
+                                    val media = page["media"]!!.jsonArray
+                                    val entries = media.map { jsonToALManga(it.jsonObject) }
+                                    entries.map { it.toTrack() }
+                                }
+                        }
+                    if (list.isNotEmpty()) {
+                        return@withIOContext list
+                    }
+                } catch (e: Exception) {
+                    TimberKt.e(e) { "Error searching by Anilist ID" }
                 }
+            }
+
+            // Fallback/Default search by title
+            val payload = buildJsonObject {
+                put("query", searchQuery())
+                putJsonObject("variables") { put("query", search) }
             }
             with(json) {
                 authClient
