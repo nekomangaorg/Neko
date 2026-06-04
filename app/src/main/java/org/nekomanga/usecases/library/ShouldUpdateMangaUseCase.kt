@@ -10,6 +10,15 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class ShouldUpdateMangaUseCase(private val trackManager: TrackManager = Injekt.get()) {
+
+    private val trackingRestrictions =
+        setOf(
+            LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ,
+            LibraryPreferences.MANGA_TRACKING_DROPPED,
+            LibraryPreferences.MANGA_TRACKING_ON_HOLD,
+            LibraryPreferences.MANGA_TRACKING_COMPLETED,
+        )
+
     /**
      * Checks if the given manga should be updated based on active restrictions. Returns the
      * restriction key (e.g. [LibraryPreferences.MANGA_HAS_UNREAD]) that matched and caused the
@@ -37,7 +46,8 @@ class ShouldUpdateMangaUseCase(private val trackManager: TrackManager = Injekt.g
             return LibraryPreferences.MANGA_NOT_COMPLETED
         }
 
-        if (tracks.isNotEmpty()) {
+        val hasActiveTrackingRestrictions = restrictions.any { it in trackingRestrictions }
+        if (hasActiveTrackingRestrictions && tracks.isNotEmpty()) {
             for (track in tracks) {
                 val service = trackManager.getService(track.sync_id) ?: continue
                 val status = service.getGlobalStatus(track.status)
