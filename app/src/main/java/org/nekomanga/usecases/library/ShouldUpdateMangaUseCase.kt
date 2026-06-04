@@ -37,42 +37,29 @@ class ShouldUpdateMangaUseCase(private val trackManager: TrackManager = Injekt.g
             return LibraryPreferences.MANGA_NOT_COMPLETED
         }
 
-        if (
-            LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ in restrictions &&
-                hasTrackWithGivenStatus(tracks, R.string.follows_plan_to_read)
-        ) {
-            return LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ
-        }
-        if (
-            LibraryPreferences.MANGA_TRACKING_DROPPED in restrictions &&
-                hasTrackWithGivenStatus(tracks, R.string.follows_dropped)
-        ) {
-            return LibraryPreferences.MANGA_TRACKING_DROPPED
-        }
-        if (
-            LibraryPreferences.MANGA_TRACKING_ON_HOLD in restrictions &&
-                hasTrackWithGivenStatus(tracks, R.string.follows_on_hold)
-        ) {
-            return LibraryPreferences.MANGA_TRACKING_ON_HOLD
-        }
-        if (
-            LibraryPreferences.MANGA_TRACKING_COMPLETED in restrictions &&
-                hasTrackWithGivenStatus(tracks, R.string.follows_completed)
-        ) {
-            return LibraryPreferences.MANGA_TRACKING_COMPLETED
+        if (tracks.isNotEmpty()) {
+            for (track in tracks) {
+                val service = trackManager.getService(track.sync_id) ?: continue
+                val status = service.getGlobalStatus(track.status)
+                if (status.isNullOrBlank()) continue
+                val globalStatusId = trackManager.getGlobalStatusResId(status)
+
+                val matchedRestriction =
+                    when (globalStatusId) {
+                        R.string.follows_plan_to_read ->
+                            LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ
+                        R.string.follows_dropped -> LibraryPreferences.MANGA_TRACKING_DROPPED
+                        R.string.follows_on_hold -> LibraryPreferences.MANGA_TRACKING_ON_HOLD
+                        R.string.follows_completed -> LibraryPreferences.MANGA_TRACKING_COMPLETED
+                        else -> null
+                    }
+
+                if (matchedRestriction != null && matchedRestriction in restrictions) {
+                    return matchedRestriction
+                }
+            }
         }
 
         return null
-    }
-
-    private fun hasTrackWithGivenStatus(tracks: List<Track>, globalStatusId: Int): Boolean {
-        return tracks.any { track ->
-            val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
-            if (status.isNullOrBlank()) {
-                false
-            } else {
-                globalStatusId == trackManager.getGlobalStatusResId(status)
-            }
-        }
     }
 }
