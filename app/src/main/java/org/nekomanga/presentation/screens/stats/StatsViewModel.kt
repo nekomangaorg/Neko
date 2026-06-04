@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
@@ -33,21 +32,16 @@ import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_STARTED
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_COMPLETED
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedStatManga
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedState
 import org.nekomanga.presentation.screens.stats.StatsHelper.getReadDuration
+import org.nekomanga.usecases.library.ShouldUpdateMangaUseCase
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class StatsViewModel() : ViewModel() {
     private val categoryRepository: CategoryRepository = Injekt.get()
@@ -62,6 +56,7 @@ class StatsViewModel() : ViewModel() {
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
     private val downloadManager: DownloadManager = Injekt.get()
+    private val shouldUpdateMangaUseCase: ShouldUpdateMangaUseCase by injectLazy()
 
     private val _simpleState = MutableStateFlow(StatsConstants.SimpleState())
     val simpleState: StateFlow<StatsConstants.SimpleState> = _simpleState.asStateFlow()
@@ -325,17 +320,6 @@ class StatsViewModel() : ViewModel() {
         return trackManager.services.values.filter { it.isLogged() }
     }
 
-    private fun hasTrackWithGivenStatus(tracks: List<Track>, globalStatusId: Int): Boolean {
-        return tracks.any { track ->
-            val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
-            if (status.isNullOrBlank()) {
-                false
-            } else {
-                globalStatusId == trackManager.getGlobalStatusResId(status)
-            }
-        }
-    }
-
     private fun getGlobalUpdateManga(
         libraryManga: List<LibraryManga>,
         tracksByMangaId: Map<Long, List<Track>>,
@@ -344,7 +328,7 @@ class StatsViewModel() : ViewModel() {
             libraryPreferences.whichCategoriesToUpdate().get().map(String::toInt)
         val excludedCategories =
             libraryPreferences.whichCategoriesToExclude().get().map(String::toInt)
-        val restrictions = libraryPreferences.autoUpdateDeviceRestrictions().get()
+        val restrictions = libraryPreferences.autoUpdateMangaRestrictions().get()
         return libraryManga
             .groupBy { it.id }
             .filterNot { it.value.any { manga -> manga.category in excludedCategories } }
@@ -355,22 +339,7 @@ class StatsViewModel() : ViewModel() {
             .filter {
                 val manga = it.value.first()
                 val mangaTracks = tracksByMangaId[manga.id] ?: emptyList()
-                when {
-                    MANGA_HAS_UNREAD in restrictions && manga.unread != 0 -> true
-                    MANGA_NOT_STARTED in restrictions &&
-                        manga.totalChapters > 0 &&
-                        !manga.hasStarted -> true
-                    MANGA_NOT_COMPLETED in restrictions && manga.status == SManga.COMPLETED -> true
-                    MANGA_TRACKING_PLAN_TO_READ in restrictions &&
-                        hasTrackWithGivenStatus(mangaTracks, R.string.follows_plan_to_read) -> false
-                    MANGA_TRACKING_DROPPED in restrictions &&
-                        hasTrackWithGivenStatus(mangaTracks, R.string.follows_dropped) -> false
-                    MANGA_TRACKING_ON_HOLD in restrictions &&
-                        hasTrackWithGivenStatus(mangaTracks, R.string.follows_on_hold) -> false
-                    MANGA_TRACKING_COMPLETED in restrictions &&
-                        hasTrackWithGivenStatus(mangaTracks, R.string.follows_completed) -> false
-                    else -> true
-                }
+                shouldUpdateMangaUseCase(manga, restrictions, mangaTracks) == null
             }
     }
 
