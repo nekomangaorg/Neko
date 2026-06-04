@@ -119,7 +119,7 @@ abstract class TrackService(val id: Int) {
     open fun isLogged(): Boolean =
         getUsername().get().isNotEmpty() && getPassword().get().isNotEmpty()
 
-    fun isLoggedInFlow(): Flow<Boolean> {
+    open fun isLoggedInFlow(): Flow<Boolean> {
         return combine(getUsername().changes(), getPassword().changes()) { username, password ->
                 username.isNotEmpty() && password.isNotEmpty()
             }

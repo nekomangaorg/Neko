@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
 import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
@@ -53,7 +54,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -131,8 +131,18 @@ class LibraryViewModel() : ViewModel() {
 
     private val _mangaRefreshingState = MutableStateFlow(emptySet<Long>())
 
-    private val loggedServices
-        get() = Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
+    private val loggedServicesFlow: Flow<List<TrackService>> =
+        combine(
+                Injekt.get<TrackManager>().services.values.map { service ->
+                    service.isLoggedInFlow().map { isLoggedIn -> service to isLoggedIn }
+                }
+            ) { serviceStatusList ->
+                serviceStatusList.mapNotNull { (service, isLoggedIn) ->
+                    service.takeIf { isLoggedIn || service.isMdList() }
+                }
+            }
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     /** Save the current list to speed up loading later */
     override fun onCleared() {
@@ -164,9 +174,7 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val trackMapFlow: Flow<Map<Long, List<String>>> =
-        trackRepository
-            .observeAllTracks()
-            .mapNotNull { tracks ->
+        combine(trackRepository.observeAllTracks(), loggedServicesFlow) { tracks, loggedServices ->
                 val serviceMap = loggedServices.associateBy { it.id }
 
                 tracks
@@ -618,11 +626,16 @@ class LibraryViewModel() : ViewModel() {
         observeLibraryUpdates()
         preferenceUpdates()
 
-        categoryRepository
-            .observeCategories()
-            .map { it.isNotEmpty() }
-            .distinctUntilChanged()
-            .onEach { hasCategories ->
+        val hasLoggedServicesFlow =
+            loggedServicesFlow.map { it.isNotEmpty() }.distinctUntilChanged()
+
+        combine(
+                categoryRepository
+                    .observeCategories()
+                    .map { it.isNotEmpty() }
+                    .distinctUntilChanged(),
+                hasLoggedServicesFlow,
+            ) { hasCategories, hasLoggedServices ->
                 val groupItems =
                     listOfNotNull(
                         LibraryGroup.ByCategory,
@@ -631,7 +644,7 @@ class LibraryViewModel() : ViewModel() {
                         LibraryGroup.ByAuthor,
                         LibraryGroup.ByContent,
                         LibraryGroup.ByLanguage,
-                        LibraryGroup.ByTrackStatus.takeIf { loggedServices.isNotEmpty() },
+                        LibraryGroup.ByTrackStatus.takeIf { hasLoggedServices },
                         LibraryGroup.Ungrouped.takeIf { hasCategories },
                     )
                 _internalLibraryScreenState.update {

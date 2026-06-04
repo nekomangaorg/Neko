@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
@@ -174,6 +175,10 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     @SuppressLint("MissingSuperCall") override fun logout() = throw Exception("not used")
 
     override fun isLogged() = mangaDexLoginHelper.isLoggedIn()
+
+    override fun isLoggedInFlow(): Flow<Boolean> {
+        return mangaDexLoginHelper.isLoggedInFlow()
+    }
 
     override fun isMdList() = true
 
