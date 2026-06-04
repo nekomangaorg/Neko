@@ -2,6 +2,8 @@ name: PR Agent (Gemini)
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+  issue_comment:
+    types: [ created, edited ]
 jobs:
   pr_agent_job:
     if: ${{ github.event.sender.type != 'Bot' }}
