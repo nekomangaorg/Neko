@@ -70,78 +70,82 @@ class StatsViewModel() : ViewModel() {
     val detailState: StateFlow<DetailedState> = _detailState.asStateFlow()
 
     init {
-        getDetailState()
-        getStatsState()
+        loadStats()
     }
 
-    private fun getStatsState() {
+    private fun loadStats() {
         viewModelScope.launchIO {
             val libraryList = getLibrary()
             if (libraryList.isEmpty()) {
                 _simpleState.update {
                     StatsConstants.SimpleState(screenState = StatsConstants.ScreenState.NoResults)
                 }
+                _detailState.update { it.copy(isLoading = false) }
             } else {
                 val tracks = getTracks(libraryList)
                 val tracksByMangaId = tracks.groupBy { it.manga_id }
-                val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
-                val lastUpdateAttempt = libraryPreferences.lastUpdateAttemptTimestamp().get()
-                val lastUpdateDuration = libraryPreferences.lastUpdateDuration().get()
 
-                val favoritedMangalist = mangaRepository.getFavoriteMangaList()
+                getStatsState(libraryList, tracks, tracksByMangaId)
+                getDetailState(libraryList, tracksByMangaId)
+            }
+        }
+    }
 
-                val mergedMangaList =
-                    mergeMangaRepository.getAllMergeManga().mapNotNull { mergedManga ->
-                        when (
-                            favoritedMangalist.firstOrNull { manga ->
-                                manga.id!! == mergedManga.mangaId
-                            } != null
-                        ) {
-                            true -> mergedManga
-                            false -> null
-                        }
-                    }
+    private suspend fun getStatsState(
+        libraryList: List<LibraryManga>,
+        tracks: List<Track>,
+        tracksByMangaId: Map<Long, List<Track>>,
+    ) {
+        val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
+        val lastUpdateAttempt = libraryPreferences.lastUpdateAttemptTimestamp().get()
+        val lastUpdateDuration = libraryPreferences.lastUpdateDuration().get()
 
-                mergedMangaList
-                    .groupBy { it.mergeType }
-                    .map { it.key to it.value.size }
-                    .toPersistentList()
+        val favoritedMangalist = mangaRepository.getFavoriteMangaList()
 
-                _simpleState.update {
-                    StatsConstants.SimpleState(
-                        screenState = StatsConstants.ScreenState.Simple,
-                        mangaCount = libraryList.count(),
-                        chapterCount = libraryList.sumOf { it.totalChapters },
-                        readCount = libraryList.sumOf { it.read },
-                        bookmarkCount = libraryList.sumOf { it.bookmarkCount },
-                        unavailableCount = libraryList.sumOf { it.unavailableCount },
-                        trackedCount = getMangaByTrackCount(libraryList, tracks),
-                        mergeCounts =
-                            mergedMangaList
-                                .groupBy { it.mergeType }
-                                .map { it.key to it.value.size }
-                                .toPersistentList(),
-                        globalUpdateCount =
-                            getGlobalUpdateManga(libraryList, tracksByMangaId).count(),
-                        downloadCount = libraryList.sumOf { getDownloadCount(it) },
-                        tagCount =
-                            libraryList
-                                .mapNotNull { it.getGenres() }
-                                .flatten()
-                                .distinct()
-                                .count { !it.contains("content rating:", true) },
-                        trackerCount = getLoggedTrackers().count(),
-                        readDuration = getReadDuration(),
-                        averageMangaRating = getAverageMangaRating(libraryList),
-                        averageUserRating = getUserScore(tracks),
-                        lastLibraryUpdate =
-                            if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
-                        lastLibraryUpdateAttempt =
-                            if (lastUpdateAttempt == 0L) "" else lastUpdateAttempt.timeSpanFromNow,
-                        lastLibraryUpdateDuration = lastUpdateDuration,
-                    )
+        val mergedMangaList =
+            mergeMangaRepository.getAllMergeManga().mapNotNull { mergedManga ->
+                when (
+                    favoritedMangalist.firstOrNull { manga -> manga.id!! == mergedManga.mangaId } !=
+                        null
+                ) {
+                    true -> mergedManga
+                    false -> null
                 }
             }
+
+        mergedMangaList.groupBy { it.mergeType }.map { it.key to it.value.size }.toPersistentList()
+
+        _simpleState.update {
+            StatsConstants.SimpleState(
+                screenState = StatsConstants.ScreenState.Simple,
+                mangaCount = libraryList.count(),
+                chapterCount = libraryList.sumOf { it.totalChapters },
+                readCount = libraryList.sumOf { it.read },
+                bookmarkCount = libraryList.sumOf { it.bookmarkCount },
+                unavailableCount = libraryList.sumOf { it.unavailableCount },
+                trackedCount = getMangaByTrackCount(libraryList, tracks),
+                mergeCounts =
+                    mergedMangaList
+                        .groupBy { it.mergeType }
+                        .map { it.key to it.value.size }
+                        .toPersistentList(),
+                globalUpdateCount = getGlobalUpdateManga(libraryList, tracksByMangaId).count(),
+                downloadCount = libraryList.sumOf { getDownloadCount(it) },
+                tagCount =
+                    libraryList
+                        .mapNotNull { it.getGenres() }
+                        .flatten()
+                        .distinct()
+                        .count { !it.contains("content rating:", true) },
+                trackerCount = getLoggedTrackers().count(),
+                readDuration = getReadDuration(),
+                averageMangaRating = getAverageMangaRating(libraryList),
+                averageUserRating = getUserScore(tracks),
+                lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
+                lastLibraryUpdateAttempt =
+                    if (lastUpdateAttempt == 0L) "" else lastUpdateAttempt.timeSpanFromNow,
+                lastLibraryUpdateDuration = lastUpdateDuration,
+            )
         }
     }
 
@@ -159,116 +163,108 @@ class StatsViewModel() : ViewModel() {
      * lists up-front, chunking the manga IDs to respect SQLite bind parameter limits (900 limits).
      * These collections are then mapped into memory using O(1) lookups via Map groupings.
      */
-    private fun getDetailState() {
-        viewModelScope.launchIO {
-            val libraryList = getLibrary()
-            if (libraryList.isNotEmpty()) {
-                val allHistories = getHistory(libraryList)
-                val allTracks = getTracks(libraryList)
-                val allMangaCategories = getMangaCategories(libraryList)
-                val allCategories = categoryRepository.getCategories()
-                val allChapters = getChapters(libraryList)
+    private suspend fun getDetailState(
+        libraryList: List<LibraryManga>,
+        tracksByMangaId: Map<Long, List<Track>>,
+    ) {
+        val allHistories = getHistory(libraryList)
+        val allMangaCategories = getMangaCategories(libraryList)
+        val allCategories = categoryRepository.getCategories()
+        val allChapters = getChapters(libraryList)
 
-                val chapterToMangaMap =
-                    allChapters
-                        .mapNotNull { chapter ->
-                            val id = chapter.id ?: return@mapNotNull null
-                            val mangaId = chapter.manga_id ?: return@mapNotNull null
-                            id to mangaId
-                        }
-                        .toMap()
-                val historiesByMangaId = allHistories.groupBy { chapterToMangaMap[it.chapter_id] }
-                val tracksByMangaId = allTracks.groupBy { it.manga_id }
-                val mangaCategoriesByMangaId = allMangaCategories.groupBy { it.manga_id }
-                val categoriesById = allCategories.associateBy { it.id }
+        val chapterToMangaMap =
+            allChapters
+                .mapNotNull { chapter ->
+                    val id = chapter.id ?: return@mapNotNull null
+                    val mangaId = chapter.manga_id ?: return@mapNotNull null
+                    id to mangaId
+                }
+                .toMap()
+        val historiesByMangaId =
+            allHistories
+                .filter { it.chapter_id in chapterToMangaMap }
+                .groupBy { chapterToMangaMap[it.chapter_id]!! }
+        val mangaCategoriesByMangaId = allMangaCategories.groupBy { it.manga_id }
+        val categoriesById = allCategories.associateBy { it.id }
 
-                val detailedStatMangaList =
-                    libraryList
-                        .map {
-                            val history = historiesByMangaId[it.id] ?: emptyList()
-                            val tracks = tracksByMangaId[it.id] ?: emptyList()
-                            val mangaCats = mangaCategoriesByMangaId[it.id] ?: emptyList()
-                            val catNames = mangaCats.mapNotNull { mc ->
-                                categoriesById[mc.category_id]?.name
-                            }
+        val detailedStatMangaList =
+            libraryList
+                .map {
+                    val history = historiesByMangaId[it.id] ?: emptyList()
+                    val tracks = tracksByMangaId[it.id] ?: emptyList()
+                    val mangaCats = mangaCategoriesByMangaId[it.id] ?: emptyList()
+                    val catNames = mangaCats.mapNotNull { mc ->
+                        categoriesById[mc.category_id]?.name
+                    }
 
-                            DetailedStatManga(
-                                id = it.id!!,
-                                title = it.title,
-                                type = MangaType.fromLangFlag(it.lang_flag),
-                                status = MangaStatus.fromStatus(it.status),
-                                contentRating =
-                                    MangaContentRating.getContentRating(it.getContentRating()),
-                                totalChapters = it.totalChapters,
-                                readChapters = it.read,
-                                bookmarkedChapters = it.bookmarkCount,
-                                unavailableChapters = it.unavailableCount,
-                                readDuration = getReadDurationFromHistory(history),
-                                startYear = getStartYear(history),
-                                rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
-                                tags = (it.getGenres() ?: emptyList()).toPersistentList(),
-                                userScore = getUserScore(tracks),
-                                trackers =
-                                    tracks
-                                        .mapNotNull { trackManager.getService(it.sync_id) }
-                                        .map { prefs.context.getString(it.nameRes()) }
-                                        .toPersistentList(),
-                                categories =
-                                    (catNames.takeUnless { it.isEmpty() }
-                                            ?: listOf(
-                                                prefs.context.getString(R.string.default_value)
-                                            ))
-                                        .sorted()
-                                        .toPersistentList(),
-                            )
-                        }
-                        .sortedBy { it.title }
-                _detailState.update {
-                    DetailedState(
-                        isLoading = false,
-                        manga = detailedStatMangaList.toPersistentList(),
+                    DetailedStatManga(
+                        id = it.id!!,
+                        title = it.title,
+                        type = MangaType.fromLangFlag(it.lang_flag),
+                        status = MangaStatus.fromStatus(it.status),
+                        contentRating = MangaContentRating.getContentRating(it.getContentRating()),
+                        totalChapters = it.totalChapters,
+                        readChapters = it.read,
+                        bookmarkedChapters = it.bookmarkCount,
+                        unavailableChapters = it.unavailableCount,
+                        readDuration = getReadDurationFromHistory(history),
+                        startYear = getStartYear(history),
+                        rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
+                        tags = (it.getGenres() ?: emptyList()).toPersistentList(),
+                        userScore = getUserScore(tracks),
+                        trackers =
+                            tracks
+                                .mapNotNull { trackManager.getService(it.sync_id) }
+                                .map { prefs.context.getString(it.nameRes()) }
+                                .toPersistentList(),
                         categories =
-                            (categoryRepository.getCategories().map { it.name } +
-                                    listOf(prefs.context.getString(R.string.default_value)))
-                                .toPersistentList(),
-                        tags =
-                            detailedStatMangaList
-                                .asSequence()
-                                .map { it.tags }
-                                .flatten()
-                                .distinct()
-                                .filter { !it.contains("content rating:", true) }
-                                .sortedBy { it }
+                            (catNames.takeUnless { it.isEmpty() }
+                                    ?: listOf(prefs.context.getString(R.string.default_value)))
+                                .sorted()
                                 .toPersistentList(),
                     )
                 }
+                .sortedBy { it.title }
+        _detailState.update {
+            DetailedState(
+                isLoading = false,
+                manga = detailedStatMangaList.toPersistentList(),
+                categories =
+                    (categoryRepository.getCategories().map { it.name } +
+                            listOf(prefs.context.getString(R.string.default_value)))
+                        .toPersistentList(),
+                tags =
+                    detailedStatMangaList
+                        .asSequence()
+                        .map { it.tags }
+                        .flatten()
+                        .distinct()
+                        .filter { !it.contains("content rating:", true) }
+                        .sortedBy { it }
+                        .toPersistentList(),
+            )
+        }
 
-                val sortedSeries =
-                    _detailState.value.tags
-                        .map { tag ->
-                            tag to
-                                _detailState.value.manga
-                                    .filter { it.tags.contains(tag) }
-                                    .toPersistentList()
-                        }
-                        .sortedByDescending { it.second.count() }
-                        .toPersistentList()
-                val totalCount = sortedSeries.sumOf { it.second.size }
-                val totalDuration = sortedSeries.sumOf { pair ->
-                    pair.second.sumOf { it.readDuration }
+        val sortedSeries =
+            _detailState.value.tags
+                .map { tag ->
+                    tag to
+                        _detailState.value.manga.filter { it.tags.contains(tag) }.toPersistentList()
                 }
+                .sortedByDescending { it.second.count() }
+                .toPersistentList()
+        val totalCount = sortedSeries.sumOf { it.second.size }
+        val totalDuration = sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }
 
-                _detailState.update {
-                    it.copy(
-                        detailTagState =
-                            StatsConstants.DetailedTagState(
-                                totalReadDuration = totalDuration,
-                                totalChapters = totalCount,
-                                sortedTagPairs = sortedSeries,
-                            )
+        _detailState.update {
+            it.copy(
+                detailTagState =
+                    StatsConstants.DetailedTagState(
+                        totalReadDuration = totalDuration,
+                        totalChapters = totalCount,
+                        sortedTagPairs = sortedSeries,
                     )
-                }
-            }
+            )
         }
     }
 
