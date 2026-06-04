@@ -1,2 +1,5 @@
-## 2026-04-23 - MangaGridView Hardcoded Value **Learning:** `MangaGridView.kt` contained a hardcoded `2.dp` padding that did not align with the AppTheme. **Action:** Next time, scan for hardcoded DP values using `grep` or similar tooling before assuming UI components are fully utilizing `Size` design tokens like `Size.extraTiny`.
-## 2026-04-23 - Size Tokens Validation **Learning:** Hardcoded DP values (e.g., `24.dp`) should be systematically replaced with design tokens like `Size.large` from `org.nekomanga.presentation.theme.Size`. **Action:** Next time, ensure all dimension and padding references strictly utilize the centralized `Size` object to maintain consistent UI theming.
+## 2024-05-27 - Extract hardcoded size correctly
+
+**Learning:** When trying to apply `Size.none` from `AppTheme` correctly in Compose `LazyColumn`, be careful while matching the text in the code block and consider how it's formatted.
+
+**Action:** Be more attentive when reviewing `git diff` outputs vs code inside the file before starting any change.

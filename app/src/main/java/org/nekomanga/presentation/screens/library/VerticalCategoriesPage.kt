@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.dp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
@@ -109,7 +108,7 @@ fun VerticalCategoriesPage(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
         state = lazyListState,
-        verticalArrangement = Arrangement.spacedBy(0.dp),
+        verticalArrangement = Arrangement.spacedBy(Size.none),
     ) {
         libraryScreenState.items.forEach { item ->
             item(key = "header-${item.categoryItem.name}-${item.categoryItem.id}") {
