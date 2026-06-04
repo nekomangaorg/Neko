@@ -169,7 +169,14 @@ class StatsViewModel() : ViewModel() {
                 val allCategories = categoryRepository.getCategories()
                 val allChapters = getChapters(libraryList)
 
-                val chapterToMangaMap = allChapters.associate { it.id!! to it.manga_id!! }
+                val chapterToMangaMap =
+                    allChapters
+                        .mapNotNull { chapter ->
+                            val id = chapter.id ?: return@mapNotNull null
+                            val mangaId = chapter.manga_id ?: return@mapNotNull null
+                            id to mangaId
+                        }
+                        .toMap()
                 val historiesByMangaId = allHistories.groupBy { chapterToMangaMap[it.chapter_id] }
                 val tracksByMangaId = allTracks.groupBy { it.manga_id }
                 val mangaCategoriesByMangaId = allMangaCategories.groupBy { it.manga_id }
