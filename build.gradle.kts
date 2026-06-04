@@ -108,10 +108,6 @@ afterEvaluate {
 tasks.register<KtfmtFormatTask>("ktfmtPrecommit")
 
 allprojects {
-  tasks.withType<KtfmtFormatTask>().configureEach {
-    exclude("**/build/**")
-  }
-  tasks.withType<KtfmtCheckTask>().configureEach {
-    exclude("**/build/**")
-  }
+  tasks.withType<KtfmtFormatTask>().configureEach { exclude("**/build/**") }
+  tasks.withType<KtfmtCheckTask>().configureEach { exclude("**/build/**") }
 }

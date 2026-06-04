@@ -29,3 +29,7 @@
 ## 2026-04-13 - [Overclock: Hot Flow Loop Lookup Optimization]
 **Learning:** Calling O(N) list lookups like `downloadManager.getQueuedDownloadOrNull` inside an O(M) mapping loop inside a hot `combine` Flow causes O(N*M) performance degradation, heavily thrashing CPU and memory by repeated iterations on list emissions, which can stutter the UI thread.
 **Action:** Pre-compute an O(1) Map representation of the list using `.associateBy { it.id }` before the loop, and use variables (like `downloadCount > 0`) to completely skip expensive IO/Cache checking functions when unnecessary.
+
+## 2026-06-04 - [Stats N+1 Database Prefetching Optimization]
+**Learning:** Performing multiple database queries (for history, tracks, categories, or chapters) inside an async map loop over large lists (like user libraries) causes extreme SQLite connection pool contention and thread starvation. For entities like History that lack a direct `manga_id` column, we must join them against chapters.
+**Action:** Fetch all dependencies in bulk batches chunked to respect SQLite host parameter limits (900). Create in-memory mappings (such as mapping chapter IDs to manga IDs first, then grouping histories by manga ID) to achieve O(1) lookups inside iteration loops, reducing overall query count from O(N) to O(1).
