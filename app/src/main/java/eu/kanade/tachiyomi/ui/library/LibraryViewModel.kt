@@ -133,12 +133,14 @@ class LibraryViewModel() : ViewModel() {
 
     private val loggedServicesFlow: Flow<List<TrackService>> =
         combine(
-            Injekt.get<TrackManager>().services.values.map { service ->
-                service.isLoggedInFlow().map { isLoggedIn -> service to isLoggedIn }
+                Injekt.get<TrackManager>().services.values.map { service ->
+                    service.isLoggedInFlow().map { isLoggedIn -> service to isLoggedIn }
+                }
+            ) { serviceStatusList ->
+                serviceStatusList.filter { it.second || it.first.isMdList() }.map { it.first }
             }
-        ) { serviceStatusList ->
-            serviceStatusList.filter { it.second || it.first.isMdList() }.map { it.first }
-        }
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     /** Save the current list to speed up loading later */
     override fun onCleared() {
