@@ -53,7 +53,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -618,11 +617,25 @@ class LibraryViewModel() : ViewModel() {
         observeLibraryUpdates()
         preferenceUpdates()
 
-        categoryRepository
-            .observeCategories()
-            .map { it.isNotEmpty() }
-            .distinctUntilChanged()
-            .onEach { hasCategories ->
+        val hasLoggedServicesFlow =
+            combine(
+                    Injekt.get<TrackManager>().services.values.map { service ->
+                        service.isLoggedInFlow().map { isLoggedIn ->
+                            isLoggedIn || service.isMdList()
+                        }
+                    }
+                ) { loggedInStatuses ->
+                    loggedInStatuses.any { it }
+                }
+                .distinctUntilChanged()
+
+        combine(
+                categoryRepository
+                    .observeCategories()
+                    .map { it.isNotEmpty() }
+                    .distinctUntilChanged(),
+                hasLoggedServicesFlow,
+            ) { hasCategories, hasLoggedServices ->
                 val groupItems =
                     listOfNotNull(
                         LibraryGroup.ByCategory,
@@ -631,7 +644,7 @@ class LibraryViewModel() : ViewModel() {
                         LibraryGroup.ByAuthor,
                         LibraryGroup.ByContent,
                         LibraryGroup.ByLanguage,
-                        LibraryGroup.ByTrackStatus.takeIf { loggedServices.isNotEmpty() },
+                        LibraryGroup.ByTrackStatus.takeIf { hasLoggedServices },
                         LibraryGroup.Ungrouped.takeIf { hasCategories },
                     )
                 _internalLibraryScreenState.update {

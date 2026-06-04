@@ -9,6 +9,8 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import java.text.DecimalFormat
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
@@ -173,5 +175,13 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
 
     override fun isLogged(): Boolean {
         return super.isLogged() && restoreToken() != null
+    }
+
+    override fun isLoggedInFlow(): Flow<Boolean> {
+        return combine(super.isLoggedInFlow(), preferences.trackToken(this).changes()) {
+            loggedIn,
+            token ->
+            loggedIn && token.isNotBlank()
+        }
     }
 }
