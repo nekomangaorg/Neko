@@ -137,7 +137,9 @@ class LibraryViewModel() : ViewModel() {
                     service.isLoggedInFlow().map { isLoggedIn -> service to isLoggedIn }
                 }
             ) { serviceStatusList ->
-                serviceStatusList.filter { it.second || it.first.isMdList() }.map { it.first }
+                serviceStatusList.mapNotNull { (service, isLoggedIn) ->
+                    service.takeIf { isLoggedIn || service.isMdList() }
+                }
             }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)

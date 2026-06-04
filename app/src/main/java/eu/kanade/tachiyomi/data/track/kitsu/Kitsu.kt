@@ -183,11 +183,10 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
                 loggedIn,
                 token ->
                 val hasValidToken =
-                    try {
-                        token.isNotBlank() && json.decodeFromString<OAuth?>(token) != null
-                    } catch (e: Exception) {
-                        false
-                    }
+                    runCatching {
+                            token.isNotBlank() && json.decodeFromString<OAuth?>(token) != null
+                        }
+                        .getOrDefault(false)
                 loggedIn && hasValidToken
             }
             .distinctUntilChanged()
