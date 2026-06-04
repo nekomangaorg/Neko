@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
 import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
@@ -130,8 +131,14 @@ class LibraryViewModel() : ViewModel() {
 
     private val _mangaRefreshingState = MutableStateFlow(emptySet<Long>())
 
-    private val loggedServices
-        get() = Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
+    private val loggedServicesFlow: Flow<List<TrackService>> =
+        combine(
+            Injekt.get<TrackManager>().services.values.map { service ->
+                service.isLoggedInFlow().map { isLoggedIn -> service to isLoggedIn }
+            }
+        ) { serviceStatusList ->
+            serviceStatusList.filter { it.second || it.first.isMdList() }.map { it.first }
+        }
 
     /** Save the current list to speed up loading later */
     override fun onCleared() {
@@ -163,9 +170,7 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val trackMapFlow: Flow<Map<Long, List<String>>> =
-        trackRepository
-            .observeAllTracks()
-            .mapNotNull { tracks ->
+        combine(trackRepository.observeAllTracks(), loggedServicesFlow) { tracks, loggedServices ->
                 val serviceMap = loggedServices.associateBy { it.id }
 
                 tracks
@@ -618,16 +623,7 @@ class LibraryViewModel() : ViewModel() {
         preferenceUpdates()
 
         val hasLoggedServicesFlow =
-            combine(
-                    Injekt.get<TrackManager>().services.values.map { service ->
-                        service.isLoggedInFlow().map { isLoggedIn ->
-                            isLoggedIn || service.isMdList()
-                        }
-                    }
-                ) { loggedInStatuses ->
-                    loggedInStatuses.any { it }
-                }
-                .distinctUntilChanged()
+            loggedServicesFlow.map { it.isNotEmpty() }.distinctUntilChanged()
 
         combine(
                 categoryRepository
