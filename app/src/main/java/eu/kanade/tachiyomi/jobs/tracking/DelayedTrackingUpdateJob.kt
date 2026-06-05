@@ -61,8 +61,8 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
                             true -> delayedTrackingStore.remove(track.id!!)
                             false -> {
                                 try {
-                                    service.update(track, true)
-                                    trackRepository.insertTrack(track)
+                                    val updatedTrack = service.update(track, true)
+                                    trackRepository.insertTrack(updatedTrack)
                                 } catch (e: Exception) {
                                     delayedTrackingStore.add(track.id!!, track.last_chapter_read)
                                     TimberKt.e(e) { "Error inserting for delayed tracker" }
