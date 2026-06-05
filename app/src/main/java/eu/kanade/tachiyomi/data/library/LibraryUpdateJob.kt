@@ -38,7 +38,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -100,6 +99,7 @@ import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.library.ShouldUpdateMangaUseCase
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
@@ -135,6 +135,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val statusHandler by injectLazy<StatusHandler>()
 
     private val mangaUseCases by injectLazy<MangaUseCases>()
+    private val shouldUpdateMangaUseCase by injectLazy<ShouldUpdateMangaUseCase>()
 
     private var extraDeferredJobs = Collections.synchronizedList(mutableListOf<Deferred<Any>>())
     private val extraScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -278,71 +279,30 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 }
             }
             .filter { libraryManga ->
-                when {
-                    LibraryPreferences.MANGA_HAS_UNREAD in restrictions &&
-                        libraryManga.unread != 0 -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_has_unread)
-                        false // Filter out
-                    }
-                    LibraryPreferences.MANGA_NOT_STARTED in restrictions &&
-                        libraryManga.totalChapters > 0 &&
-                        !libraryManga.hasStarted -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_not_started)
-                        false
-                    }
-                    LibraryPreferences.MANGA_NOT_COMPLETED in restrictions &&
-                        libraryManga.status == SManga.COMPLETED -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_completed)
-                        false
-                    }
-
-                    // --- Optimized Tracking Checks ---
-                    LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ in restrictions &&
-                        hasTrackWithGivenStatus(
-                            libraryManga,
-                            context.getString(R.string.follows_plan_to_read),
-                            tracksByMangaId,
-                        ) -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_tracking_plan_to_read)
-                        false
-                    }
-                    LibraryPreferences.MANGA_TRACKING_DROPPED in restrictions &&
-                        hasTrackWithGivenStatus(
-                            libraryManga,
-                            context.getString(R.string.follows_dropped),
-                            tracksByMangaId,
-                        ) -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_tracking_dropped)
-                        false
-                    }
-                    LibraryPreferences.MANGA_TRACKING_ON_HOLD in restrictions &&
-                        hasTrackWithGivenStatus(
-                            libraryManga,
-                            context.getString(R.string.follows_on_hold),
-                            tracksByMangaId,
-                        ) -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_tracking_on_hold)
-                        false
-                    }
-                    LibraryPreferences.MANGA_TRACKING_COMPLETED in restrictions &&
-                        hasTrackWithGivenStatus(
-                            libraryManga,
-                            context.getString(R.string.follows_completed),
-                            tracksByMangaId,
-                        ) -> {
-                        skippedUpdates[libraryManga] =
-                            context.getString(R.string.skipped_reason_tracking_completed)
-                        false
-                    }
-
-                    // If no restriction matched, keep the manga
-                    else -> true
+                val tracks = tracksByMangaId[libraryManga.id] ?: emptyList()
+                val skipReason = shouldUpdateMangaUseCase(libraryManga, restrictions, tracks)
+                if (skipReason != null) {
+                    skippedUpdates[libraryManga] =
+                        when (skipReason) {
+                            LibraryPreferences.MANGA_HAS_UNREAD ->
+                                context.getString(R.string.skipped_reason_has_unread)
+                            LibraryPreferences.MANGA_NOT_STARTED ->
+                                context.getString(R.string.skipped_reason_not_started)
+                            LibraryPreferences.MANGA_NOT_COMPLETED ->
+                                context.getString(R.string.skipped_reason_completed)
+                            LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ ->
+                                context.getString(R.string.skipped_reason_tracking_plan_to_read)
+                            LibraryPreferences.MANGA_TRACKING_DROPPED ->
+                                context.getString(R.string.skipped_reason_tracking_dropped)
+                            LibraryPreferences.MANGA_TRACKING_ON_HOLD ->
+                                context.getString(R.string.skipped_reason_tracking_on_hold)
+                            LibraryPreferences.MANGA_TRACKING_COMPLETED ->
+                                context.getString(R.string.skipped_reason_tracking_completed)
+                            else -> null
+                        }
+                    false
+                } else {
+                    true
                 }
             }
             .toList()
@@ -398,22 +358,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 launchIO { updateReadingStatus(mangaToAdd) }
 
                 finishUpdates()
-            }
-        }
-    }
-
-    private fun hasTrackWithGivenStatus(
-        libraryManga: LibraryManga,
-        globalStatus: String,
-        tracksByMangaId: Map<Long, List<Track>>,
-    ): Boolean {
-        val tracks = tracksByMangaId[libraryManga.id] ?: return false
-        return tracks.any { track ->
-            val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
-            if (status.isNullOrBlank()) {
-                false
-            } else {
-                status == globalStatus
             }
         }
     }

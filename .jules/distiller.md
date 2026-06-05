@@ -19,3 +19,8 @@
 ## 2026-05-11 - Extracting Blocked Chapter Validation
 **Learning:** Pure domain Use Cases are typically registered as singletons in `AppModule.kt` (using `addSingleton()`) and injected via `Injekt`. However, Use Cases that require an Android `Context` should not be singletons; instead, instantiate them directly where needed or pass the `Context` as a function argument to avoid leaks.
 **Action:** When extracting business logic into Use Cases, keep them pure without Android dependencies to make DI simple and safe.
+
+## 2026-06-04 - Unifying Smart Library Update Restrictions
+**Learning:** The project relies on `ShouldUpdateMangaUseCase` to coordinate smart library update filtering across both background sync `LibraryUpdateJob` and frontend `StatsViewModel`. Use Cases are registered via `addSingleton(...)` in `AppModule.kt`. 
+**Action:** When working on library update features or tracking-status matching, reuse `ShouldUpdateMangaUseCase` and fetch restrictions from `libraryPreferences.autoUpdateMangaRestrictions()` rather than incorrect device restriction keys.
+
