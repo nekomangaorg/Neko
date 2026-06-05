@@ -47,12 +47,13 @@ suspend fun updateTrackChapterRead(
     retryWhenOnline: Boolean = false,
     onError: ((TrackService, String?) -> Unit)? = null,
 ) {
+    mangaId ?: return
     withNonCancellableContext {
         val preferences = Injekt.get<PreferencesHelper>()
         val trackRepository = Injekt.get<TrackRepository>()
         val trackManager = Injekt.get<TrackManager>()
 
-        val trackList = trackRepository.getTracksForManga(mangaId!!)
+        val trackList = trackRepository.getTracksForManga(mangaId)
         trackList.map { track ->
             val service = trackManager.getService(track.sync_id)
             if (service != null && service.isLogged() && newChapterRead > track.last_chapter_read) {
@@ -61,8 +62,8 @@ suspend fun updateTrackChapterRead(
                 } else if (preferences.context.isOnline()) {
                     try {
                         track.last_chapter_read = newChapterRead
-                        service.update(track, true)
-                        trackRepository.insertTrack(track)
+                        val updatedTrack = service.update(track, true)
+                        trackRepository.insertTrack(updatedTrack)
                     } catch (e: Exception) {
                         onError?.invoke(service, e.localizedMessage)
                         if (retryWhenOnline) {

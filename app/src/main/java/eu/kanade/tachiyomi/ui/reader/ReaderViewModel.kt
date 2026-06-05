@@ -1095,7 +1095,7 @@ constructor(
      */
     private fun updateTrackChapterAfterReading(readerChapter: ReaderChapter) {
         if (!preferences.autoUpdateTrack().get()) return
-        viewModelScope.launchIO {
+        viewModelScope.launchNonCancellable {
             val newChapterRead = readerChapter.chapter.chapter_number
             updateTrackChapterRead(
                 manga?.id,
