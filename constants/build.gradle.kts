@@ -1,7 +1,4 @@
-plugins {
-    id(androidx.plugins.library.get().pluginId)
-    id(kotlinx.plugins.android.get().pluginId)
-}
+plugins { id(androidx.plugins.library.get().pluginId) }
 
 android {
     namespace = "org.nekomanga.constants"

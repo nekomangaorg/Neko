@@ -1,4 +1,5 @@
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.gradle.BasePlugin
 import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
 import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
@@ -10,7 +11,6 @@ plugins {
   id(androidx.plugins.application.get().pluginId) apply false
   id(androidx.plugins.library.get().pluginId) apply false
   alias(libs.plugins.google.services) apply false
-  id(kotlinx.plugins.android.get().pluginId) apply false
   alias(kotlinx.plugins.compose.compiler) apply false
   id(kotlinx.plugins.jvm.get().pluginId) apply false
   id(kotlinx.plugins.parcelize.get().pluginId) apply false
@@ -22,6 +22,9 @@ plugins {
 }
 
 subprojects {
+  configurations.all {
+    exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
+  }
   tasks {
     withType<KotlinCompile> {
       compilerOptions {
@@ -68,8 +71,8 @@ subprojects {
     }
     plugins.apply(libs.plugins.detekt.get().pluginId)
 
-    configure<BaseExtension> {
-      compileSdkVersion(AndroidConfig.compileSdkVersion)
+    extensions.findByType<ApplicationExtension>()?.apply {
+      compileSdk = AndroidConfig.compileSdkVersion
       defaultConfig {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
@@ -81,15 +84,35 @@ subprojects {
         isCoreLibraryDesugaringEnabled = true
       }
 
-      dependencies { add("coreLibraryDesugaring", libs.desugaring) }
-
-      packagingOptions {
+      packaging {
         resources.excludes.add("META-INF/LICENSE-LGPL-2.1.txt")
         resources.excludes.add("META-INF/LICENSE-LGPL-3.txt")
         resources.excludes.add("META-INF/LICENSE-W3C-TEST")
         resources.excludes.add("META-INF/DEPENDENCIES")
       }
     }
+
+    extensions.findByType<LibraryExtension>()?.apply {
+      compileSdk = AndroidConfig.compileSdkVersion
+      defaultConfig {
+        minSdk = AndroidConfig.minSdkVersion
+      }
+
+      compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
+      }
+
+      packaging {
+        resources.excludes.add("META-INF/LICENSE-LGPL-2.1.txt")
+        resources.excludes.add("META-INF/LICENSE-LGPL-3.txt")
+        resources.excludes.add("META-INF/LICENSE-W3C-TEST")
+        resources.excludes.add("META-INF/DEPENDENCIES")
+      }
+    }
+
+    dependencies { add("coreLibraryDesugaring", libs.desugaring) }
   }
 }
 

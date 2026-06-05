@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id(androidx.plugins.application.get().pluginId)
-    id(kotlinx.plugins.android.get().pluginId)
     id(kotlinx.plugins.parcelize.get().pluginId)
     alias(libs.plugins.about.libraries)
     alias(kotlinx.plugins.serialization)
@@ -31,7 +30,6 @@ android {
         versionName = "3.4.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
-        setProperty("archivesBaseName", "Neko")
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
         buildConfigField(
@@ -85,6 +83,8 @@ android {
 
     productFlavors { create("standard") { buildConfigField("Boolean", "INCLUDE_UPDATER", "true") } }
 }
+
+base { archivesName.set("Neko") }
 
 composeCompiler {
     val enableMetrics =
