@@ -14,6 +14,9 @@ open class ReaderPage(
     var bgType: Int? = null,
 ) : Page(index, url, imageUrl, mangaDexChapterId, null) {
 
+    /** Rendered height after image is decoded and laid out (pixels at fit-width). */
+    var renderedHeight: Int = 0
+
     /** Value to check if this page is used to as if it was too wide */
     var shiftedPage: Boolean = false
 
