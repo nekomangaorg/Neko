@@ -33,6 +33,10 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
 
         // Add previous chapter pages and transition.
         if (chapters.prevChapter != null) {
+            // We only need to add the last few pages of the previous chapter, because it'll be
+            // selected as the current chapter when one of those pages is selected.
+            // The pages need to be at least one screen tall total for the reader to not get stuck
+            // when going back to the previous chapter.
             val prevPages = chapters.prevChapter.pages
             if (prevPages != null) {
                 val screenHeight = viewer.recycler.height
