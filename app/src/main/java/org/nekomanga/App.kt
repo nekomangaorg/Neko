@@ -23,7 +23,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.multidex.MultiDex
 import coil3.SingletonImageLoader
 import eu.kanade.tachiyomi.AppModule
 import eu.kanade.tachiyomi.PreferenceModule
@@ -223,7 +222,6 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
-        MultiDex.install(this)
     }
 
     override fun onLowMemory() {

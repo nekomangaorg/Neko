@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id(androidx.plugins.library.get().pluginId)
-    id(kotlinx.plugins.android.get().pluginId)
     alias(kotlinx.plugins.serialization)
 }
 
