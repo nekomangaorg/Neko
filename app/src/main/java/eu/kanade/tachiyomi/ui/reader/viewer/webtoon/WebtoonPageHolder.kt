@@ -294,6 +294,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
     /** Called when the image is decoded and going to be displayed. */
     private fun onImageDecoded() {
         progressContainer.isVisible = false
+        page?.renderedHeight = frame.measuredHeight
     }
 
     /** Called when the image fails to decode. */
