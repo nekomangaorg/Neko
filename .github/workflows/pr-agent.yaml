@@ -5,6 +5,9 @@ on:
   issue_comment:
     types: [created, edited]
 
+concurrency:
+  group: pr-agent-global-queue
+  cancel-in-progress: false
 jobs:
   pr_agent_job:
     if: ${{ github.event.sender.type != 'Bot' }}
