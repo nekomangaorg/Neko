@@ -956,7 +956,7 @@ class LibraryViewModel() : ViewModel() {
 
             currentSearches.remove(trimmed)
             currentSearches.add(0, trimmed)
-            val newSearches = currentSearches.take(5).joinToString("\n")
+            val newSearches = currentSearches.take(10).joinToString("\n")
             libraryPreferences.libraryRecentSearches().set(newSearches)
         }
     }
