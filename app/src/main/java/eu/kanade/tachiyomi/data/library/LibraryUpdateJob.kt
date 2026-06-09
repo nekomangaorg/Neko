@@ -22,7 +22,7 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
-import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onErr
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -401,7 +401,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                             // in the future check the merge type
                                             MergeType.getSource(mergeManga.mergeType, sourceManager)
                                                 .fetchChapters(mergeManga.url)
-                                                .onFailure {
+                                                .onErr {
                                                     errorFromMerged = true
                                                     failedUpdates[manga] =
                                                         "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"

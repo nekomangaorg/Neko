@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getError
 import com.github.michaelbull.result.getOrThrow
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -93,7 +93,7 @@ class ImageHandler {
                 }
         }
 
-        attempt.onSuccess { response ->
+        attempt.onOk { response ->
             if (!response.isSuccessful) {
                 response.close()
                 TimberKt.e(attempt.getError()) {

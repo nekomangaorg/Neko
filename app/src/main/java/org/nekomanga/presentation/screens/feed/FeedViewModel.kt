@@ -2,7 +2,7 @@ package org.nekomanga.presentation.screens.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -435,7 +435,7 @@ class FeedViewModel() : ViewModel() {
 
     fun loadSummaryPage() {
         viewModelScope.launchIO {
-            feedRepository.getSummaryUpdatesList().onSuccess { list ->
+            feedRepository.getSummaryUpdatesList().onOk { list ->
                 _summaryScreenPagingState.update { state ->
                     state.copy(
                         updatesFeedMangaList = list.toPersistentList(),
@@ -446,7 +446,7 @@ class FeedViewModel() : ViewModel() {
         }
 
         viewModelScope.launchIO {
-            feedRepository.getSummaryContinueReadingList().onSuccess { list ->
+            feedRepository.getSummaryContinueReadingList().onOk { list ->
                 _summaryScreenPagingState.update { state ->
                     state.copy(
                         continueReadingList = list.toPersistentList(),
@@ -457,7 +457,7 @@ class FeedViewModel() : ViewModel() {
         }
 
         viewModelScope.launchIO {
-            feedRepository.getSummaryNewlyAddedList().onSuccess { list ->
+            feedRepository.getSummaryNewlyAddedList().onOk { list ->
                 _summaryScreenPagingState.update { state ->
                     state.copy(
                         newlyAddedFeedMangaList = list.toPersistentList(),
@@ -500,7 +500,7 @@ class FeedViewModel() : ViewModel() {
                                 limit = 100,
                                 _historyScreenPagingState.value.historyGrouping,
                             )
-                            .onSuccess { results ->
+                            .onOk { results ->
                                 _historyScreenPagingState.update {
                                     it.copy(
                                         searchQuery = searchQuery,
@@ -518,7 +518,7 @@ class FeedViewModel() : ViewModel() {
                                 limit = 100,
                                 _updatesScreenPagingState.value.updatesSortedByFetch,
                             )
-                            .onSuccess { results ->
+                            .onOk { results ->
                                 _updatesScreenPagingState.update {
                                     it.copy(
                                         searchQuery = searchQuery,
@@ -713,7 +713,7 @@ class FeedViewModel() : ViewModel() {
                         limit = limit,
                         uploadsFetchSort = _updatesScreenPagingState.value.updatesSortedByFetch,
                     )
-                    .onSuccess { results ->
+                    .onOk { results ->
                         mutableFeedManga = (mutableFeedManga + results.second).toMutableList()
                     }
             }
@@ -740,7 +740,7 @@ class FeedViewModel() : ViewModel() {
                         offset = i,
                         group = _historyScreenPagingState.value.historyGrouping,
                     )
-                    .onSuccess { results ->
+                    .onOk { results ->
                         mutableFeedManga = (mutableFeedManga + results.second).toMutableList()
                     }
             }
@@ -798,7 +798,7 @@ class FeedViewModel() : ViewModel() {
                     group = _historyScreenPagingState.value.historyGrouping,
                 )
             }
-            .onSuccess { results -> update(results.second.toPersistentList()) }
+            .onOk { results -> update(results.second.toPersistentList()) }
     }
 
     private fun updateReadOnFeed(chapterItem: ChapterItem) {

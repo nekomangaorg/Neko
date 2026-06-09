@@ -4,8 +4,8 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.onErr
+import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -134,11 +134,11 @@ class ListHandler {
         var resultError: ResultError? = null
         while (hasPages) {
             retrieveMangaFromList(listUUID, page, privateList, false)
-                .onFailure {
+                .onErr {
                     hasPages = false
                     resultError = it
                 }
-                .onSuccess { successResult ->
+                .onOk { successResult ->
                     page++
                     hasPages = successResult.hasNextPage
                     list = list + (successResult.sourceManga.toMutableList())

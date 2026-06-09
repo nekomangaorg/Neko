@@ -8,8 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.withTransaction
 import com.github.michaelbull.result.getOrElse
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.onErr
+import com.github.michaelbull.result.onOk
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -375,7 +375,7 @@ constructor(
                     this.url = url
                     title = ""
                 })
-        mangaDex.fetchMangaAndChapterDetails(tempManga, false).onSuccess { fetchedInfo ->
+        mangaDex.fetchMangaAndChapterDetails(tempManga, false).onOk { fetchedInfo ->
             val networkManga = fetchedInfo.sManga!!
             val chapters = fetchedInfo.sChapters
 
@@ -1134,7 +1134,7 @@ constructor(
         val threadId =
             sourceManager.mangaDex
                 .getChapterCommentId(chapterId)
-                .onFailure { TimberKt.e { it.message() } }
+                .onErr { TimberKt.e { it.message() } }
                 .getOrElse { null }
 
         return threadId

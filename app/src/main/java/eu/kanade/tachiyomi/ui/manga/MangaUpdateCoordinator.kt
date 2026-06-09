@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.manga
 
 import androidx.room.withTransaction
 import com.github.michaelbull.result.getOrElse
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.onErr
+import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
@@ -108,11 +108,11 @@ class MangaUpdateCoordinator {
     ) {
         sourceManager.mangaDex
             .getMangaDetails(mangaItem.uuid())
-            .onFailure {
+            .onErr {
                 send(MangaResult.Error(text = "Error getting manga from MangaDex"))
                 throw UpdateError()
             }
-            .onSuccess { (networkManga, sourceArtwork) ->
+            .onOk { (networkManga, sourceArtwork) ->
                 val currentManga = mangaItem.toManga()
                 currentManga.copyFrom(networkManga)
                 currentManga.initialized = true
@@ -209,7 +209,7 @@ class MangaUpdateCoordinator {
         val dexChaptersDeferred = async {
             sourceManager.mangaDex
                 .fetchChapterList(manga)
-                .onFailure {
+                .onErr {
                     send(MangaResult.Error(text = "MangaDex chapter fetch failed: ${it.message()}"))
                     throw UpdateError()
                 }
@@ -224,7 +224,7 @@ class MangaUpdateCoordinator {
                     val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
                     source
                         .fetchChapters(mergeManga.url)
-                        .onFailure {
+                        .onErr {
                             val msg = "Failed to fetch from ${source.name}: ${it.message()}"
                             send(MangaResult.Error(text = msg))
 
@@ -287,7 +287,7 @@ class MangaUpdateCoordinator {
     }
 
     suspend fun updateGroup(group: String) {
-        sourceManager.mangaDex.getScanlatorGroup(group).onSuccess {
+        sourceManager.mangaDex.getScanlatorGroup(group).onOk {
             val scanlatorGroupImpl = it.toScanlatorGroupImpl()
             if (group == scanlatorGroupImpl.name) {
                 scanlatorGroupRepository.insertScanlatorGroups(listOf(scanlatorGroupImpl))
@@ -296,7 +296,7 @@ class MangaUpdateCoordinator {
     }
 
     suspend fun updateUploader(uploader: String) {
-        sourceManager.mangaDex.getUploader(uploader).onSuccess {
+        sourceManager.mangaDex.getUploader(uploader).onOk {
             uploaderRepository.insertUploaders(listOf(it.toUploaderImpl()))
         }
     }
