@@ -69,6 +69,10 @@ fun LibraryScreenTopBar(
 
         SearchOutlineTopAppBar(
             onSearch = libraryScreenActions.search,
+            onSearchSubmit = libraryScreenActions.saveSearch,
+            recentSearches = libraryScreenState.recentSearches,
+            onClearRecentSearches = libraryScreenActions.clearRecentSearches,
+            onRemoveRecentSearch = libraryScreenActions.removeRecentSearch,
             searchPlaceHolder = stringResource(R.string.search_library),
             searchPlaceHolderAlt = stringResource(R.string.library_search_hint),
             color = color,

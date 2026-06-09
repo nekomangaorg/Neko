@@ -567,18 +567,29 @@ class LibraryViewModel() : ViewModel() {
             }
             .distinctUntilChanged()
 
-    /**
-     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Bolt): Prevent redundant downstream UI state
-     * recalculations when multiple preference flows emit sequentially with the same values,
-     * avoiding redundant UI recompositions.
-     */
+    private data class UiSettings(
+        val gridSize: Float,
+        val layout: LibraryDisplayMode,
+        val filters: LibraryFilters,
+        val recentSearches: List<String>,
+    )
+
     private val uiSettingsFlow =
         combine(
                 libraryPreferences.gridSize().changes(),
                 libraryPreferences.layout().changes(),
                 filterPreferencesFlow,
-            ) { gridSize, layout, filters ->
-                Triple(gridSize, layout, filters)
+                libraryPreferences.libraryRecentSearches().changes()
+                    .map { searchesStr ->
+                        if (searchesStr.isBlank()) {
+                            emptyList<String>()
+                        } else {
+                            searchesStr.split("\n").filter { it.isNotBlank() }
+                        }
+                    }
+                    .distinctUntilChanged(),
+            ) { gridSize, layout, filters, recentSearches ->
+                UiSettings(gridSize, layout, filters, recentSearches)
             }
             .distinctUntilChanged()
 
@@ -596,14 +607,15 @@ class LibraryViewModel() : ViewModel() {
                 trackMap,
                 categories,
                 viewPrefs,
-                (gridSize, layout, filters) ->
+                uiSettings ->
                 state.copy(
                     items = itemsWithRefreshing,
                     allCollapsed = allCollapsed,
-                    libraryDisplayMode = layout,
-                    rawColumnCount = gridSize,
-                    libraryFilters = filters,
-                    hasActiveFilters = filters.hasActiveFilter(),
+                    libraryDisplayMode = uiSettings.layout,
+                    rawColumnCount = uiSettings.gridSize,
+                    libraryFilters = uiSettings.filters,
+                    hasActiveFilters = uiSettings.filters.hasActiveFilter(),
+                    recentSearches = uiSettings.recentSearches.toPersistentList(),
                     currentGroupBy = viewPrefs.groupBy,
                     trackMap = trackMap.toPersistentMap(),
                     userCategories =
@@ -931,6 +943,40 @@ class LibraryViewModel() : ViewModel() {
 
     fun search(searchQuery: String?) {
         _internalLibraryScreenState.update { it.copy(searchQuery = searchQuery) }
+    }
+
+    fun saveSearch(query: String) {
+        val trimmed = query.trim()
+        if (trimmed.isBlank()) return
+        viewModelScope.launchIO {
+            val currentSearches = libraryPreferences.libraryRecentSearches().get()
+                .split("\n")
+                .filter { it.isNotBlank() }
+                .toMutableList()
+
+            currentSearches.remove(trimmed)
+            currentSearches.add(0, trimmed)
+            val newSearches = currentSearches.take(5).joinToString("\n")
+            libraryPreferences.libraryRecentSearches().set(newSearches)
+        }
+    }
+
+    fun clearRecentSearches() {
+        viewModelScope.launchIO {
+            libraryPreferences.libraryRecentSearches().set("")
+        }
+    }
+
+    fun removeRecentSearch(query: String) {
+        val trimmed = query.trim()
+        if (trimmed.isBlank()) return
+        viewModelScope.launchIO {
+            val currentSearches = libraryPreferences.libraryRecentSearches().get()
+                .split("\n")
+                .filter { it.isNotBlank() && it.trim() != trimmed }
+                .joinToString("\n")
+            libraryPreferences.libraryRecentSearches().set(currentSearches)
+        }
     }
 
     fun deepLinkSearch(searchQuery: String) {

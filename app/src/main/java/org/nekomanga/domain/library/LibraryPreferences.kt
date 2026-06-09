@@ -25,6 +25,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun lastSearchSuggestion() = this.preferenceStore.getLong("last_library_suggestion")
 
+    fun libraryRecentSearches() = this.preferenceStore.getString("library_recent_searches", "")
+
     fun updateInterval() = this.preferenceStore.getInt("pref_library_update_interval_key", 24)
 
     fun lastUpdateTimestamp() = this.preferenceStore.getLong("library_update_last_timestamp")
