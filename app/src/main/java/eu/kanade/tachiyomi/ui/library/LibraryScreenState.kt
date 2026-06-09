@@ -56,6 +56,7 @@ data class LibraryScreenState(
     val showLibraryButtonBar: Boolean = true,
     val pagerIndex: Int = 0,
     val scrollPositions: Map<Int, Int> = emptyMap(),
+    val recentSearches: PersistentList<String> = persistentListOf(),
 )
 
 data class LibraryScreenActions(
@@ -66,6 +67,7 @@ data class LibraryScreenActions(
     val deleteSelectedLibraryMangaItems: () -> Unit,
     val clearSelectedManga: () -> Unit,
     val search: (String?) -> Unit,
+    val saveSearch: (String) -> Unit = {},
     val onSearchMangaDex: (String) -> Unit,
     val updateLibrary: () -> Unit,
     val collapseExpandAllCategories: () -> Unit,
@@ -77,6 +79,8 @@ data class LibraryScreenActions(
     val filterToggled: (LibraryFilterType) -> Unit,
     val pagerIndexChanged: (Int) -> Unit,
     val scrollPositionChanged: (Int, Int) -> Unit,
+    val clearRecentSearches: () -> Unit = {},
+    val removeRecentSearch: (String) -> Unit = {},
 )
 
 data class LibrarySheetActions(
