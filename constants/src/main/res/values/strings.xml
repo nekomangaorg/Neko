@@ -362,6 +362,7 @@
 
     <!-- Feed -->
     <string name="recents">Recents</string>
+    <string name="clear_recent_searches">Clear recent searches</string>
     <string name="feed">Feed</string>
     <string name="updates_and_history">Updates &amp; history</string>
     <string name="updates">Updates</string>

@@ -232,7 +232,7 @@ fun SearchOutlineTopAppBar(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Filled.Close,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(id = R.string.clear_recent_searches),
                                     tint = MaterialTheme.colorScheme.onErrorContainer,
                                     modifier = Modifier.size(16.dp)
                                 )
