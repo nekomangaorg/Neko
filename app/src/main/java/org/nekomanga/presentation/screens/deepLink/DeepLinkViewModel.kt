@@ -8,8 +8,8 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.map
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.onErr
+import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
@@ -71,8 +71,8 @@ class DeepLinkViewModel() : ViewModel() {
                         }
                     }
                 }
-                .onFailure { _deepLinkState.value = Error(it.message()) }
-                .onSuccess { screens -> _deepLinkState.value = Success(screens) }
+                .onErr { _deepLinkState.value = Error(it.message()) }
+                .onOk { screens -> _deepLinkState.value = Success(screens) }
         }
     }
 

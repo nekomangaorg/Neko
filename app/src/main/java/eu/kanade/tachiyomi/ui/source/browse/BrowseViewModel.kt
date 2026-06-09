@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.source.browse
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.onErr
+import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -259,7 +259,7 @@ class BrowseViewModel : ViewModel() {
             if (!isOnline()) return@launchIO
             browseRepository
                 .getHomePage()
-                .onFailure { resultError ->
+                .onErr { resultError ->
                     _browseScreenState.update { state ->
                         state.copy(
                             error = UiText.String(resultError.message()),
@@ -267,7 +267,7 @@ class BrowseViewModel : ViewModel() {
                         )
                     }
                 }
-                .onSuccess {
+                .onOk {
                     _browseScreenState.update { state ->
                         state.copy(
                             homePageManga = it.updateVisibility(preferences),
@@ -289,12 +289,12 @@ class BrowseViewModel : ViewModel() {
                 _browseScreenState.update { state -> state.copy(initialLoading = true) }
                 browseRepository
                     .getFollows()
-                    .onFailure {
+                    .onErr {
                         _browseScreenState.update { state ->
                             state.copy(error = UiText.String(it.message()), initialLoading = false)
                         }
                     }
-                    .onSuccess {
+                    .onOk {
                         val groupedManga =
                             it.updateVisibility(preferences)
                                 .groupBy { manga -> manga.displayTextRes!! }
@@ -407,12 +407,12 @@ class BrowseViewModel : ViewModel() {
             _browseScreenState.update { it.copy(initialLoading = true) }
             browseRepository
                 .getRandomManga()
-                .onFailure { error ->
+                .onErr { error ->
                     _browseScreenState.update {
                         it.copy(initialLoading = false, error = UiText.String(error.message()))
                     }
                 }
-                .onSuccess { displayManga ->
+                .onOk { displayManga ->
                     _browseScreenState.update { it.copy(initialLoading = false) }
                     _deepLinkManga.value = displayManga.mangaId
                 }

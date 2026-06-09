@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.jobs.follows
 
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.onErr
+import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -61,12 +61,12 @@ class FollowsSyncProcessor {
 
             sourceManager.mangaDex
                 .fetchAllFollows()
-                .onFailure {
+                .onErr {
                     errorNotification(
                         (it as? ResultError.Generic)?.errorString ?: "Error fetching follows"
                     )
                 }
-                .onSuccess { unfilteredManga ->
+                .onOk { unfilteredManga ->
                     val listManga =
                         unfilteredManga
                             .groupBy { FollowStatus.fromStringRes(it.displayTextRes).int }

@@ -1,8 +1,8 @@
 package org.nekomanga.util.paging
 
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.onErr
+import com.github.michaelbull.result.onOk
 import org.nekomanga.domain.network.ResultError
 
 class DefaultPaginator<Key, Item>(
@@ -26,12 +26,12 @@ class DefaultPaginator<Key, Item>(
         isMakingRequest = false
 
         result
-            .onSuccess { (hasNextPage, items) ->
+            .onOk { (hasNextPage, items) ->
                 currentKey = getNextKey(items)
                 onSuccess(hasNextPage, items, currentKey)
                 onLoadUpdated(false)
             }
-            .onFailure {
+            .onErr {
                 onError(it)
                 onLoadUpdated(false)
             }
