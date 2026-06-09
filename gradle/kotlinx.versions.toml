@@ -16,7 +16,7 @@ serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization
 serialization-okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "serializationVersion" }
 
 
-immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0"
+immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.5.0"
 
 [bundles]
 
