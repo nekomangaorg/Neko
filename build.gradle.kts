@@ -94,9 +94,7 @@ subprojects {
 
     extensions.findByType<LibraryExtension>()?.apply {
       compileSdk = AndroidConfig.compileSdkVersion
-      defaultConfig {
-        minSdk = AndroidConfig.minSdkVersion
-      }
+      defaultConfig { minSdk = AndroidConfig.minSdkVersion }
 
       compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
