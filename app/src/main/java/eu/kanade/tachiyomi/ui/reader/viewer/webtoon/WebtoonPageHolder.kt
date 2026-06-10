@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -147,6 +148,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
         regionTop = 0
         regionHeight = 0
+        splitPage = null
 
         removeDecodeErrorLayout()
         frame.recycle()
@@ -291,6 +293,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
                     awaitCancellation()
                 } catch (e: Exception) {
                     org.nekomanga.logging.TimberKt.e(e) { "Error loading webtoon page" }
+                    if (e is CancellationException) throw e
                 } finally {
                     runCatching { openStream?.close() }
                 }
@@ -375,7 +378,9 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
         bitmap ?: return Buffer().write(imageBytes)
 
-        return Buffer().write(ImageUtil.bitmapToBytes(bitmap))
+        return Buffer().apply {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream())
+        }
     }
 
     private suspend fun process(imageStream: BufferedSource): BufferedSource {

@@ -491,12 +491,6 @@ object ImageUtil {
         return options.outWidth > options.outHeight
     }
 
-    fun bitmapToBytes(bitmap: Bitmap): ByteArray {
-        val output = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, output)
-        return output.toByteArray()
-    }
-
     fun splitAndStackBitmap(
         imageStream: InputStream,
         rightSideOnTop: Boolean,
