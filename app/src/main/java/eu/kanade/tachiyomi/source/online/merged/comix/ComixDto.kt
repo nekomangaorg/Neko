@@ -12,46 +12,71 @@ import org.nekomanga.constants.Constants
 class Manga(
     @SerialName("hid") private val hashId: String,
     private val title: String,
-    private val poster: Poster,
+    private val poster: Poster? = null,
+    private val url: String? = null,
 ) {
     @Serializable
     class Poster(
         private val small: String? = null,
-        private val medium: String,
-        private val large: String,
+        private val medium: String? = null,
+        private val large: String? = null,
     ) {
         fun from(quality: String? = "large") =
             when (quality) {
-                "large" -> large
-                "small" -> small
-                else -> medium
+                "large" -> large ?: medium ?: small ?: ""
+                "small" -> small ?: medium ?: large ?: ""
+                else -> medium ?: large ?: small ?: ""
             }
     }
 
     fun toSManga() =
         SManga.create().apply {
-            url = "/$hashId"
+            url = this@Manga.url?.substringAfter("/title") ?: "/$hashId"
             title = this@Manga.title
-            thumbnail_url = this@Manga.poster.from("large")
+            thumbnail_url = this@Manga.poster?.from("large")
         }
 }
 
-@Serializable class Meta(val page: Int, val lastPage: Int)
+@Serializable
+class Meta(
+    val page: Int = 1,
+    val lastPage: Int = 1,
+    val hasNext: Boolean = false,
+)
 
-@Serializable class SearchResponse(val result: Items<Manga>)
+@Serializable
+class Pagination(
+    val page: Int = 1,
+    val lastPage: Int = 1,
+)
 
-@Serializable class ChapterDetailsResponse(val result: Items<Chapter>)
+@Serializable
+class SearchResponse(
+    val result: Items<Manga>,
+)
 
-@Serializable class Items<T>(val items: List<T>, val meta: Meta)
+@Serializable
+class Items<T>(
+    val items: List<T> = emptyList(),
+    val meta: Meta? = null,
+    private val pagination: Pagination? = null,
+) {
+    fun hasNextPage(): Boolean = when {
+        meta != null -> meta.page < meta.lastPage
+        pagination != null -> pagination.page < pagination.lastPage
+        else -> false
+    }
+}
 
 @Serializable
 class Chapter(
     private val id: Int,
-    val group: Group?,
+    val group: Group? = null,
+    val url: String = "",
     val number: Double,
-    private val name: String,
-    val createdAtFormatted: String,
-    val isOfficial: Boolean,
+    private val name: String = "",
+    val createdAtFormatted: String = "",
+    val isOfficial: Boolean = false,
 ) {
     val createdAt: Long
         get() {
@@ -87,19 +112,25 @@ class Chapter(
                 "year",
                 "years" -> calendar.add(Calendar.YEAR, -amount)
             }
-            return calendar.timeInMillis / 1000
+            return calendar.timeInMillis
         }
 
-    fun toSChapter(mangaId: String) =
+    fun toSChapter(mangaSlug: String) =
         SChapter.create().apply {
-            url = "title/$mangaId/$id"
+            url = this@Chapter.url.indexOf("/title/").let { index ->
+                if (index != -1) {
+                    this@Chapter.url.substring(index + 1)
+                } else {
+                    "title/$mangaSlug/$id-chapter-${this@Chapter.number.toString().removeSuffix(".0")}"
+                }
+            }
             val chapterText = "Ch." + DecimalFormat("0.#").format(this@Chapter.number)
             chapter_txt = chapterText
             name = buildString {
                 append(chapterText)
-                this@Chapter.name.takeUnless { it.isEmpty() }?.let { append("- $it") }
+                this@Chapter.name.takeUnless { it.isEmpty() }?.let { append(" - $it") }
             }
-            date_upload = this@Chapter.createdAt * 1000
+            date_upload = this@Chapter.createdAt
             chapter_number = this@Chapter.number.toFloat()
 
             val scanlatorList = mutableListOf(Comix.name)
@@ -130,10 +161,22 @@ class Chapter(
 
 @Serializable class Group(val id: Int, val name: String)
 
-@Serializable class ChapterResponse(val result: ChapterResult? = null)
+@Serializable
+class ChapterResponse(val result: ChapterResult? = null) {
+    @Serializable
+    class ChapterResult(
+        val pages: Pages,
+    )
 
-@Serializable class ChapterResult(val id: Int, val pages: Pages = Pages())
+    @Serializable
+    class Pages(
+        val baseUrl: String,
+        val items: List<PageDto>,
+    )
 
-@Serializable class Pages(val baseUrl: String = "", val items: List<PageDto> = emptyList())
-
-@Serializable class PageDto(val url: String = "")
+    @Serializable
+    class PageDto(
+        val url: String,
+        val s: Int = 0,
+    )
+}
