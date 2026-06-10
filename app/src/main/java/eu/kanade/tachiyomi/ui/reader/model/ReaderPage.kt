@@ -50,3 +50,11 @@ open class ReaderPage(
     fun isFromSamePage(page: ReaderPage): Boolean =
         index == page.index && chapter.chapter.id == page.chapter.chapter.id
 }
+
+data class ReaderPageSplit(
+    val page: ReaderPage,
+    val topOffset: Int,
+    val splitHeight: Int,
+    var cachedBytes: ByteArray? = null,
+    var displayedHeight: Int = 0,
+)

@@ -940,7 +940,7 @@ object ImageUtil {
         return options
     }
 
-    private fun extractImageOptions(imageSource: BufferedSource): BitmapFactory.Options {
+    fun extractImageOptions(imageSource: BufferedSource): BitmapFactory.Options {
         val imageBytes = imageSource.peek().readByteArray()
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)

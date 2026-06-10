@@ -84,6 +84,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             webtoonPageTransitions.bindToPreference(
                 readerPreferences.animatedPageTransitionsWebtoon()
             )
+            webtoonSplitTallImages.bindToPreference(readerPreferences.splitTallImagesReader())
 
             updatePagedGroup(!isWebtoonView)
         }
@@ -123,6 +124,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
                 binding.webtoonPageLayout,
                 binding.webtoonInvertDoublePages,
                 binding.webtoonPageTransitions,
+                binding.webtoonSplitTallImages,
             )
             .forEach { it.isVisible = !show }
         val isFullFit =

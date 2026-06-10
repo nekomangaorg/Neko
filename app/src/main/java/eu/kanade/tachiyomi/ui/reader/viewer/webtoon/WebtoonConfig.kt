@@ -47,6 +47,8 @@ class WebtoonConfig(
     var splitPages =
         readerPreferences.webtoonPageLayout().get() == PageLayout.SPLIT_PAGES.webtoonValue
 
+    var splitTallPages = readerPreferences.splitTallImagesReader().get()
+
     var invertDoublePages = false
 
     var menuThreshold = PreferenceValues.ReaderHideThreshold.LOW.threshold
@@ -98,6 +100,13 @@ class WebtoonConfig(
                 { splitPages = it == PageLayout.SPLIT_PAGES.webtoonValue },
                 { imagePropertyChangedListener?.invoke() },
             )
+        readerPreferences.splitTallImagesReader().apply {
+            register({ splitTallPages = it })
+            changes()
+                .drop(1)
+                .onEach { reloadViewerListener?.invoke() }
+                .launchIn(scope)
+        }
         readerPreferences.webtoonReaderHideThreshold().register({ menuThreshold = it.threshold })
         readerPreferences
             .webtoonInvertDoublePages()

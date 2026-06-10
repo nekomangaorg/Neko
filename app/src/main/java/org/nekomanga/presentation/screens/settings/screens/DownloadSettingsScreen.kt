@@ -41,8 +41,8 @@ internal class DownloadSettingsScreen(
                 title = stringResource(R.string.save_chapters_as_cbz),
             ),
             Preference.PreferenceItem.SwitchPreference(
-                pref = readerPreferences.splitTallImages(),
-                title = stringResource(R.string.split_tall_images),
+                pref = readerPreferences.splitTallImagesDownload(),
+                title = stringResource(R.string.split_tall_images_download),
                 subtitle = stringResource(R.string.split_tall_images_summary),
             ),
             removeAfterReadGroup(),
@@ -193,7 +193,11 @@ internal class DownloadSettingsScreen(
             return persistentListOf(
                 SearchTerm(title = stringResource(R.string.only_download_over_unmetered)),
                 SearchTerm(title = stringResource(R.string.save_chapters_as_cbz)),
-                SearchTerm(title = stringResource(R.string.split_tall_images_summary)),
+                SearchTerm(
+                    title = stringResource(R.string.split_tall_images_download),
+                    subtitle = stringResource(R.string.split_tall_images_summary),
+                    group = stringResource(R.string.split_tall_images_download)
+                ),
                 SearchTerm(
                     title = stringResource(R.string.remove_when_marked_as_read),
                     group = stringResource(R.string.remove_after_read),
