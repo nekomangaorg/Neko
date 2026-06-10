@@ -25,6 +25,6 @@ jobs:
           config.fallback_models: '["gemini/gemini-2.5-flash"]'
           GOOGLE_AI_STUDIO.GEMINI_API_KEY: ${{ secrets.GEMINI_KEY }}
           github_action_config.auto_review: "true"
-          github_action_config.auto_describe: "false"
+          github_action_config.auto_describe: "true"
           github_action_config.auto_improve: "false"
           github_action_config.pr_actions: '["opened", "reopened", "synchronize", "ready_for_review", "review_requested"]'
