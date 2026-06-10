@@ -155,6 +155,8 @@ internal class DownloadSettingsScreen(
                                     5 to pluralStringResource(R.plurals.next_unread_chapters, 5, 5),
                                     10 to
                                         pluralStringResource(R.plurals.next_unread_chapters, 10, 10),
+                                    20 to
+                                        pluralStringResource(R.plurals.next_unread_chapters, 20, 20),
                                 )
                                 .toPersistentMap(),
                     ),

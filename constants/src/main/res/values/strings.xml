@@ -683,6 +683,7 @@
     <string name="next_3_unread">Three</string>
     <string name="next_5_unread">Five</string>
     <string name="next_10_unread">Ten</string>
+    <string name="next_20_unread">Twenty</string>
     <plurals name="next_unread_chapters">
         <item quantity="one">Next unread chapter</item>
         <item quantity="other">Next %d unread chapters</item>
