@@ -24,3 +24,8 @@
 **Learning:** The project relies on `ShouldUpdateMangaUseCase` to coordinate smart library update filtering across both background sync `LibraryUpdateJob` and frontend `StatsViewModel`. Use Cases are registered via `addSingleton(...)` in `AppModule.kt`. 
 **Action:** When working on library update features or tracking-status matching, reuse `ShouldUpdateMangaUseCase` and fetch restrictions from `libraryPreferences.autoUpdateMangaRestrictions()` rather than incorrect device restriction keys.
 
+## 2026-06-09 - Extracting AutoAddTrackers Use Case
+**Learning:** The project wraps tracking results in a custom `TrackingUpdate` sealed class (`Success` / `Error`). For DI, tracking use cases are nested inside a central `TrackUseCases` class which is registered as a singleton `addSingleton(TrackUseCases())` in `AppModule.kt`. Use Case naming typically uses verb phrases (e.g. `RegisterTracking`).
+**Action:** When creating new tracking domain logic, nest the Use Case in `TrackUseCases` and use verb phrases for naming.
+
+

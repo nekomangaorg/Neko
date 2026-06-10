@@ -1842,142 +1842,22 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         tracks: List<TrackItem>,
     ) {
         viewModelScope.launchIO {
-            val autoAddTracker = preferences.autoAddTracker().get()
-            val manga = mangaItem.toManga()
-            loggedInTrackerService
-                .firstOrNull { it.isMdList }
-                ?.let {
-                    val mdList = trackManager.mdList
-                    var track = tracks.firstOrNull { mdList.matchingTrack(it) }?.toDbTrack()
-                    if (track == null) {
-                        track = mdList.createInitialTracker(manga)
-
-                        if (isOnline()) {
-                            // Try to bind the new track to the remote service (e.g., get a remote
-                            // ID)
-                            runCatching {
-                                    mdList.bind(track)
-                                } // Assumes bind() mutates the 'track' object
-                                .onErr { exception ->
-                                    TimberKt.e(exception) { "Error binding new MangaDex track" }
-                                }
-                        }
-                        // Save the new track (with or without remote data) to the local DB *once*
-                        trackRepository.insertTrack(track)
-                    }
-                    val autoAddStatus = mangaDexPreferences.autoAddToMangaDexLibrary().get()
-                    val canAutoAdd =
-                        mangaItem.favorite && FollowStatus.isUnfollowed(track.status) && isOnline()
-
-                    if (canAutoAdd) {
-                        val newStatus =
-                            when (autoAddStatus) {
-                                1 -> FollowStatus.PLAN_TO_READ.int
-                                3 -> FollowStatus.READING.int
-                                2 -> FollowStatus.ON_HOLD.int
-                                else -> null // Preference is not set to auto-add
-                            }
-
-                        if (newStatus != null) {
-                            track.status = newStatus
-                            trackUseCases.updateTrackingService.await(
-                                track.toTrackItem(),
-                                mdList.toTrackServiceItem(),
+            trackUseCases.autoAddTrackers(
+                mangaItem = mangaItem,
+                loggedInTrackerService = loggedInTrackerService,
+                tracks = tracks,
+                onShowSnackbar = { message, prefixRes ->
+                    launchUI {
+                        appSnackbarManager.showSnackbar(
+                            SnackbarState(
+                                message = message,
+                                prefixRes = prefixRes,
+                                snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                             )
-                        }
-                    }
-                }
-
-            if (autoAddTracker.size <= 1 || !mangaItem.favorite) return@launchIO
-
-            val validContentRatings = preferences.autoTrackContentRatingSelections().get()
-            val contentRating = manga.getContentRating()
-
-            if (contentRating != null && !validContentRatings.contains(contentRating.lowercase()))
-                return@launchIO
-
-            if (!isOnline()) {
-                launchUI {
-                    appSnackbarManager.showSnackbar(
-                        SnackbarState(
-                            message = "No network connection, cannot autolink tracker",
-                            snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                         )
-                    )
-                }
-                return@launchIO
-            }
-
-            val existingTrackIds = tracks.map { it.trackServiceId }.toSet()
-
-            autoAddTracker
-                .mapNotNull { it.toIntOrNull() } // Safely convert preference strings to Ints
-                .map { autoAddTrackerId ->
-                    async {
-                        val trackService =
-                            loggedInTrackerService.firstOrNull { it.id == autoAddTrackerId }
-                                ?: return@async // Not logged in to this service, skip
-
-                        if (trackService.id in existingTrackIds)
-                            return@async // Already tracked, skip
-
-                        // Check if the manga has a remote ID for this service
-                        val id =
-                            trackManager.getIdFromManga(trackService, manga)
-                                ?: return@async // No ID found, skip
-
-                        // --- 4. Perform the search and register the track ---
-
-                        // We are online, not tracked, and have a remote ID. Proceed.
-                        val trackResult =
-                            trackUseCases.searchTracker.byId(
-                                id = id,
-                                service = trackService,
-                                manga = manga,
-                                previouslyTracker = false,
-                            )
-
-                        when (trackResult) {
-                            is TrackingConstants.TrackSearchResult.Success -> {
-                                val trackSearchItem = trackResult.trackSearchResult.firstOrNull()
-                                if (trackSearchItem != null) {
-                                    // Found a match, register it
-                                    val trackingUpdate =
-                                        trackUseCases.registerTracking.await(
-                                            TrackAndService(
-                                                trackSearchItem.trackItem,
-                                                trackService,
-                                            ),
-                                            mangaId,
-                                        )
-                                    handleTrackingUpdate(trackingUpdate)
-                                } else {
-                                    TimberKt.w {
-                                        "Auto-track search for ${trackService.id} was successful but returned no results."
-                                    }
-                                }
-                            }
-
-                            is TrackingConstants.TrackSearchResult.Error -> {
-                                // Show a specific error for *this* tracker
-                                launchUI {
-                                    appSnackbarManager.showSnackbar(
-                                        SnackbarState(
-                                            prefixRes = trackResult.trackerNameRes,
-                                            message =
-                                                " error trying to autolink tracking. ${trackResult.errorMessage}",
-                                            snackBarColor =
-                                                _mangaDetailScreenState.value.general.snackbarColor,
-                                        )
-                                    )
-                                }
-                            }
-
-                            else -> Unit
-                        }
                     }
                 }
-                .awaitAll()
+            )
         }
     }
 

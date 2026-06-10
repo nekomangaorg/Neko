@@ -15,4 +15,5 @@ class TrackUseCases(trackManager: TrackManager = Injekt.get()) {
     val removeTracking = RemoveTracking()
     val updateTrackingService = UpdateTrackingService()
     val searchTracker = SearchTracker()
+    val autoAddTrackers = AutoAddTrackers()
 }
