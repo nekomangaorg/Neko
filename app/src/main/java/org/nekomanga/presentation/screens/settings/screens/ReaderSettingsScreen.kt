@@ -434,6 +434,11 @@ internal class ReaderSettingsScreen(
                                 .toPersistentMap(),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
+                        pref = readerPreferences.splitTallImagesReader(),
+                        title = stringResource(R.string.split_tall_images_reader),
+                        subtitle = stringResource(R.string.split_tall_images_reader_summary),
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.webtoonInvertDoublePages(),
                         title = stringResource(R.string.invert_double_pages),
                     ),
@@ -646,6 +651,11 @@ internal class ReaderSettingsScreen(
                 ),
                 SearchTerm(
                     title = stringResource(R.string.page_layout),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.split_tall_images_reader),
+                    subtitle = stringResource(R.string.split_tall_images_reader_summary),
                     group = stringResource(R.string.webtoon),
                 ),
                 SearchTerm(

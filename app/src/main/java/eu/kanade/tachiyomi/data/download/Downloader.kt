@@ -529,7 +529,7 @@ class Downloader(
     }
 
     private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile) {
-        if (!readerPreferences.splitTallImages().get()) return
+        if (!readerPreferences.splitTallImagesDownload().get()) return
 
         try {
             val fileName = "%03d".format(Locale.ENGLISH, page.number)

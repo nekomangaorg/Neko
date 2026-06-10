@@ -194,5 +194,13 @@
             android:layout_marginTop="16dp"
             android:text="@string/invert_double_pages"
             android:textColor="?attr/colorOnBackground" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/webtoon_split_tall_images"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/split_tall_images_reader"
+            android:textColor="?attr/colorOnBackground" />
     </LinearLayout>
 </eu.kanade.tachiyomi.ui.reader.settings.ReaderPagedView>

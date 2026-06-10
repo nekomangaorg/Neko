@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
@@ -20,11 +21,15 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
 
     var currentChapter: ReaderChapter? = null
 
+    /** Tracks which pages have already been tall-split to prevent re-splitting on rebind. */
+    val tallSplitPages = mutableSetOf<ReaderPage>()
+
     /**
      * Updates this adapter with the given [chapters]. It handles setting a few pages of the
      * next/previous chapter to allow seamless transitions.
      */
     fun setChapters(chapters: ViewerChapters, forceTransition: Boolean) {
+        tallSplitPages.clear()
         val newItems = mutableListOf<Any>()
 
         // Force chapter transition page if there are missing chapters
@@ -93,6 +98,21 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         result.dispatchUpdatesTo(this)
     }
 
+    /**
+     * Inserts [insertPages] after [originalPage] in the items list. Called when a tall page is
+     * split into multiple chunks.
+     */
+    fun notifyPageSplit(originalPage: ReaderPage, insertPages: List<ReaderPageSplit>) {
+        tallSplitPages.add(originalPage)
+        val position = items.indexOf(originalPage)
+        if (position < 0) return
+        val newItems = items.toMutableList()
+        newItems.addAll(position + 1, insertPages)
+        val result = DiffUtil.calculateDiff(Callback(items, newItems))
+        items = newItems
+        result.dispatchUpdatesTo(this)
+    }
+
     /** Returns the amount of items of the adapter. */
     override fun getItemCount(): Int {
         return items.size
@@ -102,6 +122,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
     override fun getItemViewType(position: Int): Int {
         return when (val item = items[position]) {
             is ReaderPage -> PAGE_VIEW
+            is ReaderPageSplit -> SPLIT_PAGE_VIEW
             is ChapterTransition -> TRANSITION_VIEW
             else -> error("Unknown view type for ${item.javaClass}")
         }
@@ -110,7 +131,8 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
     /** Creates a new view holder for an item with the given [viewType]. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            PAGE_VIEW -> {
+            PAGE_VIEW,
+            SPLIT_PAGE_VIEW -> {
                 val view = ReaderPageImageView(parent.context, isWebtoon = true)
                 WebtoonPageHolder(view, viewer)
             }
@@ -126,7 +148,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
         when (holder) {
-            is WebtoonPageHolder -> holder.bind(item as ReaderPage)
+            is WebtoonPageHolder -> holder.bind(item)
             is WebtoonTransitionHolder -> holder.bind(item as ChapterTransition)
         }
     }
@@ -173,5 +195,8 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
 
         /** View holder type of a chapter transition view. */
         const val TRANSITION_VIEW = 1
+
+        /** View holder type of a tall page split chunk. */
+        const val SPLIT_PAGE_VIEW = 2
     }
 }

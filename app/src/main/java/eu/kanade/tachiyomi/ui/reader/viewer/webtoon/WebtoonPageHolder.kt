@@ -3,7 +3,12 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.BitmapRegionDecoder
 import android.graphics.Color
+import android.graphics.Rect
+import android.os.Build
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -18,6 +23,7 @@ import androidx.core.view.updatePaddingRelative
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -29,6 +35,7 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.Buffer
 import okio.BufferedSource
 import okio.buffer
 import okio.source
@@ -66,6 +73,10 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
     /** Page of a chapter. */
     private var page: ReaderPage? = null
 
+    private var regionTop = 0
+    private var regionHeight = 0
+    private var splitPage: ReaderPageSplit? = null
+
     private val scope = MainScope()
 
     /** Job for loading the page. */
@@ -92,9 +103,24 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         frame.onScaleChanged = { viewer.activity.hideMenu() }
     }
 
-    /** Binds the given [page] with this view holder, subscribing to its state. */
-    fun bind(page: ReaderPage) {
-        this.page = page
+    fun bind(item: Any) {
+        when (item) {
+            is ReaderPage -> {
+                page = item
+                regionTop = 0
+                regionHeight = 0
+                splitPage = null
+            }
+            is ReaderPageSplit -> {
+                page = item.page
+                regionTop = item.topOffset
+                regionHeight = item.splitHeight
+                splitPage = item
+                if (item.displayedHeight > 0) {
+                    progressContainer.layoutParams?.height = item.displayedHeight
+                }
+            }
+        }
         launchLoadJob()
         refreshLayoutParams()
     }
@@ -118,6 +144,9 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         cancelLoadJob()
         cancelProgressJob()
         unsubscribeReadImageHeader()
+
+        regionTop = 0
+        regionHeight = 0
 
         removeDecodeErrorLayout()
         frame.recycle()
@@ -268,14 +297,109 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
             }
     }
 
-    private fun process(imageStream: BufferedSource): BufferedSource {
+    private suspend fun checkTallImage(stream: BufferedSource): BufferedSource {
+        if (!viewer.config.splitTallPages || regionHeight > 0 || page == null) {
+            return stream
+        }
+
+        val imageBytes = stream.readByteArray()
+
+        if (viewer.adapter.tallSplitPages.contains(page)) {
+            val firstSplit =
+                viewer.adapter.items
+                    .filterIsInstance<ReaderPageSplit>()
+                    .firstOrNull { it.page == page }
+            if (firstSplit != null) {
+                regionTop = 0
+                regionHeight = firstSplit.topOffset
+                return decodeRegion(imageBytes, 0, regionHeight)
+            }
+            return Buffer().write(imageBytes)
+        }
+
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)
+        if (options.outHeight <= 0 || options.outWidth <= 0) {
+            return Buffer().write(imageBytes)
+        }
+
+        if (options.outHeight / options.outWidth <= 3) {
+            return Buffer().write(imageBytes)
+        }
+
+        val screenHeight = Resources.getSystem().displayMetrics.heightPixels
+        val displayMaxHeight = maxOf(viewer.recycler.height, screenHeight) * 2
+        if (options.outHeight <= displayMaxHeight) {
+            return Buffer().write(imageBytes)
+        }
+
+        val partCount = (options.outHeight - 1) / displayMaxHeight + 1
+        val optimalSplitHeight = options.outHeight / partCount
+
+        val insertPages = mutableListOf<ReaderPageSplit>()
+        for (i in 1 until partCount) {
+            val topOffset = i * optimalSplitHeight
+            val splitH = minOf(optimalSplitHeight, options.outHeight - topOffset)
+            insertPages.add(ReaderPageSplit(page!!, topOffset, splitH))
+        }
+
+        if (insertPages.isNotEmpty()) {
+            withContext(Dispatchers.Main) { viewer.adapter.notifyPageSplit(page!!, insertPages) }
+            regionTop = 0
+            regionHeight = optimalSplitHeight
+        }
+
+        return decodeRegion(imageBytes, 0, optimalSplitHeight)
+    }
+
+    private fun decodeRegion(
+        imageBytes: ByteArray,
+        top: Int,
+        height: Int,
+    ): BufferedSource {
+        val decoder =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size)
+            } else {
+                @Suppress("DEPRECATION")
+                BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
+            }
+
+        val region = Rect(0, top, decoder.width, top + height)
+        val bitmap =
+            decoder.decodeRegion(
+                region,
+                BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.RGB_565 },
+            )
+        decoder.recycle()
+
+        bitmap ?: return Buffer().write(imageBytes)
+
+        return Buffer().write(ImageUtil.bitmapToBytes(bitmap))
+    }
+
+    private suspend fun process(imageStream: BufferedSource): BufferedSource {
+        if (regionHeight > 0) {
+            val split = splitPage
+            if (split?.cachedBytes != null) {
+                return Buffer().write(split.cachedBytes!!)
+            }
+            val imageBytes = imageStream.readByteArray()
+            val result = decodeRegion(imageBytes, regionTop, regionHeight)
+            if (split != null) {
+                split.cachedBytes = result.readByteArray()
+                return Buffer().write(split.cachedBytes!!)
+            }
+            return result
+        }
+
         if (!viewer.config.splitPages) {
-            return imageStream
+            return checkTallImage(imageStream)
         }
 
         val isDoublePage = ImageUtil.isWideImage(imageStream)
         if (!isDoublePage) {
-            return imageStream
+            return checkTallImage(imageStream)
         }
 
         return ImageUtil.splitAndStackBitmap(
@@ -294,7 +418,9 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
     /** Called when the image is decoded and going to be displayed. */
     private fun onImageDecoded() {
         progressContainer.isVisible = false
-        page?.renderedHeight = frame.measuredHeight
+        val h = frame.measuredHeight
+        page?.renderedHeight = h
+        splitPage?.displayedHeight = h
     }
 
     /** Called when the image fails to decode. */

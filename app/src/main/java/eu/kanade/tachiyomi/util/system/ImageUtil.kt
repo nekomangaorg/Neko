@@ -491,6 +491,12 @@ object ImageUtil {
         return options.outWidth > options.outHeight
     }
 
+    fun bitmapToBytes(bitmap: Bitmap): ByteArray {
+        val output = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, output)
+        return output.toByteArray()
+    }
+
     fun splitAndStackBitmap(
         imageStream: InputStream,
         rightSideOnTop: Boolean,
@@ -940,7 +946,7 @@ object ImageUtil {
         return options
     }
 
-    private fun extractImageOptions(imageSource: BufferedSource): BitmapFactory.Options {
+    fun extractImageOptions(imageSource: BufferedSource): BitmapFactory.Options {
         val imageBytes = imageSource.peek().readByteArray()
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)

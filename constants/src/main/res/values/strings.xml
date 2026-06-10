@@ -1129,8 +1129,10 @@
     <string name="always_delete">Always delete</string>
     <string name="automatic_removal">Automatic removal</string>
     <string name="save_chapters_as_cbz">Save as CBZ archive</string>
-    <string name="split_tall_images">Split tall images</string>
-    <string name="split_tall_images_summary">Improves reader performance</string>
+    <string name="split_tall_images_reader">Split tall images</string>
+    <string name="split_tall_images_reader_summary">Improves webtoon reader performance</string>
+    <string name="split_tall_images_download">Split tall images while downloading</string>
+    <string name="split_tall_images_download_summary">Splits tall pages during download for better webtoon reader performance</string>
 
 
     <!-- Stats -->
