@@ -351,7 +351,7 @@ class GroupLibraryMangaUseCaseTest {
     }
 
     @Test
-    fun `groupByCategory includes empty system category when showEmptyCategories is true`() {
+    fun `groupByCategory excludes empty system category when showEmptyCategories is true but hasMangaInDefaultCategory is false`() {
         val manga1 = createMockManga(1, category = 1)
         val category1 = CategoryItem(id = 1, name = "Category 1", sortOrder = LibrarySort.Title)
         val systemCategory =
@@ -362,6 +362,91 @@ class GroupLibraryMangaUseCaseTest {
                 libraryMangaList = listOf(manga1),
                 categoryList = listOf(category1, systemCategory),
                 showEmptyCategories = true,
+                hasMangaInDefaultCategory = false,
+            )
+
+        val expected =
+            listOf(
+                LibraryCategoryItem(
+                    categoryItem = category1,
+                    libraryItems = persistentListOf(manga1),
+                )
+            )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `groupByCategory includes empty system category when showEmptyCategories is true and hasMangaInDefaultCategory is true`() {
+        val manga1 = createMockManga(1, category = 1)
+        val category1 = CategoryItem(id = 1, name = "Category 1", sortOrder = LibrarySort.Title)
+        val systemCategory =
+            CategoryItem(id = 0, name = CategoryItem.SYSTEM_CATEGORY, sortOrder = LibrarySort.Title)
+
+        val result =
+            useCase.groupByCategory(
+                libraryMangaList = listOf(manga1),
+                categoryList = listOf(category1, systemCategory),
+                showEmptyCategories = true,
+                hasMangaInDefaultCategory = true,
+            )
+
+        val expected =
+            listOf(
+                LibraryCategoryItem(
+                    categoryItem = category1,
+                    libraryItems = persistentListOf(manga1),
+                ),
+                LibraryCategoryItem(
+                    categoryItem = systemCategory,
+                    libraryItems = persistentListOf(),
+                ),
+            )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `groupByCategory excludes empty system category during search when hasMangaInDefaultCategory is false`() {
+        val manga1 = createMockManga(1, category = 1)
+        val category1 = CategoryItem(id = 1, name = "Category 1", sortOrder = LibrarySort.Title)
+        val systemCategory =
+            CategoryItem(id = 0, name = CategoryItem.SYSTEM_CATEGORY, sortOrder = LibrarySort.Title)
+
+        val result =
+            useCase.groupByCategory(
+                libraryMangaList = listOf(manga1),
+                categoryList = listOf(category1, systemCategory),
+                showEmptyCategories = false,
+                hasMangaInDefaultCategory = false,
+                isSearching = true,
+            )
+
+        val expected =
+            listOf(
+                LibraryCategoryItem(
+                    categoryItem = category1,
+                    libraryItems = persistentListOf(manga1),
+                )
+            )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `groupByCategory includes empty system category during search when hasMangaInDefaultCategory is true but matches is empty`() {
+        val manga1 = createMockManga(1, category = 1)
+        val category1 = CategoryItem(id = 1, name = "Category 1", sortOrder = LibrarySort.Title)
+        val systemCategory =
+            CategoryItem(id = 0, name = CategoryItem.SYSTEM_CATEGORY, sortOrder = LibrarySort.Title)
+
+        val result =
+            useCase.groupByCategory(
+                libraryMangaList = listOf(manga1),
+                categoryList = listOf(category1, systemCategory),
+                showEmptyCategories = false,
+                hasMangaInDefaultCategory = true,
+                isSearching = true,
             )
 
         val expected =
