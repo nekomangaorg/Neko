@@ -10,17 +10,21 @@ import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingUpdate
 import eu.kanade.tachiyomi.util.system.NetworkState
+import eu.kanade.tachiyomi.data.track.matchingTrack
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.manga.MangaItem
+import org.nekomanga.domain.manga.toManga
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
@@ -37,6 +41,12 @@ class AutoAddTrackersTest {
     private val updateTrackingService: UpdateTrackingService = mockk()
     private val searchTracker: SearchTracker = mockk()
     private val registerTracking: RegisterTracking = mockk()
+
+    @Before
+    fun setUp() {
+        mockkStatic("org.nekomanga.domain.manga.MangaItemKt")
+        mockkStatic("eu.kanade.tachiyomi.data.track.TrackServiceKt")
+    }
 
     private val useCase =
         AutoAddTrackers(
@@ -149,7 +159,7 @@ class AutoAddTrackersTest {
             val initialTrack = mockk<Track>(relaxed = true)
             every { mdListMock.matchingTrack(any()) } returns false
             every { mdListMock.createInitialTracker(any()) } returns initialTrack
-            coEvery { mdListMock.bind(any()) } returns Unit
+            coEvery { mdListMock.bind(any()) } returnsArgument 0
             coEvery { trackRepository.insertTrack(any()) } returns 1L
 
             useCase(

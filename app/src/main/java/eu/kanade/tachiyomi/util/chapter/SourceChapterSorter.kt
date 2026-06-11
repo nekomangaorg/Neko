@@ -99,6 +99,7 @@ fun getChapterNum(chapter: SChapter): Float? {
             txt.subStringFloatOrNull("Ch.")
                 ?: txt.subStringFloatOrNull("Chp.")
                 ?: txt.subStringFloatOrNull("Chapter")
+                ?: txt.substringBeforeLast(".cbz").substringBeforeLast(".zip").split(" - ").getOrNull(1)?.toFloatOrNull()
         }
     }
 }
