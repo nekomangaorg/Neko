@@ -429,15 +429,17 @@ class LibraryViewModel() : ViewModel() {
                 libraryMangaListFlow,
             ) { activeMangaList, libraryViewPreferences, categoryList, trackMap, rawLibraryList ->
                 withContext(Dispatchers.Default) {
-                    val showEmptyCategories =
-                        rawLibraryList.isNotEmpty() &&
-                            _internalLibraryScreenState.value.searchQuery.isNullOrBlank()
+                    val isSearching = !_internalLibraryScreenState.value.searchQuery.isNullOrBlank()
+                    val hasMangaInDefaultCategory = rawLibraryList.any { it.category == 0 }
+                    val showEmptyCategories = rawLibraryList.isNotEmpty() && !isSearching
                     when (libraryViewPreferences.groupBy) {
                         LibraryGroup.ByCategory -> {
                             groupLibraryManga.groupByCategory(
-                                activeMangaList,
-                                categoryList,
-                                showEmptyCategories,
+                                libraryMangaList = activeMangaList,
+                                categoryList = categoryList,
+                                showEmptyCategories = showEmptyCategories,
+                                hasMangaInDefaultCategory = hasMangaInDefaultCategory,
+                                isSearching = isSearching,
                             )
                         }
                         LibraryGroup.ByAuthor,
