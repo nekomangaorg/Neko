@@ -67,7 +67,12 @@ fun LibraryButtonBar(
                     Icon(
                         imageVector =
                             if (libraryScreenState.allCollapsed) ExpandAllIcon else CollapseAllIcon,
-                        contentDescription = null,
+                        contentDescription =
+                            stringResource(
+                                id =
+                                    if (libraryScreenState.allCollapsed) R.string.expand
+                                    else R.string.collapse
+                            ),
                     )
                 }
             }
@@ -85,7 +90,10 @@ fun LibraryButtonBar(
         }
         AnimatedVisibility(libraryScreenState.hasActiveFilters) {
             FilledIconButton(onClick = libraryScreenActions.clearActiveFilters) {
-                Icon(imageVector = Icons.Default.Clear, contentDescription = null)
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = stringResource(id = R.string.clear),
+                )
             }
         }
 
