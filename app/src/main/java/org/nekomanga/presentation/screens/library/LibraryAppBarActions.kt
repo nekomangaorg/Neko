@@ -71,6 +71,15 @@ fun LibraryAppBarActions(
                                                 )
                                             },
                                         ),
+                                        AppBar.OverflowAction(
+                                            title = UiText.StringResource(R.string.next_20_unread),
+                                            onClick = {
+                                                downloadChapters(
+                                                    MangaConstants.DownloadAction
+                                                        .DownloadNextUnread(20)
+                                                )
+                                            },
+                                        ),
                                     ),
                             ),
                             AppBar.OverflowAction(
