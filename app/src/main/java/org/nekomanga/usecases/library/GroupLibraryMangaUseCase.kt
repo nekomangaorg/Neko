@@ -94,7 +94,7 @@ class GroupLibraryMangaUseCase {
         libraryMangaList: List<LibraryMangaItem>,
         categoryList: List<CategoryItem>,
         showEmptyCategories: Boolean = false,
-        hasMangaInDefaultCategory: Boolean = libraryMangaList.any { it.category == 0 },
+        hasMangaInDefaultCategory: Boolean,
         isSearching: Boolean = false,
     ): List<LibraryCategoryItem> {
         if (libraryMangaList.isEmpty() && !showEmptyCategories) {

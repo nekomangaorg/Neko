@@ -291,6 +291,7 @@ class GroupLibraryMangaUseCaseTest {
             useCase.groupByCategory(
                 libraryMangaList = listOf(manga1, manga2, manga3),
                 categoryList = listOf(category2, category1),
+                hasMangaInDefaultCategory = false,
             )
 
         val expected =
@@ -318,6 +319,7 @@ class GroupLibraryMangaUseCaseTest {
             useCase.groupByCategory(
                 libraryMangaList = listOf(manga1, manga1Duplicate),
                 categoryList = listOf(category1),
+                hasMangaInDefaultCategory = false,
             )
 
         assertEquals(1, result.size)
@@ -337,6 +339,7 @@ class GroupLibraryMangaUseCaseTest {
             useCase.groupByCategory(
                 libraryMangaList = listOf(manga1),
                 categoryList = listOf(category1, systemCategory),
+                hasMangaInDefaultCategory = false,
             )
 
         val expected =
@@ -474,6 +477,7 @@ class GroupLibraryMangaUseCaseTest {
             useCase.groupByCategory(
                 libraryMangaList = listOf(manga1),
                 categoryList = listOf(systemCategory),
+                hasMangaInDefaultCategory = true,
             )
 
         val expected =
@@ -494,6 +498,7 @@ class GroupLibraryMangaUseCaseTest {
                 libraryMangaList = emptyList(),
                 categoryList =
                     listOf(CategoryItem(id = 1, name = "Cat", sortOrder = LibrarySort.Title)),
+                hasMangaInDefaultCategory = false,
             )
 
         assertEquals(emptyList<LibraryCategoryItem>(), result)
@@ -507,6 +512,7 @@ class GroupLibraryMangaUseCaseTest {
                 libraryMangaList = emptyList(),
                 categoryList = listOf(category1),
                 showEmptyCategories = true,
+                hasMangaInDefaultCategory = false,
             )
 
         val expected =
