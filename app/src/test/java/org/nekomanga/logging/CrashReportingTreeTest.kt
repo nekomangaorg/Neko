@@ -46,7 +46,7 @@ class CrashReportingTreeTest {
         Timber.tag("TestTag").d("Debug Message")
 
         verify(exactly = 0) { Log.println(any(), any(), any()) }
-        verify(exactly = 1) { mockCrashlytics.log("Debug Message") }
+        verify(exactly = 0) { mockCrashlytics.log(any()) }
     }
 
     @Test
@@ -57,7 +57,7 @@ class CrashReportingTreeTest {
         Timber.tag("TestTag").i("Info Message")
 
         verify(exactly = 1) { Log.println(Log.INFO, "TestTag", "Info Message") }
-        verify(exactly = 1) { mockCrashlytics.log("Info Message") }
+        verify(exactly = 0) { mockCrashlytics.log(any()) }
     }
 
     @Test
@@ -68,7 +68,7 @@ class CrashReportingTreeTest {
         Timber.tag("TestTag").w("Warn Message")
 
         verify(exactly = 1) { Log.println(Log.WARN, "TestTag", "Warn Message") }
-        verify(exactly = 2) { mockCrashlytics.log("Warn Message") }
+        verify(exactly = 1) { mockCrashlytics.log("Warn Message") }
     }
 
     @Test
