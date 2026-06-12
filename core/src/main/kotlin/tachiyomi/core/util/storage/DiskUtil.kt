@@ -74,6 +74,36 @@ object DiskUtil {
         }
     }
 
+    /** Gets the total space for the disk that a file path points to, in bytes. */
+    fun getTotalStorageSpace(f: UniFile): Long {
+        return try {
+            val stat = StatFs(f.uri.path)
+            stat.blockCountLong * stat.blockSizeLong
+        } catch (_: Exception) {
+            -1L
+        }
+    }
+
+    /** Gets the available space for the disk that a file path points to, in bytes. */
+    fun getAvailableStorageSpace(file: File): Long {
+        return try {
+            val stat = StatFs(file.absolutePath)
+            stat.availableBlocksLong * stat.blockSizeLong
+        } catch (_: Exception) {
+            -1L
+        }
+    }
+
+    /** Gets the total space for the disk that a file path points to, in bytes. */
+    fun getTotalStorageSpace(file: File): Long {
+        return try {
+            val stat = StatFs(file.absolutePath)
+            stat.blockCountLong * stat.blockSizeLong
+        } catch (_: Exception) {
+            -1L
+        }
+    }
+
     /** Don't display downloaded chapters in gallery apps creating `.nomedia`. */
     fun createNoMediaFile(dir: UniFile?, context: Context?) {
         if (dir != null && dir.exists()) {
