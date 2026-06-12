@@ -19,5 +19,14 @@ class CrashReportingTree : Timber.Tree() {
         if (priority == Log.WARN) {
             crashlytics.log(message)
         }
+
+        if (priority >= Log.INFO) {
+            val logMessage = if (t != null) {
+                "$message\n${Log.getStackTraceString(t)}"
+            } else {
+                message
+            }
+            Log.println(priority, tag ?: "Neko", logMessage)
+        }
     }
 }
