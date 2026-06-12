@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.concurrent.TimeUnit
 import org.nekomanga.domain.storage.StorageManager
+import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -41,6 +42,8 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
                     UniFile.fromUri(context, location.toUri())?.let {
                         notifier.showBackupComplete(it)
                     }
+                } else {
+                    Injekt.get<StoragePreferences>().lastAutoBackupTimestamp().set(System.currentTimeMillis())
                 }
             }
             Result.success()
