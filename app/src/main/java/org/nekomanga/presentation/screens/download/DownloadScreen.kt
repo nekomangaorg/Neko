@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.download.DownloadItem
@@ -48,7 +47,7 @@ import soup.compose.material.motion.MaterialFade
 @Composable
 fun DownloadScreen(
     contentPadding: PaddingValues,
-    downloads: PersistentList<DownloadItem>,
+    downloads: List<DownloadItem>,
     downloaderStatus: DownloaderStatus,
     downloadScreenActions: DownloadScreenActions,
 ) {

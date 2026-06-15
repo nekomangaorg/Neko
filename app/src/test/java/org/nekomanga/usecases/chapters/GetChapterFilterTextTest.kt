@@ -5,7 +5,6 @@ import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -69,7 +68,7 @@ class GetChapterFilterTextTest {
         val scanlator =
             MangaConstants.ScanlatorFilter(
                 scanlators =
-                    persistentListOf(MangaConstants.ScanlatorOption("test", disabled = true))
+                    listOf(MangaConstants.ScanlatorOption("test", disabled = true))
             )
         val language = MangaConstants.LanguageFilter()
 

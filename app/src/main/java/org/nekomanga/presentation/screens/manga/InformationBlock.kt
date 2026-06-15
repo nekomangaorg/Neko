@@ -39,7 +39,6 @@ import java.text.NumberFormat
 import java.util.Locale
 import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.manga.Stats
@@ -322,6 +321,6 @@ private fun CreatorDropdown(
                             ),
                     )
                 }
-                .toPersistentList(),
+                .toList(),
     )
 }

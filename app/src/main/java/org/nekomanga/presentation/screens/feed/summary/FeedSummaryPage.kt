@@ -22,8 +22,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
@@ -41,9 +39,9 @@ fun FeedSummaryPage(
     updatingUpdates: Boolean = false,
     updatingContinueReading: Boolean = false,
     updatingNewlyAdded: Boolean = false,
-    updatesFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
-    continueReadingFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
-    newlyAddedFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
+    updatesFeedMangaList: List<FeedManga> = listOf(),
+    continueReadingFeedMangaList: List<FeedManga> = listOf(),
+    newlyAddedFeedMangaList: List<FeedManga> = listOf(),
     outlineCovers: Boolean,
     dynamicCovers: Boolean,
     useVividColorHeaders: Boolean,

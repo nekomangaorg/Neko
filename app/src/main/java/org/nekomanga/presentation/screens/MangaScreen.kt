@@ -70,7 +70,6 @@ import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.text.DateFormat
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -591,7 +590,7 @@ private fun MangaScreenWrapper(
 }
 
 private fun LazyListScope.chapterList(
-    chapters: PersistentList<ChapterItem>,
+    chapters: List<ChapterItem>,
     screenState: MangaConstants.MangaDetailScreenState,
     themeColorState: ThemeColorState,
     chapterActions: ChapterActions,

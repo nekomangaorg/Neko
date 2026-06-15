@@ -4,8 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.track.TrackServiceItem
 import tachiyomi.core.preference.Preference as PreferenceData
@@ -70,14 +68,14 @@ sealed class Preference {
             override val subtitle: String? = "%s",
             val subtitleProvider:
                 @Composable
-                (value: T, entries: ImmutableMap<T, String>) -> String? =
+                (value: T, entries: Map<T, String>) -> String? =
                 { v, e ->
                     subtitle?.format(e[v])
                 },
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (newValue: T) -> Boolean = { true },
-            val entries: ImmutableMap<T, String>,
+            val entries: Map<T, String>,
         ) : PreferenceItem<T>() {
             internal fun internalSet(newValue: Any) = pref.set(newValue as T)
 
@@ -87,8 +85,8 @@ sealed class Preference {
             @Composable
             internal fun internalSubtitleProvider(
                 value: Any?,
-                entries: ImmutableMap<out Any?, String>,
-            ) = subtitleProvider(value as T, entries as ImmutableMap<T, String>)
+                entries: Map<out Any?, String>,
+            ) = subtitleProvider(value as T, entries as Map<T, String>)
         }
 
         /** [ListPreference] but with no connection to a [PreferenceData] */
@@ -98,14 +96,14 @@ sealed class Preference {
             override val subtitle: String? = "%s",
             val subtitleProvider:
                 @Composable
-                (value: String, entries: ImmutableMap<String, String>) -> String? =
+                (value: String, entries: Map<String, String>) -> String? =
                 { v, e ->
                     subtitle?.format(e[v])
                 },
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (newValue: String) -> Boolean = { true },
-            val entries: ImmutableMap<String, String>,
+            val entries: Map<String, String>,
         ) : PreferenceItem<String>()
 
         /**
@@ -118,7 +116,7 @@ sealed class Preference {
             override val subtitle: String? = "%s",
             val subtitleProvider:
                 @Composable
-                (value: Set<String>, entries: ImmutableMap<String, String>) -> String? =
+                (value: Set<String>, entries: Map<String, String>) -> String? =
                 { v, e ->
                     val combined =
                         remember(v) { v.map { e[it] }.takeIf { it.isNotEmpty() }?.joinToString() }
@@ -129,7 +127,7 @@ sealed class Preference {
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (newValue: Set<String>) -> Boolean = { true },
-            val entries: ImmutableMap<String, String>,
+            val entries: Map<String, String>,
         ) : PreferenceItem<Set<String>>()
 
         /** A [PreferenceItem] that shows a EditText in the dialog. */
@@ -191,6 +189,6 @@ sealed class Preference {
         override val title: String,
         override val enabled: Boolean = true,
         val subtitle: String? = null,
-        val preferenceItems: PersistentList<PreferenceItem<out Any>>,
+        val preferenceItems: List<PreferenceItem<out Any>>,
     ) : Preference()
 }

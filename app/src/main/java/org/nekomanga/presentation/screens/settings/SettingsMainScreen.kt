@@ -33,8 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.setting.SettingsScreenType
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
@@ -296,7 +294,7 @@ private fun SearchResult(
 @Composable
 @NonRestartableComposable
 private fun searchTerms() =
-    persistentListOf(
+    listOf(
         SettingsData(
             settingScreenType = SettingsScreenType.General,
             settingsStringTitle = stringResource(R.string.general),
@@ -357,7 +355,7 @@ private fun searchTerms() =
 private data class SettingsData(
     val settingScreenType: SettingsScreenType,
     val settingsStringTitle: String,
-    val contents: PersistentList<SearchTerm>,
+    val contents: List<SearchTerm>,
 )
 
 private data class SearchResultItem(

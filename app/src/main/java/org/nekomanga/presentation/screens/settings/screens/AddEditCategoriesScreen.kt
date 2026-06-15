@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.dialog.AddEditCategoryDialog
@@ -48,7 +47,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 internal class AddEditCategoriesScreen(
     val onNavigationIconClick: (() -> Unit)?,
-    val categories: PersistentList<CategoryItem>,
+    val categories: List<CategoryItem>,
     val addUpdateCategory: (String, Int?) -> Unit,
     val onChangeOrder: (CategoryItem, Int) -> Unit,
     val deleteCategory: (Int) -> Unit,

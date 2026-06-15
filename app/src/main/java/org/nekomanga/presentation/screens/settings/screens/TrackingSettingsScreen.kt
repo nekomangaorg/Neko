@@ -15,10 +15,6 @@ import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.ui.setting.MergeLoginEvent
 import eu.kanade.tachiyomi.ui.setting.TrackingSettingsViewModel
 import eu.kanade.tachiyomi.util.system.openInBrowser
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
-import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
@@ -41,7 +37,7 @@ internal class TrackingSettingsScreen(
     override fun getTitleRes(): Int = R.string.tracking
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
+    override fun getPreferences(): List<Preference> {
 
         val context = LocalContext.current
 
@@ -74,7 +70,7 @@ internal class TrackingSettingsScreen(
                                 MdConstants.ContentRating.pornographic to
                                     stringResource(R.string.content_rating_pornographic),
                             )
-                            .toPersistentMap(),
+                            .toMap(),
                 ),
                 Preference.PreferenceItem.TextPreference(
                     title = stringResource(R.string.refresh_tracking_metadata),
@@ -82,7 +78,7 @@ internal class TrackingSettingsScreen(
                     onClick = { TrackingSyncJob.doWorkNow(context) },
                 ),
             ) + servicesGroup(context))
-            .toPersistentList()
+            .toList()
     }
 
     @Composable
@@ -142,7 +138,7 @@ internal class TrackingSettingsScreen(
             Preference.PreferenceGroup(
                 title = stringResource(R.string.anilist),
                 preferenceItems =
-                    persistentListOf(
+                    listOf(
                         Preference.PreferenceItem.TrackerPreference(
                             tracker = trackingScreenState.anilist,
                             title =
@@ -174,7 +170,7 @@ internal class TrackingSettingsScreen(
             Preference.PreferenceGroup(
                 title = stringResource(R.string.kitsu),
                 preferenceItems =
-                    persistentListOf(
+                    listOf(
                         Preference.PreferenceItem.TrackerPreference(
                             tracker = trackingScreenState.kitsu,
                             title =
@@ -210,7 +206,7 @@ internal class TrackingSettingsScreen(
             Preference.PreferenceGroup(
                 title = stringResource(R.string.myanimelist),
                 preferenceItems =
-                    persistentListOf(
+                    listOf(
                         Preference.PreferenceItem.TrackerPreference(
                             tracker = trackingScreenState.mal,
                             title =
@@ -242,7 +238,7 @@ internal class TrackingSettingsScreen(
             Preference.PreferenceGroup(
                 title = stringResource(R.string.manga_updates),
                 preferenceItems =
-                    persistentListOf(
+                    listOf(
                         Preference.PreferenceItem.TrackerPreference(
                             tracker = trackingScreenState.mangaUpdates,
                             title =
@@ -278,7 +274,7 @@ internal class TrackingSettingsScreen(
             Preference.PreferenceGroup(
                 title = stringResource(R.string.mangabaka),
                 preferenceItems =
-                    persistentListOf(
+                    listOf(
                         Preference.PreferenceItem.TrackerPreference(
                             tracker = trackingScreenState.mangaBaka,
                             title =
@@ -316,8 +312,8 @@ internal class TrackingSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(title = stringResource(R.string.update_tracking_after_reading)),
                 SearchTerm(title = stringResource(R.string.update_tracking_marked_read)),
                 SearchTerm(

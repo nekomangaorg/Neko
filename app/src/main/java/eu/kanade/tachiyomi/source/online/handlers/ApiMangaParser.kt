@@ -104,16 +104,18 @@ class ApiMangaParser {
                     "Content rating: " + tempContentRating.capitalized()
                 }
 
-            val genres =
-                (listOf(mangaAttributesDto.publicationDemographic?.capitalized()) +
-                        mangaAttributesDto.tags
-                            .map { it.id }
-                            .map { dexTagId ->
-                                MangaTag.entries.firstOrNull { tag -> tag.uuid == dexTagId }
-                            }
-                            .map { tag -> tag?.prettyPrint } +
-                        listOf(contentRating))
-                    .filterNotNull()
+            val genres = buildList {
+                add(mangaAttributesDto.publicationDemographic?.capitalized())
+                addAll(
+                    mangaAttributesDto.tags
+                        .map { it.id }
+                        .map { dexTagId ->
+                            MangaTag.entries.firstOrNull { tag -> tag.uuid == dexTagId }
+                        }
+                        .map { tag -> tag?.prettyPrint }
+                )
+                add(contentRating)
+            }.filterNotNull()
 
             manga.genre = genres.joinToString(", ")
 

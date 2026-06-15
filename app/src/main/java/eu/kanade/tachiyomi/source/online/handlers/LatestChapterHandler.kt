@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
 import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
@@ -118,7 +117,7 @@ class LatestChapterHandler {
 
                         Ok(
                             MangaListPage(
-                                sourceManga = mangaList.toPersistentList(),
+                                sourceManga = mangaList.toList(),
                                 hasNextPage = hasMoreResults,
                             )
                         )

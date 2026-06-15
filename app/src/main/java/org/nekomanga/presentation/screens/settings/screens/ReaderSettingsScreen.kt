@@ -16,10 +16,6 @@ import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.collections.immutable.toPersistentMap
 import org.nekomanga.R
 import org.nekomanga.core.preferences.PreferenceValues
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -36,8 +32,8 @@ internal class ReaderSettingsScreen(
     override fun getTitleRes(): Int = R.string.reader_settings
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
-        return persistentListOf(
+    override fun getPreferences(): List<Preference> {
+        return listOf(
             generalGroup(),
             displayGroup(),
             einkGroup(),
@@ -54,7 +50,7 @@ internal class ReaderSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.general),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.defaultReadingMode(),
                         title = stringResource(R.string.default_reading_mode),
@@ -64,13 +60,13 @@ internal class ReaderSettingsScreen(
                                 .associate { type ->
                                     type.prefValue to stringResource(type.stringRes)
                                 }
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.doubleTapAnimSpeed(),
                         title = stringResource(R.string.double_tap_anim_speed),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 1 to
                                     stringResource(
                                         R.string.no_animation
@@ -88,7 +84,7 @@ internal class ReaderSettingsScreen(
                                 .associateWith {
                                     pluralStringResource(R.plurals.pages_plural, it, it)
                                 }
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.MultiSelectListPreference(
                         pref = readerPreferences.readerBottomButtons(),
@@ -96,7 +92,7 @@ internal class ReaderSettingsScreen(
                         entries =
                             ReaderBottomButton.entries
                                 .associate { it.value to stringResource(it.stringRes) }
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.InfoPreference(
                         title = stringResource(R.string.certain_buttons_can_be_found)
@@ -110,7 +106,7 @@ internal class ReaderSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.display),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.defaultOrientationType(),
                         title = stringResource(R.string.default_orientation),
@@ -120,7 +116,7 @@ internal class ReaderSettingsScreen(
                                 .associate { type ->
                                     type.flagValue to stringResource(type.stringRes)
                                 }
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.readerTheme(),
@@ -136,7 +132,7 @@ internal class ReaderSettingsScreen(
                                             R.string.smart_based_on_page_and_theme_use_black
                                         ),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.fullscreen(),
@@ -159,7 +155,7 @@ internal class ReaderSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.eink),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.grayscale(),
                         title = stringResource(R.string.grayscale),
@@ -184,7 +180,7 @@ internal class ReaderSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.reading),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.skipRead(),
                         title = stringResource(R.string.skip_read_chapters),
@@ -226,7 +222,7 @@ internal class ReaderSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.paged),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.navigationModePager(),
                         title = stringResource(R.string.tap_zones),
@@ -234,7 +230,7 @@ internal class ReaderSettingsScreen(
                             stringArrayResource(R.array.reader_nav)
                                 .mapIndexed { index, string -> index to string }
                                 .toMap()
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.pagerNavInverted(),
@@ -250,7 +246,7 @@ internal class ReaderSettingsScreen(
                                     ViewerNavigation.TappingInvertMode.BOTH to
                                         stringResource(R.string.both_axes),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.imageScaleType(),
@@ -264,7 +260,7 @@ internal class ReaderSettingsScreen(
                                     5 to stringResource(R.string.original_size),
                                     6 to stringResource(R.string.smart_fit),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.pagerCutoutBehavior(),
@@ -276,7 +272,7 @@ internal class ReaderSettingsScreen(
                                     1 to stringResource(R.string.start_past_cutout),
                                     2 to stringResource(R.string.ignore_cutout_areas),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                         enabled = hasDisplayCutout,
                     ),
                     Preference.PreferenceItem.SwitchPreference(
@@ -294,7 +290,7 @@ internal class ReaderSettingsScreen(
                                     3 to stringResource(R.string.right),
                                     4 to stringResource(R.string.center),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.cropBorders(),
@@ -316,7 +312,7 @@ internal class ReaderSettingsScreen(
                                 .associate { layout ->
                                     layout.value to stringResource(layout.fullStringRes)
                                 }
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.InfoPreference(
                         title = stringResource(R.string.automatic_can_still_switch)
@@ -354,7 +350,7 @@ internal class ReaderSettingsScreen(
                                     60 to stringResource(R.string.double_page_gap_60),
                                     70 to stringResource(R.string.double_page_gap_70),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                 ),
         )
@@ -365,7 +361,7 @@ internal class ReaderSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.webtoon),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.navigationModeWebtoon(),
                         title = stringResource(R.string.tap_zones),
@@ -373,7 +369,7 @@ internal class ReaderSettingsScreen(
                             stringArrayResource(R.array.reader_nav)
                                 .mapIndexed { index, string -> index to string }
                                 .toMap()
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.webtoonNavInverted(),
@@ -389,7 +385,7 @@ internal class ReaderSettingsScreen(
                                     ViewerNavigation.TappingInvertMode.BOTH to
                                         stringResource(R.string.both_axes),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.webtoonReaderHideThreshold(),
@@ -397,7 +393,7 @@ internal class ReaderSettingsScreen(
                         entries =
                             PreferenceValues.ReaderHideThreshold.entries
                                 .associate { it to stringResource(it.titleResId) }
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.cropBordersWebtoon(),
@@ -419,7 +415,7 @@ internal class ReaderSettingsScreen(
                                     20 to stringResource(R.string.webtoon_side_padding_20),
                                     25 to stringResource(R.string.webtoon_side_padding_25),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.webtoonPageLayout(),
@@ -431,7 +427,7 @@ internal class ReaderSettingsScreen(
                                     PageLayout.SPLIT_PAGES.webtoonValue to
                                         stringResource(PageLayout.SPLIT_PAGES.fullStringRes),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.splitTallImagesReader(),
@@ -459,7 +455,7 @@ internal class ReaderSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.navigation),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.readWithVolumeKeys(),
                         title = stringResource(R.string.volume_keys),
@@ -478,7 +474,7 @@ internal class ReaderSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.actions),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.readWithLongTap(),
                         title = stringResource(R.string.show_on_long_press),
@@ -494,8 +490,8 @@ internal class ReaderSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(
                     title = stringResource(R.string.default_reading_mode),
                     group = stringResource(R.string.general),

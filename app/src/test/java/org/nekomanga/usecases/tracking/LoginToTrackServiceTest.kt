@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -31,14 +30,14 @@ class LoginToTrackServiceTest {
                 nameRes = 1,
                 logoRes = 1,
                 logoColor = 1,
-                statusList = persistentListOf(1, 2, 3),
+                statusList = listOf(1, 2, 3),
                 supportsReadingDates = false,
                 canRemoveFromService = false,
                 isAutoAddTracker = false,
                 isMdList = false,
                 status = { "status" },
                 displayScore = { "score" },
-                scoreList = persistentListOf("1", "2"),
+                scoreList = listOf("1", "2"),
                 indexToScore = { 1f },
             )
 

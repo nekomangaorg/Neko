@@ -19,8 +19,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import java.util.Date
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.EmptyScreen
@@ -33,7 +31,7 @@ import org.nekomanga.presentation.theme.Size
 fun FeedHistoryPage(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedHistoryMangaList: PersistentList<FeedManga> = persistentListOf(),
+    feedHistoryMangaList: List<FeedManga> = listOf(),
     outlineCovers: Boolean,
     dynamicCovers: Boolean,
     outlineCards: Boolean,

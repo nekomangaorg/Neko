@@ -12,8 +12,6 @@ import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import kotlin.math.roundToInt
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.runBlocking
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.data.database.repository.CategoryRepository
@@ -268,16 +266,16 @@ fun SManga.getSlug(): String {
 /** resync homepage manga with db manga */
 suspend fun List<HomePageManga>.resyncHomePageManga(
     mangaRepository: MangaRepository
-): PersistentList<HomePageManga> {
+): List<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
                 displayManga =
                     homePageManga.displayManga
                         .resyncDisplayManga(mangaRepository)
-                        .toPersistentList()
+                        .toList()
             )
         }
-        .toPersistentList()
+        .toList()
 }
 
 suspend fun List<DisplayManga>.resyncDisplayManga(
@@ -311,13 +309,14 @@ fun List<DisplayManga>.unique(): List<DisplayManga> {
 }
 
 /** Updates the visibility of HomePageManga display manga */
-fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): PersistentList<HomePageManga> {
+@JvmName("updateHomePageMangaVisibility")
+fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): List<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.updateVisibility(prefs).toPersistentList()
+                displayManga = homePageManga.displayManga.updateVisibility(prefs).toList()
             )
         }
-        .toPersistentList()
+        .toList()
 }
 
 /**

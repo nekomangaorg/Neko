@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ChartColors
 import org.nekomanga.presentation.components.UiText
@@ -52,7 +51,7 @@ fun StatsWrapper(
     windowSizeClass: WindowSizeClass,
 ) {
     val colors = remember {
-        persistentListOf(
+        listOf(
             ChartColors.one,
             ChartColors.two,
             ChartColors.three,

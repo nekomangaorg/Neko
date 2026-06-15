@@ -5,8 +5,6 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.nekomanga.domain.category.CategoryItem
@@ -56,7 +54,7 @@ class GroupLibraryMangaUseCaseTest {
                     isDynamic = true,
                     isHidden = false,
                 ),
-            libraryItems = items.toPersistentList(),
+            libraryItems = items.toList(),
         )
     }
 
@@ -270,7 +268,7 @@ class GroupLibraryMangaUseCaseTest {
             listOf(
                 LibraryCategoryItem(
                     categoryItem = expectedCategoryItem,
-                    libraryItems = persistentListOf(manga1, manga2),
+                    libraryItems = listOf(manga1, manga2),
                 )
             )
 
@@ -298,11 +296,11 @@ class GroupLibraryMangaUseCaseTest {
             listOf(
                 LibraryCategoryItem(
                     categoryItem = category2,
-                    libraryItems = persistentListOf(manga2),
+                    libraryItems = listOf(manga2),
                 ),
                 LibraryCategoryItem(
                     categoryItem = category1,
-                    libraryItems = persistentListOf(manga1, manga3),
+                    libraryItems = listOf(manga1, manga3),
                 ),
             )
 
@@ -346,7 +344,7 @@ class GroupLibraryMangaUseCaseTest {
             listOf(
                 LibraryCategoryItem(
                     categoryItem = category1,
-                    libraryItems = persistentListOf(manga1),
+                    libraryItems = listOf(manga1),
                 )
             )
 
@@ -372,7 +370,7 @@ class GroupLibraryMangaUseCaseTest {
             listOf(
                 LibraryCategoryItem(
                     categoryItem = category1,
-                    libraryItems = persistentListOf(manga1),
+                    libraryItems = listOf(manga1),
                 )
             )
 
@@ -398,11 +396,11 @@ class GroupLibraryMangaUseCaseTest {
             listOf(
                 LibraryCategoryItem(
                     categoryItem = category1,
-                    libraryItems = persistentListOf(manga1),
+                    libraryItems = listOf(manga1),
                 ),
                 LibraryCategoryItem(
                     categoryItem = systemCategory,
-                    libraryItems = persistentListOf(),
+                    libraryItems = listOf(),
                 ),
             )
 
@@ -429,7 +427,7 @@ class GroupLibraryMangaUseCaseTest {
             listOf(
                 LibraryCategoryItem(
                     categoryItem = category1,
-                    libraryItems = persistentListOf(manga1),
+                    libraryItems = listOf(manga1),
                 )
             )
 
@@ -456,11 +454,11 @@ class GroupLibraryMangaUseCaseTest {
             listOf(
                 LibraryCategoryItem(
                     categoryItem = category1,
-                    libraryItems = persistentListOf(manga1),
+                    libraryItems = listOf(manga1),
                 ),
                 LibraryCategoryItem(
                     categoryItem = systemCategory,
-                    libraryItems = persistentListOf(),
+                    libraryItems = listOf(),
                 ),
             )
 
@@ -484,7 +482,7 @@ class GroupLibraryMangaUseCaseTest {
             listOf(
                 LibraryCategoryItem(
                     categoryItem = systemCategory,
-                    libraryItems = persistentListOf(manga1),
+                    libraryItems = listOf(manga1),
                 )
             )
 
@@ -516,7 +514,7 @@ class GroupLibraryMangaUseCaseTest {
             )
 
         val expected =
-            listOf(LibraryCategoryItem(categoryItem = category1, libraryItems = persistentListOf()))
+            listOf(LibraryCategoryItem(categoryItem = category1, libraryItems = listOf()))
 
         assertEquals(expected, result)
     }

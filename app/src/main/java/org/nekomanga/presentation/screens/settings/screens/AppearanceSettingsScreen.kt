@@ -16,9 +16,6 @@ import eu.kanade.tachiyomi.ui.main.states.SideNavAlignment
 import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.getActivity
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
@@ -39,13 +36,13 @@ internal class AppearanceSettingsScreen(
     override fun getTitleRes(): Int = R.string.appearance
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
+    override fun getPreferences(): List<Preference> {
 
         val context = LocalContext.current
 
         val nightMode by preferences.nightMode().collectAsState()
 
-        return persistentListOf(appearanceGroup(nightMode), detailGroup(), navigationGroup(context))
+        return listOf(appearanceGroup(nightMode), detailGroup(), navigationGroup(context))
     }
 
     @Composable
@@ -53,7 +50,7 @@ internal class AppearanceSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.app_theme),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.CustomPreference(
                         title = stringResource(R.string.light_theme),
                         content = {
@@ -106,7 +103,7 @@ internal class AppearanceSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.details_page),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = mangaDetailsPreferences.forcePortrait(),
                         title = stringResource(R.string.force_portrait_details),
@@ -129,7 +126,7 @@ internal class AppearanceSettingsScreen(
                         pref = mangaDetailsPreferences.backdropSize(),
                         title = stringResource(R.string.backdrop_size),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 MangaConstants.BackdropSize.Small to stringResource(R.string.small),
                                 MangaConstants.BackdropSize.Default to
                                     stringResource(R.string.default_size),
@@ -149,12 +146,12 @@ internal class AppearanceSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.navigation),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         pref = preferences.sideNavIconAlignment(),
                         title = stringResource(R.string.side_nav_icon_alignment),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 SideNavAlignment.Top to stringResource(R.string.top),
                                 SideNavAlignment.Center to stringResource(R.string.center),
                                 SideNavAlignment.Bottom to stringResource(R.string.bottom),
@@ -164,7 +161,7 @@ internal class AppearanceSettingsScreen(
                         pref = preferences.sideNavMode(),
                         title = stringResource(R.string.use_side_navigation),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 SideNavMode.Default to stringResource(R.string.default_behavior),
                                 SideNavMode.Never to stringResource(R.string.never),
                                 SideNavMode.Always to stringResource(R.string.always),
@@ -185,8 +182,8 @@ internal class AppearanceSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(
                     title = stringResource(R.string.light_theme),
                     group = stringResource(R.string.app_theme),

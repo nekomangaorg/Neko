@@ -46,7 +46,6 @@ import eu.kanade.tachiyomi.ui.source.browse.FilterActions
 import eu.kanade.tachiyomi.ui.source.browse.NavigationEvent
 import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
 import eu.kanade.tachiyomi.ui.source.latest.toSerializable
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -271,7 +270,7 @@ private fun BrowseWrapper(
                 EmptyScreen(
                     message = browseScreenState.error!!,
                     actions =
-                        persistentListOf(
+                        listOf(
                             Action(
                                 text = UiText.StringResource(R.string.retry),
                                 onClick = retryClick,

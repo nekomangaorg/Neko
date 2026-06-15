@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.components.theme.ThemeColorState
@@ -18,7 +17,7 @@ import org.nekomanga.presentation.components.theme.ThemeColorState
 @Composable
 fun RemovedChaptersDialog(
     themeColorState: ThemeColorState,
-    chapters: PersistentList<ChapterItem>,
+    chapters: List<ChapterItem>,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {

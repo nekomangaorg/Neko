@@ -9,11 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.util.chapter.MissingChapterHolder
-import kotlinx.collections.immutable.ImmutableSet
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.PersistentSet
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentSetOf
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
@@ -30,12 +25,12 @@ object MangaConstants {
 
     @Immutable
     data class StaticChapterData(
-        val allChapters: PersistentList<ChapterItem>,
+        val allChapters: List<ChapterItem>,
         val missingChapters: MissingChapterHolder,
-        val allScanlators: PersistentSet<String>,
-        val allUploaders: PersistentSet<String>,
-        val allSources: PersistentSet<String>,
-        val allLanguages: PersistentSet<String>,
+        val allScanlators: Set<String>,
+        val allUploaders: Set<String>,
+        val allSources: Set<String>,
+        val allLanguages: Set<String>,
     )
 
     @Immutable
@@ -52,8 +47,8 @@ object MangaConstants {
         val hideButtonText: Boolean = false,
         val backdropSize: BackdropSize = BackdropSize.Default,
         val wrapAltTitles: Boolean = false,
-        val searchChapters: PersistentList<ChapterItem> = persistentListOf(),
-        val removedChapters: PersistentList<ChapterItem> = persistentListOf(),
+        val searchChapters: List<ChapterItem> = listOf(),
+        val removedChapters: List<ChapterItem> = listOf(),
     )
 
     @Immutable
@@ -63,11 +58,11 @@ object MangaConstants {
         val isMerged: MergeConstants.IsMergedManga = MergeConstants.IsMergedManga.No,
         val currentTitle: String = "",
         val originalTitle: String = "",
-        val alternativeTitles: PersistentList<String> = persistentListOf(),
+        val alternativeTitles: List<String> = listOf(),
         val artist: String = "",
         val author: String = "",
         val currentDescription: String = "",
-        val genres: PersistentList<String> = persistentListOf(),
+        val genres: List<String> = listOf(),
         val status: Int = 0,
         val isPornographic: Boolean = false,
         val langFlag: String? = null,
@@ -76,33 +71,33 @@ object MangaConstants {
         val stats: Stats? = null,
         val lastVolume: Int? = null,
         val lastChapter: Int? = null,
-        val externalLinks: PersistentList<ExternalLink> = persistentListOf(),
+        val externalLinks: List<ExternalLink> = listOf(),
         val currentArtwork: Artwork,
-        val alternativeArtwork: PersistentList<Artwork> = persistentListOf(),
+        val alternativeArtwork: List<Artwork> = listOf(),
         val dynamicCovers: Boolean = false,
     )
 
     @Immutable
     data class MangaScreenChapterState(
-        val activeChapters: PersistentList<ChapterItem> = persistentListOf(),
-        val allChapters: PersistentList<ChapterItem> = persistentListOf(),
+        val activeChapters: List<ChapterItem> = listOf(),
+        val allChapters: List<ChapterItem> = listOf(),
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
         val chapterFilter: ChapterDisplay = ChapterDisplay(),
         val chapterFilterText: String = "",
         val chapterSortFilter: SortFilter = SortFilter(),
-        val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
-        val chapterSourceFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
-        val chapterLanguageFilter: LanguageFilter = LanguageFilter(persistentListOf()),
-        val allScanlators: ImmutableSet<String> = persistentSetOf(),
-        val allUploaders: ImmutableSet<String> = persistentSetOf(),
-        val allSources: ImmutableSet<String> = persistentSetOf(),
-        val allLanguages: ImmutableSet<String> = persistentSetOf(),
+        val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(listOf()),
+        val chapterSourceFilter: ScanlatorFilter = ScanlatorFilter(listOf()),
+        val chapterLanguageFilter: LanguageFilter = LanguageFilter(listOf()),
+        val allScanlators: Set<String> = setOf(),
+        val allUploaders: Set<String> = setOf(),
+        val allSources: Set<String> = setOf(),
+        val allLanguages: Set<String> = setOf(),
     )
 
     @Immutable
     data class MangaScreenTrackState(
-        val tracks: PersistentList<TrackItem> = persistentListOf(),
-        val loggedInTrackService: PersistentList<TrackServiceItem> = persistentListOf(),
+        val tracks: List<TrackItem> = listOf(),
+        val loggedInTrackService: List<TrackServiceItem> = listOf(),
         val trackServiceCount: Int = 0,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,
         val trackSearchResult: TrackingConstants.TrackSearchResult =
@@ -111,13 +106,13 @@ object MangaConstants {
 
     @Immutable
     data class MangaScreenCategoryState(
-        val allCategories: PersistentList<CategoryItem> = persistentListOf(),
-        val currentCategories: PersistentList<CategoryItem> = persistentListOf(),
+        val allCategories: List<CategoryItem> = listOf(),
+        val currentCategories: List<CategoryItem> = listOf(),
     )
 
     @Immutable
     data class MangaScreenMergeState(
-        val validMergeTypes: PersistentList<MergeType> = persistentListOf(),
+        val validMergeTypes: List<MergeType> = listOf(),
         val mergeSearchResult: MergeConstants.MergeSearchResult =
             MergeConstants.MergeSearchResult.Loading,
     )
@@ -150,12 +145,12 @@ object MangaConstants {
     @Immutable data class SortOption(val sortState: SortState, val sortType: SortType)
 
     @Immutable
-    data class ScanlatorFilter(val scanlators: PersistentList<ScanlatorOption> = persistentListOf())
+    data class ScanlatorFilter(val scanlators: List<ScanlatorOption> = listOf())
 
     @Immutable data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 
     @Immutable
-    data class LanguageFilter(val languages: PersistentList<LanguageOption> = persistentListOf())
+    data class LanguageFilter(val languages: List<LanguageOption> = listOf())
 
     @Immutable data class LanguageOption(val name: String, val disabled: Boolean = false)
 
@@ -265,8 +260,8 @@ object MangaConstants {
 
     @Immutable
     data class CategoriesData(
-        val all: PersistentList<CategoryItem>,
-        val current: PersistentList<CategoryItem>,
+        val all: List<CategoryItem>,
+        val current: List<CategoryItem>,
     )
 
     sealed class DownloadAction {

@@ -20,11 +20,6 @@ import eu.kanade.tachiyomi.util.manga.updateVisibility
 import eu.kanade.tachiyomi.util.system.activeNetworkState
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.collections.immutable.toImmutableSet
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -85,7 +80,7 @@ class BrowseViewModel : ViewModel() {
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 filters = createInitialDexFilter(""),
                 defaultContentRatings =
-                    mangaDexPreferences.visibleContentRatings().get().toImmutableSet(),
+                    mangaDexPreferences.visibleContentRatings().get().toSet(),
                 screenType = BrowseScreenType.Homepage,
             )
         )
@@ -110,7 +105,7 @@ class BrowseViewModel : ViewModel() {
         val contentRatings =
             MangaContentRating.getOrdered()
                 .map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }
-                .toPersistentList()
+                .toList()
 
         return DexFilters(
             query = Filter.Query(incomingQuery, QueryType.Title),
@@ -151,15 +146,15 @@ class BrowseViewModel : ViewModel() {
                         .distinctBy { it.url }
 
                 val filteredDisplayManga =
-                    allDisplayManga.filterVisibility(preferences).toPersistentList()
+                    allDisplayManga.filterVisibility(preferences).toList()
                 _browseScreenState.update { state ->
                     state.copy(
                         screenType = BrowseScreenType.Filter,
                         displayMangaHolder =
                             DisplayMangaHolder(
                                 BrowseScreenType.Filter,
-                                allDisplayManga.toPersistentList(),
-                                filteredDisplayManga.toPersistentList(),
+                                allDisplayManga.toList(),
+                                filteredDisplayManga.toList(),
                             ),
                         initialLoading = false,
                         pageLoading = false,
@@ -191,7 +186,7 @@ class BrowseViewModel : ViewModel() {
                 categoryRepository
                     .getCategories()
                     .map { category -> category.toCategoryItem() }
-                    .toPersistentList()
+                    .toList()
 
             _browseScreenState.update {
                 it.copy(
@@ -232,17 +227,17 @@ class BrowseViewModel : ViewModel() {
                                 filteredDisplayManga =
                                     it.displayMangaHolder.allDisplayManga
                                         .filterVisibility(preferences)
-                                        .toPersistentList(),
+                                        .toList(),
                                 groupedDisplayManga =
                                     it.displayMangaHolder.groupedDisplayManga
                                         .map { (stringRes, mangaList) ->
                                             stringRes to
                                                 mangaList
                                                     .updateVisibility(preferences)
-                                                    .toPersistentList()
+                                                    .toList()
                                         }
                                         .toMap()
-                                        .toImmutableMap(),
+                                        .toMap(),
                             )
                     )
                 }
@@ -302,10 +297,10 @@ class BrowseViewModel : ViewModel() {
                                     entry.key to
                                         entry.value
                                             .map { manga -> manga.copy(displayTextRes = null) }
-                                            .toPersistentList()
+                                            .toList()
                                 }
                                 .toMap()
-                                .toImmutableMap()
+                                .toMap()
 
                         _browseScreenState.update { state ->
                             state.copy(
@@ -313,9 +308,9 @@ class BrowseViewModel : ViewModel() {
                                     DisplayMangaHolder(
                                         resultType = BrowseScreenType.Follows,
                                         allDisplayManga =
-                                            it.distinctBy { manga -> manga.url }.toPersistentList(),
+                                            it.distinctBy { manga -> manga.url }.toList(),
                                         filteredDisplayManga =
-                                            it.filterVisibility(preferences).toPersistentList(),
+                                            it.filterVisibility(preferences).toList(),
                                         groupedDisplayManga = groupedManga,
                                     ),
                                 initialLoading = false,
@@ -353,8 +348,8 @@ class BrowseViewModel : ViewModel() {
                     displayMangaHolder =
                         DisplayMangaHolder(
                             resultType = BrowseScreenType.Filter,
-                            allDisplayManga = persistentListOf(),
-                            filteredDisplayManga = persistentListOf(),
+                            allDisplayManga = listOf(),
+                            filteredDisplayManga = listOf(),
                         ),
                 )
             }
@@ -470,12 +465,14 @@ class BrowseViewModel : ViewModel() {
                         if (index == -1) {
                             homePageManga
                         } else {
-                            val updatedList =
-                                list.set(index, list[index].copy(inLibrary = favorite))
+                            val updatedList = buildList {
+                                addAll(list)
+                                set(index, list[index].copy(inLibrary = favorite))
+                            }
                             homePageManga.copy(displayManga = updatedList)
                         }
                     }
-                    .toPersistentList()
+                    .toList()
             _browseScreenState.update { it.copy(homePageManga = tempList) }
         }
         viewModelScope.launchIO {
@@ -492,7 +489,7 @@ class BrowseViewModel : ViewModel() {
                     it.copy(
                         displayMangaHolder =
                             it.displayMangaHolder.copy(
-                                allDisplayManga = tempList.toPersistentList()
+                                allDisplayManga = tempList.toList()
                             )
                     )
                 }
@@ -510,7 +507,7 @@ class BrowseViewModel : ViewModel() {
                         it.copy(
                             displayMangaHolder =
                                 it.displayMangaHolder.copy(
-                                    filteredDisplayManga = tempFilterList.toPersistentList()
+                                    filteredDisplayManga = tempFilterList.toList()
                                 )
                         )
                     }
@@ -574,7 +571,7 @@ class BrowseViewModel : ViewModel() {
                     is Filter.ContentRating -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.contentRatings.toPersistentList(),
+                                browseScreenState.value.filters.contentRatings.toList(),
                                 { it.rating == newFilter.rating },
                                 newFilter,
                             )
@@ -593,7 +590,7 @@ class BrowseViewModel : ViewModel() {
                     is Filter.OriginalLanguage -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.originalLanguage.toPersistentList(),
+                                browseScreenState.value.filters.originalLanguage.toList(),
                                 { it.language == newFilter.language },
                                 newFilter,
                             )
@@ -603,7 +600,7 @@ class BrowseViewModel : ViewModel() {
                         val list =
                             lookupAndReplaceEntry(
                                 browseScreenState.value.filters.publicationDemographics
-                                    .toPersistentList(),
+                                    .toList(),
                                 { it.demographic == newFilter.demographic },
                                 newFilter,
                             )
@@ -612,7 +609,7 @@ class BrowseViewModel : ViewModel() {
                     is Filter.Status -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.statuses.toPersistentList(),
+                                browseScreenState.value.filters.statuses.toList(),
                                 { it.status == newFilter.status },
                                 newFilter,
                             )
@@ -621,7 +618,7 @@ class BrowseViewModel : ViewModel() {
                     is Filter.Tag -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.tags.toPersistentList(),
+                                browseScreenState.value.filters.tags.toList(),
                                 { it.tag == newFilter.tag },
                                 newFilter,
                             )
@@ -635,7 +632,7 @@ class BrowseViewModel : ViewModel() {
                             }
 
                         browseScreenState.value.filters.copy(
-                            sort = Filter.Sort.getSortList(filterMode).toPersistentList()
+                            sort = Filter.Sort.getSortList(filterMode).toList()
                         )
                     }
                     is Filter.HasAvailableChapters -> {
@@ -688,12 +685,16 @@ class BrowseViewModel : ViewModel() {
     }
 
     private fun <T> lookupAndReplaceEntry(
-        list: PersistentList<T>,
+        list: List<T>,
         indexMethod: (T) -> Boolean,
         newEntry: T,
-    ): PersistentList<T> {
+    ): List<T> {
         val index = list.indexOfFirst { indexMethod(it) }
-        return list.set(index, newEntry)
+        if (index == -1) return list
+        return buildList {
+            addAll(list)
+            set(index, newEntry)
+        }
     }
 
     /** Add New Category */
@@ -708,7 +709,7 @@ class BrowseViewModel : ViewModel() {
                         categoryRepository
                             .getCategories()
                             .map { category -> category.toCategoryItem() }
-                            .toPersistentList()
+                            .toList()
                 )
             }
         }
@@ -735,7 +736,7 @@ class BrowseViewModel : ViewModel() {
 
     private fun updateBrowseFilters(initialLoad: Boolean = false) {
         viewModelScope.launchIO {
-            val filters = browseFilterRepository.getBrowseFilters().toPersistentList()
+            val filters = browseFilterRepository.getBrowseFilters().toList()
             _browseScreenState.update { it.copy(savedFilters = filters) }
             if (initialLoad) {
                 filters
@@ -766,9 +767,9 @@ class BrowseViewModel : ViewModel() {
                     it.copy(
                         displayMangaHolder =
                             it.displayMangaHolder.copy(
-                                allDisplayManga = allDisplayManga.toPersistentList(),
+                                allDisplayManga = allDisplayManga.toList(),
                                 filteredDisplayManga =
-                                    allDisplayManga.filterVisibility(preferences).toPersistentList(),
+                                    allDisplayManga.filterVisibility(preferences).toList(),
                             )
                     )
                 }

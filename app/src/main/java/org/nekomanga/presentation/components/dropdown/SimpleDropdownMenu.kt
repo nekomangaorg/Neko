@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import kotlinx.collections.immutable.PersistentList
 import me.saket.cascade.CascadeColumnScope
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.theme.ThemeColorState
@@ -17,7 +16,7 @@ import org.nekomanga.presentation.components.theme.ThemeColorState
 fun SimpleDropdownMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
-    dropDownItems: PersistentList<SimpleDropDownItem>,
+    dropDownItems: List<SimpleDropDownItem>,
     themeColorState: ThemeColorState,
 ) {
     NekoDropdownMenu(

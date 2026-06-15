@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.browse
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.sheets.BrowseDisplayOptionsSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
@@ -23,7 +22,7 @@ sealed class DisplaySheetScreen {
 @Composable
 fun DisplayScreenSheet(
     currentScreen: DisplaySheetScreen,
-    categories: PersistentList<CategoryItem>,
+    categories: List<CategoryItem>,
     isList: Boolean,
     libraryEntryVisibility: Int,
     addNewCategory: (String) -> Unit,

@@ -12,7 +12,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.presentation.components.dropdown.MainDropdownMenu
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
@@ -55,7 +54,7 @@ fun AppBarActions(
                 dropDownItems =
                     overflowActions
                         .map { appBarAction -> appBarAction.toSimpleAction() }
-                        .toPersistentList(),
+                        .toList(),
             )
         }
     }

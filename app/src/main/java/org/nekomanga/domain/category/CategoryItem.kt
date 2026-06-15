@@ -4,9 +4,6 @@ import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import eu.kanade.tachiyomi.ui.library.LibrarySort
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 
 @Immutable
 data class CategoryItem(
@@ -14,7 +11,7 @@ data class CategoryItem(
     val name: String,
     val order: Int = 0,
     val flags: Int = 0,
-    val mangaOrder: PersistentList<Long> = persistentListOf(),
+    val mangaOrder: List<Long> = listOf(),
     val sortOrder: LibrarySort,
     val isAscending: Boolean = true,
     val isAlone: Boolean = true,
@@ -62,7 +59,7 @@ fun Category.toCategoryItem(): CategoryItem {
         name = this.name,
         order = this.order,
         flags = this.flags,
-        mangaOrder = this.mangaOrder.toPersistentList(),
+        mangaOrder = this.mangaOrder.toList(),
         isAscending = this.isAscending(),
         sortOrder = LibrarySort.filteredValueOf(this.mangaSort) ?: LibrarySort.Title,
         isAlone = this.isAlone,

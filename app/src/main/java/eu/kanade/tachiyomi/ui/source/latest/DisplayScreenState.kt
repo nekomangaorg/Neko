@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.category.CategoryItem
@@ -14,9 +12,9 @@ data class DisplayScreenState(
     val isLoading: Boolean = false,
     val incognitoMode: Boolean = false,
     val title: UiText = UiText.String(""),
-    val alternativeDisplay: PersistentList<DisplayResult> = persistentListOf(),
-    val allDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
-    val filteredDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
+    val alternativeDisplay: List<DisplayResult> = listOf(),
+    val allDisplayManga: List<DisplayManga> = listOf(),
+    val filteredDisplayManga: List<DisplayManga> = listOf(),
     val error: String? = null,
     val endReached: Boolean = false,
     val page: Int = 1,
@@ -28,14 +26,14 @@ data class DisplayScreenState(
     val rawColumnCount: Float,
     val promptForCategories: Boolean = false,
     val libraryEntryVisibility: Int,
-    val categories: PersistentList<CategoryItem> = persistentListOf(),
+    val categories: List<CategoryItem> = listOf(),
 )
 
 @Immutable
 data class DisplayPageResult(
     val hasNextPage: Boolean = false,
-    val displayResult: PersistentList<DisplayResult> = persistentListOf(),
-    val displayManga: PersistentList<DisplayManga> = persistentListOf(),
+    val displayResult: List<DisplayResult> = listOf(),
+    val displayManga: List<DisplayManga> = listOf(),
 )
 
 sealed interface DisplayScreenType {

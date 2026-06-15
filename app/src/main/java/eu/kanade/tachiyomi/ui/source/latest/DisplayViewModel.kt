@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.util.manga.resyncDisplayManga
 import eu.kanade.tachiyomi.util.manga.unique
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,9 +115,9 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                             isLoading = false,
                             page = newKey,
                             endReached = !hasNextPage,
-                            allDisplayManga = allDisplayManga.toPersistentList(),
+                            allDisplayManga = allDisplayManga.toList(),
                             filteredDisplayManga =
-                                allDisplayManga.filterVisibility(preferences).toPersistentList(),
+                                allDisplayManga.filterVisibility(preferences).toList(),
                         )
                     }
                 }
@@ -139,7 +138,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                 categoryRepository
                     .getCategories()
                     .map { category -> category.toCategoryItem() }
-                    .toPersistentList()
+                    .toList()
             _displayScreenState.update {
                 it.copy(
                     categories = categories,
@@ -160,7 +159,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                 it.copy(
                     libraryEntryVisibility = visibility,
                     filteredDisplayManga =
-                        it.allDisplayManga.filterVisibility(preferences).toPersistentList(),
+                        it.allDisplayManga.filterVisibility(preferences).toList(),
                 )
             }
         }
@@ -215,22 +214,31 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
         viewModelScope.launchIO {
             val index =
                 _displayScreenState.value.allDisplayManga.indexOfFirst { it.mangaId == mangaId }
-            val tempDisplayManga =
-                _displayScreenState.value.allDisplayManga[index].copy(inLibrary = favorite)
-            _displayScreenState.update {
-                it.copy(allDisplayManga = it.allDisplayManga.set(index, tempDisplayManga))
-            }
-
-            val filteredIndex =
-                _displayScreenState.value.filteredDisplayManga.indexOfFirst {
-                    it.mangaId == mangaId
-                }
-            if (filteredIndex >= 0) {
+            if (index >= 0) {
+                val tempDisplayManga =
+                    _displayScreenState.value.allDisplayManga[index].copy(inLibrary = favorite)
                 _displayScreenState.update {
                     it.copy(
-                        filteredDisplayManga =
-                            it.filteredDisplayManga.set(filteredIndex, tempDisplayManga)
+                        allDisplayManga = buildList {
+                            addAll(it.allDisplayManga)
+                            set(index, tempDisplayManga)
+                        }
                     )
+                }
+
+                val filteredIndex =
+                    _displayScreenState.value.filteredDisplayManga.indexOfFirst {
+                        it.mangaId == mangaId
+                    }
+                if (filteredIndex >= 0) {
+                    _displayScreenState.update {
+                        it.copy(
+                            filteredDisplayManga = buildList {
+                                addAll(it.filteredDisplayManga)
+                                set(filteredIndex, tempDisplayManga)
+                            }
+                        )
+                    }
                 }
             }
 
@@ -238,7 +246,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                 _displayScreenState.update {
                     it.copy(
                         filteredDisplayManga =
-                            it.allDisplayManga.filterVisibility(preferences).toPersistentList()
+                            it.allDisplayManga.filterVisibility(preferences).toList()
                     )
                 }
             }
@@ -258,7 +266,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                         categoryRepository
                             .getCategories()
                             .map { category -> category.toCategoryItem() }
-                            .toPersistentList()
+                            .toList()
                 )
             }
         }
@@ -278,12 +286,12 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                 _displayScreenState.value.allDisplayManga
                     .resyncDisplayManga(mangaRepository)
                     .unique()
-                    .toPersistentList()
+                    .toList()
             _displayScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,
                     filteredDisplayManga =
-                        newDisplayManga.filterVisibility(preferences).toPersistentList(),
+                        newDisplayManga.filterVisibility(preferences).toList(),
                 )
             }
         }

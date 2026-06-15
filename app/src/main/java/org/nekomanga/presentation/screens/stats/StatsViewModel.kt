@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Calendar
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -108,7 +107,7 @@ class StatsViewModel() : ViewModel() {
                 }
             }
 
-        mergedMangaList.groupBy { it.mergeType }.map { it.key to it.value.size }.toPersistentList()
+        mergedMangaList.groupBy { it.mergeType }.map { it.key to it.value.size }.toList()
 
         _simpleState.update {
             StatsConstants.SimpleState(
@@ -123,7 +122,7 @@ class StatsViewModel() : ViewModel() {
                     mergedMangaList
                         .groupBy { it.mergeType }
                         .map { it.key to it.value.size }
-                        .toPersistentList(),
+                        .toList(),
                 globalUpdateCount = getGlobalUpdateManga(libraryList, tracksByMangaId).count(),
                 downloadCount = libraryList.sumOf { getDownloadCount(it) },
                 tagCount =
@@ -205,29 +204,29 @@ class StatsViewModel() : ViewModel() {
                         readDuration = getReadDurationFromHistory(history),
                         startYear = getStartYear(history),
                         rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
-                        tags = (it.getGenres() ?: emptyList()).toPersistentList(),
+                        tags = (it.getGenres() ?: emptyList()).toList(),
                         userScore = getUserScore(tracks),
                         trackers =
                             tracks
                                 .mapNotNull { trackManager.getService(it.sync_id) }
                                 .map { prefs.context.getString(it.nameRes()) }
-                                .toPersistentList(),
+                                .toList(),
                         categories =
                             (catNames.takeUnless { it.isEmpty() }
                                     ?: listOf(prefs.context.getString(R.string.default_value)))
                                 .sorted()
-                                .toPersistentList(),
+                                .toList(),
                     )
                 }
                 .sortedBy { it.title }
         _detailState.update {
             DetailedState(
                 isLoading = false,
-                manga = detailedStatMangaList.toPersistentList(),
+                manga = detailedStatMangaList.toList(),
                 categories =
                     (categoryRepository.getCategories().map { it.name } +
                             listOf(prefs.context.getString(R.string.default_value)))
-                        .toPersistentList(),
+                        .toList(),
                 tags =
                     detailedStatMangaList
                         .asSequence()
@@ -236,7 +235,7 @@ class StatsViewModel() : ViewModel() {
                         .distinct()
                         .filter { !it.contains("content rating:", true) }
                         .sortedBy { it }
-                        .toPersistentList(),
+                        .toList(),
             )
         }
 
@@ -244,10 +243,10 @@ class StatsViewModel() : ViewModel() {
             _detailState.value.tags
                 .map { tag ->
                     tag to
-                        _detailState.value.manga.filter { it.tags.contains(tag) }.toPersistentList()
+                        _detailState.value.manga.filter { it.tags.contains(tag) }.toList()
                 }
                 .sortedByDescending { it.second.count() }
-                .toPersistentList()
+                .toList()
         val totalCount = sortedSeries.sumOf { it.second.size }
         val totalDuration = sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }
 

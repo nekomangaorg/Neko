@@ -6,9 +6,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -30,7 +27,7 @@ class LibrarySettingsViewModel : ViewModel() {
     val categoryRepository: CategoryRepository by injectLazy()
 
     private val _allCategories =
-        MutableStateFlow<PersistentList<CategoryItem>>((persistentListOf()))
+        MutableStateFlow<List<CategoryItem>>((listOf()))
     val allCategories = _allCategories.asStateFlow()
 
     init {
@@ -41,7 +38,7 @@ class LibrarySettingsViewModel : ViewModel() {
                     (listOf(Category.createSystemCategory()) + categories)
                         .sortedBy { it.order }
                         .map { it.toCategoryItem() }
-                        .toPersistentList()
+                        .toList()
             }
         }
     }

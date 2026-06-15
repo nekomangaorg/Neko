@@ -8,9 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentMap
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -23,15 +20,15 @@ internal class DownloadSettingsScreen(
     incognitoMode: Boolean,
     val preferences: PreferencesHelper,
     val readerPreferences: ReaderPreferences,
-    val allCategories: PersistentList<CategoryItem>,
+    val allCategories: List<CategoryItem>,
     onNavigationIconClick: (() -> Unit)?,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
     override fun getTitleRes(): Int = R.string.downloads
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
+    override fun getPreferences(): List<Preference> {
 
-        return persistentListOf(
+        return listOf(
             Preference.PreferenceItem.SwitchPreference(
                 pref = preferences.downloadOnlyOverUnmetered(),
                 title = stringResource(R.string.only_download_over_unmetered),
@@ -57,7 +54,7 @@ internal class DownloadSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.remove_after_read),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = preferences.removeAfterMarkedAsRead(),
                         title = stringResource(R.string.remove_when_marked_as_read),
@@ -75,7 +72,7 @@ internal class DownloadSettingsScreen(
                                     4 to stringResource(R.string.fifth_to_last),
                                 )
                                 .toMap()
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                 ),
         )
@@ -118,7 +115,7 @@ internal class DownloadSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.download_new_chapters),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = preferences.downloadNewChapters(),
                         title = stringResource(R.string.download_new_chapters),
@@ -143,7 +140,7 @@ internal class DownloadSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.download_ahead),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         pref = preferences.autoDownloadWhileReading(),
                         title = stringResource(R.string.auto_download_while_reading),
@@ -158,7 +155,7 @@ internal class DownloadSettingsScreen(
                                     20 to
                                         pluralStringResource(R.plurals.next_unread_chapters, 20, 20),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     ),
                     Preference.PreferenceItem.InfoPreference(
                         title = stringResource(R.string.download_ahead_info)
@@ -172,7 +169,7 @@ internal class DownloadSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.automatic_removal),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         pref = preferences.deleteRemovedChapters(),
                         title = stringResource(R.string.delete_removed_chapters),
@@ -183,7 +180,7 @@ internal class DownloadSettingsScreen(
                                     1 to stringResource(R.string.always_keep),
                                     2 to stringResource(R.string.always_delete),
                                 )
-                                .toPersistentMap(),
+                                .toMap(),
                     )
                 ),
         )
@@ -191,8 +188,8 @@ internal class DownloadSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(title = stringResource(R.string.only_download_over_unmetered)),
                 SearchTerm(title = stringResource(R.string.save_chapters_as_cbz)),
                 SearchTerm(

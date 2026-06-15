@@ -42,7 +42,6 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
 import eu.kanade.tachiyomi.ui.source.latest.toSerializable
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
@@ -215,13 +214,13 @@ private fun DisplayWrapper(
                 message = UiText.String(displayScreenState.error),
                 actions =
                     if (displayScreenState.page == 1)
-                        persistentListOf(
+                        listOf(
                             Action(
                                 text = UiText.StringResource(R.string.retry),
                                 onClick = retryClick,
                             )
                         )
-                    else persistentListOf(),
+                    else listOf(),
             )
         } else {
             if (displayScreenState.isDisplayResult) {

@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
@@ -193,7 +192,7 @@ private fun SimilarContent(
             EmptyScreen(
                 message = UiText.StringResource(resourceId = R.string.no_results_found),
                 actions =
-                    persistentListOf(
+                    listOf(
                         Action(text = UiText.StringResource(R.string.retry), onClick = onRefresh)
                     ),
             )

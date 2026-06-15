@@ -36,7 +36,6 @@ import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
@@ -204,7 +203,7 @@ open class MangaDex : HttpSource() {
                             ?: return@async Ok(null)
                     fetchList(id).map { listResults ->
                         listResults.copy(
-                            sourceManga = listResults.sourceManga.shuffled().toPersistentList()
+                            sourceManga = listResults.sourceManga.shuffled().toList()
                         )
                     }
                 }
@@ -213,7 +212,7 @@ open class MangaDex : HttpSource() {
                     fetchList(MdConstants.staffPicksId).andThen { listResults ->
                         Ok(
                             listResults.copy(
-                                sourceManga = listResults.sourceManga.shuffled().toPersistentList()
+                                sourceManga = listResults.sourceManga.shuffled().toList()
                             )
                         )
                     }
@@ -223,7 +222,7 @@ open class MangaDex : HttpSource() {
                     fetchList(MdConstants.nekoDevPicksId).andThen { listResults ->
                         Ok(
                             listResults.copy(
-                                sourceManga = listResults.sourceManga.shuffled().toPersistentList()
+                                sourceManga = listResults.sourceManga.shuffled().toList()
                             )
                         )
                     }
@@ -235,7 +234,7 @@ open class MangaDex : HttpSource() {
                             ListResults(
                                 displayScreenType = DisplayScreenType.PopularNewTitles,
                                 sourceManga =
-                                    mangaListPage.sourceManga.shuffled().toPersistentList(),
+                                    mangaListPage.sourceManga.shuffled().toList(),
                             )
                         )
                     }

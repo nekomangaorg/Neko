@@ -56,13 +56,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.DateFormat
-import kotlinx.collections.immutable.ImmutableSet
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.PersistentSet
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentSetOf
-import kotlinx.collections.immutable.toPersistentList
-import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -281,14 +274,14 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             ) { allCategories, mangaCategories ->
                 val mangaCategorySet = mangaCategories.map { it.category_id }.toSet()
                 MangaConstants.CategoriesData(
-                    all = allCategories.map { it.toCategoryItem() }.toPersistentList(),
+                    all = allCategories.map { it.toCategoryItem() }.toList(),
                     current =
                         allCategories
                             .mapNotNull {
                                 if (it.id != null && it.id in mangaCategorySet) it.toCategoryItem()
                                 else null
                             }
-                            .toPersistentList(),
+                            .toList(),
                 )
             }
             .distinctUntilChanged()
@@ -297,7 +290,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val tracksFlow =
         trackRepository
             .observeTracksForManga(mangaId)
-            .map { tracks -> tracks.map { it.toTrackItem() }.toPersistentList() }
+            .map { tracks -> tracks.map { it.toTrackItem() }.toList() }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
@@ -400,7 +393,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val staticChapterDataFlow =
         allChapterFlow
             .map { chapters ->
-                val persistentChapters = chapters.toPersistentList()
+                val persistentChapters = chapters.toList()
                 val missingChapterHolder = persistentChapters.getMissingChapters()
 
                 val allSources = mutableSetOf(MdConstants.name)
@@ -415,7 +408,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             if (it.chapter.scanlator != Constants.NO_GROUP) return@mapNotNull null
                             it.chapter.uploader
                         }
-                        .toPersistentSet()
+                        .toSet()
 
                 SourceManager.mergeSourceNames.forEach { name ->
                     val removed = allChapterScanlators.remove(name)
@@ -427,14 +420,14 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 val allLanguages =
                     persistentChapters
                         .flatMap { ChapterUtil.getLanguages(it.chapter.language) }
-                        .toPersistentSet()
+                        .toSet()
 
                 MangaConstants.StaticChapterData(
                     allChapters = persistentChapters,
                     missingChapters = missingChapterHolder,
-                    allScanlators = allChapterScanlators.toPersistentSet(),
+                    allScanlators = allChapterScanlators.toSet(),
                     allUploaders = allChapterUploaders,
-                    allSources = allSources.toPersistentSet(),
+                    allSources = allSources.toSet(),
                     allLanguages = allLanguages,
                 )
             }
@@ -533,7 +526,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             ) {
                                 val manga =
                                     effectiveManga
-                                        .copy(filteredScanlators = persistentListOf())
+                                        .copy(filteredScanlators = listOf())
                                         .toManga()
                                 mangaRepository.updateManga(manga)
                             }
@@ -544,7 +537,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                         effectiveManga.toManga(),
                                         staticChapterData.allChapters,
                                     )
-                                    .toPersistentList()
+                                    .toList()
 
                             val nextUnread = getNextUnread(effectiveManga, activeChapters)
 
@@ -566,7 +559,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                         if (it.value.isLogged()) it.value.toTrackServiceItem()
                                         else null
                                     }
-                                    .toPersistentList()
+                                    .toList()
 
                             val trackCount = loggedInTrackerService.count { service ->
                                 tracks.any { track ->
@@ -584,7 +577,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 getChapterScanlatorFilter(
                                     effectiveManga,
                                     (allChapterInfo.allScanlators + allChapterInfo.allUploaders)
-                                        .toPersistentSet(),
+                                        .toSet(),
                                 )
                             val languageFilter =
                                 getChapterLanguageFilter(
@@ -609,8 +602,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 chapterLanguageFilter = languageFilter,
                                 chapterSortFilter = sortFilter,
                                 chapterFilterText = chapterFilterText,
-                                allCategories = categoriesData.all.toPersistentList(),
-                                mangaCategories = categoriesData.current.toPersistentList(),
+                                allCategories = categoriesData.all.toList(),
+                                mangaCategories = categoriesData.current.toList(),
                                 allChapterInfo = allChapterInfo,
                                 artwork = artwork,
                                 altArtwork = alternativeArtwork,
@@ -798,7 +791,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                                     general =
                                                         it.general.copy(
                                                             removedChapters =
-                                                                removedChapters.toPersistentList()
+                                                                removedChapters.toList()
                                                         )
                                                 )
                                             }
@@ -1156,14 +1149,14 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             else -> true
                         }
                     }
-                    .toPersistentList()
+                    .toList()
 
             val loggedInServices =
                 trackManager.services
                     .mapNotNull { service ->
                         if (service.value.isLogged()) service.value.toTrackServiceItem() else null
                     }
-                    .toPersistentList()
+                    .toList()
 
             _mangaDetailScreenState.update {
                 it.copy(
@@ -1214,7 +1207,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         currentArtwork: Artwork,
         dbArtwork: List<ArtworkImpl>,
         useDynamicCover: Boolean,
-    ): PersistentList<Artwork> {
+    ): List<Artwork> {
         val quality = mangaDexPreferences.coverQuality().get()
 
         return dbArtwork
@@ -1237,7 +1230,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         },
                 )
             }
-            .toPersistentList()
+            .toList()
     }
 
     /** Get current sort filter */
@@ -1298,7 +1291,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Used to filter sources, or scanlators/uploaders */
     private fun getChapterScanlatorFilter(
         mangaItem: MangaItem,
-        allScanlators: ImmutableSet<String>,
+        allScanlators: Set<String>,
     ): MangaConstants.ScanlatorFilter {
         val scanlatorSet = mangaItem.filteredScanlators.toSet()
         val scanlatorOptions =
@@ -1310,15 +1303,15 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         disabled = scanlator in scanlatorSet,
                     )
                 }
-                .toPersistentList()
+                .toList()
 
-        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toPersistentList())
+        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toList())
     }
 
     /** Used to filter sources, or scanlators/uploaders */
     private fun getChapterLanguageFilter(
         mangaItem: MangaItem,
-        allLanguages: ImmutableSet<String>,
+        allLanguages: Set<String>,
     ): MangaConstants.LanguageFilter {
         val languageSet = mangaItem.filteredLanguage.toSet()
         val languageOptions =
@@ -1330,9 +1323,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         disabled = language in languageSet,
                     )
                 }
-                .toPersistentList()
+                .toList()
 
-        return MangaConstants.LanguageFilter(languages = languageOptions.toPersistentList())
+        return MangaConstants.LanguageFilter(languages = languageOptions.toList())
     }
 
     private fun getSortFilter(mangaItem: MangaItem): MangaConstants.SortFilter {
@@ -1369,7 +1362,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     private fun getNextUnread(
         mangaItem: MangaItem,
-        activeChapters: PersistentList<ChapterItem>,
+        activeChapters: List<ChapterItem>,
     ): NextUnreadChapter {
         val nextChapter =
             chapterSort.getNextUnreadChapter(mangaItem.toManga(), activeChapters)?.chapter
@@ -1417,7 +1410,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
             _mangaDetailScreenState.update {
                 it.copy(
-                    general = it.general.copy(searchChapters = filteredChapters.toPersistentList())
+                    general = it.general.copy(searchChapters = filteredChapters.toList())
                 )
             }
         }
@@ -1831,7 +1824,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun clearRemovedChapters() {
         viewModelScope.launchIO {
             _mangaDetailScreenState.update {
-                it.copy(general = it.general.copy(removedChapters = persistentListOf()))
+                it.copy(general = it.general.copy(removedChapters = listOf()))
             }
         }
     }
@@ -2105,8 +2098,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         chapterId: Long,
         downloadStatus: Download.State,
         downloadProgress: Int,
-        chapters: PersistentList<ChapterItem>,
-    ): PersistentList<ChapterItem> {
+        chapters: List<ChapterItem>,
+    ): List<ChapterItem> {
         val index = chapters.indexOfFirst { it.chapter.id == chapterId }
         return if (index >= 0) {
             val updatedChapter =
@@ -2114,7 +2107,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     downloadState = downloadStatus,
                     downloadProgress = downloadProgress,
                 )
-            chapters.set(index, updatedChapter)
+            buildList {
+                addAll(chapters)
+                set(index, updatedChapter)
+            }
         } else {
             chapters
         }
@@ -2431,23 +2427,23 @@ private data class AllInfo(
     val chapterLanguageFilter: MangaConstants.LanguageFilter = MangaConstants.LanguageFilter(),
     val chapterSortFilter: MangaConstants.SortFilter = MangaConstants.SortFilter(),
     val chapterFilterText: String = "",
-    val allCategories: PersistentList<CategoryItem> = persistentListOf(),
-    val mangaCategories: PersistentList<CategoryItem> = persistentListOf(),
+    val allCategories: List<CategoryItem> = listOf(),
+    val mangaCategories: List<CategoryItem> = listOf(),
     val allChapterInfo: AllChapterInfo = AllChapterInfo(),
     val artwork: Artwork,
-    val altArtwork: PersistentList<Artwork> = persistentListOf(),
-    val tracks: PersistentList<TrackItem> = persistentListOf(),
-    val loggedInTrackerService: PersistentList<TrackServiceItem> = persistentListOf(),
+    val altArtwork: List<Artwork> = listOf(),
+    val tracks: List<TrackItem> = listOf(),
+    val loggedInTrackerService: List<TrackServiceItem> = listOf(),
     val trackServiceCount: Int = 0,
 )
 
 private data class AllChapterInfo(
     val nextUnread: NextUnreadChapter = NextUnreadChapter(),
     val missingChapters: MissingChapterHolder = MissingChapterHolder(),
-    val activeChapters: PersistentList<ChapterItem> = persistentListOf(),
-    val allChapters: PersistentList<ChapterItem> = persistentListOf(),
-    val allScanlators: PersistentSet<String> = persistentSetOf(),
-    val allUploaders: PersistentSet<String> = persistentSetOf(),
-    val allSources: PersistentSet<String> = persistentSetOf(),
-    val allLanguages: PersistentSet<String> = persistentSetOf(),
+    val activeChapters: List<ChapterItem> = listOf(),
+    val allChapters: List<ChapterItem> = listOf(),
+    val allScanlators: Set<String> = setOf(),
+    val allUploaders: Set<String> = setOf(),
+    val allSources: Set<String> = setOf(),
+    val allLanguages: Set<String> = setOf(),
 )

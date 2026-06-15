@@ -8,8 +8,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -107,16 +105,16 @@ class BrowseRepository(
                             listResult.sourceManga
                                 .toDisplayManga(mangaRepository, mangaDex.id)
                                 .distinctBy { it.url }
-                                .toPersistentList(),
+                                .toList(),
                     )
                 }
             )
         }
     }
 
-    suspend fun getFollows(): Result<PersistentList<DisplayManga>, ResultError> {
+    suspend fun getFollows(): Result<List<DisplayManga>, ResultError> {
         return mangaDex.fetchAllFollows().andThen { sourceManga ->
-            Ok(sourceManga.toDisplayManga(mangaRepository, mangaDex.id).toPersistentList())
+            Ok(sourceManga.toDisplayManga(mangaRepository, mangaDex.id).toList())
         }
     }
 }

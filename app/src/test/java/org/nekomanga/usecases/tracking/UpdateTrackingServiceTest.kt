@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.ui.manga.TrackingUpdate
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -41,14 +40,14 @@ class UpdateTrackingServiceTest {
             nameRes = 0,
             logoRes = 0,
             logoColor = 0,
-            statusList = persistentListOf(),
+            statusList = listOf(),
             supportsReadingDates = false,
             canRemoveFromService = false,
             isAutoAddTracker = false,
             isMdList = false,
             status = { "" },
             displayScore = { "" },
-            scoreList = persistentListOf(),
+            scoreList = listOf(),
             indexToScore = { 0f },
         )
 

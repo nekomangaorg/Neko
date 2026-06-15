@@ -58,8 +58,6 @@ import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.rememberMarkdownState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.R
 import org.nekomanga.presentation.Chip
@@ -77,8 +75,8 @@ fun DescriptionBlock(
     title: String,
     description: String,
     isInitialized: Boolean,
-    altTitles: PersistentList<String>,
-    genres: PersistentList<String>,
+    altTitles: List<String>,
+    genres: List<String>,
     themeColorState: ThemeColorState,
     wrapAltTitles: Boolean,
     isExpanded: Boolean,
@@ -239,8 +237,8 @@ private fun CollapsedDescription(
 /** A combined, reusable composable for displaying both Alt Titles and Genres. */
 @Composable
 private fun AltTitlesAndGenres(
-    altTitles: PersistentList<String>,
-    genres: PersistentList<String>,
+    altTitles: List<String>,
+    genres: List<String>,
     currentTitle: String,
     shouldWrap: Boolean,
     themeColorState: ThemeColorState,
@@ -281,7 +279,7 @@ private fun AltTitlesAndGenres(
  */
 @Composable
 private fun AltTitles(
-    altTitles: PersistentList<String>,
+    altTitles: List<String>,
     currentTitle: String,
     shouldWrap: Boolean,
     tagColor: Color,
@@ -383,7 +381,7 @@ private fun AltTitleChip(title: String, isSelected: Boolean, tagColor: Color, on
  */
 @Composable
 private fun Genres(
-    genres: PersistentList<String>,
+    genres: List<String>,
     tagColor: Color,
     themeColorState: ThemeColorState,
     genreSearch: (String) -> Unit,
@@ -421,7 +419,7 @@ private fun Genres(
                 onDismiss = { selectedGenre = null },
                 themeColorState = themeColorState,
                 dropDownItems =
-                    persistentListOf(
+                    listOf(
                         SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search)) {
                             genreSearch(genre)
                             selectedGenre = null

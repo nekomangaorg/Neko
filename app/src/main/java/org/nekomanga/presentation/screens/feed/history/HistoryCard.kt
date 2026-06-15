@@ -37,8 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -334,7 +332,7 @@ private fun Buttons(
                             SimpleDropDownItem.Parent(
                                 UiText.StringResource(R.string.remove_history),
                                 children =
-                                    persistentListOf(
+                                    listOf(
                                         SimpleDropDownItem.Action(
                                             UiText.String(chapterName),
                                             onClick = deleteHistoryClick,
@@ -346,7 +344,7 @@ private fun Buttons(
                                     ),
                             )
                         )
-                        .toPersistentList(),
+                        .toList(),
             )
         }
     }
