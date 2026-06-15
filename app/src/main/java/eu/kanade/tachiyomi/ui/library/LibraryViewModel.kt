@@ -97,6 +97,7 @@ class LibraryViewModel() : ViewModel() {
     val downloadManager: DownloadManager = Injekt.get()
     val workManager: WorkManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
+    val chapterSort: ChapterItemSort = ChapterItemSort(chapterItemFilter, preferences, mangaDetailsPreferences)
     val chapterUseCases: ChapterUseCases = Injekt.get()
     val filterLibraryManga: FilterLibraryMangaUseCase = Injekt.get()
     val groupLibraryManga = GroupLibraryMangaUseCase()
@@ -1143,10 +1144,16 @@ class LibraryViewModel() : ViewModel() {
                         val unreadDbChapters =
                             chapterItems
                                 .asSequence()
-                                .mapNotNull {
-                                    if (!it.chapter.read) it.chapter.toDbChapter() else null
+                                .filter {
+                                    val dbChapter = it.chapter.toDbChapter()
+                                    !it.chapter.read &&
+                                        !it.chapter.isUnavailable &&
+                                        !downloadManager.isChapterDownloaded(dbChapter, dbManga) &&
+                                        downloadManager.queueState.value.none { queued -> queued.chapterItem.id == it.chapter.id }
                                 }
+                                .sortedWith(chapterSort.sortComparator(dbManga, true))
                                 .take(amount)
+                                .map { it.chapter.toDbChapter() }
                                 .toList()
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
