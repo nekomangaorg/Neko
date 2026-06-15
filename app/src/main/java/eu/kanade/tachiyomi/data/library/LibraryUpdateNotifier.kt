@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
-import kotlinx.collections.immutable.toImmutableMap
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.logging.TimberKt
@@ -174,7 +173,7 @@ class LibraryUpdateNotifier(private val context: Context) {
     suspend fun showResultNotification(newUpdates: Map<LibraryManga, Array<Chapter>>) {
         if (newUpdates.isEmpty()) return
         // create a copy of the list since it will be cleared by the time it is used
-        val updates = newUpdates.toImmutableMap()
+        val updates = newUpdates.toMap()
         val notifications = ArrayList<Pair<Notification, Int>>()
         if (!securityPreferences.hideNotificationContent().get()) {
             updates.forEach {

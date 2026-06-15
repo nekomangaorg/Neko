@@ -33,7 +33,6 @@ import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
 import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.InLibraryBadge
@@ -45,7 +44,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun BrowseHomePage(
-    browseHomePageManga: PersistentList<HomePageManga>,
+    browseHomePageManga: List<HomePageManga>,
     shouldOutlineCover: Boolean,
     dynamicCovers: Boolean,
     useVividColorHeaders: Boolean,

@@ -14,12 +14,6 @@ import eu.kanade.tachiyomi.ui.setting.MangaDexSettingsViewModel
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInFirefox
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.collections.immutable.ImmutableSet
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
@@ -43,10 +37,10 @@ internal class MangaDexSettingsScreen(
     override fun getTitleRes(): Int = R.string.site_specific_settings
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
+    override fun getPreferences(): List<Preference> {
         val context = LocalContext.current
 
-        return persistentListOf(
+        return listOf(
                 generalGroup(context, deleteSavedFilters, mangaDexPreferences),
                 chapterGroup(
                     context,
@@ -57,7 +51,7 @@ internal class MangaDexSettingsScreen(
                 imageGroup(mangaDexPreferences),
                 libraryGroup(context, mangaDexPreferences),
             )
-            .toPersistentList()
+            .toList()
     }
 
     @Composable
@@ -100,7 +94,7 @@ internal class MangaDexSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.general),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SitePreference(
                         title = loginText,
                         isLoggedIn = mangaDexSettingsState.isLoggedIn,
@@ -123,7 +117,7 @@ internal class MangaDexSettingsScreen(
                                 selected.joinToString()
                         },
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 MdConstants.ContentRating.safe to
                                     stringResource(R.string.content_rating_safe),
                                 MdConstants.ContentRating.suggestive to
@@ -148,8 +142,8 @@ internal class MangaDexSettingsScreen(
     fun chapterGroup(
         context: Context,
         mangaDexPreferences: MangaDexPreferences,
-        blockedGroups: ImmutableSet<String>,
-        blockedUploaders: ImmutableSet<String>,
+        blockedGroups: Set<String>,
+        blockedUploaders: Set<String>,
     ): Preference.PreferenceGroup {
 
         var showBlockedGroupDialog by rememberSaveable { mutableStateOf(false) }
@@ -193,7 +187,7 @@ internal class MangaDexSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.chapter_group),
             preferenceItems =
-                persistentListOf(
+                listOf(
                         Preference.PreferenceItem.SwitchPreference(
                             pref = mangaDexPreferences.includeUnavailableChapters(),
                             title = stringResource(R.string.include_unavailable),
@@ -210,7 +204,7 @@ internal class MangaDexSettingsScreen(
                             entries =
                                 MdLang.entries
                                     .associate { lang -> lang.lang to lang.prettyPrint }
-                                    .toImmutableMap(),
+                                    .toMap(),
                             pref = mangaDexPreferences.enabledChapterLanguages(),
                         ),
                         Preference.PreferenceItem.TextPreference(
@@ -241,7 +235,7 @@ internal class MangaDexSettingsScreen(
                             subtitle = stringResource(R.string.reading_sync_summary),
                         ),
                     )
-                    .toPersistentList(),
+                    .toList(),
         )
     }
 
@@ -250,7 +244,7 @@ internal class MangaDexSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.image_group),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         title = stringResource(R.string.data_saver),
                         subtitle = stringResource(R.string.data_saver_summary),
@@ -264,7 +258,7 @@ internal class MangaDexSettingsScreen(
                     Preference.PreferenceItem.ListPreference(
                         title = stringResource(R.string.cover_quality),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 0 to stringResource(R.string.original_cover_quality),
                                 1 to stringResource(R.string.medium_cover_quality),
                                 2 to stringResource(R.string.low_cover_quality),
@@ -296,11 +290,11 @@ internal class MangaDexSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.library),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         title = stringResource(R.string.auto_add_to_mangadex_library),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 0 to stringResource(R.string.disabled),
                                 1 to stringResource(R.string.follows_plan_to_read),
                                 2 to stringResource(R.string.follows_on_hold),
@@ -328,8 +322,8 @@ internal class MangaDexSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(
                     title = stringResource(R.string.show_content_rating_filter_in_search),
                     group = stringResource(R.string.general),

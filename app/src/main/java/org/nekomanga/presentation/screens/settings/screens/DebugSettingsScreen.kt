@@ -7,8 +7,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.analytics.FirebaseAnalytics
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
@@ -29,12 +27,12 @@ internal class DebugSettingsScreen(
 
     @SuppressLint("BatteryLife")
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
+    override fun getPreferences(): List<Preference> {
         val context = LocalContext.current
 
         LaunchedEffect(Unit) { toastEvent.collect { event -> context.toast(event) } }
 
-        return persistentListOf(
+        return listOf(
             Preference.PreferenceItem.TextPreference(
                 title = "Send a test firebase event",
                 onClick = {

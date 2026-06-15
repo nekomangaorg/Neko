@@ -11,10 +11,6 @@ import eu.kanade.tachiyomi.source.online.merged.suwayomi.LoginMode
 import eu.kanade.tachiyomi.ui.setting.MergeLoginEvent
 import eu.kanade.tachiyomi.ui.setting.MergeScreenState
 import eu.kanade.tachiyomi.ui.setting.MergeScreenType
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
 import org.nekomanga.presentation.components.dialog.LoginDialog
@@ -36,8 +32,8 @@ internal class MergeSettingsScreen(
     override fun getTitleRes(): Int = R.string.merge_source_settings
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
-        return persistentListOf(
+    override fun getPreferences(): List<Preference> {
+        return listOf(
             mergeGroup(
                 mergeState = komgaState,
                 sourceName = stringResource(R.string.komga),
@@ -117,19 +113,19 @@ internal class MergeSettingsScreen(
                                 entries =
                                     LoginMode.entries
                                         .associateWith { stringResource(it.titleResId) }
-                                        .toImmutableMap(),
+                                        .toMap(),
                             )
                         } else null,
                         Preference.PreferenceItem.InfoPreference(title = infoText),
                     )
-                    .toPersistentList(),
+                    .toList(),
         )
     }
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(title = stringResource(R.string.komga)),
                 SearchTerm(title = stringResource(R.string.suwayomi)),
             )

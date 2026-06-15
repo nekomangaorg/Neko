@@ -9,9 +9,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -109,9 +106,9 @@ class FeedViewModel() : ViewModel() {
                         // cache
                         updatesFeedMangaList =
                             if (state.offset == 0) {
-                                items.toPersistentList()
+                                items.toList()
                             } else {
-                                (state.updatesFeedMangaList + items).toPersistentList()
+                                (state.updatesFeedMangaList + items).toList()
                             },
                     )
                 }
@@ -144,9 +141,9 @@ class FeedViewModel() : ViewModel() {
                         // cache
                         historyFeedMangaList =
                             if (state.offset == 0) {
-                                items.toPersistentList()
+                                items.toList()
                             } else {
-                                (state.historyFeedMangaList + items).toPersistentList()
+                                (state.historyFeedMangaList + items).toList()
                             },
                     )
                 }
@@ -184,7 +181,7 @@ class FeedViewModel() : ViewModel() {
                                 ),
                         )
                     }
-                    .toPersistentList()
+                    .toList()
 
             _feedScreenState.update { it.copy(downloads = downloads) }
         }
@@ -224,7 +221,7 @@ class FeedViewModel() : ViewModel() {
                 state.copy(
                     historyGrouping = it,
                     offset = 0,
-                    historyFeedMangaList = persistentListOf(),
+                    historyFeedMangaList = listOf(),
                 )
             }
             historyPaginator.reset()
@@ -238,7 +235,7 @@ class FeedViewModel() : ViewModel() {
                     _historyScreenPagingState.update { state ->
                         state.copy(
                             offset = 0,
-                            searchHistoryFeedMangaList = persistentListOf(),
+                            searchHistoryFeedMangaList = listOf(),
                             searchQuery = "",
                         )
                     }
@@ -248,7 +245,7 @@ class FeedViewModel() : ViewModel() {
                     _updatesScreenPagingState.update { state ->
                         state.copy(
                             offset = 0,
-                            searchUpdatesFeedMangaList = persistentListOf(),
+                            searchUpdatesFeedMangaList = listOf(),
                             searchQuery = "",
                         )
                     }
@@ -270,9 +267,9 @@ class FeedViewModel() : ViewModel() {
                 state.copy(
                     updatesSortedByFetch = it,
                     offset = 0,
-                    updatesFeedMangaList = persistentListOf(),
+                    updatesFeedMangaList = listOf(),
                     searchQuery = "",
-                    searchUpdatesFeedMangaList = persistentListOf(),
+                    searchUpdatesFeedMangaList = listOf(),
                 )
             }
             updatesPaginator.reset()
@@ -357,8 +354,8 @@ class FeedViewModel() : ViewModel() {
             _historyScreenPagingState.update {
                 it.copy(
                     offset = 0,
-                    historyFeedMangaList = persistentListOf(),
-                    searchHistoryFeedMangaList = persistentListOf(),
+                    historyFeedMangaList = listOf(),
+                    searchHistoryFeedMangaList = listOf(),
                     searchQuery = "",
                 )
             }
@@ -377,7 +374,7 @@ class FeedViewModel() : ViewModel() {
                     historyFeedMangaList =
                         it.historyFeedMangaList
                             .filter { fm -> fm.mangaId != feedManga.mangaId }
-                            .toPersistentList()
+                            .toList()
                 )
             }
             loadSummaryPage()
@@ -401,7 +398,7 @@ class FeedViewModel() : ViewModel() {
                     continueReadingList =
                         state.continueReadingList
                             .filter { fm -> fm.mangaId != feedManga.mangaId }
-                            .toPersistentList()
+                            .toList()
                 )
             }
 
@@ -421,11 +418,11 @@ class FeedViewModel() : ViewModel() {
                             chapters =
                                 newFeedManga.chapters
                                     .filter { it.chapter.url != simpleChapter.url }
-                                    .toPersistentList()
+                                    .toList()
                         )
                 }
                 _historyScreenPagingState.update {
-                    it.copy(historyFeedMangaList = mutableFeedManga.toPersistentList())
+                    it.copy(historyFeedMangaList = mutableFeedManga.toList())
                 }
             }
 
@@ -438,7 +435,7 @@ class FeedViewModel() : ViewModel() {
             feedRepository.getSummaryUpdatesList().onOk { list ->
                 _summaryScreenPagingState.update { state ->
                     state.copy(
-                        updatesFeedMangaList = list.toPersistentList(),
+                        updatesFeedMangaList = list.toList(),
                         updatingUpdates = false,
                     )
                 }
@@ -449,7 +446,7 @@ class FeedViewModel() : ViewModel() {
             feedRepository.getSummaryContinueReadingList().onOk { list ->
                 _summaryScreenPagingState.update { state ->
                     state.copy(
-                        continueReadingList = list.toPersistentList(),
+                        continueReadingList = list.toList(),
                         updatingContinueReading = false,
                     )
                 }
@@ -460,7 +457,7 @@ class FeedViewModel() : ViewModel() {
             feedRepository.getSummaryNewlyAddedList().onOk { list ->
                 _summaryScreenPagingState.update { state ->
                     state.copy(
-                        newlyAddedFeedMangaList = list.toPersistentList(),
+                        newlyAddedFeedMangaList = list.toList(),
                         updatingNewlyAdded = false,
                     )
                 }
@@ -477,14 +474,14 @@ class FeedViewModel() : ViewModel() {
                     FeedScreenType.History ->
                         _historyScreenPagingState.update {
                             it.copy(
-                                searchHistoryFeedMangaList = persistentListOf(),
+                                searchHistoryFeedMangaList = listOf(),
                                 searchQuery = "",
                             )
                         }
                     FeedScreenType.Updates ->
                         _updatesScreenPagingState.update {
                             it.copy(
-                                searchUpdatesFeedMangaList = persistentListOf(),
+                                searchUpdatesFeedMangaList = listOf(),
                                 searchQuery = "",
                             )
                         }
@@ -505,7 +502,7 @@ class FeedViewModel() : ViewModel() {
                                     it.copy(
                                         searchQuery = searchQuery,
                                         searchHistoryFeedMangaList =
-                                            (results.second).toPersistentList(),
+                                            (results.second).toList(),
                                     )
                                 }
                             }
@@ -523,7 +520,7 @@ class FeedViewModel() : ViewModel() {
                                     it.copy(
                                         searchQuery = searchQuery,
                                         searchUpdatesFeedMangaList =
-                                            (results.second).toPersistentList(),
+                                            (results.second).toList(),
                                     )
                                 }
                             }
@@ -653,7 +650,7 @@ class FeedViewModel() : ViewModel() {
 
         val updatedFeedManga =
             feedManga.toMutableList().apply {
-                this[mangaIndex] = mangaToUpdate.copy(chapters = updatedChapters.toPersistentList())
+                this[mangaIndex] = mangaToUpdate.copy(chapters = updatedChapters.toList())
             }
 
         return true to updatedFeedManga
@@ -670,7 +667,7 @@ class FeedViewModel() : ViewModel() {
                     manga.chapters.firstOrNull()?.chapter?.id == updatedChapterItem.chapter.id
             ) {
                 wasUpdated = true
-                manga.copy(chapters = persistentListOf(updatedChapterItem))
+                manga.copy(chapters = listOf(updatedChapterItem))
             } else {
                 manga
             }
@@ -718,7 +715,7 @@ class FeedViewModel() : ViewModel() {
                     }
             }
             _updatesScreenPagingState.update { state ->
-                state.copy(updatesFeedMangaList = mutableFeedManga.toPersistentList())
+                state.copy(updatesFeedMangaList = mutableFeedManga.toList())
             }
         }
     }
@@ -745,7 +742,7 @@ class FeedViewModel() : ViewModel() {
                     }
             }
             _historyScreenPagingState.update { state ->
-                state.copy(historyFeedMangaList = mutableFeedManga.toPersistentList())
+                state.copy(historyFeedMangaList = mutableFeedManga.toList())
             }
         }
     }
@@ -782,7 +779,7 @@ class FeedViewModel() : ViewModel() {
 
     private suspend fun getUpdatedSearchFeedMangaList(
         feedScreenType: FeedScreenType,
-        update: (PersistentList<FeedManga>) -> Unit,
+        update: (List<FeedManga>) -> Unit,
     ) {
         if (feedScreenType == FeedScreenType.Updates) {
                 feedRepository.getUpdatesPage(
@@ -798,7 +795,7 @@ class FeedViewModel() : ViewModel() {
                     group = _historyScreenPagingState.value.historyGrouping,
                 )
             }
-            .onOk { results -> update(results.second.toPersistentList()) }
+            .onOk { results -> update(results.second.toList()) }
     }
 
     private fun updateReadOnFeed(chapterItem: ChapterItem) {
@@ -812,7 +809,7 @@ class FeedViewModel() : ViewModel() {
             if (searchHistoryUpdated) {
                 _historyScreenPagingState.update {
                     it.copy(
-                        searchHistoryFeedMangaList = searchHistoryFeedMangaList.toPersistentList()
+                        searchHistoryFeedMangaList = searchHistoryFeedMangaList.toList()
                     )
                 }
             }
@@ -826,7 +823,7 @@ class FeedViewModel() : ViewModel() {
             if (searchUpdatesUpdated) {
                 _updatesScreenPagingState.update {
                     it.copy(
-                        searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toPersistentList()
+                        searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toList()
                     )
                 }
             }
@@ -840,7 +837,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (historyFeedUpdated) {
                 _historyScreenPagingState.update {
-                    it.copy(historyFeedMangaList = historyFeedMangaList.toPersistentList())
+                    it.copy(historyFeedMangaList = historyFeedMangaList.toList())
                 }
             }
         }
@@ -853,7 +850,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (updatesFeedUpdated) {
                 _updatesScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toPersistentList())
+                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toList())
                 }
             }
         }
@@ -865,7 +862,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (updatesFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toPersistentList())
+                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toList())
                 }
             }
             val (newlyAddedFeedUpdated, newlyAddedFeedMangaList) =
@@ -875,7 +872,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (newlyAddedFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList.toPersistentList())
+                    it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList.toList())
                 }
             }
 
@@ -886,7 +883,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (continueReadingFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(continueReadingList = continueReadingList.toPersistentList())
+                    it.copy(continueReadingList = continueReadingList.toList())
                 }
             }
 
@@ -909,7 +906,7 @@ class FeedViewModel() : ViewModel() {
             if (searchHistoryFeedUpdated) {
                 _historyScreenPagingState.update {
                     it.copy(
-                        searchHistoryFeedMangaList = searchHistoryFeedMangaList.toPersistentList()
+                        searchHistoryFeedMangaList = searchHistoryFeedMangaList.toList()
                     )
                 }
             }
@@ -925,7 +922,7 @@ class FeedViewModel() : ViewModel() {
             if (searchUpdatesFeedUpdated) {
                 _updatesScreenPagingState.update {
                     it.copy(
-                        searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toPersistentList()
+                        searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toList()
                     )
                 }
             }
@@ -941,7 +938,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (historyFeedUpdated) {
                 _historyScreenPagingState.update {
-                    it.copy(historyFeedMangaList = historyFeedMangaList.toPersistentList())
+                    it.copy(historyFeedMangaList = historyFeedMangaList.toList())
                 }
             }
         }
@@ -956,7 +953,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (updatesFeedUpdated) {
                 _updatesScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toPersistentList())
+                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toList())
                 }
             }
         }
@@ -971,7 +968,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (summaryUpdatesFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = summaryUpdatesFeedMangaList.toPersistentList())
+                    it.copy(updatesFeedMangaList = summaryUpdatesFeedMangaList.toList())
                 }
             }
         }
@@ -986,7 +983,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (newlyAddedFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList.toPersistentList())
+                    it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList.toList())
                 }
             }
         }
@@ -1008,7 +1005,7 @@ class FeedViewModel() : ViewModel() {
                     )
             }
 
-            _feedScreenState.update { it.copy(downloads = mutableList.toPersistentList()) }
+            _feedScreenState.update { it.copy(downloads = mutableList.toList()) }
         }
     }
 
@@ -1028,7 +1025,7 @@ class FeedViewModel() : ViewModel() {
                                     ),
                             )
                         }
-                        .toPersistentList()
+                        .toList()
 
                 _feedScreenState.update { it.copy(downloads = downloads) }
             }
@@ -1106,11 +1103,11 @@ class FeedViewModel() : ViewModel() {
 
     companion object {
 
-        private var lastUpdatesFeedMangaList: PersistentList<FeedManga>? = null
-        private var lastHistoryFeedMangaList: PersistentList<FeedManga>? = null
-        private var lastSummaryUpdatesFeedMangaList: PersistentList<FeedManga>? = null
-        private var lastContinueReadingList: PersistentList<FeedManga>? = null
-        private var lastSummaryNewlyAddedFeedMangaList: PersistentList<FeedManga>? = null
+        private var lastUpdatesFeedMangaList: List<FeedManga>? = null
+        private var lastHistoryFeedMangaList: List<FeedManga>? = null
+        private var lastSummaryUpdatesFeedMangaList: List<FeedManga>? = null
+        private var lastContinueReadingList: List<FeedManga>? = null
+        private var lastSummaryNewlyAddedFeedMangaList: List<FeedManga>? = null
 
         fun onLowMemory() {
             lastUpdatesFeedMangaList = null

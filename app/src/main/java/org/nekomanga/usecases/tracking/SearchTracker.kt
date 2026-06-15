@@ -3,7 +3,6 @@ package org.nekomanga.usecases.tracking
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -35,7 +34,7 @@ class SearchTracker(private val trackManager: TrackManager = Injekt.get()) {
                         true -> TrackingConstants.TrackSearchResult.NoResult
                         false ->
                             TrackingConstants.TrackSearchResult.Success(
-                                results.map { it.toTrackSearchItem() }.toPersistentList(),
+                                results.map { it.toTrackSearchItem() }.toList(),
                                 hasMatchingId = id.isNotEmpty(),
                             )
                     }
@@ -76,7 +75,7 @@ class SearchTracker(private val trackManager: TrackManager = Injekt.get()) {
                     true -> TrackingConstants.TrackSearchResult.NoResult
                     false ->
                         TrackingConstants.TrackSearchResult.Success(
-                            results.map { it.toTrackSearchItem() }.toPersistentList()
+                            results.map { it.toTrackSearchItem() }.toList()
                         )
                 }
             }

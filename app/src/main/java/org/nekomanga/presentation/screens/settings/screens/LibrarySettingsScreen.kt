@@ -15,10 +15,6 @@ import eu.kanade.tachiyomi.util.system.isBackgroundDataRestricted
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openDataSaverSettings
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
@@ -42,7 +38,7 @@ internal class LibrarySettingsScreen(
     incognitoMode: Boolean,
     val libraryPreferences: LibraryPreferences,
     onNavigationIconClick: (() -> Unit)?,
-    val categories: PersistentList<CategoryItem>,
+    val categories: List<CategoryItem>,
     val viewModelScope: CoroutineScope,
     val onAddEditCategoryClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
@@ -50,10 +46,10 @@ internal class LibrarySettingsScreen(
     override fun getTitleRes(): Int = R.string.library
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
+    override fun getPreferences(): List<Preference> {
         val context = LocalContext.current
 
-        return persistentListOf(
+        return listOf(
             generalGroup(context),
             categoriesGroup(categories),
             globalUpdateGroup(context, categories),
@@ -65,7 +61,7 @@ internal class LibrarySettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.general),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = libraryPreferences.enableLocalChapters(),
                         title = stringResource(R.string.enable_local_manga),
@@ -89,7 +85,7 @@ internal class LibrarySettingsScreen(
                             }
                         },
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 0 to stringResource(R.string.chapter_filter_all),
                                 1 to stringResource(R.string.chapter_filter_any),
                             ),
@@ -100,19 +96,19 @@ internal class LibrarySettingsScreen(
 
     @Composable
     private fun categoriesGroup(
-        categories: PersistentList<CategoryItem>
+        categories: List<CategoryItem>
     ): Preference.PreferenceGroup {
         val alwaysAsk = Pair(-1, stringResource(R.string.always_ask))
         val nonSystemCategories =
             remember(categories) { categories.filterNot { it.isSystemCategory } }
         val categoryMap =
             remember(categories) {
-                (listOf(alwaysAsk) + categories.map { it.id to it.name }).toMap().toImmutableMap()
+                (listOf(alwaysAsk) + categories.map { it.id to it.name }).toMap().toMap()
             }
         return Preference.PreferenceGroup(
             title = stringResource(R.string.categories),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.TextPreference(
                         title =
                             if (nonSystemCategories.isNotEmpty())
@@ -142,7 +138,7 @@ internal class LibrarySettingsScreen(
     @Composable
     private fun globalUpdateGroup(
         context: Context,
-        allCategoryList: PersistentList<CategoryItem>,
+        allCategoryList: List<CategoryItem>,
     ): Preference.PreferenceGroup {
 
         val libraryUpdateInterval by libraryPreferences.updateInterval().collectAsState()
@@ -194,12 +190,12 @@ internal class LibrarySettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.global_updates),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         pref = libraryPreferences.updateInterval(),
                         title = stringResource(R.string.library_update_frequency),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 0 to stringResource(R.string.manual),
                                 12 to stringResource(R.string.every_12_hours),
                                 24 to stringResource(R.string.daily),
@@ -221,7 +217,7 @@ internal class LibrarySettingsScreen(
                         title = stringResource(R.string.library_update_device_restriction),
                         subtitle = stringResource(R.string.restrictions_),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 DEVICE_NETWORK_NOT_METERED to
                                     stringResource(R.string.network_not_metered),
                                 DEVICE_CHARGING to stringResource(R.string.charging),
@@ -246,7 +242,7 @@ internal class LibrarySettingsScreen(
                         pref = libraryPreferences.autoUpdateMangaRestrictions(),
                         title = stringResource(R.string.smart_library_update_restrictions),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 MANGA_HAS_UNREAD to
                                     stringResource(R.string.smart_library_has_unread),
                                 MANGA_NOT_STARTED to
@@ -295,8 +291,8 @@ internal class LibrarySettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(
                     title = stringResource(R.string.enable_local_manga),
                     subtitle = stringResource(R.string.enable_local_manga_summary),

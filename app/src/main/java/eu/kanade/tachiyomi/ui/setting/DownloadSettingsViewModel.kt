@@ -4,9 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -27,7 +24,7 @@ class DownloadSettingsViewModel : ViewModel() {
     val categoryRepository: CategoryRepository by injectLazy()
 
     private val _allCategories =
-        MutableStateFlow<PersistentList<CategoryItem>>((persistentListOf()))
+        MutableStateFlow<List<CategoryItem>>((listOf()))
     val allCategories = _allCategories.asStateFlow()
 
     init {
@@ -38,7 +35,7 @@ class DownloadSettingsViewModel : ViewModel() {
                     (listOf(Category.createSystemCategory()) + categories)
                         .sortedBy { it.order }
                         .map { it.toCategoryItem() }
-                        .toPersistentList()
+                        .toList()
             }
         }
     }

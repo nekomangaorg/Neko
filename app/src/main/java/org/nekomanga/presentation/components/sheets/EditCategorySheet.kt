@@ -28,8 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.CheckboxRow
@@ -42,8 +40,8 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun EditCategorySheet(
     addingToLibrary: Boolean,
-    categories: PersistentList<CategoryItem>,
-    mangaCategories: PersistentList<CategoryItem> = persistentListOf(),
+    categories: List<CategoryItem>,
+    mangaCategories: List<CategoryItem> = listOf(),
     themeColorState: ThemeColorState = defaultThemeColorState(),
     cancelClick: () -> Unit,
     addNewCategory: (String) -> Unit,

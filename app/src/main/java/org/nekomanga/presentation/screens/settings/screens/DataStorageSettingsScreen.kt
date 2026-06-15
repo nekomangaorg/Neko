@@ -44,9 +44,6 @@ import eu.kanade.tachiyomi.ui.setting.CacheType
 import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.toTimestampString
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -77,14 +74,14 @@ internal class DataStorageSettingsScreen(
     override fun getTitleRes(): Int = R.string.data_storage
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
+    override fun getPreferences(): List<Preference> {
         val context = LocalContext.current
 
         LaunchedEffect(Unit) { toastEvent.collect { event -> context.toast(event.resourceId) } }
 
         val pickStorageLocation = storageLocationPicker(storagePreferences.baseStorageDirectory())
 
-        return persistentListOf(
+        return listOf(
             Preference.PreferenceItem.TextPreference(
                 title = stringResource(R.string.storage_location),
                 subtitle = storageLocationText(storagePreferences.baseStorageDirectory()),
@@ -103,7 +100,7 @@ internal class DataStorageSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.storage_usage),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.InfoPreference(stringResource(R.string.storage_usage_info)),
                     Preference.PreferenceItem.CustomPreference(
                         title = "",
@@ -219,7 +216,7 @@ internal class DataStorageSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.backup_and_restore),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.CustomPreference(
                         title = stringResource(R.string.backup),
                         content = {
@@ -267,7 +264,7 @@ internal class DataStorageSettingsScreen(
                         pref = storagePreferences.backupInterval(),
                         title = stringResource(R.string.automatic_backups),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 0 to stringResource(R.string.off),
                                 6 to stringResource(R.string.every_6_hours),
                                 12 to stringResource(R.string.every_12_hours),
@@ -290,7 +287,7 @@ internal class DataStorageSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.cache),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(R.string.parent_cache_folder),
                         subtitle = stringResource(R.string.used_, cacheData.parentCacheSize),
@@ -337,8 +334,8 @@ internal class DataStorageSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(title = stringResource(R.string.storage_location)),
                 SearchTerm(
                     title = stringResource(R.string.storage_usage),

@@ -51,8 +51,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
@@ -412,7 +410,7 @@ private fun buildChapterDropdownItems(
     onComment: () -> Unit,
     markPrevious: (Boolean) -> Unit,
     blockScanlator: (MangaConstants.BlockType, String) -> Unit,
-): PersistentList<SimpleDropDownItem> {
+): List<SimpleDropDownItem> {
     return buildList {
             if (!isLocal) {
                 add(
@@ -476,7 +474,7 @@ private fun buildChapterDropdownItems(
                 )
             }
         }
-        .toPersistentList()
+        .toList()
 }
 
 @Composable

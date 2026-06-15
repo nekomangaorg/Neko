@@ -11,11 +11,6 @@ import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -77,7 +72,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                 categoryRepository
                     .getCategories()
                     .map { category -> category.toCategoryItem() }
-                    .toPersistentList()
+                    .toList()
             _similarScreenState.update {
                 it.copy(
                     categories = categories,
@@ -110,16 +105,16 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                 _similarScreenState.update {
                     it.copy(
                         isRefreshing = true,
-                        allDisplayManga = persistentMapOf(),
-                        filteredDisplayManga = persistentMapOf(),
+                        allDisplayManga = mapOf(),
+                        filteredDisplayManga = mapOf(),
                     )
                 }
 
                 val list = repo.fetchSimilar(mangaUUID, forceRefresh)
                 val allDisplayManga =
                     list
-                        .associate { group -> group.type to group.manga.toPersistentList() }
-                        .toImmutableMap()
+                        .associate { group -> group.type to group.manga.toList() }
+                        .toMap()
                 _similarScreenState.update {
                     it.copy(
                         isRefreshing = false,
@@ -176,9 +171,9 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
         preferences.browseDisplayMode().set(visibility)
     }
 
-    fun ImmutableMap<Int, PersistentList<DisplayManga>>.filterByVisibility(
+    fun Map<Int, List<DisplayManga>>.filterByVisibility(
         prefs: PreferencesHelper
-    ): ImmutableMap<Int, PersistentList<DisplayManga>> {
+    ): Map<Int, List<DisplayManga>> {
         val visibilityMode = prefs.browseDisplayMode().get()
 
         return this.mapValues { (_, displayMangaList) ->
@@ -190,9 +185,9 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                             else -> true
                         }
                     }
-                    .toPersistentList()
+                    .toList()
             }
-            .toImmutableMap()
+            .toMap()
     }
 
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
@@ -215,13 +210,13 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                 val tempDisplayManga = tempList[mangaIndex].copy(inLibrary = favorite)
                 tempList[mangaIndex] = tempDisplayManga
 
-                tempMap[mapKey] = tempList.toPersistentList()
+                tempMap[mapKey] = tempList.toList()
             }
 
             _similarScreenState.update {
                 it.copy(
-                    allDisplayManga = tempMap.toImmutableMap(),
-                    filteredDisplayManga = tempMap.toImmutableMap().filterByVisibility(preferences),
+                    allDisplayManga = tempMap.toMap(),
+                    filteredDisplayManga = tempMap.toMap().filterByVisibility(preferences),
                 )
             }
         }
@@ -240,7 +235,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                         categoryRepository
                             .getCategories()
                             .map { category -> category.toCategoryItem() }
-                            .toPersistentList()
+                            .toList()
                 )
             }
         }
@@ -288,11 +283,11 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                                         it
                                     }
                                 }
-                                .toPersistentList(),
+                                .toList(),
                         )
                     }
                     .toMap()
-                    .toImmutableMap()
+                    .toMap()
             _similarScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,

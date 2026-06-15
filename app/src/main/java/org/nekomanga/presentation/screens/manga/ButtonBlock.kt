@@ -37,9 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
@@ -105,123 +102,120 @@ fun ButtonBlock(
 
     val actionButtons =
         remember(inLibrary, mergedCount, trackServiceCount, loggedIntoTrackers) {
-            persistentListOf<ActionButtonData>()
-                .builder()
-                .apply {
-                    // Favorite Button
-                    add(
-                        ActionButtonData(
-                            icon =
-                                if (inLibrary) Icons.Filled.Favorite
-                                else Icons.Filled.FavoriteBorder,
-                            text = UiText.String(""),
-                            contentDescription =
-                                if (inLibrary) UiText.StringResource(R.string.remove_from_library)
-                                else UiText.StringResource(R.string.add_to_library),
-                            isChecked = inLibrary,
-                            onClick = toggleFavorite,
-                            dropdownItems =
-                                if (inLibrary) {
-                                    persistentListOf(
-                                        SimpleDropDownItem.Action(
-                                            text =
-                                                UiText.StringResource(R.string.remove_from_library),
-                                            onClick = toggleFavorite,
-                                        ),
-                                        SimpleDropDownItem.Action(
-                                            text = UiText.StringResource(R.string.edit_categories),
-                                            onClick = moveCategories,
-                                        ),
-                                    )
-                                } else {
-                                    null
-                                },
-                        )
+            buildList<ActionButtonData> {
+                // Favorite Button
+                add(
+                    ActionButtonData(
+                        icon =
+                            if (inLibrary) Icons.Filled.Favorite
+                            else Icons.Filled.FavoriteBorder,
+                        text = UiText.String(""),
+                        contentDescription =
+                            if (inLibrary) UiText.StringResource(R.string.remove_from_library)
+                            else UiText.StringResource(R.string.add_to_library),
+                        isChecked = inLibrary,
+                        onClick = toggleFavorite,
+                        dropdownItems =
+                            if (inLibrary) {
+                                listOf(
+                                    SimpleDropDownItem.Action(
+                                        text =
+                                            UiText.StringResource(R.string.remove_from_library),
+                                        onClick = toggleFavorite,
+                                    ),
+                                    SimpleDropDownItem.Action(
+                                        text = UiText.StringResource(R.string.edit_categories),
+                                        onClick = moveCategories,
+                                    ),
+                                )
+                            } else {
+                                null
+                            },
                     )
+                )
 
-                    // Tracking Button (conditionally added)
-                    if (loggedIntoTrackers) {
-                        val isTracked = trackServiceCount > 0
-                        val trackerIcon =
-                            when {
-                                isTracked ->
-                                    when (trackServiceCount) {
-                                        1 -> Numeric1BoxOutlineIcon
-                                        2 -> Numeric2BoxOutlineIcon
-                                        3 -> Numeric3BoxOutlineIcon
-                                        4 -> Numeric4BoxOutlineIcon
-                                        5 -> Numeric5BoxOutlineIcon
-                                        6 -> Numeric6BoxOutlineIcon
-                                        else -> Numeric0BoxOutlineIcon
-                                    }
-
-                                else -> Icons.Filled.Sync
-                            }
-                        add(
-                            ActionButtonData(
-                                icon = trackerIcon,
-                                text =
-                                    if (isTracked) UiText.StringResource(R.string.tracked)
-                                    else UiText.StringResource(R.string.tracking),
-                                isChecked = isTracked,
-                                onClick = trackingClick,
-                            )
-                        )
-                    }
-
-                    // Other buttons
-                    add(
-                        ActionButtonData(
-                            icon = ArtTrackIcon,
-                            text = UiText.StringResource(R.string.artwork),
-                            onClick = artworkClick,
-                        )
-                    )
-                    add(
-                        ActionButtonData(
-                            icon = AccountTreeIcon,
-                            text = UiText.StringResource(R.string.similar_work),
-                            onClick = similarClick,
-                        )
-                    )
-                    add(
-                        ActionButtonData(
-                            icon =
-                                when (mergedCount) {
-                                    0 -> Numeric0BoxOutlineIcon
+                // Tracking Button (conditionally added)
+                if (loggedIntoTrackers) {
+                    val isTracked = trackServiceCount > 0
+                    val trackerIcon =
+                        when {
+                            isTracked ->
+                                when (trackServiceCount) {
                                     1 -> Numeric1BoxOutlineIcon
                                     2 -> Numeric2BoxOutlineIcon
                                     3 -> Numeric3BoxOutlineIcon
                                     4 -> Numeric4BoxOutlineIcon
                                     5 -> Numeric5BoxOutlineIcon
                                     6 -> Numeric6BoxOutlineIcon
-                                    else -> MergeCheckIcon
-                                },
+                                    else -> Numeric0BoxOutlineIcon
+                                }
+
+                            else -> Icons.Filled.Sync
+                        }
+                    add(
+                        ActionButtonData(
+                            icon = trackerIcon,
                             text =
-                                UiText.StringResource(
-                                    if (mergedCount != 0) R.string.is_merged
-                                    else R.string.is_not_merged
-                                ),
-                            isChecked = mergedCount != 0,
-                            onClick = mergeClick,
-                        )
-                    )
-                    add(
-                        ActionButtonData(
-                            icon = Icons.Filled.OpenInBrowser,
-                            text = UiText.StringResource(R.string.links),
-                            onClick = linksClick,
-                        )
-                    )
-                    add(
-                        ActionButtonData(
-                            icon = Icons.Filled.Share,
-                            text = UiText.StringResource(R.string.share),
-                            onClick = shareClick,
+                                if (isTracked) UiText.StringResource(R.string.tracked)
+                                else UiText.StringResource(R.string.tracking),
+                            isChecked = isTracked,
+                            onClick = trackingClick,
                         )
                     )
                 }
-                .build()
+
+                // Other buttons
+                add(
+                    ActionButtonData(
+                        icon = ArtTrackIcon,
+                        text = UiText.StringResource(R.string.artwork),
+                        onClick = artworkClick,
+                    )
+                )
+                add(
+                    ActionButtonData(
+                        icon = AccountTreeIcon,
+                        text = UiText.StringResource(R.string.similar_work),
+                        onClick = similarClick,
+                    )
+                )
+                add(
+                    ActionButtonData(
+                        icon =
+                            when (mergedCount) {
+                                0 -> Numeric0BoxOutlineIcon
+                                1 -> Numeric1BoxOutlineIcon
+                                2 -> Numeric2BoxOutlineIcon
+                                3 -> Numeric3BoxOutlineIcon
+                                4 -> Numeric4BoxOutlineIcon
+                                5 -> Numeric5BoxOutlineIcon
+                                6 -> Numeric6BoxOutlineIcon
+                                else -> MergeCheckIcon
+                            },
+                        text =
+                            UiText.StringResource(
+                                if (mergedCount != 0) R.string.is_merged
+                                else R.string.is_not_merged
+                            ),
+                        isChecked = mergedCount != 0,
+                        onClick = mergeClick,
+                    )
+                )
+                add(
+                    ActionButtonData(
+                        icon = Icons.Filled.OpenInBrowser,
+                        text = UiText.StringResource(R.string.links),
+                        onClick = linksClick,
+                    )
+                )
+                add(
+                    ActionButtonData(
+                        icon = Icons.Filled.Share,
+                        text = UiText.StringResource(R.string.share),
+                        onClick = shareClick,
+                    )
+                )
+            }
         }
 
     // The UI is rendered by iterating over the data list.
@@ -330,7 +324,7 @@ private fun ActionButton(
                                 it
                             }
                         }
-                        .toPersistentList(),
+                        .toList(),
             )
         }
     }
@@ -341,6 +335,6 @@ private data class ActionButtonData(
     val text: UiText,
     val onClick: () -> Unit,
     val isChecked: Boolean = false,
-    val dropdownItems: ImmutableList<SimpleDropDownItem>? = null,
+    val dropdownItems: List<SimpleDropDownItem>? = null,
     val contentDescription: UiText? = null,
 )

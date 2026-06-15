@@ -59,10 +59,6 @@ import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import jp.wasabeef.gap.Gap
 import kotlin.random.Random
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedState
@@ -72,7 +68,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun DetailedStats(
     detailedStats: DetailedState,
-    colors: PersistentList<Color>,
+    colors: List<Color>,
     contentPadding: PaddingValues,
     windowSizeClass: WindowSizeClass,
 ) {
@@ -211,7 +207,7 @@ private fun FilterChipHeader(filterState: Filter, filterStateClick: (Filter) -> 
 private fun TagView(
     sortType: Sort,
     detailedStats: DetailedState,
-    colors: PersistentList<Color>,
+    colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -235,7 +231,7 @@ private fun TagView(
                                 .compareTo(t.second.sumOf { it.readDuration })
                     }
                 }
-                .toPersistentList()
+                .toList()
         }
     StatCardView(
         contentPadding = contentPadding,
@@ -254,7 +250,7 @@ private fun TagView(
 private fun ContentRatingView(
     sortType: Sort,
     detailedStats: DetailedState,
-    colors: PersistentList<Color>,
+    colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -265,7 +261,7 @@ private fun ContentRatingView(
                 .groupBy { it.contentRating.prettyPrint() }
                 .entries
                 .sortedWith(mapEntryComparator(sortType))
-                .toPersistentList()
+                .toList()
         }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -292,7 +288,7 @@ private fun ContentRatingView(
 private fun CategoryView(
     sortType: Sort,
     detailedStats: DetailedState,
-    colors: PersistentList<Color>,
+    colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -308,7 +304,7 @@ private fun CategoryView(
                 .entries
                 .filter { it.key != defaultCategoryName || it.value.isNotEmpty() }
                 .sortedWith(mapEntryComparator(sortType))
-                .toPersistentList()
+                .toList()
         }
     val colorsToUse = remember {
         when (sortedSeries.size <= colors.size) {
@@ -316,7 +312,7 @@ private fun CategoryView(
             false ->
                 sortedSeries
                     .map { Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)) }
-                    .toPersistentList()
+                    .toList()
         }
     }
 
@@ -344,7 +340,7 @@ private fun CategoryView(
 @Composable
 private fun StartYearView(
     detailedStats: DetailedState,
-    colors: PersistentList<Color>,
+    colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
 ) {
@@ -354,7 +350,7 @@ private fun StartYearView(
             .groupBy { it.startYear?.toString() ?: notStartedString }
             .entries
             .sortedBy { it.key }
-            .toPersistentList()
+            .toList()
     }
 
     val lineData = remember {
@@ -366,9 +362,9 @@ private fun StartYearView(
                     null
                 }
             }
-            .toPersistentList()
+            .toList()
     }
-    val colorMap = remember { sortedSeries.associate { it.key to colors[0] }.toImmutableMap() }
+    val colorMap = remember { sortedSeries.associate { it.key to colors[0] }.toMap() }
 
     DefaultView(
         contentPadding = contentPadding,
@@ -391,7 +387,7 @@ private fun StatusView(
     sortType: Sort,
     detailedStats: DetailedState,
     context: Context,
-    colors: PersistentList<Color>,
+    colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -402,7 +398,7 @@ private fun StatusView(
                 .groupBy { context.getString(it.status.statusRes) }
                 .entries
                 .sortedWith(mapEntryComparator(sortType))
-                .toPersistentList()
+                .toList()
         }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -430,7 +426,7 @@ private fun TypeView(
     sortType: Sort,
     detailedStats: DetailedState,
     context: Context,
-    colors: PersistentList<Color>,
+    colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -441,7 +437,7 @@ private fun TypeView(
                 .groupBy { context.getString(it.type.typeRes) }
                 .entries
                 .sortedWith(mapEntryComparator(sortType))
-                .toPersistentList()
+                .toList()
         }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -469,8 +465,8 @@ private fun DefaultView(
     contentPadding: PaddingValues,
     sortType: Sort = Sort.Entries,
     sortChipClick: () -> Unit = {},
-    sortedSeries: PersistentList<Map.Entry<String, List<StatsConstants.DetailedStatManga>>>,
-    colorMap: ImmutableMap<String, Color>,
+    sortedSeries: List<Map.Entry<String, List<StatsConstants.DetailedStatManga>>>,
+    colorMap: Map<String, Color>,
     totalCount: Int = 0,
     totalDuration: Long = 0L,
     viewType: ViewType,
@@ -537,7 +533,7 @@ private fun DefaultView(
 
 @Composable
 private fun DetailedCardView(
-    mangaList: PersistentList<StatsConstants.DetailedStatManga>,
+    mangaList: List<StatsConstants.DetailedStatManga>,
     contentPadding: PaddingValues,
     viewType: ViewType,
 ) {
@@ -560,7 +556,7 @@ private fun DetailedCardView(
 private fun StatCardView(
     contentPadding: PaddingValues,
     viewType: ViewType,
-    sortedSeries: PersistentList<Pair<String, PersistentList<StatsConstants.DetailedStatManga>>>,
+    sortedSeries: List<Pair<String, List<StatsConstants.DetailedStatManga>>>,
     color: Color,
     totalCount: Int,
     totalReadDuration: Long,
@@ -913,15 +909,15 @@ private fun <T : Comparable<T>> mapEntryComparator(sortType: Sort) =
     }
 
 /** Creates the color map using the unique key so changing sort order doesnt change the color */
-private fun <T> colorMap(sortedSeries: List<T>, colors: List<Color>): ImmutableMap<T, Color> {
-    return sortedSeries.mapIndexed { index, T -> T to colors[index] }.toMap().toImmutableMap()
+private fun <T> colorMap(sortedSeries: List<T>, colors: List<Color>): Map<T, Color> {
+    return sortedSeries.mapIndexed { index, T -> T to colors[index] }.toMap().toMap()
 }
 
 private fun <T> pieData(
-    sortedSeries: PersistentList<Map.Entry<T, List<StatsConstants.DetailedStatManga>>>,
-    colorMap: ImmutableMap<T, Color>,
+    sortedSeries: List<Map.Entry<T, List<StatsConstants.DetailedStatManga>>>,
+    colorMap: Map<T, Color>,
     sortType: Sort,
-): PersistentList<PieData> {
+): List<PieData> {
     return sortedSeries
         .mapNotNull { entry ->
             val data =
@@ -936,7 +932,7 @@ private fun <T> pieData(
                 null
             }
         }
-        .toPersistentList()
+        .toList()
 }
 
 private enum class Filter {

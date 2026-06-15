@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga
 import androidx.annotation.StringRes
 import java.text.DateFormat
 import java.time.LocalDate
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackSearchItem
 import org.nekomanga.domain.track.TrackServiceItem
@@ -40,7 +39,7 @@ object TrackingConstants {
         object NoResult : TrackSearchResult()
 
         class Success(
-            val trackSearchResult: PersistentList<TrackSearchItem>,
+            val trackSearchResult: List<TrackSearchItem>,
             val hasMatchingId: Boolean = false,
         ) : TrackSearchResult()
 

@@ -9,9 +9,6 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
 import eu.kanade.tachiyomi.util.system.getActivity
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableMap
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.presentation.screens.settings.Preference
@@ -26,9 +23,9 @@ internal class SecuritySettingsScreen(
     override fun getTitleRes(): Int = R.string.security
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
+    override fun getPreferences(): List<Preference> {
         val context = LocalContext.current
-        return persistentListOf(
+        return listOf(
             Preference.PreferenceItem.SwitchPreference(
                 pref = securityPreferences.useBiometrics(),
                 title = stringResource(R.string.lock_with_biometrics),
@@ -53,7 +50,7 @@ internal class SecuritySettingsScreen(
                                 else -> it to pluralStringResource(R.plurals.after_minutes, it, it)
                             }
                         }
-                        .toImmutableMap(),
+                        .toMap(),
             ),
             Preference.PreferenceItem.SwitchPreference(
                 pref = securityPreferences.hideNotificationContent(),
@@ -65,7 +62,7 @@ internal class SecuritySettingsScreen(
                 entries =
                     SecurityPreferences.SecureScreenMode.entries
                         .associate { it to stringResource(it.titleResId) }
-                        .toImmutableMap(),
+                        .toMap(),
                 onValueChanged = {
                     val activity = context.getActivity()
                     if (activity != null) {
@@ -82,8 +79,8 @@ internal class SecuritySettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(stringResource(R.string.lock_with_biometrics)),
                 SearchTerm(stringResource(R.string.lock_when_idle)),
                 SearchTerm(stringResource(R.string.hide_notification_content)),

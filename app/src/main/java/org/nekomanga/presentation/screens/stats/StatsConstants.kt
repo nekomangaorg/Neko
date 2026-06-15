@@ -1,8 +1,6 @@
 package org.nekomanga.presentation.screens.stats
 
 import eu.kanade.tachiyomi.data.database.models.MergeType
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
@@ -19,7 +17,7 @@ object StatsConstants {
         val globalUpdateCount: Int = 0,
         val downloadCount: Int = 0,
         val tagCount: Int = 0,
-        val mergeCounts: PersistentList<Pair<MergeType, Int>> = persistentListOf(),
+        val mergeCounts: List<Pair<MergeType, Int>> = listOf(),
         val averageMangaRating: Double = 0.0,
         val averageUserRating: Double = 0.0,
         val trackerCount: Int = 0,
@@ -31,17 +29,17 @@ object StatsConstants {
 
     data class DetailedState(
         val isLoading: Boolean = true,
-        val manga: PersistentList<DetailedStatManga> = persistentListOf(),
-        val categories: PersistentList<String> = persistentListOf(),
-        val tags: PersistentList<String> = persistentListOf(),
+        val manga: List<DetailedStatManga> = listOf(),
+        val categories: List<String> = listOf(),
+        val tags: List<String> = listOf(),
         val detailTagState: DetailedTagState = DetailedTagState(),
     )
 
     data class DetailedTagState(
         val totalReadDuration: Long = 0L,
         val totalChapters: Int = 0,
-        val sortedTagPairs: PersistentList<Pair<String, PersistentList<DetailedStatManga>>> =
-            persistentListOf(),
+        val sortedTagPairs: List<Pair<String, List<DetailedStatManga>>> =
+            listOf(),
     )
 
     data class DetailedStatManga(
@@ -58,9 +56,9 @@ object StatsConstants {
         val rating: Double?,
         val userScore: Double?,
         val startYear: Int?,
-        val trackers: PersistentList<String>,
-        val tags: PersistentList<String>,
-        val categories: PersistentList<String>,
+        val trackers: List<String>,
+        val tags: List<String>,
+        val categories: List<String>,
     )
 
     sealed class ScreenState {

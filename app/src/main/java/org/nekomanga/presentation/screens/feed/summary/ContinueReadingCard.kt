@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.presentation.components.NekoColors
@@ -153,7 +152,7 @@ fun ContinueReadingCard(
                                             ),
                                 )
                             )
-                            .toPersistentList(),
+                            .toList(),
                 )
             }
         }

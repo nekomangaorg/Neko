@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import java.text.NumberFormat
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import org.nekomanga.R
 import org.nekomanga.core.util.launchDelayed
@@ -180,7 +179,7 @@ fun DownloadButton(
         val dropDownItems =
             when (downloadState) {
                 Download.State.DOWNLOADED -> {
-                    persistentListOf(
+                    listOf(
                         SimpleDropDownItem.Action(
                             text = UiText.StringResource(R.string.remove),
                             onClick = { isDraining = true },
@@ -188,7 +187,7 @@ fun DownloadButton(
                     )
                 }
                 Download.State.ERROR -> {
-                    persistentListOf(
+                    listOf(
                         SimpleDropDownItem.Action(
                             text = UiText.StringResource(R.string.cancel),
                             onClick = {
@@ -201,7 +200,7 @@ fun DownloadButton(
                 }
                 Download.State.QUEUE,
                 Download.State.DOWNLOADING -> {
-                    persistentListOf(
+                    listOf(
                         SimpleDropDownItem.Action(
                             text = UiText.StringResource(R.string.start_downloading_now),
                             onClick = {
@@ -220,7 +219,7 @@ fun DownloadButton(
                         ),
                     )
                 }
-                Download.State.NOT_DOWNLOADED -> persistentListOf()
+                Download.State.NOT_DOWNLOADED -> listOf()
             }
 
         SimpleDropdownMenu(

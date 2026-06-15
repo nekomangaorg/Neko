@@ -39,9 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toImmutableMap
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.theme.Shapes
@@ -49,7 +46,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaGridWithHeader(
-    groupedManga: ImmutableMap<Int, PersistentList<DisplayManga>>,
+    groupedManga: Map<Int, List<DisplayManga>>,
     shouldOutlineCover: Boolean,
     dynamicCover: Boolean,
     columns: Int,
@@ -65,7 +62,7 @@ fun MangaGridWithHeader(
             groupedManga
                 .mapValues { (_, list) -> list.filter { it.isVisible }.chunked(columns) }
                 .filterValues { it.isNotEmpty() }
-                .toImmutableMap()
+                .toMap()
         }
 
     LazyColumn(

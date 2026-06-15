@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.utils.getBlockedScanlatorGroupUUIDs
 import eu.kanade.tachiyomi.source.online.utils.getBlockedUploaderUUIDs
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.ScanlatorGroupRepository
 import org.nekomanga.data.database.repository.UploaderRepository
@@ -56,7 +55,7 @@ class DisplayRepository(
         val contentRatings =
             MangaContentRating.getOrdered()
                 .map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }
-                .toPersistentList()
+                .toList()
 
         return DexFilters(
             contentRatings = contentRatings,
@@ -69,7 +68,7 @@ class DisplayRepository(
     ): Result<DisplayPageResult, ResultError> {
         return mangaDex.searchForAuthor(authorSearch).map { resultListPage ->
             val displayResult = resultListPage.results.map { it.toDisplayResult() }
-            DisplayPageResult(displayResult = displayResult.toPersistentList())
+            DisplayPageResult(displayResult = displayResult.toList())
         }
     }
 
@@ -85,7 +84,7 @@ class DisplayRepository(
                     mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                 DisplayPageResult(
                     hasNextPage = mangaListPage.hasNextPage,
-                    displayManga = displayMangaList.toPersistentList(),
+                    displayManga = displayMangaList.toList(),
                 )
             }
     }
@@ -93,7 +92,7 @@ class DisplayRepository(
     private suspend fun getGroupPage(groupName: String): Result<DisplayPageResult, ResultError> {
         return mangaDex.searchForGroup(groupName).map { resultListPage ->
             val displayResult = resultListPage.results.map { it.toDisplayResult() }
-            DisplayPageResult(displayResult = displayResult.toPersistentList())
+            DisplayPageResult(displayResult = displayResult.toList())
         }
     }
 
@@ -108,7 +107,7 @@ class DisplayRepository(
                     mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                 DisplayPageResult(
                     hasNextPage = mangaListPage.hasNextPage,
-                    displayManga = displayMangaList.toPersistentList(),
+                    displayManga = displayMangaList.toList(),
                 )
             }
     }
@@ -128,7 +127,7 @@ class DisplayRepository(
                     Ok(
                         DisplayPageResult(
                             hasNextPage = mangaListPage.hasNextPage,
-                            displayManga = displayMangaList.toPersistentList(),
+                            displayManga = displayMangaList.toList(),
                         )
                     )
                 },
@@ -151,7 +150,7 @@ class DisplayRepository(
                     Ok(
                         DisplayPageResult(
                             hasNextPage = mangaListPage.hasNextPage,
-                            displayManga = displayMangaList.toPersistentList(),
+                            displayManga = displayMangaList.toList(),
                         )
                     )
                 },
@@ -166,7 +165,7 @@ class DisplayRepository(
                 success = { listResults ->
                     val displayMangaList =
                         listResults.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
-                    Ok(DisplayPageResult(displayManga = displayMangaList.toPersistentList()))
+                    Ok(DisplayPageResult(displayManga = displayMangaList.toList()))
                 },
                 failure = { Err(it) },
             )
@@ -182,7 +181,7 @@ class DisplayRepository(
                     Ok(
                         DisplayPageResult(
                             hasNextPage = listResults.hasNextPage,
-                            displayManga = displayMangaList.toPersistentList(),
+                            displayManga = displayMangaList.toList(),
                         )
                     )
                 },
@@ -196,7 +195,7 @@ class DisplayRepository(
         val contentRatings =
             MangaContentRating.getOrdered()
                 .map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }
-                .toPersistentList()
+                .toList()
 
         val blankFilter = DexFilters(contentRatings = contentRatings)
 
@@ -211,7 +210,7 @@ class DisplayRepository(
                                 if (it.rating == rating) it.copy(state = true)
                                 else it.copy(state = false)
                             }
-                            .toPersistentList()
+                            .toList()
                 )
             } else {
                 blankFilter.copy(
@@ -222,7 +221,7 @@ class DisplayRepository(
                                     it.copy(state = ToggleableState.On)
                                 else it
                             }
-                            .toPersistentList()
+                            .toList()
                 )
             }
 
@@ -235,7 +234,7 @@ class DisplayRepository(
                     Ok(
                         DisplayPageResult(
                             hasNextPage = mangaListPage.hasNextPage,
-                            displayManga = displayMangaList.toPersistentList(),
+                            displayManga = displayMangaList.toList(),
                         )
                     )
                 },
@@ -253,7 +252,7 @@ class DisplayRepository(
                     Ok(
                         DisplayPageResult(
                             hasNextPage = listResults.hasNextPage,
-                            displayManga = displayMangaList.toPersistentList(),
+                            displayManga = displayMangaList.toList(),
                         )
                     )
                 },

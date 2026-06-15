@@ -19,9 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import java.util.Date
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
@@ -35,7 +32,7 @@ import org.nekomanga.presentation.theme.Size
 fun FeedUpdatesPage(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
+    feedUpdatesMangaList: List<FeedManga> = listOf(),
     outlineCovers: Boolean,
     dynamicCovers: Boolean,
     useVividColorHeaders: Boolean,
@@ -96,7 +93,7 @@ fun FeedUpdatesPage(
 private fun Grouped(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
+    feedUpdatesMangaList: List<FeedManga> = listOf(),
     headerColor: Color,
     outlineCovers: Boolean = false,
     dynamicCovers: Boolean = false,
@@ -139,7 +136,7 @@ private fun Grouped(
                         .map {
                             val (read, unread) =
                                 it.value.flatMap { it.chapters }.partition { it.chapter.read }
-                            val chapters = (unread.reversed() + read).toPersistentList()
+                            val chapters = (unread.reversed() + read).toList()
                             it.value.first().copy(chapters = chapters)
                         }
                 }
@@ -245,7 +242,7 @@ private fun Grouped(
 private fun Ungrouped(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
+    feedUpdatesMangaList: List<FeedManga> = listOf(),
     headerColor: Color,
     outlineCovers: Boolean = false,
     dynamicCovers: Boolean,

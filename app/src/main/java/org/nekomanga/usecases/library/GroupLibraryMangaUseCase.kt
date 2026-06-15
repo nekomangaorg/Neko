@@ -3,9 +3,6 @@ package org.nekomanga.usecases.library
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryItem
 import eu.kanade.tachiyomi.ui.library.LibraryGroup
 import eu.kanade.tachiyomi.ui.library.LibrarySort
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.manga.LibraryMangaItem
@@ -18,7 +15,7 @@ class GroupLibraryMangaUseCase {
         sortOrder: LibrarySort,
         sortAscending: Boolean,
         loggedInTrackStatus: Map<Long, List<String>>,
-    ): PersistentList<LibraryCategoryItem> {
+    ): List<LibraryCategoryItem> {
         val groupedMap = mutableMapOf<String, MutableList<LibraryMangaItem>>()
         val notTrackedList = listOf("Not tracked")
 
@@ -60,17 +57,17 @@ class GroupLibraryMangaUseCase {
                     )
                 LibraryCategoryItem(
                     categoryItem = categoryItem,
-                    libraryItems = items.toPersistentList(),
+                    libraryItems = items.toList(),
                 )
             }
-            .toPersistentList()
+            .toList()
     }
 
     fun groupByUngrouped(
         libraryMangaList: List<LibraryMangaItem>,
         sortOrder: LibrarySort,
         isAscending: Boolean,
-    ): PersistentList<LibraryCategoryItem> {
+    ): List<LibraryCategoryItem> {
 
         val allCategoryItem =
             CategoryItem(
@@ -83,9 +80,9 @@ class GroupLibraryMangaUseCase {
             )
 
         val distinctList =
-            libraryMangaList.distinctBy { it.displayManga.mangaId }.toPersistentList()
+            libraryMangaList.distinctBy { it.displayManga.mangaId }.toList()
 
-        return persistentListOf(
+        return listOf(
             LibraryCategoryItem(categoryItem = allCategoryItem, libraryItems = distinctList)
         )
     }
@@ -117,7 +114,7 @@ class GroupLibraryMangaUseCase {
 
             LibraryCategoryItem(
                 categoryItem = categoryItem,
-                libraryItems = unsortedMangaList.toPersistentList(),
+                libraryItems = unsortedMangaList.toList(),
             )
         }
     }

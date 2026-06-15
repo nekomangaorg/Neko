@@ -12,10 +12,6 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.PersistentMap
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
@@ -44,19 +40,19 @@ data class LibraryScreenState(
     val showUnreadBadges: Boolean = false,
     val showDownloadBadges: Boolean = false,
     val incognitoMode: Boolean = false,
-    val groupByOptions: PersistentList<LibraryGroup> = persistentListOf(),
-    val trackMap: PersistentMap<Long, List<String>> = persistentMapOf(),
+    val groupByOptions: List<LibraryGroup> = listOf(),
+    val trackMap: Map<Long, List<String>> = mapOf(),
     val showUnavailableFilter: Boolean = false,
     val showStartReadingButton: Boolean = true,
     val currentGroupBy: LibraryGroup = LibraryGroup.ByCategory,
-    val items: PersistentList<LibraryCategoryItem> = persistentListOf(),
-    val selectedItems: PersistentList<LibraryMangaItem> = persistentListOf(),
-    val userCategories: PersistentList<CategoryItem> = persistentListOf(),
+    val items: List<LibraryCategoryItem> = listOf(),
+    val selectedItems: List<LibraryMangaItem> = listOf(),
+    val userCategories: List<CategoryItem> = listOf(),
     val horizontalCategories: Boolean = false,
     val showLibraryButtonBar: Boolean = true,
     val pagerIndex: Int = 0,
     val scrollPositions: Map<Int, Int> = emptyMap(),
-    val recentSearches: PersistentList<String> = persistentListOf(),
+    val recentSearches: List<String> = listOf(),
 )
 
 data class LibraryScreenActions(
@@ -107,17 +103,17 @@ data class LibraryCategoryActions(
 data class LibraryViewItem(
     val libraryDisplayMode: LibraryDisplayMode,
     val rawColumnCount: Float = 3f,
-    val libraryCategoryItems: PersistentList<LibraryCategoryItem>,
+    val libraryCategoryItems: List<LibraryCategoryItem>,
     val currentGroupBy: LibraryGroup,
-    val trackMap: PersistentMap<Long, List<String>>,
-    val userCategories: PersistentList<CategoryItem>,
+    val trackMap: Map<Long, List<String>>,
+    val userCategories: List<CategoryItem>,
 )
 
 @Immutable
 data class LibraryCategoryItem(
     val categoryItem: CategoryItem,
     val isRefreshing: Boolean = false,
-    val libraryItems: PersistentList<LibraryMangaItem> = persistentListOf(),
+    val libraryItems: List<LibraryMangaItem> = listOf(),
 )
 
 @Immutable

@@ -3,8 +3,6 @@ package org.nekomanga.domain.track
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
 
 data class TrackItem(
     val id: Long?,
@@ -27,14 +25,14 @@ data class TrackServiceItem(
     val nameRes: Int,
     val logoRes: Int,
     val logoColor: Int,
-    val statusList: PersistentList<Int>,
+    val statusList: List<Int>,
     val supportsReadingDates: Boolean,
     val canRemoveFromService: Boolean,
     val isAutoAddTracker: Boolean,
     val isMdList: Boolean,
     val status: (Int) -> String,
     val displayScore: (TrackItem) -> String,
-    val scoreList: PersistentList<String>,
+    val scoreList: List<String>,
     val indexToScore: (Int) -> Float,
 )
 
@@ -44,14 +42,14 @@ fun TrackService.toTrackServiceItem(): TrackServiceItem {
         nameRes = this.nameRes(),
         logoRes = this.getLogo(),
         logoColor = this.getLogoColor(),
-        statusList = this.getStatusList().toPersistentList(),
+        statusList = this.getStatusList().toList(),
         supportsReadingDates = this.supportsReadingDates,
         canRemoveFromService = this.canRemoveFromService(),
         isAutoAddTracker = this.isAutoAddTracker(),
         isMdList = this.isMdList(),
         status = { num -> this.getStatus(num) },
         displayScore = { track -> this.displayScore(track.toDbTrack()) },
-        scoreList = this.getScoreList().toPersistentList(),
+        scoreList = this.getScoreList().toList(),
         indexToScore = { index -> this.indexToScore(index) },
     )
 }

@@ -35,8 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import eu.kanade.tachiyomi.data.download.model.Download
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
 import org.nekomanga.domain.download.DownloadItem
@@ -192,7 +190,7 @@ private fun getDropDownItems(
     moveToBottomClicked: () -> Unit,
     moveSeriesToBottomClicked: () -> Unit,
     cancelSeriesClicked: () -> Unit,
-): PersistentList<SimpleDropDownItem> {
+): List<SimpleDropDownItem> {
     return listOf(
             SimpleDropDownItem.Parent(
                 text = UiText.StringResource(R.string.move_download),
@@ -229,7 +227,7 @@ private fun getDropDownItems(
                 onClick = cancelSeriesClicked,
             ),
         )
-        .toPersistentList()
+        .toList()
 }
 
 @Composable

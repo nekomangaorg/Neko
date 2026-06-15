@@ -13,9 +13,6 @@ import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import kotlin.math.min
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
@@ -60,7 +57,7 @@ class ListHandler {
                                     UiText.String(listDto.data.attributes.name ?: ""),
                                     listUUID,
                                 ),
-                                persistentListOf(),
+                                listOf(),
                             )
                         )
                     false -> {
@@ -110,7 +107,7 @@ class ListHandler {
                                         sourceManga =
                                             mangaListDto.data
                                                 .map { it.toSourceManga(coverQuality) }
-                                                .toPersistentList(),
+                                                .toList(),
                                         hasNextPage =
                                             (mangaListDto.limit + mangaListDto.offset) <
                                                 listDto.data.relationships.size,
@@ -152,7 +149,7 @@ class ListHandler {
                 Ok(
                     ListResults(
                         displayScreenType = displayScreenType!!,
-                        sourceManga = list.toPersistentList(),
+                        sourceManga = list.toList(),
                     )
                 )
         }
@@ -161,6 +158,6 @@ class ListHandler {
 
 data class ListResults(
     val displayScreenType: DisplayScreenType,
-    val sourceManga: PersistentList<SourceManga>,
+    val sourceManga: List<SourceManga>,
     val hasNextPage: Boolean = false,
 )

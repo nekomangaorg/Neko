@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
@@ -99,7 +98,7 @@ fun SimpleStats(
                 numberFormat.format(statsState.tagCount).toString() to
                     context.getString(R.string.total_tags),
             ) + mergeCounts)
-            .toPersistentList()
+            .toList()
     }
 
     val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded

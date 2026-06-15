@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.manga
 
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
@@ -15,7 +14,7 @@ import org.nekomanga.presentation.components.theme.ThemeColorState
 fun MangaDetailsAppBarActions(
     chapterActions: MangaConstants.ChapterActions,
     themeColorState: ThemeColorState,
-    chapters: PersistentList<ChapterItem>,
+    chapters: List<ChapterItem>,
 ) {
     AppBarActions(
         themeColorState = themeColorState,

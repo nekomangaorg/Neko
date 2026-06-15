@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.Dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.MangaCover
@@ -41,7 +40,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun FeedPage(
     modifier: Modifier,
-    feedMangaList: PersistentList<FeedManga>,
+    feedMangaList: List<FeedManga>,
     summaryScreenPagingState: SummaryScreenPagingState,
     outlineCovers: Boolean,
     dynamicCovers: Boolean,

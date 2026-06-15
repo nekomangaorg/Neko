@@ -7,9 +7,6 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.manga.MangaUtil
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 
 data class MangaItem(
     val id: Long = 0L,
@@ -20,7 +17,7 @@ data class MangaItem(
     val author: String = "",
     val description: String = "",
     val contentRating: String = "",
-    val genre: PersistentList<String> = persistentListOf(),
+    val genre: List<String> = listOf(),
     val status: Int = 0,
     val coverUrl: String = "",
     val favorite: Boolean = false,
@@ -37,15 +34,15 @@ data class MangaItem(
     val myAnimeListId: String = "",
     val mangaUpdatesId: String = "",
     val animePlanetId: String = "",
-    val externalLinks: PersistentList<ExternalLink> = persistentListOf(),
-    val filteredScanlators: PersistentList<String> = persistentListOf(),
-    val filteredLanguage: PersistentList<String> = persistentListOf(),
+    val externalLinks: List<ExternalLink> = listOf(),
+    val filteredScanlators: List<String> = listOf(),
+    val filteredLanguage: List<String> = listOf(),
     val missingChapters: String = "",
     val rating: String = "",
     val users: String = "",
     val lastVolumeNumber: Int? = null,
     val lastChapterNumber: Int? = null,
-    val altTitles: PersistentList<String> = persistentListOf(),
+    val altTitles: List<String> = listOf(),
     val userCover: String = "",
     val dynamicCover: String = "",
     val userTitle: String = "",
@@ -106,7 +103,7 @@ fun Manga.toMangaItem(): MangaItem {
         author = this.author ?: "",
         description = this.description ?: "",
         contentRating = MangaUtil.getContentRating(MangaUtil.getGenres(this.genre)),
-        genre = MangaUtil.getGenres(this.genre, true).toPersistentList(),
+        genre = MangaUtil.getGenres(this.genre, true).toList(),
         status = this.status,
         coverUrl = this.thumbnail_url ?: "",
         favorite = this.favorite,
@@ -123,15 +120,15 @@ fun Manga.toMangaItem(): MangaItem {
         myAnimeListId = this.my_anime_list_id ?: "",
         mangaUpdatesId = this.manga_updates_id ?: "",
         animePlanetId = this.anime_planet_id ?: "",
-        externalLinks = this.getExternalLinks().toPersistentList(),
-        filteredScanlators = ChapterUtil.getScanlators(this.filtered_scanlators).toPersistentList(),
-        filteredLanguage = ChapterUtil.getLanguages(this.filtered_language).toPersistentList(),
+        externalLinks = this.getExternalLinks().toList(),
+        filteredScanlators = ChapterUtil.getScanlators(this.filtered_scanlators).toList(),
+        filteredLanguage = ChapterUtil.getLanguages(this.filtered_language).toList(),
         missingChapters = this.missing_chapters ?: "",
         rating = this.rating ?: "",
         users = this.users ?: "",
         lastVolumeNumber = this.last_volume_number,
         lastChapterNumber = this.last_chapter_number,
-        altTitles = this.getAltTitles().toPersistentList(),
+        altTitles = this.getAltTitles().toList(),
         dynamicCover = this.dynamic_cover ?: "",
         userCover = this.user_cover ?: "",
         userTitle = this.user_title ?: "",

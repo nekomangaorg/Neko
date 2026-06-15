@@ -17,8 +17,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.delay
 import org.nekomanga.constants.Constants
 import org.nekomanga.data.database.repository.ChapterRepository
@@ -72,7 +70,7 @@ class FeedRepository(
 
                     chapter.toSimpleChapter(chpHistory.history.last_read)?.toChapterItem()
                 }
-                .toPersistentList()
+                .toList()
 
         return feedManga.copy(chapters = simpleChapters)
     }
@@ -128,7 +126,7 @@ class FeedRepository(
                             mangaTitle = manga.displayTitle(),
                             date = recentUploadDate ?: 0L,
                             artwork = manga.toDisplayManga().currentArtwork,
-                            chapters = persistentListOf(getChapterItem(manga, chapter)),
+                            chapters = listOf(getChapterItem(manga, chapter)),
                         )
                     }
                 }
@@ -185,7 +183,7 @@ class FeedRepository(
                                     mangaTitle = history.manga.displayTitle(),
                                     date = history.history.last_read,
                                     artwork = history.manga.toDisplayManga().currentArtwork,
-                                    chapters = persistentListOf(chapter),
+                                    chapters = listOf(chapter),
                                 )
                             }
                             .groupBy { it.mangaId }
@@ -255,7 +253,7 @@ class FeedRepository(
                                 date = 0L,
                                 artwork = manga.toDisplayManga().currentArtwork,
                                 lastReadChapter = lastReadChapter,
-                                chapters = persistentListOf(chapter.toChapterItem()),
+                                chapters = listOf(chapter.toChapterItem()),
                             )
                         }
                     }
@@ -316,7 +314,7 @@ class FeedRepository(
                             mangaTitle = displayManga.getTitle(),
                             date = manga.date_added,
                             artwork = displayManga.currentArtwork,
-                            chapters = persistentListOf(getChapterItem(manga, simpleChapter)),
+                            chapters = listOf(getChapterItem(manga, simpleChapter)),
                         )
                     }
                     .takeLast(6)
@@ -372,7 +370,7 @@ class FeedRepository(
                                                     )!!,
                                                 )
                                             }
-                                            .toPersistentList()
+                                            .toList()
 
                                     bySeriesSet.add(history.manga.id!!)
 
@@ -417,7 +415,7 @@ class FeedRepository(
                                                     )!!,
                                                 )
                                             }
-                                            .toPersistentList()
+                                            .toList()
                                     FeedManga(
                                         mangaId = manga.first.id!!,
                                         mangaTitle = manga.first.displayTitle(),
@@ -448,7 +446,7 @@ class FeedRepository(
                                         mangaTitle = it.manga.displayTitle(),
                                         date = it.history.last_read,
                                         artwork = it.manga.toDisplayManga().currentArtwork,
-                                        chapters = persistentListOf(chapterItem),
+                                        chapters = listOf(chapterItem),
                                     )
                                 }
                         }
@@ -512,7 +510,7 @@ class FeedRepository(
                                 mangaTitle = it.manga.displayTitle(),
                                 date = date,
                                 artwork = it.manga.toDisplayManga().currentArtwork,
-                                chapters = persistentListOf(chapterItem),
+                                chapters = listOf(chapterItem),
                             )
                         }
                 Pair(chapters.isNotEmpty(), chapters)

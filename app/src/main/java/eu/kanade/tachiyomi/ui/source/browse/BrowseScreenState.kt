@@ -3,11 +3,6 @@ package eu.kanade.tachiyomi.ui.source.browse
 import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.ImmutableSet
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.category.CategoryItem
@@ -27,8 +22,8 @@ data class BrowseScreenState(
     val incognitoMode: Boolean = false,
     val screenType: BrowseScreenType = BrowseScreenType.Homepage,
     val displayMangaHolder: DisplayMangaHolder = DisplayMangaHolder(),
-    val homePageManga: PersistentList<HomePageManga> = persistentListOf(),
-    val otherResults: PersistentList<DisplayResult> = persistentListOf(),
+    val homePageManga: List<HomePageManga> = listOf(),
+    val otherResults: List<DisplayResult> = listOf(),
     val error: UiText? = null,
     val endReached: Boolean = false,
     val page: Int = 1,
@@ -41,24 +36,24 @@ data class BrowseScreenState(
     val rawColumnCount: Float,
     val promptForCategories: Boolean = false,
     val filters: DexFilters,
-    val defaultContentRatings: ImmutableSet<String>,
+    val defaultContentRatings: Set<String>,
     val firstLoad: Boolean = true,
-    val savedFilters: PersistentList<BrowseFilterImpl> = persistentListOf(),
-    val categories: PersistentList<CategoryItem> = persistentListOf(),
+    val savedFilters: List<BrowseFilterImpl> = listOf(),
+    val categories: List<CategoryItem> = listOf(),
 )
 
 @Immutable
 data class HomePageManga(
     val displayScreenType: DisplayScreenType,
-    val displayManga: PersistentList<DisplayManga> = persistentListOf(),
+    val displayManga: List<DisplayManga> = listOf(),
 )
 
 @Immutable
 data class DisplayMangaHolder(
     val resultType: BrowseScreenType = BrowseScreenType.None,
-    val allDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
-    val filteredDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
-    val groupedDisplayManga: ImmutableMap<Int, PersistentList<DisplayManga>> = persistentMapOf(),
+    val allDisplayManga: List<DisplayManga> = listOf(),
+    val filteredDisplayManga: List<DisplayManga> = listOf(),
+    val groupedDisplayManga: Map<Int, List<DisplayManga>> = mapOf(),
 )
 
 object LibraryEntryVisibility {

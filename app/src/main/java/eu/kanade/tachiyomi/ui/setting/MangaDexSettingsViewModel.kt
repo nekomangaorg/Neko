@@ -4,9 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlinx.collections.immutable.ImmutableSet
-import kotlinx.collections.immutable.persistentSetOf
-import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -52,7 +49,7 @@ class MangaDexSettingsViewModel : ViewModel() {
                 .changes()
                 .distinctUntilChanged()
                 .onEach { blockedGroups ->
-                    _state.update { it.copy(blockedGroups = blockedGroups.toImmutableSet()) }
+                    _state.update { it.copy(blockedGroups = blockedGroups.toSet()) }
                 }
                 .stateIn(viewModelScope)
 
@@ -61,7 +58,7 @@ class MangaDexSettingsViewModel : ViewModel() {
                 .changes()
                 .distinctUntilChanged()
                 .onEach { blockedUploaders ->
-                    _state.update { it.copy(blockedUploaders = blockedUploaders.toImmutableSet()) }
+                    _state.update { it.copy(blockedUploaders = blockedUploaders.toSet()) }
                 }
                 .stateIn(viewModelScope)
         }
@@ -79,7 +76,7 @@ class MangaDexSettingsViewModel : ViewModel() {
     data class MangaDexSettingsState(
         val isLoggedIn: Boolean = false,
         val loginUrl: String = "",
-        val blockedGroups: ImmutableSet<String> = persistentSetOf(),
-        val blockedUploaders: ImmutableSet<String> = persistentSetOf(),
+        val blockedGroups: Set<String> = setOf(),
+        val blockedUploaders: Set<String> = setOf(),
     )
 }

@@ -3,9 +3,6 @@ package org.nekomanga.presentation.screens.settings.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
@@ -21,13 +18,13 @@ internal class GeneralSettingsScreen(
     override fun getTitleRes(): Int = R.string.general
 
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
-        return persistentListOf(
+    override fun getPreferences(): List<Preference> {
+        return listOf(
             Preference.PreferenceItem.ListPreference(
                 pref = preferencesHelper.startingTab(),
                 title = stringResource(R.string.starting_screen),
                 entries =
-                    persistentMapOf(
+                    mapOf(
                         1 to stringResource(R.string.last_used_library_recents),
                         -1 to stringResource(R.string.library),
                         -2 to stringResource(R.string.feed),
@@ -41,7 +38,7 @@ internal class GeneralSettingsScreen(
                 pref = preferencesHelper.dateFormatPreference(),
                 title = stringResource(R.string.date_format),
                 entries =
-                    persistentMapOf(
+                    mapOf(
                         "" to stringResource(R.string.system_default),
                         "MM/dd/yy" to "MM/dd/yy",
                         "dd/MM/yy" to "dd/MM/yy",
@@ -63,7 +60,7 @@ internal class GeneralSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.app_shortcuts),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = preferencesHelper.showSeriesInShortcuts(),
                         title = stringResource(R.string.show_recent_series),
@@ -83,12 +80,12 @@ internal class GeneralSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.auto_updates),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.ListPreference(
                         pref = preferencesHelper.appShouldAutoUpdate(),
                         title = stringResource(R.string.auto_update_app),
                         entries =
-                            persistentMapOf(
+                            mapOf(
                                 0 to stringResource(R.string.over_any_network),
                                 1 to stringResource(R.string.over_wifi_only),
                                 2 to stringResource(R.string.dont_auto_update),
@@ -100,8 +97,8 @@ internal class GeneralSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(title = stringResource(R.string.starting_screen)),
                 SearchTerm(title = stringResource(R.string.date_format)),
                 SearchTerm(title = stringResource(R.string.manage_notifications)),

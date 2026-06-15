@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens.library
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.sheets.DisplayOptionsSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
@@ -77,7 +76,7 @@ fun LibraryBottomSheet(
                     .map { it.allCategories }
                     .flatten()
                     .distinct()
-                    .toPersistentList()
+                    .toList()
 
             EditCategorySheet(
                 addingToLibrary = false,

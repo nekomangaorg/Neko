@@ -33,10 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
@@ -44,7 +40,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaList(
-    mangaList: PersistentList<DisplayManga>,
+    mangaList: List<DisplayManga>,
     shouldOutlineCover: Boolean = true,
     dynamicCover: Boolean,
     contentPadding: PaddingValues = PaddingValues(),
@@ -99,7 +95,7 @@ fun MangaList(
 
 @Composable
 fun MangaListWithHeader(
-    groupedManga: ImmutableMap<Int, PersistentList<DisplayManga>>,
+    groupedManga: Map<Int, List<DisplayManga>>,
     shouldOutlineCover: Boolean,
     dynamicCover: Boolean,
     modifier: Modifier = Modifier,
@@ -110,9 +106,9 @@ fun MangaListWithHeader(
     val filteredGroupedManga =
         remember(groupedManga) {
             groupedManga
-                .mapValues { (_, list) -> list.filter { it.isVisible }.toPersistentList() }
+                .mapValues { (_, list) -> list.filter { it.isVisible }.toList() }
                 .filterValues { it.isNotEmpty() }
-                .toImmutableMap()
+                .toMap()
         }
 
     LazyColumn(

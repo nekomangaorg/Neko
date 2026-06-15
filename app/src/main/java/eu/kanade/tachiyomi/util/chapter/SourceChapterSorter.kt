@@ -58,13 +58,19 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
             }
     if (hasVolumeChange) {
         val (firstVolume, withVolume) = withVolume.partition { getVolumeNum(it) == 1 }
-        return specials +
-            withVolume +
-            listOf(nullVolume, firstVolume).mergeSorted(comp) +
-            zeroVolume
+        return buildList {
+            addAll(specials)
+            addAll(withVolume)
+            addAll(listOf(nullVolume, firstVolume).mergeSorted(comp))
+            addAll(zeroVolume)
+        }
     }
     // Otherwise, we assume null volume chapters are part of any volume
-    return specials + listOf(nullVolume, withVolume).mergeSorted(comp) + zeroVolume
+    return buildList {
+        addAll(specials)
+        addAll(listOf(nullVolume, withVolume).mergeSorted(comp))
+        addAll(zeroVolume)
+    }
 }
 
 // Adapted from https://stackoverflow.com/a/69041133

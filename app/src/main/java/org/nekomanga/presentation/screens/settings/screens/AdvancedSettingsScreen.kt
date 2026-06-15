@@ -27,9 +27,6 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
 import org.nekomanga.constants.Constants.DONT_KILL_MY_APP_URL
@@ -74,12 +71,12 @@ internal class AdvancedSettingsScreen(
 
     @SuppressLint("BatteryLife")
     @Composable
-    override fun getPreferences(): PersistentList<Preference> {
+    override fun getPreferences(): List<Preference> {
         val context = LocalContext.current
 
         LaunchedEffect(Unit) { toastEvent.collect { event -> context.toast(event) } }
 
-        return persistentListOf(
+        return listOf(
             Preference.PreferenceItem.SwitchPreference(
                 pref = preferences.sendCrashReports(),
                 title = stringResource(R.string.send_crash_report),
@@ -122,7 +119,7 @@ internal class AdvancedSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.background_activity),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(R.string.disable_battery_optimization),
                         subtitle = stringResource(R.string.disable_if_issues_with_updating),
@@ -155,7 +152,7 @@ internal class AdvancedSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.system),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(R.string.supported_links),
                         subtitle = stringResource(R.string.supported_links_summary),
@@ -185,7 +182,7 @@ internal class AdvancedSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.network),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(R.string.clear_cookies),
                         onClick = { clearNetworkCookies() },
@@ -230,7 +227,7 @@ internal class AdvancedSettingsScreen(
                                     PREF_DOH_NJALLA to stringResource(R.string.njalla),
                                     PREF_DOH_SHECAN to stringResource(R.string.shecan),
                                 )
-                                .toImmutableMap(),
+                                .toMap(),
                         onValueChanged = {
                             context.toast(R.string.requires_app_restart)
                             true
@@ -255,7 +252,7 @@ internal class AdvancedSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.reader),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(R.string.display_profile),
                         subtitle = readerPreferences.displayProfile().get(),
@@ -303,7 +300,7 @@ internal class AdvancedSettingsScreen(
         return Preference.PreferenceGroup(
             title = stringResource(R.string.data_management),
             preferenceItems =
-                persistentListOf(
+                listOf(
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(R.string.reindex_downloads),
                         subtitle = stringResource(R.string.reindex_downloads_summary),
@@ -330,8 +327,8 @@ internal class AdvancedSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): PersistentList<SearchTerm> {
-            return persistentListOf(
+        override fun getSearchTerms(): List<SearchTerm> {
+            return listOf(
                 SearchTerm(
                     title = stringResource(R.string.send_crash_report),
                     subtitle = stringResource(R.string.helps_fix_bugs),

@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens.settings.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.stringResource
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 
@@ -11,7 +10,7 @@ import org.nekomanga.domain.category.CategoryItem
 @ReadOnlyComposable
 @Composable
 fun getCategoriesLabel(
-    allCategories: PersistentList<CategoryItem>,
+    allCategories: List<CategoryItem>,
     included: Set<String>,
     excluded: Set<String>,
 ): String {

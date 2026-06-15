@@ -5,7 +5,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.PreferenceScreen
@@ -18,7 +17,7 @@ internal abstract class SearchableSettings(
 
     @StringRes abstract fun getTitleRes(): Int
 
-    @Composable abstract fun getPreferences(): PersistentList<Preference>
+    @Composable abstract fun getPreferences(): List<Preference>
 
     @Composable
     fun Content() {

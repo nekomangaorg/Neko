@@ -435,8 +435,10 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
                         val fetchedChapters =
-                            (listOf(holder.sChapters) +
-                                    mergedList.map { it.map { pair -> pair.first } })
+                            buildList {
+                                add(holder.sChapters)
+                                addAll(mergedList.map { it.map { pair -> pair.first } })
+                            }
                                 .mergeSorted(
                                     compareBy<SChapter> { getChapterNum(it) != null }
                                         .thenBy { getChapterNum(it) }
