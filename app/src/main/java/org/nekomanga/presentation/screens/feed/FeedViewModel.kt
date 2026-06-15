@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
@@ -750,6 +751,7 @@ class FeedViewModel() : ViewModel() {
     fun updateMangaForChanges() {
         if (!_feedScreenState.value.firstLoad) {
             viewModelScope.launchIO {
+                delay(500L)
                 if (_updatesScreenPagingState.value.searchUpdatesFeedMangaList.isNotEmpty()) {
                     launch {
                         getUpdatedSearchFeedMangaList(FeedScreenType.Updates) { feedMangaList ->
@@ -768,11 +770,11 @@ class FeedViewModel() : ViewModel() {
                         }
                     }
                 }
-            }
-            when (feedScreenState.value.feedScreenType) {
-                FeedScreenType.Summary -> loadSummaryPage()
-                FeedScreenType.History -> refreshHistoryFeed()
-                FeedScreenType.Updates -> refreshUpdatesFeed()
+                when (feedScreenState.value.feedScreenType) {
+                    FeedScreenType.Summary -> loadSummaryPage()
+                    FeedScreenType.History -> refreshHistoryFeed()
+                    FeedScreenType.Updates -> refreshUpdatesFeed()
+                }
             }
         }
     }
