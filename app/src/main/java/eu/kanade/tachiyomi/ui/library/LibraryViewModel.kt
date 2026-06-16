@@ -142,6 +142,12 @@ class LibraryViewModel() : ViewModel() {
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
+    private val hasLoggedTrackersFlow: Flow<Boolean> =
+        loggedServicesFlow
+            .map { loggedServices -> loggedServices.any { !it.isMdList() } }
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
     /** Save the current list to speed up loading later */
     override fun onCleared() {
         super.onCleared()
@@ -188,6 +194,21 @@ class LibraryViewModel() : ViewModel() {
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
+    val trackCountMapFlow: Flow<Map<Long, Int>> =
+        combine(trackRepository.observeAllTracks(), loggedServicesFlow) { tracks, loggedServices ->
+                val serviceMap = loggedServices.associateBy { it.id }
+
+                tracks
+                    .filter { track ->
+                        val trackService = serviceMap[track.sync_id]
+                        trackService != null && !trackService.isMdList()
+                    }
+                    .groupBy { it.manga_id }
+                    .mapValues { it.value.size }
+            }
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
     private val rawLibraryMangaListFlow =
         mangaRepository
             .observeLibrary()
@@ -230,14 +251,15 @@ class LibraryViewModel() : ViewModel() {
      * from frequent updates of counts.
      */
     val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
-        combine(initialLibraryItemsFlow, trackMapFlow, downloadCountMapFlow) {
+        combine(initialLibraryItemsFlow, trackMapFlow, trackCountMapFlow, downloadCountMapFlow) {
                 items,
                 trackMap,
+                trackCountMap,
                 downloadCountMap ->
                 items.map { item ->
                     val mangaId = item.displayManga.mangaId
                     val newDownloadCount = downloadCountMap[mangaId] ?: 0
-                    val newTrackCount = trackMap[mangaId]?.size ?: 0
+                    val newTrackCount = trackCountMap[mangaId] ?: 0
 
                     if (
                         item.downloadCount == newDownloadCount && item.trackCount == newTrackCount
@@ -601,13 +623,15 @@ class LibraryViewModel() : ViewModel() {
                 categoryListFlow,
                 libraryViewFlow,
                 uiSettingsFlow,
+                hasLoggedTrackersFlow,
             ) {
                 state,
                 (itemsWithRefreshing, allCollapsed),
                 trackMap,
                 categories,
                 viewPrefs,
-                uiSettings ->
+                uiSettings,
+                hasLoggedTrackers ->
                 state.copy(
                     items = itemsWithRefreshing,
                     allCollapsed = allCollapsed,
@@ -618,6 +642,7 @@ class LibraryViewModel() : ViewModel() {
                     recentSearches = uiSettings.recentSearches.toList(),
                     currentGroupBy = viewPrefs.groupBy,
                     trackMap = trackMap.toMap(),
+                    showTrackedFilter = hasLoggedTrackers,
                     userCategories =
                         categories.filterNot { it.isSystemCategory }.toList(),
                     isFirstLoad = false,

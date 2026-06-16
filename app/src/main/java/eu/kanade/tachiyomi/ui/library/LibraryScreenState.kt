@@ -42,6 +42,7 @@ data class LibraryScreenState(
     val incognitoMode: Boolean = false,
     val groupByOptions: List<LibraryGroup> = listOf(),
     val trackMap: Map<Long, List<String>> = mapOf(),
+    val showTrackedFilter: Boolean = false,
     val showUnavailableFilter: Boolean = false,
     val showStartReadingButton: Boolean = true,
     val currentGroupBy: LibraryGroup = LibraryGroup.ByCategory,
