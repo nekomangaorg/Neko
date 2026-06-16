@@ -228,7 +228,7 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
         author = authorList,
         contentRating = listOf(contentRating),
         isMerged = this.isMerged,
-        hasMissingChapters = this.missing_chapters != null,
+        hasMissingChapters = !this.missing_chapters.isNullOrBlank(),
         language = listOf(language),
         status = listOf(status),
         seriesType = seriesType,

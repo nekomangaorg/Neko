@@ -158,7 +158,7 @@ fun LibraryButtonBar(
             mergedToggleList,
             libraryScreenActions.filterToggled,
         )
-        if (libraryScreenState.trackMap.isNotEmpty()) {
+        if (libraryScreenState.showTrackedFilter) {
             ConnectedToggleButtons(
                 libraryScreenState.libraryFilters.filterTracked,
                 trackedToggleList,
