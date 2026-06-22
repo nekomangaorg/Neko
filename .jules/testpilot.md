@@ -13,3 +13,7 @@
 ## 2026-02-23 - [UpdateTrackChapterTest] **Learning:** Mocking simple data classes (`mockk<TrackItem>(relaxed = true)`) in Kotlin can lead to test fragility and code smells. **Action:** Instantiate real instances of simple data classes in tests instead of mocking them.
 
 ## 2026-05-18 - DeepLinkViewModel Testing DI **Learning:** Since `Injekt` is a global registry, registering dependencies via `Injekt.addSingleton` without resetting it will cause `DoubleRegistrationException` when multiple tests are run in the same suite. **Action:** Next time setting up tests involving `Injekt`, reinitialize the global `Injekt` variable with a new `KotlinInjektRegistrar()` at the start of each test setup.
+
+## 2026-06-22 - AppUpdateChecker Testing in ViewModels
+**Learning:** `AboutViewModel` instantiates `AppUpdateChecker` internally via a lazy delegate rather than constructor dependency injection. To mock its behavior without refactoring production code, `mockkConstructor(AppUpdateChecker::class)` must be used alongside `anyConstructed<AppUpdateChecker>()` in MockK to stub the `checkForUpdate` method.
+**Action:** When testing view models that instantiate dependencies internally instead of using constructor injection, use MockK's constructor mocking (`mockkConstructor`) and clean them up using `unmockkAll()` in the tear-down phase.
