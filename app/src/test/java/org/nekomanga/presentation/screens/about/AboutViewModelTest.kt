@@ -13,9 +13,11 @@ import io.mockk.mockkConstructor
 import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -206,16 +208,22 @@ class AboutViewModelTest {
             // Arrange
             mockkConstructor(AppUpdateChecker::class)
             coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } coAnswers {
-                // Assert that checkingForUpdates is true during execution
-                assertTrue(viewModel.aboutScreenState.value.checkingForUpdates)
+                delay(100)
                 AppUpdateResult.NoNewUpdate
             }
             coEvery { mockAppSnackbarManager.showSnackbar(any()) } returns Unit
 
             // Act
+            // Start the first check for update (will suspend at delay(100))
+            viewModel.checkForUpdate()
+            runCurrent()
+
+            // Try to trigger a second check for update concurrently while first one is suspended
             viewModel.checkForUpdate()
             advanceUntilIdle()
 
+            // Assert
+            // The underlying checker should only be invoked once
             coVerify(exactly = 1) { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) }
         }
 
