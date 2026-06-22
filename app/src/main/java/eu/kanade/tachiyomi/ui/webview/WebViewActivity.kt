@@ -59,7 +59,12 @@ open class WebViewActivity : AppCompatActivity() {
 
         setContent {
             NekoTheme {
-                WebViewScreen(title = title.toString(), url = url, onBackPressed = { finish() })
+                WebViewScreen(
+                    title = title.toString(),
+                    url = url,
+                    headers = headers,
+                    onBackPressed = { finish() },
+                )
             }
         }
     }

@@ -3,10 +3,12 @@ package org.nekomanga.presentation.screens
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
+import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.Toast
+import org.nekomanga.constants.Constants
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,7 +41,12 @@ import tachiyomi.core.util.system.setDefaultSettings
 import tachiyomi.core.util.system.shouldOverrideUrlLoading
 
 @Composable
-fun WebViewScreen(title: String, url: String, onBackPressed: () -> Unit) {
+fun WebViewScreen(
+    title: String,
+    url: String,
+    headers: Map<String, String> = emptyMap(),
+    onBackPressed: () -> Unit,
+) {
 
     val context = LocalContext.current
 
@@ -53,6 +60,7 @@ fun WebViewScreen(title: String, url: String, onBackPressed: () -> Unit) {
     WebViewWrapper(
         title = title,
         url = url,
+        headers = headers,
         onShare = { url ->
             val intent =
                 Intent(Intent.ACTION_SEND).apply {
@@ -169,10 +177,15 @@ fun WebViewWrapper(
                         WebView.setWebContentsDebuggingEnabled(true)
                     }
 
-                    headers["user-agent"]?.let { webView.settings.userAgentString = it }
+                    val userAgent = headers.entries.firstOrNull { it.key.equals("user-agent", ignoreCase = true) }?.value
+                        ?: Constants.USER_AGENT
+                    webView.settings.userAgentString = userAgent
                 },
                 client = webClient,
-                onDispose = { webview -> webview.destroy() },
+                onDispose = { webview ->
+                    runCatching { CookieManager.getInstance().flush() }
+                    webview.destroy()
+                },
             )
         }
     }
