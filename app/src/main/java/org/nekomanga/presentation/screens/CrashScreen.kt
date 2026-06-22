@@ -29,7 +29,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -87,7 +86,7 @@ fun CrashScreen(exception: Throwable?, onRestartClick: () -> Unit) {
             Icon(
                 imageVector = Icons.Outlined.BugReport,
                 contentDescription = null,
-                modifier = Modifier.size(64.dp),
+                modifier = Modifier.size(Size.extraExtraHuge),
             )
             Text(
                 text = stringResource(R.string.crash_screen_title),
