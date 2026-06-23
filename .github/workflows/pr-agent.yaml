@@ -1,9 +1,10 @@
 name: PR Agent (Gemini)
 on:
-  pull_request_target:
-    types: [opened, reopened, synchronize]
-  issue_comment:
-    types: [created, edited]
+  workflow_dispatch:
+  #pull_request_target:
+   # types: [opened, reopened, synchronize]
+  #issue_comment:
+    #types: [created, edited]
 
 concurrency:
   group: pr-agent-global-queue
