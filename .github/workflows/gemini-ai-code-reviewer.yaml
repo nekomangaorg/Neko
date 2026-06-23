@@ -1,14 +1,13 @@
 name: Gemini AI Code Reviewer
 
 on:
-  # Triggers automatically when a PR is opened, updated, or reopened (even from a fork)
+  # Triggers automatically when a PR is opened, updated, or reopened
   pull_request_target:
     types: [opened, synchronize, reopened]
   # Triggers when a comment is left on a PR
   issue_comment:
     types: [created]
 
-# Scoped down from "write-all" to the principle of least privilege
 permissions:
   contents: read
   pull-requests: write
@@ -17,21 +16,26 @@ permissions:
 jobs:
   gemini-code-review:
     runs-on: ubuntu-latest
-    # The Security Gate:
-    # Run IF it's an auto-trigger (pull_request_target)
-    # OR IF it's a comment, it contains the command, AND the author is a trusted maintainer
+    # The Security & Bot Gate:
+    # 1. Ignore ALL automated events triggered by bots (like Dependabot opening a PR)
+    # 2. Run IF it's an auto-trigger from a human (pull_request_target)
+    # 3. OR IF it's a comment, contains the command, AND the author is a trusted maintainer
     if: >
-      github.event_name == 'pull_request_target' ||
+      github.event.sender.type != 'Bot' &&
       (
-        github.event_name == 'issue_comment' &&
-        github.event.issue.pull_request &&
-        contains(github.event.comment.body, '/gemini-review') &&
-        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+        github.event_name == 'pull_request_target' ||
+        (
+          github.event_name == 'issue_comment' &&
+          github.event.issue.pull_request &&
+          contains(github.event.comment.body, '/gemini-review') &&
+          contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+        )
       )
     steps:
       - name: Workflow Trigger Info
         run: |
           echo "Triggered by: ${{ github.event_name }}"
+          echo "Sender: ${{ github.actor }}"
           echo "Repository: ${{ github.repository }}"
 
       - name: Checkout Repo
@@ -42,8 +46,5 @@ jobs:
       - uses: truongnh1992/gemini-ai-code-reviewer@main
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Ensure this name exactly matches your GitHub Repository Secret
           GEMINI_API_KEY: ${{ secrets.GEMINI_KEY }}
-          # Valid, supported Gemini model
-          GEMINI_MODEL: gemini-3.5-flash
           EXCLUDE: "package-lock.json,*.yml,*.yaml"
