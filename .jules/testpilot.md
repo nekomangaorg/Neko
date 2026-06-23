@@ -13,3 +13,11 @@
 ## 2026-02-23 - [UpdateTrackChapterTest] **Learning:** Mocking simple data classes (`mockk<TrackItem>(relaxed = true)`) in Kotlin can lead to test fragility and code smells. **Action:** Instantiate real instances of simple data classes in tests instead of mocking them.
 
 ## 2026-05-18 - DeepLinkViewModel Testing DI **Learning:** Since `Injekt` is a global registry, registering dependencies via `Injekt.addSingleton` without resetting it will cause `DoubleRegistrationException` when multiple tests are run in the same suite. **Action:** Next time setting up tests involving `Injekt`, reinitialize the global `Injekt` variable with a new `KotlinInjektRegistrar()` at the start of each test setup.
+
+## 2026-06-22 - AppUpdateChecker Testing in ViewModels
+**Learning:** `AboutViewModel` instantiates `AppUpdateChecker` internally via a lazy delegate rather than constructor dependency injection. To mock its behavior without refactoring production code, `mockkConstructor(AppUpdateChecker::class)` must be used alongside `anyConstructed<AppUpdateChecker>()` in MockK to stub the `checkForUpdate` method.
+**Action:** When testing view models that instantiate dependencies internally instead of using constructor injection, use MockK's constructor mocking (`mockkConstructor`) and clean them up using `unmockkAll()` in the tear-down phase.
+
+## 2026-06-22 - Injekt DI Resetting via Delegation
+**Learning:** `Injekt` uses Kotlin interface delegation (`object Injekt : InjektRegistry by KotlinInjektRegistrar()`). Direct reflection over `Injekt::class.java` fields will miss the delegated fields (which are located inside `KotlinInjektRegistrar`), causing `DoubleRegistrationException` in subsequent tests.
+**Action:** When resetting `Injekt` registry via reflection in `tearDown`, search not only for the `registrars` field directly but also check fields containing the `"delegate"` substring to locate the delegate and clear its `registrars` map.
