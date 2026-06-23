@@ -1,10 +1,7 @@
 name: Gemini AI Code Reviewer
 
 on:
-  # Triggers automatically when a PR is opened, updated, or reopened
-  pull_request_target:
-    types: [opened, synchronize, reopened]
-  # Triggers when a comment is left on a PR
+  # This action strictly requires 'issue_comment' to function
   issue_comment:
     types: [created]
 
@@ -16,30 +13,20 @@ permissions:
 jobs:
   gemini-code-review:
     runs-on: ubuntu-latest
-    # The Security & Bot Gate:
-    # 1. Ignore ALL automated events triggered by bots (like Dependabot opening a PR)
-    # 2. Run IF it's an auto-trigger from a human (pull_request_target)
-    # 3. OR IF it's a comment, contains the command, AND the author is a trusted maintainer
+    # Security Gate: Only trigger if it's a PR comment, contains the command, 
+    # and is written by a trusted repository member (Owner, Member, Collaborator)
     if: >
-      github.event.sender.type != 'Bot' &&
-      (
-        github.event_name == 'pull_request_target' ||
-        (
-          github.event_name == 'issue_comment' &&
-          github.event.issue.pull_request &&
-          contains(github.event.comment.body, '/gemini-review') &&
-          contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
-        )
-      )
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/gemini-review') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
     steps:
       - name: Workflow Trigger Info
         run: |
-          echo "Triggered by: ${{ github.event_name }}"
-          echo "Sender: ${{ github.actor }}"
+          echo "Triggered by comment from: ${{ github.actor }}"
           echo "Repository: ${{ github.repository }}"
 
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -47,4 +34,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_KEY }}
+          GEMINI_MODEL: gemini-1.5-flash
           EXCLUDE: "package-lock.json,*.yml,*.yaml"
