@@ -15,6 +15,7 @@ import org.nekomanga.data.database.mapper.toEntity
 import org.nekomanga.data.database.mapper.toLibraryManga
 import org.nekomanga.data.database.mapper.toManga
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.library.ScanlatorFilterOption
 import org.nekomanga.domain.site.MangaDexPreferences
 
 // SQLite caps a statement at 999 bind variables (SQLITE_MAX_VARIABLE_NUMBER) on older Android.
