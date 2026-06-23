@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.library.ScanlatorFilterOption
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
@@ -79,15 +80,15 @@ internal class LibrarySettingsScreen(
                         pref = libraryPreferences.chapterScanlatorFilterOption(),
                         title = stringResource(R.string.chapter_scanlator_filter_option),
                         subtitleProvider = { value, options ->
-                            when (value == 0) {
-                                true -> stringResource(R.string.chapter_filter_all_summary)
-                                false -> stringResource(R.string.chapter_filter_any_summary)
+                            when (value) {
+                                ScanlatorFilterOption.ALL -> stringResource(R.string.chapter_filter_all_summary)
+                                ScanlatorFilterOption.ANY -> stringResource(R.string.chapter_filter_any_summary)
                             }
                         },
                         entries =
                             mapOf(
-                                0 to stringResource(R.string.chapter_filter_all),
-                                1 to stringResource(R.string.chapter_filter_any),
+                                ScanlatorFilterOption.ALL to stringResource(R.string.chapter_filter_all),
+                                ScanlatorFilterOption.ANY to stringResource(R.string.chapter_filter_any),
                             ),
                     ),
                 ),

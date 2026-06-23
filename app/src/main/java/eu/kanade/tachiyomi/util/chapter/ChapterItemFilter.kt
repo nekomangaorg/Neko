@@ -9,6 +9,7 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.library.ScanlatorFilterOption
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.Injekt
@@ -186,7 +187,7 @@ class ChapterItemFilter(
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
 
         val sources = SourceManager.mergeSourceNames + MdConstants.name
-        val scanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
+        val scanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == ScanlatorFilterOption.ALL
 
         return chapters.filterNot { chapterItem ->
             val scanlators = ChapterUtil.getScanlators(chapterItem.chapter.scanlator)
