@@ -22,7 +22,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           config.model: "gemini/gemini-3.1-flash"
-          config.fallback_models: '["gemini/gemini-3.1-pro"]'
+          config.fallback_models: '["gemini/gemini-3.5-flash"]'
           GOOGLE_AI_STUDIO.GEMINI_API_KEY: ${{ secrets.GEMINI_KEY }}
           github_action_config.auto_review: "true"
           github_action_config.auto_describe: "false"
