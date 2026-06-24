@@ -34,5 +34,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_KEY }}
-          GEMINI_MODEL: gemini-3.1-flash
+          GEMINI_MODEL: gemini-2.5-flash
           EXCLUDE: "package-lock.json,*.yml,*.yaml"
