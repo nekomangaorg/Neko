@@ -53,6 +53,9 @@ class ChapterUtil {
 
         fun getScanlators(scanlators: String?): List<String> {
             if (scanlators.isNullOrBlank()) return emptyList()
+            if (!scanlators.contains(Constants.SCANLATOR_SEPARATOR)) {
+                return listOf(scanlators)
+            }
             return scanlators.split(Constants.SCANLATOR_SEPARATOR).distinct()
         }
 
@@ -62,6 +65,9 @@ class ChapterUtil {
 
         fun getLanguages(language: String?): List<String> {
             if (language.isNullOrBlank()) return emptyList()
+            if (!language.contains(Constants.SCANLATOR_SEPARATOR)) {
+                return listOf(language)
+            }
             return language.split(Constants.SCANLATOR_SEPARATOR).distinct()
         }
 
@@ -131,26 +137,57 @@ class ChapterUtil {
             filteredGroups: Set<String>,
             filteredUploaders: Set<String> = emptySet(),
         ): Boolean {
-            val chapterScanlators =
-                scanlators.filterNot { it in SourceManager.mergeSourceNames }.toMutableList()
-            val filtered = filteredGroups.toMutableSet()
+            if (filteredGroups.isEmpty() && filteredUploaders.isEmpty()) return false
 
-            if (uploader.isNotEmpty()) {
-                // Check uploaders if there is no group
-                if (Constants.NO_GROUP in chapterScanlators) {
-                    chapterScanlators.add(uploader)
-                    filtered += filteredUploaders
-                }
-                // Match all should ignore No Group if uploader is filtered
-                if (all && uploader.isNotEmpty() && Constants.NO_GROUP !in filteredGroups) {
-                    chapterScanlators.remove(Constants.NO_GROUP)
+            var nonMergeCount = 0
+            for (s in scanlators) {
+                if (s !in SourceManager.mergeSourceNames) {
+                    nonMergeCount++
                 }
             }
 
-            return when {
-                chapterScanlators.isEmpty() || filtered.isEmpty() -> false
-                all -> chapterScanlators.all { group -> group in filtered }
-                else -> chapterScanlators.any { group -> group in filtered }
+            if (nonMergeCount == 0 && uploader.isEmpty()) return false
+
+            var hasNoGroup = false
+            if (nonMergeCount > 0) {
+                for (s in scanlators) {
+                    if (s !in SourceManager.mergeSourceNames && s == Constants.NO_GROUP) {
+                        hasNoGroup = true
+                        break
+                    }
+                }
+            }
+
+            val needsUploaderCheck = uploader.isNotEmpty() && hasNoGroup
+
+            if (all) {
+                val skipNoGroup = uploader.isNotEmpty() && Constants.NO_GROUP !in filteredGroups && hasNoGroup
+
+                if (needsUploaderCheck) {
+                    val uploaderIsFiltered = uploader in filteredGroups || uploader in filteredUploaders
+                    if (!uploaderIsFiltered) return false
+                }
+
+                for (s in scanlators) {
+                    if (s in SourceManager.mergeSourceNames) continue
+                    if (s == Constants.NO_GROUP && skipNoGroup) continue
+                    
+                    val isFiltered = s in filteredGroups || (needsUploaderCheck && s in filteredUploaders)
+                    if (!isFiltered) return false
+                }
+                return true
+            } else {
+                if (needsUploaderCheck) {
+                    val uploaderIsFiltered = uploader in filteredGroups || uploader in filteredUploaders
+                    if (uploaderIsFiltered) return true
+                }
+
+                for (s in scanlators) {
+                    if (s in SourceManager.mergeSourceNames) continue
+                    val isFiltered = s in filteredGroups || (needsUploaderCheck && s in filteredUploaders)
+                    if (isFiltered) return true
+                }
+                return false
             }
         }
     }
