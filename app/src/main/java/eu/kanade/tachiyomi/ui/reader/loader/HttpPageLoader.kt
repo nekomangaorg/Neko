@@ -186,6 +186,10 @@ class HttpPageLoader(
             if (!chapterCache.isImageInCache(imageUrl)) {
                 page.status = Page.State.DOWNLOAD_IMAGE
                 val imageResponse = source.getImage(page)
+                if (!imageResponse.isSuccessful) {
+                    imageResponse.close()
+                    throw Exception("HTTP error ${imageResponse.code}")
+                }
                 chapterCache.putImageToCache(imageUrl, imageResponse)
             }
 
