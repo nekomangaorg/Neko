@@ -170,7 +170,7 @@ fun DetailsBottomSheet(
             MergeSheet(
                 themeColorState = themeColorState,
                 isMergedManga = mangaDetailScreenState.manga.isMerged,
-                title = mangaDetailScreenState.manga.originalTitle,
+                title = mangaDetailScreenState.manga.currentTitle,
                 altTitles = mangaDetailScreenState.manga.alternativeTitles,
                 mergeSearchResults = mangaDetailScreenState.merge.mergeSearchResult,
                 openMergeSource = { url, title ->
