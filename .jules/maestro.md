@@ -1,0 +1,3 @@
+## 2026-06-27 - Adaptive Layouts for Branding/Detail Screens
+**Learning:** For branding and configuration screens (like AboutScreen), standard full-width list items stretch uncomfortably on Expanded screens. Splitting the layout into a left pane for visual identity (brand logo and social links) and a right pane for vertical configuration lists creates a much cleaner, responsive, and premium UX.
+**Action:** Always check `windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded` to structure brand, settings, or detail screens into multi-pane side-by-side layouts rather than wrapping everything in a single full-width list.
