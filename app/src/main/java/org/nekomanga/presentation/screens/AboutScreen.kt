@@ -4,9 +4,13 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,7 +21,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -161,100 +169,229 @@ private fun AboutWrapper(
             )
         }
 
-        LazyColumn(
-            contentPadding = contentPadding,
-            modifier = Modifier.padding(horizontal = Size.medium),
-            verticalArrangement = Arrangement.spacedBy(Size.tiny),
-        ) {
-            item { LogoHeader() }
-            item { Spacer(modifier = Modifier.size(Size.large)) }
-            item {
-                ExpressiveListCard(listCardType = ListCardType.Top) {
-                    TextPreferenceWidget(
-                        title = stringResource(R.string.version),
-                        subtitle =
-                            when {
-                                BuildConfig.DEBUG -> {
-                                    "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.buildTime})"
-                                }
+        val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
-                                else -> {
-                                    "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.buildTime})"
+        if (isTablet) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(0.45f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_neko_yokai),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(Size.extraExtraHuge * 3),
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.size(Size.large))
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Spacer(modifier = Modifier.size(Size.medium))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(Size.medium, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        val iconModifier = Modifier.size(Size.extraLarge)
+                        LinkIcon(
+                            label = "Discord",
+                            modifier = iconModifier,
+                            icon = DiscordIcon,
+                            url = DISCORD_URL,
+                        )
+                        LinkIcon(
+                            modifier = iconModifier,
+                            label = "GitHub",
+                            icon = GithubIcon,
+                            url = REPO_URL,
+                        )
+                    }
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(0.55f)
+                        .fillMaxHeight()
+                        .padding(horizontal = Size.medium),
+                    verticalArrangement = Arrangement.spacedBy(Size.tiny, Alignment.CenterVertically),
+                ) {
+                    item {
+                        ExpressiveListCard(listCardType = ListCardType.Top) {
+                            TextPreferenceWidget(
+                                title = stringResource(R.string.version),
+                                subtitle =
+                                    when {
+                                        BuildConfig.DEBUG -> {
+                                            "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.buildTime})"
+                                        }
+
+                                        else -> {
+                                            "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.buildTime})"
+                                        }
+                                    },
+                                onPreferenceClick = { onVersionClicked() },
+                                onPreferenceLongClick = { onVersionLongClicked(context) },
+                            )
+                        }
+                    }
+
+                    item {
+                        ExpressiveListCard(listCardType = ListCardType.Center) {
+                            TextPreferenceWidget(
+                                title = stringResource(R.string.check_for_updates),
+                                onPreferenceClick = {
+                                    if (!context.isOnline()) {
+                                        notOnlineSnackbar()
+                                    } else {
+                                        checkForUpdate()
+                                    }
+                                },
+                            )
+                        }
+                    }
+                    item {
+                        ExpressiveListCard(listCardType = ListCardType.Center) {
+                            TextPreferenceWidget(
+                                title = stringResource(R.string.whats_new),
+                                onPreferenceClick = {
+                                    val url =
+                                        if (BuildConfig.DEBUG) {
+                                            LATEST_COMMIT_URL
+                                        } else {
+                                            RELEASE_URL
+                                        }
+                                    uriHandler.openUri(url)
+                                },
+                            )
+                        }
+                    }
+
+                    item {
+                        ExpressiveListCard(listCardType = ListCardType.Center) {
+                            TextPreferenceWidget(
+                                title = stringResource(R.string.open_source_licenses),
+                                onPreferenceClick = onClickLicenses,
+                            )
+                        }
+                    }
+
+                    item {
+                        ExpressiveListCard(listCardType = ListCardType.Bottom) {
+                            TextPreferenceWidget(
+                                title = stringResource(R.string.privacy_policy),
+                                onPreferenceClick = { uriHandler.openUri(PRIVACY_POLICY_URL) },
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            LazyColumn(
+                contentPadding = contentPadding,
+                modifier = Modifier.padding(horizontal = Size.medium),
+                verticalArrangement = Arrangement.spacedBy(Size.tiny),
+            ) {
+                item { LogoHeader() }
+                item { Spacer(modifier = Modifier.size(Size.large)) }
+                item {
+                    ExpressiveListCard(listCardType = ListCardType.Top) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.version),
+                            subtitle =
+                                when {
+                                    BuildConfig.DEBUG -> {
+                                        "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.buildTime})"
+                                    }
+
+                                    else -> {
+                                        "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.buildTime})"
+                                    }
+                                },
+                            onPreferenceClick = { onVersionClicked() },
+                            onPreferenceLongClick = { onVersionLongClicked(context) },
+                        )
+                    }
+                }
+
+                item {
+                    ExpressiveListCard(listCardType = ListCardType.Center) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.check_for_updates),
+                            onPreferenceClick = {
+                                if (!context.isOnline()) {
+                                    notOnlineSnackbar()
+                                } else {
+                                    checkForUpdate()
                                 }
                             },
-                        onPreferenceClick = { onVersionClicked() },
-                        onPreferenceLongClick = { onVersionLongClicked(context) },
-                    )
+                        )
+                    }
                 }
-            }
+                item {
+                    ExpressiveListCard(listCardType = ListCardType.Center) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.whats_new),
+                            onPreferenceClick = {
+                                val url =
+                                    if (BuildConfig.DEBUG) {
+                                        LATEST_COMMIT_URL
+                                    } else {
+                                        RELEASE_URL
+                                    }
+                                uriHandler.openUri(url)
+                            },
+                        )
+                    }
+                }
 
-            item {
-                ExpressiveListCard(listCardType = ListCardType.Center) {
-                    TextPreferenceWidget(
-                        title = stringResource(R.string.check_for_updates),
-                        onPreferenceClick = {
-                            if (!context.isOnline()) {
-                                notOnlineSnackbar()
-                            } else {
-                                checkForUpdate()
-                            }
-                        },
-                    )
+                item {
+                    ExpressiveListCard(listCardType = ListCardType.Center) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.open_source_licenses),
+                            onPreferenceClick = onClickLicenses,
+                        )
+                    }
                 }
-            }
-            item {
-                ExpressiveListCard(listCardType = ListCardType.Center) {
-                    TextPreferenceWidget(
-                        title = stringResource(R.string.whats_new),
-                        onPreferenceClick = {
-                            val url =
-                                if (BuildConfig.DEBUG) {
-                                    LATEST_COMMIT_URL
-                                } else {
-                                    RELEASE_URL
-                                }
-                            uriHandler.openUri(url)
-                        },
-                    )
-                }
-            }
 
-            item {
-                ExpressiveListCard(listCardType = ListCardType.Center) {
-                    TextPreferenceWidget(
-                        title = stringResource(R.string.open_source_licenses),
-                        onPreferenceClick = onClickLicenses,
-                    )
+                item {
+                    ExpressiveListCard(listCardType = ListCardType.Bottom) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.privacy_policy),
+                            onPreferenceClick = { uriHandler.openUri(PRIVACY_POLICY_URL) },
+                        )
+                    }
                 }
-            }
 
-            item {
-                ExpressiveListCard(listCardType = ListCardType.Bottom) {
-                    TextPreferenceWidget(
-                        title = stringResource(R.string.privacy_policy),
-                        onPreferenceClick = { uriHandler.openUri(PRIVACY_POLICY_URL) },
-                    )
-                }
-            }
-
-            item {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth().padding(Size.medium),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    val modifier = Modifier.size(Size.extraLarge)
-                    LinkIcon(
-                        label = "Discord",
-                        modifier = modifier,
-                        icon = DiscordIcon,
-                        url = DISCORD_URL,
-                    )
-                    LinkIcon(
-                        modifier = modifier,
-                        label = "GitHub",
-                        icon = GithubIcon,
-                        url = REPO_URL,
-                    )
+                item {
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth().padding(Size.medium),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        val modifier = Modifier.size(Size.extraLarge)
+                        LinkIcon(
+                            label = "Discord",
+                            modifier = modifier,
+                            icon = DiscordIcon,
+                            url = DISCORD_URL,
+                        )
+                        LinkIcon(
+                            modifier = modifier,
+                            label = "GitHub",
+                            icon = GithubIcon,
+                            url = REPO_URL,
+                        )
+                    }
                 }
             }
         }
@@ -263,15 +400,18 @@ private fun AboutWrapper(
 
 @Composable
 private fun LogoHeader() {
-    Column {
-        Surface(modifier = Modifier.fillMaxWidth().padding(top = Size.huge)) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_neko_yokai),
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(Size.extraExtraHuge * 2),
-                contentDescription = null,
-            )
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Size.huge),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_neko_yokai),
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(Size.extraExtraHuge * 2),
+            contentDescription = null,
+        )
     }
 }
 
