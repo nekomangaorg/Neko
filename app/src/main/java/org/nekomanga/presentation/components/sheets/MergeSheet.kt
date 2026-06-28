@@ -473,7 +473,7 @@ private fun BoxScope.NonSuccessResultsAndChips(
         }
         Gap(Size.medium)
         if (altTitles.isNotEmpty()) {
-            val allTitles = listOf(title) + altTitles.sorted()
+            val allTitles = (listOf(title) + altTitles.sorted()).distinct()
             val partitioned =
                 allTitles.partition { title -> allTitles.indexOf(title).mod(2) != 0 }.toList()
 
