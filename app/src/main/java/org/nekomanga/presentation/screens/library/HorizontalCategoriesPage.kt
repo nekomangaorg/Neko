@@ -40,10 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
-import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
-import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
-import eu.kanade.tachiyomi.ui.library.LibraryScreenState
+import org.nekomanga.presentation.screens.library.LibraryCategoryActions
+import org.nekomanga.presentation.screens.library.LibraryDisplayMode
+import org.nekomanga.presentation.screens.library.LibraryScreenActions
+import org.nekomanga.presentation.screens.library.LibraryScreenState
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem

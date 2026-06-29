@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.library
+package org.nekomanga.presentation.screens.library
 
 import androidx.compose.ui.util.fastAny
 import androidx.lifecycle.ViewModel
@@ -17,16 +17,16 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
-import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
-import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
-import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
-import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
-import eu.kanade.tachiyomi.ui.library.filter.FilterMerged
-import eu.kanade.tachiyomi.ui.library.filter.FilterMissingChapters
-import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
-import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
-import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
-import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
+import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
+import org.nekomanga.presentation.screens.library.filter.FilterCompleted
+import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
+import org.nekomanga.presentation.screens.library.filter.FilterMangaType
+import org.nekomanga.presentation.screens.library.filter.FilterMerged
+import org.nekomanga.presentation.screens.library.filter.FilterMissingChapters
+import org.nekomanga.presentation.screens.library.filter.FilterTracked
+import org.nekomanga.presentation.screens.library.filter.FilterUnavailable
+import org.nekomanga.presentation.screens.library.filter.FilterUnread
+import org.nekomanga.presentation.screens.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort

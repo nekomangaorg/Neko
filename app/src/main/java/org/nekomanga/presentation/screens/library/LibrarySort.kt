@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.library
+package org.nekomanga.presentation.screens.library
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes

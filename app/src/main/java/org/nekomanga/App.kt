@@ -31,7 +31,7 @@ import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.coil.coilImageLoader
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.library.LibraryViewModel
+import org.nekomanga.presentation.screens.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.main.DeepLinks
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate

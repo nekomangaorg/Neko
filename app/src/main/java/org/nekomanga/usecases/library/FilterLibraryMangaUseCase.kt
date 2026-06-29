@@ -1,6 +1,6 @@
 package org.nekomanga.usecases.library
 
-import eu.kanade.tachiyomi.ui.library.LibraryFilters
+import org.nekomanga.presentation.screens.library.LibraryFilters
 import org.nekomanga.domain.manga.LibraryMangaItem
 
 class FilterLibraryMangaUseCase {

@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdSort
-import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
+import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility

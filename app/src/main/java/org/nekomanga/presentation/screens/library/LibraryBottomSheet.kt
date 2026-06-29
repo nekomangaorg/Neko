@@ -1,8 +1,8 @@
 package org.nekomanga.presentation.screens.library
 
 import androidx.compose.runtime.Composable
-import eu.kanade.tachiyomi.ui.library.LibraryScreenState
-import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
+import org.nekomanga.presentation.screens.library.LibraryScreenState
+import org.nekomanga.presentation.screens.library.LibrarySheetActions
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.sheets.DisplayOptionsSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet

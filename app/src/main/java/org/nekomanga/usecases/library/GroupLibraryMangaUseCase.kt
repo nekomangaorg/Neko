@@ -1,8 +1,8 @@
 package org.nekomanga.usecases.library
 
-import eu.kanade.tachiyomi.ui.library.LibraryCategoryItem
-import eu.kanade.tachiyomi.ui.library.LibraryGroup
-import eu.kanade.tachiyomi.ui.library.LibrarySort
+import org.nekomanga.presentation.screens.library.LibraryCategoryItem
+import org.nekomanga.presentation.screens.library.LibraryGroup
+import org.nekomanga.presentation.screens.library.LibrarySort
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.manga.LibraryMangaItem

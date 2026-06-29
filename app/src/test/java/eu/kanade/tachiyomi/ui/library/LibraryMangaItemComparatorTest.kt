@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.library
+package org.nekomanga.presentation.screens.library
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

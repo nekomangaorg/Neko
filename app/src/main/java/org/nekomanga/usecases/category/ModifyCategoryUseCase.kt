@@ -2,7 +2,7 @@ package org.nekomanga.usecases.category
 
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import eu.kanade.tachiyomi.ui.library.LibrarySort
+import org.nekomanga.presentation.screens.library.LibrarySort
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem

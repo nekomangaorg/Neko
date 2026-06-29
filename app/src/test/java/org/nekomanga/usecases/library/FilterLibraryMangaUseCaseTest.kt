@@ -1,15 +1,15 @@
 package org.nekomanga.usecases.library
 
-import eu.kanade.tachiyomi.ui.library.LibraryFilters
-import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
-import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
-import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
-import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
-import eu.kanade.tachiyomi.ui.library.filter.FilterMerged
-import eu.kanade.tachiyomi.ui.library.filter.FilterMissingChapters
-import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
-import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
-import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
+import org.nekomanga.presentation.screens.library.LibraryFilters
+import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
+import org.nekomanga.presentation.screens.library.filter.FilterCompleted
+import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
+import org.nekomanga.presentation.screens.library.filter.FilterMangaType
+import org.nekomanga.presentation.screens.library.filter.FilterMerged
+import org.nekomanga.presentation.screens.library.filter.FilterMissingChapters
+import org.nekomanga.presentation.screens.library.filter.FilterTracked
+import org.nekomanga.presentation.screens.library.filter.FilterUnavailable
+import org.nekomanga.presentation.screens.library.filter.FilterUnread
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertFalse

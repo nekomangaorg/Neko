@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.library.filter
+package org.nekomanga.presentation.screens.library.filter
 
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.components.UiText

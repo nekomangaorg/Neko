@@ -3,7 +3,7 @@ package org.nekomanga.domain.category
 import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
-import eu.kanade.tachiyomi.ui.library.LibrarySort
+import org.nekomanga.presentation.screens.library.LibrarySort
 
 @Immutable
 data class CategoryItem(
