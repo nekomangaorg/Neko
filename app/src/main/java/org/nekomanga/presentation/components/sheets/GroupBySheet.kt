@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import eu.kanade.tachiyomi.ui.library.LibraryGroup
+import org.nekomanga.presentation.screens.library.LibraryGroup
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.theme.ThemeColorState

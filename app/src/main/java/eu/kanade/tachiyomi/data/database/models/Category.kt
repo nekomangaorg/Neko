@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.ui.library.LibrarySort
+import org.nekomanga.presentation.screens.library.LibrarySort
 import java.io.Serializable
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem.Companion.SYSTEM_CATEGORY

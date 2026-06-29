@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
-import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
+import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.lang.capitalizeWords

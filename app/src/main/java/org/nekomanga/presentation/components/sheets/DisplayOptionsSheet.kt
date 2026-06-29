@@ -30,7 +30,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
+import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.system.isLandscape
 import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt

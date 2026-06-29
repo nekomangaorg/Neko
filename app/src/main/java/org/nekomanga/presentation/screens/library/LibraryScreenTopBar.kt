@@ -8,8 +8,8 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
-import eu.kanade.tachiyomi.ui.library.LibraryScreenState
+import org.nekomanga.presentation.screens.library.LibraryScreenActions
+import org.nekomanga.presentation.screens.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterMarkActions

@@ -20,7 +20,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.ui.library.LibrarySort
+import org.nekomanga.presentation.screens.library.LibrarySort
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors

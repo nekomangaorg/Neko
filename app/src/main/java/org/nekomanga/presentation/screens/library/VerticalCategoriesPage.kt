@@ -35,11 +35,11 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
-import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
-import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
-import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
-import eu.kanade.tachiyomi.ui.library.LibraryScreenState
-import eu.kanade.tachiyomi.ui.library.LibrarySort
+import org.nekomanga.presentation.screens.library.LibraryCategoryActions
+import org.nekomanga.presentation.screens.library.LibraryDisplayMode
+import org.nekomanga.presentation.screens.library.LibraryScreenActions
+import org.nekomanga.presentation.screens.library.LibraryScreenState
+import org.nekomanga.presentation.screens.library.LibrarySort
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.LibraryMangaItem

@@ -1,6 +1,6 @@
 package org.nekomanga.usecases.category
 
-import eu.kanade.tachiyomi.ui.library.LibrarySort
+import org.nekomanga.presentation.screens.library.LibrarySort
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every

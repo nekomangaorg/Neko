@@ -1,16 +1,16 @@
 package org.nekomanga.domain.library
 
-import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
-import eu.kanade.tachiyomi.ui.library.LibraryGroup
-import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
-import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
-import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
-import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
-import eu.kanade.tachiyomi.ui.library.filter.FilterMerged
-import eu.kanade.tachiyomi.ui.library.filter.FilterMissingChapters
-import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
-import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
-import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
+import org.nekomanga.presentation.screens.library.LibraryDisplayMode
+import org.nekomanga.presentation.screens.library.LibraryGroup
+import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
+import org.nekomanga.presentation.screens.library.filter.FilterCompleted
+import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
+import org.nekomanga.presentation.screens.library.filter.FilterMangaType
+import org.nekomanga.presentation.screens.library.filter.FilterMerged
+import org.nekomanga.presentation.screens.library.filter.FilterMissingChapters
+import org.nekomanga.presentation.screens.library.filter.FilterTracked
+import org.nekomanga.presentation.screens.library.filter.FilterUnavailable
+import org.nekomanga.presentation.screens.library.filter.FilterUnread
 import tachiyomi.core.preference.PreferenceStore
 
 class LibraryPreferences(private val preferenceStore: PreferenceStore) {
