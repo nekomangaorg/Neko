@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.jobIsRunning
-import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -223,19 +222,17 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
                 )
             val statusReceiver = pendingIntent.intentSender
+            val startVersion = context.packageManager
+                .getPackageInfo(context.packageName, 0).versionName
             session.commit(statusReceiver)
             notifier.onInstalling()
 
             withContext(Dispatchers.IO) { data.close() }
             withUIContext {
                 delay(5000)
-                val hasNotification =
-                    context.notificationManager.activeNotifications.any {
-                        it.id == Notifications.ID_UPDATER
-                    }
-                // If the package manager crashes for whatever reason (china phone)
-                // set a timeout and let the user manually install
-                if (packageInstaller.getSessionInfo(sessionId) == null && !hasNotification) {
+                val currentVersion = context.packageManager
+                    .getPackageInfo(context.packageName, 0).versionName
+                if (startVersion == currentVersion) {
                     notifier.cancelInstallNotification()
                     notifier.onDownloadFinished(file.getUriCompat(context))
                     PreferenceManager.getDefaultSharedPreferences(context).edit {
