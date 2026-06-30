@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.reader.model
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
-import eu.kanade.tachiyomi.util.system.HashCode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,7 +53,7 @@ data class ReaderChapter(val chapter: Chapter) {
     }
 
     override fun hashCode(): Int {
-        return HashCode.generate(urlAndName())
+        return urlAndName().hashCode()
     }
 
     sealed class State {

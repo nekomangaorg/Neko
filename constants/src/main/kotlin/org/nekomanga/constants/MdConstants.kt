@@ -162,5 +162,8 @@ object MdConstants {
         }
     }
 
-    val mdAtHomeTokenLifespan = TimeUnit.MINUTES.toMillis(5)
+    private const val TokenLifespanMinutes = 5L
+
+    val mdAtHomeTokenLifespan = TimeUnit.MINUTES.toMillis(TokenLifespanMinutes)
 }
+
