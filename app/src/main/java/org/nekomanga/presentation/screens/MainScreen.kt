@@ -282,7 +282,12 @@ fun MainScreen(
                         )
                     }
 
-                    entry<Screens.License> { LicenseScreen(onBackPressed = goBack) }
+                    entry<Screens.License> {
+                        LicenseScreen(
+                            windowSizeClass = windowSizeClass,
+                            onBackPressed = goBack,
+                        )
+                    }
                 },
         )
     }
