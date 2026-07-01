@@ -215,8 +215,8 @@ private fun TagView(
     val tagStats = detailedStats.detailTagState
     val sortedTagPairs =
         remember(sortType) {
-            tagStats.sortedTagPairs.map { it }
-
+            // OPTIMIZATION: Removed redundant tagStats.sortedTagPairs.map { it }
+            // and .toList() to avoid unnecessary list allocations.
             tagStats.sortedTagPairs
                 .sortedWith { t, t2 ->
                     when (sortType) {
@@ -231,7 +231,6 @@ private fun TagView(
                                 .compareTo(t.second.sumOf { it.readDuration })
                     }
                 }
-                .toList()
         }
     StatCardView(
         contentPadding = contentPadding,
@@ -257,11 +256,11 @@ private fun ContentRatingView(
 ) {
     val sortedSeries =
         remember(sortType) {
+            // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
             detailedStats.manga
                 .groupBy { it.contentRating.prettyPrint() }
                 .entries
                 .sortedWith(mapEntryComparator(sortType))
-                .toList()
         }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -297,6 +296,7 @@ private fun CategoryView(
 
     val sortedSeries =
         remember(sortType) {
+            // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
             detailedStats.categories
                 .associateWith { category ->
                     detailedStats.manga.filter { it.categories.contains(category) }
@@ -304,15 +304,14 @@ private fun CategoryView(
                 .entries
                 .filter { it.key != defaultCategoryName || it.value.isNotEmpty() }
                 .sortedWith(mapEntryComparator(sortType))
-                .toList()
         }
     val colorsToUse = remember {
         when (sortedSeries.size <= colors.size) {
             true -> colors
             false ->
+                // OPTIMIZATION: Removed redundant .toList() as .map already returns a List.
                 sortedSeries
                     .map { Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)) }
-                    .toList()
         }
     }
 
@@ -346,14 +345,15 @@ private fun StartYearView(
 ) {
     val notStartedString = stringResource(id = R.string.not_started)
     val sortedSeries = remember {
+        // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
         detailedStats.manga
             .groupBy { it.startYear?.toString() ?: notStartedString }
             .entries
             .sortedBy { it.key }
-            .toList()
     }
 
     val lineData = remember {
+        // OPTIMIZATION: Removed redundant .toList() as .mapNotNull already returns a List.
         sortedSeries
             .mapNotNull {
                 if (it.key != notStartedString) {
@@ -362,7 +362,6 @@ private fun StartYearView(
                     null
                 }
             }
-            .toList()
     }
     val colorMap = remember { sortedSeries.associate { it.key to colors[0] }.toMap() }
 
@@ -394,11 +393,11 @@ private fun StatusView(
 ) {
     val sortedSeries =
         remember(sortType) {
+            // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
             detailedStats.manga
                 .groupBy { context.getString(it.status.statusRes) }
                 .entries
                 .sortedWith(mapEntryComparator(sortType))
-                .toList()
         }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -433,11 +432,11 @@ private fun TypeView(
 ) {
     val sortedSeries =
         remember(sortType) {
+            // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
             detailedStats.manga
                 .groupBy { context.getString(it.type.typeRes) }
                 .entries
                 .sortedWith(mapEntryComparator(sortType))
-                .toList()
         }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -918,6 +917,7 @@ private fun <T> pieData(
     colorMap: Map<T, Color>,
     sortType: Sort,
 ): List<PieData> {
+    // OPTIMIZATION: Removed redundant .toList() as .mapNotNull already returns a List.
     return sortedSeries
         .mapNotNull { entry ->
             val data =
@@ -932,7 +932,6 @@ private fun <T> pieData(
                 null
             }
         }
-        .toList()
 }
 
 private enum class Filter {

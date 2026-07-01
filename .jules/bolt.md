@@ -35,3 +35,8 @@ Action: Always append `.distinctUntilChanged()` after `combine()` blocks that ag
 ## 2026-05-22 - [Avoid Intermediate Lists with PersistentList mapping]
 **Learning:** [Calling `.map { it }.toList()` on a `PersistentList` is unnecessary since `PersistentList` already implements `List`. This pattern needlessly allocates a new `ArrayList` and copies all elements twice, increasing GC churn and allocations.]
 **Action:** [Pass the `PersistentList` directly to functions expecting a `List` instead of using `.map { it }.toList()` to reduce intermediate memory allocations and CPU overhead, especially within high-frequency UI state update flows.]
+
+## 2026-07-01 - [Avoid Redundant List and Flow Transformations]
+**Learning:** [Calling `.map { it }` on standard Flows or Lists (like `networkStateFlow()` or tag stats lists) before performing terminal operations like `firstOrNull()` or sorting, along with redundant `.toList()` calls on collections that are already Lists, leads to useless memory allocations and increases GC load in high-frequency UI and background tasks.]
+**Action:** [Directly access terminal operators on Flows/Collections and avoid redundant `.toList()` or `.map { it }` mappings to preserve memory and reduce CPU overhead.]
+
