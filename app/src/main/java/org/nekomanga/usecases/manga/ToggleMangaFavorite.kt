@@ -43,14 +43,14 @@ class ToggleMangaFavorite(
                             listOf(MangaCategory.create(editManga, it.toDbCategory()))
                         categoryRepository.setMangaCategories(
                             categories,
-                            listOf(editManga.id!!),
+                            listOfNotNull(editManga.id),
                         )
                     }
             } else if (categoryItems.isNotEmpty()) {
                 val categories = categoryItems.map {
                     MangaCategory.create(editManga, it.toDbCategory())
                 }
-                categoryRepository.setMangaCategories(categories, listOf(editManga.id!!))
+                categoryRepository.setMangaCategories(categories, listOfNotNull(editManga.id))
             }
         }
 
