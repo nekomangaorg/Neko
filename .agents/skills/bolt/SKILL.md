@@ -35,10 +35,10 @@ Only log critical learnings format as `## YYYY-MM-DD - [Title] \n **Learning:** 
 
 # Instructions
 1. **PROFILE**: Hunt for bottlenecks.
-  - *Compose*: Missing `derivedStateOf`, raw values instead of lambdas `() -> Type`, resolving `stringResource()` inside `LazyColumn` items, missing `@Stable`/`@Immutable`, or missing `key` parameters.
-  - *ViewModel*: Heavy mapping/filtering on `Dispatchers.Main`; missing `.distinctUntilChanged()`.
-  - *Data*: N+1 queries, unclosed I/O streams, missing DB indexes.
-  - *Kotlin*: Chained operators without `.asSequence()`, or redundant `.filter().map()` instead of `.mapNotNull()`.
+  - *Compose*: Missing `derivedStateOf`; raw values instead of lambdas `() -> Type`; resolving `stringResource()` inside `LazyColumn`/`LazyRow` items; missing `@Stable`/`@Immutable` annotations on UI state classes containing collection types; reading scroll state details (e.g., `visibleItemsInfo`) directly inside items forcing recomposition on every pixel; using non-lambda modifiers for animations/scroll offsets (e.g., `Modifier.offset` vs `Modifier.offset { ... }`); allocating new `Modifier` objects inside loops.
+  - *ViewModel*: Heavy mapping/filtering on `Dispatchers.Main`; missing `.distinctUntilChanged()`; collecting UI flows without lifecycle awareness (`collectAsState` vs `collectAsStateWithLifecycle`).
+  - *Data*: N+1 queries; synchronous I/O reads (e.g., SharedPreferences) inside cursor mappings; unclosed I/O streams; missing DB indexes.
+  - *Kotlin*: Chained operators without `.asSequence()`; redundant `.filter().map()` instead of `.mapNotNull()`; intermediate allocations before terminal operations (e.g., `.map {}.all {}`); O(N) list lookup loops (e.g., `find`/`indexOf`) inside map operations; using `.asSequence()` on small collections where iterator overhead exceeds intermediate GC costs; switching Coroutine dispatchers inside loop iterations rather than surrounding the entire loop.
 2. **SELECT**: Pick the BEST opportunity that has measurable impact, can be implemented cleanly in < 50 lines, and follows existing patterns.
 3. **OPTIMIZE**: Write clean, understandable Kotlin. Apply scope functions appropriately. Ensure thread safety and preserve existing functionality exactly.
 4. **VERIFY**: Run `./gradlew ktfmtFormat`, lint, and tests. Verify the optimization works as expected.
@@ -47,10 +47,23 @@ Only log critical learnings format as `## YYYY-MM-DD - [Title] \n **Learning:** 
 # Examples
 * Wrap frequently changing state (like scroll position) in `derivedStateOf { }`.
 * Defer Compose state reads by passing lambdas `() -> Type` instead of raw values.
+* Use `snapshotFlow` in a parameterless `LaunchedEffect(state)` to observe scroll offset or bounds, and capture external state using `rememberUpdatedState` to avoid recomposition on scroll.
+* Use lambda-based modifiers (like `Modifier.offset { ... }` or `Modifier.graphicsLayer { ... }`) to defer state reading and bypass recomposition.
+* Move `stringResource(...)` calls out of `LazyColumn` items into ViewModel/State definitions.
+* Pass baseline modifiers or reuse modifier instances inside loops to avoid redundant allocation.
 * Add `.asSequence()` to large list operations to stop intermediate memory allocation.
+* Avoid using `.asSequence()` for small collections (<= 5-10 items) where sequence overhead exceeds intermediate list GC costs.
+* Specify `ArrayList` or map capacity (e.g., `ArrayList(size)`) when the final collection size is known to prevent internal array resizing.
 * Add `remember` to prevent recalculating values during recomposition.
-* Wrap data classes in `@Immutable` to fix Compose stability.
-* Move heavy list sorting/filtering to the ViewModel via `Dispatchers.Default`.
+* Wrap data classes and UI state models in `@Immutable` to fix Compose stability, especially if they contain collections.
+* Avoid calling `.map { it }.toList()` on `PersistentList` variables when passing them to functions that expect a standard `List`.
+* Move heavy list sorting/filtering to the ViewModel via `Dispatchers.Default` using a single `withContext(Dispatchers.Default)` block surrounding the loop.
+* Collect flows in Composables using `collectAsStateWithLifecycle()` to automatically pause collection when the app goes to the background.
 * Add `.distinctUntilChanged()` to a Flow to stop spamming the UI.
 * Replace `List.filter {}.map {}` with `List.mapNotNull {}`.
+* Replace intermediate map allocations on terminal calls: `list.map { transform(it) }.all { predicate(it) }` -> `list.all { predicate(transform(it)) }`.
+* Replace O(N*M) iteration loops with pre-computed O(1) maps using `.associateBy { it.id }` or `.associate { }` before stepping into mapping/filtering.
+* Prefer zero-allocation scanning (e.g. index/character loops) over regex or `.split()` in cursor parsers.
+* Cache SharedPreferences reads outside DB cursor iteration blocks.
 * Add database indexes to Room `@Entity` on frequently queried fields.
+* When batching queries to resolve N+1 patterns, partition inputs via `.chunked(500)` to prevent crashing due to SQLite parameter limits.

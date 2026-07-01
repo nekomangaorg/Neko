@@ -215,8 +215,6 @@ private fun TagView(
     val tagStats = detailedStats.detailTagState
     val sortedTagPairs =
         remember(sortType) {
-            tagStats.sortedTagPairs.map { it }
-
             tagStats.sortedTagPairs
                 .sortedWith { t, t2 ->
                     when (sortType) {
@@ -231,7 +229,6 @@ private fun TagView(
                                 .compareTo(t.second.sumOf { it.readDuration })
                     }
                 }
-                .toList()
         }
     StatCardView(
         contentPadding = contentPadding,
@@ -261,7 +258,6 @@ private fun ContentRatingView(
                 .groupBy { it.contentRating.prettyPrint() }
                 .entries
                 .sortedWith(mapEntryComparator(sortType))
-                .toList()
         }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -304,7 +300,6 @@ private fun CategoryView(
                 .entries
                 .filter { it.key != defaultCategoryName || it.value.isNotEmpty() }
                 .sortedWith(mapEntryComparator(sortType))
-                .toList()
         }
     val colorsToUse = remember {
         when (sortedSeries.size <= colors.size) {
@@ -312,7 +307,6 @@ private fun CategoryView(
             false ->
                 sortedSeries
                     .map { Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)) }
-                    .toList()
         }
     }
 
@@ -350,7 +344,6 @@ private fun StartYearView(
             .groupBy { it.startYear?.toString() ?: notStartedString }
             .entries
             .sortedBy { it.key }
-            .toList()
     }
 
     val lineData = remember {
@@ -362,7 +355,6 @@ private fun StartYearView(
                     null
                 }
             }
-            .toList()
     }
     val colorMap = remember { sortedSeries.associate { it.key to colors[0] }.toMap() }
 
@@ -398,7 +390,6 @@ private fun StatusView(
                 .groupBy { context.getString(it.status.statusRes) }
                 .entries
                 .sortedWith(mapEntryComparator(sortType))
-                .toList()
         }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -437,7 +428,6 @@ private fun TypeView(
                 .groupBy { context.getString(it.type.typeRes) }
                 .entries
                 .sortedWith(mapEntryComparator(sortType))
-                .toList()
         }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -932,7 +922,6 @@ private fun <T> pieData(
                 null
             }
         }
-        .toList()
 }
 
 private enum class Filter {

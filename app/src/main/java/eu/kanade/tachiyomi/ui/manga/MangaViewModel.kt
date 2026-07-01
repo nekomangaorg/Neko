@@ -1105,11 +1105,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     suspend fun isOnline(): Boolean {
-        val networkState =
-            downloadManager.networkStateFlow().map { it }.distinctUntilChanged().firstOrNull()
-        networkState ?: return false
-
-        return networkState.isOnline
+        val networkState = downloadManager.networkStateFlow().firstOrNull()
+        return networkState?.isOnline == true
     }
 
     fun initialLoad() {

@@ -41,10 +41,7 @@ class AutoAddTrackers(
 ) {
 
     private suspend fun isOnline(): Boolean {
-        val networkState =
-            downloadManager.networkStateFlow().map { it }.distinctUntilChanged().firstOrNull()
-        networkState ?: return false
-        return networkState.isOnline
+        return downloadManager.networkStateFlow().firstOrNull()?.isOnline == true
     }
 
     suspend operator fun invoke(
