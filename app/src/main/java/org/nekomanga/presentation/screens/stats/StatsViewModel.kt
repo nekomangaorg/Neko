@@ -94,20 +94,12 @@ class StatsViewModel() : ViewModel() {
         val lastUpdateAttempt = libraryPreferences.lastUpdateAttemptTimestamp().get()
         val lastUpdateDuration = libraryPreferences.lastUpdateDuration().get()
 
-        val favoritedMangalist = mangaRepository.getFavoriteMangaList()
+        val favoritedMangaIds = mangaRepository.getFavoriteMangaList().mapNotNull { it.id }.toSet()
 
         val mergedMangaList =
-            mergeMangaRepository.getAllMergeManga().mapNotNull { mergedManga ->
-                when (
-                    favoritedMangalist.firstOrNull { manga -> manga.id!! == mergedManga.mangaId } !=
-                        null
-                ) {
-                    true -> mergedManga
-                    false -> null
-                }
+            mergeMangaRepository.getAllMergeManga().filter { mergedManga ->
+                mergedManga.mangaId in favoritedMangaIds
             }
-
-        mergedMangaList.groupBy { it.mergeType }.map { it.key to it.value.size }.toList()
 
         _simpleState.update {
             StatsConstants.SimpleState(
@@ -239,14 +231,19 @@ class StatsViewModel() : ViewModel() {
             )
         }
 
+        val tagToMangaMap = mutableMapOf<String, MutableList<DetailedStatManga>>()
+        for (m in detailedStatMangaList) {
+            for (tag in m.tags) {
+                tagToMangaMap.getOrPut(tag) { mutableListOf() }.add(m)
+            }
+        }
+
         val sortedSeries =
             _detailState.value.tags
                 .map { tag ->
-                    tag to
-                        _detailState.value.manga.filter { it.tags.contains(tag) }.toList()
+                    tag to (tagToMangaMap[tag]?.toList() ?: emptyList())
                 }
-                .sortedByDescending { it.second.count() }
-                .toList()
+                .sortedByDescending { it.second.size }
         val totalCount = sortedSeries.sumOf { it.second.size }
         val totalDuration = sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }
 
