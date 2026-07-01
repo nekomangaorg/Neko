@@ -1,11 +1,13 @@
 package org.nekomanga.presentation.screens.stats
 
+import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
 
 object StatsConstants {
+    @Immutable
     data class SimpleState(
         val screenState: ScreenState = ScreenState.Loading,
         val mangaCount: Int = 0,
@@ -27,6 +29,7 @@ object StatsConstants {
         val lastLibraryUpdateDuration: String = "",
     )
 
+    @Immutable
     data class DetailedState(
         val isLoading: Boolean = true,
         val manga: List<DetailedStatManga> = listOf(),
@@ -35,6 +38,7 @@ object StatsConstants {
         val detailTagState: DetailedTagState = DetailedTagState(),
     )
 
+    @Immutable
     data class DetailedTagState(
         val totalReadDuration: Long = 0L,
         val totalChapters: Int = 0,
@@ -42,6 +46,7 @@ object StatsConstants {
             listOf(),
     )
 
+    @Immutable
     data class DetailedStatManga(
         val id: Long,
         val title: String,
@@ -71,7 +76,9 @@ object StatsConstants {
         object NoResults : ScreenState()
     }
 
+    @Immutable
     data class StatusDistribution(val status: MangaStatus, val distribution: Int)
 
+    @Immutable
     data class ContentRatingDistribution(val rating: MangaContentRating, val distribution: Int)
 }

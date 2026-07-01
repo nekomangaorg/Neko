@@ -1,7 +1,9 @@
 package org.nekomanga.presentation.screens.about
 
+import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 
+@Immutable
 data class AboutScreenState(
     val incognitoMode: Boolean = false,
     val checkingForUpdates: Boolean = false,
