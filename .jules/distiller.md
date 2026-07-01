@@ -28,4 +28,9 @@
 **Learning:** The project wraps tracking results in a custom `TrackingUpdate` sealed class (`Success` / `Error`). For DI, tracking use cases are nested inside a central `TrackUseCases` class which is registered as a singleton `addSingleton(TrackUseCases())` in `AppModule.kt`. Use Case naming typically uses verb phrases (e.g. `RegisterTracking`).
 **Action:** When creating new tracking domain logic, nest the Use Case in `TrackUseCases` and use verb phrases for naming.
 
+## 2026-06-30 - Extracting ToggleMangaFavorite Use Case
+**Learning:** Duplicate business logic for toggling favorites and setting categories across Browse, Display, and Similar ViewModels can be unified into a single Use Case. By using a lambda/callback `categoriesProvider` to dynamically fetch screen-specific categories, we avoid exposing mutable screen states to the domain layer while keeping the Use Case pure and highly testable.
+**Action:** When extracting favorite or bookmark toggling logic from view models, consolidate them in the `manga` use cases folder and resolve circular dependencies by passing child Use Cases directly in the constructor.
+
+
 

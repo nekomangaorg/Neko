@@ -416,42 +416,14 @@ class BrowseViewModel : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = mangaRepository.getMangaById(mangaId) ?: return@launchIO
-            editManga.apply {
-                favorite = !favorite
-                date_added =
-                    when (favorite) {
-                        true -> Date().time
-                        false -> 0
-                    }
-            }
-            mangaRepository.updateManga(editManga)
+            val isFavorite =
+                mangaUseCases.toggleMangaFavorite(
+                    mangaId = mangaId,
+                    categoryItems = categoryItems,
+                    categoriesProvider = { _browseScreenState.value.categories },
+                ) ?: return@launchIO
 
-            mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
-
-            updateDisplayManga(mangaId, editManga.favorite)
-
-            if (editManga.favorite) {
-                val defaultCategory = libraryPreferences.defaultCategory().get()
-
-                if (categoryItems.isEmpty() && defaultCategory != -1) {
-                    _browseScreenState.value.categories
-                        .firstOrNull { defaultCategory == it.id }
-                        ?.let {
-                            val categories =
-                                listOf(MangaCategory.create(editManga, it.toDbCategory()))
-                            categoryRepository.setMangaCategories(
-                                categories,
-                                listOf(editManga.id!!),
-                            )
-                        }
-                } else if (categoryItems.isNotEmpty()) {
-                    val categories = categoryItems.map {
-                        MangaCategory.create(editManga, it.toDbCategory())
-                    }
-                    categoryRepository.setMangaCategories(categories, listOf(editManga.id!!))
-                }
-            }
+            updateDisplayManga(mangaId, isFavorite)
         }
     }
 

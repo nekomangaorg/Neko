@@ -6,6 +6,8 @@ import eu.kanade.tachiyomi.source.SourceManager
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaAggregateRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.storage.StorageManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -19,6 +21,8 @@ class MangaUseCases(
     preferences: PreferencesHelper = Injekt.get(),
     storageManager: StorageManager = Injekt.get(),
     sourceManager: SourceManager = Injekt.get(),
+    categoryRepository: CategoryRepository = Injekt.get(),
+    libraryPreferences: LibraryPreferences = Injekt.get(),
 ) {
     val updateMangaStatusAndMissingCount =
         UpdateMangaStatusAndMissingChapterCount(mangaRepository, chapterRepository, downloadManager)
@@ -27,4 +31,7 @@ class MangaUseCases(
         ModifyMangaUseCase(mangaRepository, preferences, downloadManager, storageManager)
 
     val updateMangaAggregate = UpdateMangaAggregate(mangaAggregateRepository, sourceManager)
+
+    val toggleMangaFavorite =
+        ToggleMangaFavorite(mangaRepository, categoryRepository, libraryPreferences, updateMangaAggregate)
 }
