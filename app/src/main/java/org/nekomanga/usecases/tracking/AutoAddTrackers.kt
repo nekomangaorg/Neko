@@ -41,7 +41,6 @@ class AutoAddTrackers(
 ) {
 
     private suspend fun isOnline(): Boolean {
-        // OPTIMIZATION: Removed redundant .map { it } and .distinctUntilChanged() as we only need the first element.
         return downloadManager.networkStateFlow().firstOrNull()?.isOnline == true
     }
 

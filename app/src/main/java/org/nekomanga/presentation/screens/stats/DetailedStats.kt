@@ -215,8 +215,6 @@ private fun TagView(
     val tagStats = detailedStats.detailTagState
     val sortedTagPairs =
         remember(sortType) {
-            // OPTIMIZATION: Removed redundant tagStats.sortedTagPairs.map { it }
-            // and .toList() to avoid unnecessary list allocations.
             tagStats.sortedTagPairs
                 .sortedWith { t, t2 ->
                     when (sortType) {
@@ -256,7 +254,6 @@ private fun ContentRatingView(
 ) {
     val sortedSeries =
         remember(sortType) {
-            // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
             detailedStats.manga
                 .groupBy { it.contentRating.prettyPrint() }
                 .entries
@@ -296,7 +293,6 @@ private fun CategoryView(
 
     val sortedSeries =
         remember(sortType) {
-            // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
             detailedStats.categories
                 .associateWith { category ->
                     detailedStats.manga.filter { it.categories.contains(category) }
@@ -309,7 +305,6 @@ private fun CategoryView(
         when (sortedSeries.size <= colors.size) {
             true -> colors
             false ->
-                // OPTIMIZATION: Removed redundant .toList() as .map already returns a List.
                 sortedSeries
                     .map { Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)) }
         }
@@ -345,7 +340,6 @@ private fun StartYearView(
 ) {
     val notStartedString = stringResource(id = R.string.not_started)
     val sortedSeries = remember {
-        // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
         detailedStats.manga
             .groupBy { it.startYear?.toString() ?: notStartedString }
             .entries
@@ -353,7 +347,6 @@ private fun StartYearView(
     }
 
     val lineData = remember {
-        // OPTIMIZATION: Removed redundant .toList() as .mapNotNull already returns a List.
         sortedSeries
             .mapNotNull {
                 if (it.key != notStartedString) {
@@ -393,7 +386,6 @@ private fun StatusView(
 ) {
     val sortedSeries =
         remember(sortType) {
-            // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
             detailedStats.manga
                 .groupBy { context.getString(it.status.statusRes) }
                 .entries
@@ -432,7 +424,6 @@ private fun TypeView(
 ) {
     val sortedSeries =
         remember(sortType) {
-            // OPTIMIZATION: Removed redundant .toList() to avoid unnecessary list allocation.
             detailedStats.manga
                 .groupBy { context.getString(it.type.typeRes) }
                 .entries
@@ -917,7 +908,6 @@ private fun <T> pieData(
     colorMap: Map<T, Color>,
     sortType: Sort,
 ): List<PieData> {
-    // OPTIMIZATION: Removed redundant .toList() as .mapNotNull already returns a List.
     return sortedSeries
         .mapNotNull { entry ->
             val data =
