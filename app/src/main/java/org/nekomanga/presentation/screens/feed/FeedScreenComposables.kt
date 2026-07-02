@@ -50,6 +50,7 @@ fun FeedScreenDialogs(
 
 @Composable
 fun FeedScreenContent(
+    modifier: Modifier = Modifier,
     downloadScreenVisible: Boolean,
     contentPadding: PaddingValues,
     feedScreenState: FeedScreenState,
@@ -60,7 +61,7 @@ fun FeedScreenContent(
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier) {
         if (
             (feedScreenState.feedScreenType == FeedScreenType.History &&
                 historyPagingScreenState.pageLoading &&
