@@ -704,7 +704,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     }
 
                     if (allInfo.mangaItem.initialized) {
-                        launchIO {
+                        viewModelScope.launchIO {
                             mangaUseCases.updateMangaStatusAndMissingCount(
                                 allInfo.mangaItem.toManga()
                             )
@@ -1837,7 +1837,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 loggedInTrackerService = loggedInTrackerService,
                 tracks = tracks,
                 onShowSnackbar = { message, prefixRes ->
-                    launchUI {
+                    viewModelScope.launchUI {
                         appSnackbarManager.showSnackbar(
                             SnackbarState(
                                 message = message,
@@ -2165,7 +2165,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 MangaConstants.BlockType.Group -> {
                     val scanlatorGroupImpl = scanlatorGroupRepository.getScanlatorGroupByName(name)
                     if (scanlatorGroupImpl == null) {
-                        launchIO { mangaUpdateCoordinator.updateGroup(name) }
+                        launch { mangaUpdateCoordinator.updateGroup(name) }
                     }
                     val blockedGroups = mangaDexPreferences.blockedGroups().get().toMutableSet()
                     blockedGroups.add(name)
@@ -2175,7 +2175,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 MangaConstants.BlockType.Uploader -> {
                     val uploaderImpl = uploaderGroupRepository.getUploaderByName(name)
                     if (uploaderImpl == null) {
-                        launchIO { mangaUpdateCoordinator.updateUploader(name) }
+                        launch { mangaUpdateCoordinator.updateUploader(name) }
                     }
                     val blockedUploaders =
                         mangaDexPreferences.blockedUploaders().get().toMutableSet()

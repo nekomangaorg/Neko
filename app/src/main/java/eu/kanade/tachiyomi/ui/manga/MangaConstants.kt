@@ -165,6 +165,7 @@ object MangaConstants {
         val matchesGlobalDefaults: Boolean = true,
     )
 
+    @Immutable
     data class ChapterDisplayOptions(
         val displayType: ChapterDisplayType,
         val displayState: ToggleableState,
@@ -196,6 +197,7 @@ object MangaConstants {
         Filter,
     }
 
+    @Immutable
     class ChapterFilterActions(
         val changeSort: (sortOptions: SortOption?) -> Unit,
         val changeFilter: (filterOption: ChapterDisplayOptions?) -> Unit,
@@ -284,11 +286,13 @@ object MangaConstants {
         data object Cancel : DownloadAction()
     }
 
+    @Immutable
     class CategoryActions(
         val set: (List<CategoryItem>) -> Unit = {},
         val addNew: (String) -> Unit = {},
     )
 
+    @Immutable
     class DescriptionActions(
         val genreSearch: (String) -> Unit,
         val genreSearchLibrary: (String) -> Unit,
@@ -296,12 +300,14 @@ object MangaConstants {
         val altTitleResetClick: () -> Unit,
     )
 
+    @Immutable
     class InformationActions(
         val titleLongClick: (String) -> Unit,
         val creatorCopy: (String) -> Unit,
         val creatorSearch: (String) -> Unit,
     )
 
+    @Immutable
     class TrackActions(
         val statusChange: (Int, TrackingConstants.TrackAndService) -> Unit,
         val scoreChange: (Int, TrackingConstants.TrackAndService) -> Unit,
@@ -312,6 +318,7 @@ object MangaConstants {
         val remove: (Boolean, TrackServiceItem) -> Unit,
     )
 
+    @Immutable
     class CoverActions(
         val share: (Context, Artwork) -> Unit,
         val set: (Artwork) -> Unit,
@@ -319,12 +326,14 @@ object MangaConstants {
         val reset: () -> Unit,
     )
 
+    @Immutable
     class MergeActions(
         val remove: (MergeMangaImpl) -> Unit,
         val search: (String, MergeType, List<String>) -> Unit,
         val add: (SourceMergeManga) -> Unit,
     )
 
+    @Immutable
     class ChapterActions(
         val createMangaFolder: () -> Unit,
         val mark: (List<ChapterItem>, ChapterMarkActions) -> Unit,

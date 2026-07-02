@@ -9,3 +9,7 @@
 ## 2026-07-01 - Optimize MergeManga computation and `@Immutable` screen states in Stats
 **Learning:** In `StatsViewModel`, checking for favorited manga in `mergedMangaList` used a linear search (`firstOrNull`) on a list for every item, leading to `O(N * M)` CPU overhead, combined with a duplicate `groupBy` computation that was completely discarded. Furthermore, passing `StatsConstants` UI states without `@Immutable` prevented Compose from skipping recomposition for stats screens.
 **Action:** Convert the favorited list to a `Set` for `O(1)` lookups, remove the duplicate `groupBy` computation, and annotate all `StatsConstants` data classes with `@Immutable` to ensure efficient recompositions.
+
+## 2026-07-02 - Scoped Coroutines in MangaViewModel and @Immutable Action state classes
+**Learning:** Using global unmanaged coroutine launchers (`launchIO` / `launchUI`) inside `ViewModel` contexts (such as `MangaViewModel`) or callback lambdas bypasses structured concurrency, creating potential memory leaks and resource leaks when the ViewModel's lifecycle ends. Additionally, passing custom actions or display options data classes to Compose screens without the `@Immutable` annotation prevents Compose from marking them stable, resulting in redundant screen recompositions.
+**Action:** Use `viewModelScope.launchIO`, `viewModelScope.launchUI`, or child `launch` blocks to bind coroutine lifecycles, and annotate all action and intermediate state data classes in screens and constants with `@Immutable` to maximize Compose stability.
