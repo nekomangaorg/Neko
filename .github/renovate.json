@@ -1,7 +1,9 @@
 {
   "prTitle": "chore: update {{depName}} to {{newVersion}}",
+  "semanticCommits": "enabled",
   "extends": [
     "config:base",
-    ":semanticCommitType(chore)"
+    ":semanticCommitTypeAll(chore)",
+    ":semanticCommitScopeDisabled"
   ]
 }
