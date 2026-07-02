@@ -15,7 +15,7 @@ okhttpVersion = "5.4.0"
 photoViewVersion = "2.3.0"
 retrofitVersion = "3.0.0"
 sandwichVersion = "2.2.2"
-sqliteVersion = "2.6.2"
+sqliteVersion = "2.7.0"
 kspVersion = "2.3.9"
 
 
