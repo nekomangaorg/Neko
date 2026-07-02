@@ -366,6 +366,31 @@
         <item name="colorError">@color/tako_colorError</item>
         <item name="colorOnError">@color/tako_colorOnError</item>
     </style>
+    <style name="Theme.Neko.TokyoNight">
+        <item name="colorPrimary">@color/tokyonight_colorPrimary</item>
+        <item name="colorOnPrimary">@color/tokyonight_colorOnPrimary</item>
+        <item name="colorPrimaryContainer">@color/tokyonight_colorPrimaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/tokyonight_colorOnPrimaryContainer</item>
+        <item name="colorPrimaryInverse">@color/tokyonight_colorPrimaryInverse</item>
+        <item name="colorSecondary">@color/tokyonight_colorSecondary</item>
+        <item name="colorOnSecondary">@color/tokyonight_colorOnSecondary</item>
+        <item name="colorSecondaryContainer">@color/tokyonight_colorSecondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/tokyonight_colorOnSecondaryContainer</item>
+        <item name="colorTertiary">@color/tokyonight_colorTertiary</item>
+        <item name="colorOnTertiary">@color/tokyonight_colorOnTertiary</item>
+        <item name="colorTertiaryContainer">@color/tokyonight_colorTertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/tokyonight_colorOnTertiaryContainer</item>
+        <item name="android:colorBackground">@color/tokyonight_colorBackground</item>
+        <item name="colorOnBackground">@color/tokyonight_colorOnBackground</item>
+        <item name="colorSurface">@color/tokyonight_colorSurface</item>
+        <item name="colorOnSurface">@color/tokyonight_colorOnSurface</item>
+        <item name="colorSurfaceVariant">@color/tokyonight_colorSurfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/tokyonight_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/tokyonight_colorSurfaceContainer</item>
+        <item name="colorOutline">@color/tokyonight_colorOutline</item>
+        <item name="colorError">@color/tokyonight_colorError</item>
+        <item name="colorOnError">@color/tokyonight_colorOnError</item>
+    </style>
     <style name="Theme.Neko.Teal">
         <item name="colorPrimary">@color/teal_colorPrimary</item>
         <item name="colorOnPrimary">@color/teal_colorOnPrimary</item>

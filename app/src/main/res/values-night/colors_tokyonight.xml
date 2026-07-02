@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="tokyonight_colorPrimary">#FF82AAFF</color>
+    <color name="tokyonight_colorOnPrimary">#FF1B1D2B</color>
+    <color name="tokyonight_colorPrimaryContainer">#FF444A73</color>
+    <color name="tokyonight_colorOnPrimaryContainer">#FF9AB8FF</color>
+    <color name="tokyonight_colorPrimaryInverse">#FF3D5C9E</color>
+    <color name="tokyonight_colorSecondary">#FF86E1FC</color>
+    <color name="tokyonight_colorOnSecondary">#FF1B1D2B</color>
+    <color name="tokyonight_colorSecondaryContainer">#FF444A73</color>
+    <color name="tokyonight_colorOnSecondaryContainer">#FFB2EBFF</color>
+    <color name="tokyonight_colorTertiary">#FFC099FF</color>
+    <color name="tokyonight_colorOnTertiary">#FF1B1D2B</color>
+    <color name="tokyonight_colorTertiaryContainer">#FF444A73</color>
+    <color name="tokyonight_colorOnTertiaryContainer">#FFCAABFF</color>
+    <color name="tokyonight_colorBackground">#FF222436</color>
+    <color name="tokyonight_colorOnBackground">#FFC8D3F5</color>
+    <color name="tokyonight_colorSurface">#FF222436</color>
+    <color name="tokyonight_colorOnSurface">#FFC8D3F5</color>
+    <color name="tokyonight_colorSurfaceVariant">#FF444A73</color>
+    <color name="tokyonight_colorOnSurfaceVariant">#FF828BB8</color>
+    <color name="tokyonight_colorSurfaceContainer">#FF2D304B</color>
+    <color name="tokyonight_colorOutline">#FF828BB8</color>
+    <color name="tokyonight_colorError">#FFFF757F</color>
+    <color name="tokyonight_colorOnError">#FF1B1D2B</color>
+</resources>
