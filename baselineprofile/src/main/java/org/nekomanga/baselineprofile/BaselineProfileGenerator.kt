@@ -1,5 +1,6 @@
 package org.nekomanga.baselineprofile
 
+import android.content.Context
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -20,6 +21,18 @@ class BaselineProfileGenerator {
     @Test
     fun generate() {
         val targetPackage = InstrumentationRegistry.getInstrumentation().targetContext.packageName
+        val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
+
+        // Disable onboarding and notification permission dialogs before starting the app.
+        // This ensures the generator lands directly on the main library screen.
+        val sharedPreferences = targetContext.getSharedPreferences(
+            "${targetPackage}_preferences",
+            Context.MODE_PRIVATE
+        )
+        sharedPreferences.edit()
+            .putBoolean("__APP_STATE_onboarding_complete", true)
+            .putBoolean("has_shown_notification_permission", true)
+            .apply()
 
         rule.collect(
             packageName = targetPackage,
@@ -36,6 +49,18 @@ class BaselineProfileGenerator {
 
             // Wait for the main Library screen tab text to render (timeout of 10 seconds)
             device.wait(Until.hasObject(By.text("Library")), 10_000)
+
+            // Click the Feed tab to record feed compilation paths
+            device.waitAndClick(By.text("Feed"))
+            device.waitForIdle()
+
+            // Click the Browse tab to record source and extensions discovery paths
+            device.waitAndClick(By.text("Browse"))
+            device.waitForIdle()
+
+            // Navigate back to the Library tab
+            device.waitAndClick(By.text("Library"))
+            device.waitForIdle()
         }
     }
 }
