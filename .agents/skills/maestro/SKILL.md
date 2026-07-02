@@ -22,9 +22,10 @@ Your journal is NOT a log - only add entries for CRITICAL UI architecture learni
 * Strictly separate UI structure from business logic by heavily hoisting state.
 * Ensure any layout changes dynamically adapt to different `WindowSizeClass` constraints (Compact, Medium, Expanded).
 * Document the UI architecture changes with extensive KDoc on the Screen-level composables.
+* On Expanded width screens, ensure single-column screen contents (like feeds or lists) do not stretch uncomfortably by constraining their maximum width (typically to `800.dp`) and centering them.
 
 ## ⚠️ Ask first:
-* Swapping the core navigation library (e.g., migrating from Jetpack Navigation to Voyager or Decompose).
+* Swapping the core navigation library (e.g., migrating from Jetpack Navigation / Navigation 3 to Voyager or Decompose).
 * Extracting a massive chunk of UI into an entirely new Gradle module (e.g., creating `:core:designsystem`).
 * Implementing canonical layouts (like List-Detail) if it radically changes the UX flow.
 
@@ -36,18 +37,18 @@ Your journal is NOT a log - only add entries for CRITICAL UI architecture learni
 
 # Instructions
 1. **PROFILE**: Hunt for structural frontend bottlenecks:
-  - *Navigation*: String-based route definitions causing crashes, massive monolithic `NavHost` files, or broken deep link routing.
-  - *Responsiveness*: Hardcoded screen sizes, lack of `WindowSizeClass` usage, or UI that breaks on tablets/foldables.
-  - *State*: God-object ViewModels driving entirely unrelated UI segments, or UI components mutating state directly instead of passing events up.
+  - *Navigation*: Issues in the Compose Navigation 3 flow (improper `NavKey` serialization, monolithic entry providers, or broken custom transitions on `NavDisplay`).
+  - *Responsiveness*: Hardcoded screen sizes, lack of `WindowSizeClass` usage, stretching single-column lists on tablets, or UI that breaks on tablets/foldables.
+  - *State*: God-object ViewModels driving entirely unrelated UI segments, or improper scoping of ViewModels to backstack entries (ensure use of `rememberViewModelStoreNavEntryDecorator`).
   - *Modularity*: Duplicated core UI components across features that should be moved to a central Design System.
 2. **SELECT**: Pick the BEST opportunity that solves a systemic UI flow issue, scales the app for new form factors, or makes the navigation graph type-safe.
-3. **ORCHESTRATE**: Implement the structural change. Hoist state cleanly, define type-safe `kotlinx.serialization` routes for navigation, or implement canonical adaptive layouts.
+3. **ORCHESTRATE**: Implement the structural change. Hoist state cleanly, define type-safe `kotlinx.serialization` routes for Navigation 3, or implement canonical adaptive layouts.
 4. **VERIFY**: Run `./gradlew ktfmtFormat`. Verify the navigation or adaptive layout works without crashing. Run existing UI and ViewModel tests.
 5. **PRESENT**: Create a PR using Conventional Commits with the `feat:` or `ref:` prefix (e.g., `feat: implement type-safe navigation for checkout flow`). Include What, Why, Architecture, and Impact in the description.
 
 # Examples
-* Migrating string-based Jetpack Navigation routes to type-safe Serialization objects.
+* Migrating custom manual parsing in deep links to type-safe Serialization `NavKey` objects.
 * Refactoring a single-screen layout into a canonical List-Detail adaptive layout using `WindowSizeClass`.
-* Extracting duplicated buttons, typography, and theme definitions into a centralized `:core:designsystem` module.
-* Wiring a scoped ViewModel to a nested navigation graph to share state across a multi-step wizard flow.
+* Restructuring standard list transitions in `NavDisplay` to use hierarchical slide animations vs top-level cross-fades.
+* Wiring a scoped ViewModel to a shared backstack entry in Navigation 3 to share state across a multi-step flow.
 * Implementing proper deep-link handling and backstack reconstruction for a complex notification payload.
