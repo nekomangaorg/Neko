@@ -101,6 +101,12 @@ open class MangaDex : HttpSource() {
         }
     }
 
+    suspend fun getMangaCommentId(mangaUUID: String): Result<String?, ResultError> {
+        return withIOContext {
+            return@withIOContext mangaHandler.fetchMangaCommentId(mangaUUID)
+        }
+    }
+
     suspend fun getAuthorNameByUuid(authorUuid: String): Result<String, ResultError> {
         return withIOContext {
             networkServices.service

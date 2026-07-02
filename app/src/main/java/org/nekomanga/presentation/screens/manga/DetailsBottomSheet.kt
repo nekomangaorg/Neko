@@ -160,9 +160,9 @@ fun DetailsBottomSheet(
             ExternalLinksSheet(
                 themeColorState = themeColorState,
                 externalLinks = mangaDetailScreenState.manga.externalLinks,
-                onLinkClick = { url, title ->
+                onLinkClick = { link ->
                     onNavigate(null)
-                    openInWebView(url, title)
+                    openInWebView(link.getUrl(), link.name)
                 },
             )
         }

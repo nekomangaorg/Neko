@@ -232,6 +232,24 @@ class MangaHandler {
         }
     }
 
+    suspend fun fetchMangaCommentId(mangaUUID: String): Result<String?, ResultError> {
+        return service
+            .mangaStatistics(mangaUUID)
+            .getOrResultError("Trying to get manga comments")
+            .andThen {
+                Ok(
+                    it.statistics[mangaUUID]?.comments?.threadId?.toString()
+                        ?: return@andThen Err("No thread exists")
+                )
+            }
+            .orElse {
+                authService
+                    .createForumThread(ForumThreadDto(mangaUUID, "manga"))
+                    .getOrResultError("Trying to create forum thread")
+                    .andThen { Ok(it.data.id.toString()) }
+            }
+    }
+
     suspend fun fetchChapterCommentId(chapterUUID: String): Result<String?, ResultError> {
         return service
             .chapterStatistics(chapterUUID)
