@@ -76,6 +76,7 @@ enum class DownloaderStatus {
     NetworkPaused,
 }
 
+@Immutable
 data class FeedSettingActions(
     val groupHistoryClick: (FeedHistoryGroup) -> Unit,
     val clearHistoryClick: () -> Unit,
@@ -88,6 +89,7 @@ data class FeedSettingActions(
     val toggleSwipeRefresh: () -> Unit,
 )
 
+@Immutable
 data class FeedScreenActions(
     val mangaClick: (Long) -> Unit,
     val chapterClick: (Long, Long) -> Unit,
@@ -101,6 +103,7 @@ data class FeedScreenActions(
     val updateLibrary: (Boolean) -> Unit,
 )
 
+@Immutable
 data class DownloadScreenActions(
     val downloadSwiped: (DownloadItem) -> Unit,
     val fabClick: () -> Unit,

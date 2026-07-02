@@ -56,6 +56,7 @@ data class LibraryScreenState(
     val recentSearches: List<String> = listOf(),
 )
 
+@Immutable
 data class LibraryScreenActions(
     val mangaClick: (Long) -> Unit,
     val mangaLongClick: (LibraryMangaItem) -> Unit,
@@ -80,6 +81,7 @@ data class LibraryScreenActions(
     val removeRecentSearch: (String) -> Unit = {},
 )
 
+@Immutable
 data class LibrarySheetActions(
     val groupByClick: (LibraryGroup) -> Unit,
     val categoryItemLibrarySortClick: (CategoryItem, LibrarySort) -> Unit,
@@ -95,6 +97,7 @@ data class LibrarySheetActions(
     val editCategories: (List<DisplayManga>, List<CategoryItem>) -> Unit,
 )
 
+@Immutable
 data class LibraryCategoryActions(
     val categoryItemClick: (CategoryItem) -> Unit,
     val categoryAscendingClick: (CategoryItem) -> Unit,
