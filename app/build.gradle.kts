@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id(androidx.plugins.application.get().pluginId)
+    id(androidx.plugins.baselineprofile.get().pluginId)
     id(kotlinx.plugins.parcelize.get().pluginId)
     alias(libs.plugins.about.libraries)
     alias(kotlinx.plugins.serialization)
@@ -105,6 +106,8 @@ composeCompiler {
 }
 
 dependencies {
+    baselineProfile(projects.baselineprofile)
+
     implementation(projects.constants)
     implementation(projects.core)
 
@@ -125,6 +128,7 @@ dependencies {
 
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)
+    implementation(androidx.profileinstaller)
     implementation(libs.bundles.google)
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)

@@ -29,3 +29,5 @@ include(":app")
 include(":core")
 
 include(":constants")
+
+include(":baselineprofile")

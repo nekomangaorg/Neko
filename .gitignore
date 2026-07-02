@@ -7,5 +7,6 @@
 .kotlin/
 *iml
 *.iml
+*.nix
 */build
 /.gitconfig

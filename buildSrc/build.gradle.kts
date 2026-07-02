@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(androidx.gradle)
+    implementation(androidx.baselineprofile.gradle)
     implementation(kotlinx.gradle)
     implementation(gradleApi())
 }

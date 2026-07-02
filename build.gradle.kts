@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   id(androidx.plugins.application.get().pluginId) apply false
   id(androidx.plugins.library.get().pluginId) apply false
+  id(androidx.plugins.baselineprofile.get().pluginId) apply false
   alias(libs.plugins.google.services) apply false
   alias(kotlinx.plugins.compose.compiler) apply false
   id(kotlinx.plugins.jvm.get().pluginId) apply false

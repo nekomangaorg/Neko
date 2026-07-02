@@ -1,0 +1,45 @@
+name: Generate Baseline Profile
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Generate Baseline Profile
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: aosp
+          arch: x86_64
+          profile: pixel_6
+          disk-size: 4096M
+          ram-size: 2048M
+          emulator-options: -no-snapshot -no-boot-anim -gpu swiftshader_indirect -no-audio -no-window
+          script: ./gradlew :app:generateBaselineProfile -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update baseline profiles"
+          title: "Update Baseline Profiles"
+          body: |
+            This PR automatically updates the baseline profiles based on the latest performance benchmark run.
+          branch: update-baseline-profiles
+          delete-branch: true
+          # Adjust the path below to match where your profiles are generated
+          add-paths: app/src/main/baselineProfiles
