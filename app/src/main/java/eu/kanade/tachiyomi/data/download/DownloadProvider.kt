@@ -81,8 +81,9 @@ class DownloadProvider(
      * @param source the source of the manga.
      */
     fun findMangaDir(manga: Manga): UniFile? {
-        val sourceDir = findSourceDir()
-        return sourceDir?.findFile(getMangaDirName(manga))
+        val sourceDir = findSourceDir() ?: return null
+        return sourceDir.findFile(getMangaDirName(manga))
+            ?: sourceDir.findFile(DiskUtil.buildValidFilename(manga.displayTitle()))
     }
 
     /**
@@ -205,11 +206,12 @@ class DownloadProvider(
         }
     }
 
-    fun renameMangaFolder(from: String, to: String) {
-        val sourceDir = findSourceDir()
-        val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
-        val toFileName = DiskUtil.buildValidFilename(to)
-        mangaDir?.renameTo(toFileName)
+    fun renameMangaFolder(manga: Manga, fromTitle: String) {
+        val sourceDir = findSourceDir() ?: return
+        val mangaDir =
+            sourceDir.findFile(DiskUtil.buildValidFilename("$fromTitle [${manga.uuid()}]"))
+                ?: sourceDir.findFile(DiskUtil.buildValidFilename(fromTitle))
+        mangaDir?.renameTo(getMangaDirName(manga))
     }
 
     /**
@@ -242,7 +244,7 @@ class DownloadProvider(
      * @param manga the manga to query.
      */
     fun getMangaDirName(manga: Manga): String {
-        return DiskUtil.buildValidFilename(manga.displayTitle())
+        return DiskUtil.buildValidFilename("${manga.displayTitle()} [${manga.uuid()}]")
     }
 
     /**
