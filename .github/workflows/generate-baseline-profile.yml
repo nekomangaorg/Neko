@@ -28,7 +28,15 @@ jobs:
           profile: pixel_6
           disk-size: 4096M
           ram-size: 2048M
-          emulator-options: -no-snapshot -no-boot-anim -gpu swiftshader_indirect -no-audio -no-window
+          disable-linux-hw-accel: true
+          emulator-options: >
+            -no-snapshot
+            -no-boot-anim
+            -no-audio
+            -no-window
+            -gpu swiftshader_indirect
+            -memory 2048
+            -no-accel
           script: ./gradlew :app:generateBaselineProfile -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
 
       - name: Create Pull Request
