@@ -25,6 +25,7 @@ import org.nekomanga.presentation.theme.colorschemes.PurpleColorScheme
 import org.nekomanga.presentation.theme.colorschemes.RetroColorScheme
 import org.nekomanga.presentation.theme.colorschemes.TakoColorScheme
 import org.nekomanga.presentation.theme.colorschemes.TealColorScheme
+import org.nekomanga.presentation.theme.colorschemes.TokyoNightColorScheme
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -80,6 +81,7 @@ fun colorSchemeFromTheme(
         Themes.Retro -> RetroColorScheme
         Themes.Brown -> BrownColorScheme
         Themes.Tako -> TakoColorScheme
+        Themes.TokyoNight -> TokyoNightColorScheme
         else -> NekoColorScheme
     }.getColorScheme(isSystemInDarkTheme)
 }
