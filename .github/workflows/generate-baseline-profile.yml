@@ -42,4 +42,4 @@ jobs:
           branch: update-baseline-profiles
           delete-branch: true
           # Adjust the path below to match where your profiles are generated
-          add-paths: app/src/main/baselineProfiles
+          add-paths: app/src/main/generated/baselineProfiles

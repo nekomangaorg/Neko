@@ -2,6 +2,8 @@ package org.nekomanga.baselineprofile
 
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
@@ -16,23 +18,28 @@ class BaselineProfileGenerator {
     val rule = BaselineProfileRule()
 
     @Test
-    fun generate() = rule.collect(
-        packageName = "org.nekomanga.neko",
-        includeInStartupProfile = true
-    ) {
-        // Go back to the home screen to ensure a clean cold start state
-        pressHome()
+    fun generate() {
+        val targetPackage = InstrumentationRegistry.getInstrumentation().targetContext.packageName
 
-        // Start the main activity
-        startActivityAndWait()
+        rule.collect(
+            packageName = targetPackage,
+            includeInStartupProfile = true
+        ) {
+            // Go back to the home screen to ensure a clean cold start state
+            pressHome()
 
-        // Wait for the app to initialize, fetch local data, and display the first screen.
-        // We sleep for 5 seconds to ensure typical startup paths are captured.
-        Thread.sleep(5000)
+            // Start the main activity
+            startActivityAndWait()
+
+            // Wait for the package to appear on the screen (timeout of 10 seconds)
+            device.wait(Until.hasObject(By.pkg(targetPackage)), 10_000)
+
+            // Wait for the main Library screen tab text to render (timeout of 10 seconds)
+            device.wait(Until.hasObject(By.text("Library")), 10_000)
+        }
     }
 }
 
 private fun UiDevice.waitAndClick(by: BySelector) {
     wait(Until.findObject(by), 60_000)?.click()
 }
-
