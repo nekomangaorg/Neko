@@ -25,6 +25,7 @@ jobs:
           java-version: '17'
 
       - name: Generate Baseline Profile
+        timeout-minutes: 20
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
@@ -41,9 +42,8 @@ jobs:
             -no-boot-anim
             -no-audio
             -no-window
-            -gpu swiftshader_indirect
-            -accel off  # Explicitly force software emulation
-          script: ./gradlew :app:generateBaselineProfile -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+            -gpu off
+          script: ./gradlew :baselineprofile:pixel6Api31NonMinifiedReleaseAndroidTest
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
