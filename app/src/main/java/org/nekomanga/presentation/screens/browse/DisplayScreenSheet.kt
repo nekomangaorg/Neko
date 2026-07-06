@@ -2,16 +2,20 @@ package org.nekomanga.presentation.screens.browse
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.sheets.BrowseDisplayOptionsSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 
+@Immutable
 sealed class DisplaySheetScreen {
+    @Immutable
     data class CategoriesSheet(
         val addingToLibrary: Boolean = true,
         val setCategories: (List<CategoryItem>) -> Unit,
     ) : DisplaySheetScreen()
 
+    @Immutable
     data class BrowseDisplayOptionsSheet(
         val showIsList: Boolean,
         val switchDisplayClick: () -> Unit,

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Application
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.cache.ChapterCache
@@ -131,6 +132,7 @@ enum class CacheType {
     Temp,
 }
 
+@Immutable
 data class CacheData(
     val parentCacheSize: String = "",
     val chapterDiskCacheSize: String = "",

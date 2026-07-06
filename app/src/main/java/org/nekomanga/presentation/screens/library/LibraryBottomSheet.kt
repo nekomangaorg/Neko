@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.library
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import org.nekomanga.presentation.screens.library.LibraryScreenState
 import org.nekomanga.presentation.screens.library.LibrarySheetActions
 import org.nekomanga.domain.category.CategoryItem
@@ -9,7 +10,9 @@ import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.sheets.GroupBySheet
 import org.nekomanga.presentation.components.sheets.LibrarySortSheet
 
+@Immutable
 sealed class LibraryBottomSheetScreen {
+    @Immutable
     data class SortSheet(val categoryItem: CategoryItem) : LibraryBottomSheetScreen()
 
     object GroupBySheet : LibraryBottomSheetScreen()
