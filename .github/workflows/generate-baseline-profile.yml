@@ -29,8 +29,6 @@ jobs:
           disk-size: 4096M
           ram-size: 2048M
           emulator-boot-timeout: 900
-          # Force software emulation and disable all hardware acceleration
-          disable-linux-hw-accel: true
           emulator-options: >
             -no-snapshot
             -no-boot-anim
