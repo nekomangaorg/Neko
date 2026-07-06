@@ -96,9 +96,7 @@ import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaAggregateRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MergeMangaRepository
-import org.nekomanga.data.database.repository.ScanlatorGroupRepository
 import org.nekomanga.data.database.repository.TrackRepository
-import org.nekomanga.data.database.repository.UploaderRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
@@ -163,10 +161,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val categoryRepository: CategoryRepository = Injekt.get()
     val chapterRepository: ChapterRepository = Injekt.get()
     val historyRepository: HistoryRepository = Injekt.get()
-
-    val scanlatorGroupRepository: ScanlatorGroupRepository = Injekt.get()
-
-    val uploaderGroupRepository: UploaderRepository = Injekt.get()
     val trackRepository: TrackRepository = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
 
@@ -2161,28 +2155,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     fun blockScanlator(blockType: MangaConstants.BlockType, name: String) {
         viewModelScope.launchIO {
-            when (blockType) {
-                MangaConstants.BlockType.Group -> {
-                    val scanlatorGroupImpl = scanlatorGroupRepository.getScanlatorGroupByName(name)
-                    if (scanlatorGroupImpl == null) {
-                        launch { mangaUpdateCoordinator.updateGroup(name) }
-                    }
-                    val blockedGroups = mangaDexPreferences.blockedGroups().get().toMutableSet()
-                    blockedGroups.add(name)
-                    mangaDexPreferences.blockedGroups().set(blockedGroups)
-                }
-
-                MangaConstants.BlockType.Uploader -> {
-                    val uploaderImpl = uploaderGroupRepository.getUploaderByName(name)
-                    if (uploaderImpl == null) {
-                        launch { mangaUpdateCoordinator.updateUploader(name) }
-                    }
-                    val blockedUploaders =
-                        mangaDexPreferences.blockedUploaders().get().toMutableSet()
-                    blockedUploaders.add(name)
-                    mangaDexPreferences.blockedUploaders().set(blockedUploaders)
-                }
-            }
+            mangaUseCases.blockScanlator.block(blockType, name, this)
             appSnackbarManager.showSnackbar(
                 SnackbarState(
                     messageRes = R.string.globally_blocked_group_,
@@ -2190,23 +2163,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     actionLabelRes = R.string.undo,
                     action = {
                         viewModelScope.launchIO {
-                            when (blockType) {
-                                MangaConstants.BlockType.Group -> {
-                                    scanlatorGroupRepository.deleteScanlatorGroup(name)
-                                    val allBlockedGroups =
-                                        mangaDexPreferences.blockedGroups().get().toMutableSet()
-                                    allBlockedGroups.remove(name)
-                                    mangaDexPreferences.blockedGroups().set(allBlockedGroups)
-                                }
-
-                                MangaConstants.BlockType.Uploader -> {
-                                    uploaderGroupRepository.deleteUploader(name)
-                                    val allBlockedUploaders =
-                                        mangaDexPreferences.blockedUploaders().get().toMutableSet()
-                                    allBlockedUploaders.remove(name)
-                                    mangaDexPreferences.blockedUploaders().set(allBlockedUploaders)
-                                }
-                            }
+                            mangaUseCases.blockScanlator.unblock(blockType, name)
                         }
                     },
                     snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,

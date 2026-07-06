@@ -32,6 +32,7 @@ import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.usecases.preferences.GetFormattedBuildTimeUseCase
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.addSingleton
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AboutViewModelTest {
