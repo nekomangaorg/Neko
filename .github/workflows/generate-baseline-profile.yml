@@ -38,7 +38,6 @@ jobs:
             -no-window
             -gpu swiftshader_indirect
             -memory 2048
-            -no-accel
           script: ./gradlew :app:generateBaselineProfile -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
 
       - name: Create Pull Request
