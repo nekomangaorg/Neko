@@ -38,7 +38,7 @@ room-testing = { module = "androidx.room:room-testing", version.ref = "room_vers
 profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller_version" }
 uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator_version" }
 benchmark-macro = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark_version" }
-test-ext-junit = "androidx.test.ext:junit:1.2.1"
+test-ext-junit = "androidx.test.ext:junit:1.3.0"
 baselineprofile-gradle = { module = "androidx.baselineprofile:androidx.baselineprofile.gradle.plugin", version.ref = "baselineprofile_version" }
 
 [bundles]
