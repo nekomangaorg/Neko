@@ -20,8 +20,7 @@ sealed class BrowseBottomSheetScreen {
         val setCategories: (List<CategoryItem>) -> Unit,
     ) : BrowseBottomSheetScreen()
 
-    @Immutable
-    data class FilterSheet(val nothing: String = "") : BrowseBottomSheetScreen()
+    object FilterSheet : BrowseBottomSheetScreen()
 
     @Immutable
     data class BrowseDisplayOptionsSheet(
