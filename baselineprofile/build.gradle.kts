@@ -21,16 +21,6 @@ android {
     targetProjectPath = ":app"
 
     testOptions {
-        managedDevices {
-            localDevices {
-                create("pixel6Api31") {
-                    device = "Pixel 6"
-                    apiLevel = 31
-                    systemImageSource = "aosp"
-                    testedAbi = "x86_64"
-                }
-            }
-        }
     }
 }
 
