@@ -54,10 +54,6 @@ class BaselineProfileGenerator {
             device.waitAndClick(By.text("Feed"))
             device.waitForIdle()
 
-            // Click the Browse tab to record source and extensions discovery paths
-            device.waitAndClick(By.text("Browse"))
-            device.waitForIdle()
-
             // Navigate back to the Library tab
             device.waitAndClick(By.text("Library"))
             device.waitForIdle()

@@ -21,6 +21,8 @@ android {
     targetProjectPath = ":app"
 
     testOptions {
+        // Force test results to stay in the console
+        animationsDisabled = true
     }
 }
 

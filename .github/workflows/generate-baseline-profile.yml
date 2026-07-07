@@ -38,11 +38,12 @@ jobs:
           show-emulator-log: true
           emulator-boot-timeout: 900
           emulator-options: >
-            -no-snapshot
+            -no-snapshot-save
             -no-boot-anim
-            -no-audio
+            -noaudio
             -no-window
-            -gpu off
+            -gpu swiftshader_indirect
+            -camera-back none
           script: ./gradlew :baselineprofile:connectedNonMinifiedReleaseAndroidTest
 
       - name: Create Pull Request
