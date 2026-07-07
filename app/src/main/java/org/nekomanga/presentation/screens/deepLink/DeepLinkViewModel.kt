@@ -151,15 +151,20 @@ class DeepLinkViewModel() : ViewModel() {
     }
 }
 
+@Immutable
 sealed interface DeepLinkType {
     val uuid: String
 
+    @Immutable
     data class Author(override val uuid: String) : DeepLinkType
 
+    @Immutable
     data class Group(override val uuid: String) : DeepLinkType
 
+    @Immutable
     data class Manga(override val uuid: String) : DeepLinkType
 
+    @Immutable
     data class List(override val uuid: String) : DeepLinkType
 }
 
