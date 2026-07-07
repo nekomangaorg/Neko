@@ -32,5 +32,4 @@ dependencies {
 
 baselineProfile {
     useConnectedDevices = true
-    managedDevices.add("pixel6Api31")
 }
