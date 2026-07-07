@@ -317,7 +317,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
                 regionHeight = firstSplit.topOffset
                 return decodeRegion(imageBytes, 0, regionHeight)
             }
-            return Buffer().write(imageBytes)
+            viewer.adapter.tallSplitPages.remove(page)
         }
 
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
