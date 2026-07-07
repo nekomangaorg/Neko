@@ -103,13 +103,13 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
      * split into multiple chunks.
      */
     fun notifyPageSplit(originalPage: ReaderPage, insertPages: List<ReaderPageSplit>) {
-        tallSplitPages.add(originalPage)
         val position = items.indexOf(originalPage)
         if (position < 0) return
         val newItems = items.toMutableList()
         newItems.addAll(position + 1, insertPages)
         val result = DiffUtil.calculateDiff(Callback(items, newItems))
         items = newItems
+        tallSplitPages.add(originalPage)
         result.dispatchUpdatesTo(this)
     }
 
