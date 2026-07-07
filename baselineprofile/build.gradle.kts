@@ -30,7 +30,7 @@ dependencies {
     implementation(androidx.uiautomator)
     implementation(androidx.benchmark.macro)
     implementation(androidx.test.ext.junit)
-
+    coreLibraryDesugaring(libs.desugaring)
     implementation(project(":app"))
 }
 
