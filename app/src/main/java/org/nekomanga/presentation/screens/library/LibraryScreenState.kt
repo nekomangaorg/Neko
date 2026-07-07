@@ -104,6 +104,7 @@ data class LibraryCategoryActions(
     val categoryRefreshClick: (CategoryItem) -> Unit,
 )
 
+@Immutable
 data class LibraryViewItem(
     val libraryDisplayMode: LibraryDisplayMode,
     val rawColumnCount: Float = 3f,

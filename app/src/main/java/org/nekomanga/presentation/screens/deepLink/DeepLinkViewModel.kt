@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.deepLink
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
@@ -150,22 +151,30 @@ class DeepLinkViewModel() : ViewModel() {
     }
 }
 
+@Immutable
 sealed interface DeepLinkType {
     val uuid: String
 
+    @Immutable
     data class Author(override val uuid: String) : DeepLinkType
 
+    @Immutable
     data class Group(override val uuid: String) : DeepLinkType
 
+    @Immutable
     data class Manga(override val uuid: String) : DeepLinkType
 
+    @Immutable
     data class List(override val uuid: String) : DeepLinkType
 }
 
+@Immutable
 sealed class DeepLinkState {
     object Loading : DeepLinkState()
 
+    @Immutable
     data class Error(val errorMessage: String) : DeepLinkState()
 
+    @Immutable
     data class Success(val screens: List<NavKey>) : DeepLinkState()
 }

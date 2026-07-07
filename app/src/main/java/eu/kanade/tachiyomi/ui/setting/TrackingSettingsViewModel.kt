@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.net.Uri
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -141,6 +142,7 @@ class TrackingSettingsViewModel : ViewModel() {
         }
     }
 
+    @Immutable
     data class TrackingSettingsState(
         val anilist: TrackServiceItem,
         val anilistUsername: String = "",

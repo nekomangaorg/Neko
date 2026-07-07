@@ -363,7 +363,7 @@ private fun BrowseWrapper(
                         if (sameScreen && !newIsFilterScreen) {
                             // do nothing
                         } else if (newIsFilterScreen) {
-                            openSheet(BrowseBottomSheetScreen.FilterSheet())
+                            openSheet(BrowseBottomSheetScreen.FilterSheet)
                         } else {
                             changeScreenType(item)
                         }

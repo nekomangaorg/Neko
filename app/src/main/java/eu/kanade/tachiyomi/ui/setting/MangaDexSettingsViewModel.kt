@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -73,6 +74,7 @@ class MangaDexSettingsViewModel : ViewModel() {
         viewModelScope.launchIO { mangaDexLoginHelper.logout() }
     }
 
+    @Immutable
     data class MangaDexSettingsState(
         val isLoggedIn: Boolean = false,
         val loginUrl: String = "",
