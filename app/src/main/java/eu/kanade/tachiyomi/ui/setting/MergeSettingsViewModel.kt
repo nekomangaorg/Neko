@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -104,6 +105,7 @@ sealed class MergeLoginEvent {
     object Error : MergeLoginEvent()
 }
 
+@Immutable
 data class MergeScreenState(
     val mergeScreenType: MergeScreenType,
     val isLoggedIn: Boolean = false,
