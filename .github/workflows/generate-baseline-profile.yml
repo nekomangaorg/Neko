@@ -44,7 +44,9 @@ jobs:
             -no-window
             -gpu swiftshader_indirect
             -camera-back none
-          script: ./gradlew :baselineprofile:connectedNonMinifiedReleaseAndroidTest
+          script: >
+            ./gradlew :app:assembleNonMinifiedRelease :baselineprofile:assembleNonMinifiedRelease &&
+            ./gradlew :baselineprofile:connectedNonMinifiedReleaseAndroidTest
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7

@@ -30,6 +30,8 @@ dependencies {
     implementation(androidx.uiautomator)
     implementation(androidx.benchmark.macro)
     implementation(androidx.test.ext.junit)
+
+    implementation(project(":app"))
 }
 
 baselineProfile {
