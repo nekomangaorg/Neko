@@ -10,6 +10,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -27,10 +28,10 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugaring)
     implementation(androidx.uiautomator)
     implementation(androidx.benchmark.macro)
     implementation(androidx.test.ext.junit)
-    coreLibraryDesugaring(libs.desugaring)
     implementation(project(":app"))
 }
 
