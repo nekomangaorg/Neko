@@ -23,23 +23,24 @@ class BaselineProfileGenerator {
         val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
         val targetPackage = targetContext.packageName
 
-        // Disable onboarding and notification permission dialogs before starting the app.
-        // This ensures the generator lands directly on the main library screen.
-        val sharedPreferences = targetContext.getSharedPreferences(
-            "${targetPackage}_preferences",
-            Context.MODE_PRIVATE,
-        )
-        sharedPreferences.edit()
-            .putBoolean("__APP_STATE_onboarding_complete", true)
-            .putBoolean("has_shown_notification_permission", true)
-            .apply()
-
         rule.collect(
             packageName = targetPackage,
             includeInStartupProfile = true,
             maxIterations = 1,
             stableIterations = 1
         ) {
+            // This block runs after 'pm clear' wipes app data.
+            // We pre-populate shared preferences here synchronously before launching the activity
+            // to ensure onboarding and notification permission requests are bypassed.
+            val sharedPreferences = targetContext.getSharedPreferences(
+                "${targetPackage}_preferences",
+                Context.MODE_PRIVATE,
+            )
+            sharedPreferences.edit()
+                .putBoolean("__APP_STATE_onboarding_complete", true)
+                .putBoolean("has_shown_notification_permission", true)
+                .commit()
+
             // Go back to the home screen to ensure a clean cold start state
             pressHome()
 
