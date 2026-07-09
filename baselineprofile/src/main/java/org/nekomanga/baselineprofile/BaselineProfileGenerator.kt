@@ -20,8 +20,8 @@ class BaselineProfileGenerator {
 
     @Test
     fun generate() {
-        val targetPackage = "org.nekomanga"
         val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
+        val targetPackage = targetContext.packageName
 
         // Disable onboarding and notification permission dialogs before starting the app.
         // This ensures the generator lands directly on the main library screen.
@@ -35,11 +35,10 @@ class BaselineProfileGenerator {
             .apply()
 
         rule.collect(
-            packageName = "org.nekomanga.neko",
+            packageName = targetPackage,
             includeInStartupProfile = true,
             maxIterations = 1,
             stableIterations = 1
-
         ) {
             // Go back to the home screen to ensure a clean cold start state
             pressHome()
@@ -47,13 +46,11 @@ class BaselineProfileGenerator {
             // Start the main activity
             startActivityAndWait()
 
+            // Wait for the package to appear on the screen (timeout of 15 seconds)
             val appOpened = device.wait(Until.hasObject(By.pkg(targetPackage)), 15_000)
             if (!appOpened) {
                 throw RuntimeException("App failed to launch for baseline profile generation")
             }
-
-            // Wait for the package to appear on the screen (timeout of 10 seconds)
-            device.wait(Until.hasObject(By.pkg(targetPackage)), 10_000)
 
             // Wait for the main Library screen tab text to render (timeout of 10 seconds)
             device.wait(Until.hasObject(By.text("Library")), 10_000)
