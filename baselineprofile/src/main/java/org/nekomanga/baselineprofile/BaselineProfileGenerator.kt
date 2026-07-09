@@ -35,7 +35,7 @@ class BaselineProfileGenerator {
             .apply()
 
         rule.collect(
-            packageName = targetPackage,
+            packageName = "org.nekomanga.neko",
             includeInStartupProfile = true,
             maxIterations = 1,
             stableIterations = 1
