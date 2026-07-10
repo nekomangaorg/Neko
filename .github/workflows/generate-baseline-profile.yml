@@ -45,12 +45,7 @@ jobs:
             -gpu swiftshader_indirect
             -camera-back none
             -no-metrics
-          script: |
-            ./gradlew :app:generateBaselineProfile || {
-              echo "=== LOGCAT ON FAILURE ==="
-              adb logcat -d
-              exit 1
-            }
+          script: ./gradlew :app:generateBaselineProfile || (echo "=== LOGCAT ON FAILURE ===" && adb logcat -d && exit 1)
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
