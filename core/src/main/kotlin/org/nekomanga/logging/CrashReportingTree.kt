@@ -6,17 +6,23 @@ import timber.log.Timber
 
 class CrashReportingTree : Timber.Tree() {
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        val crashlytics = FirebaseCrashlytics.getInstance()
+        val crashlytics = try {
+            FirebaseCrashlytics.getInstance()
+        } catch (e: Exception) {
+            null
+        }
 
-        if (priority == Log.ERROR) {
-            crashlytics.log(message)
-            if (t == null) {
-                crashlytics.recordException(Throwable(message))
-            } else {
-                crashlytics.recordException(t)
+        if (crashlytics != null) {
+            if (priority == Log.ERROR) {
+                crashlytics.log(message)
+                if (t == null) {
+                    crashlytics.recordException(Throwable(message))
+                } else {
+                    crashlytics.recordException(t)
+                }
+            } else if (priority == Log.WARN) {
+                crashlytics.log(message)
             }
-        } else if (priority == Log.WARN) {
-            crashlytics.log(message)
         }
 
         if (priority >= Log.INFO) {
