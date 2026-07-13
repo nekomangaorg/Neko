@@ -108,7 +108,7 @@ class MainActivity : BaseMainActivity() {
         handleDeepLink(intent)
 
         if (Migrations.upgrade(viewModel.preferences)) {
-            if (!BuildConfig.DEBUG) {
+            if (!BuildConfig.DEBUG && !isBenchmark) {
                 viewModel.setWhatsNewDialog(true)
             }
         }
