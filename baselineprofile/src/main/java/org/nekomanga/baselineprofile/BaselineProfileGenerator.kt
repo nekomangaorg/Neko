@@ -19,8 +19,9 @@ class BaselineProfileGenerator {
 
     @Test
     fun generate() {
-        val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
-        val targetPackage = targetContext.packageName
+        // For com.android.test modules, targetContext.packageName refers to the test APK
+        // ("org.nekomanga.baselineprofile"). We must explicitly specify the app's package name under test.
+        val targetPackage = "org.nekomanga.neko"
 
         rule.collect(
             packageName = targetPackage,
