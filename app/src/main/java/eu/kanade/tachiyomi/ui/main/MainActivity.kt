@@ -82,11 +82,12 @@ class MainActivity : BaseMainActivity() {
         }
 
         val isInitialDeepLink = isDeepLink(intent)
+        val isBenchmark = intent.getBooleanExtra("is_benchmark", false)
 
         val startingScreen =
             if (isInitialDeepLink) {
                 Screens.Loading(false)
-            } else if (!viewModel.preferences.hasShownOnboarding().get()) {
+            } else if (!viewModel.preferences.hasShownOnboarding().get() && !isBenchmark) {
                 Screens.Onboarding
             } else {
                 when (viewModel.preferences.startingTab().get()) {

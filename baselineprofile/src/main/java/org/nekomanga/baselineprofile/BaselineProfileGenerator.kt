@@ -19,8 +19,7 @@ class BaselineProfileGenerator {
 
     @Test
     fun generate() {
-        // For com.android.test modules, targetContext.packageName refers to the test APK
-        // ("org.nekomanga.baselineprofile"). We must explicitly specify the app's package name under test.
+        val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
         val targetPackage = "org.nekomanga.neko"
 
         rule.collect(
@@ -32,51 +31,15 @@ class BaselineProfileGenerator {
             // Go back to the home screen to ensure a clean cold start state
             pressHome()
 
-            // Start the main activity
-            startActivityAndWait()
+            // Start the main activity with the benchmark intent extra to bypass onboarding
+            startActivityAndWait { intent ->
+                intent.putExtra("is_benchmark", true)
+            }
 
             // Wait for the package to appear on the screen (timeout of 15 seconds)
             val appOpened = device.wait(Until.hasObject(By.pkg(targetPackage)), 15_000)
             if (!appOpened) {
                 throw RuntimeException("App failed to launch for baseline profile generation")
-            }
-
-            // Click through onboarding if it is showing (indicated by the presence of the 'Next' button)
-            val onboardingVisible = device.wait(Until.hasObject(By.text("Next")), 5_000)
-            if (onboardingVisible) {
-                // Step 1: FirstStep -> Click "Next"
-                device.waitAndClick(By.text("Next"))
-                device.waitForIdle()
-
-                // Step 2: ThemeStep -> Click "Next"
-                device.waitAndClick(By.text("Next"))
-                device.waitForIdle()
-
-                // Step 3: StorageStep -> Click "Select" to open system SAF directory picker
-                device.waitAndClick(By.text("Select"))
-                device.waitForIdle()
-
-                // SAF Picker: Click "Use this folder" confirmation button
-                device.waitAndClickFallback(
-                    By.res("android:id/button1"),
-                    By.textContains("Use this folder")
-                )
-                device.waitForIdle()
-
-                // System Dialog: Click "Allow" confirmation dialog
-                device.waitAndClickFallback(
-                    By.res("android:id/button1"),
-                    By.textContains("Allow")
-                )
-                device.waitForIdle()
-
-                // Back in app, StorageStep is completed -> Click "Next"
-                device.waitAndClick(By.text("Next"))
-                device.waitForIdle()
-
-                // Step 4: PermissionStep -> Click "Finish"
-                device.waitAndClick(By.text("Finish"))
-                device.waitForIdle()
             }
 
             // Wait for the main Library screen tab text to render (timeout of 15 seconds)
@@ -99,10 +62,4 @@ class BaselineProfileGenerator {
 private fun UiDevice.waitAndClick(by: BySelector) {
     wait(Until.findObject(by), 15_000)?.click()
         ?: throw RuntimeException("Could not find element to click: $by")
-}
-
-private fun UiDevice.waitAndClickFallback(byRes: BySelector, byText: BySelector) {
-    val obj = wait(Until.findObject(byRes), 15_000)
-        ?: wait(Until.findObject(byText), 5_000)
-    obj?.click() ?: throw RuntimeException("Could not find button to click: $byRes or $byText")
 }
