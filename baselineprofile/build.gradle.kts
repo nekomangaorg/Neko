@@ -35,6 +35,4 @@ dependencies {
     implementation(project(":app"))
 }
 
-baselineProfile {
-    useConnectedDevices = true
-}
+baselineProfile { useConnectedDevices = true }

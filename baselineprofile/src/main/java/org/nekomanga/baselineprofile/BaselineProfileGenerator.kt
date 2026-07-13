@@ -7,6 +7,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import java.util.regex.Pattern
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,10 +43,14 @@ class BaselineProfileGenerator {
                 throw RuntimeException("App failed to launch for baseline profile generation")
             }
 
-            // Wait for the main Library screen tab text to render (timeout of 15 seconds)
-            val libraryLoaded = device.wait(Until.hasObject(By.text("Library")), 15_000)
-            if (!libraryLoaded) {
-                throw RuntimeException("Library screen failed to load")
+            // Wait for the main screen (Library, Feed, or Browse) to render.
+            // We wait up to 30 seconds to handle slow headless emulators in CI environments.
+            val mainScreenLoaded = device.wait(
+                Until.hasObject(By.text(Pattern.compile("Library|Feed|Browse"))),
+                30_000
+            )
+            if (!mainScreenLoaded) {
+                throw RuntimeException("Main screen (Library/Feed/Browse) failed to load on startup")
             }
 
             // Click the Feed tab to record feed compilation paths
