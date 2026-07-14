@@ -8,7 +8,7 @@ class CrashReportingTree : Timber.Tree() {
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         val crashlytics = try {
             FirebaseCrashlytics.getInstance()
-        } catch (e: Exception) {
+        } catch (ignored: IllegalStateException) {
             null
         }
 
