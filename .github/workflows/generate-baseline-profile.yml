@@ -57,5 +57,4 @@ jobs:
             This PR automatically updates the baseline profiles based on the latest performance benchmark run.
           branch: update-baseline-profiles
           delete-branch: true
-          # Adjust the path below to match where your profiles are generated
-          add-paths: app/src/main/generated/baselineProfiles --info --stacktrace
+          add-paths: app/src/standardRelease/generated/baselineProfiles/
