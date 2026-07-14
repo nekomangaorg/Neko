@@ -2,6 +2,7 @@ package org.nekomanga.core.network.interceptor
 
 import com.google.common.net.HttpHeaders
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.SerializationException
 import okhttp3.logging.HttpLoggingInterceptor
 import org.nekomanga.logging.TimberKt
 
@@ -16,8 +17,8 @@ fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpL
                 val element = json.parseToJsonElement(message)
                 TimberKt.d { json.encodeToString(element) }
             }
-        } catch (ex: Exception) {
-            TimberKt.d { message }
+        } catch (ex: SerializationException) {
+            TimberKt.d(ex) { message }
         }
     }
 
