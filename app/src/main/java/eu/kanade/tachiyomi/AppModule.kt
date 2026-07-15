@@ -81,6 +81,7 @@ import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.screens.feed.FeedRepository
 import org.nekomanga.presentation.screens.similar.SimilarRepo
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.chapters.CalculateChapterFilterUseCase
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.chapters.ParseChapterNameUseCase
@@ -259,6 +260,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(ShouldUpdateMangaUseCase())
 
         addSingleton(MangaUseCases())
+
+        addSingleton(CategoryUseCases())
 
         addSingleton(TrackUseCases())
 

@@ -13,4 +13,5 @@ class CategoryUseCases(
 ) {
     val modifyCategory =
         ModifyCategoryUseCase(categoryRepository, mangaRepository, libraryPreferences)
+    val getCategories = GetCategoriesUseCase(categoryRepository)
 }

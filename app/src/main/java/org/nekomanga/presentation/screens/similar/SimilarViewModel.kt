@@ -3,8 +3,6 @@ package org.nekomanga.presentation.screens.similar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
@@ -19,14 +17,12 @@ import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
-import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.category.toCategoryItem
-import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.manga.MangaUseCases
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -41,7 +37,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     }
 
     private val repo: SimilarRepo = Injekt.get()
-    private val categoryRepository: CategoryRepository = Injekt.get()
+    private val categoryUseCases: CategoryUseCases by injectLazy()
     private val mangaRepository: MangaRepository = Injekt.get()
     private val preferences: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
@@ -68,11 +64,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     init {
         getSimilarManga()
         viewModelScope.launch {
-            val categories =
-                categoryRepository
-                    .getCategories()
-                    .map { category -> category.toCategoryItem() }
-                    .toList()
+            val categories = categoryUseCases.getCategories.get()
             _similarScreenState.update {
                 it.copy(
                     categories = categories,
@@ -197,17 +189,10 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     /** Add New Category */
     fun addNewCategory(newCategory: String) {
         viewModelScope.launchIO {
-            val category = Category.create(newCategory)
-            category.order =
-                (_similarScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            categoryRepository.insertCategory(category)
+            categoryUseCases.modifyCategory.addNewCategory(newCategory)
             _similarScreenState.update {
                 it.copy(
-                    categories =
-                        categoryRepository
-                            .getCategories()
-                            .map { category -> category.toCategoryItem() }
-                            .toList()
+                    categories = categoryUseCases.getCategories.get()
                 )
             }
         }

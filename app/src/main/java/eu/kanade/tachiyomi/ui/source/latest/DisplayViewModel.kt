@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.map
-import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.category.CategoryUtil
@@ -20,11 +18,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
-import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.category.toCategoryItem
-import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
@@ -50,8 +46,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val securityPreferences: SecurityPreferences = Injekt.get()
 
-    private val categoryRepository: CategoryRepository = Injekt.get()
-
+    private val categoryUseCases: CategoryUseCases by injectLazy()
     private val mangaRepository: MangaRepository = Injekt.get()
 
     private val mangaUseCases: MangaUseCases by injectLazy()
@@ -134,11 +129,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
         loadNextItems()
 
         viewModelScope.launchIO {
-            val categories =
-                categoryRepository
-                    .getCategories()
-                    .map { category -> category.toCategoryItem() }
-                    .toList()
+            val categories = categoryUseCases.getCategories.get()
             _displayScreenState.update {
                 it.copy(
                     categories = categories,
@@ -228,17 +219,10 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     /** Add New Category */
     fun addNewCategory(newCategory: String) {
         viewModelScope.launchIO {
-            val category = Category.create(newCategory)
-            category.order =
-                (_displayScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            categoryRepository.insertCategory(category)
+            categoryUseCases.modifyCategory.addNewCategory(newCategory)
             _displayScreenState.update {
                 it.copy(
-                    categories =
-                        categoryRepository
-                            .getCategories()
-                            .map { category -> category.toCategoryItem() }
-                            .toList()
+                    categories = categoryUseCases.getCategories.get()
                 )
             }
         }

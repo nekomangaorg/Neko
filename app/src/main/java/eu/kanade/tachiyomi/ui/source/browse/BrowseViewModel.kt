@@ -5,8 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
-import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import org.nekomanga.presentation.screens.library.LibraryDisplayMode
@@ -31,11 +29,9 @@ import org.nekomanga.R
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.BrowseFilterRepository
-import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.category.toCategoryItem
-import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
@@ -60,7 +56,7 @@ class BrowseViewModel : ViewModel() {
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
 
-    private val categoryRepository: CategoryRepository = Injekt.get()
+    private val categoryUseCases: CategoryUseCases by injectLazy()
 
     val browseFilterRepository: BrowseFilterRepository = Injekt.get()
 
@@ -182,11 +178,7 @@ class BrowseViewModel : ViewModel() {
         updateBrowseFilters(_browseScreenState.value.firstLoad)
 
         viewModelScope.launchIO {
-            val categories =
-                categoryRepository
-                    .getCategories()
-                    .map { category -> category.toCategoryItem() }
-                    .toList()
+            val categories = categoryUseCases.getCategories.get()
 
             _browseScreenState.update {
                 it.copy(
@@ -672,16 +664,10 @@ class BrowseViewModel : ViewModel() {
     /** Add New Category */
     fun addNewCategory(newCategory: String) {
         viewModelScope.launchIO {
-            val category = Category.create(newCategory)
-            category.order = (_browseScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            categoryRepository.insertCategory(category)
+            categoryUseCases.modifyCategory.addNewCategory(newCategory)
             _browseScreenState.update {
                 it.copy(
-                    categories =
-                        categoryRepository
-                            .getCategories()
-                            .map { category -> category.toCategoryItem() }
-                            .toList()
+                    categories = categoryUseCases.getCategories.get()
                 )
             }
         }
