@@ -356,4 +356,69 @@ class ModifyCategoryUseCaseTest {
                 )
             }
         }
+
+    @Test
+    fun `given category ID when deleting category then deleteCategory is called on repository`() =
+        runTest {
+            // Arrange
+            val categoryId = 456
+            val category = CategoryImpl().apply { id = categoryId; name = "To Delete" }
+            coEvery { categoryRepository.getCategoryById(categoryId) } returns category
+            coEvery { categoryRepository.deleteCategory(any()) } just runs
+
+            // Act
+            useCase.deleteCategory(categoryId)
+
+            // Assert
+            coVerify(exactly = 1) { categoryRepository.getCategoryById(categoryId) }
+            coVerify(exactly = 1) { categoryRepository.deleteCategory(category) }
+        }
+
+    @Test
+    fun `given category ID and new name when updating category name then updated category is saved`() =
+        runTest {
+            // Arrange
+            val categoryId = 456
+            val newName = "New Name"
+            val category = CategoryImpl().apply { id = categoryId; name = "Old Name" }
+            coEvery { categoryRepository.getCategoryById(categoryId) } returns category
+            coEvery { categoryRepository.insertCategory(any()) } returns categoryId
+
+            // Act
+            useCase.updateCategoryName(categoryId, newName)
+
+            // Assert
+            coVerify(exactly = 1) { categoryRepository.getCategoryById(categoryId) }
+            coVerify(exactly = 1) {
+                categoryRepository.insertCategory(
+                    match { it.id == categoryId && it.name == newName }
+                )
+            }
+        }
+
+    @Test
+    fun `given category list when reordering then orders are updated sequentially`() =
+        runTest {
+            // Arrange
+            val cat1 = CategoryImpl().apply { id = 10; name = "Cat 10"; order = 5 }
+            val cat2 = CategoryImpl().apply { id = 20; name = "Cat 20"; order = 2 }
+            coEvery { categoryRepository.getCategories() } returns listOf(cat1, cat2)
+            coEvery { categoryRepository.insertCategories(any()) } just runs
+
+            val categoryItem = CategoryItem(id = 10, name = "Cat 10", sortOrder = LibrarySort.Title)
+
+            // Act - Move Cat 10 to index 1 (meaning it comes after Cat 20)
+            useCase.reorderCategories(categoryItem, 1)
+
+            // Assert
+            coVerify(exactly = 1) {
+                categoryRepository.insertCategories(
+                    match { list ->
+                        list.size == 2 &&
+                            list[0].id == 20 && list[0].order == 1 &&
+                            list[1].id == 10 && list[1].order == 2
+                    }
+                )
+            }
+        }
 }

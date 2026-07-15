@@ -19,7 +19,10 @@ class ModifyCategoryUseCase(
     suspend fun addNewCategory(newCategory: String) {
         val categories = categoryRepository.getCategories()
         val order = (categories.maxOfOrNull { it.order } ?: 0) + 1
-        val category = Category.create(newCategory).apply { this.order = order }
+        val category = Category.create(newCategory).apply {
+            this.order = order
+            this.mangaSort = LibrarySort.Title.categoryValue
+        }
         categoryRepository.insertCategory(category)
     }
 
@@ -57,5 +60,28 @@ class ModifyCategoryUseCase(
         val dbManga = mangaRepository.getMangaById(mangaId) ?: return
         val categories = enabledCategories.map { MangaCategory.create(dbManga, it.toDbCategory()) }
         categoryRepository.setMangaCategories(categories, listOf(dbManga.id!!))
+    }
+
+    suspend fun deleteCategory(categoryId: Int) {
+        categoryRepository.getCategoryById(categoryId)?.let {
+            categoryRepository.deleteCategory(it)
+        }
+    }
+
+    suspend fun updateCategoryName(categoryId: Int, newName: String) {
+        categoryRepository.getCategoryById(categoryId)?.let {
+            it.name = newName
+            categoryRepository.insertCategory(it)
+        }
+    }
+
+    suspend fun reorderCategories(category: CategoryItem, newIndex: Int) {
+        val dbCategories = categoryRepository.getCategories().toMutableList()
+        val currentIndex = dbCategories.indexOfFirst { category.id == it.id }
+        if (currentIndex != -1) {
+            dbCategories.add(newIndex, dbCategories.removeAt(currentIndex))
+            dbCategories.forEachIndexed { index, dbCategory -> dbCategory.order = index + 1 }
+            categoryRepository.insertCategories(dbCategories)
+        }
     }
 }
