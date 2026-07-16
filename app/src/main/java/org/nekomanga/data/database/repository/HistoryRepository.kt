@@ -48,6 +48,12 @@ interface HistoryRepository {
 
     suspend fun getChapterHistoryByMangaId(mangaId: Long): List<LegacyMangaChapterHistory>
 
+    /**
+     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
+     * Bulk fetches chapter histories for a list of manga IDs to avoid N+1 queries.
+     */
+    suspend fun getChapterHistoryByMangaIds(mangaIds: List<Long>): List<LegacyMangaChapterHistory>
+
     // =========================================================================
     // STANDARD HISTORY QUERIES (Returns Domain Model)
     // =========================================================================
