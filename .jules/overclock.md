@@ -40,4 +40,4 @@
 
 ## 2026-07-16 - Feed Screen N+1 Database Queries Optimization
 **Learning:** Performing multiple sequential database queries (e.g. `historyRepository.getChapterHistoryByMangaId`, `chapterRepository.getChaptersForManga`, `mangaRepository.getMangaById`) inside loops during feed loading/updates mapping creates a severe N+1 problem, causing latency spikes and thread blockage.
-**Action:** Introduce batch-prefetch queries (like `getChapterHistoryByMangaIds` and use `getChaptersForMangaIds`/`getMangaByIds`) to retrieve dependencies in a single bulk query, mapping them to O(1) in-memory lookups.
+**Action:** Introduce batch-prefetch queries (like `getChapterHistoryByMangaIds` using a CTE with a `ROW_NUMBER() OVER` window function to apply the limit of 25 per manga directly inside the database, and use `getChaptersForMangaIds`/`getMangaByIds`) to retrieve dependencies in a single bulk query, mapping them to O(1) in-memory lookups.
