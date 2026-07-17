@@ -108,7 +108,7 @@ class ModifyMangaUseCaseTest {
             assertNotNull(result)
             verify(exactly = 1) { mockManga.user_title = newTitle }
             verify(exactly = 1) {
-                anyConstructed<DownloadProvider>().renameMangaFolder(oldTitle, newTitle)
+                anyConstructed<DownloadProvider>().renameMangaFolder(mockManga, oldTitle)
             }
             verify(exactly = 1) { downloadManager.updateDownloadCacheForManga(mockManga) }
             verify(exactly = 1) { storageManager.renamePagesAndCoverDirectory(oldTitle, newTitle) }
