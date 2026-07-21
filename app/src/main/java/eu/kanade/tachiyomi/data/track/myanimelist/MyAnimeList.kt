@@ -80,7 +80,12 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun update(track: Track, setToRead: Boolean): Track {
-        updateTrackStatus(track, setToRead, setToComplete = true, mustReadToComplete = true)
+        updateTrackStatus(
+            track,
+            setToRead,
+            setToComplete = setToRead,
+            mustReadToComplete = true,
+        )
         return api.updateItem(track)
     }
 
