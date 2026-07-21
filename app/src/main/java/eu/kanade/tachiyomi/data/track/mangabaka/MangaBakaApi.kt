@@ -129,6 +129,7 @@ class MangaBakaApi(
                             userData.finishDate?.let { Instant.parse(it).toEpochMilliseconds() }
                                 ?: 0
                         last_chapter_read = userData.progressChapter?.toFloat() ?: 0.0f
+                        total_chapters = additionalData.totalChapters?.toIntOrNull() ?: 0
                         // private = userData.isPrivate
                     }
                 } catch (e: Exception) {
@@ -224,6 +225,7 @@ class MangaBakaApi(
             start_date = item.published?.startDate.orEmpty()
             publishing_status = item.status.toString().lowercase()
             publishing_type = ""
+            total_chapters = item.totalChapters?.toIntOrNull() ?: 0
         }
     }
 
