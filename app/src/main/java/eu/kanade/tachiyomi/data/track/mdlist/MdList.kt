@@ -81,6 +81,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 // network call
 
                 if (followStatus != FollowStatus.UNFOLLOWED) {
+                    var progressUpdatedByStatusChange = false
                     if (
                         track.total_chapters != 0 &&
                             track.last_chapter_read.toInt() == track.total_chapters
@@ -94,6 +95,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                             track.status = newFollowStatus.int
                             manga.follow_status = newFollowStatus
                             mangaRepository.updateManga(manga)
+                            mdex.updateReadingProgress(track)
+                            progressUpdatedByStatusChange = true
                         }
                     }
                     if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
@@ -106,9 +109,13 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                             track.status = newFollowStatus.int
                             manga.follow_status = newFollowStatus
                             mangaRepository.updateManga(manga)
+                            mdex.updateReadingProgress(track)
+                            progressUpdatedByStatusChange = true
                         }
                     }
-                    mdex.updateReadingProgress(track)
+                    if (!progressUpdatedByStatusChange) {
+                        mdex.updateReadingProgress(track)
+                    }
                 } else if (track.last_chapter_read.toInt() != 0) {
                     // When followStatus has been changed to unfollowed 0 out read chapters since
                     // dex does
