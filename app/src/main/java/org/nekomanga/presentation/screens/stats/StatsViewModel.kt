@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
+
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.nekomanga.R
-import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
@@ -43,7 +43,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class StatsViewModel() : ViewModel() {
-    private val categoryRepository: CategoryRepository = Injekt.get()
+    private val categoryUseCases: CategoryUseCases = Injekt.get()
     private val historyRepository: HistoryRepository = Injekt.get()
     private val mangaRepository: MangaRepository = Injekt.get()
     private val mergeMangaRepository: MergeMangaRepository = Injekt.get()
@@ -154,8 +154,8 @@ class StatsViewModel() : ViewModel() {
         tracksByMangaId: Map<Long, List<Track>>,
     ) {
         val allHistories = getHistory(libraryList)
-        val allMangaCategories = getMangaCategories(libraryList)
-        val allCategories = categoryRepository.getCategories()
+        val mangaCategoriesByMangaId =
+            categoryUseCases.getCategories.getMangaCategories(libraryList.mapNotNull { it.id })
         val allChapters = getChapters(libraryList)
 
         val chapterToMangaMap =
@@ -170,8 +170,6 @@ class StatsViewModel() : ViewModel() {
             allHistories
                 .filter { it.chapter_id in chapterToMangaMap }
                 .groupBy { chapterToMangaMap[it.chapter_id]!! }
-        val mangaCategoriesByMangaId = allMangaCategories.groupBy { it.manga_id }
-        val categoriesById = allCategories.associateBy { it.id }
 
         val detailedStatMangaList =
             libraryList
@@ -179,9 +177,7 @@ class StatsViewModel() : ViewModel() {
                     val history = historiesByMangaId[it.id] ?: emptyList()
                     val tracks = tracksByMangaId[it.id] ?: emptyList()
                     val mangaCats = mangaCategoriesByMangaId[it.id] ?: emptyList()
-                    val catNames = mangaCats.mapNotNull { mc ->
-                        categoriesById[mc.category_id]?.name
-                    }
+                    val catNames = mangaCats.map { it.name }
 
                     DetailedStatManga(
                         id = it.id!!,
@@ -216,7 +212,7 @@ class StatsViewModel() : ViewModel() {
                 isLoading = false,
                 manga = detailedStatMangaList.toList(),
                 categories =
-                    (categoryRepository.getCategories().map { it.name } +
+                    (categoryUseCases.getCategories.get().map { it.name } +
                             listOf(prefs.context.getString(R.string.default_value)))
                         .toList(),
                 tags =
@@ -394,19 +390,6 @@ class StatsViewModel() : ViewModel() {
                 .mapNotNull { it.id }
                 .chunked(900)
                 .map { chunk -> async { historyRepository.getHistoryByMangaIds(chunk) } }
-                .toList()
-                .awaitAll()
-                .flatten()
-        }
-    }
-
-    private suspend fun getMangaCategories(mangaList: List<LibraryManga>): List<MangaCategory> {
-        return coroutineScope {
-            mangaList
-                .asSequence()
-                .mapNotNull { it.id }
-                .chunked(900)
-                .map { chunk -> async { categoryRepository.getMangaCategories(chunk) } }
                 .toList()
                 .awaitAll()
                 .flatten()
