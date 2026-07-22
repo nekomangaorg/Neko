@@ -148,7 +148,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun update(track: Track, setToRead: Boolean): Track {
-        updateTrackStatus(track, setToRead, setToComplete = true, mustReadToComplete = true)
+        updateTrackStatus(track, setToRead, mustReadToComplete = true)
         // If user was using API v1 fetch library_id
         if (track.library_id == null || track.library_id!! == 0L) {
             val libManga =

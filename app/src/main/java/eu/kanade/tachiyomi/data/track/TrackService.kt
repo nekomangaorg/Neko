@@ -95,15 +95,13 @@ abstract class TrackService(val id: Int) {
     open fun updateTrackStatus(
         track: Track,
         setToReadStatus: Boolean,
-        setToComplete: Boolean = false,
         mustReadToComplete: Boolean = false,
     ) {
         if (setToReadStatus && track.status == planningStatus() && track.last_chapter_read != 0f) {
             track.status = readingStatus()
         }
         if (
-            setToComplete &&
-                (!mustReadToComplete || track.status == readingStatus()) &&
+            (!mustReadToComplete || track.status == readingStatus()) &&
                 track.total_chapters != 0 &&
                 track.last_chapter_read.toInt() == track.total_chapters
         ) {
