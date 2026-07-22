@@ -82,7 +82,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
                 if (followStatus != FollowStatus.UNFOLLOWED) {
                     var progressUpdatedByStatusChange = false
-                    var statusUpdateAttemptedAndFailed = false
                     if (
                         track.total_chapters != 0 &&
                             track.last_chapter_read.toInt() == track.total_chapters
@@ -98,8 +97,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                             mangaRepository.updateManga(manga)
                             mdex.updateReadingProgress(track)
                             progressUpdatedByStatusChange = true
-                        } else {
-                            statusUpdateAttemptedAndFailed = true
                         }
                     }
                     if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
@@ -114,11 +111,9 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                             mangaRepository.updateManga(manga)
                             mdex.updateReadingProgress(track)
                             progressUpdatedByStatusChange = true
-                        } else {
-                            statusUpdateAttemptedAndFailed = true
                         }
                     }
-                    if (!progressUpdatedByStatusChange && !statusUpdateAttemptedAndFailed) {
+                    if (!progressUpdatedByStatusChange) {
                         mdex.updateReadingProgress(track)
                     }
                 } else if (track.last_chapter_read.toInt() != 0) {
