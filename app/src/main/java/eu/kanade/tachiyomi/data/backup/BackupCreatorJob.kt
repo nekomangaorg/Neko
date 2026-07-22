@@ -66,7 +66,7 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     companion object {
         fun isManualJobRunning(context: Context): Boolean {
             val list = WorkManager.getInstance(context).getWorkInfosByTag(TAG_MANUAL).get()
-            return list.find { it.state == WorkInfo.State.RUNNING } != null
+            return list.any { !it.state.isFinished }
         }
 
         fun cancelTask(context: Context) {
