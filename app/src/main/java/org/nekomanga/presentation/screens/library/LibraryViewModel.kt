@@ -59,7 +59,7 @@ import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
-import org.nekomanga.data.database.repository.CategoryRepository
+
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
@@ -88,7 +88,7 @@ class LibraryViewModel() : ViewModel() {
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
     val coverCache: CoverCache = Injekt.get()
-    val categoryRepository: CategoryRepository = Injekt.get()
+
     val chapterRepository: ChapterRepository = Injekt.get()
     val mangaRepository: MangaRepository = Injekt.get()
 
@@ -101,7 +101,7 @@ class LibraryViewModel() : ViewModel() {
     val chapterUseCases: ChapterUseCases = Injekt.get()
     val filterLibraryManga: FilterLibraryMangaUseCase = Injekt.get()
     val groupLibraryManga = GroupLibraryMangaUseCase()
-    val categoryUseCases: CategoryUseCases = CategoryUseCases()
+    val categoryUseCases: CategoryUseCases = Injekt.get()
 
     private val initialState =
         LibraryScreenState(
@@ -164,14 +164,13 @@ class LibraryViewModel() : ViewModel() {
         combine(
                 libraryPreferences.sortingMode().changes(),
                 libraryPreferences.sortAscending().changes(),
-                categoryRepository.observeCategories(),
-            ) { sortingMode, sortAscending, dbCategories ->
+                categoryUseCases.getCategories.observe(),
+            ) { sortingMode, sortAscending, categories ->
                 val librarySort = LibrarySort.valueOf(sortingMode)
                 val defaultCategory = Category.createSystemCategory().toCategoryItem()
                 val updatedDefaultCategory =
                     defaultCategory.copy(sortOrder = librarySort, isAscending = sortAscending)
-                (listOf(updatedDefaultCategory) +
-                        dbCategories.map { dbCategory -> dbCategory.toCategoryItem() })
+                (listOf(updatedDefaultCategory) + categories)
                     .sortedBy { it.order }
             }
             .distinctUntilChanged()
@@ -667,8 +666,8 @@ class LibraryViewModel() : ViewModel() {
             loggedServicesFlow.map { it.isNotEmpty() }.distinctUntilChanged()
 
         combine(
-                categoryRepository
-                    .observeCategories()
+                categoryUseCases.getCategories
+                    .observe()
                     .map { it.isNotEmpty() }
                     .distinctUntilChanged(),
                 hasLoggedServicesFlow,
@@ -1086,9 +1085,8 @@ class LibraryViewModel() : ViewModel() {
                 } else {
                     addAll(selectedItems)
                     val categoryItems =
-                        categoryRepository
+                        categoryUseCases.getCategories
                             .getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
-                            .map { it.toCategoryItem() }
                     val copy = libraryMangaItem.copy(allCategories = categoryItems)
                     add(copy)
                 }

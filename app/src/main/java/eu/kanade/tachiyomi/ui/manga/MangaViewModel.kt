@@ -90,7 +90,7 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.ArtworkRepository
-import org.nekomanga.data.database.repository.CategoryRepository
+
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaAggregateRepository
@@ -158,7 +158,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val mergeMangaRepository: MergeMangaRepository = Injekt.get()
 
     val artworkRepository: ArtworkRepository = Injekt.get()
-    val categoryRepository: CategoryRepository = Injekt.get()
+
     val chapterRepository: ChapterRepository = Injekt.get()
     val historyRepository: HistoryRepository = Injekt.get()
     val trackRepository: TrackRepository = Injekt.get()
@@ -174,7 +174,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val storageManager: StorageManager = Injekt.get()
     private val chapterUseCases: ChapterUseCases = Injekt.get()
     private val trackUseCases: org.nekomanga.usecases.tracking.TrackUseCases = Injekt.get()
-    private val categoryUseCases = CategoryUseCases()
+    private val categoryUseCases: CategoryUseCases = Injekt.get()
 
     private val mangaUseCases: MangaUseCases = Injekt.get()
 
@@ -263,19 +263,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     val categoriesDataFlow =
         combine(
-                categoryRepository.observeCategories(),
-                categoryRepository.observeMangaCategories(listOf(mangaId)),
-            ) { allCategories, mangaCategories ->
-                val mangaCategorySet = mangaCategories.map { it.category_id }.toSet()
+                categoryUseCases.getCategories.observe(),
+                categoryUseCases.getCategories.observeCategoriesForManga(mangaId),
+            ) { allCategories, currentCategories ->
                 MangaConstants.CategoriesData(
-                    all = allCategories.map { it.toCategoryItem() }.toList(),
-                    current =
-                        allCategories
-                            .mapNotNull {
-                                if (it.id != null && it.id in mangaCategorySet) it.toCategoryItem()
-                                else null
-                            }
-                            .toList(),
+                    all = allCategories,
+                    current = currentCategories,
                 )
             }
             .distinctUntilChanged()

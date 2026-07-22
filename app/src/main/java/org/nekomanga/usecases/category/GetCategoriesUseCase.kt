@@ -1,5 +1,8 @@
 package org.nekomanga.usecases.category
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.nekomanga.data.database.repository.CategoryRepository
@@ -18,4 +21,32 @@ class GetCategoriesUseCase(
             list.map { it.toCategoryItem() }
         }
     }
+
+    suspend fun getCategoriesForManga(mangaId: Long): List<CategoryItem> {
+        return categoryRepository.getCategoriesForManga(mangaId).map { it.toCategoryItem() }
+    }
+
+    fun observeCategoriesForManga(mangaId: Long): Flow<List<CategoryItem>> {
+        return categoryRepository.observeCategoriesForManga(mangaId).map { list ->
+            list.map { it.toCategoryItem() }
+        }
+    }
+
+    suspend fun getMangaCategories(mangaIds: List<Long>): Map<Long, List<CategoryItem>> {
+        val categories = categoryRepository.getCategories().associateBy { it.id }
+        val mangaCategories = coroutineScope {
+            mangaIds
+                .chunked(900)
+                .map { chunk -> async { categoryRepository.getMangaCategories(chunk) } }
+                .toList()
+                .awaitAll()
+                .flatten()
+        }
+        return mangaCategories
+            .groupBy { it.manga_id }
+            .mapValues { (_, value) ->
+                value.mapNotNull { categories[it.category_id]?.toCategoryItem() }
+            }
+    }
 }
+
