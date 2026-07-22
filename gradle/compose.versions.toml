@@ -45,7 +45,7 @@ navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref =
 date-field = "com.github.nonproto:compose-date-text-field:73c012b665"
 markdown = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdown_version" }
 markdown-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown_version" }
-markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil2", version.ref = "markdown_version" }
+markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3-android", version.ref = "markdown_version" }
 
 swipe = "me.saket.swipe:swipe:1.3.0"
 

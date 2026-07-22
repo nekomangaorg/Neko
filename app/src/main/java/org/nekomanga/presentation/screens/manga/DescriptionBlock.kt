@@ -51,15 +51,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import com.mikepenz.markdown.compose.Markdown
-import com.mikepenz.markdown.m3.markdownColor
-import com.mikepenz.markdown.m3.markdownTypography
+import org.nekomanga.presentation.components.MarkdownRender
+import org.nekomanga.presentation.components.SimpleMarkdownFlavourDescriptor
 import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.rememberMarkdownState
+import org.nekomanga.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
-import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
-import org.nekomanga.R
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
@@ -94,14 +92,14 @@ fun DescriptionBlock(
         rememberMarkdownState(
             content = smallDescription,
             retainState = true,
-            flavour = CommonMarkFlavourDescriptor(),
+            flavour = SimpleMarkdownFlavourDescriptor,
             immediate = true,
         )
     val expandedMarkdownState =
         rememberMarkdownState(
             content = description,
             retainState = true,
-            flavour = CommonMarkFlavourDescriptor(),
+            flavour = SimpleMarkdownFlavourDescriptor,
             immediate = true,
         )
 
@@ -150,10 +148,8 @@ fun DescriptionBlock(
         ) { expanded ->
             if (expanded) {
                 SelectionContainer {
-                    Markdown(
+                    MarkdownRender(
                         markdownState = expandedMarkdownState,
-                        colors = nekoMarkdownColors(),
-                        typography = nekoMarkdownTypography(),
                     )
                 }
             } else {
@@ -207,10 +203,8 @@ private fun CollapsedDescription(
         with(LocalDensity.current) { MaterialTheme.typography.bodyLarge.fontSize.toDp() * 3 }
 
     Box(modifier = Modifier.clipToBounds()) {
-        Markdown(
+        MarkdownRender(
             markdownState = markdownState,
-            colors = nekoMarkdownColors(),
-            typography = nekoMarkdownTypography(),
             modifier = Modifier.fillMaxWidth().heightIn(Size.none, descriptionHeight),
         )
         // Gradient overlay to fade out the text
@@ -466,28 +460,6 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
     }
 }
 
-@Composable
-private fun nekoMarkdownColors() =
-    markdownColor(
-        text = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-        codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-    )
 
-@Composable
-private fun nekoMarkdownTypography() =
-    markdownTypography(
-        h1 = MaterialTheme.typography.headlineMedium,
-        h2 = MaterialTheme.typography.headlineSmall,
-        h3 = MaterialTheme.typography.titleLarge,
-        h4 = MaterialTheme.typography.titleMedium,
-        h5 = MaterialTheme.typography.titleSmall,
-        h6 = MaterialTheme.typography.bodyLarge,
-        paragraph = MaterialTheme.typography.bodyLarge,
-        text = MaterialTheme.typography.bodyLarge,
-        ordered = MaterialTheme.typography.bodyLarge,
-        bullet = MaterialTheme.typography.bodyLarge,
-        quote = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-        list = MaterialTheme.typography.bodyLarge,
-    )
 
 fun TimeInterpolator.toEasing() = Easing { x -> getInterpolation(x) }
