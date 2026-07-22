@@ -47,7 +47,6 @@ import com.mikepenz.markdown.model.NoOpImageTransformerImpl
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.rememberMarkdownState
-import org.intellij.markdown.MarkdownTokenTypes.Companion.HTML_TAG
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkMarkerProcessor
@@ -241,15 +240,6 @@ private val markdownComponents = markdownComponents(
             },
         )
     },
-    custom = { type, model ->
-        if (type in DISALLOWED_MARKDOWN_TYPES) {
-            MarkdownText(
-                content = model.content.substring(model.node.startOffset, model.node.endOffset),
-                node = model.node,
-                style = model.typography.text,
-            )
-        }
-    },
 )
 
 @Composable
@@ -306,5 +296,3 @@ private class SimpleMarkdownMarkerProcessor(
         return markerBlockProviders
     }
 }
-
-val DISALLOWED_MARKDOWN_TYPES = arrayOf(HTML_TAG)
