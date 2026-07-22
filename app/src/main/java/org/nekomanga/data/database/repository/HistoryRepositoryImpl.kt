@@ -117,6 +117,22 @@ class HistoryRepositoryImpl(private val historyDao: HistoryDao) : HistoryReposit
         }
     }
 
+    override suspend fun getChapterHistoryByMangaIds(
+        mangaIds: List<Long>
+    ): List<LegacyMangaChapterHistory> {
+        if (mangaIds.isEmpty()) return emptyList()
+        return mangaIds.chunked(500).flatMap { chunk ->
+            historyDao.getChapterHistoryByMangaIds(chunk).map {
+                LegacyMangaChapterHistory(
+                    it.manga.toManga(),
+                    it.chapter.toChapter(),
+                    it.history.toHistory(),
+                )
+            }
+        }
+    }
+
+
     // --- Standard Domain Queries ---
 
     override suspend fun getHistoryByMangaId(mangaId: Long): List<History> {
