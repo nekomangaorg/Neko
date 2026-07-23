@@ -1,5 +1,6 @@
 package org.nekomanga.domain.chapter
 
+import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -10,6 +11,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 
+@Immutable
 data class SimpleChapter(
     val id: Long,
     val mangaId: Long,
@@ -190,6 +192,7 @@ fun SimpleChapter.toChapterItem(): ChapterItem {
     return ChapterItem(chapter = this)
 }
 
+@Immutable
 data class ChapterItem(
     val chapter: SimpleChapter,
     val downloadState: Download.State = Download.State.NOT_DOWNLOADED,
