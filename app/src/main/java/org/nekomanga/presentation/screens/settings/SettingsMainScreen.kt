@@ -3,6 +3,8 @@ package org.nekomanga.presentation.screens.settings
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,10 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavKey
+import androidx.compose.ui.platform.LocalLayoutDirection
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import eu.kanade.tachiyomi.ui.setting.SettingsScreenType
-import jp.wasabeef.gap.Gap
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
@@ -227,14 +229,18 @@ private fun mainContent(
         }
     }
 
+    val layoutDirection = LocalLayoutDirection.current
+    val topPadding = contentPadding.calculateTopPadding() + Size.medium
     LazyColumn(
-        contentPadding = contentPadding,
+        contentPadding = PaddingValues(
+            start = contentPadding.calculateStartPadding(layoutDirection),
+            top = topPadding,
+            end = contentPadding.calculateEndPadding(layoutDirection),
+            bottom = contentPadding.calculateBottomPadding(),
+        ),
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Size.tiny),
     ) {
-        item {
-            Gap(Size.medium)
-        }
         itemsIndexed(
             items = menuItems,
             key = { _, item -> item.labelText.hashCode() },

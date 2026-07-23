@@ -83,11 +83,6 @@ fun PreferenceScreen(
                             PreferenceItem(item = item, highlightKey = highlightKey)
                         }
                     }
-                    item(key = "spacer-$i") {
-                        if (i < items.lastIndex) {
-                            Spacer(modifier = Modifier.height(12.dp))
-                        }
-                    }
                 }
 
                 // Create Preference Item
