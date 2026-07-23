@@ -1,11 +1,14 @@
 package org.nekomanga.presentation.screens.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,9 +17,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import org.nekomanga.presentation.components.listcard.ExpressiveListCard
+import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.screens.settings.Preference.PreferenceItem
 import org.nekomanga.presentation.screens.settings.screens.SearchableSettings
 import org.nekomanga.presentation.screens.settings.widgets.PreferenceGroupHeader
+import org.nekomanga.presentation.theme.Size
 
 /**
  * Preference Screen composable which contains a list of [Preference] items
@@ -45,7 +51,12 @@ fun PreferenceScreen(
         }
     }
 
-    LazyColumn(modifier = modifier, state = state, contentPadding = contentPadding) {
+    LazyColumn(
+        modifier = modifier,
+        state = state,
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(Size.tiny),
+    ) {
         items.fastForEachIndexed { i, preference ->
             when (preference) {
                 // Create Preference Group
@@ -55,15 +66,21 @@ fun PreferenceScreen(
                     item(key = preference.title) {
                         Column { PreferenceGroupHeader(title = preference.title) }
                     }
-                    items(
+                    itemsIndexed(
                         items = preference.preferenceItems,
-                        key = { item -> "${preference.title}-${item.title}" },
-                    ) { item ->
-                        PreferenceItem(item = item, highlightKey = highlightKey)
-                    }
-                    item(key = "spacer-$i") {
-                        if (i < items.lastIndex) {
-                            Spacer(modifier = Modifier.height(12.dp))
+                        key = { _, item -> "${preference.title}-${item.title}" },
+                    ) { index, item ->
+                        val cardType = when {
+                            preference.preferenceItems.size == 1 -> ListCardType.Single
+                            index == 0 -> ListCardType.Top
+                            index == preference.preferenceItems.lastIndex -> ListCardType.Bottom
+                            else -> ListCardType.Center
+                        }
+                        ExpressiveListCard(
+                            listCardType = cardType,
+                            modifier = Modifier.padding(horizontal = Size.medium),
+                        ) {
+                            PreferenceItem(item = item, highlightKey = highlightKey)
                         }
                     }
                 }
@@ -71,7 +88,12 @@ fun PreferenceScreen(
                 // Create Preference Item
                 is PreferenceItem<*> ->
                     item(key = preference.title) {
-                        PreferenceItem(item = preference, highlightKey = highlightKey)
+                        ExpressiveListCard(
+                            listCardType = ListCardType.Single,
+                            modifier = Modifier.padding(horizontal = Size.medium),
+                        ) {
+                            PreferenceItem(item = preference, highlightKey = highlightKey)
+                        }
                     }
             }
         }
