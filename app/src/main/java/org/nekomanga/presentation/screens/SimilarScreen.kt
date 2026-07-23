@@ -19,11 +19,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
@@ -43,9 +48,22 @@ import org.nekomanga.presentation.screens.similar.SimilarTopBar
 import org.nekomanga.presentation.screens.similar.SimilarViewModel
 import org.nekomanga.presentation.theme.Size
 
+/**
+ * SimilarScreen displays manga recommendations similar to a given manga.
+ *
+ * This screen-level Composable is responsive to [WindowSizeClass]. On expanded screens
+ * (tablets/foldables), the layout limits the maximum width of the recommendations list/grid
+ * to 800.dp and centers it, preventing content from stretching uncomfortably wide.
+ *
+ * @param viewModel The ViewModel orchestrating the state of similar manga recommendations.
+ * @param windowSizeClass The screen's window size class constraints used to determine adaptive styling.
+ * @param onBackPressed Callback invoked when the user navigates back.
+ * @param onNavigateTo Callback invoked to navigate to another screen.
+ */
 @Composable
 fun SimilarScreen(
     viewModel: SimilarViewModel,
+    windowSizeClass: WindowSizeClass,
     onBackPressed: () -> Unit,
     onNavigateTo: (NavKey) -> Unit,
 ) {
@@ -54,6 +72,7 @@ fun SimilarScreen(
 
     SimilarWrapper(
         similarScreenState = screenState,
+        windowSizeClass = windowSizeClass,
         switchDisplayClick = viewModel::switchDisplayMode,
         libraryEntryVisibilityClick = viewModel::switchLibraryEntryVisibility,
         onBackPress = onBackPressed,
@@ -67,6 +86,7 @@ fun SimilarScreen(
 @Composable
 private fun SimilarWrapper(
     similarScreenState: SimilarScreenState,
+    windowSizeClass: WindowSizeClass,
     switchDisplayClick: () -> Unit,
     libraryEntryVisibilityClick: (Int) -> Unit,
     onBackPress: () -> Unit,
@@ -151,35 +171,43 @@ private fun SimilarWrapper(
             )
         },
     ) { contentPadding ->
-        SimilarContent(
-            contentPadding = contentPadding,
-            similarScreenState = similarScreenState,
-            onRefresh = onRefresh,
-            mangaClick = mangaClick,
-            mangaLongClick = { displayManga: DisplayManga ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                if (!displayManga.inLibrary && similarScreenState.promptForCategories) {
-                    scope.launch {
-                        openSheet(
-                            DisplaySheetScreen.CategoriesSheet(
-                                setCategories = { selectedCategories ->
-                                    scope.launch { sheetState.hide() }
-                                    toggleFavorite(displayManga.mangaId, selectedCategories)
-                                }
+        val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            SimilarContent(
+                modifier = if (isTablet) Modifier.widthIn(max = 800.dp) else Modifier.fillMaxSize(),
+                contentPadding = contentPadding,
+                similarScreenState = similarScreenState,
+                onRefresh = onRefresh,
+                mangaClick = mangaClick,
+                mangaLongClick = { displayManga: DisplayManga ->
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    if (!displayManga.inLibrary && similarScreenState.promptForCategories) {
+                        scope.launch {
+                            openSheet(
+                                DisplaySheetScreen.CategoriesSheet(
+                                    setCategories = { selectedCategories ->
+                                        scope.launch { sheetState.hide() }
+                                        toggleFavorite(displayManga.mangaId, selectedCategories)
+                                    }
+                                )
                             )
-                        )
+                        }
+                    } else {
+                        toggleFavorite(displayManga.mangaId, emptyList())
                     }
-                } else {
-                    toggleFavorite(displayManga.mangaId, emptyList())
-                }
-            },
-        )
+                },
+            )
+        }
     }
 }
 
 @Composable
 private fun SimilarContent(
     similarScreenState: SimilarScreenState,
+    modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     onRefresh: () -> Unit,
     mangaClick: (Long) -> Unit,
@@ -187,10 +215,11 @@ private fun SimilarContent(
 ) {
     if (similarScreenState.filteredDisplayManga.isEmpty()) {
         if (similarScreenState.isRefreshing) {
-            Box(modifier = Modifier.fillMaxSize())
+            Box(modifier = modifier.fillMaxSize())
         } else {
             EmptyScreen(
                 message = UiText.StringResource(resourceId = R.string.no_results_found),
+                modifier = modifier,
                 actions =
                     listOf(
                         Action(text = UiText.StringResource(R.string.retry), onClick = onRefresh)
@@ -203,6 +232,7 @@ private fun SimilarContent(
                 groupedManga = similarScreenState.filteredDisplayManga,
                 shouldOutlineCover = similarScreenState.outlineCovers,
                 dynamicCover = similarScreenState.dynamicCovers,
+                modifier = modifier,
                 contentPadding = contentPadding,
                 onClick = mangaClick,
                 onLongClick = mangaLongClick,
@@ -214,6 +244,7 @@ private fun SimilarContent(
                 dynamicCover = similarScreenState.dynamicCovers,
                 columns = numberOfColumns(rawValue = similarScreenState.rawColumnCount),
                 isComfortable = similarScreenState.isComfortableGrid,
+                modifier = modifier,
                 contentPadding = contentPadding,
                 onClick = mangaClick,
                 onLongClick = mangaLongClick,

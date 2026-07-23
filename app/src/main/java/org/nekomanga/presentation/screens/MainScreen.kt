@@ -239,6 +239,7 @@ fun MainScreen(
 
                         DisplayScreen(
                             viewModel = displayViewModel,
+                            windowSizeClass = windowSizeClass,
                             onBackPressed = goBack,
                             onNavigateTo = { screen -> backStack.add(screen) },
                         )
@@ -250,6 +251,7 @@ fun MainScreen(
 
                         SimilarScreen(
                             viewModel = similarViewModel,
+                            windowSizeClass = windowSizeClass,
                             onBackPressed = goBack,
                             onNavigateTo = { screen -> backStack.add(screen) },
                         )
