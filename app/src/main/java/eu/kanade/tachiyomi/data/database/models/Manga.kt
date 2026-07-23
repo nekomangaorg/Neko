@@ -13,9 +13,13 @@ import eu.kanade.tachiyomi.data.external.Engtl
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.external.Kitsu
 import eu.kanade.tachiyomi.data.external.Mal
+import eu.kanade.tachiyomi.data.external.MangaBakaLink
 import eu.kanade.tachiyomi.data.external.MangaUpdatesLink
 import eu.kanade.tachiyomi.data.external.Raw
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.util.manga.MangaMappings
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
@@ -206,6 +210,18 @@ interface Manga : SManga {
         manga_updates_id?.let { list.add(MangaUpdatesLink(it)) }
 
         my_anime_list_id?.let { list.add(Mal(it)) }
+
+        try {
+            val mappings: MangaMappings = Injekt.get()
+            val mangaDexId: String? = list.filterIsInstance<Dex>().firstOrNull()?.id ?: MdUtil.getMangaUUID(url)
+            mangaDexId?.let { id ->
+                mappings.getMbId(id)?.let { list.add(MangaBakaLink(it)) }
+            }
+        } catch (e: IllegalStateException) {
+            // In case Injekt or MangaMappings is not available (e.g. in tests)
+            // TODO: Log the exception to aid debugging in production environments.
+            // e.printStackTrace() // For immediate debugging, consider a proper logger for production.
+        }
 
         other_urls?.let { combinedString ->
             combinedString.split("||").forEach { pairString ->
