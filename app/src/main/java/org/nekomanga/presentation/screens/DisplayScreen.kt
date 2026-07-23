@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -57,9 +61,22 @@ import org.nekomanga.presentation.screens.browse.DisplaySheetScreen
 import org.nekomanga.presentation.screens.display.DisplayTopBar
 import org.nekomanga.presentation.theme.Size
 
+/**
+ * DisplayScreen displays search results, listings, or other manga lists.
+ *
+ * This screen-level Composable is responsive to [WindowSizeClass]. On expanded screens
+ * (tablets/foldables), the layout limits the maximum width of the content to 800.dp and
+ * centers it, preventing text, lists, and grids from stretching uncomfortably wide.
+ *
+ * @param viewModel The ViewModel orchestrating the display screen state.
+ * @param windowSizeClass The screen's window size class constraints used to determine adaptive styling.
+ * @param onBackPressed Callback invoked when the user navigates back.
+ * @param onNavigateTo Callback invoked to navigate to another screen.
+ */
 @Composable
 fun DisplayScreen(
     viewModel: DisplayViewModel,
+    windowSizeClass: WindowSizeClass,
     onBackPressed: () -> Unit,
     onNavigateTo: (NavKey) -> Unit,
 ) {
@@ -80,6 +97,7 @@ fun DisplayScreen(
 
     DisplayWrapper(
         displayScreenState = screenState,
+        windowSizeClass = windowSizeClass,
         switchDisplayClick = viewModel::switchDisplayMode,
         libraryEntryVisibilityClick = viewModel::switchLibraryEntryVisibility,
         onBackPress = onBackPressed,
@@ -110,6 +128,7 @@ fun DisplayScreen(
 @Composable
 private fun DisplayWrapper(
     displayScreenState: DisplayScreenState,
+    windowSizeClass: WindowSizeClass,
     switchDisplayClick: () -> Unit,
     libraryEntryVisibilityClick: (Int) -> Unit,
     onBackPress: () -> Unit,
@@ -204,69 +223,78 @@ private fun DisplayWrapper(
             )
         },
     ) { contentPadding ->
-        if (displayScreenState.isLoading && displayScreenState.page == 1) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-        } else if (displayScreenState.error != null) {
-            EmptyScreen(
-                contentPadding = contentPadding,
-                message = UiText.String(displayScreenState.error),
-                actions =
-                    if (displayScreenState.page == 1)
-                        listOf(
-                            Action(
-                                text = UiText.StringResource(R.string.retry),
-                                onClick = retryClick,
-                            )
-                        )
-                    else listOf(),
-            )
-        } else {
-            if (displayScreenState.isDisplayResult) {
-                ResultList(
-                    results = displayScreenState.alternativeDisplay,
-                    contentPadding = contentPadding,
-                    onClick = resultItemClick,
-                )
-            } else if (displayScreenState.isList) {
-                MangaList(
-                    contentPadding = contentPadding,
-                    mangaList = displayScreenState.filteredDisplayManga,
-                    shouldOutlineCover = displayScreenState.outlineCovers,
-                    dynamicCover = displayScreenState.dynamicCovers,
-                    onClick = openManga,
-                    onLongClick = ::mangaLongClick,
-                    lastPage = displayScreenState.endReached,
-                    loadNextItems = loadNextPage,
-                )
-            } else {
-                MangaGrid(
-                    contentPadding = contentPadding,
-                    mangaList = displayScreenState.filteredDisplayManga,
-                    shouldOutlineCover = displayScreenState.outlineCovers,
-                    dynamicCover = displayScreenState.dynamicCovers,
-                    columns = numberOfColumns(rawValue = displayScreenState.rawColumnCount),
-                    isComfortable = displayScreenState.isComfortableGrid,
-                    onClick = openManga,
-                    onLongClick = ::mangaLongClick,
-                    lastPage = displayScreenState.endReached,
-                    loadNextItems = loadNextPage,
-                )
-            }
-            if (displayScreenState.isLoading && displayScreenState.page != 1) {
-                Box(Modifier.fillMaxSize()) {
-                    val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
-                    val stroke =
-                        remember(strokeWidth) { Stroke(width = strokeWidth, cap = StrokeCap.Round) }
-                    LinearWavyProgressIndicator(
-                        modifier =
-                            Modifier.fillMaxWidth().align(Alignment.TopStart).statusBarsPadding(),
-                        color = MaterialTheme.colorScheme.secondary,
-                        trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
-                        stroke = stroke,
-                        trackStroke = stroke,
+        val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            val contentModifier = if (isTablet) Modifier.widthIn(max = 800.dp) else Modifier.fillMaxSize()
+            Box(modifier = contentModifier) {
+                if (displayScreenState.isLoading && displayScreenState.page == 1) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                } else if (displayScreenState.error != null) {
+                    EmptyScreen(
+                        contentPadding = contentPadding,
+                        message = UiText.String(displayScreenState.error),
+                        actions =
+                            if (displayScreenState.page == 1)
+                                listOf(
+                                    Action(
+                                        text = UiText.StringResource(R.string.retry),
+                                        onClick = retryClick,
+                                    )
+                                )
+                            else listOf(),
                     )
+                } else {
+                    if (displayScreenState.isDisplayResult) {
+                        ResultList(
+                            results = displayScreenState.alternativeDisplay,
+                            contentPadding = contentPadding,
+                            onClick = resultItemClick,
+                        )
+                    } else if (displayScreenState.isList) {
+                        MangaList(
+                            contentPadding = contentPadding,
+                            mangaList = displayScreenState.filteredDisplayManga,
+                            shouldOutlineCover = displayScreenState.outlineCovers,
+                            dynamicCover = displayScreenState.dynamicCovers,
+                            onClick = openManga,
+                            onLongClick = ::mangaLongClick,
+                            lastPage = displayScreenState.endReached,
+                            loadNextItems = loadNextPage,
+                        )
+                    } else {
+                        MangaGrid(
+                            contentPadding = contentPadding,
+                            mangaList = displayScreenState.filteredDisplayManga,
+                            shouldOutlineCover = displayScreenState.outlineCovers,
+                            dynamicCover = displayScreenState.dynamicCovers,
+                            columns = numberOfColumns(rawValue = displayScreenState.rawColumnCount),
+                            isComfortable = displayScreenState.isComfortableGrid,
+                            onClick = openManga,
+                            onLongClick = ::mangaLongClick,
+                            lastPage = displayScreenState.endReached,
+                            loadNextItems = loadNextPage,
+                        )
+                    }
+                    if (displayScreenState.isLoading && displayScreenState.page != 1) {
+                        Box(Modifier.fillMaxSize()) {
+                            val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
+                            val stroke =
+                                remember(strokeWidth) { Stroke(width = strokeWidth, cap = StrokeCap.Round) }
+                            LinearWavyProgressIndicator(
+                                modifier =
+                                    Modifier.fillMaxWidth().align(Alignment.TopStart).statusBarsPadding(),
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
+                                stroke = stroke,
+                                trackStroke = stroke,
+                            )
+                        }
+                    }
                 }
             }
         }
