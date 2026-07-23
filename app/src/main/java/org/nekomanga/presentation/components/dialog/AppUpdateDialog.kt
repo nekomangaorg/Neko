@@ -11,9 +11,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.mikepenz.markdown.compose.Markdown
-import com.mikepenz.markdown.m3.markdownColor
-import com.mikepenz.markdown.m3.markdownTypography
+import org.nekomanga.presentation.components.MarkdownRender
 import eu.kanade.tachiyomi.data.updater.Release
 import org.nekomanga.R
 
@@ -27,10 +25,8 @@ fun AppUpdateDialog(release: Release, onDismissRequest: () -> Unit, onConfirm: (
         text = {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item {
-                    Markdown(
+                    MarkdownRender(
                         content = body,
-                        colors = nekoMarkdownColors(),
-                        typography = nekoMarkdownTypography(),
                     )
                 }
             }
@@ -52,22 +48,4 @@ fun AppUpdateDialog(release: Release, onDismissRequest: () -> Unit, onConfirm: (
     )
 }
 
-@Composable
-private fun nekoMarkdownColors() =
-    markdownColor(
-        text = MaterialTheme.colorScheme.onSurface,
-        codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-    )
 
-@Composable
-private fun nekoMarkdownTypography() =
-    markdownTypography(
-        h1 = MaterialTheme.typography.headlineMedium,
-        h2 = MaterialTheme.typography.headlineSmall,
-        h3 = MaterialTheme.typography.titleLarge,
-        h4 = MaterialTheme.typography.titleMedium,
-        h5 = MaterialTheme.typography.titleSmall,
-        h6 = MaterialTheme.typography.bodyLarge,
-        paragraph = MaterialTheme.typography.bodyMedium,
-        text = MaterialTheme.typography.bodySmall,
-    )
