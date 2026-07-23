@@ -213,10 +213,14 @@ interface Manga : SManga {
 
         try {
             val mappings: MangaMappings = Injekt.get()
-            val mangaDexId = list.filterIsInstance<Dex>().firstOrNull()?.id ?: MdUtil.getMangaUUID(url)
-            mappings.getMbId(mangaDexId)?.let { list.add(MangaBakaLink(it)) }
+            val mangaDexId: String? = list.filterIsInstance<Dex>().firstOrNull()?.id ?: MdUtil.getMangaUUID(url)
+            mangaDexId?.let { id ->
+                mappings.getMbId(id)?.let { list.add(MangaBakaLink(it)) }
+            }
         } catch (e: IllegalStateException) {
             // In case Injekt or MangaMappings is not available (e.g. in tests)
+            // TODO: Log the exception to aid debugging in production environments.
+            // e.printStackTrace() // For immediate debugging, consider a proper logger for production.
         }
 
         other_urls?.let { combinedString ->

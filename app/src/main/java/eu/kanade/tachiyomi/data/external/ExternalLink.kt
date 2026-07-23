@@ -65,7 +65,7 @@ data class MangaBakaLink(override val id: String) : ExternalLink() {
     override val logo = R.drawable.ic_tracker_mangabaka
     override val logoColor: Long = 0xFF121923
 
-    override fun getUrl() = "https://mangabaka.org/$id"
+    override fun getUrl() = if (id.isNotBlank()) "https://mangabaka.org/$id" else ""
 }
 
 data class Dex(override val id: String) : ExternalLink() {
