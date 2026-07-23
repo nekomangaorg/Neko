@@ -13,7 +13,7 @@ import java.io.IOException
 class MangaMappings(context: Context) {
 
     private val dbMappings: SQLiteDatabase by lazy {
-        openDatabase(context, "2026-04-15_neko_mapping.db")
+        openDatabase(context, "2026-07-23_neko_mapping.db")
     }
 
     private fun openDatabase(context: Context, dbPath: String): SQLiteDatabase {
