@@ -57,13 +57,8 @@ import org.intellij.markdown.parser.ProductionHolder
 import org.intellij.markdown.parser.constraints.CommonMarkdownConstraints
 import org.intellij.markdown.parser.constraints.MarkdownConstraints
 import org.intellij.markdown.parser.markerblocks.MarkerBlockProvider
-import org.intellij.markdown.parser.markerblocks.providers.AtxHeaderProvider
-import org.intellij.markdown.parser.markerblocks.providers.BlockQuoteProvider
-import org.intellij.markdown.parser.markerblocks.providers.CodeBlockProvider
-import org.intellij.markdown.parser.markerblocks.providers.CodeFenceProvider
-import org.intellij.markdown.parser.markerblocks.providers.HorizontalRuleProvider
-import org.intellij.markdown.parser.markerblocks.providers.ListMarkerProvider
-import org.intellij.markdown.parser.markerblocks.providers.SetextHeaderProvider
+import org.intellij.markdown.parser.markerblocks.providers.HtmlBlockProvider
+import org.intellij.markdown.parser.markerblocks.providers.LinkReferenceDefinitionProvider
 import org.nekomanga.presentation.theme.Size
 
 const val MARKDOWN_INLINE_IMAGE_TAG = "MARKDOWN_INLINE_IMAGE"
@@ -187,16 +182,14 @@ private val markdownComponents = markdownComponents(
         )
     },
     orderedList = { ol ->
-        Column(modifier = Modifier.padding(start = Size.small)) {
-            MarkdownOrderedList(
-                content = ol.content,
-                node = ol.node,
-                style = ol.typography.ordered,
-                depth = ol.listDepth,
-                markerModifier = { Modifier.alignBy(FirstBaseline) },
-                listModifier = { Modifier.alignBy(FirstBaseline) },
-            )
-        }
+        MarkdownOrderedList(
+            content = ol.content,
+            node = ol.node,
+            style = ol.typography.ordered,
+            depth = ol.listDepth,
+            markerModifier = { Modifier.alignBy(FirstBaseline) },
+            listModifier = { Modifier.alignBy(FirstBaseline) },
+        )
     },
     unorderedList = { ul ->
         val markers = listOf("•", "◦", "▸", "▹")
@@ -204,15 +197,13 @@ private val markdownComponents = markdownComponents(
         CompositionLocalProvider(
             LocalBulletListHandler provides { _, _, _, _, _ -> "${markers[ul.listDepth % markers.size]} " },
         ) {
-            Column(modifier = Modifier.padding(start = Size.small)) {
-                MarkdownBulletList(
-                    content = ul.content,
-                    node = ul.node,
-                    style = ul.typography.bullet,
-                    markerModifier = { Modifier.alignBy(FirstBaseline) },
-                    listModifier = { Modifier.alignBy(FirstBaseline) },
-                )
-            }
+            MarkdownBulletList(
+                content = ul.content,
+                node = ul.node,
+                style = ul.typography.bullet,
+                markerModifier = { Modifier.alignBy(FirstBaseline) },
+                listModifier = { Modifier.alignBy(FirstBaseline) },
+            )
         }
     },
     table = { t ->
@@ -281,18 +272,10 @@ private class SimpleMarkdownMarkerProcessor(
     productionHolder: ProductionHolder,
     constraints: MarkdownConstraints,
 ) : CommonMarkMarkerProcessor(productionHolder, constraints) {
-    private val markerBlockProviders = listOf(
-        CodeBlockProvider(),
-        HorizontalRuleProvider(),
-        CodeFenceProvider(),
-        SetextHeaderProvider(),
-        BlockQuoteProvider(),
-        ListMarkerProvider(),
-        AtxHeaderProvider(),
-        GitHubTableMarkerProvider(),
-    )
-
     override fun getMarkerBlockProviders(): List<MarkerBlockProvider<StateInfo>> {
-        return markerBlockProviders
+        return super.getMarkerBlockProviders()
+            .filter { provider ->
+                provider !is HtmlBlockProvider && provider !is LinkReferenceDefinitionProvider
+            } + GitHubTableMarkerProvider()
     }
 }
