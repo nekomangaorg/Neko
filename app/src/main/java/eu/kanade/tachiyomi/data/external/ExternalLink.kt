@@ -84,6 +84,23 @@ data class DexComments(override val id: String) : ExternalLink() {
     override fun getUrl() = "${MdConstants.forumUrl}${id}"
 }
 
+data class DexCreateThread(
+    var createAction: (DexCreateThread) -> Unit = {},
+) : ExternalLink() {
+    override var id = ""
+    override var name = "Create comments thread"
+    override val logo = R.drawable.ic_tracker_mangadex_logo
+    override val logoColor: Long = 0xFF2B3035
+
+    override fun getUrl(): String {
+        if (id.isBlank()) createAction(this)
+        if (id.isBlank()) return "data:text/html,<h1>Failed to create comment thread</h1>"
+
+        name = "Comments"
+        return "${MdConstants.forumUrl}${id}"
+    }
+}
+
 data class DexApi(override val id: String) : ExternalLink() {
     override val name = "API"
     override val logo = R.drawable.ic_tracker_mangadex_logo
