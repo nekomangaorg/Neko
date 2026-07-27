@@ -428,49 +428,39 @@ class BrowseViewModel : ViewModel() {
         }
         viewModelScope.launchIO {
             _browseScreenState.update {
-                it.copy(
-                    homePageManga = _browseScreenState.value.homePageManga
-                        .map { homePageManga ->
-                            val list = homePageManga.displayManga
-                            val index = list.indexOfFirst { manga -> manga.mangaId == mangaId }
-                            if (index == -1) homePageManga
-                            else homePageManga.copy(
-                                displayManga = buildList {
-                                    addAll(list)
-                                    set(
-                                        index,
-                                        list[index].copy(
-                                            inLibrary = favorite,
-                                            isVisible = isVisible,
-                                        ),
-                                    )
-                                },
-                            )
-
-                        }
-                        .toList(),
-                )
-            }
-        }
-        viewModelScope.launchIO {
-            val list = _browseScreenState.value.displayMangaHolder.allDisplayManga
-            val index =
-                list.indexOfFirst {
-                    it.mangaId == mangaId
-                }
-            if (index >= 0) {
-                _browseScreenState.update {
+                val updatedHomePage = it.homePageManga
+                    .map { homePageManga ->
+                        val list = homePageManga.displayManga
+                        val index = list.indexOfFirst { manga -> manga.mangaId == mangaId }
+                        if (index == -1) homePageManga
+                        else homePageManga.copy(
+                            displayManga = buildList {
+                                addAll(list)
+                                set(
+                                    index,
+                                    list[index].copy(inLibrary = favorite, isVisible = isVisible),
+                                )
+                            },
+                        )
+                    }
+                    .toList()
+                val list = it.displayMangaHolder.allDisplayManga
+                val index = list.indexOfFirst { it.mangaId == mangaId }
+                if (index == -1) it.copy(homePageManga = updatedHomePage)
+                else {
                     val tempList = buildList {
                         addAll(list)
                         set(index, list[index].copy(inLibrary = favorite, isVisible = isVisible))
                     }
                     it.copy(
+                        homePageManga = updatedHomePage,
                         displayMangaHolder =
                             it.displayMangaHolder.copy(
                                 allDisplayManga = tempList,
                                 filteredDisplayManga = tempList.filterVisibility(preferences),
                                 groupedDisplayManga = it.displayMangaHolder.groupedDisplayManga.mapValues { (_, list) ->
-                                    val index = list.indexOfFirst { manga -> manga.mangaId == mangaId }
+                                    val index =
+                                        list.indexOfFirst { manga -> manga.mangaId == mangaId }
                                     if (index == -1) list
                                     else buildList {
                                         addAll(list)
@@ -486,7 +476,6 @@ class BrowseViewModel : ViewModel() {
                             ),
                     )
                 }
-
             }
         }
     }
