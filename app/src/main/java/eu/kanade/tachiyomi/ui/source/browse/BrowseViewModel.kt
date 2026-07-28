@@ -175,6 +175,7 @@ class BrowseViewModel : ViewModel() {
         }
 
         updateBrowseFilters(_browseScreenState.value.firstLoad)
+        _browseScreenState.update { it.copy(firstLoad = false) }
 
         viewModelScope.launchIO {
             val categories = categoryUseCases.getCategories.get()
@@ -742,6 +743,10 @@ class BrowseViewModel : ViewModel() {
                                 allDisplayManga = allDisplayManga.toList(),
                                 filteredDisplayManga =
                                     allDisplayManga.filterVisibility(preferences).toList(),
+                                groupedDisplayManga =
+                                    it.displayMangaHolder.groupedDisplayManga.mapValues { (_, list) ->
+                                        list.resyncDisplayManga(mangaRepository).toList()
+                                    },
                             ),
                     )
                 }
