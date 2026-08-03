@@ -105,7 +105,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                     _displayScreenState.update {
                         val allDisplayManga =
                             (_displayScreenState.value.allDisplayManga + items.first().displayManga)
-                                .distinct()
+                                .distinctBy { it.mangaId }
                         it.copy(
                             isLoading = false,
                             page = newKey,
