@@ -22,7 +22,7 @@ browser = "androidx.browser:browser:1.10.0"
 biometric = "androidx.biometric:biometric-ktx:1.2.0-alpha05"
 palette = "androidx.palette:palette:1.0.0"
 core-ktx = "androidx.core:core-ktx:1.19.0"
-constraintlayout = "androidx.constraintlayout:constraintlayout:2.2.1"
+constraintlayout = "androidx.constraintlayout:constraintlayout:2.2.2"
 work = "androidx.work:work-runtime-ktx:2.11.2"
 
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle_version" }
