@@ -11,10 +11,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import org.nekomanga.core.preferences.observeAndUpdate
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -37,29 +35,23 @@ class MergeSettingsViewModel : ViewModel() {
     val suwayomiMergeScreenState = _suwayomiMergeScreenState.asStateFlow()
 
     init {
-        viewModelScope.launchIO {
-            preferences
-                .sourceUrl(komga)
-                .changes()
-                .distinctUntilChanged()
-                .onEach { url ->
-                    _komgaMergeScreenState.update {
-                        it.copy(isLoggedIn = !url.isBlank(), currentUrl = url)
-                    }
+        preferences
+            .sourceUrl(komga)
+            .changes()
+            .observeAndUpdate(viewModelScope) { url ->
+                _komgaMergeScreenState.update {
+                    it.copy(isLoggedIn = url.isNotBlank(), currentUrl = url)
                 }
-                .stateIn(viewModelScope)
+            }
 
-            preferences
-                .sourceUrl(suwayomi)
-                .changes()
-                .distinctUntilChanged()
-                .onEach { url ->
-                    _suwayomiMergeScreenState.update {
-                        it.copy(isLoggedIn = !url.isBlank(), currentUrl = url)
-                    }
+        preferences
+            .sourceUrl(suwayomi)
+            .changes()
+            .observeAndUpdate(viewModelScope) { url ->
+                _suwayomiMergeScreenState.update {
+                    it.copy(isLoggedIn = url.isNotBlank(), currentUrl = url)
                 }
-                .stateIn(viewModelScope)
-        }
+            }
     }
 
     fun logout(mergeScreenType: MergeScreenType) {

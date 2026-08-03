@@ -360,19 +360,35 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         top: Int,
         height: Int,
     ): BufferedSource {
-        val decoder =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size)
-            } else {
-                @Suppress("DEPRECATION")
-                BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
+        val decoder: BitmapRegionDecoder
+        try {
+            decoder =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size)
+                } else {
+                    @Suppress("DEPRECATION")
+                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
+                }
+        } catch (_: java.io.IOException) {
+            // Slower, since it decodes the whole image multiple times, but needed for AVIF
+            // since BitmapRegionDecoder doesn't support it on all devices.
+            val fullBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            if (fullBitmap != null) {
+                val cropped = Bitmap.createBitmap(fullBitmap, 0, top, fullBitmap.width, height)
+                fullBitmap.recycle()
+                return Buffer().apply {
+                    cropped.compress(Bitmap.CompressFormat.PNG, 100, outputStream())
+                    cropped.recycle()
+                }
             }
+            return Buffer().write(imageBytes)
+        }
 
         val region = Rect(0, top, decoder.width, top + height)
         val bitmap =
             decoder.decodeRegion(
                 region,
-                BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.RGB_565 },
+                BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 },
             )
         decoder.recycle()
 
