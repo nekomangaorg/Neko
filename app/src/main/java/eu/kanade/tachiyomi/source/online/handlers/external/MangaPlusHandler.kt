@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.extension.all.mangaplus.MangaPlusResponse
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
 import java.util.UUID
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.protobuf.ProtoBuf
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
@@ -18,7 +18,6 @@ import org.nekomanga.core.network.interceptor.rateLimitHost
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
 class MangaPlusHandler {
     val headers =
@@ -26,18 +25,28 @@ class MangaPlusHandler {
             .add("Origin", WEB_URL)
             .add("Referer", "$WEB_URL/")
             .add("User-Agent", USER_AGENT)
-            .add("SESSION-TOKEN", UUID.randomUUID().toString())
             .build()
 
-    private val json: Json by injectLazy()
+    private val session = UUID.randomUUID().toString()
 
     val client: OkHttpClient by lazy {
         Injekt.get<NetworkHelper>()
             .client
             .newBuilder()
+            .addInterceptor { sessionTokenIntercept(it) }
             .addInterceptor { imageIntercept(it) }
             .rateLimitHost(API_URL.toHttpUrl(), 1)
             .build()
+    }
+
+    private fun sessionTokenIntercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        if (request.url.host != API_URL.toHttpUrl().host) return chain.proceed(request)
+        return chain.proceed(
+            request.newBuilder()
+                .header("SESSION-TOKEN", session)
+                .build(),
+        )
     }
 
     suspend fun fetchPageList(chapterId: String): List<Page> {
@@ -49,24 +58,23 @@ class MangaPlusHandler {
         val url =
             API_URL.toHttpUrl()
                 .newBuilder()
-                .addPathSegment("manga_viewer")
+                .addPathSegment("manga_viewer_v3")
                 .addQueryParameter("chapter_id", chapterId)
                 .addQueryParameter("split", "yes")
                 .addQueryParameter("img_quality", "super_high")
-                .addQueryParameter("format", "json")
                 .toString()
         return GET(url, headers)
     }
 
     private fun Response.asMangaPlusResponse(): MangaPlusResponse = use {
-        json.decodeFromString(body.string())
+        ProtoBuf.decodeFromByteArray(MangaPlusResponse.serializer(), body.bytes())
     }
 
     private fun pageListParse(response: Response): List<Page> {
         val result = response.asMangaPlusResponse()
 
         checkNotNull(result.success) {
-            val error = result.error!!.popups.firstOrNull()?.body
+            val error = result.error?.englishPopup?.body ?: result.error?.spanishPopup?.body
             when (error) {
                 null -> "Error with MangaPlus"
                 "Invalid user access(11302)" -> "Error chapter is region locked"
@@ -74,12 +82,14 @@ class MangaPlusHandler {
             }
         }
 
-        return result.success.mangaViewer!!
-            .pages
+        val viewer = result.success.mangaViewer!!
+        val viewToken = viewer.viewToken.orEmpty()
+
+        return viewer.pages
             .mapNotNull { it.mangaPage }
             .mapIndexed { i, page ->
                 val encryptionKey = if (page.encryptionKey == null) "" else "#${page.encryptionKey}"
-                Page(i, "", "${page.imageUrl}$encryptionKey")
+                Page(i, viewToken, "${page.imageUrl}$encryptionKey")
             }
     }
 
