@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -17,6 +18,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
@@ -63,6 +66,23 @@ import org.nekomanga.presentation.screens.browse.BrowseHomePage
 import org.nekomanga.presentation.screens.browse.BrowseScreenTopBar
 import org.nekomanga.presentation.theme.Size
 
+/**
+ * BrowseScreen allows the user to browse external manga sources, offering options to search,
+ * browse homepage categories (like popular, latest, and recommended manga), and view followed titles.
+ *
+ * This screen-level Composable is responsive to [WindowSizeClass]. On expanded screens
+ * (tablets/foldables), the layout constrains the maximum width of the vertical feed/lists/grids
+ * content to 800.dp and centers it, preventing layout stretching and providing an optimized,
+ * premium reading and discovery experience.
+ *
+ * @param navigationRail Optional sidebar navigation rail shown on larger screens.
+ * @param bottomBar Optional bottom navigation bar shown on compact screens.
+ * @param browseViewModel The ViewModel managing the browse state, homepage categories, and filter options.
+ * @param mainDropdown Main application dropdown menu configuration.
+ * @param mainDropdownShowing Boolean state representing if the dropdown menu is visible.
+ * @param onNavigateTo Callback triggered to handle navigation events to other screens.
+ * @param windowSizeClass The screen's window size class constraints used to determine adaptive layouts.
+ */
 @Composable
 fun BrowseScreen(
     navigationRail: @Composable () -> Unit,
@@ -75,7 +95,7 @@ fun BrowseScreen(
 ) {
     val deepLinkManga by browseViewModel.deepLinkMangaFlow.collectAsState()
 
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val currentUpdateMangaForChanges by rememberUpdatedState(browseViewModel::updateMangaForChanges)
 
     DisposableEffect(lifecycleOwner) {
@@ -137,6 +157,10 @@ fun BrowseScreen(
     )
 }
 
+/**
+ * BrowseWrapper is a helper Composable that sets up the scaffolding (top app bar, bottom bar/navigation rail)
+ * and holds the main Box container where the responsive homepage, followed manga, and filtered search pages are rendered.
+ */
 @Composable
 private fun BrowseWrapper(
     navigationRail: @Composable () -> Unit,
@@ -232,6 +256,8 @@ private fun BrowseWrapper(
         },
     ) { innerPadding ->
         val layoutDirection = LocalLayoutDirection.current
+        val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+
         // Create new padding that ignores the top bar's height
         val contentPadding =
             PaddingValues(
@@ -263,69 +289,77 @@ private fun BrowseWrapper(
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
-            if (browseScreenState.initialLoading) {
-                ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (browseScreenState.error != null) {
-                EmptyScreen(
-                    message = browseScreenState.error!!,
-                    actions =
-                        listOf(
-                            Action(
-                                text = UiText.StringResource(R.string.retry),
-                                onClick = retryClick,
-                            )
-                        ),
-                    contentPadding = recyclerContentPadding,
-                )
-            } else {
-                Crossfade(targetState = browseScreenType) { type ->
-                    when (type) {
-                        BrowseScreenType.Homepage ->
-                            BrowseHomePage(
-                                browseHomePageManga = browseScreenState.homePageManga,
-                                shouldOutlineCover = browseScreenState.outlineCovers,
-                                dynamicCovers = browseScreenState.dynamicCovers,
-                                useVividColorHeaders = browseScreenState.useVividColorHeaders,
-                                titleClick = homeScreenTitleClick,
-                                randomClick = randomClick,
-                                onClick = { id -> openManga(id) },
-                                onLongClick = ::mangaLongClick,
-                                contentPadding = recyclerContentPadding,
-                            )
+        Box(
+            modifier = Modifier.fillMaxSize().padding(contentPadding),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            val contentModifier =
+                if (isTablet) Modifier.widthIn(max = 800.dp) else Modifier.fillMaxSize()
 
-                        BrowseScreenType.Follows -> {
-                            BrowseFollowsPage(
-                                displayMangaHolder = browseScreenState.displayMangaHolder,
-                                isList = browseScreenState.isList,
-                                isComfortableGrid = browseScreenState.isComfortableGrid,
-                                outlineCovers = browseScreenState.outlineCovers,
-                                dynamicCovers = browseScreenState.dynamicCovers,
-                                rawColumnCount = browseScreenState.rawColumnCount,
-                                contentPadding = recyclerContentPadding,
-                                onClick = openManga,
-                                onLongClick = ::mangaLongClick,
-                            )
+            Box(modifier = contentModifier) {
+                if (browseScreenState.initialLoading) {
+                    ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (browseScreenState.error != null) {
+                    EmptyScreen(
+                        message = browseScreenState.error!!,
+                        actions =
+                            listOf(
+                                Action(
+                                    text = UiText.StringResource(R.string.retry),
+                                    onClick = retryClick,
+                                )
+                            ),
+                        contentPadding = recyclerContentPadding,
+                    )
+                } else {
+                    Crossfade(targetState = browseScreenType) { type ->
+                        when (type) {
+                            BrowseScreenType.Homepage ->
+                                BrowseHomePage(
+                                    browseHomePageManga = browseScreenState.homePageManga,
+                                    shouldOutlineCover = browseScreenState.outlineCovers,
+                                    dynamicCovers = browseScreenState.dynamicCovers,
+                                    useVividColorHeaders = browseScreenState.useVividColorHeaders,
+                                    titleClick = homeScreenTitleClick,
+                                    randomClick = randomClick,
+                                    onClick = { id -> openManga(id) },
+                                    onLongClick = ::mangaLongClick,
+                                    contentPadding = recyclerContentPadding,
+                                )
+
+                            BrowseScreenType.Follows -> {
+                                BrowseFollowsPage(
+                                    displayMangaHolder = browseScreenState.displayMangaHolder,
+                                    isList = browseScreenState.isList,
+                                    isComfortableGrid = browseScreenState.isComfortableGrid,
+                                    outlineCovers = browseScreenState.outlineCovers,
+                                    dynamicCovers = browseScreenState.dynamicCovers,
+                                    rawColumnCount = browseScreenState.rawColumnCount,
+                                    contentPadding = recyclerContentPadding,
+                                    onClick = openManga,
+                                    onLongClick = ::mangaLongClick,
+                                )
+                            }
+
+                            BrowseScreenType.Filter -> {
+                                BrowseFilterPage(
+                                    displayMangaHolder = browseScreenState.displayMangaHolder,
+                                    isList = browseScreenState.isList,
+                                    isComfortableGrid = browseScreenState.isComfortableGrid,
+                                    outlineCovers = browseScreenState.outlineCovers,
+                                    dynamicCovers = browseScreenState.dynamicCovers,
+                                    rawColumnCount = browseScreenState.rawColumnCount,
+                                    pageLoading = browseScreenState.pageLoading,
+                                    lastPage = browseScreenState.endReached,
+                                    contentPadding = recyclerContentPadding,
+                                    onClick = openManga,
+                                    onLongClick = ::mangaLongClick,
+                                    loadNextPage = loadNextPage,
+                                )
+                            }
+
+                            BrowseScreenType.None -> Unit
                         }
-
-                        BrowseScreenType.Filter -> {
-                            BrowseFilterPage(
-                                displayMangaHolder = browseScreenState.displayMangaHolder,
-                                isList = browseScreenState.isList,
-                                isComfortableGrid = browseScreenState.isComfortableGrid,
-                                outlineCovers = browseScreenState.outlineCovers,
-                                dynamicCovers = browseScreenState.dynamicCovers,
-                                rawColumnCount = browseScreenState.rawColumnCount,
-                                pageLoading = browseScreenState.pageLoading,
-                                lastPage = browseScreenState.endReached,
-                                contentPadding = recyclerContentPadding,
-                                onClick = openManga,
-                                onLongClick = ::mangaLongClick,
-                                loadNextPage = loadNextPage,
-                            )
-                        }
-
-                        BrowseScreenType.None -> Unit
                     }
                 }
             }

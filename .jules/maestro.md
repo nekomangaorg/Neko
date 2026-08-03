@@ -9,3 +9,7 @@
 ## 2026-07-23 - Propagating WindowSizeClass to Recommendations & Detail Screens
 **Learning:** Top-level screens with content lists/grids (like SimilarScreen and DisplayScreen) that don't receive WindowSizeClass by default will stretch uncomfortably on Expanded devices. Consistently passing WindowSizeClass down from MainActivity through MainScreen, and wrapping these lists/grids in a top-centered Box constrained to a maximum width of 800.dp, ensures a polished, premium, and unified adaptive styling across all views.
 **Action:** When creating new screen-level composables containing feeds, lists, or grids, always accept WindowSizeClass and apply a centered maximum width constraint of 800.dp on WindowWidthSizeClass.Expanded.
+
+## 2026-08-03 - Adaptive Constraints for BrowseScreen on Expanded Displays
+**Learning:** Top-level multi-view screens (like BrowseScreen, which displays home pages, follows, and search filters) stretch uncomfortably wide on Expanded width displays when unconstrained. Wrapping their content inside a top-centered Box constrained to a maximum width of 800.dp preserves correct list alignment and maintains a unified, premium look and feel.
+**Action:** For all top-level multi-view discovery/feed screens, check for WindowWidthSizeClass.Expanded, top-center the content, and restrict width to a maximum of 800.dp.
