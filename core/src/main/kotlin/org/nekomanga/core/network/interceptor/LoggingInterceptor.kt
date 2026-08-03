@@ -13,11 +13,13 @@ fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpL
                 TimberKt.d {
                     "Not logging request because it contained sessionToken || refreshToken"
                 }
-            } else {
+            } else if (message.trimStart().let { it.startsWith('{') || it.startsWith('[') }) {
                 val element = json.parseToJsonElement(message)
                 TimberKt.d { json.encodeToString(element) }
+            } else {
+                TimberKt.d { message }
             }
-        } catch (ex: SerializationException) {
+        } catch (ex: Exception) {
             TimberKt.d(ex) { message }
         }
     }
