@@ -356,7 +356,8 @@ interface HistoryDao {
      */
     @Query(
         """
-        WITH RankedHistory AS (
+        SELECT *
+        FROM (
             SELECT manga.*,
                    chapters.id AS ch_id, chapters.manga_id AS ch_manga_id, chapters.url AS ch_url, chapters.name AS ch_name,
                    chapters.chapter_txt AS ch_chapter_txt, chapters.chapter_title AS ch_chapter_title, chapters.vol AS ch_vol,
@@ -375,8 +376,6 @@ interface HistoryDao {
             AND history.last_read > 0
             WHERE manga.id IN (:mangaIds)
         )
-        SELECT *
-        FROM RankedHistory
         WHERE rn <= 25
         ORDER BY hi_last_read DESC
     """
