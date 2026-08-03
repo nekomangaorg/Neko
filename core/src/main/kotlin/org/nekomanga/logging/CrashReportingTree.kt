@@ -25,7 +25,7 @@ class CrashReportingTree : Timber.Tree() {
             }
         }
 
-        if (priority >= Log.INFO) {
+        if (priority >= Log.INFO && Timber.forest().none { it is Timber.DebugTree }) {
             val logMessage = if (t != null) {
                 "$message\n${Log.getStackTraceString(t)}"
             } else {
