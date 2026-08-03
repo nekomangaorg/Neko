@@ -20,7 +20,7 @@ fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpL
                 TimberKt.d { message }
             }
         } catch (ex: Exception) {
-            TimberKt.d { message }
+            TimberKt.d(ex) { message }
         }
     }
 
