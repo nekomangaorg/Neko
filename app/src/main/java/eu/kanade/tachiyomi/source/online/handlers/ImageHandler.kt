@@ -51,8 +51,12 @@ class ImageHandler {
     suspend fun getImage(page: Page, isLogged: Boolean): Response {
         return withIOContext {
             return@withIOContext when {
-                isExternal(page, "mangaplus") || isExternal(page, "jumpg-assets") ->
-                    getImageResponse(mangaPlusHandler.client, mangaPlusHandler.headers, page)
+                isExternal(page, "mangaplus") || isExternal(page, "jumpg-assets") -> {
+                    val headers = mangaPlusHandler.headers.newBuilder()
+                        .set("Plus-Vw-Token", page.url)
+                        .build()
+                    getImageResponse(mangaPlusHandler.client, headers, page)
+                }
                 isExternal(page, "comikey") ->
                     getImageResponse(comikeyHandler.client, comikeyHandler.headers, page)
                 isExternal(page, "azuki") ->
