@@ -29,8 +29,18 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import org.nekomanga.presentation.screens.reader.GestureNavigationOverlay
+import org.nekomanga.presentation.theme.NekoTheme
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.text.buildSpannedString
@@ -150,6 +160,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     val viewModel by viewModels<ReaderViewModel>()
 
+    var overlayNavigation by mutableStateOf<eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation?>(null)
+    var overlayVisible by mutableStateOf(false)
+    var overlayIsLtr by mutableStateOf(true)
+
     val scope = lifecycleScope
 
     /** Viewer used to display the pages (pager, webtoon, ...). */
@@ -235,7 +249,32 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ReaderActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContent {
+            NekoTheme {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    AndroidView(
+                        factory = { binding.root },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    GestureNavigationOverlay(
+                        navigation = overlayNavigation,
+                        isLtr = overlayIsLtr,
+                        visible = overlayVisible,
+                        onDismiss = {
+                            overlayVisible = false
+                            binding.navigationOverlay.performClick()
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+        }
+        binding.navigationOverlay.onNavigationChanged = { navigation, isLtr, visible ->
+            overlayNavigation = navigation
+            overlayIsLtr = isLtr
+            overlayVisible = visible
+        }
+        binding.navigationOverlay.isVisible = false
         val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar))
         val lightStatusBar = a.getBoolean(0, false)
         a.recycle()
