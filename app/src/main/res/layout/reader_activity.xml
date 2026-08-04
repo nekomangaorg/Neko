@@ -95,4 +95,10 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/reader_compose_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -249,30 +249,29 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ReaderActivityBinding.inflate(layoutInflater)
-        setContent {
+        setContentView(binding.root)
+
+        binding.readerComposeView.setContent {
             NekoTheme {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    AndroidView(
-                        factory = { binding.root },
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                    GestureNavigationOverlay(
-                        navigation = overlayNavigation,
-                        isLtr = overlayIsLtr,
-                        visible = overlayVisible,
-                        onDismiss = {
-                            overlayVisible = false
-                            binding.navigationOverlay.performClick()
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+                GestureNavigationOverlay(
+                    navigation = overlayNavigation,
+                    isLtr = overlayIsLtr,
+                    visible = overlayVisible,
+                    onDismiss = {
+                        overlayVisible = false
+                        binding.readerComposeView.isVisible = false
+                        binding.navigationOverlay.performClick()
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
         binding.navigationOverlay.onNavigationChanged = { navigation, isLtr, visible ->
             overlayNavigation = navigation
             overlayIsLtr = isLtr
             overlayVisible = visible
+            binding.readerComposeView.isVisible = visible
+            binding.navigationOverlay.isVisible = false
         }
         binding.navigationOverlay.isVisible = false
         val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar))

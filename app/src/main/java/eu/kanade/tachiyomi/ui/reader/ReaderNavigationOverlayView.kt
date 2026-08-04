@@ -17,17 +17,24 @@ import kotlin.math.abs
 class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) :
     View(context, attributeSet) {
 
+    var onNavigationChanged: ((ViewerNavigation?, Boolean, Boolean) -> Unit)? = null
+
     private var viewPropertyAnimator: ViewPropertyAnimator? = null
 
     private var navigation: ViewerNavigation? = null
 
     var isLTR = true
+        set(value) {
+            field = value
+            onNavigationChanged?.invoke(navigation, value, isVisible)
+        }
 
     fun setNavigation(navigation: ViewerNavigation, showOnStart: Boolean) {
         if (!showOnStart && (this.navigation == null || this.navigation === navigation)) {
             if (this.navigation == null) {
                 this.navigation = navigation
                 isVisible = false
+                onNavigationChanged?.invoke(navigation, isLTR, false)
             }
             return
         }
@@ -45,7 +52,10 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
             animate()
                 .alpha(1f)
                 .setDuration(FADE_DURATION)
-                .withStartAction { isVisible = true }
+                .withStartAction {
+                    isVisible = true
+                    onNavigationChanged?.invoke(navigation, isLTR, true)
+                }
                 .withEndAction { viewPropertyAnimator = null }
         viewPropertyAnimator?.start()
     }
@@ -110,6 +120,7 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
             viewPropertyAnimator =
                 animate().alpha(0f).setDuration(FADE_DURATION).withEndAction {
                     isVisible = false
+                    onNavigationChanged?.invoke(navigation, isLTR, false)
                     viewPropertyAnimator = null
                 }
             viewPropertyAnimator?.start()
