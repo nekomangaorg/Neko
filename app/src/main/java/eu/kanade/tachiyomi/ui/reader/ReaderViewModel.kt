@@ -1140,11 +1140,37 @@ constructor(
         return threadId
     }
 
+    fun setMenuVisibility(visible: Boolean) {
+        mutableState.update { it.copy(menuVisible = visible) }
+    }
+
+    fun updatePageProgress(
+        currentPageText: String,
+        totalPagesText: String,
+        currentPageIndex: Int,
+        totalPages: Int,
+    ) {
+        mutableState.update {
+            it.copy(
+                currentPageText = currentPageText,
+                totalPagesText = totalPagesText,
+                currentPageIndex = currentPageIndex,
+                totalPages = totalPages,
+            )
+        }
+    }
+
     data class State(
         val manga: Manga? = null,
         val viewerChapters: ViewerChapters? = null,
         val isLoadingAdjacentChapter: Boolean = false,
         val lastPage: Int? = null,
+        // Fields for Compose-based Reader UI
+        val currentPageText: String = "",
+        val totalPagesText: String = "",
+        val currentPageIndex: Int = 0,
+        val totalPages: Int = 0,
+        val menuVisible: Boolean = false,
     )
 
     sealed class Event {
