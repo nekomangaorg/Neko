@@ -19,11 +19,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.ReaderViewModel
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -39,7 +42,7 @@ import kotlin.math.roundToInt
 @Composable
 fun ReaderSettingsSheet(
     onDismiss: () -> Unit,
-    viewModel: eu.kanade.tachiyomi.ui.reader.ReaderViewModel,
+    viewModel: ReaderViewModel,
     modifier: Modifier = Modifier,
 ) {
     val readerPreferences: ReaderPreferences = remember { Injekt.get() }
@@ -117,7 +120,7 @@ fun ReaderSettingsSheet(
 
                 IconButton(
                     onClick = {
-                        val intent = eu.kanade.tachiyomi.ui.main.MainActivity.openReaderSettings(context)
+                        val intent = MainActivity.openReaderSettings(context)
                         context.startActivity(intent)
                         onDismiss()
                     },
@@ -155,8 +158,8 @@ fun ReaderSettingsSheet(
 
 @Composable
 private fun GeneralSettingsTab(
-    state: eu.kanade.tachiyomi.ui.reader.ReaderViewModel.State,
-    viewModel: eu.kanade.tachiyomi.ui.reader.ReaderViewModel,
+    state: ReaderViewModel.State,
+    viewModel: ReaderViewModel,
     readerPreferences: ReaderPreferences,
 ) {
     val manga = state.manga
@@ -228,9 +231,9 @@ private fun GeneralSettingsTab(
 
 @Composable
 private fun LayoutSettingsTab(
-    state: eu.kanade.tachiyomi.ui.reader.ReaderViewModel.State,
+    state: ReaderViewModel.State,
     isWebtoon: Boolean,
-    viewModel: eu.kanade.tachiyomi.ui.reader.ReaderViewModel,
+    viewModel: ReaderViewModel,
     readerPreferences: ReaderPreferences,
 ) {
     val context = LocalContext.current
@@ -249,7 +252,7 @@ private fun LayoutSettingsTab(
         val splitTallImages by readerPreferences.splitTallImagesReader().collectAsState()
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            val hasMargins = (activity?.viewer as? eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer)?.hasMargins ?: false
+            val hasMargins = (activity?.viewer as? WebtoonViewer)?.hasMargins ?: false
             ReaderSwitchSetting(
                 label = stringResource(R.string.crop_borders),
                 checked = if (hasMargins) cropBorders else cropBordersWebtoon,
