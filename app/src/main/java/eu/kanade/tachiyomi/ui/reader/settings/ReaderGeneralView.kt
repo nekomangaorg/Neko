@@ -25,7 +25,7 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
             }
         }
         binding.viewerSeries.setSelection(
-            (context as? ReaderActivity)?.viewModel?.state?.value?.manga?.readingModeType?.let {
+            (context as? ReaderActivity)?.viewModel?.manga?.readingModeType?.let {
                 ReadingModeType.fromPreference(it).prefValue
             } ?: 0
         )

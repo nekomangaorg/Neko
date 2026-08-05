@@ -3,21 +3,22 @@ package org.nekomanga.presentation.screens.reader
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -29,6 +30,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlinx.coroutines.launch
 import org.nekomanga.R
+import org.nekomanga.domain.manga.toManga
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.components.sheets.BaseSheet
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
@@ -51,7 +53,7 @@ fun ReaderSettingsSheet(
     val context = LocalContext.current
 
     val state by viewModel.state.collectAsState()
-    val manga = state.manga
+    val manga = remember(state.manga) { state.manga?.toManga() }
     val defaultReadingMode by readerPreferences.defaultReadingMode().collectAsState()
     val currentReadingMode = remember(manga?.readingModeType, manga?.viewer_flags, defaultReadingMode) {
         if (manga == null) defaultReadingMode
@@ -62,6 +64,9 @@ fun ReaderSettingsSheet(
     }
     val isWebtoon = ReadingModeType.isWebtoonType(currentReadingMode)
 
+    val readingModeType = manga?.readingModeType ?: 0
+    val orientationType = manga?.orientationType ?: OrientationType.DEFAULT.flagValue
+
     val tabs = listOf(
         stringResource(R.string.general),
         if (isWebtoon) stringResource(R.string.webtoon) else stringResource(R.string.paged),
@@ -69,11 +74,12 @@ fun ReaderSettingsSheet(
     )
 
     val pagerState = rememberPagerState(pageCount = { 3 })
+    val maxLazyHeight = LocalConfiguration.current.screenHeightDp * 0.6f
 
     BaseSheet(
         themeColor = themeColorState,
         maxSheetHeightPercentage = 0.9f,
-        bottomPaddingAroundContent = Size.large
+        bottomPaddingAroundContent = 0.dp
     ) {
         Column(
             modifier = modifier
@@ -138,17 +144,17 @@ fun ReaderSettingsSheet(
                 state = pagerState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(480.dp)
+                    .requiredHeightIn(0.dp, maxLazyHeight.dp)
             ) { page ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    when (page) {
-                        0 -> GeneralSettingsTab(state, viewModel, readerPreferences)
-                        1 -> LayoutSettingsTab(state, isWebtoon, viewModel, readerPreferences)
-                        2 -> FilterSettingsTab(readerPreferences)
+                    item {
+                        when (page) {
+                            0 -> GeneralSettingsTab(readingModeType, orientationType, viewModel, readerPreferences)
+                            1 -> LayoutSettingsTab(isWebtoon, viewModel, readerPreferences)
+                            2 -> FilterSettingsTab(readerPreferences)
+                        }
                     }
                 }
             }
@@ -158,22 +164,22 @@ fun ReaderSettingsSheet(
 
 @Composable
 private fun GeneralSettingsTab(
-    state: ReaderViewModel.State,
+    readingModeType: Int,
+    orientationType: Int,
     viewModel: ReaderViewModel,
     readerPreferences: ReaderPreferences,
 ) {
-    val manga = state.manga
     val readerTheme by readerPreferences.readerTheme().collectAsState()
     val showPageNumber by readerPreferences.showPageNumber().collectAsState()
     val keepScreenOn by readerPreferences.keepScreenOn().collectAsState()
     val alwaysShowChapterTransition by readerPreferences.alwaysShowChapterTransition().collectAsState()
 
-    val currentModeIndex = remember(manga?.readingModeType) {
-        ReadingModeType.fromPreference(manga?.readingModeType ?: 0).prefValue
+    val currentModeIndex = remember(readingModeType) {
+        ReadingModeType.fromPreference(readingModeType).prefValue
     }
 
-    val currentRotationIndex = remember(manga?.orientationType) {
-        OrientationType.fromPreference(manga?.orientationType ?: OrientationType.DEFAULT.flagValue).prefValue
+    val currentRotationIndex = remember(orientationType) {
+        OrientationType.fromPreference(orientationType).prefValue
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -231,7 +237,6 @@ private fun GeneralSettingsTab(
 
 @Composable
 private fun LayoutSettingsTab(
-    state: ReaderViewModel.State,
     isWebtoon: Boolean,
     viewModel: ReaderViewModel,
     readerPreferences: ReaderPreferences,
@@ -301,11 +306,11 @@ private fun LayoutSettingsTab(
                 }
             )
 
-            val webtoonLayoutOptions = stringArrayResource(id = R.array.webtoon_page_layouts).toList()
+            val webtoonPageLayoutOptions = stringArrayResource(id = R.array.webtoon_page_layouts).toList()
             val selectedWebtoonLayoutIndex = if (webtoonPageLayout == PageLayout.SPLIT_PAGES.webtoonValue) 1 else 0
             ReaderChipsSelector(
                 label = stringResource(R.string.page_layout),
-                options = webtoonLayoutOptions,
+                options = webtoonPageLayoutOptions,
                 selectedIndex = selectedWebtoonLayoutIndex,
                 onSelected = { index ->
                     val layoutValue = if (index == 1) PageLayout.SPLIT_PAGES.webtoonValue else PageLayout.SINGLE_PAGE.webtoonValue

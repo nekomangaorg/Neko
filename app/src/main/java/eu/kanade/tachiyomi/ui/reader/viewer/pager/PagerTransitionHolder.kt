@@ -54,7 +54,7 @@ class PagerTransitionHolder(val viewer: PagerViewer, val transition: ChapterTran
         transitionView.bind(
             transition,
             viewer.downloadManager,
-            viewer.activity.viewModel.state.value.manga,
+            viewer.activity.viewModel.manga,
         )
         transition.to?.let { observeStatus(it) }
     }

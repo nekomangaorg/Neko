@@ -39,10 +39,12 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.nekomanga.domain.manga.toManga
 import org.nekomanga.presentation.screens.reader.ReaderAppBar
 import org.nekomanga.presentation.screens.reader.ReaderBottomControls
 import org.nekomanga.presentation.screens.reader.ReaderSettingsSheet
@@ -280,7 +282,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         modifier = Modifier.fillMaxSize(),
                     )
                     ReaderAppBar(
-                        title = state.manga?.user_title ?: state.manga?.title ?: "",
+                        title = state.manga?.userTitle ?: state.manga?.title ?: "",
                         subtitle = chapterTitle,
                         onBack = { finish() },
                         showShiftDoublePage = showShiftDoublePage,
@@ -415,6 +417,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             .map { it.manga }
             .distinctUntilChanged()
             .filterNotNull()
+            .map { it.toManga() }
             .onEach(::setManga)
             .launchIn(lifecycleScope)
 
@@ -1260,7 +1263,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         updateCropBordersShortcut()
         updateBottomShortcuts()
         val viewerMode =
-            ReadingModeType.fromPreference(viewModel.state.value.manga?.readingModeType ?: 0)
+            ReadingModeType.fromPreference(viewModel.manga?.readingModeType ?: 0)
         binding.chaptersSheet.readingMode.setImageResource(viewerMode.iconRes)
         startPostponedEnterTransition()
     }

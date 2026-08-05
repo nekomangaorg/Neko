@@ -78,6 +78,9 @@ import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.manga.MangaItem
+import org.nekomanga.domain.manga.toManga
+import org.nekomanga.domain.manga.toMangaItem
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
@@ -121,7 +124,7 @@ constructor(
 
     /** The manga loaded in the reader. It can be null when instantiated for a short time. */
     val manga: Manga?
-        get() = state.value.manga
+        get() = state.value.manga?.toManga()
 
     val source: MangaDex
         get() = sourceManager.mangaDex
@@ -267,7 +270,7 @@ constructor(
             try {
                 val manga = mangaRepository.getMangaById(mangaId)
                 if (manga != null) {
-                    mutableState.update { it.copy(manga = manga) }
+                    mutableState.update { it.copy(manga = manga.toMangaItem()) }
                     if (chapterId == -1L) {
                         chapterId = initialChapterId
                     }
@@ -808,9 +811,7 @@ constructor(
                 val currChapter = currChapters.currChapter
                 currChapter.requestedPage = currChapter.chapter.last_page_read
 
-                val manga = mangaRepository.getMangaById(manga.id!!)
-
-                mutableState.update { it.copy(manga = manga, viewerChapters = currChapters) }
+                mutableState.update { it.copy(manga = manga.toMangaItem(), viewerChapters = currChapters) }
                 eventChannel.send(Event.ReloadMangaAndChapters)
             }
         }
@@ -829,10 +830,9 @@ constructor(
         }
     }
 
-    /** Updates the orientation type for the open manga. */
     fun setMangaOrientationType(rotationType: Int) {
         val manga = manga ?: return
-        this.manga?.orientationType = rotationType
+        manga.orientationType = rotationType
 
         TimberKt.i { "Manga orientation is ${manga.orientationType}" }
 
@@ -842,7 +842,7 @@ constructor(
             if (currChapters != null) {
                 mutableState.update {
                     it.copy(
-                        manga = mangaRepository.getMangaById(manga.id!!),
+                        manga = manga.toMangaItem(),
                         viewerChapters = currChapters,
                     )
                 }
@@ -1161,7 +1161,7 @@ constructor(
     }
 
     data class State(
-        val manga: Manga? = null,
+        val manga: MangaItem? = null,
         val viewerChapters: ViewerChapters? = null,
         val isLoadingAdjacentChapter: Boolean = false,
         val lastPage: Int? = null,
