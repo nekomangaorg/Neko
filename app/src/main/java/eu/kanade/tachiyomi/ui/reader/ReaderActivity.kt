@@ -39,6 +39,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +50,9 @@ import org.nekomanga.domain.manga.toManga
 import org.nekomanga.presentation.screens.reader.ReaderAppBar
 import org.nekomanga.presentation.screens.reader.ReaderBottomControls
 import org.nekomanga.presentation.screens.reader.ReaderSettingsSheet
+import org.nekomanga.presentation.extensions.collectAsState as preferenceCollectAsState
 import androidx.core.content.ContextCompat
+import org.nekomanga.presentation.screens.reader.ReaderChaptersSheet
 import org.nekomanga.presentation.screens.reader.GestureNavigationOverlay
 import org.nekomanga.presentation.theme.NekoTheme
 import androidx.core.graphics.ColorUtils
@@ -177,6 +181,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     var showShiftDoublePage by mutableStateOf(false)
     var shiftDoublePageIconRes by mutableStateOf<Int?>(null)
     var settingsSheetVisible by mutableStateOf(false)
+    var chaptersSheetVisible by mutableStateOf(false)
 
     val scope = lifecycleScope
 
@@ -225,8 +230,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     var visibleChapterRange = longArrayOf()
     private var backPressedCallback: OnBackPressedCallback? = null
     private val backCallback = {
-        if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
-            binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
+        if (chaptersSheetVisible) {
+            chaptersSheetVisible = false
+            binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+        } else if (settingsSheetVisible) {
+            settingsSheetVisible = false
+            binding.readerComposeView.isVisible = menuVisible || overlayVisible || chaptersSheetVisible
         }
         reEnableBackPressedCallBack()
     }
@@ -276,7 +285,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         visible = overlayVisible,
                         onDismiss = {
                             overlayVisible = false
-                            binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                            binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible || chaptersSheetVisible
                             binding.navigationOverlay.performClick()
                         },
                         modifier = Modifier.fillMaxSize(),
@@ -302,14 +311,17 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         visible = state.menuVisible,
                         isLoading = state.isLoadingAdjacentChapter,
                         onChaptersClick = {
-                            binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.expand()
+                            chaptersSheetVisible = true
                             setMenuVisibility(false)
+                            binding.readerComposeView.isVisible = true
+                            reEnableBackPressedCallBack()
                         },
                         onCommentsClick = { openWebView(true) },
                         onWebviewClick = { openWebView(false) },
                         onSettingsClick = {
                             settingsSheetVisible = true
                             binding.readerComposeView.isVisible = true
+                            reEnableBackPressedCallBack()
                         },
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
@@ -317,7 +329,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         ModalBottomSheet(
                             onDismissRequest = {
                                 settingsSheetVisible = false
-                                binding.readerComposeView.isVisible = menuVisible || overlayVisible
+                                binding.readerComposeView.isVisible = menuVisible || overlayVisible || chaptersSheetVisible
+                                reEnableBackPressedCallBack()
                             },
                             scrimColor = androidx.compose.ui.graphics.Color.Transparent,
                             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -325,9 +338,171 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                             ReaderSettingsSheet(
                                 onDismiss = {
                                     settingsSheetVisible = false
-                                    binding.readerComposeView.isVisible = menuVisible || overlayVisible
+                                    binding.readerComposeView.isVisible = menuVisible || overlayVisible || chaptersSheetVisible
+                                    reEnableBackPressedCallBack()
                                 },
                                 viewModel = viewModel,
+                            )
+                        }
+                    }
+                    if (chaptersSheetVisible) {
+                        ModalBottomSheet(
+                            onDismissRequest = {
+                                chaptersSheetVisible = false
+                                binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                reEnableBackPressedCallBack()
+                            },
+                            scrimColor = androidx.compose.ui.graphics.Color.Transparent,
+                            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                        ) {
+                             val enabledButtons = readerPreferences.readerBottomButtons().get()
+                             val isCommentsVisible = ReaderBottomButton.Comment.isIn(enabledButtons)
+                             val isChaptersEnabled = ReaderBottomButton.ViewChapters.isIn(enabledButtons)
+                             val isCommentsShortcutEnabled = isCommentsVisible && ReaderBottomButton.Comment.isIn(enabledButtons)
+                             val isWebViewEnabled = ReaderBottomButton.WebView.isIn(enabledButtons)
+                             val isReadingModeEnabled = ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+                             val isRotationEnabled = ReaderBottomButton.Rotation.isIn(enabledButtons)
+                             val isCropBordersEnabled = if (viewer is PagerViewer) {
+                                 ReaderBottomButton.CropBordersPaged.isIn(enabledButtons)
+                             } else {
+                                 ReaderBottomButton.CropBordersWebtoon.isIn(enabledButtons)
+                             }
+                             val isGrayscaleEnabled = ReaderBottomButton.Grayscale.isIn(enabledButtons)
+                             val isDoublePageEnabled = ReaderBottomButton.PageLayout.isIn(enabledButtons)
+                             val isShiftPageEnabled = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
+
+                             val isWebtoon = viewer is WebtoonViewer
+                             val isPager = viewer is PagerViewer
+                             val cropBordersPref = if ((viewer as? WebtoonViewer)?.hasMargins == true || (viewer is PagerViewer)) {
+                                 readerPreferences.cropBorders()
+                             } else {
+                                 readerPreferences.cropBordersWebtoon()
+                             }
+                             val cropBorders by cropBordersPref.preferenceCollectAsState()
+                             val grayscale by readerPreferences.grayscale().preferenceCollectAsState()
+
+                             val viewerMode = ReadingModeType.fromPreference(viewModel.manga?.readingModeType ?: 0)
+                             val readingModeIconRes = viewerMode.iconRes
+
+                             val orientation = OrientationType.fromPreference(viewModel.manga?.orientationType ?: readerPreferences.defaultOrientationType().get())
+                             val rotationIconRes = orientation.iconRes
+
+                             val pageLayout = readerPreferences.pageLayout().get()
+                             val isDoublePage = pageLayout == PageLayout.DOUBLE_PAGES.value ||
+                                     (pageLayout == PageLayout.AUTOMATIC.value &&
+                                         (viewer as? PagerViewer)?.config?.doublePages ?: false)
+                             val doublePageIconRes = when {
+                                 isDoublePage -> R.drawable.ic_book_open_variant_24dp
+                                 (viewer as? PagerViewer)?.config?.splitPages == true -> R.drawable.ic_book_open_split_24dp
+                                 else -> R.drawable.ic_single_page_24dp
+                             }
+
+                             val shiftPageIconRes = shiftDoublePageIconRes ?: R.drawable.ic_page_next_outline_24dp
+
+                             // Load chapters when visible
+                             LaunchedEffect(chaptersSheetVisible) {
+                                 if (chaptersSheetVisible) {
+                                     viewModel.getChapters()
+                                 }
+                             }
+
+                             ReaderChaptersSheet(
+                                 chapters = state.chapters,
+                                 isChaptersEnabled = isChaptersEnabled,
+                                 isCommentsEnabled = isCommentsShortcutEnabled,
+                                 isWebViewEnabled = isWebViewEnabled,
+                                 isReadingModeEnabled = isReadingModeEnabled,
+                                 isRotationEnabled = isRotationEnabled,
+                                 isCropBordersEnabled = isCropBordersEnabled,
+                                 isGrayscaleEnabled = isGrayscaleEnabled,
+                                 isDoublePageEnabled = isDoublePageEnabled,
+                                 isShiftPageEnabled = isShiftPageEnabled,
+                                 isWebtoon = isWebtoon,
+                                 isPager = isPager,
+                                 cropBorders = cropBorders,
+                                 grayscale = grayscale,
+                                 readingModeIconRes = readingModeIconRes,
+                                 rotationIconRes = rotationIconRes,
+                                 doublePageIconRes = doublePageIconRes,
+                                 shiftPageIconRes = shiftPageIconRes,
+                                 onChapterClick = { item, index ->
+                                    if (item.chapter.id != viewModel.getCurrentChapter()?.chapter?.id) {
+                                        binding.readerNav.leftChapter.isInvisible = true
+                                        binding.readerNav.rightChapter.isInvisible = true
+                                        isScrollingThroughPagesOrChapters = true
+                                        lifecycleScope.launch {
+                                            loadChapter(item.chapter)
+                                            chaptersSheetVisible = false
+                                            binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                            reEnableBackPressedCallBack()
+                                        }
+                                    } else {
+                                        chaptersSheetVisible = false
+                                        binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                        reEnableBackPressedCallBack()
+                                    }
+                                },
+                                onBookmarkClick = { item ->
+                                    viewModel.toggleBookmark(item.chapter)
+                                    lifecycleScope.launch {
+                                        viewModel.getChapters()
+                                    }
+                                },
+                                onCommentsClick = {
+                                    openWebView(true)
+                                    chaptersSheetVisible = false
+                                    binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                    reEnableBackPressedCallBack()
+                                },
+                                onWebviewClick = {
+                                    openWebView(false)
+                                    chaptersSheetVisible = false
+                                    binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                    reEnableBackPressedCallBack()
+                                },
+                                onReadingModeClick = {
+                                    val currentMode = ReadingModeType.fromPreference(viewModel.manga?.readingModeType ?: 0)
+                                    val allModes = ReadingModeType.values()
+                                    val nextMode = allModes[(allModes.indexOf(currentMode) + 1) % allModes.size]
+                                    viewModel.setMangaReadingMode(nextMode.flagValue)
+                                },
+                                onRotationClick = {
+                                    val currentRot = OrientationType.fromPreference(viewModel.manga?.orientationType ?: readerPreferences.defaultOrientationType().get())
+                                    val allRotations = OrientationType.values()
+                                    val nextRot = allRotations[(allRotations.indexOf(currentRot) + 1) % allRotations.size]
+                                    viewModel.setMangaOrientationType(nextRot.flagValue)
+                                    updateOrientationShortcut(nextRot.flagValue)
+                                },
+                                onCropBordersClick = {
+                                    cropBordersPref.toggle()
+                                },
+                                onGrayscaleClick = {
+                                    readerPreferences.grayscale().set(!readerPreferences.grayscale().get())
+                                },
+                                onDoublePageClick = {
+                                    if (readerPreferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
+                                        (viewer as? PagerViewer)?.config?.let { config ->
+                                            config.doublePages = !config.doublePages
+                                            reloadChapters(config.doublePages, true)
+                                        }
+                                    } else {
+                                        showPageLayoutMenu()
+                                    }
+                                },
+                                onShiftPageClick = {
+                                    shiftDoublePages()
+                                },
+                                onDisplayOptionsClick = {
+                                    settingsSheetVisible = true
+                                    chaptersSheetVisible = false
+                                    binding.readerComposeView.isVisible = true
+                                    reEnableBackPressedCallBack()
+                                },
+                                onDismiss = {
+                                    chaptersSheetVisible = false
+                                    binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                    reEnableBackPressedCallBack()
+                                }
                             )
                         }
                     }
@@ -338,7 +513,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             overlayNavigation = navigation
             overlayIsLtr = isLtr
             overlayVisible = visible
-            binding.readerComposeView.isVisible = visible || menuVisible
+            binding.readerComposeView.isVisible = visible || menuVisible || settingsSheetVisible || chaptersSheetVisible
             binding.navigationOverlay.isVisible = false
         }
         binding.navigationOverlay.isVisible = false
@@ -670,8 +845,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     fun reEnableBackPressedCallBack() {
-        backPressedCallback?.isEnabled =
-            binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()
+        backPressedCallback?.isEnabled = chaptersSheetVisible || settingsSheetVisible
     }
 
     override fun finishAfterTransition() {
@@ -1421,6 +1595,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     fun refreshChapters() {
         binding.chaptersSheet.chaptersBottomSheet.refreshList()
+        lifecycleScope.launch {
+            viewModel.getChapters()
+        }
     }
 
     /**
@@ -1458,6 +1635,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             binding.chaptersSheet.chaptersBottomSheet.selectedChapterId != page.chapter.chapter.id
         ) {
             binding.chaptersSheet.chaptersBottomSheet.refreshList()
+            lifecycleScope.launch {
+                viewModel.getChapters()
+            }
         }
         // Set seekbar progress
         binding.readerNav.pageSeekbar.valueTo = max(pages.lastIndex.toFloat(), 1f)

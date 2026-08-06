@@ -354,6 +354,7 @@ constructor(
                     )
                 }
             }
+        mutableState.update { it.copy(chapters = chapterItems) }
 
         return chapterItems
     }
@@ -1171,6 +1172,7 @@ constructor(
         val currentPageIndex: Int = 0,
         val totalPages: Int = 0,
         val menuVisible: Boolean = false,
+        val chapters: List<ReaderChapterItem> = emptyList(),
     )
 
     sealed class Event {
