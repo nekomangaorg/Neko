@@ -50,8 +50,8 @@ fun ReaderAppBar(
         modifier = modifier,
     ) {
         Surface(
-            color = Color(0xE6121212), // Dark semi-transparent background
-            contentColor = Color.White,
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
             CenterAlignedTopAppBar(
                 title = {
@@ -64,7 +64,7 @@ fun ReaderAppBar(
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         if (subtitle.isNotEmpty()) {
                             Text(
@@ -72,7 +72,7 @@ fun ReaderAppBar(
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = Color.White.copy(alpha = 0.7f)
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
                         }
                     }
@@ -82,7 +82,7 @@ fun ReaderAppBar(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.close),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -92,7 +92,7 @@ fun ReaderAppBar(
                             Icon(
                                 painter = painterResource(id = shiftDoublePageIconRes),
                                 contentDescription = null,
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     } else {
@@ -102,9 +102,9 @@ fun ReaderAppBar(
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.Transparent,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 modifier = Modifier.statusBarsPadding()
             )
@@ -144,7 +144,7 @@ fun ReaderBottomControls(
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .padding(horizontal = 12.dp, vertical = 8.dp)
-                .background(Color(0xE6121212), shape = RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f), shape = RoundedCornerShape(12.dp))
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Column(
@@ -252,28 +252,28 @@ fun ReaderBottomControls(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_format_list_numbered_24dp),
                             contentDescription = stringResource(R.string.view_chapters),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     IconButton(onClick = onCommentsClick) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_view_comments_24p),
                             contentDescription = stringResource(R.string.comments),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     IconButton(onClick = onWebviewClick) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_open_in_webview_24dp),
                             contentDescription = stringResource(R.string.open_in_webview),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     IconButton(onClick = onSettingsClick) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_tune_24dp),
                             contentDescription = stringResource(R.string.display_options),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
