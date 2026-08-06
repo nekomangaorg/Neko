@@ -40,19 +40,25 @@ class Manga(
 @Serializable
 class Meta(
     val page: Int = 1,
-    val lastPage: Int = 1,
+    private val lastPage: Int = 1,
+    @SerialName("last_page") private val lastPageOld: Int = 1,
     val hasNext: Boolean = false,
-)
+) {
+    val actualLastPage: Int get() = maxOf(lastPage, lastPageOld)
+}
 
 @Serializable
 class Pagination(
     val page: Int = 1,
-    val lastPage: Int = 1,
-)
+    private val lastPage: Int = 1,
+    @SerialName("last_page") private val lastPageOld: Int = 1,
+) {
+    val actualLastPage: Int get() = maxOf(lastPage, lastPageOld)
+}
 
 @Serializable
 class SearchResponse(
-    val result: Items<Manga>,
+    val result: Items<Manga>? = null,
 )
 
 @Serializable
@@ -62,8 +68,8 @@ class Items<T>(
     private val pagination: Pagination? = null,
 ) {
     fun hasNextPage(): Boolean = when {
-        meta != null -> meta.page < meta.lastPage
-        pagination != null -> pagination.page < pagination.lastPage
+        meta != null -> meta.page < meta.actualLastPage
+        pagination != null -> pagination.page < pagination.actualLastPage
         else -> false
     }
 }
@@ -136,7 +142,6 @@ class Chapter(
             val scanlatorList = mutableListOf(Comix.name)
             val scanGroup = this@Chapter.group
             if (scanGroup != null) {
-                // treat thinks they think might be Official as official
                 if (scanGroup.name == "Official?") {
                     scanlatorList.add("Official")
                 } else {
@@ -159,24 +164,28 @@ class Chapter(
     }
 }
 
-@Serializable class Group(val id: Int, val name: String)
+@Serializable
+class Group(
+    val id: Int? = null,
+    val name: String = "",
+)
 
 @Serializable
 class ChapterResponse(val result: ChapterResult? = null) {
     @Serializable
     class ChapterResult(
-        val pages: Pages,
+        val pages: Pages? = null,
     )
 
     @Serializable
     class Pages(
-        val baseUrl: String,
-        val items: List<PageDto>,
+        val baseUrl: String = "",
+        val items: List<PageDto> = emptyList(),
     )
 
     @Serializable
     class PageDto(
-        val url: String,
+        val url: String = "",
         val s: Int = 0,
     )
 }
