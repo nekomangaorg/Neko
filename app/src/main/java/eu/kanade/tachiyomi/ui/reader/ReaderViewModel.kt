@@ -1149,6 +1149,10 @@ constructor(
         mutableState.update { it.copy(menuStickyVisible = visible) }
     }
 
+    fun setPageNumberVisibility(visible: Boolean) {
+        mutableState.update { it.copy(pageNumberVisible = visible) }
+    }
+
     fun updatePageProgress(
         currentPageText: String,
         totalPagesText: String,
@@ -1177,6 +1181,7 @@ constructor(
         val totalPages: Int = 0,
         val menuVisible: Boolean = false,
         val menuStickyVisible: Boolean = false,
+        val pageNumberVisible: Boolean = true,
         val chapters: List<ReaderChapterItem> = emptyList(),
     )
 

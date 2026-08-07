@@ -33,6 +33,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -47,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.nekomanga.domain.manga.toManga
+import org.nekomanga.presentation.screens.reader.PageNumberIndicator
 import org.nekomanga.presentation.screens.reader.ReaderAppBar
 import org.nekomanga.presentation.screens.reader.ReaderBottomControls
 import org.nekomanga.presentation.screens.reader.ReaderSettingsSheet
@@ -233,13 +237,19 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     var didTransistionFromChapter = false
     var visibleChapterRange = longArrayOf()
     private var backPressedCallback: OnBackPressedCallback? = null
+    private var composeViewVisible: Boolean
+        get() = binding.readerComposeView.isVisible
+        set(value) {
+            binding.readerComposeView.isVisible = value || viewModel.state.value.pageNumberVisible
+        }
+
     private val backCallback = {
         if (chaptersSheetVisible) {
             chaptersSheetVisible = false
-            binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+            composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible
         } else if (settingsSheetVisible) {
             settingsSheetVisible = false
-            binding.readerComposeView.isVisible = menuVisible || overlayVisible || chaptersSheetVisible
+            composeViewVisible = menuVisible || overlayVisible || chaptersSheetVisible
         }
         reEnableBackPressedCallBack()
     }
@@ -289,7 +299,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         visible = overlayVisible,
                         onDismiss = {
                             overlayVisible = false
-                            binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible || chaptersSheetVisible
+                            composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible || chaptersSheetVisible
                             binding.navigationOverlay.performClick()
                         },
                         modifier = Modifier.fillMaxSize(),
@@ -322,23 +332,24 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         isLoading = state.isLoadingAdjacentChapter,
                         onChaptersClick = {
                             chaptersSheetVisible = true
-                            binding.readerComposeView.isVisible = true
+                            composeViewVisible = true
                             reEnableBackPressedCallBack()
                         },
                         onCommentsClick = { openWebView(true) },
                         onWebviewClick = { openWebView(false) },
                         onSettingsClick = {
                             settingsSheetVisible = true
-                            binding.readerComposeView.isVisible = true
+                            composeViewVisible = true
                             reEnableBackPressedCallBack()
                         },
+                        pageNumberVisible = state.pageNumberVisible,
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
                     if (settingsSheetVisible) {
                         ModalBottomSheet(
                             onDismissRequest = {
                                 settingsSheetVisible = false
-                                binding.readerComposeView.isVisible = menuVisible || overlayVisible || chaptersSheetVisible
+                                composeViewVisible = menuVisible || overlayVisible || chaptersSheetVisible
                                 reEnableBackPressedCallBack()
                             },
                             scrimColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -347,7 +358,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                             ReaderSettingsSheet(
                                 onDismiss = {
                                     settingsSheetVisible = false
-                                    binding.readerComposeView.isVisible = menuVisible || overlayVisible || chaptersSheetVisible
+                                    composeViewVisible = menuVisible || overlayVisible || chaptersSheetVisible
                                     reEnableBackPressedCallBack()
                                 },
                                 viewModel = viewModel,
@@ -358,7 +369,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         ModalBottomSheet(
                             onDismissRequest = {
                                 chaptersSheetVisible = false
-                                binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible
                                 reEnableBackPressedCallBack()
                             },
                             scrimColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -442,12 +453,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                         lifecycleScope.launch {
                                             loadChapter(item.chapter)
                                             chaptersSheetVisible = false
-                                            binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                            composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible
                                             reEnableBackPressedCallBack()
                                         }
                                     } else {
                                         chaptersSheetVisible = false
-                                        binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                        composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible
                                         reEnableBackPressedCallBack()
                                     }
                                 },
@@ -460,13 +471,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                 onCommentsClick = {
                                     openWebView(true)
                                     chaptersSheetVisible = false
-                                    binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                    composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible
                                     reEnableBackPressedCallBack()
                                 },
                                 onWebviewClick = {
                                     openWebView(false)
                                     chaptersSheetVisible = false
-                                    binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                    composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible
                                     reEnableBackPressedCallBack()
                                 },
                                 onReadingModeClick = {
@@ -504,16 +515,30 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                 onDisplayOptionsClick = {
                                     settingsSheetVisible = true
                                     chaptersSheetVisible = false
-                                    binding.readerComposeView.isVisible = true
+                                    composeViewVisible = true
                                     reEnableBackPressedCallBack()
                                 },
                                 onDismiss = {
                                     chaptersSheetVisible = false
-                                    binding.readerComposeView.isVisible = menuVisible || overlayVisible || settingsSheetVisible
+                                    composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible
                                     reEnableBackPressedCallBack()
                                 }
                             )
                         }
+                    }
+                    if (state.pageNumberVisible && state.currentPageText.isNotEmpty() && state.totalPagesText.isNotEmpty()) {
+                        val pageNumberText = if (resources.isLTR) {
+                            "${state.currentPageText}/${state.totalPagesText}"
+                        } else {
+                            "${state.totalPagesText}/${state.currentPageText}"
+                        }
+                        PageNumberIndicator(
+                            text = pageNumberText,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .navigationBarsPadding()
+                                .padding(bottom = 12.dp)
+                        )
                     }
                 }
             }
@@ -522,7 +547,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             overlayNavigation = navigation
             overlayIsLtr = isLtr
             overlayVisible = visible
-            binding.readerComposeView.isVisible = visible || menuVisible || settingsSheetVisible || chaptersSheetVisible
+            composeViewVisible = visible || menuVisible || settingsSheetVisible || chaptersSheetVisible
             binding.navigationOverlay.isVisible = false
         }
         binding.navigationOverlay.isVisible = false
@@ -1004,12 +1029,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
             displayOptions.setOnClickListener {
                 settingsSheetVisible = true
-                binding.readerComposeView.isVisible = true
+                composeViewVisible = true
             }
 
             displayOptions.setOnLongClickListener {
                 settingsSheetVisible = true
-                binding.readerComposeView.isVisible = true
+                composeViewVisible = true
                 true
             }
 
@@ -1322,7 +1347,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         val oldVisibility = menuVisible
         menuVisible = visible
         viewModel.setMenuVisibility(visible)
-        binding.readerComposeView.isVisible = visible || overlayVisible
+        composeViewVisible = visible || overlayVisible
 
         if (visible) coroutine?.cancel()
         binding.viewerContainer.requestLayout()
@@ -1991,7 +2016,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     )
             }
             binding.appBar.isVisible = false
-            binding.readerComposeView.isVisible = true
+            composeViewVisible = true
         } else if (!visible && (menuStickyVisible || menuVisible)) {
             if (menuStickyVisible && !menuVisible) {
                 menuStickyVisible = false
@@ -2160,7 +2185,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         /** Sets the visibility of the bottom page indicator according to [visible]. */
         private fun setPageNumberVisibility(visible: Boolean) {
-            binding.pageNumber.visibility = if (visible) View.VISIBLE else View.INVISIBLE
+            viewModel.setPageNumberVisibility(visible)
+            binding.pageNumber.visibility = View.INVISIBLE
+            composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible || chaptersSheetVisible
         }
 
         /** Sets the display profile to [path]. */

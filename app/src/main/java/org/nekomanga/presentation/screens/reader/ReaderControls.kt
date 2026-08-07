@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import org.nekomanga.R
 import org.nekomanga.presentation.components.bars.TitleTopAppBar
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,6 +96,7 @@ fun ReaderBottomControls(
     onCommentsClick: () -> Unit,
     onWebviewClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    pageNumberVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
@@ -104,12 +108,16 @@ fun ReaderBottomControls(
         exit = slideOutVertically(targetOffsetY = { it }),
         modifier = modifier,
     ) {
+        val bottomPadding = if (pageNumberVisible) 36.dp else 8.dp
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f), shape = RoundedCornerShape(12.dp))
+                .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = bottomPadding)
+                .background(
+                    MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                    shape = RoundedCornerShape(12.dp)
+                )
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Column(
@@ -244,5 +252,40 @@ fun ReaderBottomControls(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PageNumberIndicator(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .background(Color.Transparent)
+            .padding(4.dp)
+    ) {
+        // Outline text (rendered behind)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D2D2D),
+                drawStyle = Stroke(
+                    miter = 10f,
+                    width = 4f,
+                    join = StrokeJoin.Round
+                )
+            )
+        )
+        // Fill text (rendered in front)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFEBEBEB)
+            )
+        )
     }
 }
