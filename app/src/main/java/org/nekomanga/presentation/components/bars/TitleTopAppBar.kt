@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components.bars
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.AutoSizeText
 import org.nekomanga.presentation.components.FlexibleTopBar
@@ -36,6 +39,7 @@ fun TitleTopAppBar(
     navigationIcon: ImageVector? = null,
     incognitoMode: Boolean,
     onNavigationIconClicked: () -> Unit = {},
+    onTitleClick: (() -> Unit)? = null,
     actions: @Composable (RowScope.() -> Unit) = {},
     scrolledContainerColor: Color = Color.Transparent,
     scrollBehavior: TopAppBarScrollBehavior,
@@ -51,7 +55,17 @@ fun TitleTopAppBar(
         Box(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.small)
         ) {
-            Column(modifier = Modifier.fillMaxWidth(.8f).align(Alignment.Center)) {
+            val titleModifier = if (onTitleClick != null) {
+                Modifier.clickable(onClick = onTitleClick)
+            } else {
+                Modifier
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(.8f)
+                    .align(Alignment.Center)
+                    .then(titleModifier)
+            ) {
                 if (title.isEmpty() && subtitle.isEmpty()) {
                     // Do nothing
                 } else if (subtitle.isEmpty()) {
@@ -66,11 +80,15 @@ fun TitleTopAppBar(
                     AutoSizeText(
                         text = title,
                         style = MaterialTheme.typography.titleLarge.copy(color = onColor),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     AutoSizeText(
                         text = subtitle,
-                        style = MaterialTheme.typography.titleMedium.copy(color = onColor),
+                        style = MaterialTheme.typography.titleMedium.copy(color = onColor.copy(alpha = 0.7f)),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }

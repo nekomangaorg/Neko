@@ -195,6 +195,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     /** Whether the menu should stay visible. */
     private var menuStickyVisible = false
+        set(value) {
+            field = value
+            viewModel.setMenuStickyVisibility(value)
+        }
 
     private var coroutine: Job? = null
 
@@ -297,7 +301,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         showShiftDoublePage = showShiftDoublePage,
                         shiftDoublePageIconRes = shiftDoublePageIconRes,
                         onShiftDoublePage = { shiftDoublePages() },
-                        visible = state.menuVisible,
+                        visible = state.menuVisible || state.menuStickyVisible,
+                        onMangaClick = {
+                            viewModel.manga?.id?.let { id ->
+                                val intent = MainActivity.openMangaIntent(this@ReaderActivity, id)
+                                startActivity(intent)
+                            }
+                        },
                     )
                     ReaderBottomControls(
                         currentPageText = state.currentPageText,
@@ -308,11 +318,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         onPageChange = { index -> moveToPageIndex(index) },
                         onSkipPrevious = { loadAdjacentChapter(false) },
                         onSkipNext = { loadAdjacentChapter(true) },
-                        visible = state.menuVisible,
+                        visible = state.menuVisible && !chaptersSheetVisible && !settingsSheetVisible,
                         isLoading = state.isLoadingAdjacentChapter,
                         onChaptersClick = {
                             chaptersSheetVisible = true
-                            setMenuVisibility(false)
                             binding.readerComposeView.isVisible = true
                             reEnableBackPressedCallBack()
                         },
@@ -926,21 +935,21 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     /** Initializes the reader menu. It sets up click listeners and the initial visibility. */
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeMenu() {
-        // Set binding.toolbar
-        setSupportActionBar(binding.toolbar)
-        val primaryColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorSurface), 200)
-        binding.appBar.setBackgroundColor(primaryColor)
+        // Set binding.toolbar (disabled in favor of Compose ReaderAppBar)
+        // setSupportActionBar(binding.toolbar)
+        // val primaryColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorSurface), 200)
+        // binding.appBar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        binding.toolbar.setNavigationOnClickListener { popToMain() }
+        // binding.toolbar.setNavigationOnClickListener { popToMain() }
 
-        binding.toolbar.setOnClickListener {
-            viewModel.manga?.id?.let { id ->
-                val intent = MainActivity.openMangaIntent(this, id)
-                startActivity(intent)
-            }
-        }
+        // binding.toolbar.setOnClickListener {
+        //     viewModel.manga?.id?.let { id ->
+        //         val intent = MainActivity.openMangaIntent(this, id)
+        //         startActivity(intent)
+        //     }
+        // }
 
         with(binding.chaptersSheet) {
             with(doublePage) {
@@ -1765,7 +1774,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * because each one implements its own touch and key events.
      */
     fun toggleMenu() {
-        setMenuVisibility(!menuVisible)
+        if (chaptersSheetVisible || settingsSheetVisible) {
+            chaptersSheetVisible = false
+            settingsSheetVisible = false
+            setMenuVisibility(false)
+        } else {
+            setMenuVisibility(!menuVisible)
+        }
     }
 
     /** Called from the viewer to show the menu. */
@@ -1950,6 +1965,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     private fun onVisibilityChange(visible: Boolean) {
+        if (chaptersSheetVisible || settingsSheetVisible) return
         if (visible && !menuStickyVisible && !menuVisible && !binding.appBar.isVisible) {
             menuStickyVisible = true
             coroutine = launchUI {
@@ -1974,14 +1990,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         },
                     )
             }
-            binding.appBar.isVisible = true
-            val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
-            toolbarAnimation.doOnStart {
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            }
-            binding.appBar.startAnimation(toolbarAnimation)
+            binding.appBar.isVisible = false
+            binding.readerComposeView.isVisible = true
         } else if (!visible && (menuStickyVisible || menuVisible)) {
             if (menuStickyVisible && !menuVisible) {
+                menuStickyVisible = false
                 setMenuVisibility(false)
             }
             coroutine?.cancel()

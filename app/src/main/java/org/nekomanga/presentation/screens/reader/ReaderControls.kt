@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import org.nekomanga.R
+import org.nekomanga.presentation.components.bars.TitleTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +43,7 @@ fun ReaderAppBar(
     shiftDoublePageIconRes: Int?,
     onShiftDoublePage: () -> Unit,
     visible: Boolean,
+    onMangaClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
@@ -49,66 +52,28 @@ fun ReaderAppBar(
         exit = slideOutVertically(targetOffsetY = { -it }),
         modifier = modifier,
     ) {
-        Surface(
+        TitleTopAppBar(
             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        ) {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        if (subtitle.isNotEmpty()) {
-                            Text(
-                                text = subtitle,
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
+            onColor = MaterialTheme.colorScheme.onSurface,
+            title = title,
+            subtitle = subtitle,
+            navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+            onNavigationIconClicked = onBack,
+            onTitleClick = onMangaClick,
+            incognitoMode = false,
+            actions = {
+                if (showShiftDoublePage && shiftDoublePageIconRes != null) {
+                    IconButton(onClick = onShiftDoublePage) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.close),
+                            painter = painterResource(id = shiftDoublePageIconRes),
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                },
-                actions = {
-                    if (showShiftDoublePage && shiftDoublePageIconRes != null) {
-                        IconButton(onClick = onShiftDoublePage) {
-                            Icon(
-                                painter = painterResource(id = shiftDoublePageIconRes),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    } else {
-                        // Spacer to balance navigation icon
-                        Spacer(modifier = Modifier.width(48.dp))
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
-                ),
-                modifier = Modifier.statusBarsPadding()
-            )
-        }
+                }
+            },
+            scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
+        )
     }
 }
 
