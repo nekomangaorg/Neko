@@ -295,7 +295,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         modifier = Modifier.fillMaxSize(),
                     )
                     ReaderAppBar(
-                        title = state.manga?.userTitle ?: state.manga?.title ?: "",
+                        title = state.manga?.userTitle?.takeIf { it.isNotBlank() } ?: state.manga?.title ?: "",
                         subtitle = chapterTitle,
                         onBack = { finish() },
                         showShiftDoublePage = showShiftDoublePage,
