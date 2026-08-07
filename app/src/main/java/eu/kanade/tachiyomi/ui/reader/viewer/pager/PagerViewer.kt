@@ -150,10 +150,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
         config.navigationModeChangedListener = {
             val showOnStart = config.navigationOverlayForNewUser
-            activity.binding.navigationOverlay.setNavigation(config.navigator, showOnStart)
+            activity.setNavigation(config.navigator, showOnStart)
         }
         config.navigationModeInvertedListener = {
-            activity.binding.navigationOverlay.showNavigationAgain()
+            activity.showNavigationAgain()
         }
     }
 

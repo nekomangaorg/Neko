@@ -138,10 +138,10 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
         config.navigationModeChangedListener = {
             val showOnStart = config.navigationOverlayForNewUser
-            activity.binding.navigationOverlay.setNavigation(config.navigator, showOnStart)
+            activity.setNavigation(config.navigator, showOnStart)
         }
         config.navigationModeInvertedListener = {
-            activity.binding.navigationOverlay.showNavigationAgain()
+            activity.showNavigationAgain()
         }
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)

@@ -55,6 +55,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.draw.drawWithContent
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.nekomanga.domain.manga.toManga
 import org.nekomanga.presentation.screens.reader.PageNumberIndicator
@@ -111,6 +113,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
@@ -193,6 +196,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     var shiftDoublePageIconRes by mutableStateOf<Int?>(null)
     var settingsSheetVisible by mutableStateOf(false)
     var chaptersSheetVisible by mutableStateOf(false)
+    var brightnessOverlayAlpha by mutableStateOf(0f)
+    var colorFilterOverlayColor by mutableStateOf(0)
+    var colorFilterOverlayMode by mutableStateOf(0)
 
     val scope = lifecycleScope
 
@@ -300,6 +306,36 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             NekoTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 Box(modifier = Modifier.fillMaxSize()) {
+                    // Color Filter Overlay
+                    if (colorFilterOverlayColor != 0) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .drawWithContent {
+                                    drawRect(
+                                        color = androidx.compose.ui.graphics.Color(colorFilterOverlayColor),
+                                        blendMode = when (colorFilterOverlayMode) {
+                                            1 -> BlendMode.Multiply
+                                            2 -> BlendMode.Screen
+                                            3 -> BlendMode.Overlay
+                                            4 -> BlendMode.Lighten
+                                            5 -> BlendMode.Darken
+                                            else -> BlendMode.SrcOver
+                                        }
+                                    )
+                                }
+                        )
+                    }
+
+                    // Brightness Overlay
+                    if (brightnessOverlayAlpha > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = brightnessOverlayAlpha))
+                        )
+                    }
+
                     GestureNavigationOverlay(
                         navigation = overlayNavigation,
                         isLtr = overlayIsLtr,
@@ -307,7 +343,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         onDismiss = {
                             overlayVisible = false
                             composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible || chaptersSheetVisible
-                            binding.navigationOverlay.performClick()
                         },
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -562,14 +597,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 }
             }
         }
-        binding.navigationOverlay.onNavigationChanged = { navigation, isLtr, visible ->
-            overlayNavigation = navigation
-            overlayIsLtr = isLtr
-            overlayVisible = visible
-            composeViewVisible = visible || menuVisible || settingsSheetVisible || chaptersSheetVisible
-            binding.navigationOverlay.isVisible = false
-        }
-        binding.navigationOverlay.isVisible = false
+
         val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar))
         val lightStatusBar = a.getBoolean(0, false)
         a.recycle()
@@ -743,7 +771,21 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         }
     }
 
+    fun setNavigation(navigation: ViewerNavigation, showOnStart: Boolean) {
+        overlayNavigation = navigation
+        if (showOnStart) {
+            overlayVisible = true
+            composeViewVisible = true
+        }
+    }
 
+    fun showNavigationAgain() {
+        val nav = overlayNavigation
+        if (nav != null && nav !is eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation) {
+            overlayVisible = true
+            composeViewVisible = true
+        }
+    }
 
     /**
      * Called when an item of the options menu was clicked. Used to handle clicks on our menu
@@ -1104,7 +1146,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
         }
 
-        binding.navigationOverlay.isLTR = viewer !is R2LPagerViewer
+        overlayIsLtr = newViewer !is R2LPagerViewer
         binding.viewerContainer.setBackgroundColor(
             if (viewer is WebtoonViewer) {
                 Color.BLACK
@@ -1818,7 +1860,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             }
         }
 
-        /** Sets the color filter overlay according to [enabled]. */
         private fun setColorFilter(enabled: Boolean) {
             if (enabled) {
                 readerPreferences
@@ -1828,7 +1869,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     .onEach { setColorFilterValue(it) }
                     .launchIn(scope)
             } else {
-                binding.colorOverlay.isVisible = false
+                colorFilterOverlayColor = 0
             }
         }
 
@@ -1873,11 +1914,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             }
         }
 
-        /**
-         * Sets the brightness of the screen. Range is [-75, 100]. From -75 to -1 a semi-transparent
-         * black view is overlaid with the minimum brightness. From 1 to 100 it sets that value as
-         * brightness. 0 sets system brightness and hides the overlay.
-         */
         private fun setCustomBrightnessValue(value: Int) {
             // Calculate and set reader brightness.
             val readerBrightness =
@@ -1895,18 +1931,17 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
             // Set black overlay visibility.
             if (value < 0) {
-                binding.brightnessOverlay.isVisible = true
                 val alpha = (abs(value) * 2.56).toInt()
-                binding.brightnessOverlay.setBackgroundColor(Color.argb(alpha, 0, 0, 0))
+                brightnessOverlayAlpha = alpha / 255f
             } else {
-                binding.brightnessOverlay.isVisible = false
+                brightnessOverlayAlpha = 0f
             }
         }
 
         /** Sets the color filter [value]. */
         private fun setColorFilterValue(value: Int) {
-            binding.colorOverlay.isVisible = true
-            binding.colorOverlay.setFilterColor(value, readerPreferences.colorFilterMode().get())
+            colorFilterOverlayColor = value
+            colorFilterOverlayMode = readerPreferences.colorFilterMode().get()
         }
 
         private fun setLayerPaint(grayscale: Boolean, invertedColors: Boolean) {
