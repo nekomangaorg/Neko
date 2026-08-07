@@ -36,6 +36,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -540,6 +547,21 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                 .padding(bottom = 12.dp)
                         )
                     }
+                    AnimatedVisibility(
+                        visible = state.isLoading,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.25f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            ContainedLoadingIndicator()
+                        }
+                    }
                 }
             }
         }
@@ -584,7 +606,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     }
                 }
             } else {
-                binding.pleaseWait.isVisible = true
+                viewModel.setIsLoading(true)
             }
         }
 
@@ -1465,8 +1487,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         binding.readerNav.pageSeekbar.isRTL = newViewer is R2LPagerViewer
 
-        binding.pleaseWait.isVisible = true
-        binding.pleaseWait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
+        viewModel.setIsLoading(true)
         invalidateOptionsMenu()
         updateCropBordersShortcut()
         updateBottomShortcuts()
@@ -1523,8 +1544,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * method to the current viewer, but also set the subtitle on the binding.toolbar.
      */
     fun setChapters(viewerChapters: ViewerChapters) {
-        binding.pleaseWait.clearAnimation()
-        binding.pleaseWait.isVisible = false
+        viewModel.setIsLoading(false)
         if (indexChapterToShift != null && indexPageToShift != null) {
             viewerChapters.currChapter.pages
                 ?.find {
@@ -1912,12 +1932,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             if (currentChapter.chapter.isMergedChapter()) {
                 toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
             } else {
-                binding.pleaseWait.isVisible = true
+                viewModel.setIsLoading(true)
                 scope.launchIO {
                     val threadId = viewModel.lookupComment(currentChapter.chapter.uuid())
 
                     scope.launchUI {
-                        binding.pleaseWait.isVisible = false
+                        viewModel.setIsLoading(false)
 
                         if (threadId == null) {
                             toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
