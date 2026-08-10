@@ -18,18 +18,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -37,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -173,16 +172,12 @@ private fun AboutWrapper(
 
         if (isTablet) {
             Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
+                modifier = Modifier.fillMaxSize().padding(contentPadding),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
-                    modifier = Modifier
-                        .weight(0.45f)
-                        .fillMaxHeight(),
+                    modifier = Modifier.weight(0.45f).fillMaxHeight(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -195,12 +190,16 @@ private fun AboutWrapper(
                     Spacer(modifier = Modifier.size(Size.large))
                     Text(
                         text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        style =
+                            MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Spacer(modifier = Modifier.size(Size.medium))
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(Size.medium, Alignment.CenterHorizontally),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(Size.medium, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         val iconModifier = Modifier.size(Size.extraLarge)
@@ -220,11 +219,10 @@ private fun AboutWrapper(
                 }
 
                 LazyColumn(
-                    modifier = Modifier
-                        .weight(0.55f)
-                        .fillMaxHeight()
-                        .padding(horizontal = Size.medium),
-                    verticalArrangement = Arrangement.spacedBy(Size.tiny, Alignment.CenterVertically),
+                    modifier =
+                        Modifier.weight(0.55f).fillMaxHeight().padding(horizontal = Size.medium),
+                    verticalArrangement =
+                        Arrangement.spacedBy(Size.tiny, Alignment.CenterVertically),
                 ) {
                     item {
                         ExpressiveListCard(listCardType = ListCardType.Top) {
@@ -401,9 +399,7 @@ private fun AboutWrapper(
 @Composable
 private fun LogoHeader() {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = Size.huge),
+        modifier = Modifier.fillMaxWidth().padding(top = Size.huge),
         contentAlignment = Alignment.Center,
     ) {
         Icon(

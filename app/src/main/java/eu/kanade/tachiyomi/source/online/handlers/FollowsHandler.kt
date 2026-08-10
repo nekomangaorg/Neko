@@ -50,27 +50,27 @@ class FollowsHandler {
     suspend fun fetchAllFollows(): Result<List<SourceManga>, ResultError> {
         return withContext(Dispatchers.IO) {
             return@withContext runCatching {
-                    val readingFuture = async { statusHandler.fetchReadingStatusForAllManga() }
+                val readingFuture = async { statusHandler.fetchReadingStatusForAllManga() }
 
-                    fetchOffset(0)
-                        .andThen { mangaListDto ->
-                            Ok(
-                                when (mangaListDto.total > mangaListDto.limit) {
-                                        true ->
-                                            fetchRestOfFollows(
-                                                mangaListDto.limit,
-                                                mangaListDto.total,
-                                            ) + mangaListDto
-                                        false -> listOf(mangaListDto)
-                                    }
-                                    .map { it.data }
-                                    .flatten()
-                            )
-                        }
-                        .andThen { allResults ->
-                            Ok(allFollowsParser(allResults, readingFuture.await()))
-                        }
-                }
+                fetchOffset(0)
+                    .andThen { mangaListDto ->
+                        Ok(
+                            when (mangaListDto.total > mangaListDto.limit) {
+                                    true ->
+                                        fetchRestOfFollows(
+                                            mangaListDto.limit,
+                                            mangaListDto.total,
+                                        ) + mangaListDto
+                                    false -> listOf(mangaListDto)
+                                }
+                                .map { it.data }
+                                .flatten()
+                        )
+                    }
+                    .andThen { allResults ->
+                        Ok(allFollowsParser(allResults, readingFuture.await()))
+                    }
+            }
                 .getOrElse {
                     TimberKt.e(it) { "Error fetching all follows" }
                     Err(ResultError.Generic(it.toDisplayMessage()))

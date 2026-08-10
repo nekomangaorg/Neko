@@ -130,8 +130,8 @@ class SimilarHandler {
 
     private fun getDbDto(mangaDb: MangaSimilar?): SimilarMangaDatabaseDto {
         return runCatching {
-                MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb!!.data)
-            }
+            MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb!!.data)
+        }
             .getOrElse { SimilarMangaDatabaseDto() }
     }
 

@@ -1,8 +1,5 @@
 package org.nekomanga.usecases.library
 
-import org.nekomanga.presentation.screens.library.LibraryCategoryItem
-import org.nekomanga.presentation.screens.library.LibraryGroup
-import org.nekomanga.presentation.screens.library.LibrarySort
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -10,6 +7,9 @@ import org.junit.Test
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.presentation.screens.library.LibraryCategoryItem
+import org.nekomanga.presentation.screens.library.LibraryGroup
+import org.nekomanga.presentation.screens.library.LibrarySort
 
 class GroupLibraryMangaUseCaseTest {
 

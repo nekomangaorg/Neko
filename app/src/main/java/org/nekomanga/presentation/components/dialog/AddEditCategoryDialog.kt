@@ -99,7 +99,9 @@ fun AddEditCategoryDialog(
                             categoryText.text.isNotBlank() &&
                             (categorySelected.isBlank() || categorySelected != categoryText.text),
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
+                        ButtonDefaults.textButtonColors(
+                            contentColor = themeColorState.primaryColor
+                        ),
                 ) {
                     Text(text = stringResource(id = R.string.save))
                 }
@@ -108,7 +110,9 @@ fun AddEditCategoryDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
+                        ButtonDefaults.textButtonColors(
+                            contentColor = themeColorState.primaryColor
+                        ),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }

@@ -412,68 +412,67 @@ private fun buildChapterDropdownItems(
     blockScanlator: (MangaConstants.BlockType, String) -> Unit,
 ): List<SimpleDropDownItem> {
     return buildList {
-            if (!isLocal) {
-                add(
-                    SimpleDropDownItem.Action(
-                        text = UiText.StringResource(R.string.open_in_webview),
-                        onClick = onWebView,
-                    )
-                )
-            }
-
+        if (!isLocal) {
             add(
-                SimpleDropDownItem.Parent(
-                    text = UiText.StringResource(R.string.mark_previous_as),
-                    children =
-                        listOf(
-                            SimpleDropDownItem.Action(
-                                text = UiText.StringResource(R.string.read),
-                                onClick = { markPrevious(true) },
-                            ),
-                            SimpleDropDownItem.Action(
-                                text = UiText.StringResource(R.string.unread),
-                                onClick = { markPrevious(false) },
-                            ),
-                        ),
+                SimpleDropDownItem.Action(
+                    text = UiText.StringResource(R.string.open_in_webview),
+                    onClick = onWebView,
                 )
             )
-
-            val scanlatorItems =
-                ChapterUtil.getScanlators(scanlator)
-                    .mapNotNull { name ->
-                        if (name == Constants.NO_GROUP) uploader.takeIf { it.isNotBlank() }
-                        else name
-                    }
-                    .map { name ->
-                        SimpleDropDownItem.Action(
-                            text = UiText.String(name),
-                            onClick = {
-                                val type =
-                                    if (name == uploader) MangaConstants.BlockType.Uploader
-                                    else MangaConstants.BlockType.Group
-                                blockScanlator(type, name)
-                            },
-                        )
-                    }
-
-            if (scanlatorItems.isNotEmpty() && !isLocal) {
-                add(
-                    SimpleDropDownItem.Parent(
-                        text = UiText.StringResource(R.string.block_scanlator),
-                        children = scanlatorItems,
-                    )
-                )
-            }
-
-            if (!isMerged && !isLocal) {
-                add(
-                    SimpleDropDownItem.Action(
-                        text = UiText.StringResource(R.string.comments),
-                        onClick = onComment,
-                    )
-                )
-            }
         }
+
+        add(
+            SimpleDropDownItem.Parent(
+                text = UiText.StringResource(R.string.mark_previous_as),
+                children =
+                    listOf(
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.read),
+                            onClick = { markPrevious(true) },
+                        ),
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.unread),
+                            onClick = { markPrevious(false) },
+                        ),
+                    ),
+            )
+        )
+
+        val scanlatorItems =
+            ChapterUtil.getScanlators(scanlator)
+                .mapNotNull { name ->
+                    if (name == Constants.NO_GROUP) uploader.takeIf { it.isNotBlank() } else name
+                }
+                .map { name ->
+                    SimpleDropDownItem.Action(
+                        text = UiText.String(name),
+                        onClick = {
+                            val type =
+                                if (name == uploader) MangaConstants.BlockType.Uploader
+                                else MangaConstants.BlockType.Group
+                            blockScanlator(type, name)
+                        },
+                    )
+                }
+
+        if (scanlatorItems.isNotEmpty() && !isLocal) {
+            add(
+                SimpleDropDownItem.Parent(
+                    text = UiText.StringResource(R.string.block_scanlator),
+                    children = scanlatorItems,
+                )
+            )
+        }
+
+        if (!isMerged && !isLocal) {
+            add(
+                SimpleDropDownItem.Action(
+                    text = UiText.StringResource(R.string.comments),
+                    onClick = onComment,
+                )
+            )
+        }
+    }
         .toList()
 }
 

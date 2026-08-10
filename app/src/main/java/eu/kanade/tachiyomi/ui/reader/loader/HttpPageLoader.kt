@@ -48,10 +48,10 @@ class HttpPageLoader(
 
         scope.launchIO {
             flow {
-                    while (true) {
-                        emit(runInterruptible { queue.take() }.page)
-                    }
+                while (true) {
+                    emit(runInterruptible { queue.take() }.page)
                 }
+            }
                 .filter { it.status == Page.State.QUEUE }
                 .collect { collectPage(it) }
         }

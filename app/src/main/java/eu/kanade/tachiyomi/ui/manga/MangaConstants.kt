@@ -144,13 +144,11 @@ object MangaConstants {
 
     @Immutable data class SortOption(val sortState: SortState, val sortType: SortType)
 
-    @Immutable
-    data class ScanlatorFilter(val scanlators: List<ScanlatorOption> = listOf())
+    @Immutable data class ScanlatorFilter(val scanlators: List<ScanlatorOption> = listOf())
 
     @Immutable data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 
-    @Immutable
-    data class LanguageFilter(val languages: List<LanguageOption> = listOf())
+    @Immutable data class LanguageFilter(val languages: List<LanguageOption> = listOf())
 
     @Immutable data class LanguageOption(val name: String, val disabled: Boolean = false)
 

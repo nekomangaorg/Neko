@@ -2,10 +2,10 @@ package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
 import androidx.annotation.StringRes
-import org.nekomanga.presentation.screens.library.LibrarySort
 import java.io.Serializable
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem.Companion.SYSTEM_CATEGORY
+import org.nekomanga.presentation.screens.library.LibrarySort
 
 interface Category : Serializable {
 

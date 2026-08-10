@@ -28,7 +28,6 @@ import org.junit.Before
 import org.junit.Test
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
-import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.usecases.preferences.GetFormattedBuildTimeUseCase
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
@@ -56,9 +55,7 @@ class AboutViewModelTest {
         mockAppSnackbarManager = mockk()
 
         // Mock defaults needed during initialization of AboutViewModel
-        val incognitoModePref = mockk<Preference<Boolean>> {
-            every { get() } returns false
-        }
+        val incognitoModePref = mockk<Preference<Boolean>> { every { get() } returns false }
         every { mockSecurityPreferences.incognitoMode() } returns incognitoModePref
         every { mockGetFormattedBuildTimeUseCase(any()) } returns "Jan 1, 2026"
 
@@ -124,9 +121,7 @@ class AboutViewModelTest {
             // Assert
             coVerify(exactly = 1) {
                 mockAppSnackbarManager.showSnackbar(
-                    withArg {
-                        assertEquals(R.string.no_network_connection, it.messageRes)
-                    }
+                    withArg { assertEquals(R.string.no_network_connection, it.messageRes) }
                 )
             }
         }
@@ -138,7 +133,8 @@ class AboutViewModelTest {
             mockkConstructor(AppUpdateChecker::class)
             val mockRelease = mockk<Release>()
             val newUpdateResult = AppUpdateResult.NewUpdate(mockRelease)
-            coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } returns newUpdateResult
+            coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } returns
+                newUpdateResult
             coEvery { mockAppSnackbarManager.showSnackbar(any()) } returns Unit
 
             // Act
@@ -153,37 +149,35 @@ class AboutViewModelTest {
         }
 
     @Test
-    fun `given checkForUpdate when update check fails then error snackbar is shown`() =
-        runTest {
-            // Arrange
-            mockkConstructor(AppUpdateChecker::class)
-            coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } returns
-                AppUpdateResult.CantCheckForUpdate("Network timeout")
-            coEvery { mockAppSnackbarManager.showSnackbar(any()) } returns Unit
+    fun `given checkForUpdate when update check fails then error snackbar is shown`() = runTest {
+        // Arrange
+        mockkConstructor(AppUpdateChecker::class)
+        coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } returns
+            AppUpdateResult.CantCheckForUpdate("Network timeout")
+        coEvery { mockAppSnackbarManager.showSnackbar(any()) } returns Unit
 
-            // Act
-            viewModel.checkForUpdate()
-            advanceUntilIdle()
+        // Act
+        viewModel.checkForUpdate()
+        advanceUntilIdle()
 
-            // Assert
-            val state = viewModel.aboutScreenState.value
-            assertFalse(state.shouldShowUpdateDialog)
-            assertFalse(state.checkingForUpdates)
-            coVerify(exactly = 1) {
-                mockAppSnackbarManager.showSnackbar(
-                    withArg {
-                        assertEquals("Network timeout", it.message)
-                    }
-                )
-            }
+        // Assert
+        val state = viewModel.aboutScreenState.value
+        assertFalse(state.shouldShowUpdateDialog)
+        assertFalse(state.checkingForUpdates)
+        coVerify(exactly = 1) {
+            mockAppSnackbarManager.showSnackbar(
+                withArg { assertEquals("Network timeout", it.message) }
+            )
         }
+    }
 
     @Test
     fun `given checkForUpdate when no new update is available then no new updates snackbar is shown`() =
         runTest {
             // Arrange
             mockkConstructor(AppUpdateChecker::class)
-            coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } returns AppUpdateResult.NoNewUpdate
+            coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } returns
+                AppUpdateResult.NoNewUpdate
             coEvery { mockAppSnackbarManager.showSnackbar(any()) } returns Unit
 
             // Act
@@ -196,37 +190,35 @@ class AboutViewModelTest {
             assertFalse(state.checkingForUpdates)
             coVerify(exactly = 1) {
                 mockAppSnackbarManager.showSnackbar(
-                    withArg {
-                        assertEquals(R.string.no_new_updates_available, it.messageRes)
-                    }
+                    withArg { assertEquals(R.string.no_new_updates_available, it.messageRes) }
                 )
             }
         }
 
     @Test
-    fun `given checkForUpdate when already checking for updates then returns early`() =
-        runTest {
-            // Arrange
-            mockkConstructor(AppUpdateChecker::class)
-            coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } coAnswers {
+    fun `given checkForUpdate when already checking for updates then returns early`() = runTest {
+        // Arrange
+        mockkConstructor(AppUpdateChecker::class)
+        coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } coAnswers
+            {
                 delay(100)
                 AppUpdateResult.NoNewUpdate
             }
-            coEvery { mockAppSnackbarManager.showSnackbar(any()) } returns Unit
+        coEvery { mockAppSnackbarManager.showSnackbar(any()) } returns Unit
 
-            // Act
-            // Start the first check for update (will suspend at delay(100))
-            viewModel.checkForUpdate()
-            runCurrent()
+        // Act
+        // Start the first check for update (will suspend at delay(100))
+        viewModel.checkForUpdate()
+        runCurrent()
 
-            // Try to trigger a second check for update concurrently while first one is suspended
-            viewModel.checkForUpdate()
-            advanceUntilIdle()
+        // Try to trigger a second check for update concurrently while first one is suspended
+        viewModel.checkForUpdate()
+        advanceUntilIdle()
 
-            // Assert
-            // The underlying checker should only be invoked once
-            coVerify(exactly = 1) { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) }
-        }
+        // Assert
+        // The underlying checker should only be invoked once
+        coVerify(exactly = 1) { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) }
+    }
 
     @Test
     fun `given developerMode is false when onVersionClicked clicked 7 times then developerMode is toggled to true`() =
@@ -241,18 +233,14 @@ class AboutViewModelTest {
             coEvery { mockAppSnackbarManager.showSnackbar(any()) } returns Unit
 
             // Act
-            repeat(7) {
-                viewModel.onVersionClicked()
-            }
+            repeat(7) { viewModel.onVersionClicked() }
             advanceUntilIdle()
 
             // Assert
             assertTrue(devModeValue)
             coVerify(exactly = 1) {
                 mockAppSnackbarManager.showSnackbar(
-                    withArg {
-                        assertEquals(R.string.developer_mode_enabled, it.messageRes)
-                    }
+                    withArg { assertEquals(R.string.developer_mode_enabled, it.messageRes) }
                 )
             }
         }
@@ -285,7 +273,8 @@ class AboutViewModelTest {
             mockkConstructor(AppUpdateChecker::class)
             val mockRelease = mockk<Release>()
             val newUpdateResult = AppUpdateResult.NewUpdate(mockRelease)
-            coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } returns newUpdateResult
+            coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any()) } returns
+                newUpdateResult
             coEvery { mockAppSnackbarManager.showSnackbar(any()) } returns Unit
 
             // Trigger show update dialog first

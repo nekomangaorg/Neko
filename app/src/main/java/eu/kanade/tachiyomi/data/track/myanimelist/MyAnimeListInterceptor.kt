@@ -72,13 +72,13 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
             }
 
             return runCatching {
-                    if (response.isSuccessful) {
-                        with(json) { response.parseAs<OAuth>() }
-                    } else {
-                        response.close()
-                        null
-                    }
+                if (response.isSuccessful) {
+                    with(json) { response.parseAs<OAuth>() }
+                } else {
+                    response.close()
+                    null
                 }
+            }
                 .getOrNull()
                 ?.also {
                     this.oauth = it

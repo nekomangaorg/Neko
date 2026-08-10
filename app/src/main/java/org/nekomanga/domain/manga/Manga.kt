@@ -4,9 +4,9 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.models.MergeType
-import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 
 @Immutable data class SimpleManga(val title: String, val id: Long)
 

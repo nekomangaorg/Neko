@@ -22,11 +22,12 @@ import org.nekomanga.presentation.screens.license.LicenseTopAppBar
  * LicenseScreen displays the open-source libraries used in the application.
  *
  * This screen-level Composable is responsive to [WindowSizeClass]. On expanded screens
- * (tablets/foldables), the layout limits the maximum width of the dependency list to
- * 800.dp and centers it, preventing the list items from stretching uncomfortably wide
- * and providing a more polished, premium user experience.
+ * (tablets/foldables), the layout limits the maximum width of the dependency list to 800.dp and
+ * centers it, preventing the list items from stretching uncomfortably wide and providing a more
+ * polished, premium user experience.
  *
- * @param windowSizeClass The screen's window size class constraints used to determine adaptive styling.
+ * @param windowSizeClass The screen's window size class constraints used to determine adaptive
+ *   styling.
  * @param onBackPressed Callback invoked when the user navigates back.
  */
 @Composable

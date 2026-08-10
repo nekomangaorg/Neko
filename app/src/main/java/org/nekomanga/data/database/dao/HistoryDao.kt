@@ -378,7 +378,6 @@ interface HistoryDao {
     @RewriteQueriesToDropUnusedColumns
     suspend fun getChapterHistoryByMangaIds(mangaIds: List<Long>): List<MangaChapterHistory>
 
-
     @Query(
         """
         SELECT history.*

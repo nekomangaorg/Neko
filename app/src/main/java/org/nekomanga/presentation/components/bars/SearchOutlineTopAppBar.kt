@@ -3,24 +3,21 @@ package org.nekomanga.presentation.components.bars
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.size
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -40,16 +37,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.foundation.background
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.FlexibleTopBar
@@ -205,72 +203,77 @@ fun SearchOutlineTopAppBar(
                 exit = fadeOut(),
             ) {
                 LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Size.small)
-                        .padding(top = Size.small, bottom = Size.tiny),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(horizontal = Size.small)
+                            .padding(top = Size.small, bottom = Size.tiny),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     item {
                         Text(
                             text = stringResource(id = R.string.recents) + ":",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(end = Size.small)
+                            modifier = Modifier.padding(end = Size.small),
                         )
                     }
                     item {
                         Box(
-                            modifier = Modifier
-                                .padding(end = Size.small)
-                                .clip(RoundedCornerShape(Size.medium))
-                                .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f))
-                                .clickable {
-                                    onClearRecentSearches()
-                                }
-                                .padding(horizontal = Size.smedium, vertical = Size.tiny),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier.padding(end = Size.small)
+                                    .clip(RoundedCornerShape(Size.medium))
+                                    .background(
+                                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f)
+                                    )
+                                    .clickable { onClearRecentSearches() }
+                                    .padding(horizontal = Size.smedium, vertical = Size.tiny),
+                            contentAlignment = Alignment.Center,
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Filled.Close,
-                                    contentDescription = stringResource(id = R.string.clear_recent_searches),
+                                    contentDescription =
+                                        stringResource(id = R.string.clear_recent_searches),
                                     tint = MaterialTheme.colorScheme.onErrorContainer,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(16.dp),
                                 )
                                 Gap(Size.extraTiny)
                                 Text(
                                     text = stringResource(id = R.string.clear),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
                                 )
                             }
                         }
                     }
                     items(recentSearches) { query ->
                         Box(
-                            modifier = Modifier
-                                .padding(end = Size.small)
-                                .clip(RoundedCornerShape(Size.medium))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
-                                .combinedClickable(
-                                    onLongClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        onRemoveRecentSearch(query)
-                                    },
-                                    onClick = {
-                                        searchText = query
-                                        onSearch(query)
-                                        onSearchSubmit(query)
-                                    }
-                                )
-                                .padding(horizontal = Size.smedium, vertical = Size.tiny),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier.padding(end = Size.small)
+                                    .clip(RoundedCornerShape(Size.medium))
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                                    )
+                                    .combinedClickable(
+                                        onLongClick = {
+                                            haptic.performHapticFeedback(
+                                                HapticFeedbackType.LongPress
+                                            )
+                                            onRemoveRecentSearch(query)
+                                        },
+                                        onClick = {
+                                            searchText = query
+                                            onSearch(query)
+                                            onSearchSubmit(query)
+                                        },
+                                    )
+                                    .padding(horizontal = Size.smedium, vertical = Size.tiny),
+                            contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = query,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }

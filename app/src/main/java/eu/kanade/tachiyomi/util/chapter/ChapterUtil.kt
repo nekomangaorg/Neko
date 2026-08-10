@@ -161,30 +161,35 @@ class ChapterUtil {
             val needsUploaderCheck = uploader.isNotEmpty() && hasNoGroup
 
             if (all) {
-                val skipNoGroup = uploader.isNotEmpty() && Constants.NO_GROUP !in filteredGroups && hasNoGroup
+                val skipNoGroup =
+                    uploader.isNotEmpty() && Constants.NO_GROUP !in filteredGroups && hasNoGroup
 
                 if (needsUploaderCheck) {
-                    val uploaderIsFiltered = uploader in filteredGroups || uploader in filteredUploaders
+                    val uploaderIsFiltered =
+                        uploader in filteredGroups || uploader in filteredUploaders
                     if (!uploaderIsFiltered) return false
                 }
 
                 for (s in scanlators) {
                     if (s in SourceManager.mergeSourceNames) continue
                     if (s == Constants.NO_GROUP && skipNoGroup) continue
-                    
-                    val isFiltered = s in filteredGroups || (needsUploaderCheck && s in filteredUploaders)
+
+                    val isFiltered =
+                        s in filteredGroups || (needsUploaderCheck && s in filteredUploaders)
                     if (!isFiltered) return false
                 }
                 return true
             } else {
                 if (needsUploaderCheck) {
-                    val uploaderIsFiltered = uploader in filteredGroups || uploader in filteredUploaders
+                    val uploaderIsFiltered =
+                        uploader in filteredGroups || uploader in filteredUploaders
                     if (uploaderIsFiltered) return true
                 }
 
                 for (s in scanlators) {
                     if (s in SourceManager.mergeSourceNames) continue
-                    val isFiltered = s in filteredGroups || (needsUploaderCheck && s in filteredUploaders)
+                    val isFiltered =
+                        s in filteredGroups || (needsUploaderCheck && s in filteredUploaders)
                     if (isFiltered) return true
                 }
                 return false

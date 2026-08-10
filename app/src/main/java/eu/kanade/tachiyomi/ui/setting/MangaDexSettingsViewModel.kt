@@ -8,8 +8,8 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.data.database.repository.BrowseFilterRepository
 import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.injectLazy
@@ -26,32 +26,24 @@ class MangaDexSettingsViewModel : ViewModel() {
     val state = _state.asStateFlow()
 
     init {
-        mangaDexLoginHelper
-            .isLoggedInFlow()
-            .observeAndUpdate(viewModelScope) { loginCheckResult ->
-                _state.update { it.copy(isLoggedIn = loginCheckResult) }
-            }
+        mangaDexLoginHelper.isLoggedInFlow().observeAndUpdate(viewModelScope) { loginCheckResult ->
+            _state.update { it.copy(isLoggedIn = loginCheckResult) }
+        }
 
-        mangaDexPreference
-            .codeVerifier()
-            .changes()
-            .observeAndUpdate(viewModelScope) { codeVerifier ->
-                _state.update { it.copy(loginUrl = MdConstants.Login.authUrl(codeVerifier)) }
-            }
+        mangaDexPreference.codeVerifier().changes().observeAndUpdate(viewModelScope) { codeVerifier
+            ->
+            _state.update { it.copy(loginUrl = MdConstants.Login.authUrl(codeVerifier)) }
+        }
 
-        mangaDexPreference
-            .blockedGroups()
-            .changes()
-            .observeAndUpdate(viewModelScope) { blockedGroups ->
-                _state.update { it.copy(blockedGroups = blockedGroups.toSet()) }
-            }
+        mangaDexPreference.blockedGroups().changes().observeAndUpdate(viewModelScope) {
+            blockedGroups ->
+            _state.update { it.copy(blockedGroups = blockedGroups.toSet()) }
+        }
 
-        mangaDexPreference
-            .blockedUploaders()
-            .changes()
-            .observeAndUpdate(viewModelScope) { blockedUploaders ->
-                _state.update { it.copy(blockedUploaders = blockedUploaders.toSet()) }
-            }
+        mangaDexPreference.blockedUploaders().changes().observeAndUpdate(viewModelScope) {
+            blockedUploaders ->
+            _state.update { it.copy(blockedUploaders = blockedUploaders.toSet()) }
+        }
     }
 
     fun deleteAllBrowseFilters() {

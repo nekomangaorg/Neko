@@ -3,16 +3,16 @@ package org.nekomanga.usecases.manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaAggregateRepository
 import org.nekomanga.data.database.repository.MangaRepository
-import org.nekomanga.data.database.repository.CategoryRepository
-import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.data.database.repository.ScanlatorGroupRepository
 import org.nekomanga.data.database.repository.UploaderRepository
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
-import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
+import org.nekomanga.domain.storage.StorageManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -41,7 +41,12 @@ class MangaUseCases(
     val updateMangaAggregate = UpdateMangaAggregate(mangaAggregateRepository, sourceManager)
 
     val toggleMangaFavorite =
-        ToggleMangaFavorite(mangaRepository, categoryRepository, libraryPreferences, updateMangaAggregate)
+        ToggleMangaFavorite(
+            mangaRepository,
+            categoryRepository,
+            libraryPreferences,
+            updateMangaAggregate,
+        )
 
     val blockScanlator =
         BlockScanlator(

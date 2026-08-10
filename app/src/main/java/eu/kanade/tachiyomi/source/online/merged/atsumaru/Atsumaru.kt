@@ -120,10 +120,8 @@ class Atsumaru : ReducedHttpSource() {
         val body = response.body.string()
 
         return runCatching {
-                json.decodeFromString<SearchResultsDto>(body).hits.map {
-                    it.document.toSManga(baseUrl)
-                }
-            }
+            json.decodeFromString<SearchResultsDto>(body).hits.map { it.document.toSManga(baseUrl) }
+        }
             .getOrThrow()
         /*  .getOrElse {
             json.decodeFromString<BrowseMangaDto>(body).items.map { it.toSManga(baseUrl) }

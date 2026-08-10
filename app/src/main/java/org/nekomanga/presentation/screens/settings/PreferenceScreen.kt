@@ -3,8 +3,6 @@ package org.nekomanga.presentation.screens.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -70,12 +68,13 @@ fun PreferenceScreen(
                         items = preference.preferenceItems,
                         key = { _, item -> "${preference.title}-${item.title}" },
                     ) { index, item ->
-                        val cardType = when {
-                            preference.preferenceItems.size == 1 -> ListCardType.Single
-                            index == 0 -> ListCardType.Top
-                            index == preference.preferenceItems.lastIndex -> ListCardType.Bottom
-                            else -> ListCardType.Center
-                        }
+                        val cardType =
+                            when {
+                                preference.preferenceItems.size == 1 -> ListCardType.Single
+                                index == 0 -> ListCardType.Top
+                                index == preference.preferenceItems.lastIndex -> ListCardType.Bottom
+                                else -> ListCardType.Center
+                            }
                         ExpressiveListCard(
                             listCardType = cardType,
                             modifier = Modifier.padding(horizontal = Size.medium),
@@ -102,15 +101,15 @@ fun PreferenceScreen(
 
 private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {
     return flatMap {
-            if (it is Preference.PreferenceGroup) {
-                buildList<String?> {
-                    add(null) // Header
-                    addAll(it.preferenceItems.map { groupItem -> groupItem.title })
-                    add(null) // Spacer
-                }
-            } else {
-                listOf(it.title)
+        if (it is Preference.PreferenceGroup) {
+            buildList<String?> {
+                add(null) // Header
+                addAll(it.preferenceItems.map { groupItem -> groupItem.title })
+                add(null) // Spacer
             }
+        } else {
+            listOf(it.title)
         }
+    }
         .indexOfFirst { it == highlightKey }
 }

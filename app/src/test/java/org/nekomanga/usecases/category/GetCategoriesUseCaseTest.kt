@@ -1,7 +1,7 @@
 package org.nekomanga.usecases.category
 
+import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -11,10 +11,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.assertEquals
-import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import org.nekomanga.data.database.repository.CategoryRepository
 
 class GetCategoriesUseCaseTest {
@@ -40,8 +39,18 @@ class GetCategoriesUseCaseTest {
     fun `given categories in repository when getting categories then returns mapped CategoryItems`() =
         runTest {
             // Arrange
-            val cat1 = CategoryImpl().apply { id = 1; name = "Category 1"; order = 1 }
-            val cat2 = CategoryImpl().apply { id = 2; name = "Category 2"; order = 2 }
+            val cat1 =
+                CategoryImpl().apply {
+                    id = 1
+                    name = "Category 1"
+                    order = 1
+                }
+            val cat2 =
+                CategoryImpl().apply {
+                    id = 2
+                    name = "Category 2"
+                    order = 2
+                }
             coEvery { categoryRepository.getCategories() } returns listOf(cat1, cat2)
 
             // Act
@@ -59,7 +68,12 @@ class GetCategoriesUseCaseTest {
     fun `given categories in repository when observing categories then returns mapped CategoryItems flow`() =
         runTest {
             // Arrange
-            val cat1 = CategoryImpl().apply { id = 10; name = "Observed 1"; order = 10 }
+            val cat1 =
+                CategoryImpl().apply {
+                    id = 10
+                    name = "Observed 1"
+                    order = 10
+                }
             coEvery { categoryRepository.observeCategories() } returns flowOf(listOf(cat1))
 
             // Act

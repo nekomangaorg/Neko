@@ -222,16 +222,16 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
                 )
             val statusReceiver = pendingIntent.intentSender
-            val startVersion = context.packageManager
-                .getPackageInfo(context.packageName, 0).versionName
+            val startVersion =
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
             session.commit(statusReceiver)
             notifier.onInstalling()
 
             withContext(Dispatchers.IO) { data.close() }
             withUIContext {
                 delay(5000)
-                val currentVersion = context.packageManager
-                    .getPackageInfo(context.packageName, 0).versionName
+                val currentVersion =
+                    context.packageManager.getPackageInfo(context.packageName, 0).versionName
                 if (startVersion == currentVersion) {
                     notifier.cancelInstallNotification()
                     notifier.onDownloadFinished(file.getUriCompat(context))

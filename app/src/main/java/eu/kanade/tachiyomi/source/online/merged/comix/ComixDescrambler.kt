@@ -40,9 +40,14 @@ object ComixDescrambler {
         val scrambleHash = decodeScrambleHash(rawScrambleHash)
 
         val needsXor = encSeed != null && encSeed != 0 && encLen != null
-        val shouldDescrambleGrid = rawScrambleGrid == "5x5" &&
-            (rawScrambleAlgo == null || rawScrambleAlgo == "1" || rawScrambleAlgo == "2" || rawScrambleAlgo == "3") &&
-            scrambleSeed != null && scrambleSeed != 0
+        val shouldDescrambleGrid =
+            rawScrambleGrid == "5x5" &&
+                (rawScrambleAlgo == null ||
+                    rawScrambleAlgo == "1" ||
+                    rawScrambleAlgo == "2" ||
+                    rawScrambleAlgo == "3") &&
+                scrambleSeed != null &&
+                scrambleSeed != 0
 
         if (!needsXor && !shouldDescrambleGrid) return@Interceptor response
 
@@ -50,19 +55,22 @@ object ComixDescrambler {
         val bodyMediaType = body.contentType()
 
         val originalBytes = body.bytes()
-        val bytes = if (needsXor) {
-            decodeEncodedBytes(originalBytes, encSeed, encLen, rawEncAlgo)
-        } else {
-            originalBytes
-        }
+        val bytes =
+            if (needsXor) {
+                decodeEncodedBytes(originalBytes, encSeed, encLen, rawEncAlgo)
+            } else {
+                originalBytes
+            }
 
         if (shouldDescrambleGrid) {
-            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                ?: return@Interceptor response.newBuilder()
-                    .code(500)
-                    .message("Failed to decode image")
-                    .body("Failed to decode image".toResponseBody("text/plain".toMediaType()))
-                    .build()
+            val bitmap =
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    ?: return@Interceptor response
+                        .newBuilder()
+                        .code(500)
+                        .message("Failed to decode image")
+                        .body("Failed to decode image".toResponseBody("text/plain".toMediaType()))
+                        .build()
 
             val descrambled = descramble(bitmap, scrambleSeed xor scrambleHash, rawScrambleAlgo)
             bitmap.recycle()
@@ -71,7 +79,8 @@ object ComixDescrambler {
             descrambled.compress(Bitmap.CompressFormat.JPEG, 90, output.outputStream())
             descrambled.recycle()
 
-            return@Interceptor response.newBuilder()
+            return@Interceptor response
+                .newBuilder()
                 .removeHeader("Content-Length")
                 .removeHeader("Content-Type")
                 .body(output.asResponseBody(JPEG_MEDIA, output.size))
@@ -84,7 +93,8 @@ object ComixDescrambler {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 95, output.outputStream())
             bitmap.recycle()
 
-            return@Interceptor response.newBuilder()
+            return@Interceptor response
+                .newBuilder()
                 .removeHeader("Content-Encoding")
                 .header("Content-Type", JPEG_MEDIA.toString())
                 .header("Content-Length", output.size.toString())
@@ -92,7 +102,8 @@ object ComixDescrambler {
                 .build()
         }
 
-        response.newBuilder()
+        response
+            .newBuilder()
             .removeHeader("Content-Encoding")
             .removeHeader("Content-Length")
             .removeHeader("Content-Type")
@@ -100,21 +111,32 @@ object ComixDescrambler {
             .build()
     }
 
-    private fun decodeEncodedBytes(bytes: ByteArray, seed: Int, length: Int, algo: String?): ByteArray {
+    private fun decodeEncodedBytes(
+        bytes: ByteArray,
+        seed: Int,
+        length: Int,
+        algo: String?,
+    ): ByteArray {
         if (algo != "2") {
             return decodeWithLcg(bytes, seed, length)
         }
 
-        val candidates = listOf(
-            decodeWithXorshift(bytes, seed or 1, length, false),
-            decodeWithXorshift(bytes, seed, length, false),
-            decodeWithXorshift(bytes, seed or 1, length, true),
-            decodeWithLcg(bytes, seed, length),
-        )
+        val candidates =
+            listOf(
+                decodeWithXorshift(bytes, seed or 1, length, false),
+                decodeWithXorshift(bytes, seed, length, false),
+                decodeWithXorshift(bytes, seed or 1, length, true),
+                decodeWithLcg(bytes, seed, length),
+            )
         return candidates.firstOrNull { it.hasImageSignature() } ?: candidates.first()
     }
 
-    private fun decodeWithXorshift(bytes: ByteArray, initialState: Int, length: Int, highByte: Boolean): ByteArray {
+    private fun decodeWithXorshift(
+        bytes: ByteArray,
+        initialState: Int,
+        length: Int,
+        highByte: Boolean,
+    ): ByteArray {
         val result = bytes.copyOf()
         var state = initialState
         val limit = minOf(result.size, length)
@@ -144,24 +166,28 @@ object ComixDescrambler {
         return next xor (next shl 5)
     }
 
-    private fun decodeScrambleHash(hash: String?): Int = when (hash?.trim()) {
-        "03632" -> 58414
-        "02900" -> 117532
-        else -> 0
-    }
+    private fun decodeScrambleHash(hash: String?): Int =
+        when (hash?.trim()) {
+            "03632" -> 58414
+            "02900" -> 117532
+            else -> 0
+        }
 
-    private fun ByteArray.hasImageSignature(): Boolean = size >= 12 && (
-        (
-            this[0] == 'R'.code.toByte() && this[1] == 'I'.code.toByte() && this[2] == 'F'.code.toByte() &&
-                this[3] == 'F'.code.toByte() && this[8] == 'W'.code.toByte() && this[9] == 'E'.code.toByte() &&
-                this[10] == 'B'.code.toByte() && this[11] == 'P'.code.toByte()
-            ) ||
-            (this[0] == 0xFF.toByte() && this[1] == 0xD8.toByte()) ||
-            (
-                this[0] == 0x89.toByte() && this[1] == 'P'.code.toByte() && this[2] == 'N'.code.toByte() &&
-                    this[3] == 'G'.code.toByte()
-                )
-        )
+    private fun ByteArray.hasImageSignature(): Boolean =
+        size >= 12 &&
+            ((this[0] == 'R'.code.toByte() &&
+                this[1] == 'I'.code.toByte() &&
+                this[2] == 'F'.code.toByte() &&
+                this[3] == 'F'.code.toByte() &&
+                this[8] == 'W'.code.toByte() &&
+                this[9] == 'E'.code.toByte() &&
+                this[10] == 'B'.code.toByte() &&
+                this[11] == 'P'.code.toByte()) ||
+                (this[0] == 0xFF.toByte() && this[1] == 0xD8.toByte()) ||
+                (this[0] == 0x89.toByte() &&
+                    this[1] == 'P'.code.toByte() &&
+                    this[2] == 'N'.code.toByte() &&
+                    this[3] == 'G'.code.toByte()))
 
     private fun descramble(bitmap: Bitmap, seed: Int, algo: String?): Bitmap {
         val width = bitmap.width
@@ -178,8 +204,10 @@ object ComixDescrambler {
             val srcRow = srcIdx / GRID_COLS
             val dstCol = dstIdx % GRID_COLS
             val dstRow = dstIdx / GRID_COLS
-            val srcRect = Rect(srcCol * tileW, srcRow * tileH, (srcCol + 1) * tileW, (srcRow + 1) * tileH)
-            val dstRect = Rect(dstCol * tileW, dstRow * tileH, (dstCol + 1) * tileW, (dstRow + 1) * tileH)
+            val srcRect =
+                Rect(srcCol * tileW, srcRow * tileH, (srcCol + 1) * tileW, (srcRow + 1) * tileH)
+            val dstRect =
+                Rect(dstCol * tileW, dstRow * tileH, (dstCol + 1) * tileW, (dstRow + 1) * tileH)
             canvas.drawBitmap(bitmap, srcRect, dstRect, null)
         }
         return output

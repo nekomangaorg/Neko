@@ -67,8 +67,7 @@ class GetChapterFilterTextTest {
         val source = MangaConstants.ScanlatorFilter()
         val scanlator =
             MangaConstants.ScanlatorFilter(
-                scanlators =
-                    listOf(MangaConstants.ScanlatorOption("test", disabled = true))
+                scanlators = listOf(MangaConstants.ScanlatorOption("test", disabled = true))
             )
         val language = MangaConstants.LanguageFilter()
 

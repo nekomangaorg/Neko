@@ -39,14 +39,14 @@ fun ApiResponse.Failure.Error.toResultError(errorType: String): ResultError {
             false -> {
                 val json = Json { ignoreUnknownKeys = true }
                 runCatching {
-                        val error = json.decodeFromString<ErrorResponse>(errorBody)
-                        if (this.statusCode.code == 401) {
-                            "Http error code: ${this.statusCode.code}. \n Unable to authenticate, please login"
-                        } else {
+                    val error = json.decodeFromString<ErrorResponse>(errorBody)
+                    if (this.statusCode.code == 401) {
+                        "Http error code: ${this.statusCode.code}. \n Unable to authenticate, please login"
+                    } else {
 
-                            "Http error code: ${this.statusCode.code}. \n'${error.errors.joinToString("\n") { it.detail ?: it.title ?: "no details or titles in error" }}'"
-                        }
+                        "Http error code: ${this.statusCode.code}. \n'${error.errors.joinToString("\n") { it.detail ?: it.title ?: "no details or titles in error" }}'"
                     }
+                }
                     .getOrElse { "Received http error code: ${this.statusCode.code}" }
             }
         }

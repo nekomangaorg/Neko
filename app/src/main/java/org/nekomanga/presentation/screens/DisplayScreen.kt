@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +19,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +37,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,11 +65,12 @@ import org.nekomanga.presentation.theme.Size
  * DisplayScreen displays search results, listings, or other manga lists.
  *
  * This screen-level Composable is responsive to [WindowSizeClass]. On expanded screens
- * (tablets/foldables), the layout limits the maximum width of the content to 800.dp and
- * centers it, preventing text, lists, and grids from stretching uncomfortably wide.
+ * (tablets/foldables), the layout limits the maximum width of the content to 800.dp and centers it,
+ * preventing text, lists, and grids from stretching uncomfortably wide.
  *
  * @param viewModel The ViewModel orchestrating the display screen state.
- * @param windowSizeClass The screen's window size class constraints used to determine adaptive styling.
+ * @param windowSizeClass The screen's window size class constraints used to determine adaptive
+ *   styling.
  * @param onBackPressed Callback invoked when the user navigates back.
  * @param onNavigateTo Callback invoked to navigate to another screen.
  */
@@ -228,7 +229,8 @@ private fun DisplayWrapper(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.TopCenter,
         ) {
-            val contentModifier = if (isTablet) Modifier.widthIn(max = 800.dp) else Modifier.fillMaxSize()
+            val contentModifier =
+                if (isTablet) Modifier.widthIn(max = 800.dp) else Modifier.fillMaxSize()
             Box(modifier = contentModifier) {
                 if (displayScreenState.isLoading && displayScreenState.page == 1) {
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -284,12 +286,17 @@ private fun DisplayWrapper(
                         Box(Modifier.fillMaxSize()) {
                             val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
                             val stroke =
-                                remember(strokeWidth) { Stroke(width = strokeWidth, cap = StrokeCap.Round) }
+                                remember(strokeWidth) {
+                                    Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                                }
                             LinearWavyProgressIndicator(
                                 modifier =
-                                    Modifier.fillMaxWidth().align(Alignment.TopStart).statusBarsPadding(),
+                                    Modifier.fillMaxWidth()
+                                        .align(Alignment.TopStart)
+                                        .statusBarsPadding(),
                                 color = MaterialTheme.colorScheme.secondary,
-                                trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
+                                trackColor =
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
                                 stroke = stroke,
                                 trackStroke = stroke,
                             )

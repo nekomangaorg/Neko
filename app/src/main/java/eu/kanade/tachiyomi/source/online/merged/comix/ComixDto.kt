@@ -44,7 +44,8 @@ class Meta(
     @SerialName("last_page") private val lastPageOld: Int = 1,
     val hasNext: Boolean = false,
 ) {
-    val actualLastPage: Int get() = maxOf(lastPage, lastPageOld)
+    val actualLastPage: Int
+        get() = maxOf(lastPage, lastPageOld)
 }
 
 @Serializable
@@ -53,13 +54,11 @@ class Pagination(
     private val lastPage: Int = 1,
     @SerialName("last_page") private val lastPageOld: Int = 1,
 ) {
-    val actualLastPage: Int get() = maxOf(lastPage, lastPageOld)
+    val actualLastPage: Int
+        get() = maxOf(lastPage, lastPageOld)
 }
 
-@Serializable
-class SearchResponse(
-    val result: Items<Manga>? = null,
-)
+@Serializable class SearchResponse(val result: Items<Manga>? = null)
 
 @Serializable
 class Items<T>(
@@ -67,11 +66,12 @@ class Items<T>(
     val meta: Meta? = null,
     private val pagination: Pagination? = null,
 ) {
-    fun hasNextPage(): Boolean = when {
-        meta != null -> meta.page < meta.actualLastPage
-        pagination != null -> pagination.page < pagination.actualLastPage
-        else -> false
-    }
+    fun hasNextPage(): Boolean =
+        when {
+            meta != null -> meta.page < meta.actualLastPage
+            pagination != null -> pagination.page < pagination.actualLastPage
+            else -> false
+        }
 }
 
 @Serializable
@@ -123,13 +123,14 @@ class Chapter(
 
     fun toSChapter(mangaSlug: String) =
         SChapter.create().apply {
-            url = this@Chapter.url.indexOf("/title/").let { index ->
-                if (index != -1) {
-                    this@Chapter.url.substring(index + 1)
-                } else {
-                    "title/$mangaSlug/$id-chapter-${this@Chapter.number.toString().removeSuffix(".0")}"
+            url =
+                this@Chapter.url.indexOf("/title/").let { index ->
+                    if (index != -1) {
+                        this@Chapter.url.substring(index + 1)
+                    } else {
+                        "title/$mangaSlug/$id-chapter-${this@Chapter.number.toString().removeSuffix(".0")}"
+                    }
                 }
-            }
             val chapterText = "Ch." + DecimalFormat("0.#").format(this@Chapter.number)
             chapter_txt = chapterText
             name = buildString {
@@ -172,10 +173,7 @@ class Group(
 
 @Serializable
 class ChapterResponse(val result: ChapterResult? = null) {
-    @Serializable
-    class ChapterResult(
-        val pages: Pages? = null,
-    )
+    @Serializable class ChapterResult(val pages: Pages? = null)
 
     @Serializable
     class Pages(

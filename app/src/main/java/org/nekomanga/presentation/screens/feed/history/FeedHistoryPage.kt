@@ -55,11 +55,11 @@ fun FeedHistoryPage(
     if (hasMoreResults && !loadingResults) {
         LaunchedEffect(scrollState) {
             snapshotFlow {
-                    val layoutInfo = scrollState.layoutInfo
-                    val totalItems = layoutInfo.totalItemsCount
-                    val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    lastVisibleItemIndex >= (totalItems - 5)
-                }
+                val layoutInfo = scrollState.layoutInfo
+                val totalItems = layoutInfo.totalItemsCount
+                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                lastVisibleItemIndex >= (totalItems - 5)
+            }
                 .collect { isAtEnd ->
                     if (isAtEnd) {
                         loadNextPage()

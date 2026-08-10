@@ -123,7 +123,10 @@ object Notifications {
                     Group.Download,
                     context.getString(R.string.group_downloader),
                 ),
-                NotificationChannelGroup(GROUP_APP_UPDATES, context.getString(R.string.app_updates)),
+                NotificationChannelGroup(
+                    GROUP_APP_UPDATES,
+                    context.getString(R.string.app_updates),
+                ),
             )
             .forEach(context.notificationManager::createNotificationChannelGroup)
 

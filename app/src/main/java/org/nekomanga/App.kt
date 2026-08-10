@@ -31,7 +31,6 @@ import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.coil.coilImageLoader
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import org.nekomanga.presentation.screens.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.main.DeepLinks
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -52,6 +51,7 @@ import org.nekomanga.logging.CrashReportingTree
 import org.nekomanga.logging.DebugReportingTree
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.screens.feed.FeedViewModel
+import org.nekomanga.presentation.screens.library.LibraryViewModel
 import tachiyomi.core.util.system.WebViewUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.injectLazy

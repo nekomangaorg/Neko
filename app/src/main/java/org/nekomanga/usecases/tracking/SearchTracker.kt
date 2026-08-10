@@ -19,36 +19,34 @@ class SearchTracker(private val trackManager: TrackManager = Injekt.get()) {
         service: TrackServiceItem,
         manga: Manga,
         previouslyTracker: Boolean,
-    ): Flow<TrackingConstants.TrackSearchResult> =
-        flow {
-                emit(TrackingConstants.TrackSearchResult.Loading)
+    ): Flow<TrackingConstants.TrackSearchResult> = flow {
+        emit(TrackingConstants.TrackSearchResult.Loading)
 
-                val id = trackManager.getIdFromManga(service, manga) ?: ""
+        val id = trackManager.getIdFromManga(service, manga) ?: ""
 
-                val trackService =
-                    trackManager.getService(service.id)
-                        ?: throw IllegalStateException("Service not found")
-                val results = trackService.search(title, manga, previouslyTracker)
-                emit(
-                    when (results.isEmpty()) {
-                        true -> TrackingConstants.TrackSearchResult.NoResult
-                        false ->
-                            TrackingConstants.TrackSearchResult.Success(
-                                results.map { it.toTrackSearchItem() }.toList(),
-                                hasMatchingId = id.isNotEmpty(),
-                            )
-                    }
-                )
-            }
-            .catch {
-                TimberKt.e(it) { "error searching tracker" }
-                emit(
-                    TrackingConstants.TrackSearchResult.Error(
-                        it.message ?: "Error searching tracker",
-                        service.nameRes,
+        val trackService =
+            trackManager.getService(service.id) ?: throw IllegalStateException("Service not found")
+        val results = trackService.search(title, manga, previouslyTracker)
+        emit(
+            when (results.isEmpty()) {
+                true -> TrackingConstants.TrackSearchResult.NoResult
+                false ->
+                    TrackingConstants.TrackSearchResult.Success(
+                        results.map { it.toTrackSearchItem() }.toList(),
+                        hasMatchingId = id.isNotEmpty(),
                     )
-                )
             }
+        )
+    }
+        .catch {
+            TimberKt.e(it) { "error searching tracker" }
+            emit(
+                TrackingConstants.TrackSearchResult.Error(
+                    it.message ?: "Error searching tracker",
+                    service.nameRes,
+                )
+            )
+        }
 
     suspend fun byId(
         id: String,

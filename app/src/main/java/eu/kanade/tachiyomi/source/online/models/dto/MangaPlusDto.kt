@@ -4,8 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
-class
-MangaPlusResponse(
+class MangaPlusResponse(
     @ProtoNumber(1) val success: SuccessResult? = null,
     @ProtoNumber(2) val error: ErrorResult? = null,
 )
@@ -22,10 +21,7 @@ class Popup(
     @ProtoNumber(2) val body: String = "",
 )
 
-@Serializable
-class SuccessResult(
-    @ProtoNumber(10) val mangaViewer: MangaViewer? = null,
-)
+@Serializable class SuccessResult(@ProtoNumber(10) val mangaViewer: MangaViewer? = null)
 
 @Serializable
 class MangaViewer(
@@ -34,10 +30,7 @@ class MangaViewer(
     @ProtoNumber(19) val viewToken: String? = null,
 )
 
-@Serializable
-class MangaPlusPage(
-    @ProtoNumber(1) val mangaPage: MangaPage? = null,
-)
+@Serializable class MangaPlusPage(@ProtoNumber(1) val mangaPage: MangaPage? = null)
 
 @Serializable
 class MangaPage(

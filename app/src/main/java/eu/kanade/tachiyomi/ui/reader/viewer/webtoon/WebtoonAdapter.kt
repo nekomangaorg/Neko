@@ -54,7 +54,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
                         if (accumulatedHeight >= screenHeight) break
                     }
                 }
-                newItems.addAll(prevPages.takeLast(maxOf(2,pagesToTake)))
+                newItems.addAll(prevPages.takeLast(maxOf(2, pagesToTake)))
             }
         }
 

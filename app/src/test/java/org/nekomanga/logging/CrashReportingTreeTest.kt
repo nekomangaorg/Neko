@@ -25,10 +25,11 @@ class CrashReportingTreeTest {
 
         every { FirebaseCrashlytics.getInstance() } returns mockCrashlytics
         every { Log.println(any(), any(), any()) } returns 0
-        every { Log.getStackTraceString(any()) } answers {
-            val throwable = firstArg<Throwable>()
-            throwable.message ?: "exception"
-        }
+        every { Log.getStackTraceString(any()) } answers
+            {
+                val throwable = firstArg<Throwable>()
+                throwable.message ?: "exception"
+            }
     }
 
     @After

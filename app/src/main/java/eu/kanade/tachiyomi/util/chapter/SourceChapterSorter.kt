@@ -75,24 +75,22 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
 
 // Adapted from https://stackoverflow.com/a/69041133
 fun <T> List<List<T>>.mergeSorted(comparator: Comparator<T>): List<T> {
-    val iteratorToCurrentValues =
-        map { it.reversed().iterator() }
-            .filter { it.hasNext() }
-            .associateWith { it.next() }
-            .toMutableMap()
+    val iteratorToCurrentValues = map {
+        it.reversed().iterator()
+    }.filter { it.hasNext() }.associateWith { it.next() }.toMutableMap()
 
     val c: Comparator<Map.Entry<Iterator<T>, T>> = Comparator.comparing({ it.value }, comparator)
 
     return sequence {
-            while (iteratorToCurrentValues.isNotEmpty()) {
-                val smallestEntry = iteratorToCurrentValues.minWithOrNull(c)!!
+        while (iteratorToCurrentValues.isNotEmpty()) {
+            val smallestEntry = iteratorToCurrentValues.minWithOrNull(c)!!
 
-                yield(smallestEntry.value)
+            yield(smallestEntry.value)
 
-                if (!smallestEntry.key.hasNext()) iteratorToCurrentValues.remove(smallestEntry.key)
-                else iteratorToCurrentValues[smallestEntry.key] = smallestEntry.key.next()
-            }
+            if (!smallestEntry.key.hasNext()) iteratorToCurrentValues.remove(smallestEntry.key)
+            else iteratorToCurrentValues[smallestEntry.key] = smallestEntry.key.next()
         }
+    }
         .toList()
         .reversed()
 }
@@ -105,7 +103,11 @@ fun getChapterNum(chapter: SChapter): Float? {
             txt.subStringFloatOrNull("Ch.")
                 ?: txt.subStringFloatOrNull("Chp.")
                 ?: txt.subStringFloatOrNull("Chapter")
-                ?: txt.substringBeforeLast(".cbz").substringBeforeLast(".zip").split(" - ").getOrNull(1)?.toFloatOrNull()
+                ?: txt.substringBeforeLast(".cbz")
+                    .substringBeforeLast(".zip")
+                    .split(" - ")
+                    .getOrNull(1)
+                    ?.toFloatOrNull()
         }
     }
 }

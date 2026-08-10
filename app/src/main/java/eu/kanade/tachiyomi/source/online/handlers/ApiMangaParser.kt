@@ -115,7 +115,8 @@ class ApiMangaParser {
                         .map { tag -> tag?.prettyPrint }
                 )
                 add(contentRating)
-            }.filterNotNull()
+            }
+                .filterNotNull()
 
             manga.genre = genres.joinToString(", ")
 
@@ -143,21 +144,21 @@ class ApiMangaParser {
         uploaderMap: Map<String, String>,
     ): Result<List<SChapter>, ResultError> {
         return runCatching {
-                Ok(
-                    chapterListResponse
-                        .asSequence()
-                        .mapNotNull {
-                            mapChapter(
-                                it,
-                                lastChapterNumber,
-                                lastVolumeNumber,
-                                groupMap,
-                                uploaderMap,
-                            )
-                        }
-                        .toList()
-                )
-            }
+            Ok(
+                chapterListResponse
+                    .asSequence()
+                    .mapNotNull {
+                        mapChapter(
+                            it,
+                            lastChapterNumber,
+                            lastVolumeNumber,
+                            groupMap,
+                            uploaderMap,
+                        )
+                    }
+                    .toList()
+            )
+        }
             .getOrElse {
                 val msg = "Exception parsing chapters"
                 TimberKt.e(it) { msg }

@@ -23,8 +23,7 @@ class DownloadSettingsViewModel : ViewModel() {
 
     val categoryRepository: CategoryRepository by injectLazy()
 
-    private val _allCategories =
-        MutableStateFlow<List<CategoryItem>>((listOf()))
+    private val _allCategories = MutableStateFlow<List<CategoryItem>>((listOf()))
     val allCategories = _allCategories.asStateFlow()
 
     init {

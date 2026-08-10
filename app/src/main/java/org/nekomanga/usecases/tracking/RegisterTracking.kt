@@ -18,14 +18,14 @@ class RegisterTracking(
         mangaId: Long,
     ): TrackingUpdate {
         return runCatching {
-                val trackItem = trackAndService.track.copy(mangaId = mangaId)
+            val trackItem = trackAndService.track.copy(mangaId = mangaId)
 
-                val track =
-                    trackManager.getService(trackAndService.service.id)?.bind(trackItem.toDbTrack())
-                        ?: throw IllegalStateException("Service not found")
-                trackRepository.insertTrack(track)
-                TrackingUpdate.Success
-            }
+            val track =
+                trackManager.getService(trackAndService.service.id)?.bind(trackItem.toDbTrack())
+                    ?: throw IllegalStateException("Service not found")
+            trackRepository.insertTrack(track)
+            TrackingUpdate.Success
+        }
             .getOrElse { exception ->
                 TimberKt.e(exception) { "Error registering tracker" }
                 TrackingUpdate.Error("Error registering tracker", exception)

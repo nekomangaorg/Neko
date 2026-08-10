@@ -8,7 +8,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.Toast
-import org.nekomanga.constants.Constants
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +32,7 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.webview.WebviewTopBar
 import tachiyomi.core.util.system.WebViewUtil
@@ -177,8 +177,10 @@ fun WebViewWrapper(
                         WebView.setWebContentsDebuggingEnabled(true)
                     }
 
-                    val userAgent = headers.entries.firstOrNull { it.key.equals("user-agent", ignoreCase = true) }?.value
-                        ?: Constants.USER_AGENT
+                    val userAgent =
+                        headers.entries
+                            .firstOrNull { it.key.equals("user-agent", ignoreCase = true) }
+                            ?.value ?: Constants.USER_AGENT
                     webView.settings.userAgentString = userAgent
                 },
                 client = webClient,

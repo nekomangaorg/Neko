@@ -42,8 +42,7 @@ object StatsConstants {
     data class DetailedTagState(
         val totalReadDuration: Long = 0L,
         val totalChapters: Int = 0,
-        val sortedTagPairs: List<Pair<String, List<DetailedStatManga>>> =
-            listOf(),
+        val sortedTagPairs: List<Pair<String, List<DetailedStatManga>>> = listOf(),
     )
 
     @Immutable
@@ -76,8 +75,7 @@ object StatsConstants {
         object NoResults : ScreenState()
     }
 
-    @Immutable
-    data class StatusDistribution(val status: MangaStatus, val distribution: Int)
+    @Immutable data class StatusDistribution(val status: MangaStatus, val distribution: Int)
 
     @Immutable
     data class ContentRatingDistribution(val rating: MangaContentRating, val distribution: Int)

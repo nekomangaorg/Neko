@@ -66,7 +66,10 @@ fun SearchTopAppBar(
     FlexibleTopBar(
         scrollBehavior = scrollBehavior,
         colors =
-            FlexibleTopBarColors(containerColor = color, scrolledContainerColor = Color.Transparent),
+            FlexibleTopBarColors(
+                containerColor = color,
+                scrolledContainerColor = Color.Transparent,
+            ),
     ) {
         Box(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.small)

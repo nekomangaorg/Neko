@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
@@ -502,8 +502,7 @@ class FeedViewModel() : ViewModel() {
                                 _historyScreenPagingState.update {
                                     it.copy(
                                         searchQuery = searchQuery,
-                                        searchHistoryFeedMangaList =
-                                            (results.second).toList(),
+                                        searchHistoryFeedMangaList = (results.second).toList(),
                                     )
                                 }
                             }
@@ -520,8 +519,7 @@ class FeedViewModel() : ViewModel() {
                                 _updatesScreenPagingState.update {
                                     it.copy(
                                         searchQuery = searchQuery,
-                                        searchUpdatesFeedMangaList =
-                                            (results.second).toList(),
+                                        searchUpdatesFeedMangaList = (results.second).toList(),
                                     )
                                 }
                             }
@@ -810,9 +808,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (searchHistoryUpdated) {
                 _historyScreenPagingState.update {
-                    it.copy(
-                        searchHistoryFeedMangaList = searchHistoryFeedMangaList.toList()
-                    )
+                    it.copy(searchHistoryFeedMangaList = searchHistoryFeedMangaList.toList())
                 }
             }
         }
@@ -824,9 +820,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (searchUpdatesUpdated) {
                 _updatesScreenPagingState.update {
-                    it.copy(
-                        searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toList()
-                    )
+                    it.copy(searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toList())
                 }
             }
         }
@@ -907,9 +901,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (searchHistoryFeedUpdated) {
                 _historyScreenPagingState.update {
-                    it.copy(
-                        searchHistoryFeedMangaList = searchHistoryFeedMangaList.toList()
-                    )
+                    it.copy(searchHistoryFeedMangaList = searchHistoryFeedMangaList.toList())
                 }
             }
         }
@@ -923,9 +915,7 @@ class FeedViewModel() : ViewModel() {
                 )
             if (searchUpdatesFeedUpdated) {
                 _updatesScreenPagingState.update {
-                    it.copy(
-                        searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toList()
-                    )
+                    it.copy(searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toList())
                 }
             }
         }

@@ -1,11 +1,11 @@
 package org.nekomanga.usecases.library
 
-import org.nekomanga.presentation.screens.library.LibraryCategoryItem
-import org.nekomanga.presentation.screens.library.LibraryGroup
-import org.nekomanga.presentation.screens.library.LibrarySort
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.presentation.screens.library.LibraryCategoryItem
+import org.nekomanga.presentation.screens.library.LibraryGroup
+import org.nekomanga.presentation.screens.library.LibrarySort
 
 class GroupLibraryMangaUseCase {
 
@@ -79,8 +79,7 @@ class GroupLibraryMangaUseCase {
                 isDynamic = true,
             )
 
-        val distinctList =
-            libraryMangaList.distinctBy { it.displayManga.mangaId }.toList()
+        val distinctList = libraryMangaList.distinctBy { it.displayManga.mangaId }.toList()
 
         return listOf(
             LibraryCategoryItem(categoryItem = allCategoryItem, libraryItems = distinctList)

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material3.Icon
@@ -17,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -67,12 +67,12 @@ import org.nekomanga.presentation.screens.feed.UpdatesScreenPagingState
 import org.nekomanga.presentation.theme.Size
 
 /**
- * FeedScreen displays the user's customized feeds, including reading history, recent updates,
- * and summaries of newly added or continue reading items.
+ * FeedScreen displays the user's customized feeds, including reading history, recent updates, and
+ * summaries of newly added or continue reading items.
  *
  * This screen-level Composable is responsive to [WindowSizeClass]. On expanded screens
- * (tablets/foldables), the layout limits the maximum width of the feed lists and grids to
- * 800.dp and centers it, preventing UI stretching and delivering a premium, polished user experience.
+ * (tablets/foldables), the layout limits the maximum width of the feed lists and grids to 800.dp
+ * and centers it, preventing UI stretching and delivering a premium, polished user experience.
  *
  * @param navigationRail Optional sidebar navigation rail shown on larger screens.
  * @param bottomBar Optional bottom navigation bar shown on compact screens.
@@ -80,7 +80,8 @@ import org.nekomanga.presentation.theme.Size
  * @param mainDropdown Main application drop down menu configuration.
  * @param mainDropdownShowing Boolean state representing if the dropdown menu is visible.
  * @param openManga Callback triggered when a manga item is clicked.
- * @param windowSizeClass The screen's window size class constraints used to determine adaptive layouts.
+ * @param windowSizeClass The screen's window size class constraints used to determine adaptive
+ *   layouts.
  */
 @Composable
 fun FeedScreen(

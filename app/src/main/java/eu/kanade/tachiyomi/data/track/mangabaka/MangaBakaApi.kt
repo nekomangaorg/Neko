@@ -69,25 +69,24 @@ class MangaBakaApi(
     suspend fun addLibManga(track: Track): Track {
         return withIOContext {
             val url = "$LIBRARY_API_URL/${track.media_id}"
-            val body =
-                buildJsonObject {
-                        //  put("is_private", track.private)
-                        put("state", track.toApiStatus())
-                        if (track.last_chapter_read > 0.0) {
-                            put("progress_chapter", track.last_chapter_read)
-                        }
-                        if (track.score > 0) {
-                            put("rating", track.score.toInt().coerceIn(0, 100))
-                        }
-                        if (track.started_reading_date > 0) {
-                            put("start_date", track.started_reading_date.toLocalDate().toString())
-                        }
-                        if (track.finished_reading_date > 0) {
-                            put("finish_date", track.finished_reading_date.toLocalDate().toString())
-                        }
-                    }
-                    .toString()
-                    .toRequestBody()
+            val body = buildJsonObject {
+                //  put("is_private", track.private)
+                put("state", track.toApiStatus())
+                if (track.last_chapter_read > 0.0) {
+                    put("progress_chapter", track.last_chapter_read)
+                }
+                if (track.score > 0) {
+                    put("rating", track.score.toInt().coerceIn(0, 100))
+                }
+                if (track.started_reading_date > 0) {
+                    put("start_date", track.started_reading_date.toLocalDate().toString())
+                }
+                if (track.finished_reading_date > 0) {
+                    put("finish_date", track.finished_reading_date.toLocalDate().toString())
+                }
+            }
+                .toString()
+                .toRequestBody()
 
             authClient
                 .newCall(POST(url, body = body, headers = headersOf("Content-Type", APP_JSON)))
@@ -146,33 +145,32 @@ class MangaBakaApi(
     suspend fun updateLibManga(track: Track): Track {
         return withIOContext {
             val url = "$LIBRARY_API_URL/${track.media_id}"
-            val body =
-                buildJsonObject {
-                        put("state", track.toApiStatus())
-                        // put("is_private", track.private)
-                        if (track.last_chapter_read > 0.0) {
-                            put("progress_chapter", track.last_chapter_read)
-                        } else {
-                            put("progress_chapter", null)
-                        }
-                        if (track.score > 0) {
-                            put("rating", track.score.toInt().coerceIn(0, 100))
-                        } else {
-                            put("rating", null)
-                        }
-                        if (track.started_reading_date > 0) {
-                            put("start_date", track.started_reading_date.toLocalDate().toString())
-                        } else {
-                            put("start_date", null)
-                        }
-                        if (track.finished_reading_date > 0) {
-                            put("finish_date", track.finished_reading_date.toLocalDate().toString())
-                        } else {
-                            put("finish_date", null)
-                        }
-                    }
-                    .toString()
-                    .toRequestBody()
+            val body = buildJsonObject {
+                put("state", track.toApiStatus())
+                // put("is_private", track.private)
+                if (track.last_chapter_read > 0.0) {
+                    put("progress_chapter", track.last_chapter_read)
+                } else {
+                    put("progress_chapter", null)
+                }
+                if (track.score > 0) {
+                    put("rating", track.score.toInt().coerceIn(0, 100))
+                } else {
+                    put("rating", null)
+                }
+                if (track.started_reading_date > 0) {
+                    put("start_date", track.started_reading_date.toLocalDate().toString())
+                } else {
+                    put("start_date", null)
+                }
+                if (track.finished_reading_date > 0) {
+                    put("finish_date", track.finished_reading_date.toLocalDate().toString())
+                } else {
+                    put("finish_date", null)
+                }
+            }
+                .toString()
+                .toRequestBody()
 
             authClient
                 .newCall(PUT(url, body = body, headers = headersOf("Content-Type", APP_JSON)))

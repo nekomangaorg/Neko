@@ -187,7 +187,8 @@ class ChapterItemFilter(
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
 
         val sources = SourceManager.mergeSourceNames + MdConstants.name
-        val scanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == ScanlatorFilterOption.ALL
+        val scanlatorMatchAll =
+            libraryPreferences.chapterScanlatorFilterOption().get() == ScanlatorFilterOption.ALL
 
         return chapters.filterNot { chapterItem ->
             val scanlators = ChapterUtil.getScanlators(chapterItem.chapter.scanlator)

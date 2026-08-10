@@ -1,7 +1,7 @@
 package org.nekomanga.usecases.library
 
-import org.nekomanga.presentation.screens.library.LibraryFilters
 import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.presentation.screens.library.LibraryFilters
 
 class FilterLibraryMangaUseCase {
     operator fun invoke(manga: LibraryMangaItem, filters: LibraryFilters): Boolean {

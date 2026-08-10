@@ -202,9 +202,7 @@ open class MangaDex : HttpSource() {
                         networkServices.service.getSeasonalList().mapSuccess { id }.getOrNull()
                             ?: return@async Ok(null)
                     fetchList(id).map { listResults ->
-                        listResults.copy(
-                            sourceManga = listResults.sourceManga.shuffled().toList()
-                        )
+                        listResults.copy(sourceManga = listResults.sourceManga.shuffled().toList())
                     }
                 }
 
@@ -233,8 +231,7 @@ open class MangaDex : HttpSource() {
                         Ok(
                             ListResults(
                                 displayScreenType = DisplayScreenType.PopularNewTitles,
-                                sourceManga =
-                                    mangaListPage.sourceManga.shuffled().toList(),
+                                sourceManga = mangaListPage.sourceManga.shuffled().toList(),
                             )
                         )
                     }

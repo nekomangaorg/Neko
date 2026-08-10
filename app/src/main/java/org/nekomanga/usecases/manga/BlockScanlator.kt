@@ -33,8 +33,7 @@ class BlockScanlator(
                 if (uploaderImpl == null) {
                     scope.launch { mangaUpdateCoordinator.updateUploader(name) }
                 }
-                val blockedUploaders =
-                    mangaDexPreferences.blockedUploaders().get().toMutableSet()
+                val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toMutableSet()
                 blockedUploaders.add(name)
                 mangaDexPreferences.blockedUploaders().set(blockedUploaders)
             }
@@ -45,8 +44,7 @@ class BlockScanlator(
         when (blockType) {
             MangaConstants.BlockType.Group -> {
                 scanlatorGroupRepository.deleteScanlatorGroup(name)
-                val allBlockedGroups =
-                    mangaDexPreferences.blockedGroups().get().toMutableSet()
+                val allBlockedGroups = mangaDexPreferences.blockedGroups().get().toMutableSet()
                 allBlockedGroups.remove(name)
                 mangaDexPreferences.blockedGroups().set(allBlockedGroups)
             }

@@ -42,11 +42,7 @@ class MangaPlusHandler {
     private fun sessionTokenIntercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         if (request.url.host != API_URL.toHttpUrl().host) return chain.proceed(request)
-        return chain.proceed(
-            request.newBuilder()
-                .header("SESSION-TOKEN", session)
-                .build(),
-        )
+        return chain.proceed(request.newBuilder().header("SESSION-TOKEN", session).build())
     }
 
     suspend fun fetchPageList(chapterId: String): List<Page> {

@@ -62,7 +62,9 @@ class TrackingSettingsViewModel : ViewModel() {
         launchTrackerUpdates(
             tracker = trackManager.aniList,
             updateUsername = { username -> _state.update { it.copy(anilistUsername = username) } },
-            updateLoggedIn = { loggedIn -> _state.update { it.copy(aniListIsLoggedIn = loggedIn) } },
+            updateLoggedIn = { loggedIn ->
+                _state.update { it.copy(aniListIsLoggedIn = loggedIn) }
+            },
         )
 
         launchTrackerUpdates(

@@ -102,10 +102,7 @@ class WebtoonConfig(
             )
         readerPreferences.splitTallImagesReader().apply {
             register({ splitTallPages = it })
-            changes()
-                .drop(1)
-                .onEach { reloadViewerListener?.invoke() }
-                .launchIn(scope)
+            changes().drop(1).onEach { reloadViewerListener?.invoke() }.launchIn(scope)
         }
         readerPreferences.webtoonReaderHideThreshold().register({ menuThreshold = it.threshold })
         readerPreferences

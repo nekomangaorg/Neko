@@ -4,11 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.system.launchIO
-import java.util.Date
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +20,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.manga.MangaUseCases
 import uy.kohesive.injekt.Injekt
@@ -104,9 +103,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
 
                 val list = repo.fetchSimilar(mangaUUID, forceRefresh)
                 val allDisplayManga =
-                    list
-                        .associate { group -> group.type to group.manga.toList() }
-                        .toMap()
+                    list.associate { group -> group.type to group.manga.toList() }.toMap()
                 _similarScreenState.update {
                     it.copy(
                         isRefreshing = false,
@@ -191,9 +188,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
         viewModelScope.launchIO {
             categoryUseCases.modifyCategory.addNewCategory(newCategory)
             _similarScreenState.update {
-                it.copy(
-                    categories = categoryUseCases.getCategories.get()
-                )
+                it.copy(categories = categoryUseCases.getCategories.get())
             }
         }
     }

@@ -3,11 +3,9 @@ package eu.kanade.tachiyomi.util.manga
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
-import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
@@ -21,6 +19,7 @@ import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
+import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 
 suspend fun Manga.shouldDownloadNewChapters(
     categoryRepository: CategoryRepository,
@@ -270,9 +269,7 @@ suspend fun List<HomePageManga>.resyncHomePageManga(
     return this.map { homePageManga ->
             homePageManga.copy(
                 displayManga =
-                    homePageManga.displayManga
-                        .resyncDisplayManga(mangaRepository)
-                        .toList()
+                    homePageManga.displayManga.resyncDisplayManga(mangaRepository).toList()
             )
         }
         .toList()

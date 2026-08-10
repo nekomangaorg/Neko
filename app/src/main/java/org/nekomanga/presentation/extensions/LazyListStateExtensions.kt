@@ -8,21 +8,21 @@ import androidx.compose.runtime.remember
 @Composable
 fun LazyListState.isScrolledToStart(): Boolean {
     return remember {
-            derivedStateOf {
-                val firstItem = layoutInfo.visibleItemsInfo.firstOrNull()
-                firstItem == null || firstItem.offset == layoutInfo.viewportStartOffset
-            }
+        derivedStateOf {
+            val firstItem = layoutInfo.visibleItemsInfo.firstOrNull()
+            firstItem == null || firstItem.offset == layoutInfo.viewportStartOffset
         }
+    }
         .value
 }
 
 @Composable
 fun LazyListState.isScrolledToEnd(): Boolean {
     return remember {
-            derivedStateOf {
-                val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                lastItem == null || lastItem.size + lastItem.offset <= layoutInfo.viewportEndOffset
-            }
+        derivedStateOf {
+            val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
+            lastItem == null || lastItem.size + lastItem.offset <= layoutInfo.viewportEndOffset
         }
+    }
         .value
 }

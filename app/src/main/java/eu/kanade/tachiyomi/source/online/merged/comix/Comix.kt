@@ -50,9 +50,10 @@ class Comix : ReducedHttpSource() {
                 val response = chain.proceed(request)
                 if (response.code != 404) return@addInterceptor response
                 val url = request.url.toString()
-                val fallbacks = listOf("/i5/", "/si/", "/i/", "/sii/", "/ii/")
-                    .map { url.replaceFirst(SCRAMBLE_PATH_FALLBACK_REGEX, it) }
-                    .filter { it != url }
+                val fallbacks =
+                    listOf("/i5/", "/si/", "/i/", "/sii/", "/ii/")
+                        .map { url.replaceFirst(SCRAMBLE_PATH_FALLBACK_REGEX, it) }
+                        .filter { it != url }
                 if (fallbacks.isEmpty()) return@addInterceptor response
                 var lastResponse = response
                 for (fallbackUrl in fallbacks) {
@@ -65,11 +66,12 @@ class Comix : ReducedHttpSource() {
             .rateLimit(5)
             .build()
 
-    override val headers = Headers.Builder()
-        .add("Referer", "$baseUrl/")
-        .add("Origin", baseUrl)
-        .add("Accept", "*/*")
-        .build()
+    override val headers =
+        Headers.Builder()
+            .add("Referer", "$baseUrl/")
+            .add("Origin", baseUrl)
+            .add("Accept", "*/*")
+            .build()
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -78,22 +80,31 @@ class Comix : ReducedHttpSource() {
     }
 
     override suspend fun searchManga(query: String): List<SManga> {
-        val url = baseUrl.toHttpUrl().newBuilder()
-            .addPathSegment("browse")
-            .addQueryParameter("q", query.trim())
-            .addQueryParameter("sort", "relevance:desc")
-            .addQueryParameter("page", "1")
-            .build()
+        val url =
+            baseUrl
+                .toHttpUrl()
+                .newBuilder()
+                .addPathSegment("browse")
+                .addQueryParameter("q", query.trim())
+                .addQueryParameter("sort", "relevance:desc")
+                .addQueryParameter("page", "1")
+                .build()
 
         val response = client.newCall(GET(url.toString(), headers)).await()
         if (!response.isSuccessful) {
             response.close()
             throw Exception("HTTP error ${response.code}")
         }
-        return fetchMangaListFromBrowse(Request.Builder().url(url).headers(headers).build(), query.trim())
+        return fetchMangaListFromBrowse(
+            Request.Builder().url(url).headers(headers).build(),
+            query.trim(),
+        )
     }
 
-    private suspend fun fetchMangaListFromBrowse(request: Request, expectedKeyword: String = ""): List<SManga> {
+    private suspend fun fetchMangaListFromBrowse(
+        request: Request,
+        expectedKeyword: String = "",
+    ): List<SManga> {
         val response = client.newCall(request).await()
         if (!response.isSuccessful) {
             response.close()
@@ -104,13 +115,16 @@ class Comix : ReducedHttpSource() {
         response.close()
 
         // 1. Try static extraction first via script#initial-data
-        val searchResponse = extractBrowseResponse(document) ?: run {
-            // 2. Fall back to WebView interception if static parsing fails
-            val encodedKeyword = org.json.JSONObject.quote(expectedKeyword)
-            val payload = runInWebView(
-                document = document,
-                buildScript = { interfaceName ->
-                    """
+        val searchResponse =
+            extractBrowseResponse(document)
+                ?: run {
+                    // 2. Fall back to WebView interception if static parsing fails
+                    val encodedKeyword = org.json.JSONObject.quote(expectedKeyword)
+                    val payload =
+                        runInWebView(
+                            document = document,
+                            buildScript = { interfaceName ->
+                                """
                 (function () {
                     const payloadKey = '__comixBrowsePayload';
                     const expectedKeyword = $encodedKeyword;
@@ -205,22 +219,23 @@ class Comix : ReducedHttpSource() {
                     JSON.parse = proxiedParse;
                     return window[payloadKey] || null;
                 })();
-                """.trimIndent()
+                """
+                                    .trimIndent()
+                            },
+                        )
+                    json.decodeFromString<SearchResponse>(payload)
                 }
-            )
-            json.decodeFromString<SearchResponse>(payload)
-        }
 
         return searchResponse.result?.items?.map { it.toSManga() } ?: emptyList()
     }
 
-    /**
-     * Extracts pre-rendered SSR query data directly from static HTML DOM
-     */
+    /** Extracts pre-rendered SSR query data directly from static HTML DOM */
     private fun extractBrowseResponse(document: org.jsoup.nodes.Document): SearchResponse? {
         val initialData = document.selectFirst("script#initial-data")?.data() ?: return null
         return runCatching {
-            val root = json.parseToJsonElement(initialData) as? kotlinx.serialization.json.JsonObject ?: return null
+            val root =
+                json.parseToJsonElement(initialData) as? kotlinx.serialization.json.JsonObject
+                    ?: return null
             val queries = root["queries"] as? kotlinx.serialization.json.JsonObject ?: return null
 
             queries.values.firstNotNullOfOrNull { value ->
@@ -228,11 +243,12 @@ class Comix : ReducedHttpSource() {
                     .getOrNull()
                     .takeIf { (it?.result?.items?.size ?: 0) > 0 }
             }
-        }.getOrNull()
+        }
+            .getOrNull()
     }
 
     override suspend fun fetchChapters(
-        mangaUrl: String,
+        mangaUrl: String
     ): Result<List<SChapterStatusPair>, ResultError> {
         val mangaSlug = mangaUrl.removePrefix("/")
 
@@ -246,8 +262,9 @@ class Comix : ReducedHttpSource() {
             val document = response.asJsoup()
             response.close()
 
-            val payload = runInWebView(document) { interfaceName ->
-                """
+            val payload =
+                runInWebView(document) { interfaceName ->
+                    """
             (function () {
                 const payloadKey = '__comixChapterPayload';
                 if (window[payloadKey]?.installed) return null;
@@ -343,8 +360,9 @@ class Comix : ReducedHttpSource() {
 
                 return null;
             })();
-            """.trimIndent()
-            }
+            """
+                        .trimIndent()
+                }
 
             val allChapters = json.decodeFromString<List<Chapter>>(payload)
             return Ok(allChapters.map { it.toSChapter(mangaSlug) to false })
@@ -366,8 +384,9 @@ class Comix : ReducedHttpSource() {
         val document = response.asJsoup()
         response.close()
 
-        val payload = runInWebView(document) { interfaceName ->
-            """
+        val payload =
+            runInWebView(document) { interfaceName ->
+                """
         (function () {
             const payloadKey = '__comixPagePayload';
             const capture = parsed => {
@@ -404,28 +423,37 @@ class Comix : ReducedHttpSource() {
             JSON.parse = proxiedParse;
             return window[payloadKey] || null;
         })();
-        """.trimIndent()
-        }
+        """
+                    .trimIndent()
+            }
 
         val pages = json.decodeFromString<ChapterResponse>(payload).result?.pages
         val base = pages?.baseUrl?.trimEnd('/') ?: return emptyList()
 
         return pages.items.mapIndexed { index, img ->
-            val full = if (img.url.startsWith("http")) img.url else "$base/${img.url.trimStart('/')}"
+            val full =
+                if (img.url.startsWith("http")) img.url else "$base/${img.url.trimStart('/')}"
 
             // V3 grid-scramble vs. Legacy byte-XOR detection
             val isV3 = img.s == 1 || full.contains("?v3")
             val isLegacyScramble = !isV3 && (index + 1) % 4 == 0
 
-            val url = when {
-                isV3 -> full.toHttpUrl().newBuilder().apply {
-                    if (!full.toHttpUrl().queryParameterNames.contains("v3")) {
-                        addQueryParameter("v3", null)
-                    }
-                }.build().toString()
-                isLegacyScramble -> "$full#scrambled"
-                else -> full
-            }
+            val url =
+                when {
+                    isV3 ->
+                        full
+                            .toHttpUrl()
+                            .newBuilder()
+                            .apply {
+                                if (!full.toHttpUrl().queryParameterNames.contains("v3")) {
+                                    addQueryParameter("v3", null)
+                                }
+                            }
+                            .build()
+                            .toString()
+                    isLegacyScramble -> "$full#scrambled"
+                    else -> full
+                }
 
             Page(index, imageUrl = url)
         }
@@ -440,17 +468,12 @@ class Comix : ReducedHttpSource() {
         val isLegacyScramble = isScrambled && !isV3
         val baseUrlHost = baseUrl.toHttpUrl().host
 
-        val requestHeaders = if (
-            imageHost.isNotEmpty() &&
-            !imageHost.endsWith(baseUrlHost) &&
-            !isLegacyScramble
-        ) {
-            headers.newBuilder()
-                .removeAll("Origin")
-                .build()
-        } else {
-            headers
-        }
+        val requestHeaders =
+            if (imageHost.isNotEmpty() && !imageHost.endsWith(baseUrlHost) && !isLegacyScramble) {
+                headers.newBuilder().removeAll("Origin").build()
+            } else {
+                headers
+            }
 
         return GET(urlWithoutFragment, requestHeaders)
     }
@@ -470,9 +493,7 @@ class Comix : ReducedHttpSource() {
         val handler = Handler(Looper.getMainLooper())
         val jsInterface = WebViewPayloadInterface()
         val pool = ('a'..'z') + ('A'..'Z')
-        val interfaceName = (1..(10..20).random())
-            .map { pool.random() }
-            .joinToString("")
+        val interfaceName = (1..(10..20).random()).map { pool.random() }.joinToString("")
         val script = buildScript(interfaceName)
         val emptyResponse = WebResourceResponse("text/plain", "utf-8", Buffer().inputStream())
         val active = java.util.concurrent.atomic.AtomicBoolean(true)
@@ -508,58 +529,68 @@ class Comix : ReducedHttpSource() {
 
                 view.addJavascriptInterface(jsInterface, interfaceName)
 
-                view.webViewClient = object : WebViewClient() {
-                    override fun shouldInterceptRequest(
-                        view: WebView,
-                        request: WebResourceRequest,
-                    ): WebResourceResponse? {
-                        val requestUrl = request.url?.toString()?.toHttpUrlOrNull()
-                            ?: return super.shouldInterceptRequest(view, request)
+                view.webViewClient =
+                    object : WebViewClient() {
+                        override fun shouldInterceptRequest(
+                            view: WebView,
+                            request: WebResourceRequest,
+                        ): WebResourceResponse? {
+                            val requestUrl =
+                                request.url?.toString()?.toHttpUrlOrNull()
+                                    ?: return super.shouldInterceptRequest(view, request)
 
-                        val baseUrlHost = baseUrl.toHttpUrl().host
-                        val allowedHost = requestUrl.host.endsWith(baseUrlHost) ||
-                            requestUrl.host.endsWith(".comix.to") ||
-                            requestUrl.host == "comix.to" ||
-                            requestUrl.host == "comix.ws" ||
-                            requestUrl.host == "challenges.cloudflare.com"
+                            val baseUrlHost = baseUrl.toHttpUrl().host
+                            val allowedHost =
+                                requestUrl.host.endsWith(baseUrlHost) ||
+                                    requestUrl.host.endsWith(".comix.to") ||
+                                    requestUrl.host == "comix.to" ||
+                                    requestUrl.host == "comix.ws" ||
+                                    requestUrl.host == "challenges.cloudflare.com"
 
-                        if (!allowedHost) return emptyResponse
-                        return super.shouldInterceptRequest(view, request)
+                            if (!allowedHost) return emptyResponse
+                            return super.shouldInterceptRequest(view, request)
+                        }
+
+                        override fun onPageStarted(
+                            view: WebView,
+                            url: String?,
+                            favicon: android.graphics.Bitmap?,
+                        ) {
+                            super.onPageStarted(view, url, favicon)
+                            if (url != null) lastUrl = url
+                            if (active.get() && jsInterface.payload == null) {
+                                runCatching { view.evaluateJavascript(script, null) }
+                            }
+                        }
+
+                        override fun onPageFinished(view: WebView, url: String?) {
+                            super.onPageFinished(view, url)
+                            if (url != null) lastUrl = url
+                            if (active.get() && jsInterface.payload == null) {
+                                runCatching { view.evaluateJavascript(script, null) }
+                            }
+                        }
                     }
 
-                    override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
-                        super.onPageStarted(view, url, favicon)
-                        if (url != null) lastUrl = url
-                        if (active.get() && jsInterface.payload == null) {
+                val retry =
+                    object : Runnable {
+                        override fun run() {
+                            if (!active.get() || jsInterface.payload != null) return
                             runCatching { view.evaluateJavascript(script, null) }
+                            if (active.get() && jsInterface.payload == null) {
+                                handler.postDelayed(this, 100L)
+                            }
                         }
                     }
-
-                    override fun onPageFinished(view: WebView, url: String?) {
-                        super.onPageFinished(view, url)
-                        if (url != null) lastUrl = url
-                        if (active.get() && jsInterface.payload == null) {
-                            runCatching { view.evaluateJavascript(script, null) }
-                        }
-                    }
-                }
-
-                val retry = object : Runnable {
-                    override fun run() {
-                        if (!active.get() || jsInterface.payload != null) return
-                        runCatching { view.evaluateJavascript(script, null) }
-                        if (active.get() && jsInterface.payload == null) {
-                            handler.postDelayed(this, 100L)
-                        }
-                    }
-                }
                 injectScript = retry
 
-                val html = document.clone().apply {
-                    initializationScript?.let {
-                        head().prependElement("script").append(it)
-                    }
-                }.outerHtml()
+                val html =
+                    document
+                        .clone()
+                        .apply {
+                            initializationScript?.let { head().prependElement("script").append(it) }
+                        }
+                        .outerHtml()
 
                 view.loadDataWithBaseURL(
                     document.location(),
@@ -576,24 +607,25 @@ class Comix : ReducedHttpSource() {
             }
         }
 
-        val completed = try {
-            if (!started.tryAcquire(120L, TimeUnit.SECONDS)) {
-                throw Exception("Timed out starting WebView (url=$lastUrl)")
+        val completed =
+            try {
+                if (!started.tryAcquire(120L, TimeUnit.SECONDS)) {
+                    throw Exception("Timed out starting WebView (url=$lastUrl)")
+                }
+                startupError.get()?.let {
+                    throw Exception("Failed to start WebView (url=$lastUrl)", it)
+                }
+                jsInterface.await(90L, TimeUnit.SECONDS)
+            } finally {
+                active.set(false)
+                handler.post {
+                    injectScript?.let(handler::removeCallbacks)
+                    val view = webView
+                    webView = null
+                    runCatching { view?.stopLoading() }
+                    runCatching { view?.destroy() }
+                }
             }
-            startupError.get()?.let {
-                throw Exception("Failed to start WebView (url=$lastUrl)", it)
-            }
-            jsInterface.await(90L, TimeUnit.SECONDS)
-        } finally {
-            active.set(false)
-            handler.post {
-                injectScript?.let(handler::removeCallbacks)
-                val view = webView
-                webView = null
-                runCatching { view?.stopLoading() }
-                runCatching { view?.destroy() }
-            }
-        }
 
         if (!completed) {
             throw Exception("Timed out waiting for WebView payload (url=$lastUrl)")

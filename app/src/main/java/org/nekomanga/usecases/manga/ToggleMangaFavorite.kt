@@ -39,8 +39,7 @@ class ToggleMangaFavorite(
                 categoriesProvider()
                     .firstOrNull { defaultCategory == it.id }
                     ?.let {
-                        val categories =
-                            listOf(MangaCategory.create(editManga, it.toDbCategory()))
+                        val categories = listOf(MangaCategory.create(editManga, it.toDbCategory()))
                         categoryRepository.setMangaCategories(
                             categories,
                             listOfNotNull(editManga.id),

@@ -2,7 +2,6 @@ package org.nekomanga.core.network.interceptor
 
 import com.google.common.net.HttpHeaders
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.SerializationException
 import okhttp3.logging.HttpLoggingInterceptor
 import org.nekomanga.logging.TimberKt
 
@@ -15,8 +14,9 @@ fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpL
                 }
             } else {
                 val trimmed = message.trim()
-                if ((trimmed.startsWith("{") && trimmed.endsWith("}")) ||
-                    (trimmed.startsWith("[") && trimmed.endsWith("]"))
+                if (
+                    (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+                        (trimmed.startsWith("[") && trimmed.endsWith("]"))
                 ) {
                     val element = json.parseToJsonElement(message)
                     TimberKt.d { json.encodeToString(element) }

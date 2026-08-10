@@ -466,19 +466,19 @@ class Downloader(
         page.status = Page.State.DOWNLOAD_IMAGE
         page.progress = 0
         return flow {
-                val response = source.getImage(page)
-                val file = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
-                try {
-                    response.body.source().saveTo(file.openOutputStream())
-                    val extension = getImageExtension(response, file)
-                    file.renameTo("$filename.$extension")
-                } catch (e: Exception) {
-                    response.close()
-                    file.delete()
-                    throw e
-                }
-                emit(file)
+            val response = source.getImage(page)
+            val file = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
+            try {
+                response.body.source().saveTo(file.openOutputStream())
+                val extension = getImageExtension(response, file)
+                file.renameTo("$filename.$extension")
+            } catch (e: Exception) {
+                response.close()
+                file.delete()
+                throw e
             }
+            emit(file)
+        }
             // Retry 3 times, waiting 2, 4 and 8 seconds between attempts.
             .retryWhen { _, attempt ->
                 if (attempt < 3) {

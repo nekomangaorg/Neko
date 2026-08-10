@@ -20,9 +20,9 @@ class UpdateTrackScore(
 
         return if (trackAndService.service.isMdList) {
             runCatching {
-                    trackManager.mdList.updateScore(trackItem.toDbTrack())
-                    TrackingUpdate.Success
-                }
+                trackManager.mdList.updateScore(trackItem.toDbTrack())
+                TrackingUpdate.Success
+            }
                 .getOrElse { TrackingUpdate.Error("Error updating MangaDex Score", it) }
         } else {
             updateTrackingService.await(trackItem, trackAndService.service)

@@ -17,16 +17,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
-import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
-import org.nekomanga.presentation.screens.library.filter.FilterCompleted
-import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
-import org.nekomanga.presentation.screens.library.filter.FilterMangaType
-import org.nekomanga.presentation.screens.library.filter.FilterMerged
-import org.nekomanga.presentation.screens.library.filter.FilterMissingChapters
-import org.nekomanga.presentation.screens.library.filter.FilterTracked
-import org.nekomanga.presentation.screens.library.filter.FilterUnavailable
-import org.nekomanga.presentation.screens.library.filter.FilterUnread
-import org.nekomanga.presentation.screens.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
@@ -59,7 +49,6 @@ import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
-
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
@@ -73,6 +62,16 @@ import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
+import org.nekomanga.presentation.screens.library.filter.FilterCompleted
+import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
+import org.nekomanga.presentation.screens.library.filter.FilterMangaType
+import org.nekomanga.presentation.screens.library.filter.FilterMerged
+import org.nekomanga.presentation.screens.library.filter.FilterMissingChapters
+import org.nekomanga.presentation.screens.library.filter.FilterTracked
+import org.nekomanga.presentation.screens.library.filter.FilterUnavailable
+import org.nekomanga.presentation.screens.library.filter.FilterUnread
+import org.nekomanga.presentation.screens.library.filter.LibraryFilterType
 import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.library.FilterLibraryMangaUseCase
@@ -97,7 +96,8 @@ class LibraryViewModel() : ViewModel() {
     val downloadManager: DownloadManager = Injekt.get()
     val workManager: WorkManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
-    val chapterSort: ChapterItemSort = ChapterItemSort(chapterItemFilter, preferences, mangaDetailsPreferences)
+    val chapterSort: ChapterItemSort =
+        ChapterItemSort(chapterItemFilter, preferences, mangaDetailsPreferences)
     val chapterUseCases: ChapterUseCases = Injekt.get()
     val filterLibraryManga: FilterLibraryMangaUseCase = Injekt.get()
     val groupLibraryManga = GroupLibraryMangaUseCase()
@@ -170,8 +170,7 @@ class LibraryViewModel() : ViewModel() {
                 val defaultCategory = Category.createSystemCategory().toCategoryItem()
                 val updatedDefaultCategory =
                     defaultCategory.copy(sortOrder = librarySort, isAscending = sortAscending)
-                (listOf(updatedDefaultCategory) + categories)
-                    .sortedBy { it.order }
+                (listOf(updatedDefaultCategory) + categories).sortedBy { it.order }
             }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
@@ -514,9 +513,7 @@ class LibraryViewModel() : ViewModel() {
 
                                 // Sort the items in this category
                                 val sortedList =
-                                    libraryCategoryItem.libraryItems
-                                        .sortedWith(comparator)
-                                        .toList()
+                                    libraryCategoryItem.libraryItems.sortedWith(comparator).toList()
 
                                 libraryCategoryItem.copy(libraryItems = sortedList)
                             }
@@ -600,7 +597,9 @@ class LibraryViewModel() : ViewModel() {
                 libraryPreferences.gridSize().changes(),
                 libraryPreferences.layout().changes(),
                 filterPreferencesFlow,
-                libraryPreferences.libraryRecentSearches().changes()
+                libraryPreferences
+                    .libraryRecentSearches()
+                    .changes()
                     .map { searchesStr ->
                         if (searchesStr.isBlank()) {
                             emptyList<String>()
@@ -642,8 +641,7 @@ class LibraryViewModel() : ViewModel() {
                     currentGroupBy = viewPrefs.groupBy,
                     trackMap = trackMap.toMap(),
                     showTrackedFilter = hasLoggedTrackers,
-                    userCategories =
-                        categories.filterNot { it.isSystemCategory }.toList(),
+                    userCategories = categories.filterNot { it.isSystemCategory }.toList(),
                     isFirstLoad = false,
                 )
             }
@@ -683,9 +681,7 @@ class LibraryViewModel() : ViewModel() {
                         LibraryGroup.ByTrackStatus.takeIf { hasLoggedServices },
                         LibraryGroup.Ungrouped.takeIf { hasCategories },
                     )
-                _internalLibraryScreenState.update {
-                    it.copy(groupByOptions = groupItems.toList())
-                }
+                _internalLibraryScreenState.update { it.copy(groupByOptions = groupItems.toList()) }
             }
             .launchIn(viewModelScope)
     }
@@ -973,10 +969,13 @@ class LibraryViewModel() : ViewModel() {
         val trimmed = query.trim()
         if (trimmed.isBlank()) return
         viewModelScope.launchIO {
-            val currentSearches = libraryPreferences.libraryRecentSearches().get()
-                .split("\n")
-                .filter { it.isNotBlank() }
-                .toMutableList()
+            val currentSearches =
+                libraryPreferences
+                    .libraryRecentSearches()
+                    .get()
+                    .split("\n")
+                    .filter { it.isNotBlank() }
+                    .toMutableList()
 
             currentSearches.remove(trimmed)
             currentSearches.add(0, trimmed)
@@ -986,19 +985,20 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun clearRecentSearches() {
-        viewModelScope.launchIO {
-            libraryPreferences.libraryRecentSearches().set("")
-        }
+        viewModelScope.launchIO { libraryPreferences.libraryRecentSearches().set("") }
     }
 
     fun removeRecentSearch(query: String) {
         val trimmed = query.trim()
         if (trimmed.isBlank()) return
         viewModelScope.launchIO {
-            val currentSearches = libraryPreferences.libraryRecentSearches().get()
-                .split("\n")
-                .filter { it.isNotBlank() && it.trim() != trimmed }
-                .joinToString("\n")
+            val currentSearches =
+                libraryPreferences
+                    .libraryRecentSearches()
+                    .get()
+                    .split("\n")
+                    .filter { it.isNotBlank() && it.trim() != trimmed }
+                    .joinToString("\n")
             libraryPreferences.libraryRecentSearches().set(currentSearches)
         }
     }
@@ -1035,13 +1035,15 @@ class LibraryViewModel() : ViewModel() {
                 val newSelectedItems = buildList {
                     if (allSelected) {
                         // Unselect all
-                        addAll(currentSelected.filterNot { it.displayManga.mangaId in categoryItemIds })
+                        addAll(
+                            currentSelected.filterNot { it.displayManga.mangaId in categoryItemIds }
+                        )
                     } else {
                         // Select all
                         addAll(currentSelected)
-                        addAll(libraryMangaItems.filter {
-                            it.displayManga.mangaId !in selectedItemIds
-                        })
+                        addAll(
+                            libraryMangaItems.filter { it.displayManga.mangaId !in selectedItemIds }
+                        )
                     }
                 }
 
@@ -1085,8 +1087,9 @@ class LibraryViewModel() : ViewModel() {
                 } else {
                     addAll(selectedItems)
                     val categoryItems =
-                        categoryUseCases.getCategories
-                            .getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
+                        categoryUseCases.getCategories.getCategoriesForManga(
+                            libraryMangaItem.displayManga.mangaId
+                        )
                     val copy = libraryMangaItem.copy(allCategories = categoryItems)
                     add(copy)
                 }
@@ -1172,7 +1175,9 @@ class LibraryViewModel() : ViewModel() {
                                     !it.chapter.read &&
                                         !it.chapter.isUnavailable &&
                                         !downloadManager.isChapterDownloaded(dbChapter, dbManga) &&
-                                        downloadManager.queueState.value.none { queued -> queued.chapterItem.id == it.chapter.id }
+                                        downloadManager.queueState.value.none { queued ->
+                                            queued.chapterItem.id == it.chapter.id
+                                        }
                                 }
                                 .sortedWith(chapterSort.sortComparator(dbManga, true))
                                 .take(amount)

@@ -2,13 +2,13 @@ package org.nekomanga.usecases.category
 
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import org.nekomanga.presentation.screens.library.LibrarySort
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.screens.library.LibrarySort
 
 class ModifyCategoryUseCase(
     private val categoryRepository: CategoryRepository,
@@ -19,10 +19,11 @@ class ModifyCategoryUseCase(
     suspend fun addNewCategory(newCategory: String) {
         val categories = categoryRepository.getCategories()
         val order = (categories.maxOfOrNull { it.order } ?: 0) + 1
-        val category = Category.create(newCategory).apply {
-            this.order = order
-            this.mangaSort = LibrarySort.Title.categoryValue
-        }
+        val category =
+            Category.create(newCategory).apply {
+                this.order = order
+                this.mangaSort = LibrarySort.Title.categoryValue
+            }
         categoryRepository.insertCategory(category)
     }
 

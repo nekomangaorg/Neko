@@ -60,11 +60,9 @@ class AboutViewModel : ViewModel() {
                 SnackbarState(messageRes = R.string.checking_for_updates)
             )
 
-            val update =
-                runCatching { updateChecker.checkForUpdate(isUserPrompt = true) }
-                    .getOrElse { error ->
-                        AppUpdateResult.CantCheckForUpdate(error.message ?: "Error")
-                    }
+            val update = runCatching {
+                updateChecker.checkForUpdate(isUserPrompt = true)
+            }.getOrElse { error -> AppUpdateResult.CantCheckForUpdate(error.message ?: "Error") }
             when (update) {
                 is AppUpdateResult.CantCheckForUpdate -> {
                     appSnackbarManager.showSnackbar(SnackbarState(message = update.reason))

@@ -164,7 +164,9 @@ class FeedRepository(
                                 val chapter =
                                     getChapterItem(
                                         history.manga,
-                                        history.chapter.toSimpleChapter(history.history.last_read)!!,
+                                        history.chapter.toSimpleChapter(
+                                            history.history.last_read
+                                        )!!,
                                     )
 
                                 val scanlators = chapter.chapter.scanlatorList()
@@ -279,13 +281,17 @@ class FeedRepository(
 
         return com.github.michaelbull.result
             .runCatching {
-                val favoriteMangaList = mangaRepository
-                    .getFavoriteMangaList()
-                    .distinctBy { it.id }
-                    .sortedBy { it.date_added }
-                    .takeLast(100)
+                val favoriteMangaList =
+                    mangaRepository
+                        .getFavoriteMangaList()
+                        .distinctBy { it.id }
+                        .sortedBy { it.date_added }
+                        .takeLast(100)
                 val favoriteMangaIds = favoriteMangaList.mapNotNull { it.id }
-                val chaptersMap = chapterRepository.getChaptersForMangaIds(favoriteMangaIds).groupBy { it.manga_id }
+                val chaptersMap =
+                    chapterRepository.getChaptersForMangaIds(favoriteMangaIds).groupBy {
+                        it.manga_id
+                    }
 
                 favoriteMangaList
                     .mapNotNull { manga ->
@@ -347,14 +353,15 @@ class FeedRepository(
                             if (offset == 0) {
                                 bySeriesSet.clear()
                             }
-                            val recentManga = historyRepository
-                                .getRecentMangaLimit(
+                            val recentManga =
+                                historyRepository.getRecentMangaLimit(
                                     search = searchQuery,
                                     offset = offset,
                                     limit = limit,
                                 )
                             val mangaIds = recentManga.mapNotNull { it.manga.id }.distinct()
-                            val allHistories = historyRepository.getChapterHistoryByMangaIds(mangaIds)
+                            val allHistories =
+                                historyRepository.getChapterHistoryByMangaIds(mangaIds)
                             val historiesByMangaId = allHistories.groupBy { it.manga.id }
 
                             recentManga.mapNotNull { history ->
@@ -364,7 +371,8 @@ class FeedRepository(
                                     return@mapNotNull null
                                 }
 
-                                val chapterHistories = (historiesByMangaId[history.manga.id!!] ?: emptyList()).take(25)
+                                val chapterHistories =
+                                    (historiesByMangaId[history.manga.id!!] ?: emptyList()).take(25)
                                 val chapterItems =
                                     chapterHistories
                                         .mapNotNull { chpHistory ->

@@ -32,7 +32,6 @@ import androidx.core.content.getSystemService
 import androidx.core.content.res.use
 import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
@@ -379,9 +378,7 @@ suspend fun CoroutineWorker.tryToSetForeground() {
 }
 
 fun WorkManager.jobIsRunning(tag: String): Boolean =
-    getWorkInfosForUniqueWork(tag).get().let { list ->
-        list.any { !it.state.isFinished }
-    }
+    getWorkInfosForUniqueWork(tag).get().let { list -> list.any { !it.state.isFinished } }
 
 fun Context.appDelegateNightMode(): Int {
     return if (isInNightMode()) {

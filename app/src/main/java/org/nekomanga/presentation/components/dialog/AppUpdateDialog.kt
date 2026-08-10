@@ -5,15 +5,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import org.nekomanga.presentation.components.MarkdownRender
 import eu.kanade.tachiyomi.data.updater.Release
 import org.nekomanga.R
+import org.nekomanga.presentation.components.MarkdownRender
 
 /** Dialog that shows when an app update is available */
 @Composable
@@ -24,11 +23,7 @@ fun AppUpdateDialog(release: Release, onDismissRequest: () -> Unit, onConfirm: (
         modifier = Modifier.fillMaxHeight(.8f),
         text = {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                item {
-                    MarkdownRender(
-                        content = body,
-                    )
-                }
+                item { MarkdownRender(content = body) }
             }
         },
         onDismissRequest = onDismissRequest,
@@ -47,5 +42,3 @@ fun AppUpdateDialog(release: Release, onDismissRequest: () -> Unit, onConfirm: (
         },
     )
 }
-
-

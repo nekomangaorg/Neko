@@ -49,20 +49,19 @@ data class Download(
         }
 
     @Transient
-    val progressFlow =
-        flow {
-                if (pages == null) {
-                    emit(0)
-                    while (pages == null) {
-                        delay(PROGRESS_DELAY)
-                    }
-                }
-
-                val progressFlows = pages!!.map(Page::progressFlow)
-                emitAll(combine(progressFlows) { it.average().toInt() })
+    val progressFlow = flow {
+        if (pages == null) {
+            emit(0)
+            while (pages == null) {
+                delay(PROGRESS_DELAY)
             }
-            .distinctUntilChanged()
-            .debounce(PROGRESS_DELAY)
+        }
+
+        val progressFlows = pages!!.map(Page::progressFlow)
+        emitAll(combine(progressFlows) { it.average().toInt() })
+    }
+        .distinctUntilChanged()
+        .debounce(PROGRESS_DELAY)
 
     val progress: Int
         get() {

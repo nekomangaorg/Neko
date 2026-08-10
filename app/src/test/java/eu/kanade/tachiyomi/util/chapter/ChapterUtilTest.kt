@@ -20,7 +20,8 @@ class ChapterUtilTest {
 
     @Test
     fun `getScanlators splits scanlators on separator and returns distinct values`() {
-        val input = "Group A${Constants.SCANLATOR_SEPARATOR}Group B${Constants.SCANLATOR_SEPARATOR}Group A"
+        val input =
+            "Group A${Constants.SCANLATOR_SEPARATOR}Group B${Constants.SCANLATOR_SEPARATOR}Group A"
         ChapterUtil.getScanlators(input) shouldBe listOf("Group A", "Group B")
     }
 
@@ -48,7 +49,7 @@ class ChapterUtilTest {
             uploader = "",
             all = false,
             filteredGroups = emptySet(),
-            filteredUploaders = emptySet()
+            filteredUploaders = emptySet(),
         ) shouldBe false
     }
 
@@ -59,7 +60,7 @@ class ChapterUtilTest {
             uploader = "",
             all = false,
             filteredGroups = setOf("Group B"),
-            filteredUploaders = emptySet()
+            filteredUploaders = emptySet(),
         ) shouldBe true
 
         ChapterUtil.filterByScanlator(
@@ -67,7 +68,7 @@ class ChapterUtilTest {
             uploader = "",
             all = false,
             filteredGroups = setOf("Group C"),
-            filteredUploaders = emptySet()
+            filteredUploaders = emptySet(),
         ) shouldBe false
     }
 
@@ -78,7 +79,7 @@ class ChapterUtilTest {
             uploader = "",
             all = true,
             filteredGroups = setOf("Group A", "Group B"),
-            filteredUploaders = emptySet()
+            filteredUploaders = emptySet(),
         ) shouldBe true
 
         ChapterUtil.filterByScanlator(
@@ -86,7 +87,7 @@ class ChapterUtilTest {
             uploader = "",
             all = true,
             filteredGroups = setOf("Group A"),
-            filteredUploaders = emptySet()
+            filteredUploaders = emptySet(),
         ) shouldBe false
     }
 
@@ -97,7 +98,7 @@ class ChapterUtilTest {
             uploader = "",
             all = true,
             filteredGroups = setOf("Group A"),
-            filteredUploaders = emptySet()
+            filteredUploaders = emptySet(),
         ) shouldBe true
     }
 
@@ -108,7 +109,7 @@ class ChapterUtilTest {
             uploader = "Uploader X",
             all = false,
             filteredGroups = emptySet(),
-            filteredUploaders = setOf("Uploader X")
+            filteredUploaders = setOf("Uploader X"),
         ) shouldBe true
 
         ChapterUtil.filterByScanlator(
@@ -116,7 +117,7 @@ class ChapterUtilTest {
             uploader = "Uploader X",
             all = false,
             filteredGroups = emptySet(),
-            filteredUploaders = setOf("Uploader Y")
+            filteredUploaders = setOf("Uploader Y"),
         ) shouldBe false
     }
 
@@ -127,7 +128,7 @@ class ChapterUtilTest {
             uploader = "Uploader X",
             all = true,
             filteredGroups = setOf("Group A"),
-            filteredUploaders = setOf("Uploader X")
+            filteredUploaders = setOf("Uploader X"),
         ) shouldBe true
 
         ChapterUtil.filterByScanlator(
@@ -135,7 +136,7 @@ class ChapterUtilTest {
             uploader = "Uploader X",
             all = true,
             filteredGroups = setOf("Group A"),
-            filteredUploaders = setOf("Uploader Y")
+            filteredUploaders = setOf("Uploader Y"),
         ) shouldBe false
 
         // If NO_GROUP is in filteredGroups, it should not skip NO_GROUP
@@ -144,7 +145,7 @@ class ChapterUtilTest {
             uploader = "Uploader X",
             all = true,
             filteredGroups = setOf("Group A", Constants.NO_GROUP),
-            filteredUploaders = setOf("Uploader X")
+            filteredUploaders = setOf("Uploader X"),
         ) shouldBe true
     }
 }

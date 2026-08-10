@@ -77,30 +77,29 @@ class MangaUpdateCoordinator {
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
     private val mangaUseCases: MangaUseCases by injectLazy()
 
-    fun update(mangaItem: MangaItem, isMerging: Boolean) =
-        channelFlow {
-                if (!sourceManager.mangaDex.checkIfUp()) {
-                    send(MangaResult.Error(R.string.site_down))
-                    return@channelFlow
-                }
+    fun update(mangaItem: MangaItem, isMerging: Boolean) = channelFlow {
+        if (!sourceManager.mangaDex.checkIfUp()) {
+            send(MangaResult.Error(R.string.site_down))
+            return@channelFlow
+        }
 
-                TimberKt.d { "Starting update for ${mangaItem.title}" }
+        TimberKt.d { "Starting update for ${mangaItem.title}" }
 
-                val mangaWasInitialized = mangaItem.initialized
+        val mangaWasInitialized = mangaItem.initialized
 
-                // Run manga details and chapter updates in parallel.
-                try {
-                    coroutineScope {
-                        launch { updateMangaDetailsAndPersist(mangaItem) }
-                        launch { updateChapters(mangaItem, mangaWasInitialized, isMerging) }
-                    }
-                } catch (e: UpdateError) {
-                    return@channelFlow
-                }
-
-                send(MangaResult.Success)
+        // Run manga details and chapter updates in parallel.
+        try {
+            coroutineScope {
+                launch { updateMangaDetailsAndPersist(mangaItem) }
+                launch { updateChapters(mangaItem, mangaWasInitialized, isMerging) }
             }
-            .flowOn(Dispatchers.IO)
+        } catch (e: UpdateError) {
+            return@channelFlow
+        }
+
+        send(MangaResult.Success)
+    }
+        .flowOn(Dispatchers.IO)
 
     /** Fetches and persists manga details and artwork from the source. */
     private suspend fun ProducerScope<MangaResult>.updateMangaDetailsAndPersist(

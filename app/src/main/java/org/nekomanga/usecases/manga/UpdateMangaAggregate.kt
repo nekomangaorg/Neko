@@ -12,8 +12,8 @@ class UpdateMangaAggregate(
 ) {
     suspend operator fun invoke(mangaId: Long, mangaUrl: String, isFavorite: Boolean) {
         if (isFavorite) {
-            sourceManager.mangaDex.getAggregate(MdUtil.getMangaUUID(mangaUrl)).onOk {
-                aggregateDto ->
+            sourceManager.mangaDex.getAggregate(MdUtil.getMangaUUID(mangaUrl)).onOk { aggregateDto
+                ->
                 mangaAggregateRepository.insertMangaAggregate(
                     MangaAggregate(mangaId = mangaId, volumes = aggregateDto.volumes.toString())
                 )

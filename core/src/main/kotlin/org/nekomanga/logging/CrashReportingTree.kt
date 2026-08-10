@@ -6,11 +6,12 @@ import timber.log.Timber
 
 class CrashReportingTree : Timber.Tree() {
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        val crashlytics = try {
-            FirebaseCrashlytics.getInstance()
-        } catch (ignored: IllegalStateException) {
-            null
-        }
+        val crashlytics =
+            try {
+                FirebaseCrashlytics.getInstance()
+            } catch (ignored: IllegalStateException) {
+                null
+            }
 
         if (crashlytics != null) {
             if (priority == Log.ERROR) {
@@ -26,11 +27,12 @@ class CrashReportingTree : Timber.Tree() {
         }
 
         if (priority >= Log.INFO && Timber.forest().none { it is Timber.DebugTree }) {
-            val logMessage = if (t != null) {
-                "$message\n${Log.getStackTraceString(t)}"
-            } else {
-                message
-            }
+            val logMessage =
+                if (t != null) {
+                    "$message\n${Log.getStackTraceString(t)}"
+                } else {
+                    message
+                }
             Log.println(priority, tag ?: "Neko", logMessage)
         }
     }

@@ -111,11 +111,11 @@ private fun Grouped(
     if (hasMoreResults && !loadingResults) {
         LaunchedEffect(scrollState) {
             snapshotFlow {
-                    val layoutInfo = scrollState.layoutInfo
-                    val totalItems = layoutInfo.totalItemsCount
-                    val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    lastVisibleItemIndex >= (totalItems - 5)
-                }
+                val layoutInfo = scrollState.layoutInfo
+                val totalItems = layoutInfo.totalItemsCount
+                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                lastVisibleItemIndex >= (totalItems - 5)
+            }
                 .collect { isAtEnd ->
                     if (isAtEnd) {
                         loadNextPage()
@@ -260,11 +260,11 @@ private fun Ungrouped(
     if (hasMoreResults && !loadingResults) {
         LaunchedEffect(scrollState) {
             snapshotFlow {
-                    val layoutInfo = scrollState.layoutInfo
-                    val totalItems = layoutInfo.totalItemsCount
-                    val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    lastVisibleItemIndex >= (totalItems - 5)
-                }
+                val layoutInfo = scrollState.layoutInfo
+                val totalItems = layoutInfo.totalItemsCount
+                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                lastVisibleItemIndex >= (totalItems - 5)
+            }
                 .collect { isAtEnd ->
                     if (isAtEnd) {
                         loadNextPage()
@@ -295,7 +295,11 @@ private fun Ungrouped(
                         color = headerColor,
                         style = MaterialTheme.typography.titleLarge,
                         modifier =
-                            Modifier.padding(start = Size.small, top = Size.small, end = Size.small),
+                            Modifier.padding(
+                                start = Size.small,
+                                top = Size.small,
+                                end = Size.small,
+                            ),
                     )
                 }
             }

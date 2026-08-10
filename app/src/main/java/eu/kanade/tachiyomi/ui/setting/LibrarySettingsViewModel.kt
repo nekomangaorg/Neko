@@ -24,14 +24,13 @@ class LibrarySettingsViewModel : ViewModel() {
 
     val categoryUseCases: CategoryUseCases by injectLazy()
 
-    private val _allCategories =
-        MutableStateFlow<List<CategoryItem>>((listOf()))
+    private val _allCategories = MutableStateFlow<List<CategoryItem>>((listOf()))
     val allCategories = _allCategories.asStateFlow()
 
     init {
         viewModelScope.launch {
-            categoryUseCases.getCategories.observe().distinctUntilChanged().collectLatest { categories
-                ->
+            categoryUseCases.getCategories.observe().distinctUntilChanged().collectLatest {
+                categories ->
                 _allCategories.value =
                     (listOf(Category.createSystemCategory().toCategoryItem()) + categories)
                         .sortedBy { it.order }
@@ -41,9 +40,7 @@ class LibrarySettingsViewModel : ViewModel() {
     }
 
     fun addNewCategory(categoryName: String) {
-        viewModelScope.launchIO {
-            categoryUseCases.modifyCategory.addNewCategory(categoryName)
-        }
+        viewModelScope.launchIO { categoryUseCases.modifyCategory.addNewCategory(categoryName) }
     }
 
     fun addUpdateCategory(newCategoryName: String, id: Int?) {
@@ -57,9 +54,7 @@ class LibrarySettingsViewModel : ViewModel() {
     }
 
     fun deleteCategory(id: Int) {
-        viewModelScope.launchIO {
-            categoryUseCases.modifyCategory.deleteCategory(id)
-        }
+        viewModelScope.launchIO { categoryUseCases.modifyCategory.deleteCategory(id) }
     }
 
     fun onChangeOrder(category: CategoryItem, newIndex: Int) {

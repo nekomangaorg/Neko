@@ -26,7 +26,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import org.nekomanga.presentation.screens.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
@@ -37,6 +36,7 @@ import org.nekomanga.presentation.screens.about.AboutViewModel
 import org.nekomanga.presentation.screens.deepLink.DeepLinkScreen
 import org.nekomanga.presentation.screens.deepLink.DeepLinkViewModel
 import org.nekomanga.presentation.screens.feed.FeedViewModel
+import org.nekomanga.presentation.screens.library.LibraryViewModel
 import org.nekomanga.presentation.screens.similar.SimilarViewModel
 import org.nekomanga.presentation.screens.stats.StatsViewModel
 

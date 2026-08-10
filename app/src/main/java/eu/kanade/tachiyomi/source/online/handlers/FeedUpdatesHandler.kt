@@ -66,69 +66,67 @@ class FeedUpdatesHandler {
         chapterListDto: ChapterListDto
     ): Result<MangaListPage, ResultError> {
         return runCatching {
-                val result =
-                    chapterListDto.data
-                        .groupBy { chapterListDto ->
-                            chapterListDto.relationships
-                                .first { relationshipDto ->
-                                    relationshipDto.type == MdConstants.Types.manga
-                                }
-                                .id
-                        }
-                        .filterNot { uniqueManga.contains(it.key) }
-
-                val mangaIds = result.keys.toList()
-
-                uniqueManga.addAll(mangaIds)
-
-                val allContentRating =
-                    listOf(
-                        MdConstants.ContentRating.safe,
-                        MdConstants.ContentRating.suggestive,
-                        MdConstants.ContentRating.erotica,
-                        MdConstants.ContentRating.pornographic,
-                    )
-
-                val queryParameters =
-                    mutableMapOf(
-                        "ids[]" to mangaIds,
-                        "limit" to mangaIds.size,
-                        "contentRating[]" to allContentRating,
-                    )
-
-                service
-                    .search(ProxyRetrofitQueryMap(queryParameters))
-                    .getOrResultError("trying to search manga from feed uploads")
-                    .andThen { mangaListDto ->
-                        val hasMoreResults =
-                            chapterListDto.limit + chapterListDto.offset < chapterListDto.total
-
-                        val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
-
-                        val thumbQuality = mangaDexPreferences.coverQuality().get()
-                        val mangaList =
-                            mangaIds
-                                .mapNotNull { mangaDtoMap[it] }
-                                .sortedByDescending {
-                                    result[it.id]!!.first().attributes.readableAt
-                                }
-                                .map {
-                                    val chapterName =
-                                        result[it.id]?.firstOrNull()?.buildChapterName() ?: ""
-                                    it.toSourceManga(
-                                        coverQuality = thumbQuality,
-                                        displayText = chapterName,
-                                    )
-                                }
-
-                        Ok(
-                            MangaListPage(
-                                sourceManga = mangaList.toList(),
-                                hasNextPage = hasMoreResults,
-                            )
-                        )
+            val result =
+                chapterListDto.data
+                    .groupBy { chapterListDto ->
+                        chapterListDto.relationships
+                            .first { relationshipDto ->
+                                relationshipDto.type == MdConstants.Types.manga
+                            }
+                            .id
                     }
-            }
+                    .filterNot { uniqueManga.contains(it.key) }
+
+            val mangaIds = result.keys.toList()
+
+            uniqueManga.addAll(mangaIds)
+
+            val allContentRating =
+                listOf(
+                    MdConstants.ContentRating.safe,
+                    MdConstants.ContentRating.suggestive,
+                    MdConstants.ContentRating.erotica,
+                    MdConstants.ContentRating.pornographic,
+                )
+
+            val queryParameters =
+                mutableMapOf(
+                    "ids[]" to mangaIds,
+                    "limit" to mangaIds.size,
+                    "contentRating[]" to allContentRating,
+                )
+
+            service
+                .search(ProxyRetrofitQueryMap(queryParameters))
+                .getOrResultError("trying to search manga from feed uploads")
+                .andThen { mangaListDto ->
+                    val hasMoreResults =
+                        chapterListDto.limit + chapterListDto.offset < chapterListDto.total
+
+                    val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
+
+                    val thumbQuality = mangaDexPreferences.coverQuality().get()
+                    val mangaList =
+                        mangaIds
+                            .mapNotNull { mangaDtoMap[it] }
+                            .sortedByDescending { result[it.id]!!.first().attributes.readableAt }
+                            .map {
+                                val chapterName =
+                                    result[it.id]?.firstOrNull()?.buildChapterName() ?: ""
+                                it.toSourceManga(
+                                    coverQuality = thumbQuality,
+                                    displayText = chapterName,
+                                )
+                            }
+
+                    Ok(
+                        MangaListPage(
+                            sourceManga = mangaList.toList(),
+                            hasNextPage = hasMoreResults,
+                        )
+                    )
+                }
+        }
             .getOrElse { e ->
                 if (e !is CancellationException) {
                     TimberKt.e(e) { "Error parsing feed uploads" }

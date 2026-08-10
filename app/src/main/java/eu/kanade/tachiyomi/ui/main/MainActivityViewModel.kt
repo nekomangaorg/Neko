@@ -87,11 +87,9 @@ class MainActivityViewModel : ViewModel() {
         }
 
         viewModelScope.launchIO {
-            val update =
-                runCatching { updateChecker.checkForUpdate() }
-                    .getOrElse { error ->
-                        AppUpdateResult.CantCheckForUpdate(error.message ?: "Error")
-                    }
+            val update = runCatching {
+                updateChecker.checkForUpdate()
+            }.getOrElse { error -> AppUpdateResult.CantCheckForUpdate(error.message ?: "Error") }
 
             if (update is AppUpdateResult.NewUpdate) {
                 _mainScreenState.update { it.copy(appUpdateResult = update) }

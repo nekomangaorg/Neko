@@ -9,9 +9,7 @@ import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 
-class GetCategoriesUseCase(
-    private val categoryRepository: CategoryRepository,
-) {
+class GetCategoriesUseCase(private val categoryRepository: CategoryRepository) {
     suspend fun get(): List<CategoryItem> {
         return categoryRepository.getCategories().map { it.toCategoryItem() }
     }
@@ -49,4 +47,3 @@ class GetCategoriesUseCase(
             }
     }
 }
-

@@ -9,7 +9,6 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
@@ -43,7 +42,9 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
                         notifier.showBackupComplete(it)
                     }
                 } else {
-                    Injekt.get<StoragePreferences>().lastAutoBackupTimestamp().set(System.currentTimeMillis())
+                    Injekt.get<StoragePreferences>()
+                        .lastAutoBackupTimestamp()
+                        .set(System.currentTimeMillis())
                 }
             }
             Result.success()

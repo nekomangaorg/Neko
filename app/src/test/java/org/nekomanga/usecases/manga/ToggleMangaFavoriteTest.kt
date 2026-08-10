@@ -1,8 +1,6 @@
 package org.nekomanga.usecases.manga
 
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every

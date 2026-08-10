@@ -64,7 +64,8 @@ fun FilterChipWrapper(
     name: String,
     modifier: Modifier = Modifier,
     hideIcons: Boolean = false,
-    labelStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+    labelStyle: TextStyle =
+        MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
 ) {
     TriStateFilterChip(
         modifier = modifier,

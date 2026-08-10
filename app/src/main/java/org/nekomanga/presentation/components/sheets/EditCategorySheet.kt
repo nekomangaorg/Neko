@@ -142,7 +142,9 @@ fun EditCategorySheet(
                 TextButton(
                     onClick = cancelClick,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
+                        ButtonDefaults.textButtonColors(
+                            contentColor = themeColorState.primaryColor
+                        ),
                 ) {
                     Text(
                         text = stringResource(id = R.string.cancel),

@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
-
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -24,7 +23,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.nekomanga.R
-import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
@@ -37,6 +35,7 @@ import org.nekomanga.domain.manga.MangaType
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedStatManga
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedState
 import org.nekomanga.presentation.screens.stats.StatsHelper.getReadDuration
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.library.ShouldUpdateMangaUseCase
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -236,9 +235,7 @@ class StatsViewModel() : ViewModel() {
 
         val sortedSeries =
             _detailState.value.tags
-                .map { tag ->
-                    tag to (tagToMangaMap[tag]?.toList() ?: emptyList())
-                }
+                .map { tag -> tag to (tagToMangaMap[tag]?.toList() ?: emptyList()) }
                 .sortedByDescending { it.second.size }
         val totalCount = sortedSeries.sumOf { it.second.size }
         val totalDuration = sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }

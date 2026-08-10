@@ -30,7 +30,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.system.isLandscape
 import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
@@ -39,6 +38,7 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.functions.numberOfColumns
+import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import org.nekomanga.presentation.theme.Size
 
 @Composable

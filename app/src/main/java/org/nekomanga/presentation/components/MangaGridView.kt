@@ -121,11 +121,11 @@ fun MangaGrid(
         // attaching LaunchedEffect to every item, which causes unnecessary composition overhead.
         LaunchedEffect(scrollState, lastPage) {
             snapshotFlow {
-                    val layoutInfo = scrollState.layoutInfo
-                    val totalItems = layoutInfo.totalItemsCount
-                    val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    lastVisibleItemIndex >= (totalItems - 1)
-                }
+                val layoutInfo = scrollState.layoutInfo
+                val totalItems = layoutInfo.totalItemsCount
+                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                lastVisibleItemIndex >= (totalItems - 1)
+            }
                 .collect { isAtEnd ->
                     if (isAtEnd) {
                         loadNextItems()

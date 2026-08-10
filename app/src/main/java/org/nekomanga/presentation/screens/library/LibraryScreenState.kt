@@ -1,6 +1,13 @@
 package org.nekomanga.presentation.screens.library
 
 import androidx.compose.runtime.Immutable
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
+import org.nekomanga.R
+import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
+import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
 import org.nekomanga.presentation.screens.library.filter.FilterCompleted
 import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
@@ -11,13 +18,6 @@ import org.nekomanga.presentation.screens.library.filter.FilterTracked
 import org.nekomanga.presentation.screens.library.filter.FilterUnavailable
 import org.nekomanga.presentation.screens.library.filter.FilterUnread
 import org.nekomanga.presentation.screens.library.filter.LibraryFilterType
-import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import org.nekomanga.R
-import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.chapter.ChapterMarkActions
-import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.domain.manga.LibraryMangaItem
-import org.nekomanga.presentation.components.UiText
 
 /**
  * ⚡ BOLT OPTIMIZATION: Added @Immutable to mark this large data class containing standard Map types

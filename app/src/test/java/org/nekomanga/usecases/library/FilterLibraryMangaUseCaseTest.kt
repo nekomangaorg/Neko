@@ -1,5 +1,12 @@
 package org.nekomanga.usecases.library
 
+import io.mockk.every
+import io.mockk.mockk
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.screens.library.LibraryFilters
 import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
 import org.nekomanga.presentation.screens.library.filter.FilterCompleted
@@ -10,13 +17,6 @@ import org.nekomanga.presentation.screens.library.filter.FilterMissingChapters
 import org.nekomanga.presentation.screens.library.filter.FilterTracked
 import org.nekomanga.presentation.screens.library.filter.FilterUnavailable
 import org.nekomanga.presentation.screens.library.filter.FilterUnread
-import io.mockk.every
-import io.mockk.mockk
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
-import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.domain.manga.LibraryMangaItem
 
 class FilterLibraryMangaUseCaseTest {
 

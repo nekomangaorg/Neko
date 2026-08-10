@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.ui.manga.TrackingUpdate
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import org.nekomanga.data.database.repository.TrackRepository
@@ -63,7 +62,9 @@ class AutoAddTrackers(
                     if (isOnline()) {
                         // Try to bind the new track to the remote service (e.g., get a remote
                         // ID)
-                        runCatching { mdList.bind(track) } // Assumes bind() mutates the 'track' object
+                        runCatching {
+                                mdList.bind(track)
+                            } // Assumes bind() mutates the 'track' object
                             .onErr { exception ->
                                 TimberKt.e(exception) { "Error binding new MangaDex track" }
                             }
@@ -101,7 +102,8 @@ class AutoAddTrackers(
         val validContentRatings = preferences.autoTrackContentRatingSelections().get()
         val contentRating = manga.getContentRating()
 
-        if (contentRating != null && !validContentRatings.contains(contentRating.lowercase())) return
+        if (contentRating != null && !validContentRatings.contains(contentRating.lowercase()))
+            return
 
         if (!isOnline()) {
             onShowSnackbar("No network connection, cannot autolink tracker", null)
@@ -119,7 +121,8 @@ class AutoAddTrackers(
                             loggedInTrackerService.firstOrNull { it.id == autoAddTrackerId }
                                 ?: return@async // Not logged in to this service, skip
 
-                        if (trackService.id in existingTrackIds) return@async // Already tracked, skip
+                        if (trackService.id in existingTrackIds)
+                            return@async // Already tracked, skip
 
                         // Check if the manga has a remote ID for this service
                         val id =

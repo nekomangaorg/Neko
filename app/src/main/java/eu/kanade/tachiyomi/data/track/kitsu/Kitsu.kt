@@ -182,11 +182,10 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         return combine(super.isLoggedInFlow(), preferences.trackToken(this).changes()) {
                 loggedIn,
                 token ->
-                val hasValidToken =
-                    runCatching {
-                            token.isNotBlank() && json.decodeFromString<OAuth?>(token) != null
-                        }
-                        .getOrDefault(false)
+                val hasValidToken = runCatching {
+                    token.isNotBlank() && json.decodeFromString<OAuth?>(token) != null
+                }
+                    .getOrDefault(false)
                 loggedIn && hasValidToken
             }
             .distinctUntilChanged()

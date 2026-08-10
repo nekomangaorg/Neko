@@ -35,23 +35,17 @@ class MergeSettingsViewModel : ViewModel() {
     val suwayomiMergeScreenState = _suwayomiMergeScreenState.asStateFlow()
 
     init {
-        preferences
-            .sourceUrl(komga)
-            .changes()
-            .observeAndUpdate(viewModelScope) { url ->
-                _komgaMergeScreenState.update {
-                    it.copy(isLoggedIn = url.isNotBlank(), currentUrl = url)
-                }
+        preferences.sourceUrl(komga).changes().observeAndUpdate(viewModelScope) { url ->
+            _komgaMergeScreenState.update {
+                it.copy(isLoggedIn = url.isNotBlank(), currentUrl = url)
             }
+        }
 
-        preferences
-            .sourceUrl(suwayomi)
-            .changes()
-            .observeAndUpdate(viewModelScope) { url ->
-                _suwayomiMergeScreenState.update {
-                    it.copy(isLoggedIn = url.isNotBlank(), currentUrl = url)
-                }
+        preferences.sourceUrl(suwayomi).changes().observeAndUpdate(viewModelScope) { url ->
+            _suwayomiMergeScreenState.update {
+                it.copy(isLoggedIn = url.isNotBlank(), currentUrl = url)
             }
+        }
     }
 
     fun logout(mergeScreenType: MergeScreenType) {

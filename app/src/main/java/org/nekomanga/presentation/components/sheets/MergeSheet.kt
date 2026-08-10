@@ -437,7 +437,9 @@ private fun SuccessResults(
                         overflow = TextOverflow.Ellipsis,
                         color = Color.White,
                         style =
-                            MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
                     )
                 }
             }

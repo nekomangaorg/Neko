@@ -52,9 +52,7 @@ fun AppBarActions(
                 expanded = showMenu,
                 onDismiss = { showMenu = false },
                 dropDownItems =
-                    overflowActions
-                        .map { appBarAction -> appBarAction.toSimpleAction() }
-                        .toList(),
+                    overflowActions.map { appBarAction -> appBarAction.toSimpleAction() }.toList(),
             )
         }
     }

@@ -19,7 +19,6 @@ import kotlinx.coroutines.CoroutineScope
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.library.ScanlatorFilterOption
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
@@ -29,6 +28,7 @@ import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
+import org.nekomanga.domain.library.ScanlatorFilterOption
 import org.nekomanga.presentation.components.dialog.DataSaverDialog
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.screens.settings.Preference
@@ -81,14 +81,18 @@ internal class LibrarySettingsScreen(
                         title = stringResource(R.string.chapter_scanlator_filter_option),
                         subtitleProvider = { value, options ->
                             when (value) {
-                                ScanlatorFilterOption.ALL -> stringResource(R.string.chapter_filter_all_summary)
-                                ScanlatorFilterOption.ANY -> stringResource(R.string.chapter_filter_any_summary)
+                                ScanlatorFilterOption.ALL ->
+                                    stringResource(R.string.chapter_filter_all_summary)
+                                ScanlatorFilterOption.ANY ->
+                                    stringResource(R.string.chapter_filter_any_summary)
                             }
                         },
                         entries =
                             mapOf(
-                                ScanlatorFilterOption.ALL to stringResource(R.string.chapter_filter_all),
-                                ScanlatorFilterOption.ANY to stringResource(R.string.chapter_filter_any),
+                                ScanlatorFilterOption.ALL to
+                                    stringResource(R.string.chapter_filter_all),
+                                ScanlatorFilterOption.ANY to
+                                    stringResource(R.string.chapter_filter_any),
                             ),
                     ),
                 ),
@@ -96,9 +100,7 @@ internal class LibrarySettingsScreen(
     }
 
     @Composable
-    private fun categoriesGroup(
-        categories: List<CategoryItem>
-    ): Preference.PreferenceGroup {
+    private fun categoriesGroup(categories: List<CategoryItem>): Preference.PreferenceGroup {
         val alwaysAsk = Pair(-1, stringResource(R.string.always_ask))
         val nonSystemCategories =
             remember(categories) { categories.filterNot { it.isSystemCategory } }

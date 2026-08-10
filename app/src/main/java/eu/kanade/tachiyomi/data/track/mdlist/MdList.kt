@@ -72,7 +72,9 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 val followStatus = FollowStatus.fromInt(track.status)
 
                 // allow follow status to update
-                if (mdex.updateFollowStatus(MdUtil.getMangaUUID(track.tracking_url), followStatus)) {
+                if (
+                    mdex.updateFollowStatus(MdUtil.getMangaUUID(track.tracking_url), followStatus)
+                ) {
                     manga.follow_status = followStatus
                     mangaRepository.updateManga(manga)
                 }
@@ -87,7 +89,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                             track.last_chapter_read.toInt() == track.total_chapters
                     ) {
                         val newFollowStatus = FollowStatus.COMPLETED
-                        if (mdex.updateFollowStatus(
+                        if (
+                            mdex.updateFollowStatus(
                                 MdUtil.getMangaUUID(track.tracking_url),
                                 newFollowStatus,
                             )
@@ -101,7 +104,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                     }
                     if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
                         val newFollowStatus = FollowStatus.READING
-                        if (mdex.updateFollowStatus(
+                        if (
+                            mdex.updateFollowStatus(
                                 MdUtil.getMangaUUID(track.tracking_url),
                                 newFollowStatus,
                             )

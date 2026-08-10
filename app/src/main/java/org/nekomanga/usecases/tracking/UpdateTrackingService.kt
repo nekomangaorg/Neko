@@ -15,13 +15,13 @@ class UpdateTrackingService(
 ) {
     suspend fun await(track: TrackItem, service: TrackServiceItem): TrackingUpdate {
         return runCatching {
-                val trackService =
-                    trackManager.getService(service.id)
-                        ?: throw IllegalStateException("Service not found")
-                val updatedTrack = trackService.update(track.toDbTrack())
-                trackRepository.insertTrack(updatedTrack)
-                TrackingUpdate.Success
-            }
+            val trackService =
+                trackManager.getService(service.id)
+                    ?: throw IllegalStateException("Service not found")
+            val updatedTrack = trackService.update(track.toDbTrack())
+            trackRepository.insertTrack(updatedTrack)
+            TrackingUpdate.Success
+        }
             .getOrElse { TrackingUpdate.Error("Error updating tracker", it) }
     }
 }

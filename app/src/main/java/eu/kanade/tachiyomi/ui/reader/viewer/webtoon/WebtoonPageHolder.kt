@@ -309,9 +309,9 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
         if (viewer.adapter.tallSplitPages.contains(page)) {
             val firstSplit =
-                viewer.adapter.items
-                    .filterIsInstance<ReaderPageSplit>()
-                    .firstOrNull { it.page == page }
+                viewer.adapter.items.filterIsInstance<ReaderPageSplit>().firstOrNull {
+                    it.page == page
+                }
             if (firstSplit != null) {
                 regionTop = 0
                 regionHeight = firstSplit.topOffset
@@ -394,9 +394,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
         bitmap ?: return Buffer().write(imageBytes)
 
-        return Buffer().apply {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream())
-        }
+        return Buffer().apply { bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream()) }
     }
 
     private suspend fun process(imageStream: BufferedSource): BufferedSource {

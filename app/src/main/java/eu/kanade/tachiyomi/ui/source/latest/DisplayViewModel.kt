@@ -5,13 +5,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
 import eu.kanade.tachiyomi.util.manga.resyncDisplayManga
 import eu.kanade.tachiyomi.util.manga.unique
 import eu.kanade.tachiyomi.util.system.launchIO
-import java.util.Date
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,10 +18,11 @@ import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.presentation.screens.library.LibraryDisplayMode
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
@@ -182,10 +181,11 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                     _displayScreenState.value.allDisplayManga[index].copy(inLibrary = favorite)
                 _displayScreenState.update {
                     it.copy(
-                        allDisplayManga = buildList {
-                            addAll(it.allDisplayManga)
-                            set(index, tempDisplayManga)
-                        }
+                        allDisplayManga =
+                            buildList {
+                                addAll(it.allDisplayManga)
+                                set(index, tempDisplayManga)
+                            }
                     )
                 }
 
@@ -196,10 +196,11 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                 if (filteredIndex >= 0) {
                     _displayScreenState.update {
                         it.copy(
-                            filteredDisplayManga = buildList {
-                                addAll(it.filteredDisplayManga)
-                                set(filteredIndex, tempDisplayManga)
-                            }
+                            filteredDisplayManga =
+                                buildList {
+                                    addAll(it.filteredDisplayManga)
+                                    set(filteredIndex, tempDisplayManga)
+                                }
                         )
                     }
                 }
@@ -221,9 +222,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
         viewModelScope.launchIO {
             categoryUseCases.modifyCategory.addNewCategory(newCategory)
             _displayScreenState.update {
-                it.copy(
-                    categories = categoryUseCases.getCategories.get()
-                )
+                it.copy(categories = categoryUseCases.getCategories.get())
             }
         }
     }
@@ -246,8 +245,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             _displayScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,
-                    filteredDisplayManga =
-                        newDisplayManga.filterVisibility(preferences).toList(),
+                    filteredDisplayManga = newDisplayManga.filterVisibility(preferences).toList(),
                 )
             }
         }

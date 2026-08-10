@@ -645,9 +645,7 @@ fun SavedFilters(
                     } else {
                         val mutableFilters = savedFilters.toMutableList()
                         val enabledFilter = mutableFilters.removeAt(enabledFilterIndex)
-                        mutableStateOf(
-                            listOf(enabledFilter) + mutableFilters.toList()
-                        )
+                        mutableStateOf(listOf(enabledFilter) + mutableFilters.toList())
                     }
                 }
             val listState: LazyListState = rememberLazyListState()

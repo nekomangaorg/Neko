@@ -151,9 +151,17 @@ internal class DownloadSettingsScreen(
                                     3 to pluralStringResource(R.plurals.next_unread_chapters, 3, 3),
                                     5 to pluralStringResource(R.plurals.next_unread_chapters, 5, 5),
                                     10 to
-                                        pluralStringResource(R.plurals.next_unread_chapters, 10, 10),
+                                        pluralStringResource(
+                                            R.plurals.next_unread_chapters,
+                                            10,
+                                            10,
+                                        ),
                                     20 to
-                                        pluralStringResource(R.plurals.next_unread_chapters, 20, 20),
+                                        pluralStringResource(
+                                            R.plurals.next_unread_chapters,
+                                            20,
+                                            20,
+                                        ),
                                 )
                                 .toMap(),
                     ),
@@ -195,7 +203,7 @@ internal class DownloadSettingsScreen(
                 SearchTerm(
                     title = stringResource(R.string.split_tall_images_download),
                     subtitle = stringResource(R.string.split_tall_images_summary),
-                    group = stringResource(R.string.split_tall_images_download)
+                    group = stringResource(R.string.split_tall_images_download),
                 ),
                 SearchTerm(
                     title = stringResource(R.string.remove_when_marked_as_read),

@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,7 +33,6 @@ import com.mikepenz.markdown.compose.elements.MarkdownOrderedList
 import com.mikepenz.markdown.compose.elements.MarkdownTable
 import com.mikepenz.markdown.compose.elements.MarkdownTableHeader
 import com.mikepenz.markdown.compose.elements.MarkdownTableRow
-import com.mikepenz.markdown.compose.elements.MarkdownText
 import com.mikepenz.markdown.compose.elements.listDepth
 import com.mikepenz.markdown.model.DefaultMarkdownColors
 import com.mikepenz.markdown.model.DefaultMarkdownInlineContent
@@ -42,10 +40,10 @@ import com.mikepenz.markdown.model.DefaultMarkdownTypography
 import com.mikepenz.markdown.model.MarkdownAnnotator
 import com.mikepenz.markdown.model.MarkdownColors
 import com.mikepenz.markdown.model.MarkdownPadding
+import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.MarkdownTypography
 import com.mikepenz.markdown.model.NoOpImageTransformerImpl
 import com.mikepenz.markdown.model.markdownAnnotator
-import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.rememberMarkdownState
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
@@ -72,19 +70,21 @@ fun MarkdownRender(
     loadImages: Boolean = true,
 ) {
     Markdown(
-        markdownState = rememberMarkdownState(
-            content = content,
-            flavour = flavour,
-            immediate = true,
-        ),
+        markdownState =
+            rememberMarkdownState(
+                content = content,
+                flavour = flavour,
+                immediate = true,
+            ),
         annotator = annotator,
         colors = getMarkdownColors(),
         typography = getMarkdownTypography(),
         padding = markdownPadding,
         components = markdownComponents,
-        imageTransformer = remember(loadImages) {
-            if (loadImages) Coil3ImageTransformerImpl else NoOpImageTransformerImpl()
-        },
+        imageTransformer =
+            remember(loadImages) {
+                if (loadImages) Coil3ImageTransformerImpl else NoOpImageTransformerImpl()
+            },
         inlineContent = getMarkdownInlineContent(),
         modifier = modifier,
     )
@@ -104,9 +104,10 @@ fun MarkdownRender(
         typography = getMarkdownTypography(),
         padding = markdownPadding,
         components = markdownComponents,
-        imageTransformer = remember(loadImages) {
-            if (loadImages) Coil3ImageTransformerImpl else NoOpImageTransformerImpl()
-        },
+        imageTransformer =
+            remember(loadImages) {
+                if (loadImages) Coil3ImageTransformerImpl else NoOpImageTransformerImpl()
+            },
         inlineContent = getMarkdownInlineContent(),
         modifier = modifier,
     )
@@ -127,10 +128,11 @@ private fun getMarkdownColors(): MarkdownColors {
 
 @Composable
 @ReadOnlyComposable
-fun getMarkdownLinkStyle() = MaterialTheme.typography.bodyLarge.copy(
-    color = MaterialTheme.colorScheme.primary,
-    fontWeight = FontWeight.Bold,
-)
+fun getMarkdownLinkStyle() =
+    MaterialTheme.typography.bodyLarge.copy(
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+    )
 
 @Composable
 @ReadOnlyComposable
@@ -156,103 +158,109 @@ private fun getMarkdownTypography(): MarkdownTypography {
     )
 }
 
-private val markdownPadding = object : MarkdownPadding {
-    override val block: Dp = 2.dp
-    override val blockQuote: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
-    override val blockQuoteBar: PaddingValues.Absolute = PaddingValues.Absolute(
-        left = 4.dp,
-        top = 2.dp,
-        right = 4.dp,
-        bottom = 2.dp,
-    )
-    override val blockQuoteText: PaddingValues = PaddingValues(vertical = 4.dp)
-    override val codeBlock: PaddingValues = PaddingValues(8.dp)
-    override val list: Dp = 0.dp
-    override val listIndent: Dp = 8.dp
-    override val listItemBottom: Dp = 0.dp
-    override val listItemTop: Dp = 0.dp
-}
+private val markdownPadding =
+    object : MarkdownPadding {
+        override val block: Dp = 2.dp
+        override val blockQuote: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
+        override val blockQuoteBar: PaddingValues.Absolute =
+            PaddingValues.Absolute(
+                left = 4.dp,
+                top = 2.dp,
+                right = 4.dp,
+                bottom = 2.dp,
+            )
+        override val blockQuoteText: PaddingValues = PaddingValues(vertical = 4.dp)
+        override val codeBlock: PaddingValues = PaddingValues(8.dp)
+        override val list: Dp = 0.dp
+        override val listIndent: Dp = 8.dp
+        override val listItemBottom: Dp = 0.dp
+        override val listItemTop: Dp = 0.dp
+    }
 
-private val markdownComponents = markdownComponents(
-    horizontalRule = {
-        MarkdownDivider(
-            modifier = Modifier
-                .padding(vertical = Size.extraTiny)
-                .fillMaxWidth(),
-        )
-    },
-    orderedList = { ol ->
-        MarkdownOrderedList(
-            content = ol.content,
-            node = ol.node,
-            style = ol.typography.ordered,
-            depth = ol.listDepth,
-            markerModifier = { Modifier.alignBy(FirstBaseline) },
-            listModifier = { Modifier.alignBy(FirstBaseline) },
-        )
-    },
-    unorderedList = { ul ->
-        val markers = listOf("•", "◦", "▸", "▹")
-
-        CompositionLocalProvider(
-            LocalBulletListHandler provides { _, _, _, _, _ -> "${markers[ul.listDepth % markers.size]} " },
-        ) {
-            MarkdownBulletList(
-                content = ul.content,
-                node = ul.node,
-                style = ul.typography.bullet,
+private val markdownComponents =
+    markdownComponents(
+        horizontalRule = {
+            MarkdownDivider(modifier = Modifier.padding(vertical = Size.extraTiny).fillMaxWidth())
+        },
+        orderedList = { ol ->
+            MarkdownOrderedList(
+                content = ol.content,
+                node = ol.node,
+                style = ol.typography.ordered,
+                depth = ol.listDepth,
                 markerModifier = { Modifier.alignBy(FirstBaseline) },
                 listModifier = { Modifier.alignBy(FirstBaseline) },
             )
-        }
-    },
-    table = { t ->
-        MarkdownTable(
-            content = t.content,
-            node = t.node,
-            style = t.typography.text,
-            headerBlock = { content, header, tableWidth, style ->
-                MarkdownTableHeader(
-                    content = content,
-                    header = header,
-                    tableWidth = tableWidth,
-                    style = style,
-                    maxLines = Int.MAX_VALUE,
+        },
+        unorderedList = { ul ->
+            val markers = listOf("•", "◦", "▸", "▹")
+
+            CompositionLocalProvider(
+                LocalBulletListHandler provides
+                    { _, _, _, _, _ ->
+                        "${markers[ul.listDepth % markers.size]} "
+                    }
+            ) {
+                MarkdownBulletList(
+                    content = ul.content,
+                    node = ul.node,
+                    style = ul.typography.bullet,
+                    markerModifier = { Modifier.alignBy(FirstBaseline) },
+                    listModifier = { Modifier.alignBy(FirstBaseline) },
                 )
-            },
-            rowBlock = { content, header, tableWidth, style ->
-                MarkdownTableRow(
-                    content = content,
-                    header = header,
-                    tableWidth = tableWidth,
-                    style = style,
-                    maxLines = Int.MAX_VALUE,
-                )
-            },
-        )
-    },
-)
+            }
+        },
+        table = { t ->
+            MarkdownTable(
+                content = t.content,
+                node = t.node,
+                style = t.typography.text,
+                headerBlock = { content, header, tableWidth, style ->
+                    MarkdownTableHeader(
+                        content = content,
+                        header = header,
+                        tableWidth = tableWidth,
+                        style = style,
+                        maxLines = Int.MAX_VALUE,
+                    )
+                },
+                rowBlock = { content, header, tableWidth, style ->
+                    MarkdownTableRow(
+                        content = content,
+                        header = header,
+                        tableWidth = tableWidth,
+                        style = style,
+                        maxLines = Int.MAX_VALUE,
+                    )
+                },
+            )
+        },
+    )
 
 @Composable
 @ReadOnlyComposable
-private fun getMarkdownInlineContent() = DefaultMarkdownInlineContent(
-    inlineContent = mapOf(
-        MARKDOWN_INLINE_IMAGE_TAG to InlineTextContent(
-            placeholder = Placeholder(
-                width = MaterialTheme.typography.bodyMedium.fontSize * 1.25,
-                height = MaterialTheme.typography.bodyMedium.fontSize * 1.25,
-                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
-            ),
-            children = {
-                Icon(
-                    imageVector = Icons.Outlined.Image,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            },
-        ),
-    ),
-)
+private fun getMarkdownInlineContent() =
+    DefaultMarkdownInlineContent(
+        inlineContent =
+            mapOf(
+                MARKDOWN_INLINE_IMAGE_TAG to
+                    InlineTextContent(
+                        placeholder =
+                            Placeholder(
+                                width = MaterialTheme.typography.bodyMedium.fontSize * 1.25,
+                                height = MaterialTheme.typography.bodyMedium.fontSize * 1.25,
+                                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+                            ),
+                        children = {
+                            Icon(
+                                imageVector = Icons.Outlined.Image,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        },
+                    )
+            )
+    )
 
 object SimpleMarkdownFlavourDescriptor : CommonMarkFlavourDescriptor() {
     override val markerProcessorFactory: MarkerProcessorFactory = SimpleMarkdownProcessFactory
@@ -265,17 +273,16 @@ private object SimpleMarkdownProcessFactory : MarkerProcessorFactory {
 }
 
 /**
- * Like `CommonMarkFlavour`, but with html blocks and reference links removed and
- * table support added
+ * Like `CommonMarkFlavour`, but with html blocks and reference links removed and table support
+ * added
  */
 private class SimpleMarkdownMarkerProcessor(
     productionHolder: ProductionHolder,
     constraints: MarkdownConstraints,
 ) : CommonMarkMarkerProcessor(productionHolder, constraints) {
     override fun getMarkerBlockProviders(): List<MarkerBlockProvider<StateInfo>> {
-        return super.getMarkerBlockProviders()
-            .filter { provider ->
-                provider !is HtmlBlockProvider && provider !is LinkReferenceDefinitionProvider
-            } + GitHubTableMarkerProvider()
+        return super.getMarkerBlockProviders().filter { provider ->
+            provider !is HtmlBlockProvider && provider !is LinkReferenceDefinitionProvider
+        } + GitHubTableMarkerProvider()
     }
 }

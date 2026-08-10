@@ -66,9 +66,7 @@ sealed class Preference {
             val pref: PreferenceData<T>,
             override val title: String,
             override val subtitle: String? = "%s",
-            val subtitleProvider:
-                @Composable
-                (value: T, entries: Map<T, String>) -> String? =
+            val subtitleProvider: @Composable (value: T, entries: Map<T, String>) -> String? =
                 { v, e ->
                     subtitle?.format(e[v])
                 },

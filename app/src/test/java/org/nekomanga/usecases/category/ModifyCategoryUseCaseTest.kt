@@ -1,6 +1,7 @@
 package org.nekomanga.usecases.category
 
-import org.nekomanga.presentation.screens.library.LibrarySort
+import eu.kanade.tachiyomi.data.database.models.CategoryImpl
+import eu.kanade.tachiyomi.data.database.models.Manga
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -15,9 +16,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.CategoryImpl
-import eu.kanade.tachiyomi.data.database.models.Manga
 import org.junit.Test
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
@@ -25,6 +23,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.screens.library.LibrarySort
 import tachiyomi.core.preference.Preference
 
 class ModifyCategoryUseCaseTest {
@@ -362,7 +361,11 @@ class ModifyCategoryUseCaseTest {
         runTest {
             // Arrange
             val categoryId = 456
-            val category = CategoryImpl().apply { id = categoryId; name = "To Delete" }
+            val category =
+                CategoryImpl().apply {
+                    id = categoryId
+                    name = "To Delete"
+                }
             coEvery { categoryRepository.getCategoryById(categoryId) } returns category
             coEvery { categoryRepository.deleteCategory(any()) } just runs
 
@@ -380,7 +383,11 @@ class ModifyCategoryUseCaseTest {
             // Arrange
             val categoryId = 456
             val newName = "New Name"
-            val category = CategoryImpl().apply { id = categoryId; name = "Old Name" }
+            val category =
+                CategoryImpl().apply {
+                    id = categoryId
+                    name = "Old Name"
+                }
             coEvery { categoryRepository.getCategoryById(categoryId) } returns category
             coEvery { categoryRepository.insertCategory(any()) } returns categoryId
 
@@ -397,28 +404,39 @@ class ModifyCategoryUseCaseTest {
         }
 
     @Test
-    fun `given category list when reordering then orders are updated sequentially`() =
-        runTest {
-            // Arrange
-            val cat1 = CategoryImpl().apply { id = 10; name = "Cat 10"; order = 5 }
-            val cat2 = CategoryImpl().apply { id = 20; name = "Cat 20"; order = 2 }
-            coEvery { categoryRepository.getCategories() } returns listOf(cat1, cat2)
-            coEvery { categoryRepository.insertCategories(any()) } just runs
-
-            val categoryItem = CategoryItem(id = 10, name = "Cat 10", sortOrder = LibrarySort.Title)
-
-            // Act - Move Cat 10 to index 1 (meaning it comes after Cat 20)
-            useCase.reorderCategories(categoryItem, 1)
-
-            // Assert
-            coVerify(exactly = 1) {
-                categoryRepository.insertCategories(
-                    match { list ->
-                        list.size == 2 &&
-                            list[0].id == 20 && list[0].order == 1 &&
-                            list[1].id == 10 && list[1].order == 2
-                    }
-                )
+    fun `given category list when reordering then orders are updated sequentially`() = runTest {
+        // Arrange
+        val cat1 =
+            CategoryImpl().apply {
+                id = 10
+                name = "Cat 10"
+                order = 5
             }
+        val cat2 =
+            CategoryImpl().apply {
+                id = 20
+                name = "Cat 20"
+                order = 2
+            }
+        coEvery { categoryRepository.getCategories() } returns listOf(cat1, cat2)
+        coEvery { categoryRepository.insertCategories(any()) } just runs
+
+        val categoryItem = CategoryItem(id = 10, name = "Cat 10", sortOrder = LibrarySort.Title)
+
+        // Act - Move Cat 10 to index 1 (meaning it comes after Cat 20)
+        useCase.reorderCategories(categoryItem, 1)
+
+        // Assert
+        coVerify(exactly = 1) {
+            categoryRepository.insertCategories(
+                match { list ->
+                    list.size == 2 &&
+                        list[0].id == 20 &&
+                        list[0].order == 1 &&
+                        list[1].id == 10 &&
+                        list[1].order == 2
+                }
+            )
         }
+    }
 }

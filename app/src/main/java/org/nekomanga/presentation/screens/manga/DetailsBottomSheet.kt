@@ -171,10 +171,11 @@ fun DetailsBottomSheet(
                 themeColorState = themeColorState,
                 isMergedManga = mangaDetailScreenState.manga.isMerged,
                 title = mangaDetailScreenState.manga.currentTitle,
-                altTitles = buildList {
-                    add(mangaDetailScreenState.manga.originalTitle)
-                    addAll(mangaDetailScreenState.manga.alternativeTitles)
-                },
+                altTitles =
+                    buildList {
+                        add(mangaDetailScreenState.manga.originalTitle)
+                        addAll(mangaDetailScreenState.manga.alternativeTitles)
+                    },
                 mergeSearchResults = mangaDetailScreenState.merge.mergeSearchResult,
                 openMergeSource = { url, title ->
                     onNavigate(null)

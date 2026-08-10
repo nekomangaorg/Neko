@@ -34,16 +34,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavKey
-import androidx.compose.ui.platform.LocalLayoutDirection
-import org.nekomanga.presentation.components.listcard.ExpressiveListCard
-import org.nekomanga.presentation.components.listcard.ListCardType
 import eu.kanade.tachiyomi.ui.setting.SettingsScreenType
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.icons.MergeIcon
+import org.nekomanga.presentation.components.listcard.ExpressiveListCard
+import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.EmptyScreen
 import org.nekomanga.presentation.screens.Screens
@@ -124,120 +124,122 @@ private fun mainContent(
     developerMode: Boolean,
     selectedScreen: NavKey?,
 ) {
-    val menuItems = remember(selectedScreen, developerMode) {
-        buildList {
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.general),
-                    icon = Icons.Outlined.Tune,
-                    isSelected = selectedScreen == Screens.Settings.General,
-                    onClick = { onNavigateClick(Screens.Settings.General) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.appearance),
-                    icon = Icons.Outlined.Palette,
-                    isSelected = selectedScreen == Screens.Settings.Appearance,
-                    onClick = { onNavigateClick(Screens.Settings.Appearance) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.library),
-                    icon = Icons.Outlined.CollectionsBookmark,
-                    isSelected =
-                        selectedScreen == Screens.Settings.Library ||
-                            selectedScreen == Screens.Settings.Categories,
-                    onClick = { onNavigateClick(Screens.Settings.Library) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.data_storage),
-                    icon = Icons.Outlined.Folder,
-                    isSelected = selectedScreen == Screens.Settings.DataStorage,
-                    onClick = { onNavigateClick(Screens.Settings.DataStorage) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.site_specific_settings),
-                    icon = Icons.Outlined.Public,
-                    isSelected = selectedScreen == Screens.Settings.MangaDex,
-                    onClick = { onNavigateClick(Screens.Settings.MangaDex) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.merge_source_settings),
-                    icon = MergeIcon,
-                    isSelected = selectedScreen == Screens.Settings.MergeSource,
-                    onClick = { onNavigateClick(Screens.Settings.MergeSource) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.reader),
-                    icon = Icons.AutoMirrored.Default.ChromeReaderMode,
-                    isSelected = selectedScreen == Screens.Settings.Reader,
-                    onClick = { onNavigateClick(Screens.Settings.Reader) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.downloads),
-                    icon = Icons.Outlined.Download,
-                    isSelected = selectedScreen == Screens.Settings.Downloads,
-                    onClick = { onNavigateClick(Screens.Settings.Downloads) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.tracking),
-                    icon = Icons.Outlined.Autorenew,
-                    isSelected = selectedScreen == Screens.Settings.Tracking,
-                    onClick = { onNavigateClick(Screens.Settings.Tracking) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.security),
-                    icon = Icons.Outlined.Security,
-                    isSelected = selectedScreen == Screens.Settings.Security,
-                    onClick = { onNavigateClick(Screens.Settings.Security) },
-                )
-            )
-            add(
-                SettingsMenuItem(
-                    labelText = UiText.StringResource(R.string.advanced),
-                    icon = Icons.Outlined.Code,
-                    isSelected = selectedScreen == Screens.Settings.Advanced,
-                    onClick = { onNavigateClick(Screens.Settings.Advanced) },
-                )
-            )
-            if (BuildConfig.DEBUG || developerMode) {
+    val menuItems =
+        remember(selectedScreen, developerMode) {
+            buildList {
                 add(
                     SettingsMenuItem(
-                        labelText = UiText.StringResource(R.string.debug),
-                        icon = Icons.Outlined.BugReport,
-                        isSelected = selectedScreen == Screens.Settings.Debug,
-                        onClick = { onNavigateClick(Screens.Settings.Debug) },
+                        labelText = UiText.StringResource(R.string.general),
+                        icon = Icons.Outlined.Tune,
+                        isSelected = selectedScreen == Screens.Settings.General,
+                        onClick = { onNavigateClick(Screens.Settings.General) },
                     )
                 )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.appearance),
+                        icon = Icons.Outlined.Palette,
+                        isSelected = selectedScreen == Screens.Settings.Appearance,
+                        onClick = { onNavigateClick(Screens.Settings.Appearance) },
+                    )
+                )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.library),
+                        icon = Icons.Outlined.CollectionsBookmark,
+                        isSelected =
+                            selectedScreen == Screens.Settings.Library ||
+                                selectedScreen == Screens.Settings.Categories,
+                        onClick = { onNavigateClick(Screens.Settings.Library) },
+                    )
+                )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.data_storage),
+                        icon = Icons.Outlined.Folder,
+                        isSelected = selectedScreen == Screens.Settings.DataStorage,
+                        onClick = { onNavigateClick(Screens.Settings.DataStorage) },
+                    )
+                )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.site_specific_settings),
+                        icon = Icons.Outlined.Public,
+                        isSelected = selectedScreen == Screens.Settings.MangaDex,
+                        onClick = { onNavigateClick(Screens.Settings.MangaDex) },
+                    )
+                )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.merge_source_settings),
+                        icon = MergeIcon,
+                        isSelected = selectedScreen == Screens.Settings.MergeSource,
+                        onClick = { onNavigateClick(Screens.Settings.MergeSource) },
+                    )
+                )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.reader),
+                        icon = Icons.AutoMirrored.Default.ChromeReaderMode,
+                        isSelected = selectedScreen == Screens.Settings.Reader,
+                        onClick = { onNavigateClick(Screens.Settings.Reader) },
+                    )
+                )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.downloads),
+                        icon = Icons.Outlined.Download,
+                        isSelected = selectedScreen == Screens.Settings.Downloads,
+                        onClick = { onNavigateClick(Screens.Settings.Downloads) },
+                    )
+                )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.tracking),
+                        icon = Icons.Outlined.Autorenew,
+                        isSelected = selectedScreen == Screens.Settings.Tracking,
+                        onClick = { onNavigateClick(Screens.Settings.Tracking) },
+                    )
+                )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.security),
+                        icon = Icons.Outlined.Security,
+                        isSelected = selectedScreen == Screens.Settings.Security,
+                        onClick = { onNavigateClick(Screens.Settings.Security) },
+                    )
+                )
+                add(
+                    SettingsMenuItem(
+                        labelText = UiText.StringResource(R.string.advanced),
+                        icon = Icons.Outlined.Code,
+                        isSelected = selectedScreen == Screens.Settings.Advanced,
+                        onClick = { onNavigateClick(Screens.Settings.Advanced) },
+                    )
+                )
+                if (BuildConfig.DEBUG || developerMode) {
+                    add(
+                        SettingsMenuItem(
+                            labelText = UiText.StringResource(R.string.debug),
+                            icon = Icons.Outlined.BugReport,
+                            isSelected = selectedScreen == Screens.Settings.Debug,
+                            onClick = { onNavigateClick(Screens.Settings.Debug) },
+                        )
+                    )
+                }
             }
         }
-    }
 
     val layoutDirection = LocalLayoutDirection.current
     val topPadding = contentPadding.calculateTopPadding() + Size.medium
     LazyColumn(
-        contentPadding = PaddingValues(
-            start = contentPadding.calculateStartPadding(layoutDirection),
-            top = topPadding,
-            end = contentPadding.calculateEndPadding(layoutDirection),
-            bottom = contentPadding.calculateBottomPadding(),
-        ),
+        contentPadding =
+            PaddingValues(
+                start = contentPadding.calculateStartPadding(layoutDirection),
+                top = topPadding,
+                end = contentPadding.calculateEndPadding(layoutDirection),
+                bottom = contentPadding.calculateBottomPadding(),
+            ),
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Size.tiny),
     ) {
@@ -245,12 +247,13 @@ private fun mainContent(
             items = menuItems,
             key = { _, item -> item.labelText.hashCode() },
         ) { index, item ->
-            val cardType = when {
-                menuItems.size == 1 -> ListCardType.Single
-                index == 0 -> ListCardType.Top
-                index == menuItems.lastIndex -> ListCardType.Bottom
-                else -> ListCardType.Center
-            }
+            val cardType =
+                when {
+                    menuItems.size == 1 -> ListCardType.Single
+                    index == 0 -> ListCardType.Top
+                    index == menuItems.lastIndex -> ListCardType.Bottom
+                    else -> ListCardType.Center
+                }
             ExpressiveListCard(
                 listCardType = cardType,
                 modifier = Modifier.padding(horizontal = Size.medium),

@@ -247,8 +247,7 @@ class SearchHandler {
             .runCatching {
                 val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
                 val thumbQuality = mangaDexPreferences.coverQuality().get()
-                val mangaList =
-                    mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toList()
+                val mangaList = mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toList()
                 MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaList)
             }
             .mapError {

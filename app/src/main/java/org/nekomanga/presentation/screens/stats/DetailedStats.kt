@@ -215,20 +215,19 @@ private fun TagView(
     val tagStats = detailedStats.detailTagState
     val sortedTagPairs =
         remember(sortType) {
-            tagStats.sortedTagPairs
-                .sortedWith { t, t2 ->
-                    when (sortType) {
-                        Sort.Entries -> t2.second.size.compareTo(t.second.size)
-                        Sort.Chapters ->
-                            t2.second
-                                .sumOf { it.readChapters }
-                                .compareTo(t.second.sumOf { it.readChapters })
-                        Sort.Duration ->
-                            t2.second
-                                .sumOf { it.readDuration }
-                                .compareTo(t.second.sumOf { it.readDuration })
-                    }
+            tagStats.sortedTagPairs.sortedWith { t, t2 ->
+                when (sortType) {
+                    Sort.Entries -> t2.second.size.compareTo(t.second.size)
+                    Sort.Chapters ->
+                        t2.second
+                            .sumOf { it.readChapters }
+                            .compareTo(t.second.sumOf { it.readChapters })
+                    Sort.Duration ->
+                        t2.second
+                            .sumOf { it.readDuration }
+                            .compareTo(t.second.sumOf { it.readDuration })
                 }
+            }
         }
     StatCardView(
         contentPadding = contentPadding,
@@ -305,8 +304,9 @@ private fun CategoryView(
         when (sortedSeries.size <= colors.size) {
             true -> colors
             false ->
-                sortedSeries
-                    .map { Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)) }
+                sortedSeries.map {
+                    Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256))
+                }
         }
     }
 
@@ -347,14 +347,13 @@ private fun StartYearView(
     }
 
     val lineData = remember {
-        sortedSeries
-            .mapNotNull {
-                if (it.key != notStartedString) {
-                    LineData(xValue = it.key, yValue = it.value.size.toFloat())
-                } else {
-                    null
-                }
+        sortedSeries.mapNotNull {
+            if (it.key != notStartedString) {
+                LineData(xValue = it.key, yValue = it.value.size.toFloat())
+            } else {
+                null
             }
+        }
     }
     val colorMap = remember { sortedSeries.associate { it.key to colors[0] }.toMap() }
 
@@ -908,20 +907,19 @@ private fun <T> pieData(
     colorMap: Map<T, Color>,
     sortType: Sort,
 ): List<PieData> {
-    return sortedSeries
-        .mapNotNull { entry ->
-            val data =
-                when (sortType) {
-                    Sort.Entries -> entry.value.size
-                    Sort.Chapters -> entry.value.sumOf { it.readChapters }
-                    Sort.Duration -> entry.value.sumOf { it.readDuration }
-                }
-            if (data.toFloat() > 0) {
-                PieData(data.toFloat(), colorMap[entry.key]!!)
-            } else {
-                null
+    return sortedSeries.mapNotNull { entry ->
+        val data =
+            when (sortType) {
+                Sort.Entries -> entry.value.size
+                Sort.Chapters -> entry.value.sumOf { it.readChapters }
+                Sort.Duration -> entry.value.sumOf { it.readDuration }
             }
+        if (data.toFloat() > 0) {
+            PieData(data.toFloat(), colorMap[entry.key]!!)
+        } else {
+            null
         }
+    }
 }
 
 private enum class Filter {

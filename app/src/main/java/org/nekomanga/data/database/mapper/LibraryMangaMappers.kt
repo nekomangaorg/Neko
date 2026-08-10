@@ -103,11 +103,12 @@ private fun parseChapterCount(
     var validChapterCount = 0
     var startIndex = 0
 
-    val filtered = if (filteredScanlatorsString.isNullOrBlank()) {
-        emptySet()
-    } else {
-        ChapterUtil.getScanlators(filteredScanlatorsString).toSet()
-    }
+    val filtered =
+        if (filteredScanlatorsString.isNullOrBlank()) {
+            emptySet()
+        } else {
+            ChapterUtil.getScanlators(filteredScanlatorsString).toSet()
+        }
 
     while (startIndex < countString.length) {
         val endIndex = countString.indexOf(LibraryDao.RAW_CHAPTER_SEPARATOR, startIndex)
@@ -122,10 +123,14 @@ private fun parseChapterCount(
         if (typeSepIndex != -1) {
             val scanlator = groupString.substring(0, typeSepIndex)
             val restStartIndex = typeSepIndex + LibraryDao.RAW_SCANLATOR_TYPE_SEPARATOR.length
-            val countSepIndex = groupString.indexOf(LibraryDao.RAW_CHAPTER_COUNT_SEPARATOR, restStartIndex)
+            val countSepIndex =
+                groupString.indexOf(LibraryDao.RAW_CHAPTER_COUNT_SEPARATOR, restStartIndex)
             if (countSepIndex != -1) {
                 val uploader = groupString.substring(restStartIndex, countSepIndex)
-                val countStr = groupString.substring(countSepIndex + LibraryDao.RAW_CHAPTER_COUNT_SEPARATOR.length)
+                val countStr =
+                    groupString.substring(
+                        countSepIndex + LibraryDao.RAW_CHAPTER_COUNT_SEPARATOR.length
+                    )
                 val currentGroupCount = countStr.toIntOrNull() ?: 0
                 val scanlators = ChapterUtil.getScanlators(scanlator)
 

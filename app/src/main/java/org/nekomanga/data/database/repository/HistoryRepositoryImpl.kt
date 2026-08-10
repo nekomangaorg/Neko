@@ -132,7 +132,6 @@ class HistoryRepositoryImpl(private val historyDao: HistoryDao) : HistoryReposit
         }
     }
 
-
     // --- Standard Domain Queries ---
 
     override suspend fun getHistoryByMangaId(mangaId: Long): List<History> {

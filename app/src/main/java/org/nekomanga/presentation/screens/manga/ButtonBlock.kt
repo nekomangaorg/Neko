@@ -107,8 +107,7 @@ fun ButtonBlock(
                 add(
                     ActionButtonData(
                         icon =
-                            if (inLibrary) Icons.Filled.Favorite
-                            else Icons.Filled.FavoriteBorder,
+                            if (inLibrary) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                         text = UiText.String(""),
                         contentDescription =
                             if (inLibrary) UiText.StringResource(R.string.remove_from_library)
@@ -119,8 +118,7 @@ fun ButtonBlock(
                             if (inLibrary) {
                                 listOf(
                                     SimpleDropDownItem.Action(
-                                        text =
-                                            UiText.StringResource(R.string.remove_from_library),
+                                        text = UiText.StringResource(R.string.remove_from_library),
                                         onClick = toggleFavorite,
                                     ),
                                     SimpleDropDownItem.Action(
@@ -194,8 +192,7 @@ fun ButtonBlock(
                             },
                         text =
                             UiText.StringResource(
-                                if (mergedCount != 0) R.string.is_merged
-                                else R.string.is_not_merged
+                                if (mergedCount != 0) R.string.is_merged else R.string.is_not_merged
                             ),
                         isChecked = mergedCount != 0,
                         onClick = mergeClick,

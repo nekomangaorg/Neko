@@ -166,4 +166,3 @@ object MdConstants {
 
     val mdAtHomeTokenLifespan = TimeUnit.MINUTES.toMillis(TokenLifespanMinutes)
 }
-

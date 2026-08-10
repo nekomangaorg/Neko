@@ -24,7 +24,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -59,8 +58,6 @@ import java.text.DateFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -90,7 +87,6 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.ArtworkRepository
-
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaAggregateRepository
@@ -98,7 +94,6 @@ import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -119,7 +114,6 @@ import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
-import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
@@ -512,9 +506,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     !effectiveManga.filteredScanlators.isEmpty()
                             ) {
                                 val manga =
-                                    effectiveManga
-                                        .copy(filteredScanlators = listOf())
-                                        .toManga()
+                                    effectiveManga.copy(filteredScanlators = listOf()).toManga()
                                 mangaRepository.updateManga(manga)
                             }
 
@@ -1393,9 +1385,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 }
 
             _mangaDetailScreenState.update {
-                it.copy(
-                    general = it.general.copy(searchChapters = filteredChapters.toList())
-                )
+                it.copy(general = it.general.copy(searchChapters = filteredChapters.toList()))
             }
         }
     }
@@ -1833,7 +1823,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             )
                         )
                     }
-                }
+                },
             )
         }
     }
@@ -1983,23 +1973,23 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             }
 
             runCatching {
-                    val dbManga = mangaRepository.getMangaById(mangaId)!!
-                    statusHandler.getReadChapterIds(dbManga.uuid()).collect { chapterIds ->
-                        val chaptersToMarkRead =
-                            mangaDetailScreenState.value.chapters.allChapters
-                                .asSequence()
-                                .filter { !it.chapter.isMergedChapter() }
-                                .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
-                                .toList()
-                        if (chaptersToMarkRead.isNotEmpty()) {
-                            markChapters(
-                                chaptersToMarkRead,
-                                ChapterMarkActions.Read(),
-                                skipSync = true,
-                            )
-                        }
+                val dbManga = mangaRepository.getMangaById(mangaId)!!
+                statusHandler.getReadChapterIds(dbManga.uuid()).collect { chapterIds ->
+                    val chaptersToMarkRead =
+                        mangaDetailScreenState.value.chapters.allChapters
+                            .asSequence()
+                            .filter { !it.chapter.isMergedChapter() }
+                            .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
+                            .toList()
+                    if (chaptersToMarkRead.isNotEmpty()) {
+                        markChapters(
+                            chaptersToMarkRead,
+                            ChapterMarkActions.Read(),
+                            skipSync = true,
+                        )
                     }
                 }
+            }
                 .onErr {
                     TimberKt.e(it) { "Error trying to mark chapters read from MangaDex" }
                     viewModelScope.launchIO {

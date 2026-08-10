@@ -18,8 +18,10 @@ import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import org.nekomanga.presentation.screens.library.LibraryScreenActions
-import org.nekomanga.presentation.screens.library.LibraryScreenState
+import jp.wasabeef.gap.Gap
+import org.nekomanga.R
+import org.nekomanga.presentation.components.icons.CollapseAllIcon
+import org.nekomanga.presentation.components.icons.ExpandAllIcon
 import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
 import org.nekomanga.presentation.screens.library.filter.FilterCompleted
 import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
@@ -30,10 +32,6 @@ import org.nekomanga.presentation.screens.library.filter.FilterTracked
 import org.nekomanga.presentation.screens.library.filter.FilterUnavailable
 import org.nekomanga.presentation.screens.library.filter.FilterUnread
 import org.nekomanga.presentation.screens.library.filter.LibraryFilterType
-import jp.wasabeef.gap.Gap
-import org.nekomanga.R
-import org.nekomanga.presentation.components.icons.CollapseAllIcon
-import org.nekomanga.presentation.components.icons.ExpandAllIcon
 import org.nekomanga.presentation.theme.Size
 
 @Composable

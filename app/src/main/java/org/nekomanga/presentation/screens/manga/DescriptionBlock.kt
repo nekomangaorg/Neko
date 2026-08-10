@@ -49,17 +49,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import org.nekomanga.presentation.components.MarkdownRender
-import org.nekomanga.presentation.components.SimpleMarkdownFlavourDescriptor
 import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.rememberMarkdownState
-import org.nekomanga.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
+import org.nekomanga.R
 import org.nekomanga.presentation.Chip
+import org.nekomanga.presentation.components.MarkdownRender
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.SimpleMarkdownFlavourDescriptor
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -147,11 +146,7 @@ fun DescriptionBlock(
             },
         ) { expanded ->
             if (expanded) {
-                SelectionContainer {
-                    MarkdownRender(
-                        markdownState = expandedMarkdownState,
-                    )
-                }
+                SelectionContainer { MarkdownRender(markdownState = expandedMarkdownState) }
             } else {
                 CollapsedDescription(markdownState = collapsedMarkdownState) {
                     MoreLessButton(
@@ -459,7 +454,5 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
         )
     }
 }
-
-
 
 fun TimeInterpolator.toEasing() = Easing { x -> getInterpolation(x) }
