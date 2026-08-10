@@ -12,6 +12,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
@@ -21,8 +22,10 @@ import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.viewer.GestureDetectorWithLongTap
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
@@ -127,6 +130,49 @@ class PagerPageHolder(
                     }
                 )
             )
+    }
+
+    private val gestureListener =
+        object : GestureDetectorWithLongTap.Listener() {
+            override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
+                if (width > 0 && height > 0) {
+                    val pos = PointF(ev.x / width.toFloat(), ev.y / height.toFloat())
+                    val navigator = viewer.config.navigator
+                    when (navigator.getAction(pos)) {
+                        ViewerNavigation.NavigationRegion.MENU -> viewer.activity.toggleMenu()
+                        ViewerNavigation.NavigationRegion.NEXT -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveToNext()
+                        }
+                        ViewerNavigation.NavigationRegion.PREV -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveToPrevious()
+                        }
+                        ViewerNavigation.NavigationRegion.RIGHT -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveRight()
+                        }
+                        ViewerNavigation.NavigationRegion.LEFT -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveLeft()
+                        }
+                    }
+                }
+                return true
+            }
+
+            override fun onLongTapConfirmed(ev: MotionEvent) {
+                if (viewer.activity.menuVisible || viewer.config.longTapEnabled) {
+                    viewer.activity.onPageLongTap(page, extraPage)
+                }
+            }
+        }
+
+    private val gestureDetector = GestureDetectorWithLongTap(viewer.activity, gestureListener)
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        gestureDetector.onTouchEvent(ev)
+        return super.dispatchTouchEvent(ev)
     }
 
     override fun onImageLoaded() {

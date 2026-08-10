@@ -22,17 +22,14 @@ fun PagerPageItem(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val pageHolder = remember(page, extraPage) {
-        PagerPageHolder(viewer, page, extraPage).apply {
-            layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+    val pageHolder =
+        remember(page, extraPage) {
+            PagerPageHolder(viewer, page, extraPage).apply {
+                layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            }
         }
-    }
 
-    DisposableEffect(pageHolder) {
-        onDispose {
-            pageHolder.recycle()
-        }
-    }
+    DisposableEffect(pageHolder) { onDispose { pageHolder.recycle() } }
 
     Box(modifier = modifier.fillMaxSize()) {
         AndroidView(

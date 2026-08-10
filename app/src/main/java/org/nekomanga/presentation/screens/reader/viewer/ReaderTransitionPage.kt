@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,11 +25,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -36,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
@@ -51,15 +49,25 @@ fun ReaderTransitionPage(
     manga: Manga?,
     downloadManager: DownloadManager,
     onRetry: (ReaderChapter) -> Unit,
+    onTap: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.fillMaxSize().padding(horizontal = 32.dp),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = { onTap?.invoke() },
+                )
+                .padding(horizontal = 32.dp),
         contentAlignment = Alignment.Center,
     ) {
         ElevatedCard(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth(),
+            onClick = { onTap?.invoke() },
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(24.dp),
@@ -105,8 +113,10 @@ private fun PrevChapterTransitionContent(
 ) {
     val prevChapter = transition.to
     if (prevChapter != null) {
-        val isPrevDownloaded = manga?.let { downloadManager.isChapterDownloaded(prevChapter.chapter, it) } ?: false
-        val isCurrentDownloaded = manga?.let { downloadManager.isChapterDownloaded(transition.from.chapter, it) } ?: false
+        val isPrevDownloaded =
+            manga?.let { downloadManager.isChapterDownloaded(prevChapter.chapter, it) } ?: false
+        val isCurrentDownloaded =
+            manga?.let { downloadManager.isChapterDownloaded(transition.from.chapter, it) } ?: false
 
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
             Text(
@@ -164,8 +174,10 @@ private fun NextChapterTransitionContent(
 ) {
     val nextChapter = transition.to
     if (nextChapter != null) {
-        val isCurrentDownloaded = manga?.let { downloadManager.isChapterDownloaded(transition.from.chapter, it) } ?: false
-        val isNextDownloaded = manga?.let { downloadManager.isChapterDownloaded(nextChapter.chapter, it) } ?: false
+        val isCurrentDownloaded =
+            manga?.let { downloadManager.isChapterDownloaded(transition.from.chapter, it) } ?: false
+        val isNextDownloaded =
+            manga?.let { downloadManager.isChapterDownloaded(nextChapter.chapter, it) } ?: false
 
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
             Text(
@@ -218,7 +230,10 @@ private fun NextChapterTransitionContent(
 @Composable
 private fun DownloadStatusIcon(isDownloaded: Boolean) {
     Icon(
-        painter = painterResource(if (isDownloaded) R.drawable.ic_file_download_24dp else R.drawable.ic_cloud_24dp),
+        painter =
+            painterResource(
+                if (isDownloaded) R.drawable.ic_file_download_24dp else R.drawable.ic_cloud_24dp
+            ),
         contentDescription = null,
         tint = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(20.dp),
@@ -229,17 +244,19 @@ private fun DownloadStatusIcon(isDownloaded: Boolean) {
 private fun MissingChapterWarningSection(transition: ChapterTransition) {
     if (transition.to == null) return
 
-    val hasMissing = when (transition) {
-        is ChapterTransition.Prev -> hasMissingChapters(transition.from, transition.to)
-        is ChapterTransition.Next -> hasMissingChapters(transition.to, transition.from)
-    }
+    val hasMissing =
+        when (transition) {
+            is ChapterTransition.Prev -> hasMissingChapters(transition.from, transition.to)
+            is ChapterTransition.Next -> hasMissingChapters(transition.to, transition.from)
+        }
 
     if (!hasMissing) return
 
-    val diff = when (transition) {
-        is ChapterTransition.Prev -> calculateChapterDifference(transition.from, transition.to)
-        is ChapterTransition.Next -> calculateChapterDifference(transition.to, transition.from)
-    }
+    val diff =
+        when (transition) {
+            is ChapterTransition.Prev -> calculateChapterDifference(transition.from, transition.to)
+            is ChapterTransition.Next -> calculateChapterDifference(transition.to, transition.from)
+        }
 
     Spacer(modifier = Modifier.height(16.dp))
     Surface(
@@ -259,11 +276,12 @@ private fun MissingChapterWarningSection(transition: ChapterTransition) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = pluralStringResource(
-                    R.plurals.missing_chapters_warning,
-                    diff.toInt(),
-                    diff.toInt(),
-                ),
+                text =
+                    pluralStringResource(
+                        R.plurals.missing_chapters_warning,
+                        diff.toInt(),
+                        diff.toInt(),
+                    ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )
@@ -301,15 +319,17 @@ private fun ChapterPreloadStatusSection(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             ) {
                 Text(
-                    text = stringResource(R.string.failed_to_load_pages_, currentState.error.message ?: ""),
+                    text =
+                        stringResource(
+                            R.string.failed_to_load_pages_,
+                            currentState.error.message ?: "",
+                        ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = onRetry) {
-                    Text(text = stringResource(R.string.retry))
-                }
+                Button(onClick = onRetry) { Text(text = stringResource(R.string.retry)) }
             }
         }
         is ReaderChapter.State.Loaded -> {}

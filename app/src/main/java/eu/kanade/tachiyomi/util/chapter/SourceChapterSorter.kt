@@ -77,7 +77,10 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
 fun <T> List<List<T>>.mergeSorted(comparator: Comparator<T>): List<T> {
     val iteratorToCurrentValues = map {
         it.reversed().iterator()
-    }.filter { it.hasNext() }.associateWith { it.next() }.toMutableMap()
+    }
+        .filter { it.hasNext() }
+        .associateWith { it.next() }
+        .toMutableMap()
 
     val c: Comparator<Map.Entry<Iterator<T>, T>> = Comparator.comparing({ it.value }, comparator)
 

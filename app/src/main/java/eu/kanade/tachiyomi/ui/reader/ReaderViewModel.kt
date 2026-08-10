@@ -77,10 +77,10 @@ import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
-import org.nekomanga.domain.network.message
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.manga.toManga
 import org.nekomanga.domain.manga.toMangaItem
+import org.nekomanga.domain.network.message
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
@@ -812,7 +812,9 @@ constructor(
                 val currChapter = currChapters.currChapter
                 currChapter.requestedPage = currChapter.chapter.last_page_read
 
-                mutableState.update { it.copy(manga = manga.toMangaItem(), viewerChapters = currChapters) }
+                mutableState.update {
+                    it.copy(manga = manga.toMangaItem(), viewerChapters = currChapters)
+                }
                 eventChannel.send(Event.ReloadMangaAndChapters)
             }
         }

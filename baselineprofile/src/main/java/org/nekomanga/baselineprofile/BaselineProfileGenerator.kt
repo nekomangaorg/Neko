@@ -15,8 +15,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class BaselineProfileGenerator {
 
-    @get:Rule
-    val rule = BaselineProfileRule()
+    @get:Rule val rule = BaselineProfileRule()
 
     @Test
     fun generate() {
@@ -27,15 +26,13 @@ class BaselineProfileGenerator {
             packageName = targetPackage,
             includeInStartupProfile = true,
             maxIterations = 1,
-            stableIterations = 1
+            stableIterations = 1,
         ) {
             // Go back to the home screen to ensure a clean cold start state
             pressHome()
 
             // Start the main activity with the benchmark intent extra to bypass onboarding
-            startActivityAndWait { intent ->
-                intent.putExtra("is_benchmark", true)
-            }
+            startActivityAndWait { intent -> intent.putExtra("is_benchmark", true) }
 
             // Wait for the package to appear on the screen (timeout of 15 seconds)
             val appOpened = device.wait(Until.hasObject(By.pkg(targetPackage)), 15_000)
@@ -45,12 +42,15 @@ class BaselineProfileGenerator {
 
             // Wait for the main screen (Library, Feed, or Browse) to render.
             // We wait up to 30 seconds to handle slow headless emulators in CI environments.
-            val mainScreenLoaded = device.wait(
-                Until.hasObject(By.text(Pattern.compile("Library|Feed|Browse"))),
-                30_000
-            )
+            val mainScreenLoaded =
+                device.wait(
+                    Until.hasObject(By.text(Pattern.compile("Library|Feed|Browse"))),
+                    30_000,
+                )
             if (!mainScreenLoaded) {
-                throw RuntimeException("Main screen (Library/Feed/Browse) failed to load on startup")
+                throw RuntimeException(
+                    "Main screen (Library/Feed/Browse) failed to load on startup"
+                )
             }
 
             // Click the Feed tab to record feed compilation paths

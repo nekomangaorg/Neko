@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.reader
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -20,11 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -93,8 +92,7 @@ fun GestureNavigationOverlay(
                         fontWeight = FontWeight.Bold,
                         style =
                             LocalTextStyle.current.copy(
-                                drawStyle =
-                                    Stroke(miter = 10f, width = 6f, join = StrokeJoin.Round)
+                                drawStyle = Stroke(miter = 10f, width = 6f, join = StrokeJoin.Round)
                             ),
                     )
                     Text(

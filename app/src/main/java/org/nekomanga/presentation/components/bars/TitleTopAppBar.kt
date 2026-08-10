@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.AutoSizeText
 import org.nekomanga.presentation.components.FlexibleTopBar
@@ -55,16 +53,14 @@ fun TitleTopAppBar(
         Box(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.small)
         ) {
-            val titleModifier = if (onTitleClick != null) {
-                Modifier.clickable(onClick = onTitleClick)
-            } else {
-                Modifier
-            }
+            val titleModifier =
+                if (onTitleClick != null) {
+                    Modifier.clickable(onClick = onTitleClick)
+                } else {
+                    Modifier
+                }
             Column(
-                modifier = Modifier
-                    .fillMaxWidth(.8f)
-                    .align(Alignment.Center)
-                    .then(titleModifier)
+                modifier = Modifier.fillMaxWidth(.8f).align(Alignment.Center).then(titleModifier)
             ) {
                 if (title.isEmpty() && subtitle.isEmpty()) {
                     // Do nothing
@@ -86,7 +82,10 @@ fun TitleTopAppBar(
 
                     AutoSizeText(
                         text = subtitle,
-                        style = MaterialTheme.typography.titleMedium.copy(color = onColor.copy(alpha = 0.7f)),
+                        style =
+                            MaterialTheme.typography.titleMedium.copy(
+                                color = onColor.copy(alpha = 0.7f)
+                            ),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                     )

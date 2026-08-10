@@ -6,6 +6,9 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.viewpager.widget.ViewPager
@@ -38,13 +41,16 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      */
     val pager = createPager()
 
+    /** Target page position to synchronize with Compose Pager. */
+    var requestedPagePosition by mutableStateOf<Pair<Int, Boolean>?>(null)
+
     /**
      * Configuration used by the pager, like allow taps, scale mode on images, page transitions...
      */
     val config = PagerConfig(scope, this)
 
     /** Adapter of the pager. */
-    private val adapter = PagerViewerAdapter(this)
+    val adapter = PagerViewerAdapter(this)
 
     /** Currently active item. It can be a chapter page or a chapter transition. */
     private var currentPage: Any? = null
@@ -85,13 +91,6 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 if (pager.isRestoring) return
-                val page = adapter.joinedItems.getOrNull(position)
-                if (
-                    !activity.isScrollingThroughPagesOrChapters && page?.first !is ChapterTransition
-                ) {
-                    activity.hideMenu()
-                }
-
                 onPageChange(position)
                 TimberKt.d { "finished on page change from pagerListener" }
             }
@@ -152,9 +151,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             val showOnStart = config.navigationOverlayForNewUser
             activity.setNavigation(config.navigator, showOnStart)
         }
-        config.navigationModeInvertedListener = {
-            activity.showNavigationAgain()
-        }
+        config.navigationModeInvertedListener = { activity.showNavigationAgain() }
     }
 
     /** Creates a new ViewPager. */
@@ -371,6 +368,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             }
         if (position != -1) {
             val currentPosition = pager.currentItem
+            requestedPagePosition = position to animated
             pager.setCurrentItem(position, animated)
             // manually call onPageChange since ViewPager listener is not triggered in this case
             if (currentPosition == position) {
@@ -401,27 +399,31 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     }
 
     /** Moves to the page at the right. */
-    protected open fun moveRight() {
-        if (pager.currentItem != adapter.count - 1) {
+    open fun moveRight() {
+        val current = requestedPagePosition?.first ?: pager.currentItem
+        if (current < adapter.count - 1) {
             hasMoved = true
+            requestedPagePosition = (current + 1) to config.usePageTransitions
             val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
             if (holder != null && config.navigateToPan && holder.canPanRight()) {
                 holder.panRight()
             } else {
-                pager.setCurrentItem(pager.currentItem + 1, config.usePageTransitions)
+                pager.setCurrentItem(current + 1, config.usePageTransitions)
             }
         }
     }
 
     /** Moves to the page at the left. */
-    protected open fun moveLeft() {
-        if (pager.currentItem != 0) {
+    open fun moveLeft() {
+        val current = requestedPagePosition?.first ?: pager.currentItem
+        if (current > 0) {
             hasMoved = true
+            requestedPagePosition = (current - 1) to config.usePageTransitions
             val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
             if (holder != null && config.navigateToPan && holder.canPanLeft()) {
                 holder.panLeft()
             } else {
-                pager.setCurrentItem(pager.currentItem - 1, config.usePageTransitions)
+                pager.setCurrentItem(current - 1, config.usePageTransitions)
             }
         }
     }

@@ -18,7 +18,6 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -28,6 +27,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.manga.toManga
@@ -38,7 +38,6 @@ import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -55,23 +54,26 @@ fun ReaderSettingsSheet(
     val state by viewModel.state.collectAsState()
     val manga = remember(state.manga) { state.manga?.toManga() }
     val defaultReadingMode by readerPreferences.defaultReadingMode().collectAsState()
-    val currentReadingMode = remember(manga?.readingModeType, manga?.viewer_flags, defaultReadingMode) {
-        if (manga == null) defaultReadingMode
-        else {
-            val viewer = if (manga.readingModeType == 0) defaultReadingMode else manga.readingModeType
-            if (manga.isLongStrip()) ReadingModeType.WEBTOON.flagValue else viewer
+    val currentReadingMode =
+        remember(manga?.readingModeType, manga?.viewer_flags, defaultReadingMode) {
+            if (manga == null) defaultReadingMode
+            else {
+                val viewer =
+                    if (manga.readingModeType == 0) defaultReadingMode else manga.readingModeType
+                if (manga.isLongStrip()) ReadingModeType.WEBTOON.flagValue else viewer
+            }
         }
-    }
     val isWebtoon = ReadingModeType.isWebtoonType(currentReadingMode)
 
     val readingModeType = manga?.readingModeType ?: 0
     val orientationType = manga?.orientationType ?: OrientationType.DEFAULT.flagValue
 
-    val tabs = listOf(
-        stringResource(R.string.general),
-        if (isWebtoon) stringResource(R.string.webtoon) else stringResource(R.string.paged),
-        stringResource(R.string.filter)
-    )
+    val tabs =
+        listOf(
+            stringResource(R.string.general),
+            if (isWebtoon) stringResource(R.string.webtoon) else stringResource(R.string.paged),
+            stringResource(R.string.filter),
+        )
 
     val pagerState = rememberPagerState(pageCount = { 3 })
     val maxLazyHeight = LocalConfiguration.current.screenHeightDp * 0.6f
@@ -79,18 +81,15 @@ fun ReaderSettingsSheet(
     BaseSheet(
         themeColor = themeColorState,
         maxSheetHeightPercentage = 0.9f,
-        bottomPaddingAroundContent = 0.dp
+        bottomPaddingAroundContent = 0.dp,
     ) {
         Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = Size.medium, vertical = Size.small)
+            modifier =
+                modifier.fillMaxWidth().padding(horizontal = Size.medium, vertical = Size.small)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = Size.medium),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth().padding(bottom = Size.medium),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 SecondaryTabRow(
                     selectedTabIndex = pagerState.currentPage,
@@ -99,27 +98,28 @@ fun ReaderSettingsSheet(
                     divider = {},
                     indicator = {
                         TabRowDefaults.SecondaryIndicator(
-                            Modifier.tabIndicatorOffset(pagerState.currentPage, matchContentSize = true),
-                            color = MaterialTheme.colorScheme.primary
+                            Modifier.tabIndicatorOffset(
+                                pagerState.currentPage,
+                                matchContentSize = true,
+                            ),
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
                             selected = pagerState.currentPage == index,
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
+                            onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                             text = {
                                 Text(
                                     text = title,
                                     style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal
+                                    fontWeight =
+                                        if (pagerState.currentPage == index) FontWeight.Bold
+                                        else FontWeight.Normal,
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -130,28 +130,30 @@ fun ReaderSettingsSheet(
                         context.startActivity(intent)
                         onDismiss()
                     },
-                    modifier = Modifier.padding(start = Size.small)
+                    modifier = Modifier.padding(start = Size.small),
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_outline_settings_24dp),
                         contentDescription = stringResource(R.string.reader_settings),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
 
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredHeightIn(0.dp, maxLazyHeight.dp)
+                modifier = Modifier.fillMaxWidth().requiredHeightIn(0.dp, maxLazyHeight.dp),
             ) { page ->
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
                         when (page) {
-                            0 -> GeneralSettingsTab(readingModeType, orientationType, viewModel, readerPreferences)
+                            0 ->
+                                GeneralSettingsTab(
+                                    readingModeType,
+                                    orientationType,
+                                    viewModel,
+                                    readerPreferences,
+                                )
                             1 -> LayoutSettingsTab(isWebtoon, viewModel, readerPreferences)
                             2 -> FilterSettingsTab(readerPreferences)
                         }
@@ -172,15 +174,14 @@ private fun GeneralSettingsTab(
     val readerTheme by readerPreferences.readerTheme().collectAsState()
     val showPageNumber by readerPreferences.showPageNumber().collectAsState()
     val keepScreenOn by readerPreferences.keepScreenOn().collectAsState()
-    val alwaysShowChapterTransition by readerPreferences.alwaysShowChapterTransition().collectAsState()
+    val alwaysShowChapterTransition by
+        readerPreferences.alwaysShowChapterTransition().collectAsState()
 
-    val currentModeIndex = remember(readingModeType) {
-        ReadingModeType.fromPreference(readingModeType).prefValue
-    }
+    val currentModeIndex =
+        remember(readingModeType) { ReadingModeType.fromPreference(readingModeType).prefValue }
 
-    val currentRotationIndex = remember(orientationType) {
-        OrientationType.fromPreference(orientationType).prefValue
-    }
+    val currentRotationIndex =
+        remember(orientationType) { OrientationType.fromPreference(orientationType).prefValue }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         val readingModeOptions = stringArrayResource(id = R.array.viewers_selector).toList()
@@ -191,7 +192,7 @@ private fun GeneralSettingsTab(
             onSelected = { index ->
                 val readingModeType = ReadingModeType.fromSpinner(index)
                 viewModel.setMangaReadingMode(readingModeType.flagValue)
-            }
+            },
         )
 
         val rotationOptions = stringArrayResource(id = R.array.rotation_type).toList()
@@ -202,7 +203,7 @@ private fun GeneralSettingsTab(
             onSelected = { index ->
                 val rotationType = OrientationType.fromSpinner(index)
                 viewModel.setMangaOrientationType(rotationType.flagValue)
-            }
+            },
         )
 
         val themeOptions = stringArrayResource(id = R.array.reader_themes).toList()
@@ -210,27 +211,25 @@ private fun GeneralSettingsTab(
             label = stringResource(R.string.background_color),
             options = themeOptions,
             selectedIndex = readerTheme,
-            onSelected = { index ->
-                readerPreferences.readerTheme().set(index)
-            }
+            onSelected = { index -> readerPreferences.readerTheme().set(index) },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.show_page_number),
             checked = showPageNumber,
-            onCheckedChange = { readerPreferences.showPageNumber().set(it) }
+            onCheckedChange = { readerPreferences.showPageNumber().set(it) },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.keep_screen_on),
             checked = keepScreenOn,
-            onCheckedChange = { readerPreferences.keepScreenOn().set(it) }
+            onCheckedChange = { readerPreferences.keepScreenOn().set(it) },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.always_show_chapter_transition),
             checked = alwaysShowChapterTransition,
-            onCheckedChange = { readerPreferences.alwaysShowChapterTransition().set(it) }
+            onCheckedChange = { readerPreferences.alwaysShowChapterTransition().set(it) },
         )
     }
 }
@@ -252,8 +251,10 @@ private fun LayoutSettingsTab(
         val webtoonNav by readerPreferences.navigationModeWebtoon().collectAsState()
         val webtoonInvert by readerPreferences.webtoonNavInverted().collectAsState()
         val webtoonPageLayout by readerPreferences.webtoonPageLayout().collectAsState()
-        val webtoonInvertDoublePages by readerPreferences.webtoonInvertDoublePages().collectAsState()
-        val webtoonPageTransitions by readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
+        val webtoonInvertDoublePages by
+            readerPreferences.webtoonInvertDoublePages().collectAsState()
+        val webtoonPageTransitions by
+            readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
         val splitTallImages by readerPreferences.splitTallImagesReader().collectAsState()
 
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -267,11 +268,12 @@ private fun LayoutSettingsTab(
                     } else {
                         readerPreferences.cropBordersWebtoon().set(it)
                     }
-                }
+                },
             )
 
             val sidePaddingOptions = stringArrayResource(id = R.array.webtoon_side_padding).toList()
-            val sidePaddingValues = stringArrayResource(id = R.array.webtoon_side_padding_values).map { it.toInt() }
+            val sidePaddingValues =
+                stringArrayResource(id = R.array.webtoon_side_padding_values).map { it.toInt() }
             val selectedSidePaddingIndex = maxOf(0, sidePaddingValues.indexOf(webtoonSidePadding))
             ReaderChipsSelector(
                 label = stringResource(R.string.pref_webtoon_side_padding),
@@ -279,13 +281,13 @@ private fun LayoutSettingsTab(
                 selectedIndex = selectedSidePaddingIndex,
                 onSelected = { index ->
                     readerPreferences.webtoonSidePadding().set(sidePaddingValues[index])
-                }
+                },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.enable_zoom_out),
                 checked = webtoonEnableZoomOut,
-                onCheckedChange = { readerPreferences.webtoonEnableZoomOut().set(it) }
+                onCheckedChange = { readerPreferences.webtoonEnableZoomOut().set(it) },
             )
 
             val webtoonNavOptions = stringArrayResource(id = R.array.reader_nav).toList()
@@ -293,49 +295,56 @@ private fun LayoutSettingsTab(
                 label = stringResource(R.string.tap_zones),
                 options = webtoonNavOptions,
                 selectedIndex = webtoonNav,
-                onSelected = { readerPreferences.navigationModeWebtoon().set(it) }
+                onSelected = { readerPreferences.navigationModeWebtoon().set(it) },
             )
 
-            val invertTappingOptions = stringArrayResource(id = R.array.invert_tapping_mode).toList()
+            val invertTappingOptions =
+                stringArrayResource(id = R.array.invert_tapping_mode).toList()
             ReaderChipsSelector(
                 label = stringResource(R.string.invert_tapping),
                 options = invertTappingOptions,
                 selectedIndex = webtoonInvert.ordinal,
                 onSelected = { index ->
-                    readerPreferences.webtoonNavInverted().set(ViewerNavigation.TappingInvertMode.values()[index])
-                }
+                    readerPreferences
+                        .webtoonNavInverted()
+                        .set(ViewerNavigation.TappingInvertMode.values()[index])
+                },
             )
 
-            val webtoonPageLayoutOptions = stringArrayResource(id = R.array.webtoon_page_layouts).toList()
-            val selectedWebtoonLayoutIndex = if (webtoonPageLayout == PageLayout.SPLIT_PAGES.webtoonValue) 1 else 0
+            val webtoonPageLayoutOptions =
+                stringArrayResource(id = R.array.webtoon_page_layouts).toList()
+            val selectedWebtoonLayoutIndex =
+                if (webtoonPageLayout == PageLayout.SPLIT_PAGES.webtoonValue) 1 else 0
             ReaderChipsSelector(
                 label = stringResource(R.string.page_layout),
                 options = webtoonPageLayoutOptions,
                 selectedIndex = selectedWebtoonLayoutIndex,
                 onSelected = { index ->
-                    val layoutValue = if (index == 1) PageLayout.SPLIT_PAGES.webtoonValue else PageLayout.SINGLE_PAGE.webtoonValue
+                    val layoutValue =
+                        if (index == 1) PageLayout.SPLIT_PAGES.webtoonValue
+                        else PageLayout.SINGLE_PAGE.webtoonValue
                     readerPreferences.webtoonPageLayout().set(layoutValue)
-                }
+                },
             )
 
             if (webtoonPageLayout != PageLayout.SINGLE_PAGE.webtoonValue) {
                 ReaderSwitchSetting(
                     label = stringResource(R.string.invert_double_pages),
                     checked = webtoonInvertDoublePages,
-                    onCheckedChange = { readerPreferences.webtoonInvertDoublePages().set(it) }
+                    onCheckedChange = { readerPreferences.webtoonInvertDoublePages().set(it) },
                 )
             }
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.animate_page_transitions_webtoon),
                 checked = webtoonPageTransitions,
-                onCheckedChange = { readerPreferences.animatedPageTransitionsWebtoon().set(it) }
+                onCheckedChange = { readerPreferences.animatedPageTransitionsWebtoon().set(it) },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.split_tall_images_reader),
                 checked = splitTallImages,
-                onCheckedChange = { readerPreferences.splitTallImagesReader().set(it) }
+                onCheckedChange = { readerPreferences.splitTallImagesReader().set(it) },
             )
         }
     } else {
@@ -361,9 +370,7 @@ private fun LayoutSettingsTab(
                 label = stringResource(R.string.scale_type),
                 options = scaleOptions,
                 selectedIndex = imageScaleType - 1,
-                onSelected = { index ->
-                    readerPreferences.imageScaleType().set(index + 1)
-                }
+                onSelected = { index -> readerPreferences.imageScaleType().set(index + 1) },
             )
 
             val zoomStartOptions = stringArrayResource(id = R.array.zoom_start).toList()
@@ -371,21 +378,19 @@ private fun LayoutSettingsTab(
                 label = stringResource(R.string.zoom_start_position),
                 options = zoomStartOptions,
                 selectedIndex = zoomStart - 1,
-                onSelected = { index ->
-                    readerPreferences.zoomStart().set(index + 1)
-                }
+                onSelected = { index -> readerPreferences.zoomStart().set(index + 1) },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.crop_borders),
                 checked = cropBorders,
-                onCheckedChange = { readerPreferences.cropBorders().set(it) }
+                onCheckedChange = { readerPreferences.cropBorders().set(it) },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.animate_page_transitions),
                 checked = pageTransitions,
-                onCheckedChange = { readerPreferences.animatedPageTransitions().set(it) }
+                onCheckedChange = { readerPreferences.animatedPageTransitions().set(it) },
             )
 
             val pagerNavOptions = stringArrayResource(id = R.array.reader_nav).toList()
@@ -393,17 +398,20 @@ private fun LayoutSettingsTab(
                 label = stringResource(R.string.tap_zones),
                 options = pagerNavOptions,
                 selectedIndex = pagerNav,
-                onSelected = { readerPreferences.navigationModePager().set(it) }
+                onSelected = { readerPreferences.navigationModePager().set(it) },
             )
 
-            val invertTappingOptions = stringArrayResource(id = R.array.invert_tapping_mode).toList()
+            val invertTappingOptions =
+                stringArrayResource(id = R.array.invert_tapping_mode).toList()
             ReaderChipsSelector(
                 label = stringResource(R.string.invert_tapping),
                 options = invertTappingOptions,
                 selectedIndex = pagerInvert.ordinal,
                 onSelected = { index ->
-                    readerPreferences.pagerNavInverted().set(ViewerNavigation.TappingInvertMode.values()[index])
-                }
+                    readerPreferences
+                        .pagerNavInverted()
+                        .set(ViewerNavigation.TappingInvertMode.values()[index])
+                },
             )
 
             val pagedLayoutOptions = stringArrayResource(id = R.array.page_layouts).toList()
@@ -411,14 +419,14 @@ private fun LayoutSettingsTab(
                 label = stringResource(R.string.page_layout),
                 options = pagedLayoutOptions,
                 selectedIndex = pageLayoutPref,
-                onSelected = { readerPreferences.pageLayout().set(it) }
+                onSelected = { readerPreferences.pageLayout().set(it) },
             )
 
             if (pageLayoutPref != PageLayout.SINGLE_PAGE.value) {
                 ReaderSwitchSetting(
                     label = stringResource(R.string.invert_double_pages),
                     checked = invertDoublePages,
-                    onCheckedChange = { readerPreferences.invertDoublePages().set(it) }
+                    onCheckedChange = { readerPreferences.invertDoublePages().set(it) },
                 )
 
                 val gapOptions = stringArrayResource(id = R.array.double_page_gap).toList()
@@ -429,7 +437,7 @@ private fun LayoutSettingsTab(
                     selectedIndex = selectedGapIndex,
                     onSelected = { index ->
                         readerPreferences.doublePageGap().set(gapOptions[index].toInt())
-                    }
+                    },
                 )
             }
 
@@ -437,37 +445,38 @@ private fun LayoutSettingsTab(
                 ReaderSwitchSetting(
                     label = stringResource(R.string.zoom_double_page_spreads),
                     checked = landscapeZoom,
-                    onCheckedChange = { readerPreferences.landscapeZoom().set(it) }
+                    onCheckedChange = { readerPreferences.landscapeZoom().set(it) },
                 )
             }
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.navigate_pan),
                 checked = navigateToPan,
-                onCheckedChange = { readerPreferences.navigateToPan().set(it) }
+                onCheckedChange = { readerPreferences.navigateToPan().set(it) },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.double_page_rotate),
                 checked = doublePageRotate,
-                onCheckedChange = { readerPreferences.doublePageRotate().set(it) }
+                onCheckedChange = { readerPreferences.doublePageRotate().set(it) },
             )
 
             if (doublePageRotate) {
                 ReaderSwitchSetting(
                     label = stringResource(R.string.double_page_rotate_reverse),
                     checked = doublePageRotateReverse,
-                    onCheckedChange = { readerPreferences.doublePageRotateReverse().set(it) }
+                    onCheckedChange = { readerPreferences.doublePageRotateReverse().set(it) },
                 )
             }
 
             val isFullFit = imageScaleType - 1 in listOf(0, 1, 5)
-            val hasCutout = activity?.window?.decorView?.let { decorView ->
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                    decorView.rootWindowInsets?.displayCutout?.safeInsetTop != null ||
+            val hasCutout =
+                activity?.window?.decorView?.let { decorView ->
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                        decorView.rootWindowInsets?.displayCutout?.safeInsetTop != null ||
                             decorView.rootWindowInsets?.displayCutout?.safeInsetBottom != null
-                } else false
-            } ?: false
+                    } else false
+                } ?: false
 
             if (isFullFit && hasCutout && keepScreenOn) {
                 val cutoutOptions = stringArrayResource(id = R.array.cutout_behavior).toList()
@@ -475,7 +484,7 @@ private fun LayoutSettingsTab(
                     label = stringResource(R.string.cutout_area_behavior),
                     options = cutoutOptions,
                     selectedIndex = pagerCutoutBehavior,
-                    onSelected = { readerPreferences.pagerCutoutBehavior().set(it) }
+                    onSelected = { readerPreferences.pagerCutoutBehavior().set(it) },
                 )
             }
         }
@@ -483,9 +492,7 @@ private fun LayoutSettingsTab(
 }
 
 @Composable
-private fun FilterSettingsTab(
-    readerPreferences: ReaderPreferences,
-) {
+private fun FilterSettingsTab(readerPreferences: ReaderPreferences) {
     val grayscale by readerPreferences.grayscale().collectAsState()
     val invertedColors by readerPreferences.invertedColors().collectAsState()
     val colorFilter by readerPreferences.colorFilter().collectAsState()
@@ -503,19 +510,19 @@ private fun FilterSettingsTab(
         ReaderSwitchSetting(
             label = stringResource(R.string.grayscale),
             checked = grayscale,
-            onCheckedChange = { readerPreferences.grayscale().set(it) }
+            onCheckedChange = { readerPreferences.grayscale().set(it) },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.pref_inverted_colors),
             checked = invertedColors,
-            onCheckedChange = { readerPreferences.invertedColors().set(it) }
+            onCheckedChange = { readerPreferences.invertedColors().set(it) },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.use_custom_brightness),
             checked = customBrightness,
-            onCheckedChange = { readerPreferences.customBrightness().set(it) }
+            onCheckedChange = { readerPreferences.customBrightness().set(it) },
         )
 
         if (customBrightness) {
@@ -524,14 +531,14 @@ private fun FilterSettingsTab(
                 value = customBrightnessValue.toFloat(),
                 valueRange = -75f..100f,
                 valueFormatter = { it.roundToInt().toString() },
-                onValueChange = { readerPreferences.customBrightnessValue().set(it.roundToInt()) }
+                onValueChange = { readerPreferences.customBrightnessValue().set(it.roundToInt()) },
             )
         }
 
         ReaderSwitchSetting(
             label = stringResource(R.string.use_custom_color_filter),
             checked = colorFilter,
-            onCheckedChange = { readerPreferences.colorFilter().set(it) }
+            onCheckedChange = { readerPreferences.colorFilter().set(it) },
         )
 
         if (colorFilter) {
@@ -540,7 +547,7 @@ private fun FilterSettingsTab(
                 label = stringResource(R.string.color_filter_blend_mode),
                 options = blendModes,
                 selectedIndex = colorFilterMode,
-                onSelected = { readerPreferences.colorFilterMode().set(it) }
+                onSelected = { readerPreferences.colorFilterMode().set(it) },
             )
 
             ReaderSliderSetting(
@@ -550,7 +557,7 @@ private fun FilterSettingsTab(
                 valueFormatter = { it.roundToInt().toString() },
                 onValueChange = { value ->
                     updateColorComponent(value.roundToInt(), ALPHA_MASK, 24, readerPreferences)
-                }
+                },
             )
 
             ReaderSliderSetting(
@@ -560,7 +567,7 @@ private fun FilterSettingsTab(
                 valueFormatter = { it.roundToInt().toString() },
                 onValueChange = { value ->
                     updateColorComponent(value.roundToInt(), RED_MASK, 16, readerPreferences)
-                }
+                },
             )
 
             ReaderSliderSetting(
@@ -570,7 +577,7 @@ private fun FilterSettingsTab(
                 valueFormatter = { it.roundToInt().toString() },
                 onValueChange = { value ->
                     updateColorComponent(value.roundToInt(), GREEN_MASK, 8, readerPreferences)
-                }
+                },
             )
 
             ReaderSliderSetting(
@@ -580,7 +587,7 @@ private fun FilterSettingsTab(
                 valueFormatter = { it.roundToInt().toString() },
                 onValueChange = { value ->
                     updateColorComponent(value.roundToInt(), BLUE_MASK, 0, readerPreferences)
-                }
+                },
             )
         }
     }
@@ -596,7 +603,7 @@ fun SettingsSectionHeader(
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.Bold,
-        modifier = modifier.padding(vertical = Size.smedium)
+        modifier = modifier.padding(vertical = Size.smedium),
     )
 }
 
@@ -609,21 +616,17 @@ fun ReaderChipsSelector(
     onSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = Size.small)
-    ) {
+    Column(modifier = modifier.fillMaxWidth().padding(vertical = Size.small)) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = Size.tiny)
+            modifier = Modifier.padding(bottom = Size.tiny),
         )
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Size.small),
-            verticalArrangement = Arrangement.spacedBy(Size.small)
+            verticalArrangement = Arrangement.spacedBy(Size.small),
         ) {
             options.forEachIndexed { index, option ->
                 val selected = index == selectedIndex
@@ -631,18 +634,21 @@ fun ReaderChipsSelector(
                     selected = selected,
                     onClick = { onSelected(index) },
                     label = { Text(option) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        borderColor = Color.Transparent,
-                        selectedBorderColor = Color.Transparent,
-                        enabled = true,
-                        selected = selected
-                    )
+                    colors =
+                        FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            containerColor =
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
+                    border =
+                        FilterChipDefaults.filterChipBorder(
+                            borderColor = Color.Transparent,
+                            selectedBorderColor = Color.Transparent,
+                            enabled = true,
+                            selected = selected,
+                        ),
                 )
             }
         }
@@ -658,19 +664,20 @@ fun ReaderSwitchSetting(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
-            .padding(vertical = Size.smedium)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable { onCheckedChange(!checked) }
+                .padding(vertical = Size.smedium),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
         )
     }
 }
@@ -684,36 +691,33 @@ fun ReaderSliderSetting(
     onValueChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier
-        .fillMaxWidth()
-        .padding(vertical = Size.small)) {
+    Column(modifier = modifier.fillMaxWidth().padding(vertical = Size.small)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Text(
                 text = valueFormatter(value),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
         }
         Slider(
             value = value,
             onValueChange = onValueChange,
             valueRange = valueRange,
-            colors = SliderDefaults.colors(
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
-                thumbColor = MaterialTheme.colorScheme.primary
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Size.tiny)
+            colors =
+                SliderDefaults.colors(
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                ),
+            modifier = Modifier.fillMaxWidth().padding(top = Size.tiny),
         )
     }
 }

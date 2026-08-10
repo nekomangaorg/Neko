@@ -7,10 +7,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,28 +83,24 @@ fun ReaderChaptersSheet(
     BaseSheet(
         themeColor = themeColorState,
         maxSheetHeightPercentage = 0.9f,
-        bottomPaddingAroundContent = 0.dp
+        bottomPaddingAroundContent = 0.dp,
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(vertical = Size.small)
-        ) {
+        Column(modifier = modifier.fillMaxWidth().padding(vertical = Size.small)) {
             // Drag handle pill is drawn by BaseSheet, so we build the header shortcuts row
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = Size.medium, vertical = Size.small),
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = Size.medium, vertical = Size.small),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 if (isChaptersEnabled) {
                     IconButton(onClick = onDismiss) {
                         Icon(
                             painter = painterResource(R.drawable.ic_format_list_numbered_24dp),
                             contentDescription = stringResource(R.string.chapters),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -114,7 +110,7 @@ fun ReaderChaptersSheet(
                         Icon(
                             painter = painterResource(R.drawable.ic_view_comments_24p),
                             contentDescription = stringResource(R.string.comments),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -124,7 +120,7 @@ fun ReaderChaptersSheet(
                         Icon(
                             painter = painterResource(R.drawable.ic_open_in_webview_24dp),
                             contentDescription = stringResource(R.string.open_in_webview),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -134,7 +130,7 @@ fun ReaderChaptersSheet(
                         Icon(
                             painter = painterResource(readingModeIconRes),
                             contentDescription = stringResource(R.string.reading_mode),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -144,7 +140,7 @@ fun ReaderChaptersSheet(
                         Icon(
                             painter = painterResource(rotationIconRes),
                             contentDescription = stringResource(R.string.rotation),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -152,9 +148,12 @@ fun ReaderChaptersSheet(
                 if ((isPager || isWebtoon) && isCropBordersEnabled) {
                     IconButton(onClick = onCropBordersClick) {
                         Icon(
-                            imageVector = if (cropBorders) Icons.Default.CropFree else Icons.Default.Crop,
+                            imageVector =
+                                if (cropBorders) Icons.Default.CropFree else Icons.Default.Crop,
                             contentDescription = stringResource(R.string.crop_borders),
-                            tint = if (cropBorders) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            tint =
+                                if (cropBorders) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.outline,
                         )
                     }
                 }
@@ -164,7 +163,9 @@ fun ReaderChaptersSheet(
                         Icon(
                             painter = painterResource(R.drawable.ic_palette),
                             contentDescription = stringResource(R.string.grayscale_toggle),
-                            tint = if (grayscale) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            tint =
+                                if (grayscale) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.outline,
                         )
                     }
                 }
@@ -174,7 +175,7 @@ fun ReaderChaptersSheet(
                         Icon(
                             painter = painterResource(doublePageIconRes),
                             contentDescription = stringResource(R.string.double_pages),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -184,7 +185,7 @@ fun ReaderChaptersSheet(
                         Icon(
                             painter = painterResource(shiftPageIconRes),
                             contentDescription = stringResource(R.string.shift_one_page_over),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -193,25 +194,21 @@ fun ReaderChaptersSheet(
                     Icon(
                         painter = painterResource(R.drawable.ic_tune_24dp),
                         contentDescription = stringResource(R.string.display_options),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
 
             HorizontalDivider()
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = maxLazyHeight)
-            ) {
+            Box(modifier = Modifier.fillMaxWidth().heightIn(max = maxLazyHeight)) {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     itemsIndexed(
                         items = chapters,
-                        key = { _, item -> item.chapter.id ?: 0L }
+                        key = { _, item -> item.chapter.id ?: 0L },
                     ) { index, item ->
                         val isLoading = loadingIndex == index
                         ChapterListItem(
@@ -221,9 +218,7 @@ fun ReaderChaptersSheet(
                                 loadingIndex = index
                                 onChapterClick(item, index)
                             },
-                            onBookmarkClick = {
-                                onBookmarkClick(item)
-                            }
+                            onBookmarkClick = { onBookmarkClick(item) },
                         )
                     }
                 }
@@ -240,74 +235,83 @@ private fun ChapterListItem(
     onBookmarkClick: () -> Unit,
 ) {
     val context = LocalContext.current
-    val chapterColor = remember(item.chapter, item.isCurrent) { Color(ChapterUtil.chapterColor(context, item.chapter)) }
-    val bookmarkColor = remember(item.chapter) { Color(ChapterUtil.bookmarkColor(context, item.chapter)) }
+    val chapterColor =
+        remember(item.chapter, item.isCurrent) {
+            Color(ChapterUtil.chapterColor(context, item.chapter))
+        }
+    val bookmarkColor =
+        remember(item.chapter) { Color(ChapterUtil.bookmarkColor(context, item.chapter)) }
 
     val fontStyle = if (item.isCurrent) FontStyle.Italic else FontStyle.Normal
     val fontWeight = if (item.isCurrent) FontWeight.Bold else FontWeight.Normal
 
     val manga = item.manga
-    val titleText = remember(item.chapter) {
-        if (manga.hideChapterTitle(item.mangaDetailsPreferences)) {
-            val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
-            val number = decimalFormat.format(item.chapter_number.toDouble())
-            context.getString(R.string.chapter_, number)
-        } else {
-            item.name
+    val titleText =
+        remember(item.chapter) {
+            if (manga.hideChapterTitle(item.mangaDetailsPreferences)) {
+                val decimalFormat =
+                    DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
+                val number = decimalFormat.format(item.chapter_number.toDouble())
+                context.getString(R.string.chapter_, number)
+            } else {
+                item.name
+            }
         }
-    }
 
-    val subtitleText = remember(item.chapter) {
-        val statuses = mutableListOf<String>()
-        ChapterUtil.relativeDate(item)?.let { statuses.add(it) }
-        item.scanlator?.takeIf { it.isNotBlank() }?.let { statuses.add(it) }
-        statuses.joinToString(Constants.SEPARATOR)
-    }
+    val subtitleText =
+        remember(item.chapter) {
+            val statuses = mutableListOf<String>()
+            ChapterUtil.relativeDate(item)?.let { statuses.add(it) }
+            item.scanlator?.takeIf { it.isNotBlank() }?.let { statuses.add(it) }
+            statuses.joinToString(Constants.SEPARATOR)
+        }
 
-    val hasLanguage = remember(item.chapter.language) {
-        !item.chapter.language.isNullOrBlank() &&
-            !item.chapter.language.equals("english", true) &&
-            !item.chapter.language.equals("en", true)
-    }
+    val hasLanguage =
+        remember(item.chapter.language) {
+            !item.chapter.language.isNullOrBlank() &&
+                !item.chapter.language.equals("english", true) &&
+                !item.chapter.language.equals("en", true)
+        }
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = !isLoading, onClick = onClick)
-            .padding(horizontal = Size.medium, vertical = Size.small),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier.fillMaxWidth()
+                .clickable(enabled = !isLoading, onClick = onClick)
+                .padding(horizontal = Size.medium, vertical = Size.small),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = titleText,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = fontWeight,
-                    fontStyle = fontStyle,
-                    color = chapterColor
-                )
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = fontWeight,
+                        fontStyle = fontStyle,
+                        color = chapterColor,
+                    ),
             )
             Spacer(modifier = Modifier.height(2.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (hasLanguage) {
                     Text(
                         text = item.chapter.language ?: "",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = fontWeight,
-                            fontStyle = fontStyle,
-                            color = chapterColor
-                        ),
-                        modifier = Modifier.padding(end = Size.small)
+                        style =
+                            MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = fontWeight,
+                                fontStyle = fontStyle,
+                                color = chapterColor,
+                            ),
+                        modifier = Modifier.padding(end = Size.small),
                     )
                 }
                 Text(
                     text = subtitleText,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = fontWeight,
-                        fontStyle = fontStyle,
-                        color = chapterColor
-                    )
+                    style =
+                        MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = fontWeight,
+                            fontStyle = fontStyle,
+                            color = chapterColor,
+                        ),
                 )
             }
         }
@@ -316,17 +320,18 @@ private fun ChapterListItem(
             CircularProgressIndicator(
                 modifier = Modifier.size(24.dp),
                 strokeWidth = 2.dp,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
         } else {
             IconButton(onClick = onBookmarkClick) {
                 Icon(
-                    painter = painterResource(
-                        if (item.chapter.bookmark) R.drawable.ic_bookmark_24dp
-                        else R.drawable.ic_bookmark_border_24dp
-                    ),
+                    painter =
+                        painterResource(
+                            if (item.chapter.bookmark) R.drawable.ic_bookmark_24dp
+                            else R.drawable.ic_bookmark_border_24dp
+                        ),
                     contentDescription = stringResource(R.string.bookmarked),
-                    tint = bookmarkColor
+                    tint = bookmarkColor,
                 )
             }
         }
