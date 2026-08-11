@@ -68,12 +68,12 @@ fun ComposeWebtoonViewer(
 
         // Sync slider or programmatic page jumps
         LaunchedEffect(viewer.requestedPagePosition) {
-            viewer.requestedPagePosition?.let { (targetPage, animated) ->
-                if (targetPage in items.indices) {
-                    if (animated) {
-                        lazyListState.animateScrollToItem(targetPage)
+            viewer.requestedPagePosition?.let { request ->
+                if (request.targetPage in items.indices) {
+                    if (request.animated) {
+                        lazyListState.animateScrollToItem(request.targetPage)
                     } else {
-                        lazyListState.scrollToItem(targetPage)
+                        lazyListState.scrollToItem(request.targetPage)
                     }
                 }
             }
@@ -208,13 +208,14 @@ fun ComposeWebtoonViewer(
             ) {
                 itemsIndexed(
                     items = items,
-                    key = { _, item ->
+                    key = { index, item ->
                         when (item) {
-                            is ReaderPage -> "page_${item.chapter.chapter.id}_${item.index}"
+                            is ReaderPage -> "page_${item.chapter.chapter.id}_${item.index}_$index"
                             is ReaderPageSplit ->
-                                "split_${item.page.chapter.chapter.id}_${item.page.index}_${item.topOffset}"
-                            is ChapterTransition -> "transition_${item.hashCode()}"
-                            else -> item.hashCode()
+                                "split_${item.page.chapter.chapter.id}_${item.page.index}_${item.topOffset}_$index"
+                            is ChapterTransition ->
+                                "transition_${(item as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.from.chapter.id}_${item.to?.chapter?.id}_$index"
+                            else -> "item_${index}_${item.hashCode()}"
                         }
                     },
                 ) { _, item ->

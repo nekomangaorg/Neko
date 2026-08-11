@@ -92,7 +92,17 @@ fun ComposePagerViewer(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 1,
-                    key = { index -> items.getOrNull(index).hashCode() },
+                    key = { index ->
+                        val item = items.getOrNull(index)
+                        val unwrapped = if (item is Pair<*, *>) item.first else item
+                        when (unwrapped) {
+                            is ReaderPage ->
+                                "pager_page_${unwrapped.chapter.chapter.id}_${unwrapped.index}_$index"
+                            is ChapterTransition ->
+                                "pager_transition_${(unwrapped as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${unwrapped.from.chapter.id}_${unwrapped.to?.chapter?.id}_$index"
+                            else -> "pager_item_${index}_${item.hashCode()}"
+                        }
+                    },
                 ) { index ->
                     val item = items.getOrNull(index) ?: return@VerticalPager
                     PagerItemContent(
@@ -108,7 +118,17 @@ fun ComposePagerViewer(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 1,
-                    key = { index -> items.getOrNull(index).hashCode() },
+                    key = { index ->
+                        val item = items.getOrNull(index)
+                        val unwrapped = if (item is Pair<*, *>) item.first else item
+                        when (unwrapped) {
+                            is ReaderPage ->
+                                "pager_page_${unwrapped.chapter.chapter.id}_${unwrapped.index}_$index"
+                            is ChapterTransition ->
+                                "pager_transition_${(unwrapped as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${unwrapped.from.chapter.id}_${unwrapped.to?.chapter?.id}_$index"
+                            else -> "pager_item_${index}_${item.hashCode()}"
+                        }
+                    },
                 ) { index ->
                     val item = items.getOrNull(index) ?: return@HorizontalPager
                     PagerItemContent(

@@ -71,11 +71,12 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
-import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
+import eu.kanade.tachiyomi.ui.base.activity.BaseMainActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Error
@@ -112,6 +113,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
+import eu.kanade.tachiyomi.util.system.setThemeByPref
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
@@ -140,10 +142,14 @@ import kotlinx.coroutines.withContext
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
-import org.nekomanga.databinding.ReaderActivityBinding
+import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.toManga
+import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.extensions.collectAsState as preferenceCollectAsState
 import org.nekomanga.presentation.screens.reader.GestureNavigationOverlay
@@ -157,12 +163,20 @@ import org.nekomanga.presentation.screens.reader.viewer.ComposeWebtoonViewer
 import org.nekomanga.presentation.theme.NekoTheme
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the viewers,
  * to which calls from the view model or UI events are delegated.
  */
-class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
+class ReaderActivity : BaseMainActivity() {
+
+    val preferences: PreferencesHelper by injectLazy()
+    val readerPreferences: ReaderPreferences by injectLazy()
+    val securityPreferences: SecurityPreferences by injectLazy()
+    val networkPreferences: NetworkPreferences by injectLazy()
+    val libraryPreferences: LibraryPreferences by injectLazy()
+    val mangaDetailsPreferences: MangaDetailsPreferences by injectLazy()
 
     val viewModel by viewModels<ReaderViewModel>()
 
@@ -214,7 +228,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     var sheetManageNavColor = false
 
-    private val wic by lazy { WindowInsetsControllerCompat(window, binding.root) }
+    private val wic by lazy { WindowInsetsControllerCompat(window, window.decorView) }
     var lastVis = false
 
     private var snackbar: Snackbar? = null
@@ -235,19 +249,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     var didTransistionFromChapter = false
     var visibleChapterRange = longArrayOf()
     private var backPressedCallback: OnBackPressedCallback? = null
-    private var composeViewVisible: Boolean
-        get() = binding.readerComposeView.isVisible
-        set(value) {
-            binding.readerComposeView.isVisible = value || viewModel.state.value.pageNumberVisible
-        }
 
     private val backCallback = {
         if (chaptersSheetVisible) {
             chaptersSheetVisible = false
-            composeViewVisible = menuVisible || overlayVisible || settingsSheetVisible
         } else if (settingsSheetVisible) {
             settingsSheetVisible = false
-            composeViewVisible = menuVisible || overlayVisible || chaptersSheetVisible
         }
         reEnableBackPressedCallBack()
     }
@@ -283,12 +290,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     /** Called when the activity is created. Initializes the view model and configuration. */
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        setThemeByPref(preferences)
         super.onCreate(savedInstanceState)
-        binding = ReaderActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        binding.readerComposeView.isVisible = true
-        binding.readerComposeView.setContent {
+        setContent {
             NekoTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -363,14 +368,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         navigation = overlayNavigation,
                         isLtr = overlayIsLtr,
                         visible = overlayVisible,
-                        onDismiss = {
-                            overlayVisible = false
-                            composeViewVisible =
-                                menuVisible ||
-                                    overlayVisible ||
-                                    settingsSheetVisible ||
-                                    chaptersSheetVisible
-                        },
+                        onDismiss = { overlayVisible = false },
                         modifier = Modifier.fillMaxSize(),
                     )
                     ReaderAppBar(
@@ -405,14 +403,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         isLoading = state.isLoadingAdjacentChapter,
                         onChaptersClick = {
                             chaptersSheetVisible = true
-                            composeViewVisible = true
                             reEnableBackPressedCallBack()
                         },
                         onCommentsClick = { openWebView(true) },
                         onWebviewClick = { openWebView(false) },
                         onSettingsClick = {
                             settingsSheetVisible = true
-                            composeViewVisible = true
                             reEnableBackPressedCallBack()
                         },
                         pageNumberVisible = state.pageNumberVisible,
@@ -422,8 +418,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         ModalBottomSheet(
                             onDismissRequest = {
                                 settingsSheetVisible = false
-                                composeViewVisible =
-                                    menuVisible || overlayVisible || chaptersSheetVisible
                                 reEnableBackPressedCallBack()
                             },
                             scrimColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -433,8 +427,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                             ReaderSettingsSheet(
                                 onDismiss = {
                                     settingsSheetVisible = false
-                                    composeViewVisible =
-                                        menuVisible || overlayVisible || chaptersSheetVisible
                                     reEnableBackPressedCallBack()
                                 },
                                 viewModel = viewModel,
@@ -445,8 +437,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         ModalBottomSheet(
                             onDismissRequest = {
                                 chaptersSheetVisible = false
-                                composeViewVisible =
-                                    menuVisible || overlayVisible || settingsSheetVisible
                                 reEnableBackPressedCallBack()
                             },
                             scrimColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -556,16 +546,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                         lifecycleScope.launch {
                                             loadChapter(item.chapter)
                                             chaptersSheetVisible = false
-                                            composeViewVisible =
-                                                menuVisible ||
-                                                    overlayVisible ||
-                                                    settingsSheetVisible
                                             reEnableBackPressedCallBack()
                                         }
                                     } else {
                                         chaptersSheetVisible = false
-                                        composeViewVisible =
-                                            menuVisible || overlayVisible || settingsSheetVisible
                                         reEnableBackPressedCallBack()
                                     }
                                 },
@@ -576,15 +560,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                 onCommentsClick = {
                                     openWebView(true)
                                     chaptersSheetVisible = false
-                                    composeViewVisible =
-                                        menuVisible || overlayVisible || settingsSheetVisible
                                     reEnableBackPressedCallBack()
                                 },
                                 onWebviewClick = {
                                     openWebView(false)
                                     chaptersSheetVisible = false
-                                    composeViewVisible =
-                                        menuVisible || overlayVisible || settingsSheetVisible
                                     reEnableBackPressedCallBack()
                                 },
                                 onReadingModeClick = {
@@ -634,13 +614,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                 onDisplayOptionsClick = {
                                     settingsSheetVisible = true
                                     chaptersSheetVisible = false
-                                    composeViewVisible = true
                                     reEnableBackPressedCallBack()
                                 },
                                 onDismiss = {
                                     chaptersSheetVisible = false
-                                    composeViewVisible =
-                                        menuVisible || overlayVisible || settingsSheetVisible
                                     reEnableBackPressedCallBack()
                                 },
                             )
@@ -797,7 +774,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         viewModel.deletePendingChapters()
         coroutine?.cancel()
         viewer?.destroy()
-        binding.viewerContainer.removeAllViews()
         viewer = null
         config = null
         bottomSheet?.dismiss()
@@ -865,7 +841,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         overlayNavigation = navigation
         if (showOnStart) {
             overlayVisible = true
-            composeViewVisible = true
         }
     }
 
@@ -876,7 +851,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 nav !is eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
         ) {
             overlayVisible = true
-            composeViewVisible = true
         }
     }
 
@@ -1009,7 +983,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         val peek = 50.dpToPx
         lastVis = window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) ?: false
         var firstPass = true
-        binding.readerLayout.doOnApplyWindowInsetsCompat { _, insets, _ ->
+        window.decorView.doOnApplyWindowInsetsCompat { _, insets, _ ->
             setNavColor(insets)
             val systemInsets = insets.ignoredSystemInsets
             val vis = insets.isVisible(statusBars())
@@ -1026,11 +1000,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             if (!fullscreen && sheetManageNavColor) {
                 window.navigationBarColor = getResourceColor(R.attr.colorSurface)
             }
-            binding.viewerContainer.requestLayout()
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             @Suppress("DEPRECATION")
-            binding.readerLayout.setOnSystemUiVisibilityChangeListener {
+            window.decorView.setOnSystemUiVisibilityChangeListener {
                 if (readerPreferences.fullscreen().get()) {
                     onVisibilityChange((it and View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0)
                 }
@@ -1110,7 +1083,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     private fun showPageLayoutMenu() {
-        with(binding.readerComposeView) {
+        with(window.decorView) {
             val config = (viewer as? PagerViewer)?.config
             val selectedId =
                 when {
@@ -1157,10 +1130,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         val oldVisibility = menuVisible
         menuVisible = visible
         viewModel.setMenuVisibility(visible)
-        composeViewVisible = visible || overlayVisible
 
         if (visible) coroutine?.cancel()
-        binding.viewerContainer.requestLayout()
         if (visible) {
             snackbar?.dismiss()
             wic.show(systemBars())
@@ -1200,7 +1171,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 viewModel.manga?.readingModeType!! != readerPreferences.defaultReadingMode().get()
         ) {
             snackbar =
-                binding.readerLayout.snack(
+                window.decorView.snack(
                     getString(
                         R.string.reading_,
                         getString(
@@ -1227,12 +1198,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         // Destroy previous viewer if there was one
         if (prevViewer != null) {
             prevViewer.destroy()
-            binding.viewerContainer.removeAllViews()
         }
         viewer = newViewer
-        if (newViewer !is PagerViewer && newViewer !is WebtoonViewer) {
-            binding.viewerContainer.addView(newViewer.getView())
-        }
 
         if (newViewer is PagerViewer) {
             if (readerPreferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
@@ -1250,13 +1217,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         }
 
         overlayIsLtr = newViewer !is R2LPagerViewer
-        binding.viewerContainer.setBackgroundColor(
-            if (viewer is WebtoonViewer) {
-                Color.BLACK
-            } else {
-                getResourceColor(R.attr.background)
-            }
-        )
 
         supportActionBar?.title = manga.user_title ?: manga.title
 
@@ -1734,7 +1694,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     }
                 }
             }
-        snackbar = binding.readerLayout.snack(errorText, 5000)
+        snackbar = window.decorView.snack(errorText, 5000)
     }
 
     private fun onVisibilityChange(visible: Boolean) {
@@ -1756,14 +1716,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         } else {
                             Color.BLACK
                         },
-                        if (binding.root.rootWindowInsetsCompat?.hasSideNavBar() == true) {
+                        if (window.decorView.rootWindowInsetsCompat?.hasSideNavBar() == true) {
                             255
                         } else {
                             179
                         },
                     )
             }
-            composeViewVisible = true
         } else if (!visible && (menuStickyVisible || menuVisible)) {
             if (menuStickyVisible && !menuVisible) {
                 menuStickyVisible = false
@@ -1920,8 +1879,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         private fun setPageNumberVisibility(visible: Boolean) {
             viewModel.setPageNumberVisibility(visible)
-            composeViewVisible =
-                menuVisible || overlayVisible || settingsSheetVisible || chaptersSheetVisible
         }
 
         /** Sets the display profile to [path]. */
@@ -1940,7 +1897,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             WindowCompat.setDecorFitsSystemWindows(window, !enabled || isSplitScreen)
             wic.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            binding.root.rootWindowInsetsCompat?.let { setNavColor(it) }
+            window.decorView.rootWindowInsetsCompat?.let { setNavColor(it) }
         }
 
         /** Sets the keep screen on mode according to [enabled]. */
@@ -2051,13 +2008,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         }
 
         private fun setLayerPaint(grayscale: Boolean, invertedColors: Boolean) {
-            val paint =
-                if (grayscale || invertedColors) {
-                    getCombinedPaint(grayscale, invertedColors)
-                } else {
-                    null
-                }
-            binding.viewerContainer.setLayerType(View.LAYER_TYPE_HARDWARE, paint)
+            // Layer paint is handled natively in Compose
         }
     }
 }

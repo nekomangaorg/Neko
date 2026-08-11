@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -37,8 +38,14 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
     val scope = MainScope()
 
+    data class WebtoonPagePosition(
+        val targetPage: Int,
+        val animated: Boolean,
+        val timestamp: Long = System.nanoTime(),
+    )
+
     /** Target page position to synchronize with Compose LazyList. */
-    var requestedPagePosition by mutableStateOf<Pair<Int, Boolean>?>(null)
+    var requestedPagePosition by mutableStateOf<WebtoonPagePosition?>(null)
 
     /** Delta scroll to synchronize with Compose LazyList. */
     var requestedScrollDelta by mutableStateOf<Int?>(null)
@@ -270,10 +277,12 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         val forceTransition = config.alwaysShowChapterTransition || currentPage is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
+        val pages = chapters.currChapter.pages ?: return
+        val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
+        if (requestedIndex in pages.indices) {
+            moveToPage(pages[requestedIndex], false)
+        }
         if (recycler.isGone) {
-            TimberKt.d { "Recycler first layout" }
-            val pages = chapters.currChapter.pages ?: return
-            moveToPage(pages[min(chapters.currChapter.requestedPage, pages.lastIndex)])
             recycler.isVisible = true
         }
     }
@@ -281,9 +290,10 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Tells this viewer to move to the given [page]. */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
         TimberKt.d { "moveToPage" }
-        val position = adapter.items.indexOf(page)
+        val position =
+            adapter.items.indexOfFirst { it == page || (it as? ReaderPageSplit)?.page == page }
         if (position != -1) {
-            requestedPagePosition = position to animated
+            requestedPagePosition = WebtoonPagePosition(position, animated)
             recycler.scrollToPosition(position)
             if (layoutManager.findLastEndVisibleItemPosition() == -1) {
                 onScrolled(position)
