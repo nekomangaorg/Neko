@@ -97,7 +97,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
     init {
         refreshLayoutParams()
-        frame.setBackgroundColor(Color.BLACK)
+        frame.setBackgroundColor(Color.TRANSPARENT)
 
         frame.onImageLoaded = { onImageDecoded() }
         frame.onImageLoadError = { onImageDecodeError() }
@@ -124,6 +124,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         }
         launchLoadJob()
         refreshLayoutParams()
+        frame.setBackgroundColor(Color.TRANSPARENT)
     }
 
     private fun refreshLayoutParams() {

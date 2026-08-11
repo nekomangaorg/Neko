@@ -42,6 +42,9 @@ class WebtoonConfig(
     var enableZoomOut = false
         private set
 
+    var readerTheme = 0
+        private set
+
     var zoomPropertyChangedListener: ((Boolean) -> Unit)? = null
 
     var splitPages =
@@ -54,6 +57,10 @@ class WebtoonConfig(
     var menuThreshold = PreferenceValues.ReaderHideThreshold.LOW.threshold
 
     init {
+        readerPreferences
+            .readerTheme()
+            .register({ readerTheme = it }, { imagePropertyChangedListener?.invoke() })
+
         readerPreferences.animatedPageTransitionsWebtoon().register({ usePageTransitions = it })
 
         readerPreferences

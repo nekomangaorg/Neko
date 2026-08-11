@@ -413,6 +413,13 @@ constructor(
         val insetInfo: InsetInfo? = null,
     )
 
+    var onDispatchTouchEvent: ((MotionEvent) -> Unit)? = null
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        onDispatchTouchEvent?.invoke(ev)
+        return super.dispatchTouchEvent(ev)
+    }
+
     data class InsetInfo(
         val cutoutBehavior: Int,
         val topCutoutInset: Float,

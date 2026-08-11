@@ -9,6 +9,9 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +36,12 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     val downloadManager: DownloadManager by injectLazy()
 
     val scope = MainScope()
+
+    /** Target page position to synchronize with Compose LazyList. */
+    var requestedPagePosition by mutableStateOf<Pair<Int, Boolean>?>(null)
+
+    /** Delta scroll to synchronize with Compose LazyList. */
+    var requestedScrollDelta by mutableStateOf<Int?>(null)
 
     /** Recycler view used by this viewer. */
     val recycler = WebtoonRecyclerView(activity)
@@ -274,6 +283,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         TimberKt.d { "moveToPage" }
         val position = adapter.items.indexOf(page)
         if (position != -1) {
+            requestedPagePosition = position to animated
             recycler.scrollToPosition(position)
             if (layoutManager.findLastEndVisibleItemPosition() == -1) {
                 onScrolled(position)
@@ -298,6 +308,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
     /** Scrolls up by [scrollDistance]. */
     override fun moveToPrevious() {
+        requestedScrollDelta = -scrollDistance
         if (config.usePageTransitions) {
             recycler.smoothScrollBy(0, -scrollDistance)
         } else {
@@ -307,6 +318,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
     /** Scrolls down by [scrollDistance]. */
     override fun moveToNext() {
+        requestedScrollDelta = scrollDistance
         if (config.usePageTransitions) {
             recycler.smoothScrollBy(0, scrollDistance)
         } else {

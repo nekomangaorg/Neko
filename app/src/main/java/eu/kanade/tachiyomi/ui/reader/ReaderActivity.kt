@@ -153,6 +153,7 @@ import org.nekomanga.presentation.screens.reader.ReaderBottomControls
 import org.nekomanga.presentation.screens.reader.ReaderChaptersSheet
 import org.nekomanga.presentation.screens.reader.ReaderSettingsSheet
 import org.nekomanga.presentation.screens.reader.viewer.ComposePagerViewer
+import org.nekomanga.presentation.screens.reader.viewer.ComposeWebtoonViewer
 import org.nekomanga.presentation.theme.NekoTheme
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -178,6 +179,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     var colorFilterOverlayColor by mutableStateOf(0)
     var colorFilterOverlayMode by mutableStateOf(0)
     var pagedViewerItems by mutableStateOf<List<Any>>(emptyList())
+    var webtoonViewerItems by mutableStateOf<List<Any>>(emptyList())
     var currentViewerState by mutableStateOf<BaseViewer?>(null)
 
     val scope = lifecycleScope
@@ -290,7 +292,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             NekoTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Native Compose Pager Viewer
+                    // Native Compose Viewers
                     val currentViewer = currentViewerState
                     if (currentViewer is PagerViewer && pagedViewerItems.isNotEmpty()) {
                         ComposePagerViewer(
@@ -303,6 +305,17 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                             onPageSelected = { page, hasExtraPage ->
                                 onPageSelected(page, hasExtraPage)
                             },
+                            onTransitionSelected = { _ -> },
+                            onRetryTransition = { chapter -> requestPreloadChapter(chapter) },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    } else if (currentViewer is WebtoonViewer && webtoonViewerItems.isNotEmpty()) {
+                        ComposeWebtoonViewer(
+                            viewer = currentViewer,
+                            items = webtoonViewerItems,
+                            manga = viewModel.manga,
+                            downloadManager = Injekt.get<DownloadManager>(),
+                            onPageSelected = { page -> onPageSelected(page, false) },
                             onTransitionSelected = { _ -> },
                             onRetryTransition = { chapter -> requestPreloadChapter(chapter) },
                             modifier = Modifier.fillMaxSize(),
@@ -1217,7 +1230,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             binding.viewerContainer.removeAllViews()
         }
         viewer = newViewer
-        if (newViewer !is PagerViewer) {
+        if (newViewer !is PagerViewer && newViewer !is WebtoonViewer) {
             binding.viewerContainer.addView(newViewer.getView())
         }
 
@@ -1227,8 +1240,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             }
             lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
             pagedViewerItems = newViewer.adapter.joinedItems.toList()
+            webtoonViewerItems = emptyList()
+        } else if (newViewer is WebtoonViewer) {
+            pagedViewerItems = emptyList()
+            webtoonViewerItems = newViewer.adapter.items.toList()
         } else {
             pagedViewerItems = emptyList()
+            webtoonViewerItems = emptyList()
         }
 
         overlayIsLtr = newViewer !is R2LPagerViewer
@@ -1316,6 +1334,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         viewer?.setChapters(viewerChapters)
         if (viewer is PagerViewer) {
             pagedViewerItems = (viewer as PagerViewer).adapter.joinedItems.toList()
+            webtoonViewerItems = emptyList()
+        } else if (viewer is WebtoonViewer) {
+            pagedViewerItems = emptyList()
+            webtoonViewerItems = (viewer as WebtoonViewer).adapter.items.toList()
         }
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
