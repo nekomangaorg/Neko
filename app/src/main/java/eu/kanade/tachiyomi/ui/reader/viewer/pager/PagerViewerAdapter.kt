@@ -131,7 +131,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         val item2 = joinedItems[position].second
         return when (item) {
             is ReaderPage -> PagerPageHolder(viewer, item, item2 as? ReaderPage)
-            is ChapterTransition -> PagerTransitionHolder(viewer, item)
+            is ChapterTransition -> View(container.context)
             else -> throw NotImplementedError("Holder for ${item.javaClass} not implemented")
         }
     }

@@ -28,9 +28,12 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.presentation.components.sheets.BaseSheet
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @Composable
 fun ReaderChaptersSheet(
@@ -246,9 +249,10 @@ private fun ChapterListItem(
     val fontWeight = if (item.isCurrent) FontWeight.Bold else FontWeight.Normal
 
     val manga = item.manga
+    val mangaDetailsPreferences = remember { Injekt.get<MangaDetailsPreferences>() }
     val titleText =
         remember(item.chapter) {
-            if (manga.hideChapterTitle(item.mangaDetailsPreferences)) {
+            if (manga.hideChapterTitle(mangaDetailsPreferences)) {
                 val decimalFormat =
                     DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
                 val number = decimalFormat.format(item.chapter_number.toDouble())
