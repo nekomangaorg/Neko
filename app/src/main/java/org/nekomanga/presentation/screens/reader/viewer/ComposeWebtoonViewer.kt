@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -34,6 +35,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.abs
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
+import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -48,8 +50,22 @@ fun ComposeWebtoonViewer(
     onRetryTransition: (ReaderChapter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    key(viewer) {
-        val lazyListState = rememberLazyListState()
+    val currentChapterId =
+        (viewer.adapter.currentChapter
+                ?: items.firstOrNull { it is ReaderPage }?.let { (it as ReaderPage).chapter })
+            ?.chapter
+            ?.id
+
+    key(viewer, currentChapterId) {
+        val defaultPageIndex =
+            items.indexOfFirst { it is ReaderPage || it is ReaderPageSplit }.takeIf { it != -1 }
+                ?: 0
+        val initialItemIndex =
+            (viewer.requestedPagePosition?.targetPage ?: defaultPageIndex).coerceIn(
+                0,
+                (items.size - 1).coerceAtLeast(0),
+            )
+        val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = initialItemIndex)
 
         val readerPreferences = remember { Injekt.get<ReaderPreferences>() }
         val readerTheme by readerPreferences.readerTheme().collectAsState()
@@ -75,6 +91,18 @@ fun ComposeWebtoonViewer(
                     } else {
                         lazyListState.scrollToItem(request.targetPage)
                     }
+                }
+            }
+        }
+
+        // Ensure we default to the first actual page instead of a leading transition
+        LaunchedEffect(items) {
+            if (viewer.requestedPagePosition == null && lazyListState.firstVisibleItemIndex == 0) {
+                val firstPageIndex = items.indexOfFirst {
+                    it is ReaderPage || it is ReaderPageSplit
+                }
+                if (firstPageIndex > 0) {
+                    lazyListState.scrollToItem(firstPageIndex)
                 }
             }
         }
@@ -240,6 +268,9 @@ fun ComposeWebtoonViewer(
                                 downloadManager = downloadManager,
                                 onRetry = onRetryTransition,
                                 onTap = { viewer.activity.toggleMenu() },
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .padding(top = Size.small, bottom = Size.extraLarge),
                             )
                         }
                     }

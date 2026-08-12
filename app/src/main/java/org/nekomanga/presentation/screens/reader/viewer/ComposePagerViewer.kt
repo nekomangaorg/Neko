@@ -33,9 +33,27 @@ fun ComposePagerViewer(
     onRetryTransition: (ReaderChapter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    key(viewer::class, isRtl, isVertical) {
+    val currentChapterId =
+        (viewer.adapter.currentChapter
+                ?: items
+                    .firstOrNull {
+                        it is ReaderPage || (it is Pair<*, *> && it.first is ReaderPage)
+                    }
+                    ?.let {
+                        if (it is Pair<*, *>) (it.first as? ReaderPage)?.chapter
+                        else (it as? ReaderPage)?.chapter
+                    })
+            ?.chapter
+            ?.id
+
+    key(viewer::class, currentChapterId, isRtl, isVertical) {
+        val defaultPageIndex =
+            items
+                .indexOfFirst { it is ReaderPage || (it is Pair<*, *> && it.first is ReaderPage) }
+                .takeIf { it != -1 } ?: 0
+
         val initialPage =
-            (viewer.requestedPagePosition?.first ?: 0).coerceIn(
+            (viewer.requestedPagePosition?.first ?: defaultPageIndex).coerceIn(
                 0,
                 (items.size - 1).coerceAtLeast(0),
             )

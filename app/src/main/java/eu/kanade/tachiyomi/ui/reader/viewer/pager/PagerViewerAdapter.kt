@@ -70,7 +70,8 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         if (
             prevHasMissingChapters ||
                 forceTransition ||
-                chapters.prevChapter?.state !is ReaderChapter.State.Loaded
+                (chapters.prevChapter != null &&
+                    chapters.prevChapter.state !is ReaderChapter.State.Loaded)
         ) {
             newItems.add(ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter))
         }

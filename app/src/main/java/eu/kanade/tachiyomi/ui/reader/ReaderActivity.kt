@@ -81,6 +81,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Success
+import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -310,7 +311,9 @@ class ReaderActivity : BaseMainActivity() {
                             onPageSelected = { page, hasExtraPage ->
                                 onPageSelected(page, hasExtraPage)
                             },
-                            onTransitionSelected = { _ -> },
+                            onTransitionSelected = { transition ->
+                                onTransitionSelected(transition)
+                            },
                             onRetryTransition = { chapter -> requestPreloadChapter(chapter) },
                             modifier = Modifier.fillMaxSize(),
                         )
@@ -321,7 +324,9 @@ class ReaderActivity : BaseMainActivity() {
                             manga = viewModel.manga,
                             downloadManager = Injekt.get<DownloadManager>(),
                             onPageSelected = { page -> onPageSelected(page, false) },
-                            onTransitionSelected = { _ -> },
+                            onTransitionSelected = { transition ->
+                                onTransitionSelected(transition)
+                            },
                             onRetryTransition = { chapter -> requestPreloadChapter(chapter) },
                             modifier = Modifier.fillMaxSize(),
                         )
@@ -1396,6 +1401,22 @@ class ReaderActivity : BaseMainActivity() {
             currentPageIndex = progressVal,
             totalPages = pages.lastIndex,
         )
+    }
+
+    /** Called from the viewer whenever a transition is marked as active. */
+    fun onTransitionSelected(transition: ChapterTransition) {
+        viewModel.updatePageProgress(
+            currentPageText = "",
+            totalPagesText = "",
+            currentPageIndex = 0,
+            totalPages = 0,
+        )
+        val toChapter = transition.to
+        if (toChapter != null) {
+            requestPreloadChapter(toChapter)
+        } else if (transition is ChapterTransition.Next) {
+            showMenu()
+        }
     }
 
     /**
