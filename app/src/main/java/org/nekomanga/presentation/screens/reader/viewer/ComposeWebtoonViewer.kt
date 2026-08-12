@@ -1,9 +1,12 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
 import android.graphics.PointF
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,9 +22,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -33,6 +38,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.abs
+import kotlinx.coroutines.launch
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
@@ -66,6 +72,11 @@ fun ComposeWebtoonViewer(
                 (items.size - 1).coerceAtLeast(0),
             )
         val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = initialItemIndex)
+
+        val scaleAnimatable = remember { Animatable(1f) }
+        val offsetXAnimatable = remember { Animatable(0f) }
+        val offsetYAnimatable = remember { Animatable(0f) }
+        val coroutineScope = rememberCoroutineScope()
 
         val readerPreferences = remember { Injekt.get<ReaderPreferences>() }
         val readerTheme by readerPreferences.readerTheme().collectAsState()
@@ -183,55 +194,146 @@ fun ComposeWebtoonViewer(
         Box(modifier = modifier.fillMaxSize().background(backgroundColor)) {
             LazyColumn(
                 state = lazyListState,
+                userScrollEnabled = scaleAnimatable.value <= 1.05f,
                 modifier =
-                    Modifier.fillMaxSize().pointerInput(viewer, items) {
-                        detectTapGestures(
-                            onTap = { offset ->
-                                val screenWidth = size.width.toFloat()
-                                val screenHeight = size.height.toFloat()
-                                if (screenWidth > 0 && screenHeight > 0) {
-                                    val pos =
-                                        PointF(
-                                            offset.x / screenWidth,
-                                            offset.y / screenHeight,
-                                        )
-                                    val navigator = viewer.config.navigator
-                                    when (navigator.getAction(pos)) {
-                                        ViewerNavigation.NavigationRegion.MENU ->
+                    Modifier.fillMaxSize()
+                        .graphicsLayer {
+                            scaleX = scaleAnimatable.value
+                            scaleY = scaleAnimatable.value
+                            translationX = offsetXAnimatable.value
+                            translationY = offsetYAnimatable.value
+                        }
+                        .pointerInput(viewer.config.enableZoomOut) {
+                            detectTransformGestures(panZoomLock = true) { _, pan, zoom, _ ->
+                                val currentScale = scaleAnimatable.value
+                                val newScale =
+                                    (currentScale * zoom).coerceIn(
+                                        if (viewer.config.enableZoomOut) 0.5f else 1f,
+                                        3f,
+                                    )
+                                val currentX = offsetXAnimatable.value
+                                val currentY = offsetYAnimatable.value
+                                coroutineScope.launch {
+                                    scaleAnimatable.snapTo(newScale)
+                                    if (newScale > 1f) {
+                                        val maxOffsetX = (size.width * (newScale - 1f)) / 2f
+                                        val maxOffsetY = (size.height * (newScale - 1f)) / 2f
+                                        val newX =
+                                            (currentX + pan.x).coerceIn(
+                                                -maxOffsetX,
+                                                maxOffsetX,
+                                            )
+                                        val newY =
+                                            (currentY + pan.y).coerceIn(
+                                                -maxOffsetY,
+                                                maxOffsetY,
+                                            )
+                                        offsetXAnimatable.snapTo(newX)
+                                        offsetYAnimatable.snapTo(newY)
+                                    } else {
+                                        offsetXAnimatable.snapTo(0f)
+                                        offsetYAnimatable.snapTo(0f)
+                                    }
+                                }
+                            }
+                            if (scaleAnimatable.value < 1f) {
+                                coroutineScope.launch {
+                                    scaleAnimatable.animateTo(1f, tween(200))
+                                    offsetXAnimatable.animateTo(0f, tween(200))
+                                    offsetYAnimatable.animateTo(0f, tween(200))
+                                }
+                            }
+                        }
+                        .pointerInput(viewer, items) {
+                            detectTapGestures(
+                                onDoubleTap = { offset ->
+                                    coroutineScope.launch {
+                                        if (scaleAnimatable.value > 1.05f) {
+                                            launch { scaleAnimatable.animateTo(1f, tween(250)) }
+                                            launch { offsetXAnimatable.animateTo(0f, tween(250)) }
+                                            launch { offsetYAnimatable.animateTo(0f, tween(250)) }
+                                        } else {
+                                            val targetScale = 2.5f
+                                            val targetX =
+                                                ((size.width / 2f) - offset.x) * (targetScale - 1f)
+                                            val targetY =
+                                                ((size.height / 2f) - offset.y) * (targetScale - 1f)
+                                            val maxOffsetX = (size.width * (targetScale - 1f)) / 2f
+                                            val maxOffsetY = (size.height * (targetScale - 1f)) / 2f
+                                            launch {
+                                                scaleAnimatable.animateTo(targetScale, tween(250))
+                                            }
+                                            launch {
+                                                offsetXAnimatable.animateTo(
+                                                    targetX.coerceIn(-maxOffsetX, maxOffsetX),
+                                                    tween(250),
+                                                )
+                                            }
+                                            launch {
+                                                offsetYAnimatable.animateTo(
+                                                    targetY.coerceIn(-maxOffsetY, maxOffsetY),
+                                                    tween(250),
+                                                )
+                                            }
+                                        }
+                                    }
+                                },
+                                onTap = { offset ->
+                                    if (scaleAnimatable.value > 1.05f) {
+                                        coroutineScope.launch {
+                                            launch { scaleAnimatable.animateTo(1f, tween(200)) }
+                                            launch { offsetXAnimatable.animateTo(0f, tween(200)) }
+                                            launch { offsetYAnimatable.animateTo(0f, tween(200)) }
+                                        }
+                                    } else {
+                                        val screenWidth = size.width.toFloat()
+                                        val screenHeight = size.height.toFloat()
+                                        if (screenWidth > 0 && screenHeight > 0) {
+                                            val pos =
+                                                PointF(
+                                                    offset.x / screenWidth,
+                                                    offset.y / screenHeight,
+                                                )
+                                            val navigator = viewer.config.navigator
+                                            when (navigator.getAction(pos)) {
+                                                ViewerNavigation.NavigationRegion.MENU ->
+                                                    viewer.activity.toggleMenu()
+                                                ViewerNavigation.NavigationRegion.NEXT,
+                                                ViewerNavigation.NavigationRegion.RIGHT -> {
+                                                    if (viewer.activity.menuVisible) {
+                                                        viewer.activity.hideMenu()
+                                                    }
+                                                    viewer.moveToNext()
+                                                }
+                                                ViewerNavigation.NavigationRegion.PREV,
+                                                ViewerNavigation.NavigationRegion.LEFT -> {
+                                                    if (viewer.activity.menuVisible) {
+                                                        viewer.activity.hideMenu()
+                                                    }
+                                                    viewer.moveToPrevious()
+                                                }
+                                            }
+                                        } else {
                                             viewer.activity.toggleMenu()
-                                        ViewerNavigation.NavigationRegion.NEXT,
-                                        ViewerNavigation.NavigationRegion.RIGHT -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveToNext()
-                                        }
-                                        ViewerNavigation.NavigationRegion.PREV,
-                                        ViewerNavigation.NavigationRegion.LEFT -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveToPrevious()
                                         }
                                     }
-                                } else {
-                                    viewer.activity.toggleMenu()
-                                }
-                            },
-                            onLongPress = {
-                                if (viewer.activity.menuVisible || viewer.config.longTapEnabled) {
-                                    val activeItem =
-                                        items.getOrNull(lazyListState.firstVisibleItemIndex)
-                                    val page =
-                                        (activeItem as? ReaderPage)
-                                            ?: (activeItem as? ReaderPageSplit)?.page
-                                    if (page != null) {
-                                        viewer.activity.onPageLongTap(page)
+                                },
+                                onLongPress = {
+                                    if (
+                                        viewer.activity.menuVisible || viewer.config.longTapEnabled
+                                    ) {
+                                        val activeItem =
+                                            items.getOrNull(lazyListState.firstVisibleItemIndex)
+                                        val page =
+                                            (activeItem as? ReaderPage)
+                                                ?: (activeItem as? ReaderPageSplit)?.page
+                                        if (page != null) {
+                                            viewer.activity.onPageLongTap(page)
+                                        }
                                     }
-                                }
-                            },
-                        )
-                    },
+                                },
+                            )
+                        },
                 contentPadding = PaddingValues(bottom = if (hasMargins) 15.dp else 0.dp),
             ) {
                 itemsIndexed(
