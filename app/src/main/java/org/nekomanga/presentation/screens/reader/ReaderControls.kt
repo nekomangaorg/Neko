@@ -46,10 +46,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import org.nekomanga.R
 import org.nekomanga.presentation.components.bars.TitleTopAppBar
+import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,17 +124,22 @@ fun ReaderBottomControls(
         exit = slideOutVertically(targetOffsetY = { it }),
         modifier = modifier,
     ) {
-        val bottomPadding = if (pageNumberVisible) 36.dp else 8.dp
+        val bottomPadding = if (pageNumberVisible) Size.extraLarge + Size.tiny else Size.small
         Box(
             modifier =
                 Modifier.fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = bottomPadding)
+                    .padding(
+                        start = Size.smedium,
+                        end = Size.smedium,
+                        top = Size.small,
+                        bottom = bottomPadding,
+                    )
                     .background(
                         MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(Shapes.coverRadius),
                     )
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .padding(horizontal = Size.smedium, vertical = Size.small - Size.extraTiny)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -145,12 +151,12 @@ fun ReaderBottomControls(
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier.size(Size.huge - Size.small),
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(Size.large),
+                                strokeWidth = Size.extraTiny,
                                 color = MaterialTheme.colorScheme.primary,
                             )
                         } else {
@@ -172,7 +178,7 @@ fun ReaderBottomControls(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.width(44.dp),
+                        modifier = Modifier.width(Size.huge - Size.tiny),
                     )
 
                     val sliderLayoutDirection =
@@ -199,7 +205,7 @@ fun ReaderBottomControls(
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
                                     thumbColor = MaterialTheme.colorScheme.primary,
                                 ),
-                            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                            modifier = Modifier.weight(1f).padding(horizontal = Size.small),
                         )
                     }
 
@@ -208,17 +214,17 @@ fun ReaderBottomControls(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.width(44.dp),
+                        modifier = Modifier.width(Size.huge - Size.tiny),
                     )
 
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier.size(Size.huge - Size.small),
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(Size.large),
+                                strokeWidth = Size.extraTiny,
                                 color = MaterialTheme.colorScheme.primary,
                             )
                         } else {
@@ -233,7 +239,7 @@ fun ReaderBottomControls(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Size.tiny))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -281,7 +287,7 @@ fun PageNumberIndicator(
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.background(Color.Transparent).padding(4.dp),
+        modifier = modifier.background(Color.Transparent).padding(Size.tiny),
     ) {
         // Outline text (rendered behind)
         Text(

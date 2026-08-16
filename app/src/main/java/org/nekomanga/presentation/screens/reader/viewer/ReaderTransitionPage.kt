@@ -34,7 +34,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -78,8 +77,9 @@ fun ReaderTransitionPage(
         contentAlignment = Alignment.Center,
     ) {
         ElevatedCard(
-            shape = RoundedCornerShape(20.dp),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
+            shape = RoundedCornerShape(Size.mediumLarge),
+            elevation =
+                CardDefaults.elevatedCardElevation(defaultElevation = Size.small - Size.extraTiny),
             modifier = Modifier.fillMaxWidth(),
             onClick = { onTap?.invoke() },
         ) {
@@ -143,7 +143,7 @@ private fun PrevChapterTransitionContent(
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 6.dp),
+                modifier = Modifier.padding(top = Size.small - Size.extraTiny),
             ) {
                 Text(
                     text = prevChapter.chapter.name,
@@ -153,12 +153,12 @@ private fun PrevChapterTransitionContent(
                     modifier = Modifier.weight(1f, fill = false),
                 )
                 if (isPrevDownloaded != isCurrentDownloaded) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(Size.small))
                     DownloadStatusIcon(isDownloaded = isPrevDownloaded)
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Size.mediumLarge))
 
             Text(
                 text = stringResource(R.string.current_chapter),
@@ -171,7 +171,7 @@ private fun PrevChapterTransitionContent(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 6.dp),
+                modifier = Modifier.padding(top = Size.small - Size.extraTiny),
             )
         }
     } else {
@@ -181,7 +181,7 @@ private fun PrevChapterTransitionContent(
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(vertical = 12.dp),
+            modifier = Modifier.padding(vertical = Size.smedium),
         )
     }
 }
@@ -211,10 +211,10 @@ private fun NextChapterTransitionContent(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 6.dp),
+                modifier = Modifier.padding(top = Size.small - Size.extraTiny),
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Size.mediumLarge))
 
             Text(
                 text = stringResource(R.string.next_title),
@@ -224,7 +224,7 @@ private fun NextChapterTransitionContent(
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 6.dp),
+                modifier = Modifier.padding(top = Size.small - Size.extraTiny),
             ) {
                 Text(
                     text = nextChapter.chapter.name,
@@ -234,7 +234,7 @@ private fun NextChapterTransitionContent(
                     modifier = Modifier.weight(1f, fill = false),
                 )
                 if (isNextDownloaded != isCurrentDownloaded) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(Size.small))
                     DownloadStatusIcon(isDownloaded = isNextDownloaded)
                 }
             }
@@ -246,7 +246,7 @@ private fun NextChapterTransitionContent(
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(vertical = 12.dp),
+            modifier = Modifier.padding(vertical = Size.smedium),
         )
     }
 }
@@ -260,7 +260,7 @@ private fun DownloadStatusIcon(isDownloaded: Boolean) {
             ),
         contentDescription = null,
         tint = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.size(22.dp),
+        modifier = Modifier.size(Size.large - Size.extraTiny),
     )
 }
 
@@ -282,23 +282,23 @@ private fun MissingChapterWarningSection(transition: ChapterTransition) {
             is ChapterTransition.Next -> calculateChapterDifference(transition.to, transition.from)
         }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(Size.medium))
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Size.small),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(Size.smedium),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = Icons.Outlined.WarningAmber,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(Size.large),
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Size.small))
             Text(
                 text =
                     pluralStringResource(
@@ -327,7 +327,7 @@ private fun ChapterPreloadStatusSection(
         is ReaderChapter.State.Error -> {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = Size.small),
             ) {
                 Text(
                     text =
@@ -339,7 +339,7 @@ private fun ChapterPreloadStatusSection(
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Size.small))
                 Button(onClick = onRetry) { Text(text = stringResource(R.string.retry)) }
             }
         }

@@ -86,7 +86,7 @@ fun ReaderChaptersSheet(
     BaseSheet(
         themeColor = themeColorState,
         maxSheetHeightPercentage = 0.9f,
-        bottomPaddingAroundContent = 0.dp,
+        bottomPaddingAroundContent = Size.none,
     ) {
         Column(modifier = modifier.fillMaxWidth().padding(vertical = Size.small)) {
             // Drag handle pill is drawn by BaseSheet, so we build the header shortcuts row
@@ -294,7 +294,7 @@ private fun ChapterListItem(
                         color = chapterColor,
                     ),
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(Size.extraTiny))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (hasLanguage) {
                     Text(
@@ -322,8 +322,8 @@ private fun ChapterListItem(
 
         if (isLoading) {
             CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                strokeWidth = 2.dp,
+                modifier = Modifier.size(Size.large),
+                strokeWidth = Size.extraTiny,
                 color = MaterialTheme.colorScheme.primary,
             )
         } else {

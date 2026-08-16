@@ -364,7 +364,7 @@ fun ComposeWebtoonViewer(
                                 },
                             )
                         },
-                contentPadding = PaddingValues(bottom = if (hasMargins) 15.dp else 0.dp),
+                contentPadding = PaddingValues(bottom = if (hasMargins) Size.medium else Size.none),
             ) {
                 itemsIndexed(
                     items = items,

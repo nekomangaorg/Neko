@@ -48,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
@@ -163,6 +162,7 @@ import org.nekomanga.presentation.screens.reader.ReaderSettingsSheet
 import org.nekomanga.presentation.screens.reader.viewer.ComposePagerViewer
 import org.nekomanga.presentation.screens.reader.viewer.ComposeWebtoonViewer
 import org.nekomanga.presentation.theme.NekoTheme
+import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -645,7 +645,7 @@ class ReaderActivity : BaseMainActivity() {
                             modifier =
                                 Modifier.align(Alignment.BottomCenter)
                                     .navigationBarsPadding()
-                                    .padding(bottom = 12.dp),
+                                    .padding(bottom = Size.smedium),
                         )
                     }
                     AnimatedVisibility(
@@ -1794,7 +1794,6 @@ class ReaderActivity : BaseMainActivity() {
             val id = pathSegments[1]
             val secondary = pathSegments.getOrNull(2)
             if (secondary == "comments") {
-                openInBrowser(intent.data!!.toString(), true)
                 openInBrowser(intent.data!!.toString(), true)
                 return true
             } else if (!id.isNullOrBlank()) {

@@ -81,7 +81,7 @@ fun ReaderSettingsSheet(
     BaseSheet(
         themeColor = themeColorState,
         maxSheetHeightPercentage = 0.9f,
-        bottomPaddingAroundContent = 0.dp,
+        bottomPaddingAroundContent = Size.none,
     ) {
         Column(
             modifier =
@@ -142,7 +142,7 @@ fun ReaderSettingsSheet(
 
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxWidth().requiredHeightIn(0.dp, maxLazyHeight.dp),
+                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
             ) { page ->
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
