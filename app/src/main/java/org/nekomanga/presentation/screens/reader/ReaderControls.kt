@@ -295,7 +295,7 @@ fun PageNumberIndicator(
             style =
                 MaterialTheme.typography.bodySmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2D2D2D),
+                    color = MaterialTheme.colorScheme.onSurface,
                     drawStyle =
                         Stroke(
                             miter = 10f,
@@ -310,7 +310,7 @@ fun PageNumberIndicator(
             style =
                 MaterialTheme.typography.bodySmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFEBEBEB),
+                    color = MaterialTheme.colorScheme.surface,
                 ),
         )
     }

@@ -196,16 +196,11 @@ class ReaderActivity : BaseMainActivity() {
     var colorFilterOverlayMode by mutableStateOf(0)
     var pagedViewerItems by mutableStateOf<List<Any>>(emptyList())
     var webtoonViewerItems by mutableStateOf<List<Any>>(emptyList())
-    var currentViewerState by mutableStateOf<BaseViewer?>(null)
 
     val scope = lifecycleScope
 
     /** Viewer used to display the pages (pager, webtoon, ...). */
-    var viewer: BaseViewer? = null
-        set(value) {
-            field = value
-            currentViewerState = value
-        }
+    var viewer by mutableStateOf<BaseViewer?>(null)
 
     /** Whether the menu is currently visible. */
     var menuVisible = false
@@ -300,7 +295,7 @@ class ReaderActivity : BaseMainActivity() {
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 Box(modifier = Modifier.fillMaxSize()) {
                     // Native Compose Viewers
-                    val currentViewer = currentViewerState
+                    val currentViewer = viewer
                     if (currentViewer is PagerViewer && pagedViewerItems.isNotEmpty()) {
                         ComposePagerViewer(
                             viewer = currentViewer,
