@@ -1,5 +1,9 @@
 package org.nekomanga.presentation.screens.reader
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -28,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
+import kotlinx.coroutines.delay
 
 @Composable
 fun GestureNavigationOverlay(
@@ -37,70 +42,84 @@ fun GestureNavigationOverlay(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (!visible || navigation == null || navigation is DisabledNavigation) return
+    if (navigation == null || navigation is DisabledNavigation) return
 
     var currentVisible by remember { mutableStateOf(visible) }
-    LaunchedEffect(visible) { currentVisible = visible }
 
-    if (!currentVisible) return
+    LaunchedEffect(visible, navigation, isLtr) {
+        currentVisible = visible
+        if (visible) {
+            delay(1500L)
+            currentVisible = false
+            onDismiss()
+        }
+    }
 
-    val context = LocalContext.current
+    AnimatedVisibility(
+        visible = currentVisible && visible,
+        enter = fadeIn(animationSpec = tween(250)),
+        exit = fadeOut(animationSpec = tween(500)),
+        modifier = modifier.fillMaxSize(),
+    ) {
+        val context = LocalContext.current
 
-    BoxWithConstraints(
-        modifier =
-            modifier.fillMaxSize().pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        if (event.changes.any { it.changedToDown() }) {
-                            currentVisible = false
-                            onDismiss()
+        BoxWithConstraints(
+            modifier =
+                Modifier.fillMaxSize().pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (event.changes.any { it.changedToDown() }) {
+                                currentVisible = false
+                                onDismiss()
+                            }
                         }
                     }
                 }
-            }
-    ) {
-        val width = maxWidth
-        val height = maxHeight
+        ) {
+            val width = maxWidth
+            val height = maxHeight
 
-        navigation.regions.forEach { regionItem ->
-            val region = regionItem.invert(navigation.invertMode)
-            val rect = region.rectF
-            val directionalRegion = region.type.directionalRegion(isLtr)
-            val color = Color(ContextCompat.getColor(context, directionalRegion.colorRes))
+            navigation.regions.forEach { regionItem ->
+                val region = regionItem.invert(navigation.invertMode)
+                val rect = region.rectF
+                val directionalRegion = region.type.directionalRegion(isLtr)
+                val color = Color(ContextCompat.getColor(context, directionalRegion.colorRes))
 
-            val leftDp = width * rect.left
-            val topDp = height * rect.top
-            val rightDp = width * rect.right
-            val bottomDp = height * rect.bottom
+                val leftDp = width * rect.left
+                val topDp = height * rect.top
+                val rightDp = width * rect.right
+                val bottomDp = height * rect.bottom
 
-            val regionWidth = rightDp - leftDp
-            val regionHeight = bottomDp - topDp
+                val regionWidth = rightDp - leftDp
+                val regionHeight = bottomDp - topDp
 
-            Box(
-                modifier =
-                    Modifier.offset(x = leftDp, y = topDp)
-                        .size(width = regionWidth, height = regionHeight)
-                        .background(color)
-            ) {
-                val regionText = stringResource(directionalRegion.nameRes)
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = regionText,
-                        color = Color.Black,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        style =
-                            LocalTextStyle.current.copy(
-                                drawStyle = Stroke(miter = 10f, width = 6f, join = StrokeJoin.Round)
-                            ),
-                    )
-                    Text(
-                        text = regionText,
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
+                Box(
+                    modifier =
+                        Modifier.offset(x = leftDp, y = topDp)
+                            .size(width = regionWidth, height = regionHeight)
+                            .background(color)
+                ) {
+                    val regionText = stringResource(directionalRegion.nameRes)
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = regionText,
+                            color = Color.Black,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            style =
+                                LocalTextStyle.current.copy(
+                                    drawStyle =
+                                        Stroke(miter = 10f, width = 6f, join = StrokeJoin.Round)
+                                ),
+                        )
+                        Text(
+                            text = regionText,
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
         }

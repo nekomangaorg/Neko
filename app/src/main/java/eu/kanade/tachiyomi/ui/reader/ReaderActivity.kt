@@ -844,9 +844,14 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     fun setNavigation(navigation: ViewerNavigation, showOnStart: Boolean) {
+        val isFirstInit = overlayNavigation == null
         overlayNavigation = navigation
-        if (showOnStart) {
-            overlayVisible = true
+        if (isFirstInit) {
+            if (showOnStart) {
+                showNavigationAgain()
+            }
+        } else {
+            showNavigationAgain()
         }
     }
 
