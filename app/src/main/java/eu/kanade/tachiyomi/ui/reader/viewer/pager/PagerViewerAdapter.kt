@@ -24,6 +24,9 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     /** Single list of items */
     private var subItems: MutableList<Any> = mutableListOf()
 
+    var prevTransition: ChapterTransition.Prev? = null
+        private set
+
     var nextTransition: ChapterTransition.Next? = null
         private set
 
@@ -50,13 +53,10 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         val nextHasMissingChapters = hasMissingChapters(chapters.nextChapter, chapters.currChapter)
 
         this.forceTransition = forceTransition
+
         // Add previous chapter pages and transition.
         if (chapters.prevChapter != null) {
-            // We only need to add the last few pages of the previous chapter, because it'll be
-            // selected as the current chapter when one of those pages is selected.
             val prevPages = chapters.prevChapter.pages
-            // We will take an even number of pages if the page count if even
-            // however we should take account full pages when deciding
             val numberOfFullPages =
                 (chapters.prevChapter.pages?.count { it.fullPage == true || it.isolatedPage } ?: 0)
             if (prevPages != null) {
@@ -66,15 +66,20 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             }
         }
 
-        // Skip transition page if the chapter is loaded & current page is not a transition page
-        if (
-            prevHasMissingChapters ||
-                forceTransition ||
-                (chapters.prevChapter != null &&
-                    chapters.prevChapter.state !is ReaderChapter.State.Loaded)
-        ) {
-            newItems.add(ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter))
-        }
+        prevTransition =
+            if (chapters.prevChapter != null) {
+                ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter).also {
+                    if (
+                        prevHasMissingChapters ||
+                            forceTransition ||
+                            chapters.prevChapter.state !is ReaderChapter.State.Loaded
+                    ) {
+                        newItems.add(it)
+                    }
+                }
+            } else {
+                null
+            }
 
         // Add current chapter.
         val currPages = chapters.currChapter.pages
@@ -86,19 +91,21 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
 
         // Add next chapter transition and pages.
         nextTransition =
-            ChapterTransition.Next(chapters.currChapter, chapters.nextChapter).also {
-                if (
-                    nextHasMissingChapters ||
-                        forceTransition ||
-                        chapters.nextChapter?.state !is ReaderChapter.State.Loaded
-                ) {
-                    newItems.add(it)
+            if (chapters.nextChapter != null) {
+                ChapterTransition.Next(chapters.currChapter, chapters.nextChapter).also {
+                    if (
+                        nextHasMissingChapters ||
+                            forceTransition ||
+                            chapters.nextChapter.state !is ReaderChapter.State.Loaded
+                    ) {
+                        newItems.add(it)
+                    }
                 }
+            } else {
+                null
             }
 
         if (chapters.nextChapter != null) {
-            // Add at most two pages, because this chapter will be selected before the user can
-            // swap more pages.
             val nextPages = chapters.nextChapter.pages
             if (nextPages != null) {
                 newItems.addAll(nextPages.take(2))
@@ -389,6 +396,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             index = joinedItems.indexOfFirst { it.first == newerPage || it.second == newerPage }
         }
         if (index > -1) {
+            viewer.requestedPagePosition = index to false
             viewer.pager.setCurrentItem(index, false)
         }
     }

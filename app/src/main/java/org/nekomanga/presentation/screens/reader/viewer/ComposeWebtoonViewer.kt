@@ -21,8 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,7 +64,7 @@ fun ComposeWebtoonViewer(
             ?.chapter
             ?.id
 
-    key(viewer, currentChapterId) {
+    key(viewer, currentChapterId, items.size > 1) {
         val defaultPageIndex =
             items.indexOfFirst { it is ReaderPage || it is ReaderPageSplit }.takeIf { it != -1 }
                 ?: 0
@@ -93,28 +95,53 @@ fun ComposeWebtoonViewer(
                 }
             }
 
-        // Sync slider or programmatic page jumps
-        LaunchedEffect(viewer.requestedPagePosition) {
-            viewer.requestedPagePosition?.let { request ->
-                if (request.targetPage in items.indices) {
-                    if (request.animated) {
-                        lazyListState.animateScrollToItem(request.targetPage)
+        var lastActiveItem by remember { mutableStateOf<Any?>(null) }
+
+        LaunchedEffect(currentChapterId) {
+            viewer.adapter.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
+            viewer.adapter.nextTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
+        }
+
+        LaunchedEffect(items) {
+            val activeItem = lastActiveItem
+            if (activeItem != null) {
+                val newIndex = items.indexOfFirst { item ->
+                    val itemPage = (item as? ReaderPage) ?: (item as? ReaderPageSplit)?.page
+                    val activePage =
+                        (activeItem as? ReaderPage) ?: (activeItem as? ReaderPageSplit)?.page
+                    if (itemPage != null && activePage != null) {
+                        itemPage.chapter.chapter.id == activePage.chapter.chapter.id &&
+                            itemPage.index == activePage.index
+                    } else if (item is ChapterTransition && activeItem is ChapterTransition) {
+                        val itemIsPrev = item is ChapterTransition.Prev
+                        val activeIsPrev = activeItem is ChapterTransition.Prev
+                        itemIsPrev == activeIsPrev &&
+                            item.from.chapter.id == activeItem.from.chapter.id &&
+                            item.to?.chapter?.id == activeItem.to?.chapter?.id
                     } else {
-                        lazyListState.scrollToItem(request.targetPage)
+                        item == activeItem
                     }
+                }
+                if (newIndex != -1 && newIndex != lazyListState.firstVisibleItemIndex) {
+                    val offset = lazyListState.firstVisibleItemScrollOffset
+                    lazyListState.scrollToItem(newIndex, offset)
                 }
             }
         }
 
-        // Ensure we default to the first actual page instead of a leading transition
-        LaunchedEffect(items) {
-            if (viewer.requestedPagePosition == null && lazyListState.firstVisibleItemIndex == 0) {
-                val firstPageIndex = items.indexOfFirst {
-                    it is ReaderPage || it is ReaderPageSplit
+        // Sync programmatic page jumps (slider, TOC, etc.)
+        LaunchedEffect(viewer.requestedPagePosition) {
+            val req = viewer.requestedPagePosition ?: return@LaunchedEffect
+            val target = req.targetPage
+            if (target in items.indices) {
+                if (lazyListState.firstVisibleItemIndex != target) {
+                    if (req.animated) {
+                        lazyListState.animateScrollToItem(target)
+                    } else {
+                        lazyListState.scrollToItem(target)
+                    }
                 }
-                if (firstPageIndex > 0) {
-                    lazyListState.scrollToItem(firstPageIndex)
-                }
+                viewer.requestedPagePosition = null
             }
         }
 
@@ -155,21 +182,24 @@ fun ComposeWebtoonViewer(
             }
                 .collect { activeIndex ->
                     if (activeIndex in items.indices) {
-                        when (val item = items[activeIndex]) {
+                        val item = items[activeIndex]
+                        lastActiveItem = item
+                        when (item) {
                             is ReaderPage -> {
                                 onPageSelected(item)
                                 val pages = item.chapter.pages
                                 if (
-                                    pages != null &&
-                                        pages.size - item.number < 5 &&
-                                        item.chapter == viewer.adapter.currentChapter
+                                    pages != null && item.chapter == viewer.adapter.currentChapter
                                 ) {
-                                    val nextItem = items.lastOrNull()
-                                    val transitionChapter =
-                                        (nextItem as? ChapterTransition.Next)?.to
-                                            ?: (nextItem as? ReaderPage)?.chapter
-                                    if (transitionChapter != null) {
-                                        viewer.activity.requestPreloadChapter(transitionChapter)
+                                    if (pages.size - item.number < 5) {
+                                        viewer.adapter.nextTransition?.to?.let {
+                                            viewer.activity.requestPreloadChapter(it)
+                                        }
+                                    }
+                                    if (item.number <= 5) {
+                                        viewer.adapter.prevTransition?.to?.let {
+                                            viewer.activity.requestPreloadChapter(it)
+                                        }
                                     }
                                 }
                             }
@@ -369,10 +399,27 @@ fun ComposeWebtoonViewer(
                                 manga = manga,
                                 downloadManager = downloadManager,
                                 onRetry = onRetryTransition,
-                                onTap = { viewer.activity.toggleMenu() },
+                                onTap = {
+                                    val toChapter = item.to
+                                    if (toChapter != null) {
+                                        coroutineScope.launch {
+                                            viewer.activity.loadChapter(toChapter.chapter)
+                                        }
+                                    } else {
+                                        viewer.activity.toggleMenu()
+                                    }
+                                },
                                 modifier =
                                     Modifier.fillMaxWidth()
-                                        .padding(top = Size.small, bottom = Size.extraLarge),
+                                        .padding(
+                                            top =
+                                                if (item is ChapterTransition.Prev) {
+                                                    Size.appBarHeight + Size.large
+                                                } else {
+                                                    Size.small
+                                                },
+                                            bottom = Size.extraLarge,
+                                        ),
                             )
                         }
                     }

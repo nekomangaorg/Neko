@@ -12,13 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -62,11 +62,17 @@ fun ReaderTransitionPage(
                     indication = null,
                     onClick = { onTap?.invoke() },
                 )
+                .statusBarsPadding()
                 .navigationBarsPadding()
                 .padding(
                     start = Size.mediumLarge,
                     end = Size.mediumLarge,
-                    top = Size.small,
+                    top =
+                        if (transition is ChapterTransition.Prev) {
+                            Size.appBarHeight + Size.large
+                        } else {
+                            Size.small
+                        },
                     bottom = Size.large,
                 ),
         contentAlignment = Alignment.Center,
@@ -315,22 +321,9 @@ private fun ChapterPreloadStatusSection(
     val state by chapter.stateFlow.collectAsStateWithLifecycle()
 
     when (val currentState = state) {
-        is ReaderChapter.State.Wait -> {}
-        is ReaderChapter.State.Loading -> {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            ) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(R.string.loading_pages),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
+        is ReaderChapter.State.Wait,
+        is ReaderChapter.State.Loading,
+        is ReaderChapter.State.Loaded -> {}
         is ReaderChapter.State.Error -> {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -350,6 +343,5 @@ private fun ChapterPreloadStatusSection(
                 Button(onClick = onRetry) { Text(text = stringResource(R.string.retry)) }
             }
         }
-        is ReaderChapter.State.Loaded -> {}
     }
 }

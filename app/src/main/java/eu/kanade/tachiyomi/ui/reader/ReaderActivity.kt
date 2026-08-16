@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.style.DynamicDrawableSpan
 import android.text.style.ImageSpan
+import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -1424,6 +1425,10 @@ class ReaderActivity : BaseMainActivity() {
      * actions to perform is shown.
      */
     fun onPageLongTap(page: ReaderPage, extraPage: ReaderPage? = null) {
+        window.decorView.performHapticFeedback(
+            HapticFeedbackConstants.LONG_PRESS,
+            HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+        )
         val items =
             if (extraPage != null) {
                 listOf(

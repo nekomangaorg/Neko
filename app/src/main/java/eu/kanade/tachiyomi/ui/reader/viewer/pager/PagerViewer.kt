@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.view.children
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -23,6 +24,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
@@ -173,8 +175,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             it.item.first.index == page.index || it.item.second?.index == page.index
         }
 
+    /** Currently active page index in the adapter. */
+    var currentPagePosition: Int = 0
+
     /** Called when a new page (either a [ReaderPage] or [ChapterTransition]) is marked as active */
     fun onPageChange(position: Int) {
+        currentPagePosition = position
         val page = adapter.joinedItems.getOrNull(position)
         if (page != null && currentPage != page) {
             val pageF = page.first
@@ -337,10 +343,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     /** Sets the active [chapters] on this pager. */
     private fun setChaptersInternal(chapters: ViewerChapters) {
-        TimberKt.d { "setChaptersInternal" }
-        val forceTransition =
-            config.alwaysShowChapterTransition ||
-                adapter.joinedItems.getOrNull(pager.currentItem)?.first is ChapterTransition
+        val forceTransition = config.alwaysShowChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
         // Layout the pager once a chapter is being set
@@ -391,16 +394,30 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     }
 
     override fun moveToNext() {
+        val current = currentPagePosition
+        val item = adapter.joinedItems.getOrNull(current)
+        val unwrapped = if (item is Pair<*, *>) item.first else item
+        if (unwrapped is ChapterTransition.Next && unwrapped.to != null) {
+            activity.lifecycleScope.launch { activity.loadChapter(unwrapped.to.chapter) }
+            return
+        }
         moveRight()
     }
 
     override fun moveToPrevious() {
+        val current = currentPagePosition
+        val item = adapter.joinedItems.getOrNull(current)
+        val unwrapped = if (item is Pair<*, *>) item.first else item
+        if (unwrapped is ChapterTransition.Prev && unwrapped.to != null) {
+            activity.lifecycleScope.launch { activity.loadChapter(unwrapped.to.chapter) }
+            return
+        }
         moveLeft()
     }
 
     /** Moves to the page at the right. */
     open fun moveRight() {
-        val current = requestedPagePosition?.first ?: pager.currentItem
+        val current = currentPagePosition
         if (current < adapter.count - 1) {
             hasMoved = true
             requestedPagePosition = (current + 1) to config.usePageTransitions
@@ -415,7 +432,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     /** Moves to the page at the left. */
     open fun moveLeft() {
-        val current = requestedPagePosition?.first ?: pager.currentItem
+        val current = currentPagePosition
         if (current > 0) {
             hasMoved = true
             requestedPagePosition = (current - 1) to config.usePageTransitions

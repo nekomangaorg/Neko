@@ -19,6 +19,12 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
     var items: List<Any> = emptyList()
         private set
 
+    var prevTransition: ChapterTransition.Prev? = null
+        private set
+
+    var nextTransition: ChapterTransition.Next? = null
+        private set
+
     var currentChapter: ReaderChapter? = null
 
     /** Tracks which pages have already been tall-split to prevent re-splitting on rebind. */
@@ -44,7 +50,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
             // when going back to the previous chapter.
             val prevPages = chapters.prevChapter.pages
             if (prevPages != null) {
-                val screenHeight = viewer.recycler.height
+                val screenHeight = viewer.activity.resources.displayMetrics.heightPixels
                 var accumulatedHeight = 0
                 var pagesToTake = 0
                 for (page in prevPages.reversed()) {
@@ -58,15 +64,22 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
             }
         }
 
-        // Skip transition page if the chapter is loaded & current page is not a transition page
-        if (
-            prevHasMissingChapters ||
-                forceTransition ||
-                (chapters.prevChapter != null &&
-                    chapters.prevChapter.state !is ReaderChapter.State.Loaded)
-        ) {
-            newItems.add(ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter))
-        }
+        // Add transition page if forced, if there are missing chapters, or if previous chapter is
+        // not loaded
+        prevTransition =
+            if (chapters.prevChapter != null) {
+                ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter).also {
+                    if (
+                        prevHasMissingChapters ||
+                            forceTransition ||
+                            chapters.prevChapter.state !is ReaderChapter.State.Loaded
+                    ) {
+                        newItems.add(it)
+                    }
+                }
+            } else {
+                null
+            }
 
         // Add current chapter.
         val currPages = chapters.currChapter.pages
@@ -77,13 +90,20 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         currentChapter = chapters.currChapter
 
         // Add next chapter transition and pages.
-        if (
-            nextHasMissingChapters ||
-                forceTransition ||
-                chapters.nextChapter?.state !is ReaderChapter.State.Loaded
-        ) {
-            newItems.add(ChapterTransition.Next(chapters.currChapter, chapters.nextChapter))
-        }
+        nextTransition =
+            if (chapters.nextChapter != null) {
+                ChapterTransition.Next(chapters.currChapter, chapters.nextChapter).also {
+                    if (
+                        nextHasMissingChapters ||
+                            forceTransition ||
+                            chapters.nextChapter?.state !is ReaderChapter.State.Loaded
+                    ) {
+                        newItems.add(it)
+                    }
+                }
+            } else {
+                null
+            }
 
         if (chapters.nextChapter != null) {
             // Add at most two pages, because this chapter will be selected before the user can

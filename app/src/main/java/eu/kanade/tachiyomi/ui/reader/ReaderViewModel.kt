@@ -445,16 +445,16 @@ constructor(
      * Callers must handle errors.
      */
     private suspend fun loadChapter(loader: ChapterLoader, chapter: ReaderChapter): ViewerChapters {
-        TimberKt.d { "Loading ${chapter.chapter.url}" }
-
-        loader.loadChapter(chapter)
-
         val chapterList = getChapterList()
+        val targetChapter = chapterList.find { it.chapter.id == chapter.chapter.id } ?: chapter
+        TimberKt.d { "Loading ${targetChapter.chapter.url}" }
 
-        val chapterPos = chapterList.indexOf(chapter)
+        loader.loadChapter(targetChapter)
+
+        val chapterPos = chapterList.indexOf(targetChapter)
         val newChapters =
             ViewerChapters(
-                chapter,
+                targetChapter,
                 chapterList.getOrNull(chapterPos - 1),
                 chapterList.getOrNull(chapterPos + 1),
             )
@@ -476,17 +476,30 @@ constructor(
     suspend fun loadChapter(chapter: ReaderChapter): Int? {
         val loader = loader ?: return -1
 
-        TimberKt.d { "Loading adjacent ${chapter.chapter.url}" }
+        val chapterList = getChapterList()
+        val targetChapter = chapterList.find { it.chapter.id == chapter.chapter.id } ?: chapter
+
+        TimberKt.d { "Loading adjacent ${targetChapter.chapter.url}" }
+        val isPrev =
+            state.value.viewerChapters?.prevChapter?.chapter?.id == targetChapter.chapter.id
         var lastPage: Int? =
-            if (chapter.chapter.pages_left <= 1) 0 else chapter.chapter.last_page_read
+            if (isPrev) {
+                targetChapter.pages?.lastIndex ?: 0
+            } else {
+                if (targetChapter.chapter.pages_left <= 1) 0
+                else targetChapter.chapter.last_page_read
+            }
         mutableState.update { it.copy(isLoadingAdjacentChapter = true) }
         try {
-            withIOContext { loadChapter(loader, chapter) }
+            val newChapters = withIOContext { loadChapter(loader, targetChapter) }
+            if (isPrev) {
+                lastPage = newChapters.currChapter.pages?.lastIndex ?: 0
+            }
         } catch (e: Throwable) {
             if (e is CancellationException) {
                 throw e
             }
-            TimberKt.e(e) { "Error Loading adjacent chapter ${chapter.chapter.url}" }
+            TimberKt.e(e) { "Error Loading adjacent chapter ${targetChapter.chapter.url}" }
             lastPage = null
         } finally {
             mutableState.update { it.copy(isLoadingAdjacentChapter = false) }
@@ -506,28 +519,32 @@ constructor(
      * that the user doesn't have to wait too long to continue reading.
      */
     private suspend fun preload(chapter: ReaderChapter) {
-        if (chapter.pageLoader is HttpPageLoader) {
+        val chapterList = getChapterList()
+        val targetChapter = chapterList.find { it.chapter.id == chapter.chapter.id } ?: chapter
+
+        if (targetChapter.pageLoader is HttpPageLoader) {
             val manga = manga ?: return
             val isDownloaded = withIOContext {
-                downloadManager.isChapterDownloaded(chapter.chapter, manga)
+                downloadManager.isChapterDownloaded(targetChapter.chapter, manga)
             }
             if (isDownloaded) {
-                chapter.state = ReaderChapter.State.Wait
+                targetChapter.state = ReaderChapter.State.Wait
             }
         }
 
         if (
-            chapter.state != ReaderChapter.State.Wait && chapter.state !is ReaderChapter.State.Error
+            targetChapter.state != ReaderChapter.State.Wait &&
+                targetChapter.state !is ReaderChapter.State.Error
         ) {
             return
         }
 
-        TimberKt.d { "Preloading ${chapter.chapter.url} - ${chapter.chapter.name}" }
+        TimberKt.d { "Preloading ${targetChapter.chapter.url} - ${targetChapter.chapter.name}" }
 
         val loader = loader ?: return
         withIOContext {
             try {
-                loader.loadChapter(chapter)
+                loader.loadChapter(targetChapter)
             } catch (e: Throwable) {
                 if (e is CancellationException) {
                     throw e
