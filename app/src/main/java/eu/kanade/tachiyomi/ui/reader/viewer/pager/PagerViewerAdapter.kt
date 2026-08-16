@@ -67,18 +67,15 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         }
 
         prevTransition =
-            if (chapters.prevChapter != null) {
-                ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter).also {
-                    if (
+            ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter).also {
+                if (
+                    chapters.prevChapter == null ||
                         prevHasMissingChapters ||
-                            forceTransition ||
-                            chapters.prevChapter.state !is ReaderChapter.State.Loaded
-                    ) {
-                        newItems.add(it)
-                    }
+                        forceTransition ||
+                        chapters.prevChapter.state !is ReaderChapter.State.Loaded
+                ) {
+                    newItems.add(it)
                 }
-            } else {
-                null
             }
 
         // Add current chapter.
@@ -91,18 +88,15 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
 
         // Add next chapter transition and pages.
         nextTransition =
-            if (chapters.nextChapter != null) {
-                ChapterTransition.Next(chapters.currChapter, chapters.nextChapter).also {
-                    if (
+            ChapterTransition.Next(chapters.currChapter, chapters.nextChapter).also {
+                if (
+                    chapters.nextChapter == null ||
                         nextHasMissingChapters ||
-                            forceTransition ||
-                            chapters.nextChapter.state !is ReaderChapter.State.Loaded
-                    ) {
-                        newItems.add(it)
-                    }
+                        forceTransition ||
+                        chapters.nextChapter?.state !is ReaderChapter.State.Loaded
+                ) {
+                    newItems.add(it)
                 }
-            } else {
-                null
             }
 
         if (chapters.nextChapter != null) {
