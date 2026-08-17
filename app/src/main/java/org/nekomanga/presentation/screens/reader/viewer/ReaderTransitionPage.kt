@@ -35,19 +35,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.viewer.calculateChapterDifference
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 import org.nekomanga.R
+import org.nekomanga.domain.manga.MangaItem
+import org.nekomanga.domain.manga.toManga
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ReaderTransitionPage(
     transition: ChapterTransition,
-    manga: Manga?,
+    manga: MangaItem?,
     downloadManager: DownloadManager,
     onRetry: (ReaderChapter) -> Unit,
     onTap: (() -> Unit)? = null,
@@ -124,15 +125,18 @@ fun ReaderTransitionPage(
 @Composable
 private fun PrevChapterTransitionContent(
     transition: ChapterTransition.Prev,
-    manga: Manga?,
+    manga: MangaItem?,
     downloadManager: DownloadManager,
 ) {
     val prevChapter = transition.to
     if (prevChapter != null) {
         val isPrevDownloaded =
-            manga?.let { downloadManager.isChapterDownloaded(prevChapter.chapter, it) } ?: false
+            manga?.let { downloadManager.isChapterDownloaded(prevChapter.chapter, it.toManga()) }
+                ?: false
         val isCurrentDownloaded =
-            manga?.let { downloadManager.isChapterDownloaded(transition.from.chapter, it) } ?: false
+            manga?.let {
+                downloadManager.isChapterDownloaded(transition.from.chapter, it.toManga())
+            } ?: false
 
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
             Text(
@@ -189,15 +193,18 @@ private fun PrevChapterTransitionContent(
 @Composable
 private fun NextChapterTransitionContent(
     transition: ChapterTransition.Next,
-    manga: Manga?,
+    manga: MangaItem?,
     downloadManager: DownloadManager,
 ) {
     val nextChapter = transition.to
     if (nextChapter != null) {
         val isCurrentDownloaded =
-            manga?.let { downloadManager.isChapterDownloaded(transition.from.chapter, it) } ?: false
+            manga?.let {
+                downloadManager.isChapterDownloaded(transition.from.chapter, it.toManga())
+            } ?: false
         val isNextDownloaded =
-            manga?.let { downloadManager.isChapterDownloaded(nextChapter.chapter, it) } ?: false
+            manga?.let { downloadManager.isChapterDownloaded(nextChapter.chapter, it.toManga()) }
+                ?: false
 
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
             Text(

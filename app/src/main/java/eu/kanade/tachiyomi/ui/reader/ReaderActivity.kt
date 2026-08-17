@@ -84,6 +84,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
@@ -149,7 +150,11 @@ import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.manga.toManga
+import org.nekomanga.domain.manga.MangaItem
+import org.nekomanga.domain.manga.hideChapterTitle
+import org.nekomanga.domain.manga.isLongStrip
+import org.nekomanga.domain.manga.orientationType
+import org.nekomanga.domain.manga.readingModeType
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.extensions.collectAsState as preferenceCollectAsState
@@ -194,8 +199,8 @@ class ReaderActivity : BaseMainActivity() {
     var brightnessOverlayAlpha by mutableStateOf(0f)
     var colorFilterOverlayColor by mutableStateOf(0)
     var colorFilterOverlayMode by mutableStateOf(0)
-    var pagedViewerItems by mutableStateOf<List<Any>>(emptyList())
-    var webtoonViewerItems by mutableStateOf<List<Any>>(emptyList())
+    var pagedViewerItems by mutableStateOf<List<ReaderUiItem>>(emptyList())
+    var webtoonViewerItems by mutableStateOf<List<ReaderUiItem>>(emptyList())
 
     val scope = lifecycleScope
 
@@ -728,7 +733,6 @@ class ReaderActivity : BaseMainActivity() {
             .map { it.manga }
             .distinctUntilChanged()
             .filterNotNull()
-            .map { it.toManga() }
             .onEach(::setManga)
             .launchIn(lifecycleScope)
 
@@ -1159,9 +1163,9 @@ class ReaderActivity : BaseMainActivity() {
      * Called from the view model when a manga is ready. Used to instantiate the appropriate viewer
      * and the binding.toolbar title.
      */
-    fun setManga(manga: Manga) {
+    fun setManga(manga: MangaItem) {
         val prevViewer = viewer
-        val noDefault = manga.viewer_flags == -1
+        val noDefault = manga.viewerFlags == -1
         val mangaViewer = viewModel.getMangaReadingMode()
         val newViewer =
             when (mangaViewer) {
@@ -1212,11 +1216,13 @@ class ReaderActivity : BaseMainActivity() {
                 setDoublePageMode(newViewer)
             }
             lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
-            pagedViewerItems = newViewer.adapter.joinedItems.toList()
+            pagedViewerItems =
+                newViewer.adapter.joinedItems.mapNotNull { ReaderUiItem.fromPagerItem(it) }
             webtoonViewerItems = emptyList()
         } else if (newViewer is WebtoonViewer) {
             pagedViewerItems = emptyList()
-            webtoonViewerItems = newViewer.adapter.items.toList()
+            webtoonViewerItems =
+                newViewer.adapter.items.mapNotNull { ReaderUiItem.fromWebtoonItem(it) }
         } else {
             pagedViewerItems = emptyList()
             webtoonViewerItems = emptyList()
@@ -1224,7 +1230,7 @@ class ReaderActivity : BaseMainActivity() {
 
         overlayIsLtr = newViewer !is R2LPagerViewer
 
-        supportActionBar?.title = manga.user_title ?: manga.title
+        supportActionBar?.title = manga.userTitle.ifBlank { manga.title }
 
         viewModel.setIsLoading(true)
         invalidateOptionsMenu()
@@ -1299,11 +1305,17 @@ class ReaderActivity : BaseMainActivity() {
         lastShiftDoubleState = null
         viewer?.setChapters(viewerChapters)
         if (viewer is PagerViewer) {
-            pagedViewerItems = (viewer as PagerViewer).adapter.joinedItems.toList()
+            pagedViewerItems =
+                (viewer as PagerViewer).adapter.joinedItems.mapNotNull {
+                    ReaderUiItem.fromPagerItem(it)
+                }
             webtoonViewerItems = emptyList()
         } else if (viewer is WebtoonViewer) {
             pagedViewerItems = emptyList()
-            webtoonViewerItems = (viewer as WebtoonViewer).adapter.items.toList()
+            webtoonViewerItems =
+                (viewer as WebtoonViewer).adapter.items.mapNotNull {
+                    ReaderUiItem.fromWebtoonItem(it)
+                }
         }
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null

@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,16 +32,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
+import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.abs
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
@@ -50,8 +51,8 @@ import uy.kohesive.injekt.api.get
 @Composable
 fun ComposeWebtoonViewer(
     viewer: WebtoonViewer,
-    items: List<Any>,
-    manga: Manga?,
+    items: List<ReaderUiItem>,
+    manga: MangaItem?,
     downloadManager: DownloadManager,
     onPageSelected: (ReaderPage) -> Unit,
     onTransitionSelected: (ChapterTransition) -> Unit,
@@ -60,14 +61,17 @@ fun ComposeWebtoonViewer(
 ) {
     val currentChapterId =
         (viewer.adapter.currentChapter
-                ?: items.firstOrNull { it is ReaderPage }?.let { (it as ReaderPage).chapter })
+                ?: items
+                    .firstOrNull { it is ReaderUiItem.Page }
+                    ?.let { (it as ReaderUiItem.Page).page.chapter })
             ?.chapter
             ?.id
 
     key(viewer, currentChapterId, items.size > 1) {
         val defaultPageIndex =
-            items.indexOfFirst { it is ReaderPage || it is ReaderPageSplit }.takeIf { it != -1 }
-                ?: 0
+            items
+                .indexOfFirst { it is ReaderUiItem.Page || it is ReaderUiItem.SplitPage }
+                .takeIf { it != -1 } ?: 0
         val initialItemIndex =
             (viewer.requestedPagePosition?.targetPage ?: defaultPageIndex).coerceIn(
                 0,
@@ -75,9 +79,9 @@ fun ComposeWebtoonViewer(
             )
         val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = initialItemIndex)
 
-        val scaleAnimatable = remember { Animatable(1f) }
-        val offsetXAnimatable = remember { Animatable(0f) }
-        val offsetYAnimatable = remember { Animatable(0f) }
+        var scale by remember { mutableFloatStateOf(1f) }
+        var offsetX by remember { mutableFloatStateOf(0f) }
+        var offsetY by remember { mutableFloatStateOf(0f) }
         val coroutineScope = rememberCoroutineScope()
 
         val readerPreferences = remember { Injekt.get<ReaderPreferences>() }
@@ -95,7 +99,7 @@ fun ComposeWebtoonViewer(
                 }
             }
 
-        var lastActiveItem by remember { mutableStateOf<Any?>(null) }
+        var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
 
         LaunchedEffect(currentChapterId) {
             viewer.adapter.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
@@ -106,18 +110,30 @@ fun ComposeWebtoonViewer(
             val activeItem = lastActiveItem
             if (activeItem != null) {
                 val newIndex = items.indexOfFirst { item ->
-                    val itemPage = (item as? ReaderPage) ?: (item as? ReaderPageSplit)?.page
+                    val itemPage =
+                        when (item) {
+                            is ReaderUiItem.Page -> item.page
+                            is ReaderUiItem.SplitPage -> item.page
+                            is ReaderUiItem.Transition -> null
+                        }
                     val activePage =
-                        (activeItem as? ReaderPage) ?: (activeItem as? ReaderPageSplit)?.page
+                        when (activeItem) {
+                            is ReaderUiItem.Page -> activeItem.page
+                            is ReaderUiItem.SplitPage -> activeItem.page
+                            is ReaderUiItem.Transition -> null
+                        }
                     if (itemPage != null && activePage != null) {
                         itemPage.chapter.chapter.id == activePage.chapter.chapter.id &&
                             itemPage.index == activePage.index
-                    } else if (item is ChapterTransition && activeItem is ChapterTransition) {
-                        val itemIsPrev = item is ChapterTransition.Prev
-                        val activeIsPrev = activeItem is ChapterTransition.Prev
+                    } else if (
+                        item is ReaderUiItem.Transition && activeItem is ReaderUiItem.Transition
+                    ) {
+                        val itemIsPrev = item.transition is ChapterTransition.Prev
+                        val activeIsPrev = activeItem.transition is ChapterTransition.Prev
                         itemIsPrev == activeIsPrev &&
-                            item.from.chapter.id == activeItem.from.chapter.id &&
-                            item.to?.chapter?.id == activeItem.to?.chapter?.id
+                            item.transition.from.chapter.id ==
+                                activeItem.transition.from.chapter.id &&
+                            item.transition.to?.chapter?.id == activeItem.transition.to?.chapter?.id
                     } else {
                         item == activeItem
                     }
@@ -185,30 +201,31 @@ fun ComposeWebtoonViewer(
                         val item = items[activeIndex]
                         lastActiveItem = item
                         when (item) {
-                            is ReaderPage -> {
-                                onPageSelected(item)
-                                val pages = item.chapter.pages
+                            is ReaderUiItem.Page -> {
+                                onPageSelected(item.page)
+                                val pages = item.page.chapter.pages
                                 if (
-                                    pages != null && item.chapter == viewer.adapter.currentChapter
+                                    pages != null &&
+                                        item.page.chapter == viewer.adapter.currentChapter
                                 ) {
-                                    if (pages.size - item.number < 5) {
+                                    if (pages.size - item.page.number < 5) {
                                         viewer.adapter.nextTransition?.to?.let {
                                             viewer.activity.requestPreloadChapter(it)
                                         }
                                     }
-                                    if (item.number <= 5) {
+                                    if (item.page.number <= 5) {
                                         viewer.adapter.prevTransition?.to?.let {
                                             viewer.activity.requestPreloadChapter(it)
                                         }
                                     }
                                 }
                             }
-                            is ReaderPageSplit -> {
+                            is ReaderUiItem.SplitPage -> {
                                 onPageSelected(item.page)
                             }
-                            is ChapterTransition -> {
-                                onTransitionSelected(item)
-                                val toChapter = item.to
+                            is ReaderUiItem.Transition -> {
+                                onTransitionSelected(item.transition)
+                                val toChapter = item.transition.to
                                 if (toChapter != null) {
                                     viewer.activity.requestPreloadChapter(toChapter)
                                 }
@@ -224,53 +241,41 @@ fun ComposeWebtoonViewer(
         Box(modifier = modifier.fillMaxSize().background(backgroundColor)) {
             LazyColumn(
                 state = lazyListState,
-                userScrollEnabled = scaleAnimatable.value <= 1.05f,
+                userScrollEnabled = scale <= 1.05f,
                 modifier =
                     Modifier.fillMaxSize()
                         .graphicsLayer {
-                            scaleX = scaleAnimatable.value
-                            scaleY = scaleAnimatable.value
-                            translationX = offsetXAnimatable.value
-                            translationY = offsetYAnimatable.value
+                            scaleX = scale
+                            scaleY = scale
+                            translationX = offsetX
+                            translationY = offsetY
                         }
                         .pointerInput(viewer.config.enableZoomOut) {
                             detectTransformGestures(panZoomLock = true) { _, pan, zoom, _ ->
-                                val currentScale = scaleAnimatable.value
                                 val newScale =
-                                    (currentScale * zoom).coerceIn(
+                                    (scale * zoom).coerceIn(
                                         if (viewer.config.enableZoomOut) 0.5f else 1f,
                                         3f,
                                     )
-                                val currentX = offsetXAnimatable.value
-                                val currentY = offsetYAnimatable.value
-                                coroutineScope.launch {
-                                    scaleAnimatable.snapTo(newScale)
-                                    if (newScale > 1f) {
-                                        val maxOffsetX = (size.width * (newScale - 1f)) / 2f
-                                        val maxOffsetY = (size.height * (newScale - 1f)) / 2f
-                                        val newX =
-                                            (currentX + pan.x).coerceIn(
-                                                -maxOffsetX,
-                                                maxOffsetX,
-                                            )
-                                        val newY =
-                                            (currentY + pan.y).coerceIn(
-                                                -maxOffsetY,
-                                                maxOffsetY,
-                                            )
-                                        offsetXAnimatable.snapTo(newX)
-                                        offsetYAnimatable.snapTo(newY)
-                                    } else {
-                                        offsetXAnimatable.snapTo(0f)
-                                        offsetYAnimatable.snapTo(0f)
-                                    }
+                                scale = newScale
+                                if (newScale > 1f) {
+                                    val maxOffsetX = (size.width * (newScale - 1f)) / 2f
+                                    val maxOffsetY = (size.height * (newScale - 1f)) / 2f
+                                    offsetX = (offsetX + pan.x).coerceIn(-maxOffsetX, maxOffsetX)
+                                    offsetY = (offsetY + pan.y).coerceIn(-maxOffsetY, maxOffsetY)
+                                } else {
+                                    offsetX = 0f
+                                    offsetY = 0f
                                 }
                             }
-                            if (scaleAnimatable.value < 1f) {
+                            if (scale < 1f) {
                                 coroutineScope.launch {
-                                    scaleAnimatable.animateTo(1f, tween(200))
-                                    offsetXAnimatable.animateTo(0f, tween(200))
-                                    offsetYAnimatable.animateTo(0f, tween(200))
+                                    val animScale = Animatable(scale)
+                                    val animX = Animatable(offsetX)
+                                    val animY = Animatable(offsetY)
+                                    launch { animScale.animateTo(1f, tween(200)) { scale = value } }
+                                    launch { animX.animateTo(0f, tween(200)) { offsetX = value } }
+                                    launch { animY.animateTo(0f, tween(200)) { offsetY = value } }
                                 }
                             }
                         }
@@ -278,10 +283,21 @@ fun ComposeWebtoonViewer(
                             detectTapGestures(
                                 onDoubleTap = { offset ->
                                     coroutineScope.launch {
-                                        if (scaleAnimatable.value > 1.05f) {
-                                            launch { scaleAnimatable.animateTo(1f, tween(250)) }
-                                            launch { offsetXAnimatable.animateTo(0f, tween(250)) }
-                                            launch { offsetYAnimatable.animateTo(0f, tween(250)) }
+                                        if (scale > 1.05f) {
+                                            val animScale = Animatable(scale)
+                                            val animX = Animatable(offsetX)
+                                            val animY = Animatable(offsetY)
+                                            launch {
+                                                animScale.animateTo(1f, tween(250)) {
+                                                    scale = value
+                                                }
+                                            }
+                                            launch {
+                                                animX.animateTo(0f, tween(250)) { offsetX = value }
+                                            }
+                                            launch {
+                                                animY.animateTo(0f, tween(250)) { offsetY = value }
+                                            }
                                         } else {
                                             val targetScale = 2.5f
                                             val targetX =
@@ -290,30 +306,47 @@ fun ComposeWebtoonViewer(
                                                 ((size.height / 2f) - offset.y) * (targetScale - 1f)
                                             val maxOffsetX = (size.width * (targetScale - 1f)) / 2f
                                             val maxOffsetY = (size.height * (targetScale - 1f)) / 2f
+                                            val boundedX = targetX.coerceIn(-maxOffsetX, maxOffsetX)
+                                            val boundedY = targetY.coerceIn(-maxOffsetY, maxOffsetY)
+
+                                            val animScale = Animatable(scale)
+                                            val animX = Animatable(offsetX)
+                                            val animY = Animatable(offsetY)
                                             launch {
-                                                scaleAnimatable.animateTo(targetScale, tween(250))
+                                                animScale.animateTo(targetScale, tween(250)) {
+                                                    scale = value
+                                                }
                                             }
                                             launch {
-                                                offsetXAnimatable.animateTo(
-                                                    targetX.coerceIn(-maxOffsetX, maxOffsetX),
-                                                    tween(250),
-                                                )
+                                                animX.animateTo(boundedX, tween(250)) {
+                                                    offsetX = value
+                                                }
                                             }
                                             launch {
-                                                offsetYAnimatable.animateTo(
-                                                    targetY.coerceIn(-maxOffsetY, maxOffsetY),
-                                                    tween(250),
-                                                )
+                                                animY.animateTo(boundedY, tween(250)) {
+                                                    offsetY = value
+                                                }
                                             }
                                         }
                                     }
                                 },
                                 onTap = { offset ->
-                                    if (scaleAnimatable.value > 1.05f) {
+                                    if (scale > 1.05f) {
                                         coroutineScope.launch {
-                                            launch { scaleAnimatable.animateTo(1f, tween(200)) }
-                                            launch { offsetXAnimatable.animateTo(0f, tween(200)) }
-                                            launch { offsetYAnimatable.animateTo(0f, tween(200)) }
+                                            val animScale = Animatable(scale)
+                                            val animX = Animatable(offsetX)
+                                            val animY = Animatable(offsetY)
+                                            launch {
+                                                animScale.animateTo(1f, tween(200)) {
+                                                    scale = value
+                                                }
+                                            }
+                                            launch {
+                                                animX.animateTo(0f, tween(200)) { offsetX = value }
+                                            }
+                                            launch {
+                                                animY.animateTo(0f, tween(200)) { offsetY = value }
+                                            }
                                         }
                                     } else {
                                         val screenWidth = size.width.toFloat()
@@ -355,8 +388,12 @@ fun ComposeWebtoonViewer(
                                         val activeItem =
                                             items.getOrNull(lazyListState.firstVisibleItemIndex)
                                         val page =
-                                            (activeItem as? ReaderPage)
-                                                ?: (activeItem as? ReaderPageSplit)?.page
+                                            when (activeItem) {
+                                                is ReaderUiItem.Page -> activeItem.page
+                                                is ReaderUiItem.SplitPage -> activeItem.page
+                                                is ReaderUiItem.Transition,
+                                                null -> null
+                                            }
                                         if (page != null) {
                                             viewer.activity.onPageLongTap(page)
                                         }
@@ -370,18 +407,18 @@ fun ComposeWebtoonViewer(
                     items = items,
                     key = { index, item ->
                         when (item) {
-                            is ReaderPage -> "page_${item.chapter.chapter.id}_${item.index}_$index"
-                            is ReaderPageSplit ->
-                                "split_${item.page.chapter.chapter.id}_${item.page.index}_${item.topOffset}_$index"
-                            is ChapterTransition ->
-                                "transition_${(item as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.from.chapter.id}_${item.to?.chapter?.id}_$index"
-                            else -> "item_${index}_${item.hashCode()}"
+                            is ReaderUiItem.Page ->
+                                "page_${item.page.chapter.chapter.id}_${item.page.index}_$index"
+                            is ReaderUiItem.SplitPage ->
+                                "split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}_$index"
+                            is ReaderUiItem.Transition ->
+                                "transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}_$index"
                         }
                     },
                 ) { _, item ->
                     when (item) {
-                        is ReaderPage,
-                        is ReaderPageSplit -> {
+                        is ReaderUiItem.Page,
+                        is ReaderUiItem.SplitPage -> {
                             WebtoonPageItem(
                                 viewer = viewer,
                                 item = item,
@@ -393,14 +430,14 @@ fun ComposeWebtoonViewer(
                                     },
                             )
                         }
-                        is ChapterTransition -> {
+                        is ReaderUiItem.Transition -> {
                             ReaderTransitionPage(
-                                transition = item,
+                                transition = item.transition,
                                 manga = manga,
                                 downloadManager = downloadManager,
                                 onRetry = onRetryTransition,
                                 onTap = {
-                                    val toChapter = item.to
+                                    val toChapter = item.transition.to
                                     if (toChapter != null) {
                                         coroutineScope.launch {
                                             viewer.activity.loadChapter(toChapter.chapter)
@@ -413,7 +450,7 @@ fun ComposeWebtoonViewer(
                                     Modifier.fillMaxWidth()
                                         .padding(
                                             top =
-                                                if (item is ChapterTransition.Prev) {
+                                                if (item.transition is ChapterTransition.Prev) {
                                                     Size.appBarHeight + Size.large
                                                 } else {
                                                     Size.small

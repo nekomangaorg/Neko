@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,23 +20,25 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.manga.MangaItem
+import org.nekomanga.presentation.theme.Size
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ComposePagerViewer(
     viewer: PagerViewer,
-    items: List<Any>,
+    items: List<ReaderUiItem>,
     isRtl: Boolean,
     isVertical: Boolean,
-    manga: Manga?,
+    manga: MangaItem?,
     downloadManager: DownloadManager,
     onPageSelected: (ReaderPage, Boolean) -> Unit,
     onTransitionSelected: (ChapterTransition) -> Unit,
@@ -47,13 +48,8 @@ fun ComposePagerViewer(
     val currentChapterId =
         (viewer.adapter.currentChapter
                 ?: items
-                    .firstOrNull {
-                        it is ReaderPage || (it is Pair<*, *> && it.first is ReaderPage)
-                    }
-                    ?.let {
-                        if (it is Pair<*, *>) (it.first as? ReaderPage)?.chapter
-                        else (it as? ReaderPage)?.chapter
-                    })
+                    .firstOrNull { it is ReaderUiItem.Page }
+                    ?.let { (it as ReaderUiItem.Page).page.chapter })
             ?.chapter
             ?.id
 
@@ -61,15 +57,10 @@ fun ComposePagerViewer(
         val defaultPageIndex =
             items
                 .indexOfFirst {
-                    val p = if (it is Pair<*, *>) it.first else it
-                    (p as? ReaderPage)?.chapter?.chapter?.id == currentChapterId
+                    it is ReaderUiItem.Page && it.page.chapter.chapter.id == currentChapterId
                 }
                 .takeIf { it != -1 }
-                ?: items
-                    .indexOfFirst {
-                        it is ReaderPage || (it is Pair<*, *> && it.first is ReaderPage)
-                    }
-                    .takeIf { it != -1 }
+                ?: items.indexOfFirst { it is ReaderUiItem.Page }.takeIf { it != -1 }
                 ?: 0
 
         val initialPage =
@@ -83,7 +74,7 @@ fun ComposePagerViewer(
                 pageCount = { items.size },
             )
 
-        var lastActiveItem by remember { mutableStateOf<Any?>(null) }
+        var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
         var isTransitioning by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
 
@@ -96,20 +87,18 @@ fun ComposePagerViewer(
             val activeItem = lastActiveItem
             if (activeItem != null) {
                 val newIndex = items.indexOfFirst { item ->
-                    val itemUnwrapped = if (item is Pair<*, *>) item.first else item
-                    val activeUnwrapped =
-                        if (activeItem is Pair<*, *>) activeItem.first else activeItem
-                    if (itemUnwrapped is ReaderPage && activeUnwrapped is ReaderPage) {
-                        itemUnwrapped.chapter.chapter.id == activeUnwrapped.chapter.chapter.id &&
-                            itemUnwrapped.index == activeUnwrapped.index
+                    if (item is ReaderUiItem.Page && activeItem is ReaderUiItem.Page) {
+                        item.page.chapter.chapter.id == activeItem.page.chapter.chapter.id &&
+                            item.page.index == activeItem.page.index
                     } else if (
-                        itemUnwrapped is ChapterTransition && activeUnwrapped is ChapterTransition
+                        item is ReaderUiItem.Transition && activeItem is ReaderUiItem.Transition
                     ) {
-                        val itemIsPrev = itemUnwrapped is ChapterTransition.Prev
-                        val activeIsPrev = activeUnwrapped is ChapterTransition.Prev
+                        val itemIsPrev = item.transition is ChapterTransition.Prev
+                        val activeIsPrev = activeItem.transition is ChapterTransition.Prev
                         itemIsPrev == activeIsPrev &&
-                            itemUnwrapped.from.chapter.id == activeUnwrapped.from.chapter.id &&
-                            itemUnwrapped.to?.chapter?.id == activeUnwrapped.to?.chapter?.id
+                            item.transition.from.chapter.id ==
+                                activeItem.transition.from.chapter.id &&
+                            item.transition.to?.chapter?.id == activeItem.transition.to?.chapter?.id
                     } else {
                         item == activeItem
                     }
@@ -134,12 +123,10 @@ fun ComposePagerViewer(
                 viewer.requestedPagePosition = null
             }
         }
+
         LaunchedEffect(pagerState.interactionSource) {
             pagerState.interactionSource.interactions.collect { interaction ->
-                if (
-                    interaction is androidx.compose.foundation.interaction.DragInteraction.Start &&
-                        viewer.activity.menuVisible
-                ) {
+                if (interaction is DragInteraction.Start && viewer.activity.menuVisible) {
                     viewer.activity.hideMenu()
                 }
             }
@@ -152,56 +139,59 @@ fun ComposePagerViewer(
                     if (pageIndex in items.indices) {
                         val item = items[pageIndex]
                         lastActiveItem = item
-                        val unwrapped = if (item is Pair<*, *>) item.first else item
-                        val extra = if (item is Pair<*, *>) item.second as? ReaderPage else null
-                        when (unwrapped) {
-                            is ReaderPage -> {
-                                onPageSelected(unwrapped, extra != null)
-                                val pages = unwrapped.chapter.pages
+                        when (item) {
+                            is ReaderUiItem.Page -> {
+                                onPageSelected(item.page, item.extraPage != null)
+                                val pages = item.page.chapter.pages
                                 if (
                                     pages != null &&
-                                        unwrapped.chapter == viewer.adapter.currentChapter
+                                        item.page.chapter == viewer.adapter.currentChapter
                                 ) {
-                                    if (pages.size - unwrapped.number < 5) {
+                                    if (pages.size - item.page.number < 5) {
                                         viewer.adapter.nextTransition?.to?.let {
                                             viewer.activity.requestPreloadChapter(it)
                                         }
                                     }
-                                    if (unwrapped.number <= 5) {
+                                    if (item.page.number <= 5) {
                                         viewer.adapter.prevTransition?.to?.let {
                                             viewer.activity.requestPreloadChapter(it)
                                         }
                                     }
                                 }
                             }
-                            is ChapterTransition -> {
-                                onTransitionSelected(unwrapped)
+                            is ReaderUiItem.Transition -> {
+                                onTransitionSelected(item.transition)
+                            }
+                            is ReaderUiItem.SplitPage -> {
+                                onPageSelected(item.page, false)
                             }
                         }
                     }
                 }
         }
 
+        val density = LocalDensity.current
+        val thresholdPx = with(density) { Size.huge.toPx() }
+
         val nestedScrollConnection =
-            remember(pagerState, items, isVertical) {
+            remember(pagerState, items, isVertical, thresholdPx) {
                 object : NestedScrollConnection {
                     var accumulatedOverscroll = 0f
 
                     private fun checkAndTrigger(delta: Float) {
                         val currentIndex = pagerState.currentPage
                         val currentItem = items.getOrNull(currentIndex)
-                        val unwrapped =
-                            if (currentItem is Pair<*, *>) currentItem.first else currentItem
 
-                        if (unwrapped is ChapterTransition) {
-                            val toChapter = unwrapped.to
+                        if (currentItem is ReaderUiItem.Transition) {
+                            val transition = currentItem.transition
+                            val toChapter = transition.to
                             if (toChapter != null) {
                                 accumulatedOverscroll += delta
                                 val isTrigger =
-                                    if (unwrapped is ChapterTransition.Prev) {
-                                        accumulatedOverscroll > 40f
+                                    if (transition is ChapterTransition.Prev) {
+                                        accumulatedOverscroll > thresholdPx
                                     } else {
-                                        accumulatedOverscroll < -40f
+                                        accumulatedOverscroll < -thresholdPx
                                     }
                                 if (isTrigger && !isTransitioning) {
                                     accumulatedOverscroll = 0f
@@ -262,14 +252,14 @@ fun ComposePagerViewer(
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 1,
                     key = { index ->
-                        val item = items.getOrNull(index)
-                        val unwrapped = if (item is Pair<*, *>) item.first else item
-                        when (unwrapped) {
-                            is ReaderPage ->
-                                "pager_page_${unwrapped.chapter.chapter.id}_${unwrapped.index}_$index"
-                            is ChapterTransition ->
-                                "pager_transition_${(unwrapped as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${unwrapped.from.chapter.id}_${unwrapped.to?.chapter?.id}_$index"
-                            else -> "pager_item_${index}_${item.hashCode()}"
+                        when (val item = items.getOrNull(index)) {
+                            is ReaderUiItem.Page ->
+                                "pager_page_${item.page.chapter.chapter.id}_${item.page.index}_$index"
+                            is ReaderUiItem.Transition ->
+                                "pager_transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}_$index"
+                            is ReaderUiItem.SplitPage ->
+                                "pager_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}_$index"
+                            null -> "pager_item_$index"
                         }
                     },
                 ) { index ->
@@ -288,14 +278,14 @@ fun ComposePagerViewer(
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 1,
                     key = { index ->
-                        val item = items.getOrNull(index)
-                        val unwrapped = if (item is Pair<*, *>) item.first else item
-                        when (unwrapped) {
-                            is ReaderPage ->
-                                "pager_page_${unwrapped.chapter.chapter.id}_${unwrapped.index}_$index"
-                            is ChapterTransition ->
-                                "pager_transition_${(unwrapped as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${unwrapped.from.chapter.id}_${unwrapped.to?.chapter?.id}_$index"
-                            else -> "pager_item_${index}_${item.hashCode()}"
+                        when (val item = items.getOrNull(index)) {
+                            is ReaderUiItem.Page ->
+                                "pager_page_${item.page.chapter.chapter.id}_${item.page.index}_$index"
+                            is ReaderUiItem.Transition ->
+                                "pager_transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}_$index"
+                            is ReaderUiItem.SplitPage ->
+                                "pager_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}_$index"
+                            null -> "pager_item_$index"
                         }
                     },
                 ) { index ->
@@ -316,31 +306,34 @@ fun ComposePagerViewer(
 @Composable
 private fun PagerItemContent(
     viewer: PagerViewer,
-    item: Any,
-    manga: Manga?,
+    item: ReaderUiItem,
+    manga: MangaItem?,
     downloadManager: DownloadManager,
     onRetryTransition: (ReaderChapter) -> Unit,
 ) {
-    val unwrapped = if (item is Pair<*, *>) item.first else item
-    val extra = if (item is Pair<*, *>) item.second as? ReaderPage else null
-
-    when (unwrapped) {
-        is ReaderPage -> {
+    when (item) {
+        is ReaderUiItem.Page -> {
             PagerPageItem(
                 viewer = viewer,
-                page = unwrapped,
-                extraPage = extra,
+                page = item.page,
+                extraPage = item.extraPage,
             )
         }
-        is ChapterTransition -> {
+        is ReaderUiItem.SplitPage -> {
+            PagerPageItem(
+                viewer = viewer,
+                page = item.page,
+            )
+        }
+        is ReaderUiItem.Transition -> {
             val coroutineScope = rememberCoroutineScope()
             ReaderTransitionPage(
-                transition = unwrapped,
+                transition = item.transition,
                 manga = manga,
                 downloadManager = downloadManager,
                 onRetry = onRetryTransition,
                 onTap = {
-                    val toChapter = unwrapped.to
+                    val toChapter = item.transition.to
                     if (toChapter != null) {
                         coroutineScope.launch { viewer.activity.loadChapter(toChapter.chapter) }
                     } else {
