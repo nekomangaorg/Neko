@@ -334,7 +334,11 @@ private fun ChapterListItem(
                             if (item.chapter.bookmark) R.drawable.ic_bookmark_24dp
                             else R.drawable.ic_bookmark_border_24dp
                         ),
-                    contentDescription = stringResource(R.string.bookmarked),
+                    contentDescription =
+                        stringResource(
+                            if (item.chapter.bookmark) R.string.bookmarked
+                            else R.string.not_bookmarked
+                        ),
                     tint = bookmarkColor,
                 )
             }

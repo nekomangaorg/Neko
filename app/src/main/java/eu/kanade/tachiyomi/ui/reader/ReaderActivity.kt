@@ -575,14 +575,10 @@ class ReaderActivity : BaseMainActivity() {
                                     reEnableBackPressedCallBack()
                                 },
                                 onReadingModeClick = {
-                                    val currentMode =
-                                        ReadingModeType.fromPreference(
+                                    val nextMode =
+                                        ReadingModeType.getNextReadingMode(
                                             viewModel.manga?.readingModeType ?: 0
                                         )
-                                    val allModes = ReadingModeType.values()
-                                    val nextMode =
-                                        allModes[
-                                            (allModes.indexOf(currentMode) + 1) % allModes.size]
                                     viewModel.setMangaReadingMode(nextMode.flagValue)
                                 },
                                 onRotationClick = {
@@ -591,7 +587,7 @@ class ReaderActivity : BaseMainActivity() {
                                             viewModel.manga?.orientationType
                                                 ?: readerPreferences.defaultOrientationType().get()
                                         )
-                                    val allRotations = OrientationType.values()
+                                    val allRotations = OrientationType.entries
                                     val nextRot =
                                         allRotations[
                                             (allRotations.indexOf(currentRot) + 1) %
