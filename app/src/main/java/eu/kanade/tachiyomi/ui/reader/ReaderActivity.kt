@@ -257,6 +257,8 @@ class ReaderActivity : BaseMainActivity() {
             chaptersSheetVisible = false
         } else if (settingsSheetVisible) {
             settingsSheetVisible = false
+        } else if (menuVisible) {
+            toggleMenu()
         }
         reEnableBackPressedCallBack()
     }
@@ -906,7 +908,7 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     fun reEnableBackPressedCallBack() {
-        backPressedCallback?.isEnabled = chaptersSheetVisible || settingsSheetVisible
+        backPressedCallback?.isEnabled = chaptersSheetVisible || settingsSheetVisible || menuVisible
     }
 
     override fun finishAfterTransition() {
@@ -1157,6 +1159,7 @@ class ReaderActivity : BaseMainActivity() {
             }
         }
         menuStickyVisible = false
+        reEnableBackPressedCallBack()
     }
 
     /**
@@ -1231,6 +1234,7 @@ class ReaderActivity : BaseMainActivity() {
         overlayIsLtr = newViewer !is R2LPagerViewer
 
         supportActionBar?.title = manga.userTitle.ifBlank { manga.title }
+        chapterTitle = viewModel.getCurrentChapter()?.chapter?.name ?: ""
 
         viewModel.setIsLoading(true)
         invalidateOptionsMenu()

@@ -171,8 +171,8 @@ class PagerPageHolder(
     private val gestureDetector = GestureDetectorWithLongTap(viewer.activity, gestureListener)
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        gestureDetector.onTouchEvent(ev)
-        return super.dispatchTouchEvent(ev)
+        val handled = gestureDetector.onTouchEvent(ev)
+        return handled || super.dispatchTouchEvent(ev)
     }
 
     override fun onImageLoaded() {

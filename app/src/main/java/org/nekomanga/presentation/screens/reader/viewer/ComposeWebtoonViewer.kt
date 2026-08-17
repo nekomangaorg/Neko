@@ -139,7 +139,24 @@ fun ComposeWebtoonViewer(
                     }
                 }
                 if (newIndex != -1 && newIndex != lazyListState.firstVisibleItemIndex) {
-                    val offset = lazyListState.firstVisibleItemScrollOffset
+                    val currentChapterId =
+                        (items.getOrNull(lazyListState.firstVisibleItemIndex) as? ReaderUiItem.Page)
+                            ?.page
+                            ?.chapter
+                            ?.chapter
+                            ?.id
+                    val newChapterId =
+                        (items.getOrNull(newIndex) as? ReaderUiItem.Page)
+                            ?.page
+                            ?.chapter
+                            ?.chapter
+                            ?.id
+                    val offset =
+                        if (currentChapterId == newChapterId) {
+                            lazyListState.firstVisibleItemScrollOffset
+                        } else {
+                            0
+                        }
                     lazyListState.scrollToItem(newIndex, offset)
                 }
             }
@@ -268,7 +285,7 @@ fun ComposeWebtoonViewer(
                                     offsetY = 0f
                                 }
                             }
-                            if (scale < 1f) {
+                            if (scale < 1f && (offsetX != 0f || offsetY != 0f || scale != 1f)) {
                                 coroutineScope.launch {
                                     val animScale = Animatable(scale)
                                     val animX = Animatable(offsetX)
