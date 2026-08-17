@@ -100,6 +100,7 @@ fun ComposeWebtoonViewer(
             }
 
         var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
+        var isTransitioning by remember { mutableStateOf(false) }
 
         LaunchedEffect(currentChapterId) {
             viewer.adapter.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
@@ -471,8 +472,15 @@ fun ComposeWebtoonViewer(
                                 onTap = {
                                     val toChapter = item.transition.to
                                     if (toChapter != null) {
-                                        coroutineScope.launch {
-                                            viewer.activity.loadChapter(toChapter.chapter)
+                                        if (!isTransitioning) {
+                                            isTransitioning = true
+                                            coroutineScope.launch {
+                                                try {
+                                                    viewer.activity.loadChapter(toChapter.chapter)
+                                                } finally {
+                                                    isTransitioning = false
+                                                }
+                                            }
                                         }
                                     } else {
                                         viewer.activity.toggleMenu()

@@ -130,13 +130,19 @@ private fun PrevChapterTransitionContent(
 ) {
     val prevChapter = transition.to
     if (prevChapter != null) {
+        val queue by downloadManager.queueState.collectAsStateWithLifecycle()
         val isPrevDownloaded =
-            manga?.let { downloadManager.isChapterDownloaded(prevChapter.chapter, it.toManga()) }
-                ?: false
+            remember(prevChapter, manga, queue) {
+                manga?.let {
+                    downloadManager.isChapterDownloaded(prevChapter.chapter, it.toManga())
+                } ?: false
+            }
         val isCurrentDownloaded =
-            manga?.let {
-                downloadManager.isChapterDownloaded(transition.from.chapter, it.toManga())
-            } ?: false
+            remember(transition.from, manga, queue) {
+                manga?.let {
+                    downloadManager.isChapterDownloaded(transition.from.chapter, it.toManga())
+                } ?: false
+            }
 
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
             Text(
@@ -198,13 +204,19 @@ private fun NextChapterTransitionContent(
 ) {
     val nextChapter = transition.to
     if (nextChapter != null) {
+        val queue by downloadManager.queueState.collectAsStateWithLifecycle()
         val isCurrentDownloaded =
-            manga?.let {
-                downloadManager.isChapterDownloaded(transition.from.chapter, it.toManga())
-            } ?: false
+            remember(transition.from, manga, queue) {
+                manga?.let {
+                    downloadManager.isChapterDownloaded(transition.from.chapter, it.toManga())
+                } ?: false
+            }
         val isNextDownloaded =
-            manga?.let { downloadManager.isChapterDownloaded(nextChapter.chapter, it.toManga()) }
-                ?: false
+            remember(nextChapter, manga, queue) {
+                manga?.let {
+                    downloadManager.isChapterDownloaded(nextChapter.chapter, it.toManga())
+                } ?: false
+            }
 
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
             Text(

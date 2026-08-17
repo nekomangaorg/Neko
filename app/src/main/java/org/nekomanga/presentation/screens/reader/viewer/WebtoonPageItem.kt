@@ -36,6 +36,7 @@ fun WebtoonPageItem(
     Box(modifier = modifier.fillMaxWidth().heightIn(min = 400.dp)) {
         AndroidView(
             factory = { pageHolder.itemView },
+            update = { pageHolder.bind(item) },
             modifier = Modifier.fillMaxWidth(),
         )
     }

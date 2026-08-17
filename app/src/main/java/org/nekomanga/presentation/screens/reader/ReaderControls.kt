@@ -85,7 +85,7 @@ fun ReaderAppBar(
                     IconButton(onClick = onShiftDoublePage) {
                         Icon(
                             painter = painterResource(id = shiftDoublePageIconRes),
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.shift_one_page_over),
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
