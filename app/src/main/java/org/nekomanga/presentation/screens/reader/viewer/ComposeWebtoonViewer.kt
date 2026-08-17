@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -67,7 +67,7 @@ fun ComposeWebtoonViewer(
             ?.chapter
             ?.id
 
-    key(viewer, currentChapterId, items.size > 1) {
+    key(viewer) {
         val defaultPageIndex =
             items
                 .indexOfFirst { it is ReaderUiItem.Page || it is ReaderUiItem.SplitPage }
@@ -420,25 +420,40 @@ fun ComposeWebtoonViewer(
                         },
                 contentPadding = PaddingValues(bottom = if (hasMargins) Size.medium else Size.none),
             ) {
-                itemsIndexed(
+                items(
                     items = items,
-                    key = { index, item ->
+                    key = { item ->
                         when (item) {
                             is ReaderUiItem.Page ->
-                                "page_${item.page.chapter.chapter.id}_${item.page.index}_$index"
+                                if (item.extraPage != null) {
+                                    "webtoon_page_${item.page.chapter.chapter.id}_${item.page.index}_${item.extraPage.index}"
+                                } else {
+                                    "webtoon_page_${item.page.chapter.chapter.id}_${item.page.index}"
+                                }
                             is ReaderUiItem.SplitPage ->
-                                "split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}_$index"
+                                "webtoon_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}"
                             is ReaderUiItem.Transition ->
-                                "transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}_$index"
+                                "webtoon_transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}"
                         }
                     },
-                ) { _, item ->
+                ) { item ->
                     when (item) {
-                        is ReaderUiItem.Page,
+                        is ReaderUiItem.Page -> {
+                            WebtoonPageItem(
+                                viewer = viewer,
+                                item = item.page,
+                                modifier =
+                                    if (sidePaddingPercent > 0f) {
+                                        Modifier.padding(horizontal = (sidePaddingPercent * 100).dp)
+                                    } else {
+                                        Modifier
+                                    },
+                            )
+                        }
                         is ReaderUiItem.SplitPage -> {
                             WebtoonPageItem(
                                 viewer = viewer,
-                                item = item,
+                                item = item.split,
                                 modifier =
                                     if (sidePaddingPercent > 0f) {
                                         Modifier.padding(horizontal = (sidePaddingPercent * 100).dp)

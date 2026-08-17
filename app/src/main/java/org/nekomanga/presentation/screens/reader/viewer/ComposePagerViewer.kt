@@ -53,7 +53,7 @@ fun ComposePagerViewer(
             ?.chapter
             ?.id
 
-    key(viewer::class, currentChapterId, items.size > 1, isRtl, isVertical) {
+    key(viewer, isRtl, isVertical) {
         val defaultPageIndex =
             items
                 .indexOfFirst {
@@ -254,12 +254,16 @@ fun ComposePagerViewer(
                     key = { index ->
                         when (val item = items.getOrNull(index)) {
                             is ReaderUiItem.Page ->
-                                "pager_page_${item.page.chapter.chapter.id}_${item.page.index}_$index"
+                                if (item.extraPage != null) {
+                                    "pager_page_${item.page.chapter.chapter.id}_${item.page.index}_${item.extraPage.index}"
+                                } else {
+                                    "pager_page_${item.page.chapter.chapter.id}_${item.page.index}"
+                                }
                             is ReaderUiItem.Transition ->
-                                "pager_transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}_$index"
+                                "pager_transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}"
                             is ReaderUiItem.SplitPage ->
-                                "pager_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}_$index"
-                            null -> "pager_item_$index"
+                                "pager_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}"
+                            null -> "pager_null_$index"
                         }
                     },
                 ) { index ->
@@ -280,12 +284,16 @@ fun ComposePagerViewer(
                     key = { index ->
                         when (val item = items.getOrNull(index)) {
                             is ReaderUiItem.Page ->
-                                "pager_page_${item.page.chapter.chapter.id}_${item.page.index}_$index"
+                                if (item.extraPage != null) {
+                                    "pager_page_${item.page.chapter.chapter.id}_${item.page.index}_${item.extraPage.index}"
+                                } else {
+                                    "pager_page_${item.page.chapter.chapter.id}_${item.page.index}"
+                                }
                             is ReaderUiItem.Transition ->
-                                "pager_transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}_$index"
+                                "pager_transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}"
                             is ReaderUiItem.SplitPage ->
-                                "pager_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}_$index"
-                            null -> "pager_item_$index"
+                                "pager_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}"
+                            null -> "pager_null_$index"
                         }
                     },
                 ) { index ->

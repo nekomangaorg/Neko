@@ -68,7 +68,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -1208,35 +1207,44 @@ class ReaderActivity : BaseMainActivity() {
 
         setOrientation(viewModel.getMangaOrientationType())
 
-        // Destroy previous viewer if there was one
-        if (prevViewer != null) {
-            prevViewer.destroy()
-        }
-        viewer = newViewer
+        val isSameViewerType =
+            prevViewer != null &&
+                prevViewer::class == newViewer::class &&
+                (prevViewer !is WebtoonViewer ||
+                    (newViewer is WebtoonViewer &&
+                        prevViewer.noWebtoonTag == newViewer.noWebtoonTag))
 
-        if (newViewer is PagerViewer) {
-            if (readerPreferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
-                setDoublePageMode(newViewer)
+        if (!isSameViewerType) {
+            // Destroy previous viewer if there was one
+            prevViewer?.destroy()
+            viewer = newViewer
+
+            if (newViewer is PagerViewer) {
+                if (readerPreferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
+                    setDoublePageMode(newViewer)
+                }
+                lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
+                pagedViewerItems =
+                    newViewer.adapter.joinedItems.mapNotNull { ReaderUiItem.fromPagerItem(it) }
+                webtoonViewerItems = emptyList()
+            } else if (newViewer is WebtoonViewer) {
+                pagedViewerItems = emptyList()
+                webtoonViewerItems =
+                    newViewer.adapter.items.mapNotNull { ReaderUiItem.fromWebtoonItem(it) }
+            } else {
+                pagedViewerItems = emptyList()
+                webtoonViewerItems = emptyList()
             }
-            lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
-            pagedViewerItems =
-                newViewer.adapter.joinedItems.mapNotNull { ReaderUiItem.fromPagerItem(it) }
-            webtoonViewerItems = emptyList()
-        } else if (newViewer is WebtoonViewer) {
-            pagedViewerItems = emptyList()
-            webtoonViewerItems =
-                newViewer.adapter.items.mapNotNull { ReaderUiItem.fromWebtoonItem(it) }
-        } else {
-            pagedViewerItems = emptyList()
-            webtoonViewerItems = emptyList()
         }
 
-        overlayIsLtr = newViewer !is R2LPagerViewer
+        overlayIsLtr = (viewer ?: newViewer) !is R2LPagerViewer
 
         supportActionBar?.title = manga.userTitle.ifBlank { manga.title }
         chapterTitle = viewModel.getCurrentChapter()?.chapter?.name ?: ""
 
-        viewModel.setIsLoading(true)
+        if (viewModel.state.value.viewerChapters == null) {
+            viewModel.setIsLoading(true)
+        }
         invalidateOptionsMenu()
         startPostponedEnterTransition()
     }

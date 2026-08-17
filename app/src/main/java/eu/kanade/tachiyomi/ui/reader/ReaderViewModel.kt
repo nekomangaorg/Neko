@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.canDeleteChapter
-import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
@@ -277,6 +276,16 @@ constructor(
             try {
                 val manga = mangaRepository.getMangaById(mangaId)
                 if (manga != null) {
+                    if (manga.viewer_flags == -1) {
+                        val default = readerPreferences.defaultReadingMode().get()
+                        val readerType = manga.defaultReaderType()
+                        val cantSwitchToLTR =
+                            (readerType == ReadingModeType.LEFT_TO_RIGHT.flagValue &&
+                                default != ReadingModeType.RIGHT_TO_LEFT.flagValue)
+                        manga.viewer_flags = 0
+                        manga.readingModeType = if (cantSwitchToLTR) 0 else readerType
+                        mangaRepository.updateViewerFlags(manga)
+                    }
                     mutableState.update { it.copy(manga = manga.toMangaItem()) }
                     if (chapterId == -1L) {
                         chapterId = initialChapterId
@@ -818,8 +827,7 @@ constructor(
             val dbManga = manga.toManga()
             dbManga.viewer_flags = 0
             dbManga.readingModeType = if (cantSwitchToLTR) 0 else readerType
-            runBlocking { mangaRepository.updateViewerFlags(dbManga) }
-            mutableState.update { it.copy(manga = dbManga.toMangaItem()) }
+            viewModelScope.launchNonCancellable { mangaRepository.updateViewerFlags(dbManga) }
         }
         val currentManga = state.value.manga ?: manga
         val viewer =
