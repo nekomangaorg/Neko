@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +54,7 @@ fun MangaGridWithHeader(
     modifier: Modifier = Modifier,
     isComfortable: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
+    collapsedGroups: SnapshotStateSet<Int>,
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
@@ -72,26 +74,38 @@ fun MangaGridWithHeader(
     ) {
         chunkedGroupedManga.forEach { (stringRes, chunks) ->
             item(key = "header-$stringRes") {
-                HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
+                HeaderCard {
+                    DefaultHeaderText(
+                        text = stringResource(id = stringRes),
+                        isExpanded = stringRes !in collapsedGroups,
+                        onClick = {
+                            if (!collapsedGroups.add(stringRes)) {
+                                collapsedGroups.remove(stringRes)
+                            }
+                        },
+                    )
+                }
             }
 
-            itemsIndexed(items = chunks, key = { index, _ -> "grid-row-$stringRes-$index" }) {
-                _,
-                rowItems ->
-                VerticalGrid(
-                    columns = SimpleGridCells.Fixed(columns),
-                    modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
-                    horizontalArrangement = Arrangement.spacedBy(Size.small),
-                ) {
-                    rowItems.forEach { displayManga ->
-                        MangaGridItem(
-                            displayManga = displayManga,
-                            shouldOutlineCover = shouldOutlineCover,
-                            dynamicCover = dynamicCover,
-                            isComfortable = isComfortable,
-                            onClick = onClick,
-                            onLongClick = onLongClick,
-                        )
+            if (stringRes !in collapsedGroups) {
+                itemsIndexed(items = chunks, key = { index, _ -> "grid-row-$stringRes-$index" }) {
+                    _,
+                    rowItems ->
+                    VerticalGrid(
+                        columns = SimpleGridCells.Fixed(columns),
+                        modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
+                        horizontalArrangement = Arrangement.spacedBy(Size.small),
+                    ) {
+                        rowItems.forEach { displayManga ->
+                            MangaGridItem(
+                                displayManga = displayManga,
+                                shouldOutlineCover = shouldOutlineCover,
+                                dynamicCover = dynamicCover,
+                                isComfortable = isComfortable,
+                                onClick = onClick,
+                                onLongClick = onLongClick,
+                            )
+                        }
                     }
                 }
             }

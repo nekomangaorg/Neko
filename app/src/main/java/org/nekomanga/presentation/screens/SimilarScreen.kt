@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -214,6 +215,7 @@ private fun SimilarContent(
     mangaClick: (Long) -> Unit,
     mangaLongClick: (DisplayManga) -> Unit,
 ) {
+    val collapsedGroups = remember { mutableStateSetOf<Int>() }
     if (similarScreenState.filteredDisplayManga.isEmpty()) {
         if (similarScreenState.isRefreshing) {
             Box(modifier = modifier.fillMaxSize())
@@ -235,6 +237,7 @@ private fun SimilarContent(
                 dynamicCover = similarScreenState.dynamicCovers,
                 modifier = modifier,
                 contentPadding = contentPadding,
+                collapsedGroups = collapsedGroups,
                 onClick = mangaClick,
                 onLongClick = mangaLongClick,
             )
@@ -247,6 +250,7 @@ private fun SimilarContent(
                 isComfortable = similarScreenState.isComfortableGrid,
                 modifier = modifier,
                 contentPadding = contentPadding,
+                collapsedGroups = collapsedGroups,
                 onClick = mangaClick,
                 onLongClick = mangaLongClick,
             )

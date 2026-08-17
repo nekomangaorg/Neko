@@ -2,6 +2,8 @@ package org.nekomanga.presentation.screens.browse
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateSetOf
+import androidx.compose.runtime.remember
 import eu.kanade.tachiyomi.ui.source.browse.DisplayMangaHolder
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
@@ -23,6 +25,7 @@ fun BrowseFollowsPage(
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
 ) {
+    val collapsedGroups = remember { mutableStateSetOf<Int>() }
     if (displayMangaHolder.allDisplayManga.isEmpty()) {
         EmptyScreen(
             message = UiText.StringResource(resourceId = R.string.no_results_found),
@@ -37,6 +40,7 @@ fun BrowseFollowsPage(
                 onClick = onClick,
                 onLongClick = onLongClick,
                 contentPadding = contentPadding,
+                collapsedGroups = collapsedGroups,
             )
         } else {
             MangaGridWithHeader(
@@ -48,6 +52,7 @@ fun BrowseFollowsPage(
                 onClick = onClick,
                 onLongClick = onLongClick,
                 contentPadding = contentPadding,
+                collapsedGroups = collapsedGroups,
             )
         }
     }

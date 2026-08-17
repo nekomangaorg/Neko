@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -100,6 +101,7 @@ fun MangaListWithHeader(
     dynamicCover: Boolean,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
+    collapsedGroups: SnapshotStateSet<Int>,
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
@@ -118,27 +120,39 @@ fun MangaListWithHeader(
     ) {
         filteredGroupedManga.forEach { (stringRes, mangaList) ->
             item(key = "header-$stringRes") {
-                HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
+                HeaderCard {
+                    DefaultHeaderText(
+                        text = stringResource(id = stringRes),
+                        isExpanded = stringRes !in collapsedGroups,
+                        onClick = {
+                            if (!collapsedGroups.add(stringRes)) {
+                                collapsedGroups.remove(stringRes)
+                            }
+                        },
+                    )
+                }
             }
-            itemsIndexed(
-                mangaList,
-                key = { _, displayManga -> "${stringRes}-item-${displayManga.mangaId}" },
-            ) { index, displayManga ->
-                val listCardType =
-                    when {
-                        index == 0 && mangaList.size > 1 -> ListCardType.Top
-                        index == mangaList.size - 1 && mangaList.size > 1 -> ListCardType.Bottom
-                        mangaList.size == 1 -> ListCardType.Single
-                        else -> ListCardType.Center
-                    }
-                MangaListItem(
-                    displayManga = displayManga,
-                    listCardType = listCardType,
-                    shouldOutlineCover = shouldOutlineCover,
-                    dynamicCover = dynamicCover,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                )
+            if (stringRes !in collapsedGroups) {
+                itemsIndexed(
+                    mangaList,
+                    key = { _, displayManga -> "${stringRes}-item-${displayManga.mangaId}" },
+                ) { index, displayManga ->
+                    val listCardType =
+                        when {
+                            index == 0 && mangaList.size > 1 -> ListCardType.Top
+                            index == mangaList.size - 1 && mangaList.size > 1 -> ListCardType.Bottom
+                            mangaList.size == 1 -> ListCardType.Single
+                            else -> ListCardType.Center
+                        }
+                    MangaListItem(
+                        displayManga = displayManga,
+                        listCardType = listCardType,
+                        shouldOutlineCover = shouldOutlineCover,
+                        dynamicCover = dynamicCover,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                    )
+                }
             }
         }
     }
