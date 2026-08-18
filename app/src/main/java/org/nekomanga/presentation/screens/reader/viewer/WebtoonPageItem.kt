@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -15,6 +16,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonPageHolder
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
+import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.presentation.extensions.collectAsState
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @Composable
 fun WebtoonPageItem(
@@ -22,6 +27,11 @@ fun WebtoonPageItem(
     item: Any,
     modifier: Modifier = Modifier,
 ) {
+    val readerPreferences: ReaderPreferences = remember { Injekt.get() }
+    val cropBordersWebtoon by readerPreferences.cropBordersWebtoon().collectAsState()
+    val cropBorders by readerPreferences.cropBorders().collectAsState()
+    val sidePadding by readerPreferences.webtoonSidePadding().collectAsState()
+
     val pageHolder =
         remember(item) {
             val imageView =
@@ -36,7 +46,16 @@ fun WebtoonPageItem(
     Box(modifier = modifier.fillMaxWidth().heightIn(min = 400.dp)) {
         AndroidView(
             factory = { pageHolder.itemView },
-            update = { pageHolder.bind(item) },
+            update = { holder ->
+                // Trigger layout & config update when observed preferences change
+                if (
+                    sidePadding >= 0 &&
+                        (cropBordersWebtoon || !cropBordersWebtoon) &&
+                        (cropBorders || !cropBorders)
+                ) {
+                    pageHolder.updateImageProperties()
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
         )
     }

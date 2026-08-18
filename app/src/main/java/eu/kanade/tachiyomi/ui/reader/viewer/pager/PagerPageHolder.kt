@@ -264,6 +264,10 @@ class PagerPageHolder(
         }
     }
 
+    fun updateImageProperties() {
+        updateImageConfig(imageConfig)
+    }
+
     fun onPageSelected(forward: Boolean?) {
         (pageView as? SubsamplingScaleImageView)?.apply {
             if (isReady) {

@@ -30,7 +30,11 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
+import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @Composable
 fun ComposePagerViewer(
@@ -109,12 +113,17 @@ fun ComposePagerViewer(
             }
         }
 
+        val readerPreferences: ReaderPreferences = remember { Injekt.get() }
+        val animatedTransitions by readerPreferences.animatedPageTransitions().collectAsState()
+
         LaunchedEffect(viewer.requestedPagePosition) {
             val req = viewer.requestedPagePosition ?: return@LaunchedEffect
             val target = req.first
             if (target in 0 until pagerState.pageCount) {
                 if (target != pagerState.currentPage) {
-                    if (req.second) {
+                    val useAnimation =
+                        req.second && animatedTransitions && viewer.config.usePageTransitions
+                    if (useAnimation) {
                         pagerState.animateScrollToPage(target)
                     } else {
                         pagerState.scrollToPage(target)

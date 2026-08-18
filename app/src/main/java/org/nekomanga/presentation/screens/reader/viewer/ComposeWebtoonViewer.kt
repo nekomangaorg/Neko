@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -84,8 +85,12 @@ fun ComposeWebtoonViewer(
         var offsetY by remember { mutableFloatStateOf(0f) }
         val coroutineScope = rememberCoroutineScope()
 
-        val readerPreferences = remember { Injekt.get<ReaderPreferences>() }
+        val readerPreferences: ReaderPreferences = remember { Injekt.get() }
         val readerTheme by readerPreferences.readerTheme().collectAsState()
+        val webtoonSidePadding by readerPreferences.webtoonSidePadding().collectAsState()
+        val animatedTransitions by
+            readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
+        val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsState()
         val themeBackground = MaterialTheme.colorScheme.background
         val backgroundColor =
             remember(readerTheme, themeBackground) {
@@ -182,7 +187,11 @@ fun ComposeWebtoonViewer(
         // Sync delta scroll
         LaunchedEffect(viewer.requestedScrollDelta) {
             viewer.requestedScrollDelta?.let { delta ->
-                lazyListState.animateScrollBy(delta.toFloat())
+                if (animatedTransitions && viewer.config.usePageTransitions) {
+                    lazyListState.animateScrollBy(delta.toFloat())
+                } else {
+                    lazyListState.scrollBy(delta.toFloat())
+                }
                 viewer.requestedScrollDelta = null
             }
         }
@@ -253,7 +262,7 @@ fun ComposeWebtoonViewer(
                 }
         }
 
-        val sidePaddingPercent = viewer.config.sidePadding / 100f
+        val sidePaddingPercent = webtoonSidePadding / 100f
         val hasMargins = viewer.hasMargins
 
         Box(modifier = modifier.fillMaxSize().background(backgroundColor)) {
@@ -268,7 +277,7 @@ fun ComposeWebtoonViewer(
                             translationX = offsetX
                             translationY = offsetY
                         }
-                        .pointerInput(viewer.config.enableZoomOut) {
+                        .pointerInput(enableZoomOut) {
                             detectTransformGestures(panZoomLock = true) { _, pan, zoom, _ ->
                                 val newScale =
                                     (scale * zoom).coerceIn(

@@ -94,6 +94,30 @@ constructor(
         onViewClicked?.invoke()
     }
 
+    fun updateImageConfig(config: Config) {
+        this.config = config
+        (pageView as? SubsamplingScaleImageView)?.apply {
+            setDoubleTapZoomDuration(config.zoomDuration.getSystemScaledDuration())
+            setMinimumScaleType(config.minimumScaleType)
+            setCropBorders(config.cropBorders)
+            if (config.insetInfo != null) {
+                val topInsets = config.insetInfo.topCutoutInset
+                val bottomInsets = config.insetInfo.bottomCutoutInset
+                setExtendPastCutout(
+                    config.insetInfo.cutoutBehavior == PagerConfig.CUTOUT_START_EXTENDED &&
+                        config.insetInfo.scaleTypeIsFullFit &&
+                        topInsets + bottomInsets > 0
+                )
+            }
+            if (isReady) {
+                setupZoom(config)
+                this@ReaderPageImageView.onNeedsLandscapeZoom()
+            }
+            requestLayout()
+            invalidate()
+        }
+    }
+
     fun setImage(inputStream: InputStream, isAnimated: Boolean, config: Config) {
         if (isAnimated) {
             prepareAnimatedImageView()

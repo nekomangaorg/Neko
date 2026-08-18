@@ -33,6 +33,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -427,17 +428,25 @@ class ReaderActivity : BaseMainActivity() {
                                 settingsSheetVisible = false
                                 reEnableBackPressedCallBack()
                             },
-                            scrimColor = androidx.compose.ui.graphics.Color.Transparent,
                             sheetState =
                                 rememberModalBottomSheetState(skipPartiallyExpanded = true),
                         ) {
-                            ReaderSettingsSheet(
-                                onDismiss = {
-                                    settingsSheetVisible = false
-                                    reEnableBackPressedCallBack()
-                                },
-                                viewModel = viewModel,
-                            )
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                ReaderSettingsSheet(
+                                    onDismiss = {
+                                        settingsSheetVisible = false
+                                        reEnableBackPressedCallBack()
+                                    },
+                                    viewModel = viewModel,
+                                )
+                                GestureNavigationOverlay(
+                                    navigation = overlayNavigation,
+                                    isLtr = overlayIsLtr,
+                                    visible = overlayVisible,
+                                    onDismiss = { overlayVisible = false },
+                                    modifier = Modifier.matchParentSize(),
+                                )
+                            }
                         }
                     }
                     if (chaptersSheetVisible) {
@@ -446,7 +455,6 @@ class ReaderActivity : BaseMainActivity() {
                                 chaptersSheetVisible = false
                                 reEnableBackPressedCallBack()
                             },
-                            scrimColor = androidx.compose.ui.graphics.Color.Transparent,
                             sheetState =
                                 rememberModalBottomSheetState(skipPartiallyExpanded = true),
                         ) {
@@ -842,6 +850,7 @@ class ReaderActivity : BaseMainActivity() {
     fun setNavigation(navigation: ViewerNavigation, showOnStart: Boolean) {
         val isFirstInit = overlayNavigation == null
         overlayNavigation = navigation
+        overlayIsLtr = viewer !is R2LPagerViewer
         if (isFirstInit) {
             if (showOnStart) {
                 showNavigationAgain()
@@ -1154,6 +1163,7 @@ class ReaderActivity : BaseMainActivity() {
             }
         }
         menuStickyVisible = false
+        viewModel.setMenuStickyVisibility(false)
         reEnableBackPressedCallBack()
     }
 
@@ -1747,10 +1757,12 @@ class ReaderActivity : BaseMainActivity() {
         if (chaptersSheetVisible || settingsSheetVisible) return
         if (visible && !menuStickyVisible && !menuVisible) {
             menuStickyVisible = true
+            viewModel.setMenuStickyVisibility(true)
             coroutine = launchUI {
                 delay(2000)
                 if (window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) == true) {
                     menuStickyVisible = false
+                    viewModel.setMenuStickyVisibility(false)
                     setMenuVisibility(false)
                 }
             }
@@ -1772,6 +1784,7 @@ class ReaderActivity : BaseMainActivity() {
         } else if (!visible && (menuStickyVisible || menuVisible)) {
             if (menuStickyVisible && !menuVisible) {
                 menuStickyVisible = false
+                viewModel.setMenuStickyVisibility(false)
                 setMenuVisibility(false)
             }
             coroutine?.cancel()
