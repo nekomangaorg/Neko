@@ -33,7 +33,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -431,22 +430,13 @@ class ReaderActivity : BaseMainActivity() {
                             sheetState =
                                 rememberModalBottomSheetState(skipPartiallyExpanded = true),
                         ) {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                ReaderSettingsSheet(
-                                    onDismiss = {
-                                        settingsSheetVisible = false
-                                        reEnableBackPressedCallBack()
-                                    },
-                                    viewModel = viewModel,
-                                )
-                                GestureNavigationOverlay(
-                                    navigation = overlayNavigation,
-                                    isLtr = overlayIsLtr,
-                                    visible = overlayVisible,
-                                    onDismiss = { overlayVisible = false },
-                                    modifier = Modifier.matchParentSize(),
-                                )
-                            }
+                            ReaderSettingsSheet(
+                                onDismiss = {
+                                    settingsSheetVisible = false
+                                    reEnableBackPressedCallBack()
+                                },
+                                viewModel = viewModel,
+                            )
                         }
                     }
                     if (chaptersSheetVisible) {

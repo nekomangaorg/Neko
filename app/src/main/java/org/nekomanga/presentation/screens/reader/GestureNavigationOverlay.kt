@@ -13,11 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
-import kotlinx.coroutines.delay
 
 @Composable
 fun GestureNavigationOverlay(
@@ -44,19 +38,8 @@ fun GestureNavigationOverlay(
 ) {
     if (navigation == null || navigation is DisabledNavigation) return
 
-    var currentVisible by remember { mutableStateOf(visible) }
-
-    LaunchedEffect(visible, navigation, isLtr) {
-        currentVisible = visible
-        if (visible) {
-            delay(1500L)
-            currentVisible = false
-            onDismiss()
-        }
-    }
-
     AnimatedVisibility(
-        visible = currentVisible && visible,
+        visible = visible,
         enter = fadeIn(animationSpec = tween(250)),
         exit = fadeOut(animationSpec = tween(500)),
         modifier = modifier.fillMaxSize(),
@@ -70,7 +53,6 @@ fun GestureNavigationOverlay(
                         while (true) {
                             val event = awaitPointerEvent()
                             if (event.changes.any { it.changedToDown() }) {
-                                currentVisible = false
                                 onDismiss()
                             }
                         }
