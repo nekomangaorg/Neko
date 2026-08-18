@@ -186,10 +186,10 @@ class ReaderActivity : BaseMainActivity() {
 
     val viewModel by viewModels<ReaderViewModel>()
 
-    var overlayNavigation by
-        mutableStateOf<eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation?>(null)
+    var overlayNavigation by mutableStateOf<ViewerNavigation?>(null)
     var overlayVisible by mutableStateOf(false)
     var overlayIsLtr by mutableStateOf(true)
+    var overlayInvertMode by mutableStateOf(ViewerNavigation.TappingInvertMode.NONE)
     var chapterTitle by mutableStateOf("")
     var showShiftDoublePage by mutableStateOf(false)
     var shiftDoublePageIconRes by mutableStateOf<Int?>(null)
@@ -374,6 +374,7 @@ class ReaderActivity : BaseMainActivity() {
                     GestureNavigationOverlay(
                         navigation = overlayNavigation,
                         isLtr = overlayIsLtr,
+                        invertMode = overlayInvertMode,
                         visible = overlayVisible,
                         onDismiss = { overlayVisible = false },
                         modifier = Modifier.fillMaxSize(),
@@ -841,6 +842,7 @@ class ReaderActivity : BaseMainActivity() {
         val isFirstInit = overlayNavigation == null
         overlayNavigation = navigation
         overlayIsLtr = viewer !is R2LPagerViewer
+        overlayInvertMode = navigation.invertMode
         if (isFirstInit) {
             if (showOnStart) {
                 showNavigationAgain()
@@ -856,6 +858,7 @@ class ReaderActivity : BaseMainActivity() {
             nav != null &&
                 nav !is eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
         ) {
+            overlayInvertMode = nav.invertMode
             overlayVisible = true
         }
     }

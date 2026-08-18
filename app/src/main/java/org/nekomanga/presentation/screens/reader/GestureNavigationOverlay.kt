@@ -35,6 +35,8 @@ fun GestureNavigationOverlay(
     visible: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    invertMode: ViewerNavigation.TappingInvertMode =
+        navigation?.invertMode ?: ViewerNavigation.TappingInvertMode.NONE,
 ) {
     if (navigation == null || navigation is DisabledNavigation) return
 
@@ -63,7 +65,7 @@ fun GestureNavigationOverlay(
             val height = maxHeight
 
             navigation.regions.forEach { regionItem ->
-                val region = regionItem.invert(navigation.invertMode)
+                val region = regionItem.invert(invertMode)
                 val rect = region.rectF
                 val directionalRegion = region.type.directionalRegion(isLtr)
                 val color = Color(ContextCompat.getColor(context, directionalRegion.colorRes))
