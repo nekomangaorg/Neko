@@ -178,24 +178,26 @@ constructor(
     }
 
     protected fun SubsamplingScaleImageView.setupZoom(config: Config?) {
+        val targetScale = minScale
         // 5x zoom
-        maxScale = scale * MAX_ZOOM_SCALE
-        setDoubleTapZoomScale(scale * 2)
+        maxScale = targetScale * MAX_ZOOM_SCALE
+        setDoubleTapZoomScale(targetScale * 2)
 
         config ?: return
 
         var centerV = 0f
         when (config.zoomStartPosition) {
             PagerConfig.ZoomType.Left -> {
-                setScaleAndCenter(scale, PointF(0f, 0f))
+                setScaleAndCenter(targetScale, PointF(0f, 0f))
             }
             PagerConfig.ZoomType.Right -> {
-                setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
+                setScaleAndCenter(targetScale, PointF(sWidth.toFloat(), 0f))
                 centerV = sWidth.toFloat()
             }
             PagerConfig.ZoomType.Center -> {
-                setScaleAndCenter(scale, center.also { it?.y = 0f })
-                centerV = center?.x ?: 0f
+                val currentCenter = center ?: PointF(sWidth / 2f, sHeight / 2f)
+                setScaleAndCenter(targetScale, PointF(currentCenter.x, 0f))
+                centerV = currentCenter.x
             }
         }
         val insetInfo = config.insetInfo ?: return
@@ -206,9 +208,10 @@ constructor(
                 topInsets + bottomInsets > 0 &&
                 insetInfo.scaleTypeIsFullFit
         ) {
+            val currentCenter = center ?: PointF(sWidth / 2f, sHeight / 2f)
             setScaleAndCenter(
-                scale,
-                PointF(centerV, (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f)),
+                targetScale,
+                PointF(centerV, currentCenter.y + topInsets - bottomInsets),
             )
         }
     }

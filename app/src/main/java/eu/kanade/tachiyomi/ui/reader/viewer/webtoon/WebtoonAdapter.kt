@@ -111,6 +111,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         val result = DiffUtil.calculateDiff(Callback(items, newItems))
         items = newItems
         result.dispatchUpdatesTo(this)
+        viewer.activity.updateWebtoonViewerItems()
     }
 
     /**
@@ -126,6 +127,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         items = newItems
         tallSplitPages.add(originalPage)
         result.dispatchUpdatesTo(this)
+        viewer.activity.updateWebtoonViewerItems()
     }
 
     /** Returns the amount of items of the adapter. */

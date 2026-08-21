@@ -347,6 +347,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             this.joinedItems = subJoinedItems
         }
         notifyDataSetChanged()
+        viewer.activity.updatePagedViewerItems()
 
         // Step 6: Move back to our previous page or transition page
         // The listener is likely off around now, but either way when shifting or doubling,

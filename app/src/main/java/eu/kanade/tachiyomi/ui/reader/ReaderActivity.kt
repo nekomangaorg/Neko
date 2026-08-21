@@ -38,16 +38,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
@@ -299,7 +302,21 @@ class ReaderActivity : BaseMainActivity() {
         setContent {
             NekoTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
-                Box(modifier = Modifier.fillMaxSize()) {
+                val readerPreferences: ReaderPreferences = remember { Injekt.get() }
+                val readerTheme by readerPreferences.readerTheme().preferenceCollectAsState()
+                val themeBackground = MaterialTheme.colorScheme.background
+                val backgroundColor =
+                    remember(readerTheme, themeBackground) {
+                        when (readerTheme) {
+                            0 -> ComposeColor.White
+                            1 -> ComposeColor.Black
+                            2 -> ComposeColor.White
+                            3 -> themeBackground
+                            4 -> ComposeColor.Black
+                            else -> themeBackground
+                        }
+                    }
+                Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
                     // Native Compose Viewers
                     val currentViewer = viewer
                     if (currentViewer is PagerViewer && pagedViewerItems.isNotEmpty()) {
@@ -1260,6 +1277,20 @@ class ReaderActivity : BaseMainActivity() {
         viewModel.restartReadTimer()
     }
 
+    fun updatePagedViewerItems() {
+        (viewer as? PagerViewer)?.let { pViewer ->
+            pagedViewerItems =
+                pViewer.adapter.joinedItems.mapNotNull { item -> ReaderUiItem.fromPagerItem(item) }
+        }
+    }
+
+    fun updateWebtoonViewerItems() {
+        (viewer as? WebtoonViewer)?.let { wViewer ->
+            webtoonViewerItems =
+                wViewer.adapter.items.mapNotNull { item -> ReaderUiItem.fromWebtoonItem(item) }
+        }
+    }
+
     fun reloadChapters(doublePages: Boolean, force: Boolean = false) {
         val pViewer = viewer as? PagerViewer ?: return
         pViewer.updateShifting()
@@ -1286,6 +1317,7 @@ class ReaderActivity : BaseMainActivity() {
             TimberKt.d { "about to reloadChapter call set chaptersDoubleShift" }
             pViewer.setChaptersDoubleShift(it)
             TimberKt.d { "finished reloadChapter call set chaptersDoubleShift" }
+            updatePagedViewerItems()
         }
         invalidateOptionsMenu()
     }
@@ -1316,17 +1348,11 @@ class ReaderActivity : BaseMainActivity() {
         lastShiftDoubleState = null
         viewer?.setChapters(viewerChapters)
         if (viewer is PagerViewer) {
-            pagedViewerItems =
-                (viewer as PagerViewer).adapter.joinedItems.mapNotNull {
-                    ReaderUiItem.fromPagerItem(it)
-                }
+            updatePagedViewerItems()
             webtoonViewerItems = emptyList()
         } else if (viewer is WebtoonViewer) {
             pagedViewerItems = emptyList()
-            webtoonViewerItems =
-                (viewer as WebtoonViewer).adapter.items.mapNotNull {
-                    ReaderUiItem.fromWebtoonItem(it)
-                }
+            updateWebtoonViewerItems()
         }
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null

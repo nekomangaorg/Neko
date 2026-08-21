@@ -264,7 +264,34 @@ class PagerPageHolder(
         }
     }
 
+    fun updateReaderTheme(theme: Int = viewer.config.readerTheme) {
+        setBackgroundColor(
+            when (theme) {
+                3 -> Color.TRANSPARENT
+                else -> ThemeUtil.readerBackgroundColor(theme, context)
+            }
+        )
+        progressBar.foregroundTintList =
+            ColorStateList.valueOf(
+                context.getResourceColor(
+                    if (isInvertedFromTheme()) {
+                        R.attr.colorPrimaryInverse
+                    } else {
+                        R.attr.colorPrimary
+                    }
+                )
+            )
+        if (theme >= 2) {
+            if (page.bg != null) {
+                pageView?.background = page.bg
+            }
+        } else {
+            pageView?.background = null
+        }
+    }
+
     fun updateImageProperties() {
+        updateReaderTheme()
         updateImageConfig(imageConfig)
     }
 
@@ -587,36 +614,51 @@ class PagerPageHolder(
         }
     }
 
+    fun createConfig(
+        scaleType: Int = viewer.config.imageScaleType,
+        cropBorders: Boolean = viewer.config.imageCropBorders,
+        zoomType: PagerConfig.ZoomType = viewer.config.imageZoomType,
+        landscapeZoom: Boolean = viewer.config.landscapeZoom,
+    ): Config {
+        val scaleTypeIsFullFit =
+            when (scaleType) {
+                SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
+                SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
+                SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP -> true
+                else -> false
+            }
+        return Config(
+            zoomDuration = viewer.config.doubleTapAnimDuration,
+            minimumScaleType = scaleType,
+            cropBorders = cropBorders,
+            zoomStartPosition = zoomType,
+            landscapeZoom = landscapeZoom,
+            insetInfo =
+                InsetInfo(
+                    cutoutBehavior = viewer.config.cutoutBehavior,
+                    topCutoutInset =
+                        viewer.activity.window.decorView.rootWindowInsets
+                            ?.topCutoutInset()
+                            ?.toFloat() ?: 0f,
+                    bottomCutoutInset =
+                        viewer.activity.window.decorView.rootWindowInsets
+                            ?.bottomCutoutInset()
+                            ?.toFloat() ?: 0f,
+                    scaleTypeIsFullFit = scaleTypeIsFullFit,
+                    isFullscreen =
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                            viewer.config.isFullscreen &&
+                            !viewer.activity.isInMultiWindowMode,
+                    isSplitScreen =
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                            viewer.activity.isInMultiWindowMode,
+                    insets = viewer.activity.window.decorView.rootWindowInsets,
+                ),
+        )
+    }
+
     private val imageConfig: Config
-        get() =
-            Config(
-                zoomDuration = viewer.config.doubleTapAnimDuration,
-                minimumScaleType = viewer.config.imageScaleType,
-                cropBorders = viewer.config.imageCropBorders,
-                zoomStartPosition = viewer.config.imageZoomType,
-                landscapeZoom = viewer.config.landscapeZoom,
-                insetInfo =
-                    InsetInfo(
-                        cutoutBehavior = viewer.config.cutoutBehavior,
-                        topCutoutInset =
-                            viewer.activity.window.decorView.rootWindowInsets
-                                ?.topCutoutInset()
-                                ?.toFloat() ?: 0f,
-                        bottomCutoutInset =
-                            viewer.activity.window.decorView.rootWindowInsets
-                                ?.bottomCutoutInset()
-                                ?.toFloat() ?: 0f,
-                        scaleTypeIsFullFit = viewer.config.scaleTypeIsFullFit(),
-                        isFullscreen =
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                                viewer.config.isFullscreen &&
-                                !viewer.activity.isInMultiWindowMode,
-                        isSplitScreen =
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                                viewer.activity.isInMultiWindowMode,
-                        insets = viewer.activity.window.decorView.rootWindowInsets,
-                    ),
-            )
+        get() = createConfig()
 
     private suspend fun setBG(bytesArray: ByteArray): Drawable {
         return withContext(Default) {

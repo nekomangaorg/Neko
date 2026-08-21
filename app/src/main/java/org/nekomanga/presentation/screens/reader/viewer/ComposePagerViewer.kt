@@ -1,11 +1,13 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -115,6 +118,19 @@ fun ComposePagerViewer(
 
         val readerPreferences: ReaderPreferences = remember { Injekt.get() }
         val animatedTransitions by readerPreferences.animatedPageTransitions().collectAsState()
+        val readerTheme by readerPreferences.readerTheme().collectAsState()
+        val themeBackground = MaterialTheme.colorScheme.background
+        val backgroundColor =
+            remember(readerTheme, themeBackground) {
+                when (readerTheme) {
+                    0 -> Color.White
+                    1 -> Color.Black
+                    2 -> Color.White
+                    3 -> themeBackground
+                    4 -> Color.Black
+                    else -> themeBackground
+                }
+            }
 
         LaunchedEffect(viewer.requestedPagePosition) {
             val req = viewer.requestedPagePosition ?: return@LaunchedEffect
@@ -254,7 +270,13 @@ fun ComposePagerViewer(
                 }
             }
 
-        Box(modifier = modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
+        Box(
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .background(backgroundColor)
+                    .nestedScroll(nestedScrollConnection)
+        ) {
             if (isVertical) {
                 VerticalPager(
                     state = pagerState,
