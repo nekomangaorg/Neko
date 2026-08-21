@@ -73,6 +73,11 @@ fun ReaderChaptersSheet(
     val listState = rememberLazyListState()
     val maxLazyHeight = (LocalConfiguration.current.screenHeightDp * 0.6f).dp
     var loadingIndex by remember { mutableStateOf<Int?>(null) }
+    val mangaDetailsPreferences = remember { Injekt.get<MangaDetailsPreferences>() }
+    val hideChapterTitles =
+        remember(chapters, mangaDetailsPreferences) {
+            chapters.firstOrNull()?.manga?.hideChapterTitle(mangaDetailsPreferences) ?: false
+        }
 
     // Scroll to the current reading chapter
     LaunchedEffect(chapters) {
@@ -217,6 +222,7 @@ fun ReaderChaptersSheet(
                         ChapterListItem(
                             item = item,
                             isLoading = isLoading,
+                            hideChapterTitles = hideChapterTitles,
                             onClick = {
                                 loadingIndex = index
                                 onChapterClick(item, index)
@@ -234,6 +240,7 @@ fun ReaderChaptersSheet(
 private fun ChapterListItem(
     item: ReaderChapterItem,
     isLoading: Boolean,
+    hideChapterTitles: Boolean,
     onClick: () -> Unit,
     onBookmarkClick: () -> Unit,
 ) {
@@ -248,11 +255,9 @@ private fun ChapterListItem(
     val fontStyle = if (item.isCurrent) FontStyle.Italic else FontStyle.Normal
     val fontWeight = if (item.isCurrent) FontWeight.Bold else FontWeight.Normal
 
-    val manga = item.manga
-    val mangaDetailsPreferences = remember { Injekt.get<MangaDetailsPreferences>() }
     val titleText =
-        remember(item.chapter) {
-            if (manga.hideChapterTitle(mangaDetailsPreferences)) {
+        remember(item.chapter, hideChapterTitles) {
+            if (hideChapterTitles) {
                 val decimalFormat =
                     DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
                 val number = decimalFormat.format(item.chapter_number.toDouble())

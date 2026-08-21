@@ -113,6 +113,10 @@ fun ReaderBottomControls(
     onWebviewClick: () -> Unit,
     onSettingsClick: () -> Unit,
     pageNumberVisible: Boolean,
+    isChaptersVisible: Boolean = true,
+    isCommentsVisible: Boolean = true,
+    isWebViewVisible: Boolean = true,
+    isSettingsVisible: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
@@ -246,33 +250,42 @@ fun ReaderBottomControls(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    IconButton(onClick = onChaptersClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_format_list_numbered_24dp),
-                            contentDescription = stringResource(R.string.view_chapters),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
+                    if (isChaptersVisible) {
+                        IconButton(onClick = onChaptersClick) {
+                            Icon(
+                                painter =
+                                    painterResource(id = R.drawable.ic_format_list_numbered_24dp),
+                                contentDescription = stringResource(R.string.view_chapters),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
                     }
-                    IconButton(onClick = onCommentsClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_view_comments_24p),
-                            contentDescription = stringResource(R.string.comments),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
+                    if (isCommentsVisible) {
+                        IconButton(onClick = onCommentsClick) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_view_comments_24p),
+                                contentDescription = stringResource(R.string.comments),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
                     }
-                    IconButton(onClick = onWebviewClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_open_in_webview_24dp),
-                            contentDescription = stringResource(R.string.open_in_webview),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
+                    if (isWebViewVisible) {
+                        IconButton(onClick = onWebviewClick) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_open_in_webview_24dp),
+                                contentDescription = stringResource(R.string.open_in_webview),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
                     }
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_tune_24dp),
-                            contentDescription = stringResource(R.string.display_options),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
+                    if (isSettingsVisible) {
+                        IconButton(onClick = onSettingsClick) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_tune_24dp),
+                                contentDescription = stringResource(R.string.display_options),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
                     }
                 }
             }

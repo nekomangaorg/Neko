@@ -12,13 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonPageHolder
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
+import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -48,7 +48,7 @@ fun WebtoonPageItem(
     DisposableEffect(pageHolder) { onDispose { pageHolder.recycle() } }
 
     key(pageHolder) {
-        Box(modifier = modifier.fillMaxWidth().heightIn(min = 400.dp)) {
+        Box(modifier = modifier.fillMaxWidth().heightIn(min = Size.extraLarge * 10)) {
             AndroidView(
                 factory = { pageHolder.itemView },
                 update = { holder ->

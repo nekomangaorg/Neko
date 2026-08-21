@@ -414,6 +414,13 @@ class ReaderActivity : BaseMainActivity() {
                             }
                         },
                     )
+                    val enabledButtons by
+                        readerPreferences.readerBottomButtons().preferenceCollectAsState()
+                    val isCommentsVisible = ReaderBottomButton.Comment.isIn(enabledButtons)
+                    val isWebViewVisible = ReaderBottomButton.WebView.isIn(enabledButtons)
+                    val isChaptersVisible = ReaderBottomButton.ViewChapters.isIn(enabledButtons)
+                    val isSettingsVisible = true
+
                     ReaderBottomControls(
                         currentPageText = state.currentPageText,
                         totalPagesText = state.totalPagesText,
@@ -437,6 +444,10 @@ class ReaderActivity : BaseMainActivity() {
                             reEnableBackPressedCallBack()
                         },
                         pageNumberVisible = state.pageNumberVisible,
+                        isChaptersVisible = isChaptersVisible,
+                        isCommentsVisible = isCommentsVisible,
+                        isWebViewVisible = isWebViewVisible,
+                        isSettingsVisible = isSettingsVisible,
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
                     if (settingsSheetVisible) {
@@ -448,12 +459,35 @@ class ReaderActivity : BaseMainActivity() {
                             sheetState =
                                 rememberModalBottomSheetState(skipPartiallyExpanded = true),
                         ) {
+                            val hasCutout =
+                                window.decorView.rootWindowInsets?.let { insets ->
+                                    if (
+                                        android.os.Build.VERSION.SDK_INT >=
+                                            android.os.Build.VERSION_CODES.P
+                                    ) {
+                                        insets.displayCutout?.safeInsetTop != null ||
+                                            insets.displayCutout?.safeInsetBottom != null
+                                    } else false
+                                } ?: false
                             ReaderSettingsSheet(
+                                manga = viewModel.manga,
+                                hasMargins = (viewer as? WebtoonViewer)?.hasMargins ?: false,
+                                hasCutout = hasCutout,
+                                onReadingModeChange = { readingMode ->
+                                    viewModel.setMangaReadingMode(readingMode.flagValue)
+                                },
+                                onOrientationChange = { orientation ->
+                                    viewModel.setMangaOrientationType(orientation.flagValue)
+                                },
+                                onOpenReaderSettings = {
+                                    val intent =
+                                        MainActivity.openReaderSettings(this@ReaderActivity)
+                                    startActivity(intent)
+                                },
                                 onDismiss = {
                                     settingsSheetVisible = false
                                     reEnableBackPressedCallBack()
                                 },
-                                viewModel = viewModel,
                             )
                         }
                     }
@@ -466,8 +500,6 @@ class ReaderActivity : BaseMainActivity() {
                             sheetState =
                                 rememberModalBottomSheetState(skipPartiallyExpanded = true),
                         ) {
-                            val enabledButtons = readerPreferences.readerBottomButtons().get()
-                            val isCommentsVisible = ReaderBottomButton.Comment.isIn(enabledButtons)
                             val isChaptersEnabled =
                                 ReaderBottomButton.ViewChapters.isIn(enabledButtons)
                             val isCommentsShortcutEnabled =

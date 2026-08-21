@@ -28,7 +28,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,23 +35,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.reader.ReaderViewModel
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.nekomanga.R
+import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.manga.isLongStrip
 import org.nekomanga.domain.manga.orientationType
 import org.nekomanga.domain.manga.readingModeType
@@ -67,17 +62,19 @@ import uy.kohesive.injekt.api.get
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ReaderSettingsSheet(
+    manga: MangaItem?,
+    hasMargins: Boolean,
+    hasCutout: Boolean,
+    onReadingModeChange: (ReadingModeType) -> Unit,
+    onOrientationChange: (OrientationType) -> Unit,
+    onOpenReaderSettings: () -> Unit,
     onDismiss: () -> Unit,
-    viewModel: ReaderViewModel,
     modifier: Modifier = Modifier,
 ) {
     val readerPreferences: ReaderPreferences = remember { Injekt.get() }
     val themeColorState = defaultThemeColorState()
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
-    val state by viewModel.state.collectAsState()
-    val manga = state.manga
     val defaultReadingMode by readerPreferences.defaultReadingMode().collectAsState()
     val currentReadingMode =
         remember(manga?.readingModeType, manga?.viewerFlags, defaultReadingMode) {
@@ -151,8 +148,7 @@ fun ReaderSettingsSheet(
 
                 IconButton(
                     onClick = {
-                        val intent = MainActivity.openReaderSettings(context)
-                        context.startActivity(intent)
+                        onOpenReaderSettings()
                         onDismiss()
                     },
                     modifier = Modifier.padding(start = Size.small),
@@ -174,12 +170,19 @@ fun ReaderSettingsSheet(
                         when (page) {
                             0 ->
                                 GeneralSettingsTab(
-                                    readingModeType,
-                                    orientationType,
-                                    viewModel,
-                                    readerPreferences,
+                                    readingModeType = readingModeType,
+                                    orientationType = orientationType,
+                                    onReadingModeChange = onReadingModeChange,
+                                    onOrientationChange = onOrientationChange,
+                                    readerPreferences = readerPreferences,
                                 )
-                            1 -> LayoutSettingsTab(isWebtoon, viewModel, readerPreferences)
+                            1 ->
+                                LayoutSettingsTab(
+                                    isWebtoon = isWebtoon,
+                                    hasMargins = hasMargins,
+                                    hasCutout = hasCutout,
+                                    readerPreferences = readerPreferences,
+                                )
                             2 -> FilterSettingsTab(readerPreferences)
                         }
                     }
@@ -193,7 +196,8 @@ fun ReaderSettingsSheet(
 private fun GeneralSettingsTab(
     readingModeType: Int,
     orientationType: Int,
-    viewModel: ReaderViewModel,
+    onReadingModeChange: (ReadingModeType) -> Unit,
+    onOrientationChange: (OrientationType) -> Unit,
     readerPreferences: ReaderPreferences,
 ) {
     val readerTheme by readerPreferences.readerTheme().collectAsState()
@@ -216,7 +220,7 @@ private fun GeneralSettingsTab(
             selectedIndex = currentModeIndex,
             onSelected = { index ->
                 val readingModeType = ReadingModeType.fromSpinner(index)
-                viewModel.setMangaReadingMode(readingModeType.flagValue)
+                onReadingModeChange(readingModeType)
             },
         )
 
@@ -227,7 +231,7 @@ private fun GeneralSettingsTab(
             selectedIndex = currentRotationIndex,
             onSelected = { index ->
                 val rotationType = OrientationType.fromSpinner(index)
-                viewModel.setMangaOrientationType(rotationType.flagValue)
+                onOrientationChange(rotationType)
             },
         )
 
@@ -262,12 +266,10 @@ private fun GeneralSettingsTab(
 @Composable
 private fun LayoutSettingsTab(
     isWebtoon: Boolean,
-    viewModel: ReaderViewModel,
+    hasMargins: Boolean,
+    hasCutout: Boolean,
     readerPreferences: ReaderPreferences,
 ) {
-    val context = LocalContext.current
-    val activity = remember(context) { context as? ReaderActivity }
-
     if (isWebtoon) {
         val cropBordersWebtoon by readerPreferences.cropBordersWebtoon().collectAsState()
         val cropBorders by readerPreferences.cropBorders().collectAsState()
@@ -283,7 +285,6 @@ private fun LayoutSettingsTab(
         val splitTallImages by readerPreferences.splitTallImagesReader().collectAsState()
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            val hasMargins = (activity?.viewer as? WebtoonViewer)?.hasMargins ?: false
             ReaderSwitchSetting(
                 label = stringResource(R.string.crop_borders),
                 checked = if (hasMargins) cropBorders else cropBordersWebtoon,
@@ -495,14 +496,6 @@ private fun LayoutSettingsTab(
             }
 
             val isFullFit = imageScaleType - 1 in listOf(0, 1, 5)
-            val hasCutout =
-                activity?.window?.decorView?.let { decorView ->
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                        decorView.rootWindowInsets?.displayCutout?.safeInsetTop != null ||
-                            decorView.rootWindowInsets?.displayCutout?.safeInsetBottom != null
-                    } else false
-                } ?: false
-
             if (isFullFit && hasCutout && keepScreenOn) {
                 val cutoutOptions = stringArrayResource(id = R.array.cutout_behavior).toList()
                 ReaderChipsSelector(
