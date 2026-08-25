@@ -9,6 +9,9 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +20,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -33,6 +37,18 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     val downloadManager: DownloadManager by injectLazy()
 
     val scope = MainScope()
+
+    data class WebtoonPagePosition(
+        val targetPage: Int,
+        val animated: Boolean,
+        val timestamp: Long = System.nanoTime(),
+    )
+
+    /** Target page position to synchronize with Compose LazyList. */
+    var requestedPagePosition by mutableStateOf<WebtoonPagePosition?>(null)
+
+    /** Delta scroll to synchronize with Compose LazyList. */
+    var requestedScrollDelta by mutableStateOf<Int?>(null)
 
     /** Recycler view used by this viewer. */
     val recycler = WebtoonRecyclerView(activity)
@@ -138,11 +154,9 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
         config.navigationModeChangedListener = {
             val showOnStart = config.navigationOverlayForNewUser
-            activity.binding.navigationOverlay.setNavigation(config.navigator, showOnStart)
+            activity.setNavigation(config.navigator, showOnStart)
         }
-        config.navigationModeInvertedListener = {
-            activity.binding.navigationOverlay.showNavigationAgain()
-        }
+        config.navigationModeInvertedListener = { activity.showNavigationAgain() }
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)
@@ -260,13 +274,15 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
         TimberKt.d { "setChapters" }
-        val forceTransition = config.alwaysShowChapterTransition || currentPage is ChapterTransition
+        val forceTransition = config.alwaysShowChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
+        val pages = chapters.currChapter.pages ?: return
+        val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
+        if (requestedIndex in pages.indices) {
+            moveToPage(pages[requestedIndex], false)
+        }
         if (recycler.isGone) {
-            TimberKt.d { "Recycler first layout" }
-            val pages = chapters.currChapter.pages ?: return
-            moveToPage(pages[min(chapters.currChapter.requestedPage, pages.lastIndex)])
             recycler.isVisible = true
         }
     }
@@ -274,8 +290,10 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Tells this viewer to move to the given [page]. */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
         TimberKt.d { "moveToPage" }
-        val position = adapter.items.indexOf(page)
+        val position =
+            adapter.items.indexOfFirst { it == page || (it as? ReaderPageSplit)?.page == page }
         if (position != -1) {
+            requestedPagePosition = WebtoonPagePosition(position, animated)
             recycler.scrollToPosition(position)
             if (layoutManager.findLastEndVisibleItemPosition() == -1) {
                 onScrolled(position)
@@ -300,6 +318,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
     /** Scrolls up by [scrollDistance]. */
     override fun moveToPrevious() {
+        requestedScrollDelta = -scrollDistance
         if (config.usePageTransitions) {
             recycler.smoothScrollBy(0, -scrollDistance)
         } else {
@@ -309,6 +328,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
     /** Scrolls down by [scrollDistance]. */
     override fun moveToNext() {
+        requestedScrollDelta = scrollDistance
         if (config.usePageTransitions) {
             recycler.smoothScrollBy(0, scrollDistance)
         } else {

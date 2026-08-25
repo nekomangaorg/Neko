@@ -93,7 +93,10 @@ class PagerConfig(
             .pagerNavInverted()
             .changes()
             .drop(1)
-            .onEach { navigationModeInvertedListener?.invoke() }
+            .onEach {
+                navigator.invertMode = it
+                navigationModeInvertedListener?.invoke()
+            }
             .launchIn(scope)
 
         readerPreferences

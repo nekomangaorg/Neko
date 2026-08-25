@@ -94,6 +94,30 @@ constructor(
         onViewClicked?.invoke()
     }
 
+    fun updateImageConfig(config: Config) {
+        this.config = config
+        (pageView as? SubsamplingScaleImageView)?.apply {
+            setDoubleTapZoomDuration(config.zoomDuration.getSystemScaledDuration())
+            setMinimumScaleType(config.minimumScaleType)
+            setCropBorders(config.cropBorders)
+            if (config.insetInfo != null) {
+                val topInsets = config.insetInfo.topCutoutInset
+                val bottomInsets = config.insetInfo.bottomCutoutInset
+                setExtendPastCutout(
+                    config.insetInfo.cutoutBehavior == PagerConfig.CUTOUT_START_EXTENDED &&
+                        config.insetInfo.scaleTypeIsFullFit &&
+                        topInsets + bottomInsets > 0
+                )
+            }
+            if (isReady) {
+                setupZoom(config)
+                this@ReaderPageImageView.onNeedsLandscapeZoom()
+            }
+            requestLayout()
+            invalidate()
+        }
+    }
+
     fun setImage(inputStream: InputStream, isAnimated: Boolean, config: Config) {
         if (isAnimated) {
             prepareAnimatedImageView()
@@ -154,24 +178,26 @@ constructor(
     }
 
     protected fun SubsamplingScaleImageView.setupZoom(config: Config?) {
+        val targetScale = minScale
         // 5x zoom
-        maxScale = scale * MAX_ZOOM_SCALE
-        setDoubleTapZoomScale(scale * 2)
+        maxScale = targetScale * MAX_ZOOM_SCALE
+        setDoubleTapZoomScale(targetScale * 2)
 
         config ?: return
 
         var centerV = 0f
         when (config.zoomStartPosition) {
             PagerConfig.ZoomType.Left -> {
-                setScaleAndCenter(scale, PointF(0f, 0f))
+                setScaleAndCenter(targetScale, PointF(0f, 0f))
             }
             PagerConfig.ZoomType.Right -> {
-                setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
+                setScaleAndCenter(targetScale, PointF(sWidth.toFloat(), 0f))
                 centerV = sWidth.toFloat()
             }
             PagerConfig.ZoomType.Center -> {
-                setScaleAndCenter(scale, center.also { it?.y = 0f })
-                centerV = center?.x ?: 0f
+                val currentCenter = center ?: PointF(sWidth / 2f, sHeight / 2f)
+                setScaleAndCenter(targetScale, PointF(currentCenter.x, 0f))
+                centerV = currentCenter.x
             }
         }
         val insetInfo = config.insetInfo ?: return
@@ -182,9 +208,10 @@ constructor(
                 topInsets + bottomInsets > 0 &&
                 insetInfo.scaleTypeIsFullFit
         ) {
+            val currentCenter = center ?: PointF(sWidth / 2f, sHeight / 2f)
             setScaleAndCenter(
-                scale,
-                PointF(centerV, (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f)),
+                targetScale,
+                PointF(centerV, currentCenter.y + topInsets - bottomInsets),
             )
         }
     }
@@ -412,6 +439,13 @@ constructor(
         val landscapeZoom: Boolean = false,
         val insetInfo: InsetInfo? = null,
     )
+
+    var onDispatchTouchEvent: ((MotionEvent) -> Unit)? = null
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        onDispatchTouchEvent?.invoke(ev)
+        return super.dispatchTouchEvent(ev)
+    }
 
     data class InsetInfo(
         val cutoutBehavior: Int,

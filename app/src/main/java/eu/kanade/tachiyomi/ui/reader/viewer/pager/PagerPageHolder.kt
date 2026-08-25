@@ -12,6 +12,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
@@ -21,8 +22,10 @@ import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.viewer.GestureDetectorWithLongTap
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
@@ -129,6 +132,49 @@ class PagerPageHolder(
             )
     }
 
+    private val gestureListener =
+        object : GestureDetectorWithLongTap.Listener() {
+            override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
+                if (width > 0 && height > 0) {
+                    val pos = PointF(ev.x / width.toFloat(), ev.y / height.toFloat())
+                    val navigator = viewer.config.navigator
+                    when (navigator.getAction(pos)) {
+                        ViewerNavigation.NavigationRegion.MENU -> viewer.activity.toggleMenu()
+                        ViewerNavigation.NavigationRegion.NEXT -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveToNext()
+                        }
+                        ViewerNavigation.NavigationRegion.PREV -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveToPrevious()
+                        }
+                        ViewerNavigation.NavigationRegion.RIGHT -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveRight()
+                        }
+                        ViewerNavigation.NavigationRegion.LEFT -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveLeft()
+                        }
+                    }
+                }
+                return true
+            }
+
+            override fun onLongTapConfirmed(ev: MotionEvent) {
+                if (viewer.activity.menuVisible || viewer.config.longTapEnabled) {
+                    viewer.activity.onPageLongTap(page, extraPage)
+                }
+            }
+        }
+
+    private val gestureDetector = GestureDetectorWithLongTap(viewer.activity, gestureListener)
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        val handled = gestureDetector.onTouchEvent(ev)
+        return handled || super.dispatchTouchEvent(ev)
+    }
+
     override fun onImageLoaded() {
         super.onImageLoaded()
         (pageView as? SubsamplingScaleImageView)?.apply {
@@ -216,6 +262,37 @@ class PagerPageHolder(
                 progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
             }
         }
+    }
+
+    fun updateReaderTheme(theme: Int = viewer.config.readerTheme) {
+        setBackgroundColor(
+            when (theme) {
+                3 -> Color.TRANSPARENT
+                else -> ThemeUtil.readerBackgroundColor(theme, context)
+            }
+        )
+        progressBar.foregroundTintList =
+            ColorStateList.valueOf(
+                context.getResourceColor(
+                    if (isInvertedFromTheme()) {
+                        R.attr.colorPrimaryInverse
+                    } else {
+                        R.attr.colorPrimary
+                    }
+                )
+            )
+        if (theme >= 2) {
+            if (page.bg != null) {
+                pageView?.background = page.bg
+            }
+        } else {
+            pageView?.background = null
+        }
+    }
+
+    fun updateImageProperties() {
+        updateReaderTheme()
+        updateImageConfig(imageConfig)
     }
 
     fun onPageSelected(forward: Boolean?) {
@@ -537,36 +614,51 @@ class PagerPageHolder(
         }
     }
 
+    fun createConfig(
+        scaleType: Int = viewer.config.imageScaleType,
+        cropBorders: Boolean = viewer.config.imageCropBorders,
+        zoomType: PagerConfig.ZoomType = viewer.config.imageZoomType,
+        landscapeZoom: Boolean = viewer.config.landscapeZoom,
+    ): Config {
+        val scaleTypeIsFullFit =
+            when (scaleType) {
+                SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
+                SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
+                SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP -> true
+                else -> false
+            }
+        return Config(
+            zoomDuration = viewer.config.doubleTapAnimDuration,
+            minimumScaleType = scaleType,
+            cropBorders = cropBorders,
+            zoomStartPosition = zoomType,
+            landscapeZoom = landscapeZoom,
+            insetInfo =
+                InsetInfo(
+                    cutoutBehavior = viewer.config.cutoutBehavior,
+                    topCutoutInset =
+                        viewer.activity.window.decorView.rootWindowInsets
+                            ?.topCutoutInset()
+                            ?.toFloat() ?: 0f,
+                    bottomCutoutInset =
+                        viewer.activity.window.decorView.rootWindowInsets
+                            ?.bottomCutoutInset()
+                            ?.toFloat() ?: 0f,
+                    scaleTypeIsFullFit = scaleTypeIsFullFit,
+                    isFullscreen =
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                            viewer.config.isFullscreen &&
+                            !viewer.activity.isInMultiWindowMode,
+                    isSplitScreen =
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                            viewer.activity.isInMultiWindowMode,
+                    insets = viewer.activity.window.decorView.rootWindowInsets,
+                ),
+        )
+    }
+
     private val imageConfig: Config
-        get() =
-            Config(
-                zoomDuration = viewer.config.doubleTapAnimDuration,
-                minimumScaleType = viewer.config.imageScaleType,
-                cropBorders = viewer.config.imageCropBorders,
-                zoomStartPosition = viewer.config.imageZoomType,
-                landscapeZoom = viewer.config.landscapeZoom,
-                insetInfo =
-                    InsetInfo(
-                        cutoutBehavior = viewer.config.cutoutBehavior,
-                        topCutoutInset =
-                            viewer.activity.window.decorView.rootWindowInsets
-                                ?.topCutoutInset()
-                                ?.toFloat() ?: 0f,
-                        bottomCutoutInset =
-                            viewer.activity.window.decorView.rootWindowInsets
-                                ?.bottomCutoutInset()
-                                ?.toFloat() ?: 0f,
-                        scaleTypeIsFullFit = viewer.config.scaleTypeIsFullFit(),
-                        isFullscreen =
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                                viewer.config.isFullscreen &&
-                                !viewer.activity.isInMultiWindowMode,
-                        isSplitScreen =
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                                viewer.activity.isInMultiWindowMode,
-                        insets = viewer.activity.window.decorView.rootWindowInsets,
-                    ),
-            )
+        get() = createConfig()
 
     private suspend fun setBG(bytesArray: ByteArray): Drawable {
         return withContext(Default) {

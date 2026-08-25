@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components.bars
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ fun TitleTopAppBar(
     navigationIcon: ImageVector? = null,
     incognitoMode: Boolean,
     onNavigationIconClicked: () -> Unit = {},
+    onTitleClick: (() -> Unit)? = null,
     actions: @Composable (RowScope.() -> Unit) = {},
     scrolledContainerColor: Color = Color.Transparent,
     scrollBehavior: TopAppBarScrollBehavior,
@@ -51,7 +53,15 @@ fun TitleTopAppBar(
         Box(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.small)
         ) {
-            Column(modifier = Modifier.fillMaxWidth(.8f).align(Alignment.Center)) {
+            val titleModifier =
+                if (onTitleClick != null) {
+                    Modifier.clickable(onClick = onTitleClick)
+                } else {
+                    Modifier
+                }
+            Column(
+                modifier = Modifier.fillMaxWidth(.8f).align(Alignment.Center).then(titleModifier)
+            ) {
                 if (title.isEmpty() && subtitle.isEmpty()) {
                     // Do nothing
                 } else if (subtitle.isEmpty()) {
@@ -66,11 +76,18 @@ fun TitleTopAppBar(
                     AutoSizeText(
                         text = title,
                         style = MaterialTheme.typography.titleLarge.copy(color = onColor),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     AutoSizeText(
                         text = subtitle,
-                        style = MaterialTheme.typography.titleMedium.copy(color = onColor),
+                        style =
+                            MaterialTheme.typography.titleMedium.copy(
+                                color = onColor.copy(alpha = 0.7f)
+                            ),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }

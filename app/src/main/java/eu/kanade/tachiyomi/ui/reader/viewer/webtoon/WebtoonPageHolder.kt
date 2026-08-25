@@ -97,7 +97,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
     init {
         refreshLayoutParams()
-        frame.setBackgroundColor(Color.BLACK)
+        frame.setBackgroundColor(Color.TRANSPARENT)
 
         frame.onImageLoaded = { onImageDecoded() }
         frame.onImageLoadError = { onImageDecodeError() }
@@ -123,6 +123,24 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
             }
         }
         launchLoadJob()
+        refreshLayoutParams()
+        frame.setBackgroundColor(Color.TRANSPARENT)
+    }
+
+    fun updateImageProperties() {
+        val cropBorders =
+            if (viewer.hasMargins) {
+                viewer.config.verticalCropBorders
+            } else {
+                viewer.config.webtoonCropBorders
+            }
+        frame.updateImageConfig(
+            ReaderPageImageView.Config(
+                zoomDuration = viewer.config.doubleTapAnimDuration,
+                minimumScaleType = SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
+                cropBorders = cropBorders,
+            )
+        )
         refreshLayoutParams()
     }
 

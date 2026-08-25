@@ -9,10 +9,14 @@ import org.nekomanga.presentation.theme.Themes
 
 object ThemeUtil {
 
-    fun readerBackgroundColor(theme: Int): Int {
+    fun readerBackgroundColor(theme: Int, context: Context? = null): Int {
+        val isDark = context?.isInNightMode() ?: true
         return when (theme) {
+            0 -> Color.WHITE
             1 -> Color.BLACK
-            else -> Color.WHITE
+            3 -> if (isDark) Color.BLACK else Color.WHITE
+            4 -> Color.BLACK
+            else -> if (isDark) Color.BLACK else Color.WHITE
         }
     }
 }

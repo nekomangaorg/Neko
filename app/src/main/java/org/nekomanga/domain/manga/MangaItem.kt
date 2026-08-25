@@ -5,8 +5,12 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
+import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.manga.MangaUtil
+import java.util.Locale
+import org.nekomanga.domain.details.MangaDetailsPreferences
 
 data class MangaItem(
     val id: Long = 0L,
@@ -146,5 +150,45 @@ fun MangaItem.getDescription(): String {
         description.isNotEmpty() -> description
         !initialized -> ""
         else -> "No description"
+    }
+}
+
+val MangaItem.hideChapterTitles: Boolean
+    get() = chapterFlags and Manga.CHAPTER_DISPLAY_MASK == Manga.CHAPTER_DISPLAY_NUMBER
+
+val MangaItem.usesLocalFilter: Boolean
+    get() = chapterFlags and Manga.CHAPTER_FILTER_LOCAL_MASK == Manga.CHAPTER_FILTER_LOCAL
+
+fun MangaItem.hideChapterTitle(mangaDetailsPreferences: MangaDetailsPreferences): Boolean =
+    if (usesLocalFilter) hideChapterTitles
+    else mangaDetailsPreferences.hideChapterTitlesByDefault().get()
+
+val MangaItem.readingModeType: Int
+    get() = viewerFlags and ReadingModeType.MASK
+
+val MangaItem.orientationType: Int
+    get() = viewerFlags and OrientationType.MASK
+
+fun MangaItem.isLongStrip(): Boolean = this.genre.any { it.equals("long strip", ignoreCase = true) }
+
+fun MangaItem.displayTitle(): String = this.userTitle.ifBlank { this.title }
+
+fun MangaItem.defaultReaderType(): Int {
+    val currentTags = genre.map { it.trim().lowercase(Locale.US) }
+    return when {
+        isLongStrip() -> {
+            ReadingModeType.WEBTOON.flagValue
+        }
+        currentTags.any { tag ->
+            tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
+        } -> {
+            ReadingModeType.WEBTOON.flagValue
+        }
+        currentTags.any { tag ->
+            tag == "chinese" || tag == "manhua" || tag.startsWith("english") || tag == "comic"
+        } -> {
+            ReadingModeType.LEFT_TO_RIGHT.flagValue
+        }
+        else -> 0
     }
 }

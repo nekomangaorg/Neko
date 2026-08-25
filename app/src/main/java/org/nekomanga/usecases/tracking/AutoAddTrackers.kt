@@ -63,8 +63,8 @@ class AutoAddTrackers(
                         // Try to bind the new track to the remote service (e.g., get a remote
                         // ID)
                         runCatching {
-                                mdList.bind(track)
-                            } // Assumes bind() mutates the 'track' object
+                            mdList.bind(track)
+                        } // Assumes bind() mutates the 'track' object
                             .onErr { exception ->
                                 TimberKt.e(exception) { "Error binding new MangaDex track" }
                             }
