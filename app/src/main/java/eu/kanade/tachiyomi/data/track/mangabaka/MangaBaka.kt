@@ -127,6 +127,7 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
             track.copyPersonalFrom(remoteTrack)
             track.title = remoteTrack.title
             track.media_id = remoteTrack.media_id
+            track.total_chapters = remoteTrack.total_chapters
             update(track)
         } else {
             // Set default fields if it's not found in the list
@@ -156,6 +157,7 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
         track.copyPersonalFrom(remoteTrack)
         track.media_id = remoteTrack.media_id
         track.title = remoteTrack.title
+        track.total_chapters = remoteTrack.total_chapters
         return track
     }
 
