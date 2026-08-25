@@ -28,6 +28,7 @@ import org.nekomanga.core.network.PUT
 import org.nekomanga.data.network.mangabaka.dto.MangaBakaLibraryListResult
 import org.nekomanga.data.network.mangabaka.dto.MangaBakaOAuth
 import org.nekomanga.data.network.mangabaka.dto.MangaBakaProfile
+import org.nekomanga.data.network.mangabaka.dto.MangaBakaPublicationStatus
 import org.nekomanga.data.network.mangabaka.dto.MangaBakaSeries
 import org.nekomanga.data.network.mangabaka.dto.MangaBakaSeriesResult
 import org.nekomanga.data.network.mangabaka.dto.MangaBakaSeriesSearchResult
@@ -128,7 +129,12 @@ class MangaBakaApi(
                             userData.finishDate?.let { Instant.parse(it).toEpochMilliseconds() }
                                 ?: 0
                         last_chapter_read = userData.progressChapter?.toFloat() ?: 0.0f
-                        total_chapters = additionalData.totalChapters?.toIntOrNull() ?: 0
+                        total_chapters =
+                            if (additionalData.status == MangaBakaPublicationStatus.COMPLETED) {
+                                additionalData.totalChapters?.toIntOrNull() ?: 0
+                            } else {
+                                0
+                            }
                         // private = userData.isPrivate
                     }
                 } catch (e: Exception) {
@@ -223,7 +229,12 @@ class MangaBakaApi(
             start_date = item.published?.startDate.orEmpty()
             publishing_status = item.status.toString().lowercase()
             publishing_type = ""
-            total_chapters = item.totalChapters?.toIntOrNull() ?: 0
+            total_chapters =
+                if (item.status == MangaBakaPublicationStatus.COMPLETED) {
+                    item.totalChapters?.toIntOrNull() ?: 0
+                } else {
+                    0
+                }
         }
     }
 
