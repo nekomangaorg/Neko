@@ -52,6 +52,7 @@ suspend fun updateTrackChapterRead(
         val preferences = Injekt.get<PreferencesHelper>()
         val trackRepository = Injekt.get<TrackRepository>()
         val trackManager = Injekt.get<TrackManager>()
+        val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
 
         val trackList = trackRepository.getTracksForManga(mangaId)
         trackList.map { track ->
@@ -64,6 +65,7 @@ suspend fun updateTrackChapterRead(
                         track.last_chapter_read = newChapterRead
                         val updatedTrack = service.update(track, true)
                         trackRepository.insertTrack(updatedTrack)
+                        delayedTrackingStore.remove(track.id!!)
                     } catch (e: Exception) {
                         onError?.invoke(service, e.localizedMessage)
                         if (retryWhenOnline) {
