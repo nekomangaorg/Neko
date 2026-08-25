@@ -1589,9 +1589,10 @@ class ReaderActivity : BaseMainActivity() {
      * because each one implements its own touch and key events.
      */
     fun toggleMenu() {
-        if (chaptersSheetVisible || settingsSheetVisible) {
+        if (chaptersSheetVisible || settingsSheetVisible || pageActionsPage != null) {
             chaptersSheetVisible = false
             settingsSheetVisible = false
+            pageActionsPage = null
             setMenuVisibility(false)
         } else {
             setMenuVisibility(!menuVisible)
@@ -1780,7 +1781,7 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     private fun onVisibilityChange(visible: Boolean) {
-        if (chaptersSheetVisible || settingsSheetVisible) return
+        if (chaptersSheetVisible || settingsSheetVisible || pageActionsPage != null) return
         if (visible && !menuStickyVisible && !menuVisible) {
             menuStickyVisible = true
             viewModel.setMenuStickyVisibility(true)
