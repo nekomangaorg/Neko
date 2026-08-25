@@ -14,7 +14,6 @@ import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.ui.graphics.vector.ImageVector
-import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import org.nekomanga.R
 
 enum class LibrarySort(
@@ -69,10 +68,6 @@ enum class LibrarySort(
             Rating -> Icons.Default.BarChart
             Downloads -> Icons.Outlined.FileDownload
         }
-    }
-
-    fun menuSheetItem(isDynamic: Boolean): MaterialMenuSheet.MenuSheetItem {
-        return MaterialMenuSheet.MenuSheetItem(mainValue, iconRes(isDynamic), stringRes(isDynamic))
     }
 
     companion object {

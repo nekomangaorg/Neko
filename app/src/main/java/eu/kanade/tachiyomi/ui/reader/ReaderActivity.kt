@@ -66,7 +66,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -77,7 +76,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseMainActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.AddToLibraryFirst
@@ -165,6 +163,8 @@ import org.nekomanga.presentation.screens.reader.PageNumberIndicator
 import org.nekomanga.presentation.screens.reader.ReaderAppBar
 import org.nekomanga.presentation.screens.reader.ReaderBottomControls
 import org.nekomanga.presentation.screens.reader.ReaderChaptersSheet
+import org.nekomanga.presentation.screens.reader.ReaderPageAction
+import org.nekomanga.presentation.screens.reader.ReaderPageActionsSheet
 import org.nekomanga.presentation.screens.reader.ReaderSettingsSheet
 import org.nekomanga.presentation.screens.reader.viewer.ComposePagerViewer
 import org.nekomanga.presentation.screens.reader.viewer.ComposeWebtoonViewer
@@ -198,6 +198,7 @@ class ReaderActivity : BaseMainActivity() {
     var shiftDoublePageIconRes by mutableStateOf<Int?>(null)
     var settingsSheetVisible by mutableStateOf(false)
     var chaptersSheetVisible by mutableStateOf(false)
+    var pageActionsPage by mutableStateOf<Pair<ReaderPage, ReaderPage?>?>(null)
     var brightnessOverlayAlpha by mutableStateOf(0f)
     var colorFilterOverlayColor by mutableStateOf(0)
     var colorFilterOverlayMode by mutableStateOf(0)
@@ -226,9 +227,6 @@ class ReaderActivity : BaseMainActivity() {
 
     /** Configuration at reader level, like background color or forced orientation. */
     private var config: ReaderConfig? = null
-
-    /** Current Bottom Sheet on display, used to dismiss */
-    private var bottomSheet: BottomSheetDialog? = null
 
     var sheetManageNavColor = false
 
@@ -259,6 +257,8 @@ class ReaderActivity : BaseMainActivity() {
             chaptersSheetVisible = false
         } else if (settingsSheetVisible) {
             settingsSheetVisible = false
+        } else if (pageActionsPage != null) {
+            pageActionsPage = null
         } else if (menuVisible) {
             toggleMenu()
         }
@@ -674,6 +674,32 @@ class ReaderActivity : BaseMainActivity() {
                             )
                         }
                     }
+                    if (pageActionsPage != null) {
+                        val pages = pageActionsPage
+                        val page = pages?.first
+                        val extraPage = pages?.second
+                        if (page != null) {
+                            ModalBottomSheet(
+                                onDismissRequest = {
+                                    pageActionsPage = null
+                                    reEnableBackPressedCallBack()
+                                },
+                                sheetState =
+                                    rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                            ) {
+                                ReaderPageActionsSheet(
+                                    hasExtraPage = extraPage != null,
+                                    onActionClicked = { action ->
+                                        handlePageAction(action, page, extraPage)
+                                    },
+                                    onDismiss = {
+                                        pageActionsPage = null
+                                        reEnableBackPressedCallBack()
+                                    },
+                                )
+                            }
+                        }
+                    }
                     if (
                         state.pageNumberVisible &&
                             state.currentPageText.isNotEmpty() &&
@@ -826,8 +852,6 @@ class ReaderActivity : BaseMainActivity() {
         viewer?.destroy()
         viewer = null
         config = null
-        bottomSheet?.dismiss()
-        bottomSheet = null
         snackbar?.dismiss()
         snackbar = null
     }
@@ -954,7 +978,8 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     fun reEnableBackPressedCallBack() {
-        backPressedCallback?.isEnabled = chaptersSheetVisible || settingsSheetVisible || menuVisible
+        backPressedCallback?.isEnabled =
+            chaptersSheetVisible || settingsSheetVisible || pageActionsPage != null || menuVisible
     }
 
     override fun finishAfterTransition() {
@@ -1510,95 +1535,45 @@ class ReaderActivity : BaseMainActivity() {
             HapticFeedbackConstants.LONG_PRESS,
             HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
         )
-        val items =
-            if (extraPage != null) {
-                listOf(
-                    MaterialMenuSheet.MenuSheetItem(
-                        3,
-                        R.drawable.ic_outline_share_24dp,
-                        R.string.share_second_page,
-                    ),
-                    MaterialMenuSheet.MenuSheetItem(
-                        4,
-                        R.drawable.ic_outline_save_24dp,
-                        R.string.save_second_page,
-                    ),
-                    MaterialMenuSheet.MenuSheetItem(
-                        5,
-                        R.drawable.ic_outline_photo_24dp,
-                        R.string.set_second_page_as_cover,
-                    ),
-                    MaterialMenuSheet.MenuSheetItem(
-                        0,
-                        R.drawable.ic_share_24dp,
-                        R.string.share_first_page,
-                    ),
-                    MaterialMenuSheet.MenuSheetItem(
-                        1,
-                        R.drawable.ic_save_24dp,
-                        R.string.save_first_page,
-                    ),
-                    MaterialMenuSheet.MenuSheetItem(
-                        2,
-                        R.drawable.ic_photo_24dp,
-                        R.string.set_first_page_as_cover,
-                    ),
-                    MaterialMenuSheet.MenuSheetItem(
-                        6,
-                        R.drawable.ic_share_all_outline_24dp,
-                        R.string.share_combined_pages,
-                    ),
-                    MaterialMenuSheet.MenuSheetItem(
-                        7,
-                        R.drawable.ic_save_all_outline_24dp,
-                        R.string.save_combined_pages,
-                    ),
-                )
-            } else {
-                listOf(
-                    MaterialMenuSheet.MenuSheetItem(0, R.drawable.ic_share_24dp, R.string.share),
-                    MaterialMenuSheet.MenuSheetItem(1, R.drawable.ic_save_24dp, R.string.save),
-                    MaterialMenuSheet.MenuSheetItem(
-                        2,
-                        R.drawable.ic_photo_24dp,
-                        R.string.set_as_cover,
-                    ),
-                )
-            }
-        MaterialMenuSheet(this, items) { _, item ->
-                when (item) {
-                    0 -> shareImage(page)
-                    1 -> saveImage(page)
-                    2 -> showSetCoverPrompt(page)
-                    3 -> extraPage?.let { shareImage(it) }
-                    4 -> extraPage?.let { saveImage(it) }
-                    5 -> extraPage?.let { showSetCoverPrompt(it) }
-                    6,
-                    7 ->
-                        extraPage?.let { secondPage ->
-                            (viewer as? PagerViewer)?.let { viewer ->
-                                val isLTR =
-                                    (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
-                                val bg =
-                                    if (
-                                        viewer.config.readerTheme >= 2 ||
-                                            viewer.config.readerTheme == 0
-                                    ) {
-                                        Color.WHITE
-                                    } else {
-                                        Color.BLACK
-                                    }
-                                if (item == 6) {
-                                    viewModel.shareImages(page, secondPage, isLTR, bg)
-                                } else {
-                                    viewModel.saveImages(page, secondPage, isLTR, bg)
-                                }
+        pageActionsPage = page to extraPage
+        reEnableBackPressedCallBack()
+    }
+
+    private fun handlePageAction(
+        action: ReaderPageAction,
+        page: ReaderPage,
+        extraPage: ReaderPage?,
+    ) {
+        when (action) {
+            ReaderPageAction.Share -> shareImage(page)
+            ReaderPageAction.Save -> saveImage(page)
+            ReaderPageAction.SetAsCover -> showSetCoverPrompt(page)
+            ReaderPageAction.ShareFirstPage -> shareImage(page)
+            ReaderPageAction.SaveFirstPage -> saveImage(page)
+            ReaderPageAction.SetFirstPageAsCover -> showSetCoverPrompt(page)
+            ReaderPageAction.ShareSecondPage -> extraPage?.let { shareImage(it) }
+            ReaderPageAction.SaveSecondPage -> extraPage?.let { saveImage(it) }
+            ReaderPageAction.SetSecondPageAsCover -> extraPage?.let { showSetCoverPrompt(it) }
+            ReaderPageAction.ShareCombinedPages,
+            ReaderPageAction.SaveCombinedPages -> {
+                extraPage?.let { secondPage ->
+                    (viewer as? PagerViewer)?.let { viewer ->
+                        val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
+                        val bg =
+                            if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
+                                Color.WHITE
+                            } else {
+                                Color.BLACK
                             }
+                        if (action == ReaderPageAction.ShareCombinedPages) {
+                            viewModel.shareImages(page, secondPage, isLTR, bg)
+                        } else {
+                            viewModel.saveImages(page, secondPage, isLTR, bg)
                         }
+                    }
                 }
-                true
             }
-            .show()
+        }
     }
 
     /**
