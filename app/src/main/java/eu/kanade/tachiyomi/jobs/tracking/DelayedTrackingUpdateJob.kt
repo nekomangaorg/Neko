@@ -32,6 +32,8 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
         val trackRepository = Injekt.get<TrackRepository>()
         val trackManager = Injekt.get<TrackManager>()
 
+        var hasErrors = false
+
         withIOContext {
             delayedTrackingStore.getItems().forEach { item ->
                 val track = trackRepository.getTrackById(item.trackId)
@@ -57,6 +59,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
                             trackRepository.insertTrack(updatedTrack)
                             delayedTrackingStore.remove(item.trackId)
                         } catch (e: Exception) {
+                            hasErrors = true
                             TimberKt.e(e) { "Error inserting for delayed tracker" }
                         }
                     }
@@ -64,7 +67,11 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
             }
         }
 
-        return Result.success()
+        return if (hasErrors) {
+            Result.retry()
+        } else {
+            Result.success()
+        }
     }
 
     companion object {

@@ -187,7 +187,7 @@ class DelayedTrackingUpdateJobTest {
         val job = DelayedTrackingUpdateJob(context, workerParams)
         val result = job.doWork()
 
-        assertEquals(Result.success(), result)
+        assertEquals(Result.retry(), result)
         coVerify(exactly = 1) { service.update(track, true) }
         coVerify(exactly = 0) { mockTrackRepository.insertTrack(any()) }
         coVerify(exactly = 0) { delayedTrackingStore.remove(1L) }
