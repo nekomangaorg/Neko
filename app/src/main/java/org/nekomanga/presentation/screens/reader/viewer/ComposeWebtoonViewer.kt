@@ -9,7 +9,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.DragInteraction
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -265,7 +264,8 @@ fun ComposeWebtoonViewer(
         val sidePaddingPercent = webtoonSidePadding / 100f
         val hasMargins = viewer.hasMargins
 
-        Box(modifier = modifier.fillMaxSize().background(backgroundColor)) {
+        BoxWithConstraints(modifier = modifier.fillMaxSize().background(backgroundColor)) {
+            val horizontalPadding = maxWidth * sidePaddingPercent
             LazyColumn(
                 state = lazyListState,
                 userScrollEnabled = scale <= 1.05f,
@@ -453,8 +453,8 @@ fun ComposeWebtoonViewer(
                                 viewer = viewer,
                                 item = item.page,
                                 modifier =
-                                    if (sidePaddingPercent > 0f) {
-                                        Modifier.padding(horizontal = (sidePaddingPercent * 100).dp)
+                                    if (horizontalPadding > Size.none) {
+                                        Modifier.padding(horizontal = horizontalPadding)
                                     } else {
                                         Modifier
                                     },
@@ -465,8 +465,8 @@ fun ComposeWebtoonViewer(
                                 viewer = viewer,
                                 item = item.split,
                                 modifier =
-                                    if (sidePaddingPercent > 0f) {
-                                        Modifier.padding(horizontal = (sidePaddingPercent * 100).dp)
+                                    if (horizontalPadding > Size.none) {
+                                        Modifier.padding(horizontal = horizontalPadding)
                                     } else {
                                         Modifier
                                     },

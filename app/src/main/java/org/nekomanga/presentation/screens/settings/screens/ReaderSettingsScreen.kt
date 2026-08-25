@@ -403,19 +403,12 @@ internal class ReaderSettingsScreen(
                         pref = readerPreferences.webtoonDisableGaps(),
                         title = stringResource(R.string.disable_gaps),
                     ),
-                    Preference.PreferenceItem.ListPreference(
+                    Preference.PreferenceItem.SliderPreference(
                         pref = readerPreferences.webtoonSidePadding(),
                         title = stringResource(R.string.pref_webtoon_side_padding),
-                        entries =
-                            mapOf(
-                                    0 to stringResource(R.string.webtoon_side_padding_0),
-                                    5 to stringResource(R.string.webtoon_side_padding_5),
-                                    10 to stringResource(R.string.webtoon_side_padding_10),
-                                    15 to stringResource(R.string.webtoon_side_padding_15),
-                                    20 to stringResource(R.string.webtoon_side_padding_20),
-                                    25 to stringResource(R.string.webtoon_side_padding_25),
-                                )
-                                .toMap(),
+                        min = 0,
+                        max = 25,
+                        valueFormatter = { "$it%" },
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.webtoonPageLayout(),

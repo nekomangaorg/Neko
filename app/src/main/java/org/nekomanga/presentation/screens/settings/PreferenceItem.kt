@@ -27,6 +27,7 @@ import org.nekomanga.presentation.screens.settings.widgets.InfoWidget
 import org.nekomanga.presentation.screens.settings.widgets.ListPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.MultiSelectListPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.SitePreferenceWidget
+import org.nekomanga.presentation.screens.settings.widgets.SliderPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.SwitchPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.TrackingPreferenceWidget
@@ -89,17 +90,24 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                 )
             }
             is Preference.PreferenceItem.SliderPreference -> {
-                /*SliderItem(
-                    label = item.title,
+                val value by item.pref.collectAsState()
+                SliderPreferenceWidget(
+                    value = value,
                     min = item.min,
                     max = item.max,
                     steps = item.steps,
-                    value = item.value,
-                    valueText =
-                        item.subtitle.takeUnless { it.isNullOrEmpty() } ?: item.value.toString(),
-                    onChange = { scope.launch { item.onValueChanged(it) } },
-                    labelStyle = MaterialTheme.typography.titleLarge,
-                )*/
+                    title = item.title,
+                    subtitle = item.subtitle,
+                    icon = item.icon,
+                    valueFormatter = item.valueFormatter,
+                    onValueChange = { newValue ->
+                        scope.launch {
+                            if (item.onValueChanged(newValue)) {
+                                item.pref.set(newValue)
+                            }
+                        }
+                    },
+                )
             }
             is Preference.PreferenceItem.ListPreference<*> -> {
                 val value by item.pref.collectAsState()

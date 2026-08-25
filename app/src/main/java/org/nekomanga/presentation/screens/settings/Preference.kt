@@ -49,10 +49,11 @@ sealed class Preference {
 
         /** A [PreferenceItem] that provides a slider to select an integer number. */
         data class SliderPreference(
-            val value: Int,
+            val pref: PreferenceData<Int>,
             val max: Int,
             val min: Int = 0,
             val steps: Int = 0,
+            val valueFormatter: (Int) -> String = { "$it" },
             override val title: String = "",
             override val subtitle: String? = null,
             override val icon: ImageVector? = null,

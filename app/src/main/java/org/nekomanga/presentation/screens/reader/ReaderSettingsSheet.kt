@@ -297,17 +297,12 @@ private fun LayoutSettingsTab(
                 },
             )
 
-            val sidePaddingOptions = stringArrayResource(id = R.array.webtoon_side_padding).toList()
-            val sidePaddingValues =
-                stringArrayResource(id = R.array.webtoon_side_padding_values).map { it.toInt() }
-            val selectedSidePaddingIndex = maxOf(0, sidePaddingValues.indexOf(webtoonSidePadding))
-            ReaderChipsSelector(
+            ReaderSliderSetting(
                 label = stringResource(R.string.pref_webtoon_side_padding),
-                options = sidePaddingOptions,
-                selectedIndex = selectedSidePaddingIndex,
-                onSelected = { index ->
-                    readerPreferences.webtoonSidePadding().set(sidePaddingValues[index])
-                },
+                value = webtoonSidePadding.toFloat().coerceIn(0f, 25f),
+                valueRange = 0f..25f,
+                valueFormatter = { "${it.roundToInt()}%" },
+                onValueChange = { readerPreferences.webtoonSidePadding().set(it.roundToInt()) },
             )
 
             ReaderSwitchSetting(
