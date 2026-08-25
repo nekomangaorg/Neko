@@ -153,31 +153,17 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
 
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
         viewModelScope.launch {
-            val listOfKeyIndex =
-                _similarScreenState.value.allDisplayManga.mapNotNull { entry ->
-                    val tempListIndex = entry.value.indexOfFirst { it.mangaId == mangaId }
-                    when (tempListIndex == -1) {
-                        true -> null
-                        false -> entry.key to tempListIndex
-                    }
+            val currentAll = _similarScreenState.value.allDisplayManga
+            val updatedAll = currentAll.mapValues { (_, list) ->
+                list.map { manga ->
+                    if (manga.mangaId == mangaId) manga.copy(inLibrary = favorite) else manga
                 }
-
-            val tempMap = _similarScreenState.value.allDisplayManga.toMutableMap()
-
-            listOfKeyIndex.forEach { pair ->
-                val mapKey = pair.first
-                val mangaIndex = pair.second
-                val tempList = _similarScreenState.value.allDisplayManga[mapKey]!!.toMutableList()
-                val tempDisplayManga = tempList[mangaIndex].copy(inLibrary = favorite)
-                tempList[mangaIndex] = tempDisplayManga
-
-                tempMap[mapKey] = tempList.toList()
             }
 
             _similarScreenState.update {
                 it.copy(
-                    allDisplayManga = tempMap.toMap(),
-                    filteredDisplayManga = tempMap.toMap().filterByVisibility(preferences),
+                    allDisplayManga = updatedAll,
+                    filteredDisplayManga = updatedAll.filterByVisibility(preferences),
                 )
             }
         }
@@ -207,6 +193,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                     .distinct()
                     .toList()
 
+            if (allMangaIds.isEmpty()) return@launchIO
+
             val fetchedMangas =
                 allMangaIds
                     .chunked(900)
@@ -214,32 +202,23 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                     .associateBy { it.id }
 
             val newDisplayManga =
-                _similarScreenState.value.allDisplayManga
-                    .map { entry ->
-                        Pair(
-                            entry.key,
-                            entry.value
-                                .map {
-                                    val dbManga = fetchedMangas[it.mangaId]
-                                    if (dbManga != null) {
-                                        it.copy(
-                                            currentArtwork =
-                                                it.currentArtwork.copy(
-                                                    cover = dbManga.user_cover ?: "",
-                                                    originalCover =
-                                                        dbManga.thumbnail_url
-                                                            ?: MdConstants.noCoverUrl,
-                                                )
-                                        )
-                                    } else {
-                                        it
-                                    }
-                                }
-                                .toList(),
-                        )
+                _similarScreenState.value.allDisplayManga.mapValues { (_, list) ->
+                    list.map { manga ->
+                        val dbManga = fetchedMangas[manga.mangaId]
+                        if (dbManga != null) {
+                            manga.copy(
+                                currentArtwork =
+                                    manga.currentArtwork.copy(
+                                        cover = dbManga.user_cover ?: "",
+                                        originalCover =
+                                            dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
+                                    )
+                            )
+                        } else {
+                            manga
+                        }
                     }
-                    .toMap()
-                    .toMap()
+                }
             _similarScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,
