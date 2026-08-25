@@ -19,7 +19,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.nekomanga.data.database.repository.TrackRepository
+import org.nekomanga.domain.track.store.DelayedTrackingStore
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.addSingleton
 
@@ -29,6 +29,7 @@ class ChapterTrackSyncTest {
     private lateinit var mockTrackRepository: TrackRepository
     private lateinit var trackManager: TrackManager
     private lateinit var preferences: PreferencesHelper
+    private lateinit var delayedTrackingStore: DelayedTrackingStore
     private lateinit var context: Context
 
     @Before
@@ -37,6 +38,7 @@ class ChapterTrackSyncTest {
         mockTrackRepository = mockk(relaxed = true)
         trackManager = mockk(relaxed = true)
         preferences = mockk(relaxed = true)
+        delayedTrackingStore = mockk(relaxed = true)
         context = mockk(relaxed = true)
 
         every { preferences.context } returns context
@@ -45,6 +47,7 @@ class ChapterTrackSyncTest {
         Injekt.addSingleton(mockTrackRepository)
         Injekt.addSingleton(trackManager)
         Injekt.addSingleton(preferences)
+        Injekt.addSingleton(delayedTrackingStore)
 
         mockkStatic("eu.kanade.tachiyomi.util.system.ContextExtensionsKt")
     }
@@ -69,11 +72,12 @@ class ChapterTrackSyncTest {
     }
 
     @Test
-    fun `given track and online when new chapter read is higher then updates service and inserts returned track`() =
+    fun `given track and online when new chapter read is higher then updates service, inserts returned track, and removes from delayed store`() =
         runTest {
             val mangaId = 1L
             val track =
                 mockk<Track>(relaxed = true) {
+                    every { id } returns 100L
                     every { sync_id } returns 2
                     every { last_chapter_read } returns 3f
                 }
@@ -90,5 +94,6 @@ class ChapterTrackSyncTest {
 
             coVerify(exactly = 1) { service.update(track, true) }
             coVerify(exactly = 1) { mockTrackRepository.insertTrack(updatedTrack) }
+            coVerify(exactly = 1) { delayedTrackingStore.remove(100L) }
         }
 }
