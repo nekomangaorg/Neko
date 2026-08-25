@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import kotlin.math.roundToInt
-import kotlinx.coroutines.runBlocking
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
@@ -19,6 +18,7 @@ import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 
 suspend fun Manga.shouldDownloadNewChapters(
@@ -59,7 +59,7 @@ suspend fun SourceManga.toDisplayManga(
     if (localManga == null) {
         val newManga = Manga.create(this.url, this.title, sourceId)
         newManga.apply { this.thumbnail_url = currentThumbnail }
-        newManga.id = runBlocking { mangaRepository.insertManga(newManga) }
+        newManga.id = mangaRepository.insertManga(newManga)
         localManga = newManga
     } else if (localManga.title.isBlank()) {
         localManga.title = this.title
@@ -79,36 +79,44 @@ suspend fun Iterable<SourceManga>.toDisplayManga(
     val urls = sourceMangas.map { it.url }.distinct()
 
     // The repository chunks internally to respect the SQLite bind-variable limit.
-    val existingMangas = mangaRepository.getMangaByUrls(urls).associateBy { it.url }
+    val existingMangas = mangaRepository.getMangaByUrls(urls).associateBy { it.url }.toMutableMap()
 
     val newMangasList = mutableListOf<Manga>()
     val updateMangasList = mutableListOf<Manga>()
+    val newlyCreatedByUrl = mutableMapOf<String, Manga>()
 
-    val mappedMangas = sourceMangas.map { sourceManga ->
-        var localManga = existingMangas[sourceManga.url]
+    for (sourceManga in sourceMangas) {
+        val url = sourceManga.url
+        var localManga = existingMangas[url] ?: newlyCreatedByUrl[url]
         if (localManga == null) {
             val newManga =
                 Manga.create(sourceManga.url, sourceManga.title, sourceId).apply {
                     this.thumbnail_url = sourceManga.currentThumbnail
                 }
             newMangasList.add(newManga)
-            localManga = newManga
-        } else if (localManga.title.isBlank()) {
+            newlyCreatedByUrl[url] = newManga
+        } else if (localManga.title.isBlank() && sourceManga.title.isNotBlank()) {
             localManga.title = sourceManga.title
             updateMangasList.add(localManga)
         }
-        sourceManga to localManga
     }
 
     if (newMangasList.isNotEmpty()) {
-        val insertedIds = runBlocking { mangaRepository.insertMangaList(newMangasList) }
+        val insertedIds = mangaRepository.insertMangaList(newMangasList)
         newMangasList.forEachIndexed { index, manga -> manga.id = insertedIds[index] }
     }
     if (updateMangasList.isNotEmpty()) {
-        runBlocking { mangaRepository.updateMangaList(updateMangasList) }
+        mangaRepository.updateMangaList(updateMangasList)
     }
 
-    return mappedMangas.map { (sourceManga, localManga) ->
+    val allMangasByUrl = existingMangas + newlyCreatedByUrl
+
+    return sourceMangas.mapNotNull { sourceManga ->
+        val localManga = allMangasByUrl[sourceManga.url]
+        if (localManga == null) {
+            TimberKt.e { "Manga not found for url: ${sourceManga.url}" }
+            return@mapNotNull null
+        }
         localManga.toDisplayManga(sourceManga.displayText, sourceManga.displayTextRes)
     }
 }
