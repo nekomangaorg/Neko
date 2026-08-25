@@ -18,6 +18,7 @@ import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 
 suspend fun Manga.shouldDownloadNewChapters(
@@ -110,8 +111,12 @@ suspend fun Iterable<SourceManga>.toDisplayManga(
 
     val allMangasByUrl = existingMangas + newlyCreatedByUrl
 
-    return sourceMangas.map { sourceManga ->
-        val localManga = allMangasByUrl[sourceManga.url]!!
+    return sourceMangas.mapNotNull { sourceManga ->
+        val localManga = allMangasByUrl[sourceManga.url]
+        if (localManga == null) {
+            TimberKt.e { "Manga not found for url: ${sourceManga.url}" }
+            return@mapNotNull null
+        }
         localManga.toDisplayManga(sourceManga.displayText, sourceManga.displayTextRes)
     }
 }

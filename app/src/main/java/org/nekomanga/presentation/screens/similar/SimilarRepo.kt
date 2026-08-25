@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.similar
 
 import androidx.annotation.StringRes
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
@@ -143,15 +144,57 @@ class SimilarRepo(
             // Bulk pre-resolve all SourceManga across all recommendation categories in a single
             // batch
             val allSourceMangas = rawGroups.flatMap { it.second }
-            val resolvedDisplayManga = allSourceMangas.toDisplayManga(mangaRepository, mangaDex.id)
+            val distinctUrls = allSourceMangas.map { it.url }.distinct()
 
-            // Slice the resolved 1-to-1 DisplayManga list back into their respective groups in O(1)
-            var offset = 0
-            rawGroups.map { (groupId, sourceMangaList) ->
-                val count = sourceMangaList.size
-                val groupDisplayManga = resolvedDisplayManga.subList(offset, offset + count)
-                offset += count
-                SimilarMangaGroup(groupId, groupDisplayManga)
+            // Fetch existing manga in one bulk query (chunked internally to respect SQLite
+            // parameter limits)
+            val existingMangas =
+                mangaRepository.getMangaByUrls(distinctUrls).associateBy { it.url }.toMutableMap()
+
+            val newMangasList = mutableListOf<Manga>()
+            val updateMangasList = mutableListOf<Manga>()
+            val newlyCreatedByUrl = mutableMapOf<String, Manga>()
+
+            for (sourceManga in allSourceMangas) {
+                val url = sourceManga.url
+                val localManga = existingMangas[url] ?: newlyCreatedByUrl[url]
+                if (localManga == null) {
+                    val newManga =
+                        Manga.create(sourceManga.url, sourceManga.title, mangaDex.id).apply {
+                            this.thumbnail_url = sourceManga.currentThumbnail
+                        }
+                    newMangasList.add(newManga)
+                    newlyCreatedByUrl[url] = newManga
+                } else if (localManga.title.isBlank() && sourceManga.title.isNotBlank()) {
+                    localManga.title = sourceManga.title
+                    updateMangasList.add(localManga)
+                }
+            }
+
+            if (newMangasList.isNotEmpty()) {
+                val insertedIds = mangaRepository.insertMangaList(newMangasList)
+                newMangasList.forEachIndexed { index, manga -> manga.id = insertedIds[index] }
+            }
+            if (updateMangasList.isNotEmpty()) {
+                mangaRepository.updateMangaList(updateMangasList)
+            }
+
+            val allMangasByUrl = existingMangas + newlyCreatedByUrl
+
+            rawGroups.mapNotNull { (groupId, sourceMangaList) ->
+                val groupDisplayManga = sourceMangaList.mapNotNull { sourceManga ->
+                    val localManga = allMangasByUrl[sourceManga.url]
+                    if (localManga == null) {
+                        TimberKt.e { "Failed to resolve manga for url: ${sourceManga.url}" }
+                        return@mapNotNull null
+                    }
+                    localManga.toDisplayManga(sourceManga.displayText, sourceManga.displayTextRes)
+                }
+                if (groupDisplayManga.isEmpty()) {
+                    null
+                } else {
+                    SimilarMangaGroup(groupId, groupDisplayManga)
+                }
             }
         }
     }
