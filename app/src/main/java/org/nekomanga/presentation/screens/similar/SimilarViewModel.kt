@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +19,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.screens.browse.LibraryEntryVisibility
 import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.manga.MangaUseCases

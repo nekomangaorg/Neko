@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import eu.kanade.tachiyomi.ui.source.browse.DisplayMangaHolder
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.MangaGridWithHeader

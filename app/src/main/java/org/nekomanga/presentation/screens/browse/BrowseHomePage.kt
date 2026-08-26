@@ -29,7 +29,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
 import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import jp.wasabeef.gap.Gap

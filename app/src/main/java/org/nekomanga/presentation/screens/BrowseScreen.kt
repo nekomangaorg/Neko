@@ -39,11 +39,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavKey
-import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
-import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
-import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
-import eu.kanade.tachiyomi.ui.source.browse.FilterActions
-import eu.kanade.tachiyomi.ui.source.browse.NavigationEvent
 import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
 import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import kotlinx.coroutines.flow.StateFlow
@@ -60,7 +55,12 @@ import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
 import org.nekomanga.presentation.screens.browse.BrowseFilterPage
 import org.nekomanga.presentation.screens.browse.BrowseFollowsPage
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
+import org.nekomanga.presentation.screens.browse.BrowseScreenState
 import org.nekomanga.presentation.screens.browse.BrowseScreenTopBar
+import org.nekomanga.presentation.screens.browse.BrowseScreenType
+import org.nekomanga.presentation.screens.browse.BrowseViewModel
+import org.nekomanga.presentation.screens.browse.FilterActions
+import org.nekomanga.presentation.screens.browse.NavigationEvent
 import org.nekomanga.presentation.theme.Size
 
 @Composable
