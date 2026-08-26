@@ -1,4 +1,4 @@
-package org.nekomanga.ui.theme
+package org.nekomanga.presentation.theme
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -9,10 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import org.nekomanga.presentation.theme.NekoTheme
-import org.nekomanga.presentation.theme.Size
-import org.nekomanga.presentation.theme.Themes
-import org.nekomanga.presentation.theme.colorSchemeFromTheme
 
 @Composable
 private fun NekoThemePreview(theme: Themes, isDark: Boolean, content: @Composable () -> Unit) {

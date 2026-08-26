@@ -35,9 +35,9 @@ import kotlin.math.abs
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
-import org.nekomanga.ui.theme.ThemeConfig
-import org.nekomanga.ui.theme.ThemeConfigProvider
-import org.nekomanga.ui.theme.ThemedPreviews
+import org.nekomanga.presentation.theme.ThemeConfig
+import org.nekomanga.presentation.theme.ThemeConfigProvider
+import org.nekomanga.presentation.theme.ThemedPreviews
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -45,9 +45,9 @@ import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Size
-import org.nekomanga.ui.theme.ThemeConfig
-import org.nekomanga.ui.theme.ThemeConfigProvider
-import org.nekomanga.ui.theme.ThemedPreviews
+import org.nekomanga.presentation.theme.ThemeConfig
+import org.nekomanga.presentation.theme.ThemeConfigProvider
+import org.nekomanga.presentation.theme.ThemedPreviews
 
 @Composable
 fun VerticalCategoriesPage(

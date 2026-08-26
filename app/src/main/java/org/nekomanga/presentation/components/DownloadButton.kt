@@ -65,9 +65,9 @@ import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
-import org.nekomanga.ui.theme.ThemeConfig
-import org.nekomanga.ui.theme.ThemeConfigProvider
-import org.nekomanga.ui.theme.ThemedPreviews
+import org.nekomanga.presentation.theme.ThemeConfig
+import org.nekomanga.presentation.theme.ThemeConfigProvider
+import org.nekomanga.presentation.theme.ThemedPreviews
 
 private const val iconSize = 20
 private const val borderSize = 2.0

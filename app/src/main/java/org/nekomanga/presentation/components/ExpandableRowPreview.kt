@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import org.nekomanga.ui.theme.Themed
-import org.nekomanga.ui.theme.ThemedPreviews
-import org.nekomanga.ui.theme.withThemes
+import org.nekomanga.presentation.theme.Themed
+import org.nekomanga.presentation.theme.ThemedPreviews
+import org.nekomanga.presentation.theme.withThemes
 
 private data class ExpandableRowState(
     val rowText: String,
