@@ -45,12 +45,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.roundToInt
 import org.nekomanga.R
 import org.nekomanga.presentation.components.bars.TitleTopAppBar
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.ui.theme.ThemeConfig
+import org.nekomanga.ui.theme.ThemeConfigProvider
+import org.nekomanga.ui.theme.ThemedPreviews
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -302,13 +307,28 @@ fun PageNumberIndicator(
         contentAlignment = Alignment.Center,
         modifier = modifier.background(Color.Transparent).padding(Size.tiny),
     ) {
-        // Outline text (rendered behind)
+        // Outer outline text (black outline rendered behind)
         Text(
             text = text,
             style =
-                MaterialTheme.typography.bodySmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
+                MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    drawStyle =
+                        Stroke(
+                            miter = 10f,
+                            width = 6f,
+                            join = StrokeJoin.Round,
+                        ),
+                ),
+        )
+        // Middle outline text (primary color outline)
+        Text(
+            text = text,
+            style =
+                MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.Black,
                     drawStyle =
                         Stroke(
                             miter = 10f,
@@ -317,14 +337,36 @@ fun PageNumberIndicator(
                         ),
                 ),
         )
-        // Fill text (rendered in front)
+        // Fill text (onPrimary color number rendered in front)
         Text(
             text = text,
             style =
-                MaterialTheme.typography.bodySmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.surface,
+                MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White,
                 ),
         )
+    }
+}
+
+@Preview
+@Composable
+private fun PageNumberIndicatorPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        Box(
+            modifier =
+                Modifier.background(MaterialTheme.colorScheme.surfaceVariant).padding(Size.medium)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(Size.small),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                PageNumberIndicator(text = "1/24")
+                PageNumberIndicator(text = "12/45")
+                PageNumberIndicator(text = "128/350")
+            }
+        }
     }
 }
