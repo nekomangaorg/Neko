@@ -53,9 +53,9 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.bars.TitleTopAppBar
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
-import org.nekomanga.ui.theme.ThemeConfig
-import org.nekomanga.ui.theme.ThemeConfigProvider
-import org.nekomanga.ui.theme.ThemedPreviews
+import org.nekomanga.presentation.theme.ThemeConfig
+import org.nekomanga.presentation.theme.ThemeConfigProvider
+import org.nekomanga.presentation.theme.ThemedPreviews
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

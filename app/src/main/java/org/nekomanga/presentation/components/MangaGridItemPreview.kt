@@ -17,9 +17,9 @@ import coil3.compose.LocalAsyncImagePreviewHandler
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.theme.Size
-import org.nekomanga.ui.theme.Themed
-import org.nekomanga.ui.theme.ThemedPreviews
-import org.nekomanga.ui.theme.withThemes
+import org.nekomanga.presentation.theme.Themed
+import org.nekomanga.presentation.theme.ThemedPreviews
+import org.nekomanga.presentation.theme.withThemes
 
 @Preview(widthDp = 400, showBackground = true)
 @Composable

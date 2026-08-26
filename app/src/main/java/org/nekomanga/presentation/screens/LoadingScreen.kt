@@ -10,9 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import org.nekomanga.ui.theme.ThemeConfig
-import org.nekomanga.ui.theme.ThemeConfigProvider
-import org.nekomanga.ui.theme.ThemedPreviews
+import org.nekomanga.presentation.theme.ThemeConfig
+import org.nekomanga.presentation.theme.ThemeConfigProvider
+import org.nekomanga.presentation.theme.ThemedPreviews
 
 @Composable
 fun LoadingScreen(showLoadingIcon: Boolean = true) {
