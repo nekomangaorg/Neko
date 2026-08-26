@@ -68,7 +68,7 @@ fun ReaderTransitionPage(
                     start = Size.mediumLarge,
                     end = Size.mediumLarge,
                     top =
-                        if (transition is ChapterTransition.Prev) {
+                        if (transition is ChapterTransition.Prev && transition.to == null) {
                             Size.appBarHeight + Size.large
                         } else {
                             Size.small

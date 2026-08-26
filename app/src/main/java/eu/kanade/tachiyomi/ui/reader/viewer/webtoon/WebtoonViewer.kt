@@ -277,12 +277,12 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         val forceTransition = config.alwaysShowChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
-        val pages = chapters.currChapter.pages ?: return
-        val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
-        if (requestedIndex in pages.indices) {
-            moveToPage(pages[requestedIndex], false)
-        }
         if (recycler.isGone) {
+            val pages = chapters.currChapter.pages ?: return
+            val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
+            if (requestedIndex in pages.indices) {
+                moveToPage(pages[requestedIndex], false)
+            }
             recycler.isVisible = true
         }
     }
