@@ -3,9 +3,6 @@ package org.nekomanga.presentation.screens.browse
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
-import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
-import eu.kanade.tachiyomi.ui.source.browse.FilterActions
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.sheets.BrowseDisplayOptionsSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet

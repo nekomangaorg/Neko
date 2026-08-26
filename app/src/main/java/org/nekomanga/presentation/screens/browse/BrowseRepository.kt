@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.source.browse
+package org.nekomanga.presentation.screens.browse
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result

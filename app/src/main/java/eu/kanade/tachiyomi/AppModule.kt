@@ -35,7 +35,6 @@ import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
-import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
 import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
@@ -79,6 +78,7 @@ import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.screens.browse.BrowseRepository
 import org.nekomanga.presentation.screens.feed.FeedRepository
 import org.nekomanga.presentation.screens.similar.SimilarRepo
 import org.nekomanga.usecases.category.CategoryUseCases

@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
-import eu.kanade.tachiyomi.ui.source.browse.DisplayMangaHolder
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.MangaGrid

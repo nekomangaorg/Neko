@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.source.browse
+package org.nekomanga.presentation.screens.browse
 
 import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
