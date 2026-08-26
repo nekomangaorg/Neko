@@ -53,6 +53,8 @@ fun MangaGridWithHeader(
     modifier: Modifier = Modifier,
     isComfortable: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
+    collapsedGroups: Set<Int> = emptySet(),
+    onToggleGroupCollapse: (Int) -> Unit = {},
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
@@ -72,26 +74,35 @@ fun MangaGridWithHeader(
     ) {
         chunkedGroupedManga.forEach { (stringRes, chunks) ->
             item(key = "header-$stringRes") {
-                HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
+                HeaderCard {
+                    DefaultHeaderText(
+                        text = stringResource(id = stringRes),
+                        isExpanded = stringRes !in collapsedGroups,
+                        onClick = { onToggleGroupCollapse(stringRes) },
+                    )
+                }
             }
 
-            itemsIndexed(items = chunks, key = { index, _ -> "grid-row-$stringRes-$index" }) {
-                _,
-                rowItems ->
-                VerticalGrid(
-                    columns = SimpleGridCells.Fixed(columns),
-                    modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
-                    horizontalArrangement = Arrangement.spacedBy(Size.small),
-                ) {
-                    rowItems.forEach { displayManga ->
-                        MangaGridItem(
-                            displayManga = displayManga,
-                            shouldOutlineCover = shouldOutlineCover,
-                            dynamicCover = dynamicCover,
-                            isComfortable = isComfortable,
-                            onClick = onClick,
-                            onLongClick = onLongClick,
-                        )
+            if (stringRes !in collapsedGroups) {
+                itemsIndexed(items = chunks, key = { index, _ -> "grid-row-$stringRes-$index" }) {
+                    _,
+                    rowItems ->
+                    VerticalGrid(
+                        columns = SimpleGridCells.Fixed(columns),
+                        modifier =
+                            Modifier.fillMaxWidth().padding(horizontal = Size.small).animateItem(),
+                        horizontalArrangement = Arrangement.spacedBy(Size.small),
+                    ) {
+                        rowItems.forEach { displayManga ->
+                            MangaGridItem(
+                                displayManga = displayManga,
+                                shouldOutlineCover = shouldOutlineCover,
+                                dynamicCover = dynamicCover,
+                                isComfortable = isComfortable,
+                                onClick = onClick,
+                                onLongClick = onLongClick,
+                            )
+                        }
                     }
                 }
             }

@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -214,6 +215,11 @@ private fun SimilarContent(
     mangaClick: (Long) -> Unit,
     mangaLongClick: (DisplayManga) -> Unit,
 ) {
+    var collapsedGroups by rememberSaveable { mutableStateOf(emptySet<Int>()) }
+    val toggleGroupCollapse: (Int) -> Unit = { groupId ->
+        collapsedGroups =
+            if (groupId in collapsedGroups) collapsedGroups - groupId else collapsedGroups + groupId
+    }
     if (similarScreenState.filteredDisplayManga.isEmpty()) {
         if (similarScreenState.isRefreshing) {
             Box(modifier = modifier.fillMaxSize())
@@ -235,6 +241,8 @@ private fun SimilarContent(
                 dynamicCover = similarScreenState.dynamicCovers,
                 modifier = modifier,
                 contentPadding = contentPadding,
+                collapsedGroups = collapsedGroups,
+                onToggleGroupCollapse = toggleGroupCollapse,
                 onClick = mangaClick,
                 onLongClick = mangaLongClick,
             )
@@ -247,6 +255,8 @@ private fun SimilarContent(
                 isComfortable = similarScreenState.isComfortableGrid,
                 modifier = modifier,
                 contentPadding = contentPadding,
+                collapsedGroups = collapsedGroups,
+                onToggleGroupCollapse = toggleGroupCollapse,
                 onClick = mangaClick,
                 onLongClick = mangaLongClick,
             )
