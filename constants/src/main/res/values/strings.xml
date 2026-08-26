@@ -218,6 +218,8 @@
     <string name="collapse_all_categories">Collapse all categories</string>
     <string name="expand">Expand</string>
     <string name="collapse">Collapse</string>
+    <string name="expanded">Expanded</string>
+    <string name="collapsed">Collapsed</string>
     <string name="reorder_filters">Reorder filters</string>
     <string name="_unread">%d unread</string>
     <string name="search_library">Search library</string>

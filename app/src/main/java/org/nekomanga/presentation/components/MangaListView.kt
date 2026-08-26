@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -101,7 +100,8 @@ fun MangaListWithHeader(
     dynamicCover: Boolean,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    collapsedGroups: SnapshotStateSet<Int>,
+    collapsedGroups: Set<Int> = emptySet(),
+    onToggleGroupCollapse: (Int) -> Unit = {},
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
@@ -124,11 +124,7 @@ fun MangaListWithHeader(
                     DefaultHeaderText(
                         text = stringResource(id = stringRes),
                         isExpanded = stringRes !in collapsedGroups,
-                        onClick = {
-                            if (!collapsedGroups.add(stringRes)) {
-                                collapsedGroups.remove(stringRes)
-                            }
-                        },
+                        onClick = { onToggleGroupCollapse(stringRes) },
                     )
                 }
             }
@@ -145,6 +141,7 @@ fun MangaListWithHeader(
                             else -> ListCardType.Center
                         }
                     MangaListItem(
+                        modifier = Modifier.animateItem(),
                         displayManga = displayManga,
                         listCardType = listCardType,
                         shouldOutlineCover = shouldOutlineCover,
@@ -160,6 +157,7 @@ fun MangaListWithHeader(
 
 @Composable
 private fun MangaListItem(
+    modifier: Modifier = Modifier,
     displayManga: DisplayManga,
     listCardType: ListCardType,
     shouldOutlineCover: Boolean,
@@ -168,7 +166,7 @@ private fun MangaListItem(
     onLongClick: (DisplayManga) -> Unit,
 ) {
     ExpressiveListCard(
-        modifier = Modifier.padding(horizontal = Size.small),
+        modifier = modifier.padding(horizontal = Size.small),
         listCardType = listCardType,
     ) {
         MangaRow(

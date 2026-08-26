@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,7 +53,8 @@ fun MangaGridWithHeader(
     modifier: Modifier = Modifier,
     isComfortable: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
-    collapsedGroups: SnapshotStateSet<Int>,
+    collapsedGroups: Set<Int> = emptySet(),
+    onToggleGroupCollapse: (Int) -> Unit = {},
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
@@ -78,11 +78,7 @@ fun MangaGridWithHeader(
                     DefaultHeaderText(
                         text = stringResource(id = stringRes),
                         isExpanded = stringRes !in collapsedGroups,
-                        onClick = {
-                            if (!collapsedGroups.add(stringRes)) {
-                                collapsedGroups.remove(stringRes)
-                            }
-                        },
+                        onClick = { onToggleGroupCollapse(stringRes) },
                     )
                 }
             }
@@ -93,7 +89,8 @@ fun MangaGridWithHeader(
                     rowItems ->
                     VerticalGrid(
                         columns = SimpleGridCells.Fixed(columns),
-                        modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
+                        modifier =
+                            Modifier.fillMaxWidth().padding(horizontal = Size.small).animateItem(),
                         horizontalArrangement = Arrangement.spacedBy(Size.small),
                     ) {
                         rowItems.forEach { displayManga ->

@@ -2,8 +2,10 @@ package org.nekomanga.presentation.screens.browse
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateSetOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import eu.kanade.tachiyomi.ui.source.browse.DisplayMangaHolder
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
@@ -25,7 +27,11 @@ fun BrowseFollowsPage(
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
 ) {
-    val collapsedGroups = remember { mutableStateSetOf<Int>() }
+    var collapsedGroups by rememberSaveable { mutableStateOf(emptySet<Int>()) }
+    val toggleGroupCollapse: (Int) -> Unit = { groupId ->
+        collapsedGroups =
+            if (groupId in collapsedGroups) collapsedGroups - groupId else collapsedGroups + groupId
+    }
     if (displayMangaHolder.allDisplayManga.isEmpty()) {
         EmptyScreen(
             message = UiText.StringResource(resourceId = R.string.no_results_found),
@@ -41,6 +47,7 @@ fun BrowseFollowsPage(
                 onLongClick = onLongClick,
                 contentPadding = contentPadding,
                 collapsedGroups = collapsedGroups,
+                onToggleGroupCollapse = toggleGroupCollapse,
             )
         } else {
             MangaGridWithHeader(
@@ -53,6 +60,7 @@ fun BrowseFollowsPage(
                 onLongClick = onLongClick,
                 contentPadding = contentPadding,
                 collapsedGroups = collapsedGroups,
+                onToggleGroupCollapse = toggleGroupCollapse,
             )
         }
     }
