@@ -28,7 +28,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -36,6 +35,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.abs
@@ -92,14 +92,7 @@ fun ComposeWebtoonViewer(
         val themeBackground = MaterialTheme.colorScheme.background
         val backgroundColor =
             remember(readerTheme, themeBackground) {
-                when (readerTheme) {
-                    0 -> Color.White
-                    1 -> Color.Black
-                    2 -> themeBackground
-                    3 -> themeBackground
-                    4 -> Color.Black
-                    else -> themeBackground
-                }
+                ReaderTheme.fromPreference(readerTheme).color(themeBackground)
             }
 
         LaunchedEffect(currentChapterId) {

@@ -50,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
@@ -89,6 +88,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -307,14 +307,7 @@ class ReaderActivity : BaseMainActivity() {
                 val themeBackground = MaterialTheme.colorScheme.background
                 val backgroundColor =
                     remember(readerTheme, themeBackground) {
-                        when (readerTheme) {
-                            0 -> ComposeColor.White
-                            1 -> ComposeColor.Black
-                            2 -> ComposeColor.White
-                            3 -> themeBackground
-                            4 -> ComposeColor.Black
-                            else -> themeBackground
-                        }
+                        ReaderTheme.fromPreference(readerTheme).color(themeBackground)
                     }
                 Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
                     // Native Compose Viewers
@@ -1559,8 +1552,9 @@ class ReaderActivity : BaseMainActivity() {
                 extraPage?.let { secondPage ->
                     (viewer as? PagerViewer)?.let { viewer ->
                         val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
+                        val theme = ReaderTheme.fromPreference(viewer.config.readerTheme)
                         val bg =
-                            if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
+                            if (theme.isSmart || theme == ReaderTheme.WHITE) {
                                 Color.WHITE
                             } else {
                                 Color.BLACK

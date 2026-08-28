@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import org.nekomanga.R
@@ -122,17 +123,9 @@ internal class ReaderSettingsScreen(
                         pref = readerPreferences.readerTheme(),
                         title = stringResource(R.string.background_color),
                         entries =
-                            mapOf(
-                                    0 to stringResource(R.string.white),
-                                    1 to stringResource(R.string.black),
-                                    2 to stringResource(R.string.smart_based_on_page),
-                                    3 to stringResource(R.string.smart_based_on_page_and_theme),
-                                    4 to
-                                        stringResource(
-                                            R.string.smart_based_on_page_and_theme_use_black
-                                        ),
-                                )
-                                .toMap(),
+                            ReaderTheme.entries.associate { theme ->
+                                theme.prefValue to stringResource(theme.settingsStringRes)
+                            },
                     ),
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.fullscreen(),
