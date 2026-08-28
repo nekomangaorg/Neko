@@ -9,7 +9,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.DragInteraction
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -86,7 +86,6 @@ fun ComposeWebtoonViewer(
 
         val readerPreferences: ReaderPreferences = remember { Injekt.get() }
         val readerTheme by readerPreferences.readerTheme().collectAsState()
-        val webtoonSidePadding by readerPreferences.webtoonSidePadding().collectAsState()
         val animatedTransitions by
             readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
         val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsState()
@@ -203,11 +202,8 @@ fun ComposeWebtoonViewer(
                 }
         }
 
-        val sidePaddingPercent = webtoonSidePadding / 100f
         val hasMargins = viewer.hasMargins
-
-        BoxWithConstraints(modifier = modifier.fillMaxSize().background(backgroundColor)) {
-            val horizontalPadding = maxWidth * sidePaddingPercent
+        Box(modifier = modifier.fillMaxSize().background(backgroundColor)) {
             LazyColumn(
                 state = lazyListState,
                 userScrollEnabled = scale <= 1.05f,
@@ -404,24 +400,12 @@ fun ComposeWebtoonViewer(
                             WebtoonPageItem(
                                 viewer = viewer,
                                 item = item.page,
-                                modifier =
-                                    if (horizontalPadding > Size.none) {
-                                        Modifier.padding(horizontal = horizontalPadding)
-                                    } else {
-                                        Modifier
-                                    },
                             )
                         }
                         is ReaderUiItem.SplitPage -> {
                             WebtoonPageItem(
                                 viewer = viewer,
                                 item = item.split,
-                                modifier =
-                                    if (horizontalPadding > Size.none) {
-                                        Modifier.padding(horizontal = horizontalPadding)
-                                    } else {
-                                        Modifier
-                                    },
                             )
                         }
                         is ReaderUiItem.Transition -> {
