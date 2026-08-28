@@ -1116,7 +1116,7 @@ class ReaderActivity : BaseMainActivity() {
     private suspend fun loadChapter(chapter: ReaderChapter) {
         val lastPage = viewModel.loadChapter(chapter) ?: return
         isScrollingThroughPagesOrChapters = false
-        if (lastPage > 0) {
+        if (lastPage >= 0) {
             moveToPageIndex(lastPage, false, chapterChange = true)
         }
         refreshChapters()
