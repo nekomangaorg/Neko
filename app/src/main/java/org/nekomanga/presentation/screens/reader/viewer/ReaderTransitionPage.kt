@@ -51,7 +51,7 @@ fun ReaderTransitionPage(
     manga: MangaItem?,
     downloadManager: DownloadManager,
     onRetry: (ReaderChapter) -> Unit,
-    onTap: (() -> Unit)? = null,
+    onTap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -60,7 +60,7 @@ fun ReaderTransitionPage(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = { onTap?.invoke() },
+                    onClick = onTap,
                 )
                 .statusBarsPadding()
                 .navigationBarsPadding()
@@ -82,7 +82,6 @@ fun ReaderTransitionPage(
             elevation =
                 CardDefaults.elevatedCardElevation(defaultElevation = Size.small - Size.extraTiny),
             modifier = Modifier.fillMaxWidth(),
-            onClick = { onTap?.invoke() },
         ) {
             Column(
                 modifier =

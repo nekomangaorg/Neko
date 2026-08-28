@@ -365,20 +365,12 @@ private fun PagerItemContent(
             )
         }
         is ReaderUiItem.Transition -> {
-            val coroutineScope = rememberCoroutineScope()
             ReaderTransitionPage(
                 transition = item.transition,
                 manga = manga,
                 downloadManager = downloadManager,
                 onRetry = onRetryTransition,
-                onTap = {
-                    val toChapter = item.transition.to
-                    if (toChapter != null) {
-                        coroutineScope.launch { viewer.activity.loadChapter(toChapter.chapter) }
-                    } else {
-                        viewer.activity.toggleMenu()
-                    }
-                },
+                onTap = { viewer.activity.toggleMenu() },
                 modifier = Modifier.fillMaxSize(),
             )
         }
