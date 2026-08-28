@@ -360,12 +360,14 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                     (oldCurrent?.first as? ChapterTransition)?.from != currentChapter ->
                     if (oldCurrent?.first is ChapterTransition.Prev) {
                         subItems
+                            .asSequence()
                             .filterIsInstance<ReaderPage>()
                             .filter { it.chapter == currentChapter }
                             .maxByOrNull { it.index }
-                            ?: subItems.find { (it as? ReaderPage)?.chapter == currentChapter }
                     } else {
-                        subItems.find { (it as? ReaderPage)?.chapter == currentChapter }
+                        subItems.asSequence().filterIsInstance<ReaderPage>().find {
+                            it.chapter == currentChapter
+                        }
                     }
                 useSecondPage && oldCurrent?.second is ReaderPage ->
                     (oldCurrent.second ?: oldCurrent.first)
