@@ -96,7 +96,7 @@ fun ComposeWebtoonViewer(
                 when (readerTheme) {
                     0 -> Color.White
                     1 -> Color.Black
-                    2 -> Color.White
+                    2 -> themeBackground
                     3 -> themeBackground
                     4 -> Color.Black
                     else -> themeBackground
