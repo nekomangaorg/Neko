@@ -157,13 +157,13 @@ fun ComposeWebtoonViewer(
                             val itemMiddle = it.offset + it.size / 2
                             abs(itemMiddle - viewportMiddle)
                         } ?: visibleItems.first()
-                    activeItemInfo.index to lazyListState.isScrollInProgress
+                    activeItemInfo.index
                 } else {
-                    lazyListState.firstVisibleItemIndex to lazyListState.isScrollInProgress
+                    lazyListState.firstVisibleItemIndex
                 }
             }
-                .collect { (activeIndex, scrolling) ->
-                    if (!scrolling && activeIndex in items.indices) {
+                .collect { activeIndex ->
+                    if (activeIndex in items.indices) {
                         val item = items[activeIndex]
                         when (item) {
                             is ReaderUiItem.Page -> {
