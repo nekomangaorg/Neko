@@ -259,8 +259,6 @@ class ReaderActivity : BaseMainActivity() {
             settingsSheetVisible = false
         } else if (pageActionsPage != null) {
             pageActionsPage = null
-        } else if (menuVisible) {
-            toggleMenu()
         }
         reEnableBackPressedCallBack()
     }
@@ -972,7 +970,7 @@ class ReaderActivity : BaseMainActivity() {
 
     fun reEnableBackPressedCallBack() {
         backPressedCallback?.isEnabled =
-            chaptersSheetVisible || settingsSheetVisible || pageActionsPage != null || menuVisible
+            chaptersSheetVisible || settingsSheetVisible || pageActionsPage != null
     }
 
     override fun finishAfterTransition() {
