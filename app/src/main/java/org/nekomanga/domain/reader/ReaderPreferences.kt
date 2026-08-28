@@ -3,6 +3,7 @@ package org.nekomanga.domain.reader
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import org.nekomanga.core.preferences.PreferenceValues
@@ -57,7 +58,11 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
     fun zoomStart() = this.preferenceStore.getInt("pref_zoom_start_key", 1)
 
-    fun readerTheme() = this.preferenceStore.getInt("pref_reader_theme_key", 2)
+    fun readerTheme() =
+        this.preferenceStore.getInt(
+            "pref_reader_theme_key",
+            ReaderTheme.SMART_BY_PAGE.prefValue,
+        )
 
     fun cropBorders() = this.preferenceStore.getBoolean("crop_borders")
 

@@ -22,6 +22,7 @@ import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.GestureDetectorWithLongTap
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
@@ -114,10 +115,11 @@ class PagerPageHolder(
     init {
         addView(progressBar)
         launchLoadJob()
+        val readerTheme = ReaderTheme.fromPreference(viewer.config.readerTheme)
         setBackgroundColor(
-            when (val theme = viewer.config.readerTheme) {
-                3 -> Color.TRANSPARENT
-                else -> ThemeUtil.readerBackgroundColor(theme)
+            when (readerTheme) {
+                ReaderTheme.SMART_BY_THEME -> Color.TRANSPARENT
+                else -> ThemeUtil.readerBackgroundColor(viewer.config.readerTheme)
             }
         )
         progressBar.foregroundTintList =
@@ -265,9 +267,10 @@ class PagerPageHolder(
     }
 
     fun updateReaderTheme(theme: Int = viewer.config.readerTheme) {
+        val readerTheme = ReaderTheme.fromPreference(theme)
         setBackgroundColor(
-            when (theme) {
-                3 -> Color.TRANSPARENT
+            when (readerTheme) {
+                ReaderTheme.SMART_BY_THEME -> Color.TRANSPARENT
                 else -> ThemeUtil.readerBackgroundColor(theme, context)
             }
         )
@@ -281,7 +284,7 @@ class PagerPageHolder(
                     }
                 )
             )
-        if (theme >= 2) {
+        if (readerTheme.isSmart) {
             if (page.bg != null) {
                 pageView?.background = page.bg
             }
@@ -559,8 +562,9 @@ class PagerPageHolder(
                     }
 
                 val currentOpenStream = openStream ?: return@launch
+                val readerTheme = ReaderTheme.fromPreference(viewer.config.readerTheme)
                 if (!isAnimated) {
-                    if (viewer.config.readerTheme >= 2) {
+                    if (readerTheme.isSmart) {
                         if (
                             page.bg != null &&
                                 page.bgType ==
@@ -593,7 +597,7 @@ class PagerPageHolder(
                     }
                 } else {
                     setImage(currentOpenStream, true, imageConfig)
-                    if (viewer.config.readerTheme >= 2 && page.bg != null) {
+                    if (readerTheme.isSmart && page.bg != null) {
                         pageView?.background = page.bg
                     }
                 }
@@ -663,10 +667,11 @@ class PagerPageHolder(
     private suspend fun setBG(bytesArray: ByteArray): Drawable {
         return withContext(Default) {
             val readerPreferences by injectLazy<ReaderPreferences>()
+            val theme = ReaderTheme.fromPreference(readerPreferences.readerTheme().get())
             ImageUtil.autoSetBackground(
                 BitmapFactory.decodeByteArray(bytesArray, 0, bytesArray.size),
-                readerPreferences.readerTheme().get() == 2,
-                readerPreferences.readerTheme().get() == 4,
+                theme == ReaderTheme.SMART_BY_PAGE,
+                theme == ReaderTheme.SMART_BY_THEME_BUT_BLACK,
                 context,
             )
         }
@@ -917,8 +922,9 @@ class PagerPageHolder(
             return Buffer().write(imageBytes)
         }
         val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
+        val theme = ReaderTheme.fromPreference(viewer.config.readerTheme)
         val bg =
-            if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
+            if (theme.isSmart || theme == ReaderTheme.WHITE) {
                 Color.WHITE
             } else {
                 Color.BLACK
@@ -956,7 +962,8 @@ class PagerPageHolder(
 
     companion object {
         fun getBGType(readerTheme: Int, context: Context): Int {
-            return if (readerTheme == 3) {
+            val theme = ReaderTheme.fromPreference(readerTheme)
+            return if (theme == ReaderTheme.SMART_BY_THEME) {
                 if (context.isInNightMode()) 2 else 1
             } else {
                 0 + (context.resources.configuration?.orientation ?: 0) * 10

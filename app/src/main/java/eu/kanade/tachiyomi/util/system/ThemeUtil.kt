@@ -1,23 +1,17 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.content.Context
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import org.nekomanga.presentation.theme.Themes
 
 object ThemeUtil {
 
     fun readerBackgroundColor(theme: Int, context: Context? = null): Int {
         val isDark = context?.isInNightMode() ?: true
-        return when (theme) {
-            0 -> Color.WHITE
-            1 -> Color.BLACK
-            3 -> if (isDark) Color.BLACK else Color.WHITE
-            4 -> Color.BLACK
-            else -> if (isDark) Color.BLACK else Color.WHITE
-        }
+        return ReaderTheme.fromPreference(theme).androidColor(isDark)
     }
 }
 

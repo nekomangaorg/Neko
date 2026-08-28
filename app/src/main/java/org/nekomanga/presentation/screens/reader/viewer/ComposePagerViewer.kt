@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -30,6 +29,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
@@ -122,14 +122,7 @@ fun ComposePagerViewer(
         val themeBackground = MaterialTheme.colorScheme.background
         val backgroundColor =
             remember(readerTheme, themeBackground) {
-                when (readerTheme) {
-                    0 -> Color.White
-                    1 -> Color.Black
-                    2 -> Color.White
-                    3 -> themeBackground
-                    4 -> Color.Black
-                    else -> themeBackground
-                }
+                ReaderTheme.fromPreference(readerTheme).color(themeBackground)
             }
 
         LaunchedEffect(viewer.requestedPagePosition) {
