@@ -39,7 +39,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.abs
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -163,7 +162,6 @@ fun ComposeWebtoonViewer(
                     lazyListState.firstVisibleItemIndex
                 }
             }
-                .distinctUntilChanged()
                 .collect { activeIndex ->
                     if (activeIndex in items.indices) {
                         val item = items[activeIndex]

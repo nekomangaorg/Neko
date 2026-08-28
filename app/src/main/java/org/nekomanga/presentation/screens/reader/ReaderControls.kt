@@ -212,7 +212,11 @@ fun ReaderBottomControls(
                                     onPageChange(roundedValue)
                                 }
                             },
-                            onValueChangeFinished = { draggingValue = null },
+                            onValueChangeFinished = {
+                                val finalValue = lastValue
+                                draggingValue = null
+                                onPageChange(finalValue)
+                            },
                             valueRange = 0f..targetMax,
                             colors =
                                 SliderDefaults.colors(
