@@ -115,18 +115,16 @@ class HttpPageLoader(
                 page.status = Page.State.QUEUE
             }
 
-            val queuedPages = mutableListOf<PriorityPage>()
+            var priorityPage: PriorityPage? = null
             if (page.status == Page.State.QUEUE) {
-                queuedPages += PriorityPage(page, 1).also { queue.offer(it) }
+                priorityPage = PriorityPage(page, 1).also { queue.offer(it) }
             }
-            queuedPages += preloadNextPages(page, preloadSize)
+            preloadNextPages(page, preloadSize)
 
             suspendCancellableCoroutine<Nothing> { continuation ->
                 continuation.invokeOnCancellation {
-                    queuedPages.forEach {
-                        if (it.page.status == Page.State.QUEUE) {
-                            queue.remove(it)
-                        }
+                    if (priorityPage != null && priorityPage.page.status == Page.State.QUEUE) {
+                        queue.remove(priorityPage)
                     }
                 }
             }
@@ -144,7 +142,7 @@ class HttpPageLoader(
         if (pageIndex == pages.lastIndex) return emptyList()
 
         return pages.subList(pageIndex + 1, min(pageIndex + 1 + amount, pages.size)).mapNotNull {
-            if (it.status == Page.State.QUEUE) {
+            if (it.status == Page.State.QUEUE && !queue.any { queued -> queued.page == it }) {
                 PriorityPage(it, 0).apply { queue.offer(this) }
             } else {
                 null
