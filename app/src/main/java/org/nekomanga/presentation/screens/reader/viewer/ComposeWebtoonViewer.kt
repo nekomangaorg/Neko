@@ -23,7 +23,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -102,8 +101,6 @@ fun ComposeWebtoonViewer(
                     else -> themeBackground
                 }
             }
-
-        var isTransitioning by remember { mutableStateOf(false) }
 
         LaunchedEffect(currentChapterId) {
             viewer.adapter.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
@@ -430,23 +427,6 @@ fun ComposeWebtoonViewer(
                                 manga = manga,
                                 downloadManager = downloadManager,
                                 onRetry = onRetryTransition,
-                                onTap = {
-                                    val toChapter = item.transition.to
-                                    if (toChapter != null) {
-                                        if (!isTransitioning) {
-                                            isTransitioning = true
-                                            coroutineScope.launch {
-                                                try {
-                                                    viewer.activity.loadChapter(toChapter.chapter)
-                                                } finally {
-                                                    isTransitioning = false
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        viewer.activity.toggleMenu()
-                                    }
-                                },
                                 modifier =
                                     Modifier.fillMaxWidth()
                                         .padding(

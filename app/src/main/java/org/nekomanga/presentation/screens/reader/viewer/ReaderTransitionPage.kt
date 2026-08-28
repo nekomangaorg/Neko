@@ -1,7 +1,5 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,17 +49,11 @@ fun ReaderTransitionPage(
     manga: MangaItem?,
     downloadManager: DownloadManager,
     onRetry: (ReaderChapter) -> Unit,
-    onTap: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier =
             modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = { onTap?.invoke() },
-                )
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .padding(
@@ -82,7 +74,6 @@ fun ReaderTransitionPage(
             elevation =
                 CardDefaults.elevatedCardElevation(defaultElevation = Size.small - Size.extraTiny),
             modifier = Modifier.fillMaxWidth(),
-            onClick = { onTap?.invoke() },
         ) {
             Column(
                 modifier =
