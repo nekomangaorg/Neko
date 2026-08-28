@@ -145,14 +145,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
     }
 
     private fun refreshLayoutParams() {
-        frame.layoutParams =
-            FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
-                val margin =
-                    Resources.getSystem().displayMetrics.widthPixels *
-                        (viewer.config.sidePadding / 100f)
-                marginEnd = margin.toInt()
-                marginStart = margin.toInt()
-            }
+        frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         if (viewer.hasMargins) {
             frame.updatePaddingRelative(bottom = 15.dpToPx)
         }

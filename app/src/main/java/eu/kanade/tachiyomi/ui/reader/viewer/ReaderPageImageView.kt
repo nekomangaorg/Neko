@@ -178,7 +178,7 @@ constructor(
     }
 
     protected fun SubsamplingScaleImageView.setupZoom(config: Config?) {
-        val targetScale = minScale
+        val targetScale = if (scale > 0f) scale else minScale
         // 5x zoom
         maxScale = targetScale * MAX_ZOOM_SCALE
         setDoubleTapZoomScale(targetScale * 2)
