@@ -358,7 +358,15 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             when {
                 (oldCurrent?.first as? ReaderPage)?.chapter != currentChapter &&
                     (oldCurrent?.first as? ChapterTransition)?.from != currentChapter ->
-                    subItems.find { (it as? ReaderPage)?.chapter == currentChapter }
+                    if (oldCurrent?.first is ChapterTransition.Prev) {
+                        subItems
+                            .filterIsInstance<ReaderPage>()
+                            .filter { it.chapter == currentChapter }
+                            .maxByOrNull { it.index }
+                            ?: subItems.find { (it as? ReaderPage)?.chapter == currentChapter }
+                    } else {
+                        subItems.find { (it as? ReaderPage)?.chapter == currentChapter }
+                    }
                 useSecondPage && oldCurrent?.second is ReaderPage ->
                     (oldCurrent.second ?: oldCurrent.first)
                 else -> oldCurrent?.first ?: return
