@@ -427,7 +427,7 @@ class ReaderActivity : BaseMainActivity() {
                         currentPageIndex = state.currentPageIndex,
                         totalPages = state.totalPages,
                         isRtl = viewer is R2LPagerViewer,
-                        onPageChange = { index -> moveToPageIndex(index) },
+                        onPageChange = { index -> moveToPageIndex(index, animated = false) },
                         onSkipPrevious = { loadAdjacentChapter(false) },
                         onSkipNext = { loadAdjacentChapter(true) },
                         visible =

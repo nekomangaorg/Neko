@@ -39,6 +39,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.abs
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -157,13 +158,14 @@ fun ComposeWebtoonViewer(
                             val itemMiddle = it.offset + it.size / 2
                             abs(itemMiddle - viewportMiddle)
                         } ?: visibleItems.first()
-                    activeItemInfo.index to lazyListState.isScrollInProgress
+                    activeItemInfo.index
                 } else {
-                    lazyListState.firstVisibleItemIndex to lazyListState.isScrollInProgress
+                    lazyListState.firstVisibleItemIndex
                 }
             }
-                .collect { (activeIndex, scrolling) ->
-                    if (!scrolling && activeIndex in items.indices) {
+                .distinctUntilChanged()
+                .collect { activeIndex ->
+                    if (activeIndex in items.indices) {
                         val item = items[activeIndex]
                         when (item) {
                             is ReaderUiItem.Page -> {

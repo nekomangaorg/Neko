@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -125,7 +126,8 @@ fun ReaderBottomControls(
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
-    var lastValue by remember(currentPageIndex) { mutableStateOf(currentPageIndex) }
+    var draggingValue by remember { mutableStateOf<Float?>(null) }
+    var lastValue by remember(currentPageIndex) { mutableIntStateOf(currentPageIndex) }
 
     AnimatedVisibility(
         visible = visible,
@@ -193,20 +195,25 @@ fun ReaderBottomControls(
                     val sliderLayoutDirection =
                         if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
                     CompositionLocalProvider(LocalLayoutDirection provides sliderLayoutDirection) {
+                        val targetMax = maxOf(totalPages.toFloat(), 1f)
+                        val displayValue =
+                            (draggingValue ?: currentPageIndex.toFloat()).coerceIn(0f, targetMax)
                         Slider(
-                            value = currentPageIndex.toFloat(),
+                            value = displayValue,
                             steps = totalPages,
                             onValueChange = { value ->
+                                draggingValue = value
                                 val roundedValue = value.roundToInt()
                                 if (roundedValue != lastValue) {
                                     lastValue = roundedValue
                                     view.performHapticFeedback(
                                         HapticFeedbackConstants.TEXT_HANDLE_MOVE
                                     )
+                                    onPageChange(roundedValue)
                                 }
-                                onPageChange(roundedValue)
                             },
-                            valueRange = 0f..maxOf(totalPages.toFloat(), 1f),
+                            onValueChangeFinished = { draggingValue = null },
+                            valueRange = 0f..targetMax,
                             colors =
                                 SliderDefaults.colors(
                                     activeTrackColor = MaterialTheme.colorScheme.primary,
