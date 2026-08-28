@@ -427,6 +427,7 @@ fun ComposeWebtoonViewer(
                                 manga = manga,
                                 downloadManager = downloadManager,
                                 onRetry = onRetryTransition,
+                                onTap = { viewer.activity.toggleMenu() },
                                 modifier =
                                     Modifier.fillMaxWidth()
                                         .padding(

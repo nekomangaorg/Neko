@@ -1,8 +1,6 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
-import android.graphics.PointF
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -33,7 +30,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
-import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
@@ -374,53 +370,8 @@ private fun PagerItemContent(
                 manga = manga,
                 downloadManager = downloadManager,
                 onRetry = onRetryTransition,
-                modifier =
-                    Modifier.fillMaxSize().pointerInput(viewer) {
-                        detectTapGestures(
-                            onTap = { offset ->
-                                val screenWidth = size.width.toFloat()
-                                val screenHeight = size.height.toFloat()
-                                if (screenWidth > 0 && screenHeight > 0) {
-                                    val pos =
-                                        PointF(
-                                            offset.x / screenWidth,
-                                            offset.y / screenHeight,
-                                        )
-                                    val navigator = viewer.config.navigator
-                                    when (navigator.getAction(pos)) {
-                                        ViewerNavigation.NavigationRegion.MENU ->
-                                            viewer.activity.toggleMenu()
-                                        ViewerNavigation.NavigationRegion.NEXT -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveToNext()
-                                        }
-                                        ViewerNavigation.NavigationRegion.PREV -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveToPrevious()
-                                        }
-                                        ViewerNavigation.NavigationRegion.RIGHT -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveRight()
-                                        }
-                                        ViewerNavigation.NavigationRegion.LEFT -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveLeft()
-                                        }
-                                    }
-                                } else {
-                                    viewer.activity.toggleMenu()
-                                }
-                            }
-                        )
-                    },
+                onTap = { viewer.activity.toggleMenu() },
+                modifier = Modifier.fillMaxSize(),
             )
         }
     }
