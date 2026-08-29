@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -196,13 +198,19 @@ fun ComposeWebtoonViewer(
         val sidePaddingPercent = webtoonSidePadding / 100f
         val hasMargins = viewer.hasMargins
 
-        BoxWithConstraints(modifier = modifier.fillMaxSize().background(backgroundColor)) {
+        BoxWithConstraints(
+            contentAlignment = Alignment.Center,
+            modifier = modifier.fillMaxSize().background(backgroundColor),
+        ) {
             val horizontalPadding = maxWidth * sidePaddingPercent
+            val columnHeight = if (scale < 1f) maxHeight / scale else maxHeight
             LazyColumn(
                 state = lazyListState,
                 userScrollEnabled = scale <= 1.05f,
+                beyondBoundsItemCount = 2,
                 modifier =
-                    Modifier.fillMaxSize()
+                    Modifier.fillMaxWidth()
+                        .height(columnHeight)
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
