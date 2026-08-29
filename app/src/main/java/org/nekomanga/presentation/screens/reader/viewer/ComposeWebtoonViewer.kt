@@ -16,6 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
+import androidx.compose.foundation.lazy.LazyListPrefetchScope
+import androidx.compose.foundation.lazy.LazyListPrefetchStrategy
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
@@ -78,7 +81,12 @@ fun ComposeWebtoonViewer(
                 0,
                 (items.size - 1).coerceAtLeast(0),
             )
-        val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = initialItemIndex)
+        val prefetchStrategy = remember { WebtoonPrefetchStrategy(prefetchCount = 3) }
+        val lazyListState =
+            rememberLazyListState(
+                initialFirstVisibleItemIndex = initialItemIndex,
+                prefetchStrategy = prefetchStrategy,
+            )
 
         var scale by remember { mutableFloatStateOf(1f) }
         var offsetX by remember { mutableFloatStateOf(0f) }
@@ -207,7 +215,6 @@ fun ComposeWebtoonViewer(
             LazyColumn(
                 state = lazyListState,
                 userScrollEnabled = scale <= 1.05f,
-                beyondBoundsItemCount = 3,
                 modifier =
                     Modifier.fillMaxWidth()
                         .height(columnHeight)
@@ -447,6 +454,41 @@ fun ComposeWebtoonViewer(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+private class WebtoonPrefetchStrategy(private val prefetchCount: Int = 3) :
+    LazyListPrefetchStrategy {
+    override fun LazyListPrefetchScope.onScroll(delta: Float, layoutInfo: LazyListLayoutInfo) {
+        if (layoutInfo.visibleItemsInfo.isEmpty()) return
+        if (delta < 0) {
+            val lastVisible = layoutInfo.visibleItemsInfo.last().index
+            for (i in 1..prefetchCount) {
+                val nextIndex = lastVisible + i
+                if (nextIndex < layoutInfo.totalItemsCount) {
+                    schedulePrefetch(nextIndex)
+                }
+            }
+        } else if (delta > 0) {
+            val firstVisible = layoutInfo.visibleItemsInfo.first().index
+            for (i in 1..prefetchCount) {
+                val prevIndex = firstVisible - i
+                if (prevIndex >= 0) {
+                    schedulePrefetch(prevIndex)
+                }
+            }
+        }
+    }
+
+    override fun LazyListPrefetchScope.onVisibleItemsUpdated(layoutInfo: LazyListLayoutInfo) {
+        if (layoutInfo.visibleItemsInfo.isEmpty()) return
+        val lastVisible = layoutInfo.visibleItemsInfo.last().index
+        for (i in 1..prefetchCount) {
+            val nextIndex = lastVisible + i
+            if (nextIndex < layoutInfo.totalItemsCount) {
+                schedulePrefetch(nextIndex)
             }
         }
     }
