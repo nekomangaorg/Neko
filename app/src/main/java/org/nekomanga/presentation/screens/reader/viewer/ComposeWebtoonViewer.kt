@@ -207,7 +207,7 @@ fun ComposeWebtoonViewer(
             LazyColumn(
                 state = lazyListState,
                 userScrollEnabled = scale <= 1.05f,
-                beyondBoundsItemCount = 2,
+                beyondBoundsItemCount = 3,
                 modifier =
                     Modifier.fillMaxWidth()
                         .height(columnHeight)
