@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListPrefetchScope
 import androidx.compose.foundation.lazy.LazyListPrefetchStrategy
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.layout.NestedPrefetchScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -485,11 +486,25 @@ private class WebtoonPrefetchStrategy(private val prefetchCount: Int = 3) :
     override fun LazyListPrefetchScope.onVisibleItemsUpdated(layoutInfo: LazyListLayoutInfo) {
         if (layoutInfo.visibleItemsInfo.isEmpty()) return
         val lastVisible = layoutInfo.visibleItemsInfo.last().index
+        val firstVisible = layoutInfo.visibleItemsInfo.first().index
+
         for (i in 1..prefetchCount) {
             val nextIndex = lastVisible + i
             if (nextIndex < layoutInfo.totalItemsCount) {
                 schedulePrefetch(nextIndex)
             }
+        }
+        for (i in 1..prefetchCount) {
+            val prevIndex = firstVisible - i
+            if (prevIndex >= 0) {
+                schedulePrefetch(prevIndex)
+            }
+        }
+    }
+
+    override fun NestedPrefetchScope.onNestedPrefetch(firstVisibleItemIndex: Int) {
+        for (i in 0 until prefetchCount) {
+            schedulePrecomposition(firstVisibleItemIndex + i)
         }
     }
 }
