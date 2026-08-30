@@ -13,8 +13,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListPrefetchScope
@@ -230,7 +231,8 @@ fun ComposeWebtoonViewer(
                 userScrollEnabled = scale <= 1.05f,
                 modifier =
                     Modifier.fillMaxWidth()
-                        .height(columnHeight)
+                        .wrapContentHeight(unbounded = true)
+                        .requiredHeight(columnHeight)
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
