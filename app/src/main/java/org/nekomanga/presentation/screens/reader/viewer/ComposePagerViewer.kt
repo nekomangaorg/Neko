@@ -62,23 +62,28 @@ fun ComposePagerViewer(
 
     key(viewer, currentChapterId, isRtl, isVertical) {
         val defaultPageIndex =
-            if (isRtl) {
-                items
-                    .indexOfLast {
-                        it is ReaderUiItem.Page && it.page.chapter.chapter.id == currentChapterId
+            items
+                .indexOfFirst { item ->
+                    item is ReaderUiItem.Page &&
+                        item.page.chapter.chapter.id == currentChapterId &&
+                        (item.page.index == 0 || item.extraPage?.index == 0)
+                }
+                .takeIf { it != -1 }
+                ?: items
+                    .mapIndexedNotNull { index, item ->
+                        if (
+                            item is ReaderUiItem.Page &&
+                                item.page.chapter.chapter.id == currentChapterId
+                        ) {
+                            index to minOf(item.page.index, item.extraPage?.index ?: Int.MAX_VALUE)
+                        } else {
+                            null
+                        }
                     }
-                    .takeIf { it != -1 }
-                    ?: items.indexOfLast { it is ReaderUiItem.Page }.takeIf { it != -1 }
-                    ?: 0
-            } else {
-                items
-                    .indexOfFirst {
-                        it is ReaderUiItem.Page && it.page.chapter.chapter.id == currentChapterId
-                    }
-                    .takeIf { it != -1 }
-                    ?: items.indexOfFirst { it is ReaderUiItem.Page }.takeIf { it != -1 }
-                    ?: 0
-            }
+                    .minByOrNull { it.second }
+                    ?.first
+                ?: items.indexOfFirst { it is ReaderUiItem.Page }.takeIf { it != -1 }
+                ?: 0
 
         val initialPage =
             (viewer.requestedPagePosition?.first ?: defaultPageIndex).coerceIn(
