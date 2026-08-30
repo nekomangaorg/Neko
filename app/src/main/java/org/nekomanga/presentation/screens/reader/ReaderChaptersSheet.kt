@@ -29,6 +29,7 @@ import java.text.DecimalFormatSymbols
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.sheets.BaseSheet
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -47,8 +48,6 @@ fun ReaderChaptersSheet(
     isGrayscaleEnabled: Boolean,
     isDoublePageEnabled: Boolean,
     isShiftPageEnabled: Boolean,
-    isWebtoon: Boolean,
-    isPager: Boolean,
     cropBorders: Boolean,
     grayscale: Boolean,
     readingModeIconRes: Int,
@@ -95,114 +94,105 @@ fun ReaderChaptersSheet(
     ) {
         Column(modifier = modifier.fillMaxWidth().padding(vertical = Size.small)) {
             // Drag handle pill is drawn by BaseSheet, so we build the header shortcuts row
-            Row(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = Size.medium, vertical = Size.small),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                if (isChaptersEnabled) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier =
+                        Modifier.widthIn(min = maxWidth)
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = Size.medium, vertical = Size.small),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    if (isChaptersEnabled) {
+                        ToolTipButton(
+                            toolTipLabel = stringResource(R.string.chapters),
                             painter = painterResource(R.drawable.ic_format_list_numbered_24dp),
-                            contentDescription = stringResource(R.string.chapters),
-                            tint = MaterialTheme.colorScheme.primary,
+                            enabledTint = MaterialTheme.colorScheme.primary,
+                            onClick = onDismiss,
                         )
                     }
-                }
 
-                if (isCommentsEnabled) {
-                    IconButton(onClick = onCommentsClick) {
-                        Icon(
+                    if (isCommentsEnabled) {
+                        ToolTipButton(
+                            toolTipLabel = stringResource(R.string.comments),
                             painter = painterResource(R.drawable.ic_view_comments_24p),
-                            contentDescription = stringResource(R.string.comments),
-                            tint = MaterialTheme.colorScheme.primary,
+                            enabledTint = MaterialTheme.colorScheme.primary,
+                            onClick = onCommentsClick,
                         )
                     }
-                }
 
-                if (isWebViewEnabled) {
-                    IconButton(onClick = onWebviewClick) {
-                        Icon(
+                    if (isWebViewEnabled) {
+                        ToolTipButton(
+                            toolTipLabel = stringResource(R.string.open_in_webview),
                             painter = painterResource(R.drawable.ic_open_in_webview_24dp),
-                            contentDescription = stringResource(R.string.open_in_webview),
-                            tint = MaterialTheme.colorScheme.primary,
+                            enabledTint = MaterialTheme.colorScheme.primary,
+                            onClick = onWebviewClick,
                         )
                     }
-                }
 
-                if (isReadingModeEnabled) {
-                    IconButton(onClick = onReadingModeClick) {
-                        Icon(
+                    if (isReadingModeEnabled) {
+                        ToolTipButton(
+                            toolTipLabel = stringResource(R.string.reading_mode),
                             painter = painterResource(readingModeIconRes),
-                            contentDescription = stringResource(R.string.reading_mode),
-                            tint = MaterialTheme.colorScheme.primary,
+                            enabledTint = MaterialTheme.colorScheme.primary,
+                            onClick = onReadingModeClick,
                         )
                     }
-                }
 
-                if (isPager && isRotationEnabled) {
-                    IconButton(onClick = onRotationClick) {
-                        Icon(
+                    if (isRotationEnabled) {
+                        ToolTipButton(
+                            toolTipLabel = stringResource(R.string.rotation),
                             painter = painterResource(rotationIconRes),
-                            contentDescription = stringResource(R.string.rotation),
-                            tint = MaterialTheme.colorScheme.primary,
+                            enabledTint = MaterialTheme.colorScheme.primary,
+                            onClick = onRotationClick,
                         )
                     }
-                }
 
-                if ((isPager || isWebtoon) && isCropBordersEnabled) {
-                    IconButton(onClick = onCropBordersClick) {
-                        Icon(
-                            imageVector =
-                                if (cropBorders) Icons.Default.CropFree else Icons.Default.Crop,
-                            contentDescription = stringResource(R.string.crop_borders),
-                            tint =
+                    if (isCropBordersEnabled) {
+                        ToolTipButton(
+                            toolTipLabel = stringResource(R.string.crop_borders),
+                            icon = if (cropBorders) Icons.Default.CropFree else Icons.Default.Crop,
+                            enabledTint =
                                 if (cropBorders) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.outline,
+                            onClick = onCropBordersClick,
                         )
                     }
-                }
 
-                if (isGrayscaleEnabled) {
-                    IconButton(onClick = onGrayscaleClick) {
-                        Icon(
+                    if (isGrayscaleEnabled) {
+                        ToolTipButton(
+                            toolTipLabel = stringResource(R.string.grayscale_toggle),
                             painter = painterResource(R.drawable.ic_palette),
-                            contentDescription = stringResource(R.string.grayscale_toggle),
-                            tint =
+                            enabledTint =
                                 if (grayscale) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.outline,
+                            onClick = onGrayscaleClick,
                         )
                     }
-                }
 
-                if (isPager && isDoublePageEnabled) {
-                    IconButton(onClick = onDoublePageClick) {
-                        Icon(
+                    if (isDoublePageEnabled) {
+                        ToolTipButton(
+                            toolTipLabel = stringResource(R.string.double_pages),
                             painter = painterResource(doublePageIconRes),
-                            contentDescription = stringResource(R.string.double_pages),
-                            tint = MaterialTheme.colorScheme.primary,
+                            enabledTint = MaterialTheme.colorScheme.primary,
+                            onClick = onDoublePageClick,
                         )
                     }
-                }
 
-                if (isShiftPageEnabled) {
-                    IconButton(onClick = onShiftPageClick) {
-                        Icon(
+                    if (isShiftPageEnabled) {
+                        ToolTipButton(
+                            toolTipLabel = stringResource(R.string.shift_one_page_over),
                             painter = painterResource(shiftPageIconRes),
-                            contentDescription = stringResource(R.string.shift_one_page_over),
-                            tint = MaterialTheme.colorScheme.primary,
+                            enabledTint = MaterialTheme.colorScheme.primary,
+                            onClick = onShiftPageClick,
                         )
                     }
-                }
 
-                IconButton(onClick = onDisplayOptionsClick) {
-                    Icon(
+                    ToolTipButton(
+                        toolTipLabel = stringResource(R.string.display_options),
                         painter = painterResource(R.drawable.ic_tune_24dp),
-                        contentDescription = stringResource(R.string.display_options),
-                        tint = MaterialTheme.colorScheme.primary,
+                        enabledTint = MaterialTheme.colorScheme.primary,
+                        onClick = onDisplayOptionsClick,
                     )
                 }
             }
