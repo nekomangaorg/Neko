@@ -421,7 +421,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         val current = currentPagePosition
         if (current < adapter.count - 1) {
             hasMoved = true
-            requestedPagePosition = (current + 1) to config.usePageTransitions
+            requestedPagePosition = (current + 1) to true
             val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
             if (holder != null && config.navigateToPan && holder.canPanRight()) {
                 holder.panRight()
@@ -436,7 +436,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         val current = currentPagePosition
         if (current > 0) {
             hasMoved = true
-            requestedPagePosition = (current - 1) to config.usePageTransitions
+            requestedPagePosition = (current - 1) to true
             val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
             if (holder != null && config.navigateToPan && holder.canPanLeft()) {
                 holder.panLeft()

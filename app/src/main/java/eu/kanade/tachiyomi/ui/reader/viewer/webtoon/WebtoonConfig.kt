@@ -25,7 +25,7 @@ class WebtoonConfig(
     readerPreferences: ReaderPreferences = Injekt.get(),
 ) : ViewerConfig(preferences, readerPreferences, scope) {
 
-    var usePageTransitions = false
+    var usePageTransitions = readerPreferences.animatedPageTransitionsWebtoon().get()
         private set
 
     var webtoonCropBorders = false
