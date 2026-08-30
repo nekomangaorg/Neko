@@ -5,6 +5,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -12,7 +13,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.viewinterop.AndroidView
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonPageHolder
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
@@ -47,8 +51,23 @@ fun WebtoonPageItem(
 
     DisposableEffect(pageHolder) { onDispose { pageHolder.recycle() } }
 
+    val knownHeightPx =
+        when (item) {
+            is ReaderPage -> item.renderedHeight.takeIf { it > 0 }
+            is ReaderPageSplit -> item.displayedHeight.takeIf { it > 0 }
+            else -> null
+        }
+
+    val heightModifier =
+        if (knownHeightPx != null) {
+            val density = LocalDensity.current
+            Modifier.height(with(density) { knownHeightPx.toDp() })
+        } else {
+            Modifier.heightIn(min = Size.extraLarge * 10)
+        }
+
     key(pageHolder) {
-        Box(modifier = modifier.fillMaxWidth().heightIn(min = Size.extraLarge * 10)) {
+        Box(modifier = modifier.fillMaxWidth().then(heightModifier)) {
             AndroidView(
                 factory = { pageHolder.itemView },
                 update = { holder ->
