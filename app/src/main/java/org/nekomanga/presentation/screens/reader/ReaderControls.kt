@@ -27,8 +27,6 @@ import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -57,6 +55,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.roundToInt
 import org.nekomanga.R
+import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.bars.TitleTopAppBar
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
@@ -94,13 +93,11 @@ fun ReaderAppBar(
             incognitoMode = false,
             actions = {
                 if (showShiftDoublePage && shiftDoublePageIconRes != null) {
-                    IconButton(onClick = onShiftDoublePage) {
-                        Icon(
-                            painter = painterResource(id = shiftDoublePageIconRes),
-                            contentDescription = stringResource(R.string.shift_one_page_over),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
+                    ToolTipButton(
+                        toolTipLabel = stringResource(R.string.shift_one_page_over),
+                        painter = painterResource(id = shiftDoublePageIconRes),
+                        onClick = onShiftDoublePage,
+                    )
                 }
             },
             scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
@@ -195,13 +192,12 @@ fun ReaderBottomControls(
                                 color = MaterialTheme.colorScheme.primary,
                             )
                         } else {
-                            IconButton(onClick = onSkipPrevious) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_skip_previous_24),
-                                    contentDescription = stringResource(R.string.previous_chapter),
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.previous_chapter),
+                                painter = painterResource(id = R.drawable.ic_skip_previous_24),
+                                enabledTint = MaterialTheme.colorScheme.primary,
+                                onClick = onSkipPrevious,
+                            )
                         }
                     }
 
@@ -272,13 +268,12 @@ fun ReaderBottomControls(
                                 color = MaterialTheme.colorScheme.primary,
                             )
                         } else {
-                            IconButton(onClick = onSkipNext) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_skip_next_24),
-                                    contentDescription = stringResource(R.string.next_chapter),
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.next_chapter),
+                                painter = painterResource(id = R.drawable.ic_skip_next_24),
+                                enabledTint = MaterialTheme.colorScheme.primary,
+                                onClick = onSkipNext,
+                            )
                         }
                     }
                 }
@@ -294,105 +289,82 @@ fun ReaderBottomControls(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (isChaptersVisible) {
-                            IconButton(onClick = onChaptersClick) {
-                                Icon(
-                                    painter =
-                                        painterResource(
-                                            id = R.drawable.ic_format_list_numbered_24dp
-                                        ),
-                                    contentDescription = stringResource(R.string.view_chapters),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.view_chapters),
+                                painter =
+                                    painterResource(id = R.drawable.ic_format_list_numbered_24dp),
+                                onClick = onChaptersClick,
+                            )
                         }
                         if (isCommentsVisible) {
-                            IconButton(onClick = onCommentsClick) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_view_comments_24p),
-                                    contentDescription = stringResource(R.string.comments),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.comments),
+                                painter = painterResource(id = R.drawable.ic_view_comments_24p),
+                                onClick = onCommentsClick,
+                            )
                         }
                         if (isWebViewVisible) {
-                            IconButton(onClick = onWebviewClick) {
-                                Icon(
-                                    painter =
-                                        painterResource(id = R.drawable.ic_open_in_webview_24dp),
-                                    contentDescription = stringResource(R.string.open_in_webview),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.open_in_webview),
+                                painter = painterResource(id = R.drawable.ic_open_in_webview_24dp),
+                                onClick = onWebviewClick,
+                            )
                         }
                         if (isReadingModeVisible) {
-                            IconButton(onClick = onReadingModeClick) {
-                                Icon(
-                                    painter = painterResource(id = readingModeIconRes),
-                                    contentDescription = stringResource(R.string.reading_mode),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.reading_mode),
+                                painter = painterResource(id = readingModeIconRes),
+                                onClick = onReadingModeClick,
+                            )
                         }
                         if (isRotationVisible) {
-                            IconButton(onClick = onRotationClick) {
-                                Icon(
-                                    painter = painterResource(id = rotationIconRes),
-                                    contentDescription = stringResource(R.string.rotation),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.rotation),
+                                painter = painterResource(id = rotationIconRes),
+                                onClick = onRotationClick,
+                            )
                         }
                         if (isCropBordersVisible) {
-                            IconButton(onClick = onCropBordersClick) {
-                                Icon(
-                                    imageVector =
-                                        if (cropBorders) Icons.Default.CropFree
-                                        else Icons.Default.Crop,
-                                    contentDescription = stringResource(R.string.crop_borders),
-                                    tint =
-                                        if (cropBorders) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.crop_borders),
+                                icon =
+                                    if (cropBorders) Icons.Default.CropFree else Icons.Default.Crop,
+                                enabledTint =
+                                    if (cropBorders) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurface,
+                                onClick = onCropBordersClick,
+                            )
                         }
                         if (isGrayscaleVisible) {
-                            IconButton(onClick = onGrayscaleClick) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_palette),
-                                    contentDescription = stringResource(R.string.grayscale_toggle),
-                                    tint =
-                                        if (grayscale) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.grayscale_toggle),
+                                painter = painterResource(id = R.drawable.ic_palette),
+                                enabledTint =
+                                    if (grayscale) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurface,
+                                onClick = onGrayscaleClick,
+                            )
                         }
                         if (isDoublePageVisible) {
-                            IconButton(onClick = onDoublePageClick) {
-                                Icon(
-                                    painter = painterResource(id = doublePageIconRes),
-                                    contentDescription = stringResource(R.string.double_pages),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.double_pages),
+                                painter = painterResource(id = doublePageIconRes),
+                                onClick = onDoublePageClick,
+                            )
                         }
                         if (isShiftPageVisible) {
-                            IconButton(onClick = onShiftPageClick) {
-                                Icon(
-                                    painter = painterResource(id = shiftPageIconRes),
-                                    contentDescription =
-                                        stringResource(R.string.shift_one_page_over),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.shift_one_page_over),
+                                painter = painterResource(id = shiftPageIconRes),
+                                onClick = onShiftPageClick,
+                            )
                         }
                         if (isSettingsVisible) {
-                            IconButton(onClick = onSettingsClick) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_tune_24dp),
-                                    contentDescription = stringResource(R.string.display_options),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.display_options),
+                                painter = painterResource(id = R.drawable.ic_tune_24dp),
+                                onClick = onSettingsClick,
+                            )
                         }
                     }
                 }
