@@ -48,8 +48,6 @@ fun ReaderChaptersSheet(
     isGrayscaleEnabled: Boolean,
     isDoublePageEnabled: Boolean,
     isShiftPageEnabled: Boolean,
-    isWebtoon: Boolean,
-    isPager: Boolean,
     cropBorders: Boolean,
     grayscale: Boolean,
     readingModeIconRes: Int,
@@ -172,7 +170,7 @@ fun ReaderChaptersSheet(
                         )
                     }
 
-                    if (isPager && isDoublePageEnabled) {
+                    if (isDoublePageEnabled) {
                         ToolTipButton(
                             toolTipLabel = stringResource(R.string.double_pages),
                             painter = painterResource(doublePageIconRes),

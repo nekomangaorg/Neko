@@ -427,8 +427,6 @@ class ReaderActivity : BaseMainActivity() {
                             canShowSplitAtBottom()
                     val isSettingsVisible = true
 
-                    val isWebtoon = viewer is WebtoonViewer
-                    val isPager = viewer is PagerViewer
                     val cropBordersPref =
                         if (
                             (viewer as? WebtoonViewer)?.hasMargins == true ||
@@ -488,9 +486,7 @@ class ReaderActivity : BaseMainActivity() {
 
                     val onCropBordersClick: () -> Unit = { cropBordersPref.toggle() }
 
-                    val onGrayscaleClick: () -> Unit = {
-                        readerPreferences.grayscale().set(!readerPreferences.grayscale().get())
-                    }
+                    val onGrayscaleClick: () -> Unit = { readerPreferences.grayscale().toggle() }
 
                     val onDoublePageClick: () -> Unit = {
                         if (readerPreferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
@@ -620,8 +616,6 @@ class ReaderActivity : BaseMainActivity() {
                                 isGrayscaleEnabled = isGrayscaleVisible,
                                 isDoublePageEnabled = isDoublePageVisible,
                                 isShiftPageEnabled = isShiftPageVisible,
-                                isWebtoon = isWebtoon,
-                                isPager = isPager,
                                 cropBorders = cropBorders,
                                 grayscale = grayscale,
                                 readingModeIconRes = readingModeIconRes,

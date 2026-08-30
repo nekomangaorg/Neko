@@ -331,7 +331,7 @@ fun ReaderBottomControls(
                                     if (cropBorders) Icons.Default.CropFree else Icons.Default.Crop,
                                 enabledTint =
                                     if (cropBorders) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurface,
+                                    else MaterialTheme.colorScheme.outline,
                                 onClick = onCropBordersClick,
                             )
                         }
@@ -341,7 +341,7 @@ fun ReaderBottomControls(
                                 painter = painterResource(id = R.drawable.ic_palette),
                                 enabledTint =
                                     if (grayscale) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurface,
+                                    else MaterialTheme.colorScheme.outline,
                                 onClick = onGrayscaleClick,
                             )
                         }
