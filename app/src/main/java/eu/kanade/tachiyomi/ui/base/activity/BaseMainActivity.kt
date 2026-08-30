@@ -15,9 +15,4 @@ open class BaseMainActivity : AppCompatActivity() {
         super.onResume()
         SecureActivityDelegate.promptLockIfNeeded(this)
     }
-
-    override fun finish() {
-        super.finish()
-        SecureActivityDelegate.locked = true
-    }
 }

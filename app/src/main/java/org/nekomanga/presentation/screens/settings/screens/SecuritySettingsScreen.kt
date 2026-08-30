@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
 import eu.kanade.tachiyomi.util.system.getActivity
+import java.util.Date
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.presentation.screens.settings.Preference
@@ -31,10 +32,16 @@ internal class SecuritySettingsScreen(
                 title = stringResource(R.string.lock_with_biometrics),
                 enabled = context.isAuthenticationSupported(),
                 onValueChanged = {
-                    (context as FragmentActivity).authenticate(
-                        title = context.getString(R.string.lock_with_biometrics)
-                    )
-                    true
+                    val activity = context.getActivity() as? FragmentActivity
+                    val authenticated =
+                        activity?.authenticate(
+                            title = context.getString(R.string.lock_with_biometrics)
+                        ) ?: false
+                    if (authenticated) {
+                        SecureActivityDelegate.locked = false
+                        securityPreferences.lastUnlock().set(Date().time)
+                    }
+                    authenticated
                 },
             ),
             Preference.PreferenceItem.ListPreference(
@@ -63,10 +70,11 @@ internal class SecuritySettingsScreen(
                     SecurityPreferences.SecureScreenMode.entries
                         .associate { it to stringResource(it.titleResId) }
                         .toMap(),
-                onValueChanged = {
+                onValueChanged = { newValue ->
+                    securityPreferences.secureScreen().set(newValue)
                     val activity = context.getActivity()
                     if (activity != null) {
-                        SecureActivityDelegate.setSecure(context.getActivity())
+                        SecureActivityDelegate.setSecure(activity)
                     }
                     true
                 },
