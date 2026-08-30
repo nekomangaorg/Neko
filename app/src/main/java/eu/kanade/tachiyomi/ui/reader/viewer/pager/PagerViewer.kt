@@ -130,7 +130,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         }
         pager.longTapListener = f@{
             if (activity.menuVisible || config.longTapEnabled) {
-                val item = adapter.joinedItems.getOrNull(pager.currentItem)
+                val item = adapter.joinedItems.getOrNull(currentPagePosition)
                 val firstPage = item?.first as? ReaderPage
                 val secondPage = item?.second as? ReaderPage
                 if (firstPage is ReaderPage) {
@@ -316,13 +316,14 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         pager.addOnPageChangeListener(pagerListener)
         // Since we removed the listener while shifting, call page change to update the ui
         TimberKt.d { "about to on page change from setChapterDoubleShift" }
-        onPageChange(pager.currentItem)
+        onPageChange(currentPagePosition)
         TimberKt.d { "finished on page change from setChapterDoubleShift" }
     }
 
     fun updateShifting(page: ReaderPage? = null) {
         TimberKt.d { "update shifting" }
-        adapter.pageToShift = page ?: adapter.joinedItems[pager.currentItem].first as? ReaderPage
+        adapter.pageToShift =
+            page ?: adapter.joinedItems.getOrNull(currentPagePosition)?.first as? ReaderPage
     }
 
     fun getShiftedPage(): ReaderPage? = adapter.pageToShift
@@ -370,7 +371,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                         (it.first as? ReaderPage)?.firstHalf != false)
             }
         if (position != -1) {
-            val currentPosition = pager.currentItem
+            val currentPosition = currentPagePosition
             requestedPagePosition = position to animated
             pager.setCurrentItem(position, animated)
             // manually call onPageChange since ViewPager listener is not triggered in this case
@@ -460,7 +461,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * changed.
      */
     private fun refreshAdapter() {
-        val currentItem = pager.currentItem
+        val currentItem = currentPagePosition
         pager.adapter = adapter
         pager.setCurrentItem(currentItem, false)
     }
@@ -533,7 +534,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     }
 
     fun hideMenuIfVisible(item: Any) {
-        val currentItem = adapter.joinedItems.getOrNull(pager.currentItem)
+        val currentItem = adapter.joinedItems.getOrNull(currentPagePosition)
         if (item == currentItem && isIdle) {
             activity.hideMenu()
         }

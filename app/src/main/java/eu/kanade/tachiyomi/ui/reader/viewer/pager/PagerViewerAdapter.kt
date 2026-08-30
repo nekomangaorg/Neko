@@ -161,7 +161,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     }
 
     fun splitDoublePages(current: ReaderPage) {
-        val oldCurrent = joinedItems.getOrNull(viewer.pager.currentItem)
+        val oldCurrent = joinedItems.getOrNull(viewer.currentPagePosition)
         setJoinedItems(
             if (viewer.config.splitPages) {
                 (oldCurrent?.first as? ReaderPage)?.firstHalf == false
@@ -178,13 +178,13 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         viewer.scope.launchUI {
             delay(100)
             TimberKt.d { "about to on page change from splitDoublePages" }
-            viewer.onPageChange(viewer.pager.currentItem)
+            viewer.onPageChange(viewer.currentPagePosition)
             TimberKt.d { "finished on page change from splitDoublePages" }
         }
     }
 
     private fun setJoinedItems(useSecondPage: Boolean = false) {
-        val oldCurrent = joinedItems.getOrNull(viewer.pager.currentItem)
+        val oldCurrent = joinedItems.getOrNull(viewer.currentPagePosition)
         if (!viewer.config.doublePages) {
             // If not in double mode, set up items like before
             subItems.forEach {
