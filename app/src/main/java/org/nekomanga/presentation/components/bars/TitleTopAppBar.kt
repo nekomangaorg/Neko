@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -60,7 +61,12 @@ fun TitleTopAppBar(
                     Modifier
                 }
             Column(
-                modifier = Modifier.fillMaxWidth(.8f).align(Alignment.Center).then(titleModifier)
+                modifier =
+                    Modifier.fillMaxWidth(.8f)
+                        .align(Alignment.Center)
+                        .wrapContentSize(Alignment.Center)
+                        .then(titleModifier),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 if (title.isEmpty() && subtitle.isEmpty()) {
                     // Do nothing

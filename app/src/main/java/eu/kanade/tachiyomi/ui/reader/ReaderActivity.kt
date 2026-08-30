@@ -399,9 +399,20 @@ class ReaderActivity : BaseMainActivity() {
                         onShiftDoublePage = { shiftDoublePages() },
                         visible = state.menuVisible || state.menuStickyVisible,
                         onMangaClick = {
-                            viewModel.manga?.id?.let { id ->
-                                val intent = MainActivity.openMangaIntent(this@ReaderActivity, id)
-                                startActivity(intent)
+                            if (fromUrl) {
+                                viewModel.manga?.id?.let { id ->
+                                    val intent =
+                                        MainActivity.openMangaIntent(this@ReaderActivity, id)
+                                            .apply {
+                                                flags =
+                                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                                        Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                            }
+                                    startActivity(intent)
+                                    finishAfterTransition()
+                                }
+                            } else {
+                                finish()
                             }
                         },
                     )
@@ -908,15 +919,10 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     fun setNavigation(navigation: ViewerNavigation, showOnStart: Boolean) {
-        val isFirstInit = overlayNavigation == null
         overlayNavigation = navigation
         overlayIsLtr = viewer !is R2LPagerViewer
         overlayInvertMode = navigation.invertMode
-        if (isFirstInit) {
-            if (showOnStart) {
-                showNavigationAgain()
-            }
-        } else {
+        if (showOnStart) {
             showNavigationAgain()
         }
     }
@@ -1787,11 +1793,9 @@ class ReaderActivity : BaseMainActivity() {
             viewModel.setMenuStickyVisibility(true)
             coroutine = launchUI {
                 delay(2000)
-                if (window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) == true) {
-                    menuStickyVisible = false
-                    viewModel.setMenuStickyVisibility(false)
-                    setMenuVisibility(false)
-                }
+                menuStickyVisible = false
+                viewModel.setMenuStickyVisibility(false)
+                setMenuVisibility(false)
             }
             if (sheetManageNavColor) {
                 window.navigationBarColor =
