@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -82,7 +83,7 @@ fun ComposeWebtoonViewer(
                 0,
                 (items.size - 1).coerceAtLeast(0),
             )
-        val prefetchStrategy = remember { WebtoonPrefetchStrategy(prefetchCount = 3) }
+        val prefetchStrategy = remember { WebtoonPrefetchStrategy(prefetchCount = 5) }
         val lazyListState =
             rememberLazyListState(
                 initialFirstVisibleItemIndex = initialItemIndex,
@@ -209,10 +210,12 @@ fun ComposeWebtoonViewer(
 
         BoxWithConstraints(
             contentAlignment = Alignment.Center,
-            modifier = modifier.fillMaxSize().background(backgroundColor),
+            modifier = modifier.fillMaxSize().background(backgroundColor).clipToBounds(),
         ) {
             val horizontalPadding = maxWidth * sidePaddingPercent
-            val columnHeight = if (scale < 1f) maxHeight / scale else maxHeight
+            val extraLayoutSpace = maxHeight * 0.8f
+            val baseHeight = if (scale < 1f) maxHeight / scale else maxHeight
+            val columnHeight = baseHeight + extraLayoutSpace
             LazyColumn(
                 state = lazyListState,
                 userScrollEnabled = scale <= 1.05f,
