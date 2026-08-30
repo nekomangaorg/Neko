@@ -1,10 +1,12 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
@@ -263,6 +265,17 @@ fun ComposePagerViewer(
                 }
             }
 
+        val useAnimation = animatedTransitions && viewer.config.usePageTransitions
+        val flingBehavior =
+            if (useAnimation) {
+                PagerDefaults.flingBehavior(state = pagerState)
+            } else {
+                PagerDefaults.flingBehavior(
+                    state = pagerState,
+                    snapAnimationSpec = snap<Float>(),
+                )
+            }
+
         Box(
             modifier =
                 modifier
@@ -275,6 +288,7 @@ fun ComposePagerViewer(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 1,
+                    flingBehavior = flingBehavior,
                     key = { index ->
                         when (val item = items.getOrNull(index)) {
                             is ReaderUiItem.Page ->
@@ -305,6 +319,7 @@ fun ComposePagerViewer(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 1,
+                    flingBehavior = flingBehavior,
                     key = { index ->
                         when (val item = items.getOrNull(index)) {
                             is ReaderUiItem.Page ->
