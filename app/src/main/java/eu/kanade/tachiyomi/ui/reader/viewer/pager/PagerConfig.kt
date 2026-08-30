@@ -26,7 +26,7 @@ class PagerConfig(
     readerPreferences: ReaderPreferences = Injekt.get(),
 ) : ViewerConfig(preferences, readerPreferences, scope) {
 
-    var usePageTransitions = false
+    var usePageTransitions = readerPreferences.animatedPageTransitions().get()
         private set
 
     var imageScaleType = 1

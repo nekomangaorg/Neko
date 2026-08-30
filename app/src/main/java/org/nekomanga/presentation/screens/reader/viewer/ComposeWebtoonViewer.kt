@@ -124,8 +124,7 @@ fun ComposeWebtoonViewer(
             val target = req.targetPage
             if (target in items.indices) {
                 if (lazyListState.firstVisibleItemIndex != target) {
-                    val useAnimation =
-                        req.animated && animatedTransitions && viewer.config.usePageTransitions
+                    val useAnimation = req.animated && animatedTransitions
                     if (useAnimation) {
                         lazyListState.animateScrollToItem(target)
                     } else {
@@ -140,7 +139,7 @@ fun ComposeWebtoonViewer(
         LaunchedEffect(viewer.requestedScrollDelta) {
             viewer.requestedScrollDelta?.let { delta ->
                 val scrollAmount = if (scale > 0f) delta.toFloat() / scale else delta.toFloat()
-                if (animatedTransitions && viewer.config.usePageTransitions) {
+                if (animatedTransitions) {
                     lazyListState.animateScrollBy(scrollAmount)
                 } else {
                     lazyListState.scrollBy(scrollAmount)

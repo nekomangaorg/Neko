@@ -132,8 +132,7 @@ fun ComposePagerViewer(
             val target = req.first
             if (target in 0 until pagerState.pageCount) {
                 if (target != pagerState.currentPage) {
-                    val useAnimation =
-                        req.second && animatedTransitions && viewer.config.usePageTransitions
+                    val useAnimation = req.second && animatedTransitions
                     if (useAnimation) {
                         pagerState.animateScrollToPage(target)
                     } else {
@@ -265,7 +264,7 @@ fun ComposePagerViewer(
                 }
             }
 
-        val useAnimation = animatedTransitions && viewer.config.usePageTransitions
+        val useAnimation = animatedTransitions
         val flingBehavior =
             if (useAnimation) {
                 PagerDefaults.flingBehavior(state = pagerState)
