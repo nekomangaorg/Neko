@@ -13,8 +13,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListPrefetchScope
@@ -205,6 +206,17 @@ fun ComposeWebtoonViewer(
                 }
         }
 
+        LaunchedEffect(enableZoomOut) {
+            if (!enableZoomOut && scale < 1f) {
+                val animScale = Animatable(scale)
+                val animX = Animatable(offsetX)
+                val animY = Animatable(offsetY)
+                launch { animScale.animateTo(1f, tween(200)) { scale = value } }
+                launch { animX.animateTo(0f, tween(200)) { offsetX = value } }
+                launch { animY.animateTo(0f, tween(200)) { offsetY = value } }
+            }
+        }
+
         val sidePaddingPercent = webtoonSidePadding / 100f
         val hasMargins = viewer.hasMargins
 
@@ -213,15 +225,14 @@ fun ComposeWebtoonViewer(
             modifier = modifier.fillMaxSize().background(backgroundColor).clipToBounds(),
         ) {
             val horizontalPadding = maxWidth * sidePaddingPercent
-            val extraLayoutSpace = maxHeight * 0.8f
-            val baseHeight = if (scale < 1f) maxHeight / scale else maxHeight
-            val columnHeight = baseHeight + extraLayoutSpace
+            val columnHeight = if (scale < 1f) maxHeight / scale else maxHeight
             LazyColumn(
                 state = lazyListState,
                 userScrollEnabled = scale <= 1.05f,
                 modifier =
                     Modifier.fillMaxWidth()
-                        .height(columnHeight)
+                        .wrapContentHeight(unbounded = true)
+                        .requiredHeight(columnHeight)
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
@@ -230,11 +241,8 @@ fun ComposeWebtoonViewer(
                         }
                         .pointerInput(enableZoomOut) {
                             detectTransformGestures(panZoomLock = true) { _, pan, zoom, _ ->
-                                val newScale =
-                                    (scale * zoom).coerceIn(
-                                        if (viewer.config.enableZoomOut) 0.5f else 1f,
-                                        3f,
-                                    )
+                                val minScale = if (enableZoomOut) 0.5f else 1f
+                                val newScale = (scale * zoom).coerceIn(minScale, 3f)
                                 scale = newScale
                                 if (newScale > 1f) {
                                     val maxOffsetX = (size.width * (newScale - 1f)) / 2f
@@ -246,22 +254,12 @@ fun ComposeWebtoonViewer(
                                     offsetY = 0f
                                 }
                             }
-                            if (scale < 1f && (offsetX != 0f || offsetY != 0f || scale != 1f)) {
-                                coroutineScope.launch {
-                                    val animScale = Animatable(scale)
-                                    val animX = Animatable(offsetX)
-                                    val animY = Animatable(offsetY)
-                                    launch { animScale.animateTo(1f, tween(200)) { scale = value } }
-                                    launch { animX.animateTo(0f, tween(200)) { offsetX = value } }
-                                    launch { animY.animateTo(0f, tween(200)) { offsetY = value } }
-                                }
-                            }
                         }
                         .pointerInput(viewer, items) {
                             detectTapGestures(
                                 onDoubleTap = { offset ->
                                     coroutineScope.launch {
-                                        if (scale > 1.05f) {
+                                        if (scale > 1.05f || scale < 0.95f) {
                                             val animScale = Animatable(scale)
                                             val animX = Animatable(offsetX)
                                             val animY = Animatable(offsetY)
