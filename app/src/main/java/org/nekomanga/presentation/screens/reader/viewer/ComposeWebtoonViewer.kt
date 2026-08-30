@@ -5,8 +5,11 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -37,7 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.input.pointer.util.VelocityTracker
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -93,7 +99,6 @@ fun ComposeWebtoonViewer(
 
         var scale by remember { mutableFloatStateOf(1f) }
         var offsetX by remember { mutableFloatStateOf(0f) }
-        var offsetY by remember { mutableFloatStateOf(0f) }
         val coroutineScope = rememberCoroutineScope()
 
         val readerPreferences: ReaderPreferences = remember { Injekt.get() }
@@ -132,10 +137,11 @@ fun ComposeWebtoonViewer(
         // Sync delta scroll
         LaunchedEffect(viewer.requestedScrollDelta) {
             viewer.requestedScrollDelta?.let { delta ->
+                val scrollAmount = if (scale > 0f) delta.toFloat() / scale else delta.toFloat()
                 if (animatedTransitions && viewer.config.usePageTransitions) {
-                    lazyListState.animateScrollBy(delta.toFloat())
+                    lazyListState.animateScrollBy(scrollAmount)
                 } else {
-                    lazyListState.scrollBy(delta.toFloat())
+                    lazyListState.scrollBy(scrollAmount)
                 }
                 viewer.requestedScrollDelta = null
             }
@@ -210,10 +216,8 @@ fun ComposeWebtoonViewer(
             if (!enableZoomOut && scale < 1f) {
                 val animScale = Animatable(scale)
                 val animX = Animatable(offsetX)
-                val animY = Animatable(offsetY)
                 launch { animScale.animateTo(1f, tween(200)) { scale = value } }
                 launch { animX.animateTo(0f, tween(200)) { offsetX = value } }
-                launch { animY.animateTo(0f, tween(200)) { offsetY = value } }
             }
         }
 
@@ -228,7 +232,7 @@ fun ComposeWebtoonViewer(
             val columnHeight = if (scale < 1f) maxHeight / scale else maxHeight
             LazyColumn(
                 state = lazyListState,
-                userScrollEnabled = scale <= 1.05f,
+                userScrollEnabled = true,
                 modifier =
                     Modifier.fillMaxWidth()
                         .wrapContentHeight(unbounded = true)
@@ -237,21 +241,92 @@ fun ComposeWebtoonViewer(
                             scaleX = scale
                             scaleY = scale
                             translationX = offsetX
-                            translationY = offsetY
+                            translationY = 0f
                         }
                         .pointerInput(enableZoomOut) {
-                            detectTransformGestures(panZoomLock = true) { _, pan, zoom, _ ->
-                                val minScale = if (enableZoomOut) 0.5f else 1f
-                                val newScale = (scale * zoom).coerceIn(minScale, 3f)
-                                scale = newScale
-                                if (newScale > 1f) {
-                                    val maxOffsetX = (size.width * (newScale - 1f)) / 2f
-                                    val maxOffsetY = (size.height * (newScale - 1f)) / 2f
-                                    offsetX = (offsetX + pan.x).coerceIn(-maxOffsetX, maxOffsetX)
-                                    offsetY = (offsetY + pan.y).coerceIn(-maxOffsetY, maxOffsetY)
-                                } else {
-                                    offsetX = 0f
-                                    offsetY = 0f
+                            val velocityTracker = VelocityTracker()
+                            awaitEachGesture {
+                                val minScale = if (viewer.config.enableZoomOut) 0.5f else 1f
+                                val maxScale = 3f
+
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                velocityTracker.resetTracking()
+                                velocityTracker.addPosition(down.uptimeMillis, down.position)
+
+                                do {
+                                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                                    val activePointers = event.changes.filter { it.pressed }
+
+                                    if (activePointers.size >= 2) {
+                                        val zoomChange = event.calculateZoom()
+                                        val panChange = event.calculatePan()
+
+                                        val newScale =
+                                            (scale * zoomChange).coerceIn(minScale, maxScale)
+                                        scale = newScale
+
+                                        if (newScale > 1f) {
+                                            val maxOffsetX = (size.width * (newScale - 1f)) / 2f
+                                            offsetX =
+                                                (offsetX + panChange.x).coerceIn(
+                                                    -maxOffsetX,
+                                                    maxOffsetX,
+                                                )
+                                        } else {
+                                            offsetX = 0f
+                                        }
+
+                                        event.changes.forEach {
+                                            if (it.positionChanged()) {
+                                                it.consume()
+                                            }
+                                        }
+                                    } else if (activePointers.size == 1) {
+                                        val change = activePointers.first()
+                                        velocityTracker.addPosition(
+                                            change.uptimeMillis,
+                                            change.position,
+                                        )
+
+                                        if (scale > 1.05f) {
+                                            val panX = change.position.x - change.previousPosition.x
+                                            if (panX != 0f) {
+                                                val maxOffsetX = (size.width * (scale - 1f)) / 2f
+                                                offsetX =
+                                                    (offsetX + panX).coerceIn(
+                                                        -maxOffsetX,
+                                                        maxOffsetX,
+                                                    )
+                                            }
+                                        }
+                                    }
+                                } while (event.changes.any { it.pressed })
+
+                                if (scale < 1f && !viewer.config.enableZoomOut) {
+                                    coroutineScope.launch {
+                                        val animScale = Animatable(scale)
+                                        val animX = Animatable(offsetX)
+                                        launch {
+                                            animScale.animateTo(1f, tween(200)) { scale = value }
+                                        }
+                                        launch {
+                                            animX.animateTo(0f, tween(200)) { offsetX = value }
+                                        }
+                                    }
+                                } else if (scale > 1.05f) {
+                                    val velocity = velocityTracker.calculateVelocity()
+                                    if (abs(velocity.x) > 100f) {
+                                        coroutineScope.launch {
+                                            val maxOffsetX = (size.width * (scale - 1f)) / 2f
+                                            val animX = Animatable(offsetX)
+                                            val targetX =
+                                                (offsetX + velocity.x * 0.15f).coerceIn(
+                                                    -maxOffsetX,
+                                                    maxOffsetX,
+                                                )
+                                            animX.animateTo(targetX, tween(200)) { offsetX = value }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -262,7 +337,6 @@ fun ComposeWebtoonViewer(
                                         if (scale > 1.05f || scale < 0.95f) {
                                             val animScale = Animatable(scale)
                                             val animX = Animatable(offsetX)
-                                            val animY = Animatable(offsetY)
                                             launch {
                                                 animScale.animateTo(1f, tween(250)) {
                                                     scale = value
@@ -271,23 +345,15 @@ fun ComposeWebtoonViewer(
                                             launch {
                                                 animX.animateTo(0f, tween(250)) { offsetX = value }
                                             }
-                                            launch {
-                                                animY.animateTo(0f, tween(250)) { offsetY = value }
-                                            }
                                         } else {
                                             val targetScale = 2.5f
                                             val targetX =
                                                 ((size.width / 2f) - offset.x) * (targetScale - 1f)
-                                            val targetY =
-                                                ((size.height / 2f) - offset.y) * (targetScale - 1f)
                                             val maxOffsetX = (size.width * (targetScale - 1f)) / 2f
-                                            val maxOffsetY = (size.height * (targetScale - 1f)) / 2f
                                             val boundedX = targetX.coerceIn(-maxOffsetX, maxOffsetX)
-                                            val boundedY = targetY.coerceIn(-maxOffsetY, maxOffsetY)
 
                                             val animScale = Animatable(scale)
                                             val animX = Animatable(offsetX)
-                                            val animY = Animatable(offsetY)
                                             launch {
                                                 animScale.animateTo(targetScale, tween(250)) {
                                                     scale = value
@@ -298,63 +364,39 @@ fun ComposeWebtoonViewer(
                                                     offsetX = value
                                                 }
                                             }
-                                            launch {
-                                                animY.animateTo(boundedY, tween(250)) {
-                                                    offsetY = value
-                                                }
-                                            }
                                         }
                                     }
                                 },
                                 onTap = { offset ->
-                                    if (scale > 1.05f) {
-                                        coroutineScope.launch {
-                                            val animScale = Animatable(scale)
-                                            val animX = Animatable(offsetX)
-                                            val animY = Animatable(offsetY)
-                                            launch {
-                                                animScale.animateTo(1f, tween(200)) {
-                                                    scale = value
+                                    val screenWidth = size.width.toFloat()
+                                    val screenHeight = size.height.toFloat()
+                                    if (screenWidth > 0 && screenHeight > 0) {
+                                        val pos =
+                                            PointF(
+                                                offset.x / screenWidth,
+                                                offset.y / screenHeight,
+                                            )
+                                        val navigator = viewer.config.navigator
+                                        when (navigator.getAction(pos)) {
+                                            ViewerNavigation.NavigationRegion.MENU ->
+                                                viewer.activity.toggleMenu()
+                                            ViewerNavigation.NavigationRegion.NEXT,
+                                            ViewerNavigation.NavigationRegion.RIGHT -> {
+                                                if (viewer.activity.menuVisible) {
+                                                    viewer.activity.hideMenu()
                                                 }
+                                                viewer.moveToNext()
                                             }
-                                            launch {
-                                                animX.animateTo(0f, tween(200)) { offsetX = value }
-                                            }
-                                            launch {
-                                                animY.animateTo(0f, tween(200)) { offsetY = value }
+                                            ViewerNavigation.NavigationRegion.PREV,
+                                            ViewerNavigation.NavigationRegion.LEFT -> {
+                                                if (viewer.activity.menuVisible) {
+                                                    viewer.activity.hideMenu()
+                                                }
+                                                viewer.moveToPrevious()
                                             }
                                         }
                                     } else {
-                                        val screenWidth = size.width.toFloat()
-                                        val screenHeight = size.height.toFloat()
-                                        if (screenWidth > 0 && screenHeight > 0) {
-                                            val pos =
-                                                PointF(
-                                                    offset.x / screenWidth,
-                                                    offset.y / screenHeight,
-                                                )
-                                            val navigator = viewer.config.navigator
-                                            when (navigator.getAction(pos)) {
-                                                ViewerNavigation.NavigationRegion.MENU ->
-                                                    viewer.activity.toggleMenu()
-                                                ViewerNavigation.NavigationRegion.NEXT,
-                                                ViewerNavigation.NavigationRegion.RIGHT -> {
-                                                    if (viewer.activity.menuVisible) {
-                                                        viewer.activity.hideMenu()
-                                                    }
-                                                    viewer.moveToNext()
-                                                }
-                                                ViewerNavigation.NavigationRegion.PREV,
-                                                ViewerNavigation.NavigationRegion.LEFT -> {
-                                                    if (viewer.activity.menuVisible) {
-                                                        viewer.activity.hideMenu()
-                                                    }
-                                                    viewer.moveToPrevious()
-                                                }
-                                            }
-                                        } else {
-                                            viewer.activity.toggleMenu()
-                                        }
+                                        viewer.activity.toggleMenu()
                                     }
                                 },
                                 onLongPress = {
