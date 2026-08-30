@@ -410,7 +410,100 @@ class ReaderActivity : BaseMainActivity() {
                     val isCommentsVisible = ReaderBottomButton.Comment.isIn(enabledButtons)
                     val isWebViewVisible = ReaderBottomButton.WebView.isIn(enabledButtons)
                     val isChaptersVisible = ReaderBottomButton.ViewChapters.isIn(enabledButtons)
+                    val isReadingModeVisible = ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+                    val isRotationVisible = ReaderBottomButton.Rotation.isIn(enabledButtons)
+                    val isCropBordersVisible =
+                        if (viewer is PagerViewer) {
+                            ReaderBottomButton.CropBordersPaged.isIn(enabledButtons)
+                        } else {
+                            ReaderBottomButton.CropBordersWebtoon.isIn(enabledButtons)
+                        }
+                    val isGrayscaleVisible = ReaderBottomButton.Grayscale.isIn(enabledButtons)
+                    val isDoublePageVisible =
+                        (viewer is PagerViewer) &&
+                            ReaderBottomButton.PageLayout.isIn(enabledButtons)
+                    val isShiftPageVisible =
+                        ((viewer as? PagerViewer)?.config?.doublePages ?: false) &&
+                            canShowSplitAtBottom()
                     val isSettingsVisible = true
+
+                    val isWebtoon = viewer is WebtoonViewer
+                    val isPager = viewer is PagerViewer
+                    val cropBordersPref =
+                        if (
+                            (viewer as? WebtoonViewer)?.hasMargins == true ||
+                                (viewer is PagerViewer)
+                        ) {
+                            readerPreferences.cropBorders()
+                        } else {
+                            readerPreferences.cropBordersWebtoon()
+                        }
+                    val cropBorders by cropBordersPref.preferenceCollectAsState()
+                    val grayscale by readerPreferences.grayscale().preferenceCollectAsState()
+
+                    val viewerMode =
+                        ReadingModeType.fromPreference(state.manga?.readingModeType ?: 0)
+                    val readingModeIconRes = viewerMode.iconRes
+
+                    val defaultOrientation by
+                        readerPreferences.defaultOrientationType().preferenceCollectAsState()
+                    val orientation =
+                        OrientationType.fromPreference(
+                            state.manga?.orientationType ?: defaultOrientation
+                        )
+                    val rotationIconRes = orientation.iconRes
+
+                    val pageLayout by readerPreferences.pageLayout().preferenceCollectAsState()
+                    val isDoublePage =
+                        pageLayout == PageLayout.DOUBLE_PAGES.value ||
+                            (pageLayout == PageLayout.AUTOMATIC.value &&
+                                (viewer as? PagerViewer)?.config?.doublePages ?: false)
+                    val doublePageIconRes =
+                        when {
+                            isDoublePage -> R.drawable.ic_book_open_variant_24dp
+                            (viewer as? PagerViewer)?.config?.splitPages == true ->
+                                R.drawable.ic_book_open_split_24dp
+                            else -> R.drawable.ic_single_page_24dp
+                        }
+
+                    val shiftPageIconRes =
+                        shiftDoublePageIconRes ?: R.drawable.ic_page_next_outline_24dp
+
+                    val onReadingModeClick: () -> Unit = {
+                        val nextMode =
+                            ReadingModeType.getNextReadingMode(state.manga?.readingModeType ?: 0)
+                        viewModel.setMangaReadingMode(nextMode.flagValue)
+                    }
+
+                    val onRotationClick: () -> Unit = {
+                        val currentRot =
+                            OrientationType.fromPreference(
+                                state.manga?.orientationType ?: defaultOrientation
+                            )
+                        val allRotations = OrientationType.entries
+                        val nextRot =
+                            allRotations[(allRotations.indexOf(currentRot) + 1) % allRotations.size]
+                        viewModel.setMangaOrientationType(nextRot.flagValue)
+                    }
+
+                    val onCropBordersClick: () -> Unit = { cropBordersPref.toggle() }
+
+                    val onGrayscaleClick: () -> Unit = {
+                        readerPreferences.grayscale().set(!readerPreferences.grayscale().get())
+                    }
+
+                    val onDoublePageClick: () -> Unit = {
+                        if (readerPreferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
+                            (viewer as? PagerViewer)?.config?.let { config ->
+                                config.doublePages = !config.doublePages
+                                reloadChapters(config.doublePages, true)
+                            }
+                        } else {
+                            showPageLayoutMenu()
+                        }
+                    }
+
+                    val onShiftPageClick: () -> Unit = { shiftDoublePages() }
 
                     ReaderBottomControls(
                         currentPageText = state.currentPageText,
@@ -424,21 +517,39 @@ class ReaderActivity : BaseMainActivity() {
                         visible =
                             state.menuVisible && !chaptersSheetVisible && !settingsSheetVisible,
                         isLoading = state.isLoadingAdjacentChapter,
+                        pageNumberVisible = state.pageNumberVisible,
+                        isChaptersVisible = isChaptersVisible,
+                        isCommentsVisible = isCommentsVisible,
+                        isWebViewVisible = isWebViewVisible,
+                        isReadingModeVisible = isReadingModeVisible,
+                        isRotationVisible = isRotationVisible,
+                        isCropBordersVisible = isCropBordersVisible,
+                        isGrayscaleVisible = isGrayscaleVisible,
+                        isDoublePageVisible = isDoublePageVisible,
+                        isShiftPageVisible = isShiftPageVisible,
+                        isSettingsVisible = isSettingsVisible,
+                        cropBorders = cropBorders,
+                        grayscale = grayscale,
+                        readingModeIconRes = readingModeIconRes,
+                        rotationIconRes = rotationIconRes,
+                        doublePageIconRes = doublePageIconRes,
+                        shiftPageIconRes = shiftPageIconRes,
                         onChaptersClick = {
                             chaptersSheetVisible = true
                             reEnableBackPressedCallBack()
                         },
                         onCommentsClick = { openWebView(true) },
                         onWebviewClick = { openWebView(false) },
+                        onReadingModeClick = onReadingModeClick,
+                        onRotationClick = onRotationClick,
+                        onCropBordersClick = onCropBordersClick,
+                        onGrayscaleClick = onGrayscaleClick,
+                        onDoublePageClick = onDoublePageClick,
+                        onShiftPageClick = onShiftPageClick,
                         onSettingsClick = {
                             settingsSheetVisible = true
                             reEnableBackPressedCallBack()
                         },
-                        pageNumberVisible = state.pageNumberVisible,
-                        isChaptersVisible = isChaptersVisible,
-                        isCommentsVisible = isCommentsVisible,
-                        isWebViewVisible = isWebViewVisible,
-                        isSettingsVisible = isSettingsVisible,
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
                     if (settingsSheetVisible) {
@@ -491,72 +602,6 @@ class ReaderActivity : BaseMainActivity() {
                             sheetState =
                                 rememberModalBottomSheetState(skipPartiallyExpanded = true),
                         ) {
-                            val isChaptersEnabled =
-                                ReaderBottomButton.ViewChapters.isIn(enabledButtons)
-                            val isCommentsShortcutEnabled =
-                                isCommentsVisible && ReaderBottomButton.Comment.isIn(enabledButtons)
-                            val isWebViewEnabled = ReaderBottomButton.WebView.isIn(enabledButtons)
-                            val isReadingModeEnabled =
-                                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
-                            val isRotationEnabled = ReaderBottomButton.Rotation.isIn(enabledButtons)
-                            val isCropBordersEnabled =
-                                if (viewer is PagerViewer) {
-                                    ReaderBottomButton.CropBordersPaged.isIn(enabledButtons)
-                                } else {
-                                    ReaderBottomButton.CropBordersWebtoon.isIn(enabledButtons)
-                                }
-                            val isGrayscaleEnabled =
-                                ReaderBottomButton.Grayscale.isIn(enabledButtons)
-                            val isDoublePageEnabled =
-                                ReaderBottomButton.PageLayout.isIn(enabledButtons)
-                            val isShiftPageEnabled =
-                                ((viewer as? PagerViewer)?.config?.doublePages ?: false) &&
-                                    canShowSplitAtBottom()
-
-                            val isWebtoon = viewer is WebtoonViewer
-                            val isPager = viewer is PagerViewer
-                            val cropBordersPref =
-                                if (
-                                    (viewer as? WebtoonViewer)?.hasMargins == true ||
-                                        (viewer is PagerViewer)
-                                ) {
-                                    readerPreferences.cropBorders()
-                                } else {
-                                    readerPreferences.cropBordersWebtoon()
-                                }
-                            val cropBorders by cropBordersPref.preferenceCollectAsState()
-                            val grayscale by
-                                readerPreferences.grayscale().preferenceCollectAsState()
-
-                            val viewerMode =
-                                ReadingModeType.fromPreference(
-                                    viewModel.manga?.readingModeType ?: 0
-                                )
-                            val readingModeIconRes = viewerMode.iconRes
-
-                            val orientation =
-                                OrientationType.fromPreference(
-                                    viewModel.manga?.orientationType
-                                        ?: readerPreferences.defaultOrientationType().get()
-                                )
-                            val rotationIconRes = orientation.iconRes
-
-                            val pageLayout = readerPreferences.pageLayout().get()
-                            val isDoublePage =
-                                pageLayout == PageLayout.DOUBLE_PAGES.value ||
-                                    (pageLayout == PageLayout.AUTOMATIC.value &&
-                                        (viewer as? PagerViewer)?.config?.doublePages ?: false)
-                            val doublePageIconRes =
-                                when {
-                                    isDoublePage -> R.drawable.ic_book_open_variant_24dp
-                                    (viewer as? PagerViewer)?.config?.splitPages == true ->
-                                        R.drawable.ic_book_open_split_24dp
-                                    else -> R.drawable.ic_single_page_24dp
-                                }
-
-                            val shiftPageIconRes =
-                                shiftDoublePageIconRes ?: R.drawable.ic_page_next_outline_24dp
-
                             // Load chapters when visible
                             LaunchedEffect(chaptersSheetVisible) {
                                 if (chaptersSheetVisible) {
@@ -566,15 +611,15 @@ class ReaderActivity : BaseMainActivity() {
 
                             ReaderChaptersSheet(
                                 chapters = state.chapters,
-                                isChaptersEnabled = isChaptersEnabled,
-                                isCommentsEnabled = isCommentsShortcutEnabled,
-                                isWebViewEnabled = isWebViewEnabled,
-                                isReadingModeEnabled = isReadingModeEnabled,
-                                isRotationEnabled = isRotationEnabled,
-                                isCropBordersEnabled = isCropBordersEnabled,
-                                isGrayscaleEnabled = isGrayscaleEnabled,
-                                isDoublePageEnabled = isDoublePageEnabled,
-                                isShiftPageEnabled = isShiftPageEnabled,
+                                isChaptersEnabled = isChaptersVisible,
+                                isCommentsEnabled = isCommentsVisible,
+                                isWebViewEnabled = isWebViewVisible,
+                                isReadingModeEnabled = isReadingModeVisible,
+                                isRotationEnabled = isRotationVisible,
+                                isCropBordersEnabled = isCropBordersVisible,
+                                isGrayscaleEnabled = isGrayscaleVisible,
+                                isDoublePageEnabled = isDoublePageVisible,
+                                isShiftPageEnabled = isShiftPageVisible,
                                 isWebtoon = isWebtoon,
                                 isPager = isPager,
                                 cropBorders = cropBorders,
@@ -613,46 +658,12 @@ class ReaderActivity : BaseMainActivity() {
                                     chaptersSheetVisible = false
                                     reEnableBackPressedCallBack()
                                 },
-                                onReadingModeClick = {
-                                    val nextMode =
-                                        ReadingModeType.getNextReadingMode(
-                                            viewModel.manga?.readingModeType ?: 0
-                                        )
-                                    viewModel.setMangaReadingMode(nextMode.flagValue)
-                                },
-                                onRotationClick = {
-                                    val currentRot =
-                                        OrientationType.fromPreference(
-                                            viewModel.manga?.orientationType
-                                                ?: readerPreferences.defaultOrientationType().get()
-                                        )
-                                    val allRotations = OrientationType.entries
-                                    val nextRot =
-                                        allRotations[
-                                            (allRotations.indexOf(currentRot) + 1) %
-                                                allRotations.size]
-                                    viewModel.setMangaOrientationType(nextRot.flagValue)
-                                },
-                                onCropBordersClick = { cropBordersPref.toggle() },
-                                onGrayscaleClick = {
-                                    readerPreferences
-                                        .grayscale()
-                                        .set(!readerPreferences.grayscale().get())
-                                },
-                                onDoublePageClick = {
-                                    if (
-                                        readerPreferences.pageLayout().get() ==
-                                            PageLayout.AUTOMATIC.value
-                                    ) {
-                                        (viewer as? PagerViewer)?.config?.let { config ->
-                                            config.doublePages = !config.doublePages
-                                            reloadChapters(config.doublePages, true)
-                                        }
-                                    } else {
-                                        showPageLayoutMenu()
-                                    }
-                                },
-                                onShiftPageClick = { shiftDoublePages() },
+                                onReadingModeClick = onReadingModeClick,
+                                onRotationClick = onRotationClick,
+                                onCropBordersClick = onCropBordersClick,
+                                onGrayscaleClick = onGrayscaleClick,
+                                onDoublePageClick = onDoublePageClick,
+                                onShiftPageClick = onShiftPageClick,
                                 onDisplayOptionsClick = {
                                     settingsSheetVisible = true
                                     chaptersSheetVisible = false

@@ -5,8 +5,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,9 +18,13 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Crop
+import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -114,15 +120,33 @@ fun ReaderBottomControls(
     onSkipNext: () -> Unit,
     visible: Boolean,
     isLoading: Boolean,
-    onChaptersClick: () -> Unit,
-    onCommentsClick: () -> Unit,
-    onWebviewClick: () -> Unit,
-    onSettingsClick: () -> Unit,
     pageNumberVisible: Boolean,
     isChaptersVisible: Boolean = true,
     isCommentsVisible: Boolean = true,
     isWebViewVisible: Boolean = true,
+    isReadingModeVisible: Boolean = false,
+    isRotationVisible: Boolean = false,
+    isCropBordersVisible: Boolean = false,
+    isGrayscaleVisible: Boolean = false,
+    isDoublePageVisible: Boolean = false,
+    isShiftPageVisible: Boolean = false,
     isSettingsVisible: Boolean = true,
+    cropBorders: Boolean = false,
+    grayscale: Boolean = false,
+    readingModeIconRes: Int = R.drawable.ic_reader_default_24dp,
+    rotationIconRes: Int = R.drawable.ic_screen_rotation_24dp,
+    doublePageIconRes: Int = R.drawable.ic_book_open_variant_24dp,
+    shiftPageIconRes: Int = R.drawable.ic_page_next_outline_24dp,
+    onChaptersClick: () -> Unit = {},
+    onCommentsClick: () -> Unit = {},
+    onWebviewClick: () -> Unit = {},
+    onReadingModeClick: () -> Unit = {},
+    onRotationClick: () -> Unit = {},
+    onCropBordersClick: () -> Unit = {},
+    onGrayscaleClick: () -> Unit = {},
+    onDoublePageClick: () -> Unit = {},
+    onShiftPageClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
@@ -261,46 +285,114 @@ fun ReaderBottomControls(
 
                 Spacer(modifier = Modifier.height(Size.tiny))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (isChaptersVisible) {
-                        IconButton(onClick = onChaptersClick) {
-                            Icon(
-                                painter =
-                                    painterResource(id = R.drawable.ic_format_list_numbered_24dp),
-                                contentDescription = stringResource(R.string.view_chapters),
-                                tint = MaterialTheme.colorScheme.onSurface,
-                            )
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier =
+                            Modifier.widthIn(min = maxWidth)
+                                .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (isChaptersVisible) {
+                            IconButton(onClick = onChaptersClick) {
+                                Icon(
+                                    painter =
+                                        painterResource(
+                                            id = R.drawable.ic_format_list_numbered_24dp
+                                        ),
+                                    contentDescription = stringResource(R.string.view_chapters),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
                         }
-                    }
-                    if (isCommentsVisible) {
-                        IconButton(onClick = onCommentsClick) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_view_comments_24p),
-                                contentDescription = stringResource(R.string.comments),
-                                tint = MaterialTheme.colorScheme.onSurface,
-                            )
+                        if (isCommentsVisible) {
+                            IconButton(onClick = onCommentsClick) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_view_comments_24p),
+                                    contentDescription = stringResource(R.string.comments),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
                         }
-                    }
-                    if (isWebViewVisible) {
-                        IconButton(onClick = onWebviewClick) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_open_in_webview_24dp),
-                                contentDescription = stringResource(R.string.open_in_webview),
-                                tint = MaterialTheme.colorScheme.onSurface,
-                            )
+                        if (isWebViewVisible) {
+                            IconButton(onClick = onWebviewClick) {
+                                Icon(
+                                    painter =
+                                        painterResource(id = R.drawable.ic_open_in_webview_24dp),
+                                    contentDescription = stringResource(R.string.open_in_webview),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
                         }
-                    }
-                    if (isSettingsVisible) {
-                        IconButton(onClick = onSettingsClick) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_tune_24dp),
-                                contentDescription = stringResource(R.string.display_options),
-                                tint = MaterialTheme.colorScheme.onSurface,
-                            )
+                        if (isReadingModeVisible) {
+                            IconButton(onClick = onReadingModeClick) {
+                                Icon(
+                                    painter = painterResource(id = readingModeIconRes),
+                                    contentDescription = stringResource(R.string.reading_mode),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                        if (isRotationVisible) {
+                            IconButton(onClick = onRotationClick) {
+                                Icon(
+                                    painter = painterResource(id = rotationIconRes),
+                                    contentDescription = stringResource(R.string.rotation),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                        if (isCropBordersVisible) {
+                            IconButton(onClick = onCropBordersClick) {
+                                Icon(
+                                    imageVector =
+                                        if (cropBorders) Icons.Default.CropFree
+                                        else Icons.Default.Crop,
+                                    contentDescription = stringResource(R.string.crop_borders),
+                                    tint =
+                                        if (cropBorders) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                        if (isGrayscaleVisible) {
+                            IconButton(onClick = onGrayscaleClick) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_palette),
+                                    contentDescription = stringResource(R.string.grayscale_toggle),
+                                    tint =
+                                        if (grayscale) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                        if (isDoublePageVisible) {
+                            IconButton(onClick = onDoublePageClick) {
+                                Icon(
+                                    painter = painterResource(id = doublePageIconRes),
+                                    contentDescription = stringResource(R.string.double_pages),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                        if (isShiftPageVisible) {
+                            IconButton(onClick = onShiftPageClick) {
+                                Icon(
+                                    painter = painterResource(id = shiftPageIconRes),
+                                    contentDescription =
+                                        stringResource(R.string.shift_one_page_over),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                        if (isSettingsVisible) {
+                            IconButton(onClick = onSettingsClick) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_tune_24dp),
+                                    contentDescription = stringResource(R.string.display_options),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
                         }
                     }
                 }
