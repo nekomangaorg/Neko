@@ -40,7 +40,7 @@ fun <T> ButtonGroup(
                 checked = isSelected,
                 onCheckedChange = { _ -> onItemClick(item) },
                 colors =
-                    ToggleButtonDefaults.toggleButtonColors(
+                    ToggleButtonDefaults.colors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         checkedContainerColor = MaterialTheme.colorScheme.primary,
