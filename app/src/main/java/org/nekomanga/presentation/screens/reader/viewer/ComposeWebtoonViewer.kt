@@ -424,30 +424,7 @@ fun ComposeWebtoonViewer(
             ) {
                 items(
                     items = items,
-                    key = { item ->
-                        when (item) {
-                            is ReaderUiItem.Page ->
-                                if (item.extraPage != null) {
-                                    "webtoon_page_${item.page.chapter.chapter.id}_${item.page.index}_${item.extraPage.index}"
-                                } else {
-                                    "webtoon_page_${item.page.chapter.chapter.id}_${item.page.index}"
-                                }
-                            is ReaderUiItem.SplitPage ->
-                                "webtoon_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}"
-                            is ReaderUiItem.Transition -> {
-                                val fromId = item.transition.from.chapter.id
-                                val toId = item.transition.to?.chapter?.id
-                                if (fromId != null && toId != null) {
-                                    "webtoon_transition_${minOf(fromId, toId)}_${maxOf(fromId, toId)}"
-                                } else {
-                                    val type =
-                                        if (item.transition is ChapterTransition.Prev) "prev"
-                                        else "next"
-                                    "webtoon_transition_${type}_${fromId}_${toId}"
-                                }
-                            }
-                        }
-                    },
+                    key = { item -> item.key("webtoon") },
                 ) { item ->
                     when (item) {
                         is ReaderUiItem.Page -> {
