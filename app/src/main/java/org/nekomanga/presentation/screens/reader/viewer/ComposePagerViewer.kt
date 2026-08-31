@@ -113,7 +113,8 @@ fun ComposePagerViewer(
                 val newIndex = items.indexOfFirst { item ->
                     if (item is ReaderUiItem.Page && activeItem is ReaderUiItem.Page) {
                         item.page.chapter.chapter.id == activeItem.page.chapter.chapter.id &&
-                            item.page.index == activeItem.page.index
+                            item.page.index == activeItem.page.index &&
+                            item.page.firstHalf == activeItem.page.firstHalf
                     } else if (
                         item is ReaderUiItem.Transition && activeItem is ReaderUiItem.Transition
                     ) {
@@ -303,21 +304,7 @@ fun ComposePagerViewer(
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 1,
                     flingBehavior = flingBehavior,
-                    key = { index ->
-                        when (val item = items.getOrNull(index)) {
-                            is ReaderUiItem.Page ->
-                                if (item.extraPage != null) {
-                                    "pager_page_${item.page.chapter.chapter.id}_${item.page.index}_${item.extraPage.index}"
-                                } else {
-                                    "pager_page_${item.page.chapter.chapter.id}_${item.page.index}"
-                                }
-                            is ReaderUiItem.Transition ->
-                                "pager_transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}"
-                            is ReaderUiItem.SplitPage ->
-                                "pager_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}"
-                            null -> "pager_null_$index"
-                        }
-                    },
+                    key = { index -> items.getOrNull(index)?.key("pager") ?: "pager_null_$index" },
                 ) { index ->
                     val item = items.getOrNull(index) ?: return@VerticalPager
                     PagerItemContent(
@@ -334,21 +321,7 @@ fun ComposePagerViewer(
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 1,
                     flingBehavior = flingBehavior,
-                    key = { index ->
-                        when (val item = items.getOrNull(index)) {
-                            is ReaderUiItem.Page ->
-                                if (item.extraPage != null) {
-                                    "pager_page_${item.page.chapter.chapter.id}_${item.page.index}_${item.extraPage.index}"
-                                } else {
-                                    "pager_page_${item.page.chapter.chapter.id}_${item.page.index}"
-                                }
-                            is ReaderUiItem.Transition ->
-                                "pager_transition_${(item.transition as? ChapterTransition.Prev)?.let { "prev" } ?: "next"}_${item.transition.from.chapter.id}_${item.transition.to?.chapter?.id}"
-                            is ReaderUiItem.SplitPage ->
-                                "pager_split_${item.page.chapter.chapter.id}_${item.page.index}_${item.split.topOffset}"
-                            null -> "pager_null_$index"
-                        }
-                    },
+                    key = { index -> items.getOrNull(index)?.key("pager") ?: "pager_null_$index" },
                 ) { index ->
                     val item = items.getOrNull(index) ?: return@HorizontalPager
                     PagerItemContent(
