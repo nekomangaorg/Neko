@@ -48,9 +48,6 @@ class ChapterLoader(
                     } else {
                         async(Dispatchers.IO) {
                             try {
-                                if (chapterIsReady(chapter)) {
-                                    return@async
-                                }
                                 chapter.state = ReaderChapter.State.Loading
                                 TimberKt.d { "Loading pages for ${chapter.chapter.name}" }
                                 val loader = getPageLoader(chapter)

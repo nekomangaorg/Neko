@@ -167,7 +167,7 @@ fun ComposePagerViewer(
             }
         }
 
-        LaunchedEffect(pagerState) {
+        LaunchedEffect(pagerState, items) {
             snapshotFlow { pagerState.currentPage }
                 .distinctUntilChanged()
                 .collect { pageIndex ->
