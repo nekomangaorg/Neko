@@ -156,7 +156,9 @@ fun ReaderBottomControls(
         exit = slideOutVertically(targetOffsetY = { it }),
         modifier = modifier,
     ) {
-        val bottomPadding = if (pageNumberVisible) Size.extraLarge + Size.tiny else Size.small
+        val isPagesVisible = currentPageText.isNotEmpty() && totalPagesText.isNotEmpty()
+        val bottomPadding =
+            if (pageNumberVisible && isPagesVisible) Size.extraLarge + Size.tiny else Size.small
         Box(
             modifier =
                 Modifier.fillMaxWidth()
@@ -201,61 +203,70 @@ fun ReaderBottomControls(
                         }
                     }
 
-                    val leftText = if (isRtl) totalPagesText else currentPageText
-                    val rightText = if (isRtl) currentPageText else totalPagesText
+                    if (isPagesVisible) {
+                        val leftText = if (isRtl) totalPagesText else currentPageText
+                        val rightText = if (isRtl) currentPageText else totalPagesText
 
-                    Text(
-                        text = leftText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.width(Size.huge - Size.tiny),
-                    )
-
-                    val sliderLayoutDirection =
-                        if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
-                    CompositionLocalProvider(LocalLayoutDirection provides sliderLayoutDirection) {
-                        val targetMax = maxOf(totalPages.toFloat(), 1f)
-                        val displayValue =
-                            (draggingValue ?: currentPageIndex.toFloat()).coerceIn(0f, targetMax)
-                        Slider(
-                            value = displayValue,
-                            steps = totalPages,
-                            onValueChange = { value ->
-                                draggingValue = value
-                                val roundedValue = value.roundToInt()
-                                if (roundedValue != lastValue) {
-                                    lastValue = roundedValue
-                                    view.performHapticFeedback(
-                                        HapticFeedbackConstants.TEXT_HANDLE_MOVE
-                                    )
-                                    onPageChange(roundedValue)
-                                }
-                            },
-                            onValueChangeFinished = {
-                                val finalValue = lastValue
-                                draggingValue = null
-                                onPageChange(finalValue)
-                            },
-                            valueRange = 0f..targetMax,
-                            colors =
-                                SliderDefaults.colors(
-                                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                                    inactiveTrackColor =
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
-                                    thumbColor = MaterialTheme.colorScheme.primary,
-                                ),
-                            modifier = Modifier.weight(1f).padding(horizontal = Size.small),
+                        Text(
+                            text = leftText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(Size.huge - Size.tiny),
                         )
-                    }
 
-                    Text(
-                        text = rightText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.width(Size.huge - Size.tiny),
-                    )
+                        val sliderLayoutDirection =
+                            if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
+                        CompositionLocalProvider(
+                            LocalLayoutDirection provides sliderLayoutDirection
+                        ) {
+                            val targetMax = maxOf(totalPages.toFloat(), 1f)
+                            val displayValue =
+                                (draggingValue ?: currentPageIndex.toFloat()).coerceIn(
+                                    0f,
+                                    targetMax,
+                                )
+                            Slider(
+                                value = displayValue,
+                                steps = 0,
+                                onValueChange = { value ->
+                                    draggingValue = value
+                                    val roundedValue = value.roundToInt()
+                                    if (roundedValue != lastValue) {
+                                        lastValue = roundedValue
+                                        view.performHapticFeedback(
+                                            HapticFeedbackConstants.TEXT_HANDLE_MOVE
+                                        )
+                                        onPageChange(roundedValue)
+                                    }
+                                },
+                                onValueChangeFinished = {
+                                    val finalValue = lastValue
+                                    draggingValue = null
+                                    onPageChange(finalValue)
+                                },
+                                valueRange = 0f..targetMax,
+                                colors =
+                                    SliderDefaults.colors(
+                                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                                        inactiveTrackColor =
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
+                                        thumbColor = MaterialTheme.colorScheme.primary,
+                                    ),
+                                modifier = Modifier.weight(1f).padding(horizontal = Size.small),
+                            )
+                        }
+
+                        Text(
+                            text = rightText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(Size.huge - Size.tiny),
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
 
                     Box(
                         contentAlignment = Alignment.Center,
@@ -441,6 +452,50 @@ private fun PageNumberIndicatorPreview(
                 PageNumberIndicator(text = "1/24")
                 PageNumberIndicator(text = "12/45")
                 PageNumberIndicator(text = "128/350")
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ReaderBottomControlsPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        Box(
+            modifier =
+                Modifier.background(MaterialTheme.colorScheme.surfaceVariant).padding(Size.medium)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(Size.medium)) {
+                // Normal page state
+                ReaderBottomControls(
+                    currentPageText = "1",
+                    totalPagesText = "24",
+                    currentPageIndex = 0,
+                    totalPages = 23,
+                    isRtl = false,
+                    onPageChange = {},
+                    onSkipPrevious = {},
+                    onSkipNext = {},
+                    visible = true,
+                    isLoading = false,
+                    pageNumberVisible = true,
+                )
+                // Transition page state
+                ReaderBottomControls(
+                    currentPageText = "",
+                    totalPagesText = "",
+                    currentPageIndex = 0,
+                    totalPages = 0,
+                    isRtl = false,
+                    onPageChange = {},
+                    onSkipPrevious = {},
+                    onSkipNext = {},
+                    visible = true,
+                    isLoading = false,
+                    pageNumberVisible = true,
+                )
             }
         }
     }
