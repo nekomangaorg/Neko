@@ -277,6 +277,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      */
     private fun onTransitionSelected(transition: ChapterTransition) {
         TimberKt.d { "onTransitionSelected: $transition" }
+        activity.onTransitionSelected(transition)
         val toChapter = transition.to
         if (toChapter != null) {
             TimberKt.d { "Request preload destination chapter because we're on the transition" }
