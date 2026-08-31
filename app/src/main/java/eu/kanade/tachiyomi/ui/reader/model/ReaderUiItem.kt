@@ -14,9 +14,9 @@ sealed interface ReaderUiItem {
         val extraPage: ReaderPage? = null,
     ) : ReaderUiItem {
         override fun key(prefix: String): String {
-            val firstHalfSuffix = page.firstHalf?.let { "_$it" } ?: ""
+            val firstHalfSuffix = page.firstHalf?.let { "_half_$it" } ?: ""
             return if (extraPage != null) {
-                val extraHalfSuffix = extraPage.firstHalf?.let { "_$it" } ?: ""
+                val extraHalfSuffix = extraPage.firstHalf?.let { "_half_$it" } ?: ""
                 "${prefix}_page_${page.chapter.chapter.id}_${page.index}${firstHalfSuffix}_${extraPage.chapter.chapter.id}_${extraPage.index}${extraHalfSuffix}"
             } else {
                 "${prefix}_page_${page.chapter.chapter.id}_${page.index}${firstHalfSuffix}"

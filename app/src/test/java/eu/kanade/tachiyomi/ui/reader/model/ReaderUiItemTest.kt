@@ -46,8 +46,8 @@ class ReaderUiItemTest {
         val firstItem = ReaderUiItem.Page(firstHalf)
         val secondItem = ReaderUiItem.Page(secondHalf)
 
-        assertEquals("pager_page_102992_0_true", firstItem.key("pager"))
-        assertEquals("pager_page_102992_0_false", secondItem.key("pager"))
+        assertEquals("pager_page_102992_0_half_true", firstItem.key("pager"))
+        assertEquals("pager_page_102992_0_half_false", secondItem.key("pager"))
         assertNotEquals(firstItem.key("pager"), secondItem.key("pager"))
     }
 
