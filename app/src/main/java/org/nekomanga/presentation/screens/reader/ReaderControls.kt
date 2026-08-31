@@ -265,7 +265,7 @@ fun ReaderBottomControls(
                             modifier = Modifier.width(Size.huge - Size.tiny),
                         )
                     } else {
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.weight(1f).fillMaxWidth())
                     }
 
                     Box(
