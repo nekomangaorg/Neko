@@ -7,7 +7,12 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
-import eu.kanade.tachiyomi.util.system.withIOContext
+import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 
@@ -20,39 +25,62 @@ class ChapterLoader(
     private val sourceManager: SourceManager,
 ) {
 
+    private val activeLoads = ConcurrentHashMap<Long, Deferred<Unit>>()
+
     /**
      * Assigns the chapter's page loader and loads the its pages. Returns immediately if the chapter
-     * is already loaded.
+     * is already loaded. Deduplicates concurrent loads for the same chapter.
      */
     suspend fun loadChapter(chapter: ReaderChapter) {
         if (chapterIsReady(chapter)) {
             return
         }
 
-        chapter.state = ReaderChapter.State.Loading
-        withIOContext {
-            TimberKt.d { "Loading pages for ${chapter.chapter.name}" }
-            try {
-                val loader = getPageLoader(chapter)
-                chapter.pageLoader = loader
+        val chapterId = chapter.chapter.id ?: return
 
-                val pages = loader.getPages().onEach { it.chapter = chapter }
+        coroutineScope {
+            val deferred =
+                activeLoads.compute(chapterId) { _, existing ->
+                    if (existing != null && existing.isActive) {
+                        existing
+                    } else {
+                        async(Dispatchers.IO) {
+                            try {
+                                if (chapterIsReady(chapter)) {
+                                    return@async
+                                }
+                                chapter.state = ReaderChapter.State.Loading
+                                TimberKt.d { "Loading pages for ${chapter.chapter.name}" }
+                                val loader = getPageLoader(chapter)
+                                chapter.pageLoader = loader
 
-                if (pages.isEmpty()) {
-                    throw Exception(context.getString(R.string.no_pages_found))
+                                val pages = loader.getPages().onEach { it.chapter = chapter }
+
+                                if (pages.isEmpty()) {
+                                    throw Exception(context.getString(R.string.no_pages_found))
+                                }
+
+                                // If the chapter is partially read, set the starting page to the
+                                // last the user read
+                                // otherwise use the requested page.
+                                if (!chapter.chapter.read) {
+                                    chapter.requestedPage = chapter.chapter.last_page_read
+                                }
+
+                                chapter.state = ReaderChapter.State.Loaded(pages)
+                            } catch (e: Throwable) {
+                                if (e !is CancellationException) {
+                                    chapter.state = ReaderChapter.State.Error(e)
+                                }
+                                throw e
+                            } finally {
+                                activeLoads.remove(chapterId)
+                            }
+                        }
+                    }
                 }
 
-                // If the chapter is partially read, set the starting page to the last the user read
-                // otherwise use the requested page.
-                if (!chapter.chapter.read) {
-                    chapter.requestedPage = chapter.chapter.last_page_read
-                }
-
-                chapter.state = ReaderChapter.State.Loaded(pages)
-            } catch (e: Throwable) {
-                chapter.state = ReaderChapter.State.Error(e)
-                throw e
-            }
+            deferred?.await()
         }
     }
 
