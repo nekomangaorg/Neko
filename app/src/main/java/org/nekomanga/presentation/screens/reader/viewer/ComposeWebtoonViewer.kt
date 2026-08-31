@@ -164,20 +164,18 @@ fun ComposeWebtoonViewer(
             snapshotFlow {
                 val layoutInfo = lazyListState.layoutInfo
                 val visibleItems = layoutInfo.visibleItemsInfo
-                val activeIndex =
-                    if (visibleItems.isNotEmpty()) {
-                        val viewportMiddle =
-                            (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-                        val activeItemInfo =
-                            visibleItems.minByOrNull {
-                                val itemMiddle = it.offset + it.size / 2
-                                abs(itemMiddle - viewportMiddle)
-                            } ?: visibleItems.first()
-                        activeItemInfo.index
-                    } else {
-                        lazyListState.firstVisibleItemIndex
-                    }
-                items.getOrNull(activeIndex)
+                if (visibleItems.isNotEmpty()) {
+                    val viewportMiddle =
+                        (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+                    val activeItemInfo =
+                        visibleItems.minByOrNull {
+                            val itemMiddle = it.offset + it.size / 2
+                            abs(itemMiddle - viewportMiddle)
+                        } ?: visibleItems.first()
+                    items.getOrNull(activeItemInfo.index)
+                } else {
+                    items.getOrNull(lazyListState.firstVisibleItemIndex)
+                }
             }
                 .filterNotNull()
                 .distinctUntilChanged()

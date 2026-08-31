@@ -36,7 +36,9 @@ class ChapterLoader(
             return
         }
 
-        val chapterId = chapter.chapter.id ?: return
+        val chapterId =
+            chapter.chapter.id
+                ?: throw IllegalStateException("Chapter ID cannot be null for loading")
 
         coroutineScope {
             val deferred =
