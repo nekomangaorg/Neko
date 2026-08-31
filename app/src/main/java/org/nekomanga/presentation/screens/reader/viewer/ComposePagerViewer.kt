@@ -34,7 +34,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -169,35 +168,39 @@ fun ComposePagerViewer(
         }
 
         LaunchedEffect(pagerState) {
-            snapshotFlow { items.getOrNull(pagerState.currentPage) }
-                .filterNotNull()
+            snapshotFlow { pagerState.currentPage }
                 .distinctUntilChanged()
-                .collect { item ->
-                    lastActiveItem = item
-                    when (item) {
-                        is ReaderUiItem.Page -> {
-                            onPageSelected(item.page, item.extraPage != null)
-                            val pages = item.page.chapter.pages
-                            if (
-                                pages != null && item.page.chapter == viewer.adapter.currentChapter
-                            ) {
-                                if (pages.size - item.page.number < 5) {
-                                    viewer.adapter.nextTransition?.to?.let {
-                                        viewer.activity.requestPreloadChapter(it)
+                .collect { pageIndex ->
+                    viewer.onPageChange(pageIndex)
+                    val item = items.getOrNull(pageIndex)
+                    if (item != null) {
+                        lastActiveItem = item
+                        when (item) {
+                            is ReaderUiItem.Page -> {
+                                onPageSelected(item.page, item.extraPage != null)
+                                val pages = item.page.chapter.pages
+                                if (
+                                    pages != null &&
+                                        item.page.chapter == viewer.adapter.currentChapter
+                                ) {
+                                    if (pages.size - item.page.number < 5) {
+                                        viewer.adapter.nextTransition?.to?.let {
+                                            viewer.activity.requestPreloadChapter(it)
+                                        }
                                     }
-                                }
-                                if (item.page.number <= 5) {
-                                    viewer.adapter.prevTransition?.to?.let {
-                                        viewer.activity.requestPreloadChapter(it)
+                                    if (item.page.number <= 5) {
+                                        viewer.adapter.prevTransition?.to?.let {
+                                            viewer.activity.requestPreloadChapter(it)
+                                        }
                                     }
                                 }
                             }
-                        }
-                        is ReaderUiItem.Transition -> {
-                            onTransitionSelected(item.transition)
-                        }
-                        is ReaderUiItem.SplitPage -> {
-                            onPageSelected(item.page, false)
+                            is ReaderUiItem.Transition -> {
+                                onTransitionSelected(item.transition)
+                            }
+                            is ReaderUiItem.SplitPage -> {
+                                onPageSelected(item.page, false)
+                            }
                         }
                     }
                 }

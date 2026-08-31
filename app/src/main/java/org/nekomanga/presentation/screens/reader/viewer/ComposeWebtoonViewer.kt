@@ -206,6 +206,10 @@ fun ComposeWebtoonViewer(
                         }
                         is ReaderUiItem.Transition -> {
                             onTransitionSelected(item.transition)
+                            val toChapter = item.transition.to
+                            if (toChapter != null) {
+                                viewer.activity.requestPreloadChapter(toChapter)
+                            }
                         }
                     }
                 }
