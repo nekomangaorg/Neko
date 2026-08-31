@@ -228,7 +228,7 @@ fun ReaderBottomControls(
                                 )
                             Slider(
                                 value = displayValue,
-                                steps = 0,
+                                steps = maxOf(0, totalPages - 1),
                                 onValueChange = { value ->
                                     draggingValue = value
                                     val roundedValue = value.roundToInt()
