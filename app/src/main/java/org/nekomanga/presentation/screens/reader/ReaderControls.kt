@@ -487,7 +487,7 @@ private fun ReaderBottomControlsPreview(
                     currentPageText = "",
                     totalPagesText = "",
                     currentPageIndex = 0,
-                    totalPages = 0,
+                    totalPages = 1,
                     isRtl = false,
                     onPageChange = {},
                     onSkipPrevious = {},
