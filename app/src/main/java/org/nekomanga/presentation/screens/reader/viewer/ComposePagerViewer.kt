@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -169,10 +170,11 @@ fun ComposePagerViewer(
 
         LaunchedEffect(pagerState, items) {
             snapshotFlow { pagerState.currentPage }
+                .distinctUntilChanged()
                 .collect { pageIndex ->
                     viewer.onPageChange(pageIndex)
-                    if (pageIndex in items.indices) {
-                        val item = items[pageIndex]
+                    val item = items.getOrNull(pageIndex)
+                    if (item != null) {
                         lastActiveItem = item
                         when (item) {
                             is ReaderUiItem.Page -> {

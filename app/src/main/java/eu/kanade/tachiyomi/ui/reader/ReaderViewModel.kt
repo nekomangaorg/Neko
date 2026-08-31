@@ -647,10 +647,12 @@ constructor(
     /** Helper function to run completion logic. */
     private suspend fun updateChapterProgressOnComplete(readerChapter: ReaderChapter) {
         if (!securityPreferences.incognitoMode().get()) {
-            readerChapter.chapter.read = true
-            updateTrackChapterAfterReading(readerChapter)
-            updateReadingStatus(readerChapter)
-            deleteChapterIfNeeded(readerChapter)
+            if (!readerChapter.chapter.read) {
+                readerChapter.chapter.read = true
+                updateTrackChapterAfterReading(readerChapter)
+                updateReadingStatus(readerChapter)
+                deleteChapterIfNeeded(readerChapter)
+            }
         }
     }
 

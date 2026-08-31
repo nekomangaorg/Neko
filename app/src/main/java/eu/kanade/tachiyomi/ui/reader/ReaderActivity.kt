@@ -1486,6 +1486,7 @@ class ReaderActivity : BaseMainActivity() {
      */
     @SuppressLint("SetTextI18n")
     fun onPageSelected(page: ReaderPage, hasExtraPage: Boolean) {
+        (viewer as? PagerViewer)?.hasMoved = true
         viewModel.onPageSelected(page, hasExtraPage)
         val pages = page.chapter.pages ?: return
 

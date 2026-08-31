@@ -301,11 +301,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     }
 
     fun setChaptersDoubleShift(chapters: ViewerChapters) {
+        val isNewChapter = adapter.currentChapter?.chapter?.id != chapters.currChapter.chapter.id
         // Remove Listener since we're about to change the size of the items
         // If we don't the size change could put us on a new chapter
         pager.removeOnPageChangeListener(pagerListener)
         setChaptersInternal(chapters)
-        if (!hasMoved) {
+        if (isNewChapter && !hasMoved) {
             activity.isScrollingThroughPagesOrChapters = true
             chapters.currChapter.pages?.let { pages ->
                 val page = chapters.currChapter.requestedPage.coerceIn(0, pages.lastIndex)
@@ -314,10 +315,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             activity.isScrollingThroughPagesOrChapters = false
         }
         pager.addOnPageChangeListener(pagerListener)
-        // Since we removed the listener while shifting, call page change to update the ui
-        TimberKt.d { "about to on page change from setChapterDoubleShift" }
-        onPageChange(currentPagePosition)
-        TimberKt.d { "finished on page change from setChapterDoubleShift" }
+        if (isNewChapter && !hasMoved) {
+            // Since we removed the listener while shifting, call page change to update the ui
+            TimberKt.d { "about to on page change from setChapterDoubleShift" }
+            onPageChange(currentPagePosition)
+            TimberKt.d { "finished on page change from setChapterDoubleShift" }
+        }
     }
 
     fun updateShifting(page: ReaderPage? = null) {

@@ -53,6 +53,8 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.abs
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -158,7 +160,7 @@ fun ComposeWebtoonViewer(
         }
 
         // Track active visible page
-        LaunchedEffect(lazyListState, items) {
+        LaunchedEffect(lazyListState) {
             snapshotFlow {
                 val layoutInfo = lazyListState.layoutInfo
                 val visibleItems = layoutInfo.visibleItemsInfo
@@ -170,43 +172,41 @@ fun ComposeWebtoonViewer(
                             val itemMiddle = it.offset + it.size / 2
                             abs(itemMiddle - viewportMiddle)
                         } ?: visibleItems.first()
-                    activeItemInfo.index
+                    items.getOrNull(activeItemInfo.index)
                 } else {
-                    lazyListState.firstVisibleItemIndex
+                    items.getOrNull(lazyListState.firstVisibleItemIndex)
                 }
             }
-                .collect { activeIndex ->
-                    if (activeIndex in items.indices) {
-                        val item = items[activeIndex]
-                        when (item) {
-                            is ReaderUiItem.Page -> {
-                                onPageSelected(item.page)
-                                val pages = item.page.chapter.pages
-                                if (
-                                    pages != null &&
-                                        item.page.chapter == viewer.adapter.currentChapter
-                                ) {
-                                    if (pages.size - item.page.number < 5) {
-                                        viewer.adapter.nextTransition?.to?.let {
-                                            viewer.activity.requestPreloadChapter(it)
-                                        }
+                .filterNotNull()
+                .distinctUntilChanged()
+                .collect { item ->
+                    when (item) {
+                        is ReaderUiItem.Page -> {
+                            onPageSelected(item.page)
+                            val pages = item.page.chapter.pages
+                            if (
+                                pages != null && item.page.chapter == viewer.adapter.currentChapter
+                            ) {
+                                if (pages.size - item.page.number < 5) {
+                                    viewer.adapter.nextTransition?.to?.let {
+                                        viewer.activity.requestPreloadChapter(it)
                                     }
-                                    if (item.page.number <= 5) {
-                                        viewer.adapter.prevTransition?.to?.let {
-                                            viewer.activity.requestPreloadChapter(it)
-                                        }
+                                }
+                                if (item.page.number <= 5) {
+                                    viewer.adapter.prevTransition?.to?.let {
+                                        viewer.activity.requestPreloadChapter(it)
                                     }
                                 }
                             }
-                            is ReaderUiItem.SplitPage -> {
-                                onPageSelected(item.page)
-                            }
-                            is ReaderUiItem.Transition -> {
-                                onTransitionSelected(item.transition)
-                                val toChapter = item.transition.to
-                                if (toChapter != null) {
-                                    viewer.activity.requestPreloadChapter(toChapter)
-                                }
+                        }
+                        is ReaderUiItem.SplitPage -> {
+                            onPageSelected(item.page)
+                        }
+                        is ReaderUiItem.Transition -> {
+                            onTransitionSelected(item.transition)
+                            val toChapter = item.transition.to
+                            if (toChapter != null) {
+                                viewer.activity.requestPreloadChapter(toChapter)
                             }
                         }
                     }
