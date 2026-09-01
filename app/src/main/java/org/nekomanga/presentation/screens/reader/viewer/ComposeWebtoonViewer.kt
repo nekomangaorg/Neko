@@ -34,6 +34,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -115,6 +116,8 @@ fun ComposeWebtoonViewer(
                 ReaderTheme.fromPreference(readerTheme).color(themeBackground)
             }
 
+        val currentItems by rememberUpdatedState(items)
+
         LaunchedEffect(currentChapterId) {
             viewer.adapter.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
             viewer.adapter.nextTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
@@ -124,7 +127,7 @@ fun ComposeWebtoonViewer(
         LaunchedEffect(viewer.requestedPagePosition) {
             val req = viewer.requestedPagePosition ?: return@LaunchedEffect
             val target = req.targetPage
-            if (target in items.indices) {
+            if (target in currentItems.indices) {
                 if (lazyListState.firstVisibleItemIndex != target) {
                     val useAnimation = req.animated && animatedTransitions
                     if (useAnimation) {
@@ -172,9 +175,9 @@ fun ComposeWebtoonViewer(
                             val itemMiddle = it.offset + it.size / 2
                             abs(itemMiddle - viewportMiddle)
                         } ?: visibleItems.first()
-                    items.getOrNull(activeItemInfo.index)
+                    currentItems.getOrNull(activeItemInfo.index)
                 } else {
-                    items.getOrNull(lazyListState.firstVisibleItemIndex)
+                    currentItems.getOrNull(lazyListState.firstVisibleItemIndex)
                 }
             }
                 .filterNotNull()
@@ -331,7 +334,7 @@ fun ComposeWebtoonViewer(
                                 }
                             }
                         }
-                        .pointerInput(viewer, items) {
+                        .pointerInput(viewer) {
                             detectTapGestures(
                                 onDoubleTap = { offset ->
                                     coroutineScope.launch {
@@ -405,7 +408,9 @@ fun ComposeWebtoonViewer(
                                         viewer.activity.menuVisible || viewer.config.longTapEnabled
                                     ) {
                                         val activeItem =
-                                            items.getOrNull(lazyListState.firstVisibleItemIndex)
+                                            currentItems.getOrNull(
+                                                lazyListState.firstVisibleItemIndex
+                                            )
                                         val page =
                                             when (activeItem) {
                                                 is ReaderUiItem.Page -> activeItem.page
