@@ -146,16 +146,19 @@ fun ComposePagerViewer(
 
         LaunchedEffect(viewer.requestedPagePosition) {
             val req = viewer.requestedPagePosition ?: return@LaunchedEffect
-            val target = req.first
-            if (target in 0 until pagerState.pageCount) {
-                if (target != pagerState.currentPage) {
-                    val useAnimation = req.second && animatedTransitions
-                    if (useAnimation) {
-                        pagerState.animateScrollToPage(target)
-                    } else {
-                        pagerState.scrollToPage(target)
+            try {
+                if (pagerState.pageCount > 0) {
+                    val target = req.first.coerceIn(0, pagerState.pageCount - 1)
+                    if (target != pagerState.currentPage) {
+                        val useAnimation = req.second && animatedTransitions
+                        if (useAnimation) {
+                            pagerState.animateScrollToPage(target)
+                        } else {
+                            pagerState.scrollToPage(target)
+                        }
                     }
                 }
+            } finally {
                 viewer.requestedPagePosition = null
             }
         }
@@ -178,7 +181,6 @@ fun ComposePagerViewer(
                         lastActiveItem = item
                         when (item) {
                             is ReaderUiItem.Page -> {
-                                onPageSelected(item.page, item.extraPage != null)
                                 val pages = item.page.chapter.pages
                                 if (
                                     pages != null &&
@@ -196,12 +198,8 @@ fun ComposePagerViewer(
                                     }
                                 }
                             }
-                            is ReaderUiItem.Transition -> {
-                                onTransitionSelected(item.transition)
-                            }
-                            is ReaderUiItem.SplitPage -> {
-                                onPageSelected(item.page, false)
-                            }
+                            is ReaderUiItem.Transition -> Unit
+                            is ReaderUiItem.SplitPage -> Unit
                         }
                     }
                 }
@@ -211,7 +209,7 @@ fun ComposePagerViewer(
         val thresholdPx = with(density) { Size.huge.toPx() }
 
         val nestedScrollConnection =
-            remember(pagerState, items, isVertical, thresholdPx) {
+            remember(pagerState, items, isVertical, isRtl, thresholdPx) {
                 object : NestedScrollConnection {
                     var accumulatedOverscroll = 0f
 
@@ -225,10 +223,18 @@ fun ComposePagerViewer(
                             if (toChapter != null) {
                                 accumulatedOverscroll += delta
                                 val isTrigger =
-                                    if (transition is ChapterTransition.Prev) {
-                                        accumulatedOverscroll > thresholdPx
+                                    if (isRtl) {
+                                        if (transition is ChapterTransition.Prev) {
+                                            accumulatedOverscroll < -thresholdPx
+                                        } else {
+                                            accumulatedOverscroll > thresholdPx
+                                        }
                                     } else {
-                                        accumulatedOverscroll < -thresholdPx
+                                        if (transition is ChapterTransition.Prev) {
+                                            accumulatedOverscroll > thresholdPx
+                                        } else {
+                                            accumulatedOverscroll < -thresholdPx
+                                        }
                                     }
                                 if (isTrigger && !isTransitioning) {
                                     accumulatedOverscroll = 0f
