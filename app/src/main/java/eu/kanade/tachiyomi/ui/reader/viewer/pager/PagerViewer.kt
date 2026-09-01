@@ -13,6 +13,7 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
@@ -381,12 +382,26 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         }
     }
 
+    var isTransitioning: Boolean = false
+
+    fun triggerLoadChapter(chapter: Chapter) {
+        if (isTransitioning) return
+        isTransitioning = true
+        activity.lifecycleScope.launch {
+            try {
+                activity.loadChapter(chapter)
+            } finally {
+                isTransitioning = false
+            }
+        }
+    }
+
     override fun moveToNext() {
         val current = requestedPagePosition?.first ?: currentPagePosition
         val item = adapter.joinedItems.getOrNull(current)
         val unwrapped = if (item is Pair<*, *>) item.first else item
         if (unwrapped is ChapterTransition.Next && unwrapped.to != null) {
-            activity.lifecycleScope.launch { activity.loadChapter(unwrapped.to.chapter) }
+            triggerLoadChapter(unwrapped.to.chapter)
             return
         }
         moveRight()
@@ -397,7 +412,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         val item = adapter.joinedItems.getOrNull(current)
         val unwrapped = if (item is Pair<*, *>) item.first else item
         if (unwrapped is ChapterTransition.Prev && unwrapped.to != null) {
-            activity.lifecycleScope.launch { activity.loadChapter(unwrapped.to.chapter) }
+            triggerLoadChapter(unwrapped.to.chapter)
             return
         }
         moveLeft()

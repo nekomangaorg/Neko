@@ -146,16 +146,19 @@ fun ComposePagerViewer(
 
         LaunchedEffect(viewer.requestedPagePosition) {
             val req = viewer.requestedPagePosition ?: return@LaunchedEffect
-            val target = req.first
-            if (target in 0 until pagerState.pageCount) {
-                if (target != pagerState.currentPage) {
-                    val useAnimation = req.second && animatedTransitions
-                    if (useAnimation) {
-                        pagerState.animateScrollToPage(target)
-                    } else {
-                        pagerState.scrollToPage(target)
+            try {
+                if (pagerState.pageCount > 0) {
+                    val target = req.first.coerceIn(0, pagerState.pageCount - 1)
+                    if (target != pagerState.currentPage) {
+                        val useAnimation = req.second && animatedTransitions
+                        if (useAnimation) {
+                            pagerState.animateScrollToPage(target)
+                        } else {
+                            pagerState.scrollToPage(target)
+                        }
                     }
                 }
+            } finally {
                 viewer.requestedPagePosition = null
             }
         }
@@ -178,7 +181,6 @@ fun ComposePagerViewer(
                         lastActiveItem = item
                         when (item) {
                             is ReaderUiItem.Page -> {
-                                onPageSelected(item.page, item.extraPage != null)
                                 val pages = item.page.chapter.pages
                                 if (
                                     pages != null &&
@@ -196,12 +198,8 @@ fun ComposePagerViewer(
                                     }
                                 }
                             }
-                            is ReaderUiItem.Transition -> {
-                                onTransitionSelected(item.transition)
-                            }
-                            is ReaderUiItem.SplitPage -> {
-                                onPageSelected(item.page, false)
-                            }
+                            is ReaderUiItem.Transition -> Unit
+                            is ReaderUiItem.SplitPage -> Unit
                         }
                     }
                 }
