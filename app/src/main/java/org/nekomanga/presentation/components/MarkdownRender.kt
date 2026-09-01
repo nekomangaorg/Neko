@@ -43,6 +43,7 @@ import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.MarkdownTypography
 import com.mikepenz.markdown.model.NoOpImageTransformerImpl
 import com.mikepenz.markdown.model.markdownAnnotator
+import com.mikepenz.markdown.model.markdownPadding
 import com.mikepenz.markdown.model.rememberMarkdownState
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
@@ -78,7 +79,7 @@ fun MarkdownRender(
         annotator = annotator,
         colors = getMarkdownColors(),
         typography = getMarkdownTypography(),
-        padding = markdownPadding,
+        padding = getMarkdownPadding(),
         components = markdownComponents,
         imageTransformer =
             remember(loadImages) {
@@ -101,7 +102,7 @@ fun MarkdownRender(
         annotator = annotator,
         colors = getMarkdownColors(),
         typography = getMarkdownTypography(),
-        padding = markdownPadding,
+        padding = getMarkdownPadding(),
         components = markdownComponents,
         imageTransformer =
             remember(loadImages) {
@@ -157,25 +158,25 @@ private fun getMarkdownTypography(): MarkdownTypography {
     )
 }
 
-private val markdownPadding =
-    object : MarkdownPadding {
-        override val block: Dp = Size.extraTiny
-        override val blockQuote: PaddingValues =
-            PaddingValues(horizontal = Size.medium, vertical = Size.none)
-        override val blockQuoteBar: PaddingValues.Absolute =
+@Composable
+private fun getMarkdownPadding(): MarkdownPadding =
+    markdownPadding(
+        block = 2.dp,
+        blockQuote = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+        blockQuoteBar =
             PaddingValues.Absolute(
-                left = Size.tiny,
-                top = Size.extraTiny,
-                right = Size.tiny,
-                bottom = Size.extraTiny,
-            )
-        override val blockQuoteText: PaddingValues = PaddingValues(vertical = Size.tiny)
-        override val codeBlock: PaddingValues = PaddingValues(Size.small)
-        override val list: Dp = Size.none
-        override val listIndent: Dp = Size.small
-        override val listItemBottom: Dp = Size.none
-        override val listItemTop: Dp = Size.none
-    }
+                left = 4.dp,
+                top = 2.dp,
+                right = 4.dp,
+                bottom = 2.dp,
+            ),
+        blockQuoteText = PaddingValues(vertical = 4.dp),
+        codeBlock = PaddingValues(8.dp),
+        list = 0.dp,
+        listIndent = 8.dp,
+        listItemBottom = 0.dp,
+        listItemTop = 0.dp,
+    )
 
 private val markdownComponents =
     markdownComponents(
