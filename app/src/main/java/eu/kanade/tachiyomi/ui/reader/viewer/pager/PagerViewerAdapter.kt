@@ -401,6 +401,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             index = joinedItems.indexOfFirst { it.first == newerPage || it.second == newerPage }
         }
         if (index > -1) {
+            viewer.currentPagePosition = index
             viewer.requestedPagePosition = index to false
             viewer.pager.setCurrentItem(index, false)
         }

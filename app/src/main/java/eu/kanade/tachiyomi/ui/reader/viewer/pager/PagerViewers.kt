@@ -22,7 +22,7 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
 
     /** Moves to the next page. On a R2L pager the next page is the one at the left. */
     override fun moveToNext() {
-        val current = currentPagePosition
+        val current = requestedPagePosition?.first ?: currentPagePosition
         val item = adapter.joinedItems.getOrNull(current)
         val unwrapped = if (item is Pair<*, *>) item.first else item
         if (unwrapped is ChapterTransition.Next && unwrapped.to != null) {
@@ -34,7 +34,7 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
 
     /** Moves to the previous page. On a R2L pager the previous page is the one at the right. */
     override fun moveToPrevious() {
-        val current = currentPagePosition
+        val current = requestedPagePosition?.first ?: currentPagePosition
         val item = adapter.joinedItems.getOrNull(current)
         val unwrapped = if (item is Pair<*, *>) item.first else item
         if (unwrapped is ChapterTransition.Prev && unwrapped.to != null) {
@@ -53,7 +53,7 @@ class VerticalPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
     }
 
     override fun moveToNext() {
-        val current = currentPagePosition
+        val current = requestedPagePosition?.first ?: currentPagePosition
         val item = adapter.joinedItems.getOrNull(current)
         val unwrapped = if (item is Pair<*, *>) item.first else item
         if (unwrapped is ChapterTransition.Next && unwrapped.to != null) {
@@ -64,7 +64,7 @@ class VerticalPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
     }
 
     override fun moveToPrevious() {
-        val current = currentPagePosition
+        val current = requestedPagePosition?.first ?: currentPagePosition
         val item = adapter.joinedItems.getOrNull(current)
         val unwrapped = if (item is Pair<*, *>) item.first else item
         if (unwrapped is ChapterTransition.Prev && unwrapped.to != null) {

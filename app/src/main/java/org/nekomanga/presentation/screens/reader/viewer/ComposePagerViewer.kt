@@ -211,7 +211,7 @@ fun ComposePagerViewer(
         val thresholdPx = with(density) { Size.huge.toPx() }
 
         val nestedScrollConnection =
-            remember(pagerState, items, isVertical, thresholdPx) {
+            remember(pagerState, items, isVertical, isRtl, thresholdPx) {
                 object : NestedScrollConnection {
                     var accumulatedOverscroll = 0f
 
@@ -225,10 +225,18 @@ fun ComposePagerViewer(
                             if (toChapter != null) {
                                 accumulatedOverscroll += delta
                                 val isTrigger =
-                                    if (transition is ChapterTransition.Prev) {
-                                        accumulatedOverscroll > thresholdPx
+                                    if (isRtl) {
+                                        if (transition is ChapterTransition.Prev) {
+                                            accumulatedOverscroll < -thresholdPx
+                                        } else {
+                                            accumulatedOverscroll > thresholdPx
+                                        }
                                     } else {
-                                        accumulatedOverscroll < -thresholdPx
+                                        if (transition is ChapterTransition.Prev) {
+                                            accumulatedOverscroll > thresholdPx
+                                        } else {
+                                            accumulatedOverscroll < -thresholdPx
+                                        }
                                     }
                                 if (isTrigger && !isTransitioning) {
                                     accumulatedOverscroll = 0f

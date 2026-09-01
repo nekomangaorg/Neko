@@ -182,7 +182,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     fun onPageChange(position: Int) {
         currentPagePosition = position
         val page = adapter.joinedItems.getOrNull(position)
-        if (page != null && currentPage != page) {
+        if (page != null && currentPage != page.first) {
             val pageF = page.first
             val allowPreload = checkAllowPreload(pageF as? ReaderPage)
             val forward =
@@ -314,14 +314,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 moveToPage(pages[page], false)
             }
             activity.isScrollingThroughPagesOrChapters = false
+        } else {
+            onPageChange(currentPagePosition)
         }
         pager.addOnPageChangeListener(pagerListener)
-        if (isNewChapter && !hasMoved) {
-            // Since we removed the listener while shifting, call page change to update the ui
-            TimberKt.d { "about to on page change from setChapterDoubleShift" }
-            onPageChange(currentPagePosition)
-            TimberKt.d { "finished on page change from setChapterDoubleShift" }
-        }
     }
 
     fun updateShifting(page: ReaderPage? = null) {
@@ -375,23 +371,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                         (it.first as? ReaderPage)?.firstHalf != false)
             }
         if (position != -1) {
-            val currentPosition = currentPagePosition
+            currentPagePosition = position
             requestedPagePosition = position to animated
             pager.setCurrentItem(position, animated)
-            // manually call onPageChange since ViewPager listener is not triggered in this case
-            if (currentPosition == position) {
-                TimberKt.d { "about to on page change from moveToPage" }
-                onPageChange(position)
-            } else {
-                // Call this since with double shift onPageChange wont get called (it shouldn't)
-                // Instead just update the page count in ui
-                val joinedItem =
-                    adapter.joinedItems.firstOrNull { it.first == page || it.second == page }
-                activity.onPageSelected(
-                    joinedItem?.first as? ReaderPage ?: page,
-                    joinedItem?.second is ReaderPage,
-                )
-            }
+            onPageChange(position)
             TimberKt.d { "finished moveToPage method" }
         } else {
             TimberKt.d { "Page $page not found in adapter" }
@@ -399,7 +382,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     }
 
     override fun moveToNext() {
-        val current = currentPagePosition
+        val current = requestedPagePosition?.first ?: currentPagePosition
         val item = adapter.joinedItems.getOrNull(current)
         val unwrapped = if (item is Pair<*, *>) item.first else item
         if (unwrapped is ChapterTransition.Next && unwrapped.to != null) {
@@ -410,7 +393,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     }
 
     override fun moveToPrevious() {
-        val current = currentPagePosition
+        val current = requestedPagePosition?.first ?: currentPagePosition
         val item = adapter.joinedItems.getOrNull(current)
         val unwrapped = if (item is Pair<*, *>) item.first else item
         if (unwrapped is ChapterTransition.Prev && unwrapped.to != null) {
@@ -422,42 +405,44 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     /** Moves to the page at the right. */
     open fun moveRight() {
-        val current = currentPagePosition
+        val current = requestedPagePosition?.first ?: currentPagePosition
         if (current < adapter.count - 1) {
             hasMoved = true
-            requestedPagePosition = (current + 1) to true
+            val target = current + 1
+            requestedPagePosition = target to true
             val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
             if (holder != null && config.navigateToPan && holder.canPanRight()) {
                 holder.panRight()
             } else {
-                pager.setCurrentItem(current + 1, config.usePageTransitions)
+                pager.setCurrentItem(target, config.usePageTransitions)
             }
         }
     }
 
     /** Moves to the page at the left. */
     open fun moveLeft() {
-        val current = currentPagePosition
+        val current = requestedPagePosition?.first ?: currentPagePosition
         if (current > 0) {
             hasMoved = true
-            requestedPagePosition = (current - 1) to true
+            val target = current - 1
+            requestedPagePosition = target to true
             val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
             if (holder != null && config.navigateToPan && holder.canPanLeft()) {
                 holder.panLeft()
             } else {
-                pager.setCurrentItem(current - 1, config.usePageTransitions)
+                pager.setCurrentItem(target, config.usePageTransitions)
             }
         }
     }
 
     /** Moves to the page at the top (or previous). */
     protected open fun moveUp() {
-        moveToPrevious()
+        moveLeft()
     }
 
     /** Moves to the page at the bottom (or next). */
     protected open fun moveDown() {
-        moveToNext()
+        moveRight()
     }
 
     /**
