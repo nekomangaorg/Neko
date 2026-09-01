@@ -53,7 +53,6 @@ import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.jobIsRunning
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.saveTimeTaken
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -102,7 +101,6 @@ import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.library.ShouldUpdateMangaUseCase
 import org.nekomanga.usecases.manga.MangaUseCases
-import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -356,7 +354,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     hasDownloads = downloadResults.any { it }
                 }
 
-                launchIO { updateReadingStatus(mangaToAdd) }
+                updateReadingStatus(mangaToAdd)
 
                 finishUpdates()
             }
@@ -677,22 +675,34 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 val readingStatus = statusHandler.fetchReadingStatusForAllManga()
                 if (readingStatus.isNotEmpty()) {
                     TimberKt.d { "Updating follow statuses" }
-                    mangaList.mapAsync { libraryManga ->
-                        runCatching {
-                            trackRepository
-                                .getTracksForManga(libraryManga.id!!)
-                                .toMutableList()
-                                .firstOrNull { it.sync_id == trackManager.mdList.id }
-                                ?.apply {
-                                    val result =
-                                        readingStatus[MdUtil.getMangaUUID(libraryManga.url)]
-                                    if (this.status != FollowStatus.fromDex(result).int) {
-                                        this.status = FollowStatus.fromDex(result).int
-                                        trackRepository.insertTrack(this)
-                                    }
-                                }
+                    val mangaIds = mangaList.mapNotNull { it.id }
+                    val tracksByMangaId =
+                        mangaIds
+                            .chunked(900)
+                            .map { chunk ->
+                                async { trackRepository.getTracksForMangaByIds(chunk) }
+                            }
+                            .awaitAll()
+                            .flatten()
+                            .groupBy { it.manga_id }
+
+                    val tracksToUpdate = mutableListOf<Track>()
+                    mangaList.forEach { libraryManga ->
+                        val mangaId = libraryManga.id ?: return@forEach
+                        val track =
+                            tracksByMangaId[mangaId]?.firstOrNull {
+                                it.sync_id == trackManager.mdList.id
+                            } ?: return@forEach
+                        val result = readingStatus[MdUtil.getMangaUUID(libraryManga.url)]
+                        val newStatus = FollowStatus.fromDex(result).int
+                        if (track.status != newStatus) {
+                            track.status = newStatus
+                            tracksToUpdate.add(track)
                         }
-                            .onFailure { TimberKt.e(it) { "Error refreshing tracking" } }
+                    }
+
+                    if (tracksToUpdate.isNotEmpty()) {
+                        trackRepository.insertTracks(tracksToUpdate)
                     }
                 }
             }
