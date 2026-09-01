@@ -2,10 +2,16 @@ package org.nekomanga.logging
 
 import android.util.Log
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import java.util.concurrent.CancellationException as JvmCancellationException
+import kotlin.coroutines.cancellation.CancellationException
 import timber.log.Timber
 
 class CrashReportingTree : Timber.Tree() {
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+        if (t is CancellationException || t is JvmCancellationException) {
+            return
+        }
+
         val crashlytics =
             try {
                 FirebaseCrashlytics.getInstance()

@@ -89,4 +89,16 @@ class CrashReportingTreeTest {
         }
         verify(exactly = 1) { mockCrashlytics.recordException(exception) }
     }
+
+    @Test
+    fun `log error level with CancellationException does not record exception or write to logcat`() {
+        val tree = CrashReportingTree()
+        Timber.plant(tree)
+        val exception = kotlinx.coroutines.CancellationException("Job was cancelled")
+
+        Timber.tag("TestTag").e(exception, "Cancelled")
+
+        verify(exactly = 0) { Log.println(any(), any(), any()) }
+        verify(exactly = 0) { mockCrashlytics.recordException(any()) }
+    }
 }

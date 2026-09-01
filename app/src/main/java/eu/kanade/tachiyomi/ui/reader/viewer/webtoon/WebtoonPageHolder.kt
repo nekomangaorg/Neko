@@ -41,6 +41,7 @@ import okio.BufferedSource
 import okio.buffer
 import okio.source
 import org.nekomanga.R
+import org.nekomanga.logging.TimberKt
 
 /**
  * Holder of the webtoon reader for a single page of a chapter.
@@ -302,9 +303,10 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
                     // Keep the coroutine alive to close the input stream only when cancelled
                     awaitCancellation()
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
-                    org.nekomanga.logging.TimberKt.e(e) { "Error loading webtoon page" }
-                    if (e is CancellationException) throw e
+                    TimberKt.e(e) { "Error loading webtoon page" }
                 } finally {
                     runCatching { openStream?.close() }
                 }

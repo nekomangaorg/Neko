@@ -128,6 +128,7 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -1439,6 +1440,9 @@ class ReaderActivity : BaseMainActivity() {
      * this case the activity is closed and a toast is shown to the user.
      */
     fun setInitialChapterError(error: Throwable) {
+        if (error is CancellationException) {
+            return
+        }
         TimberKt.e(error) { "Error setting initial chapter" }
         finish()
         toast(error.message.orUnknownError(this))
@@ -1862,6 +1866,8 @@ class ReaderActivity : BaseMainActivity() {
                 scope.launch(Dispatchers.IO) {
                     try {
                         viewModel.loadChapterURL(id)
+                    } catch (e: CancellationException) {
+                        throw e
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) { setInitialChapterError(e) }
                     }
