@@ -56,7 +56,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     val adapter = PagerViewerAdapter(this)
 
     /** Currently active item. It can be a chapter page or a chapter transition. */
-    private var currentPage: Any? = null
+    protected var currentPage: Any? = null
 
     /**
      * Viewer chapters to set when the pager enters idle mode. Otherwise, if the view was settling
@@ -171,7 +171,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     }
 
     /** Returns the PagerPageHolder for the provided page */
-    private fun getPageHolder(page: ReaderPage): PagerPageHolder? =
+    protected fun getPageHolder(page: ReaderPage): PagerPageHolder? =
         pager.children.filterIsInstance(PagerPageHolder::class.java).firstOrNull {
             it.item.first.index == page.index || it.item.second?.index == page.index
         }
@@ -421,6 +421,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     /** Moves to the page at the right. */
     open fun moveRight() {
         val current = requestedPagePosition?.first ?: currentPagePosition
+        val item = adapter.joinedItems.getOrNull(current)
+        val unwrapped = if (item is Pair<*, *>) item.first else item
+        if (unwrapped is ChapterTransition.Next && unwrapped.to != null) {
+            triggerLoadChapter(unwrapped.to.chapter)
+            return
+        }
         if (current < adapter.count - 1) {
             hasMoved = true
             val target = current + 1
@@ -437,6 +443,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     /** Moves to the page at the left. */
     open fun moveLeft() {
         val current = requestedPagePosition?.first ?: currentPagePosition
+        val item = adapter.joinedItems.getOrNull(current)
+        val unwrapped = if (item is Pair<*, *>) item.first else item
+        if (unwrapped is ChapterTransition.Prev && unwrapped.to != null) {
+            triggerLoadChapter(unwrapped.to.chapter)
+            return
+        }
         if (current > 0) {
             hasMoved = true
             val target = current - 1
