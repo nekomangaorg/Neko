@@ -337,35 +337,75 @@ fun ComposeWebtoonViewer(
                         .pointerInput(viewer) {
                             detectTapGestures(
                                 onDoubleTap = { offset ->
-                                    coroutineScope.launch {
-                                        if (scale > 1.05f || scale < 0.95f) {
-                                            val animScale = Animatable(scale)
-                                            val animX = Animatable(offsetX)
-                                            launch {
-                                                animScale.animateTo(1f, tween(250)) {
-                                                    scale = value
+                                    val screenWidth = size.width.toFloat()
+                                    val screenHeight = size.height.toFloat()
+                                    val isNavigationRegion =
+                                        if (screenWidth > 0 && screenHeight > 0) {
+                                            val pos =
+                                                PointF(
+                                                    offset.x / screenWidth,
+                                                    offset.y / screenHeight,
+                                                )
+                                            val navigator = viewer.config.navigator
+                                            when (navigator.getAction(pos)) {
+                                                ViewerNavigation.NavigationRegion.NEXT,
+                                                ViewerNavigation.NavigationRegion.RIGHT -> {
+                                                    if (viewer.activity.menuVisible) {
+                                                        viewer.activity.hideMenu()
+                                                    }
+                                                    viewer.moveToNext()
+                                                    true
                                                 }
-                                            }
-                                            launch {
-                                                animX.animateTo(0f, tween(250)) { offsetX = value }
+                                                ViewerNavigation.NavigationRegion.PREV,
+                                                ViewerNavigation.NavigationRegion.LEFT -> {
+                                                    if (viewer.activity.menuVisible) {
+                                                        viewer.activity.hideMenu()
+                                                    }
+                                                    viewer.moveToPrevious()
+                                                    true
+                                                }
+                                                ViewerNavigation.NavigationRegion.MENU -> false
                                             }
                                         } else {
-                                            val targetScale = 2.5f
-                                            val targetX =
-                                                ((size.width / 2f) - offset.x) * (targetScale - 1f)
-                                            val maxOffsetX = (size.width * (targetScale - 1f)) / 2f
-                                            val boundedX = targetX.coerceIn(-maxOffsetX, maxOffsetX)
+                                            false
+                                        }
 
-                                            val animScale = Animatable(scale)
-                                            val animX = Animatable(offsetX)
-                                            launch {
-                                                animScale.animateTo(targetScale, tween(250)) {
-                                                    scale = value
+                                    if (!isNavigationRegion) {
+                                        coroutineScope.launch {
+                                            if (scale > 1.05f || scale < 0.95f) {
+                                                val animScale = Animatable(scale)
+                                                val animX = Animatable(offsetX)
+                                                launch {
+                                                    animScale.animateTo(1f, tween(250)) {
+                                                        scale = value
+                                                    }
                                                 }
-                                            }
-                                            launch {
-                                                animX.animateTo(boundedX, tween(250)) {
-                                                    offsetX = value
+                                                launch {
+                                                    animX.animateTo(0f, tween(250)) {
+                                                        offsetX = value
+                                                    }
+                                                }
+                                            } else {
+                                                val targetScale = 2.5f
+                                                val targetX =
+                                                    ((size.width / 2f) - offset.x) *
+                                                        (targetScale - 1f)
+                                                val maxOffsetX =
+                                                    (size.width * (targetScale - 1f)) / 2f
+                                                val boundedX =
+                                                    targetX.coerceIn(-maxOffsetX, maxOffsetX)
+
+                                                val animScale = Animatable(scale)
+                                                val animX = Animatable(offsetX)
+                                                launch {
+                                                    animScale.animateTo(targetScale, tween(250)) {
+                                                        scale = value
+                                                    }
+                                                }
+                                                launch {
+                                                    animX.animateTo(boundedX, tween(250)) {
+                                                        offsetX = value
+                                                    }
                                                 }
                                             }
                                         }

@@ -136,31 +136,53 @@ class PagerPageHolder(
 
     private val gestureListener =
         object : GestureDetectorWithLongTap.Listener() {
+            private fun handleNavigation(ev: MotionEvent): Boolean {
+                if (width <= 0 || height <= 0) return false
+                val pos = PointF(ev.x / width.toFloat(), ev.y / height.toFloat())
+                val navigator = viewer.config.navigator
+                return when (navigator.getAction(pos)) {
+                    ViewerNavigation.NavigationRegion.NEXT -> {
+                        if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                        viewer.moveToNext()
+                        true
+                    }
+                    ViewerNavigation.NavigationRegion.PREV -> {
+                        if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                        viewer.moveToPrevious()
+                        true
+                    }
+                    ViewerNavigation.NavigationRegion.RIGHT -> {
+                        if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                        viewer.moveRight()
+                        true
+                    }
+                    ViewerNavigation.NavigationRegion.LEFT -> {
+                        if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                        viewer.moveLeft()
+                        true
+                    }
+                    ViewerNavigation.NavigationRegion.MENU -> false
+                }
+            }
+
+            override fun onSingleTapUp(ev: MotionEvent): Boolean {
+                return handleNavigation(ev)
+            }
+
+            override fun onDoubleTap(ev: MotionEvent): Boolean {
+                return handleNavigation(ev)
+            }
+
             override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
                 if (width > 0 && height > 0) {
                     val pos = PointF(ev.x / width.toFloat(), ev.y / height.toFloat())
                     val navigator = viewer.config.navigator
-                    when (navigator.getAction(pos)) {
-                        ViewerNavigation.NavigationRegion.MENU -> viewer.activity.toggleMenu()
-                        ViewerNavigation.NavigationRegion.NEXT -> {
-                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
-                            viewer.moveToNext()
-                        }
-                        ViewerNavigation.NavigationRegion.PREV -> {
-                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
-                            viewer.moveToPrevious()
-                        }
-                        ViewerNavigation.NavigationRegion.RIGHT -> {
-                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
-                            viewer.moveRight()
-                        }
-                        ViewerNavigation.NavigationRegion.LEFT -> {
-                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
-                            viewer.moveLeft()
-                        }
+                    if (navigator.getAction(pos) == ViewerNavigation.NavigationRegion.MENU) {
+                        viewer.activity.toggleMenu()
+                        return true
                     }
                 }
-                return true
+                return false
             }
 
             override fun onLongTapConfirmed(ev: MotionEvent) {

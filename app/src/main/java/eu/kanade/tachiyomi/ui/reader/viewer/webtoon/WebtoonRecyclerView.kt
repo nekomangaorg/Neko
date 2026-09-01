@@ -216,8 +216,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
 
     inner class GestureListener : GestureDetectorWithLongTap.Listener() {
 
-        override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
+        override fun onSingleTapUp(ev: MotionEvent): Boolean {
             tapListener?.invoke(ev)
+            return false
+        }
+
+        override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
             return false
         }
 
