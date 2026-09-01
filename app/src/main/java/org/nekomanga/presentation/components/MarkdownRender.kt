@@ -21,7 +21,6 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
 import com.mikepenz.markdown.compose.LocalBulletListHandler
@@ -44,6 +43,7 @@ import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.MarkdownTypography
 import com.mikepenz.markdown.model.NoOpImageTransformerImpl
 import com.mikepenz.markdown.model.markdownAnnotator
+import com.mikepenz.markdown.model.markdownPadding
 import com.mikepenz.markdown.model.rememberMarkdownState
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
@@ -79,7 +79,7 @@ fun MarkdownRender(
         annotator = annotator,
         colors = getMarkdownColors(),
         typography = getMarkdownTypography(),
-        padding = markdownPadding,
+        padding = getMarkdownPadding(),
         components = markdownComponents,
         imageTransformer =
             remember(loadImages) {
@@ -102,7 +102,7 @@ fun MarkdownRender(
         annotator = annotator,
         colors = getMarkdownColors(),
         typography = getMarkdownTypography(),
-        padding = markdownPadding,
+        padding = getMarkdownPadding(),
         components = markdownComponents,
         imageTransformer =
             remember(loadImages) {
@@ -158,24 +158,25 @@ private fun getMarkdownTypography(): MarkdownTypography {
     )
 }
 
-private val markdownPadding =
-    object : MarkdownPadding {
-        override val block: Dp = 2.dp
-        override val blockQuote: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
-        override val blockQuoteBar: PaddingValues.Absolute =
+@Composable
+private fun getMarkdownPadding(): MarkdownPadding =
+    markdownPadding(
+        block = 2.dp,
+        blockQuote = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+        blockQuoteBar =
             PaddingValues.Absolute(
                 left = 4.dp,
                 top = 2.dp,
                 right = 4.dp,
                 bottom = 2.dp,
-            )
-        override val blockQuoteText: PaddingValues = PaddingValues(vertical = 4.dp)
-        override val codeBlock: PaddingValues = PaddingValues(8.dp)
-        override val list: Dp = 0.dp
-        override val listIndent: Dp = 8.dp
-        override val listItemBottom: Dp = 0.dp
-        override val listItemTop: Dp = 0.dp
-    }
+            ),
+        blockQuoteText = PaddingValues(vertical = 4.dp),
+        codeBlock = PaddingValues(8.dp),
+        list = 0.dp,
+        listIndent = 8.dp,
+        listItemBottom = 0.dp,
+        listItemTop = 0.dp,
+    )
 
 private val markdownComponents =
     markdownComponents(
