@@ -334,7 +334,7 @@ fun ComposeWebtoonViewer(
                                 }
                             }
                         }
-                        .pointerInput(viewer, currentItems) {
+                        .pointerInput(viewer) {
                             detectTapGestures(
                                 onDoubleTap = { offset ->
                                     coroutineScope.launch {

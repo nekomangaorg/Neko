@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
 import com.mikepenz.markdown.compose.LocalBulletListHandler
 import com.mikepenz.markdown.compose.Markdown
@@ -160,21 +159,22 @@ private fun getMarkdownTypography(): MarkdownTypography {
 
 private val markdownPadding =
     object : MarkdownPadding {
-        override val block: Dp = 2.dp
-        override val blockQuote: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
+        override val block: Dp = Size.extraTiny
+        override val blockQuote: PaddingValues =
+            PaddingValues(horizontal = Size.medium, vertical = Size.none)
         override val blockQuoteBar: PaddingValues.Absolute =
             PaddingValues.Absolute(
-                left = 4.dp,
-                top = 2.dp,
-                right = 4.dp,
-                bottom = 2.dp,
+                left = Size.tiny,
+                top = Size.extraTiny,
+                right = Size.tiny,
+                bottom = Size.extraTiny,
             )
-        override val blockQuoteText: PaddingValues = PaddingValues(vertical = 4.dp)
-        override val codeBlock: PaddingValues = PaddingValues(8.dp)
-        override val list: Dp = 0.dp
-        override val listIndent: Dp = 8.dp
-        override val listItemBottom: Dp = 0.dp
-        override val listItemTop: Dp = 0.dp
+        override val blockQuoteText: PaddingValues = PaddingValues(vertical = Size.tiny)
+        override val codeBlock: PaddingValues = PaddingValues(Size.small)
+        override val list: Dp = Size.none
+        override val listIndent: Dp = Size.small
+        override val listItemBottom: Dp = Size.none
+        override val listItemTop: Dp = Size.none
     }
 
 private val markdownComponents =
