@@ -22,18 +22,15 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
 
     /** Moves to the next page. On a R2L pager the next page is the one at the left. */
     override fun moveToNext() {
-        val current = currentPagePosition
-        val item = adapter.joinedItems.getOrNull(current)
-        val unwrapped = if (item is Pair<*, *>) item.first else item
-        if (unwrapped is ChapterTransition.Next && unwrapped.to != null) {
-            activity.lifecycleScope.launch { activity.loadChapter(unwrapped.to.chapter) }
-            return
-        }
         moveLeft()
     }
 
     /** Moves to the previous page. On a R2L pager the previous page is the one at the right. */
     override fun moveToPrevious() {
+        moveRight()
+    }
+
+    override fun moveRight() {
         val current = currentPagePosition
         val item = adapter.joinedItems.getOrNull(current)
         val unwrapped = if (item is Pair<*, *>) item.first else item
@@ -41,7 +38,36 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
             activity.lifecycleScope.launch { activity.loadChapter(unwrapped.to.chapter) }
             return
         }
-        moveRight()
+        if (current < adapter.count - 1) {
+            hasMoved = true
+            requestedPagePosition = (current + 1) to true
+            val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
+            if (holder != null && config.navigateToPan && holder.canPanRight()) {
+                holder.panRight()
+            } else {
+                pager.setCurrentItem(current + 1, config.usePageTransitions)
+            }
+        }
+    }
+
+    override fun moveLeft() {
+        val current = currentPagePosition
+        val item = adapter.joinedItems.getOrNull(current)
+        val unwrapped = if (item is Pair<*, *>) item.first else item
+        if (unwrapped is ChapterTransition.Next && unwrapped.to != null) {
+            activity.lifecycleScope.launch { activity.loadChapter(unwrapped.to.chapter) }
+            return
+        }
+        if (current > 0) {
+            hasMoved = true
+            requestedPagePosition = (current - 1) to true
+            val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
+            if (holder != null && config.navigateToPan && holder.canPanLeft()) {
+                holder.panLeft()
+            } else {
+                pager.setCurrentItem(current - 1, config.usePageTransitions)
+            }
+        }
     }
 }
 
@@ -60,7 +86,7 @@ class VerticalPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
             activity.lifecycleScope.launch { activity.loadChapter(unwrapped.to.chapter) }
             return
         }
-        moveDown()
+        moveRight()
     }
 
     override fun moveToPrevious() {
@@ -71,6 +97,6 @@ class VerticalPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
             activity.lifecycleScope.launch { activity.loadChapter(unwrapped.to.chapter) }
             return
         }
-        moveUp()
+        moveLeft()
     }
 }

@@ -1,7 +1,7 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import android.graphics.PointF
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -51,17 +52,26 @@ fun ReaderTransitionPage(
     manga: MangaItem?,
     downloadManager: DownloadManager,
     onRetry: (ReaderChapter) -> Unit,
-    onTap: () -> Unit,
+    onTap: (PointF) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier =
             modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onTap,
-                )
+                .pointerInput(onTap) {
+                    detectTapGestures(
+                        onTap = { offset ->
+                            val screenWidth = size.width.toFloat()
+                            val screenHeight = size.height.toFloat()
+                            if (screenWidth > 0 && screenHeight > 0) {
+                                val pos = PointF(offset.x / screenWidth, offset.y / screenHeight)
+                                onTap(pos)
+                            } else {
+                                onTap(PointF(0.5f, 0.5f))
+                            }
+                        }
+                    )
+                }
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .padding(

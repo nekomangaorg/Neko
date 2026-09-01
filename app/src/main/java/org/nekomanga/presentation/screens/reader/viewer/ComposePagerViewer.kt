@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -367,7 +368,28 @@ private fun PagerItemContent(
                 manga = manga,
                 downloadManager = downloadManager,
                 onRetry = onRetryTransition,
-                onTap = { viewer.activity.toggleMenu() },
+                onTap = { pos ->
+                    val navigator = viewer.config.navigator
+                    when (navigator.getAction(pos)) {
+                        ViewerNavigation.NavigationRegion.MENU -> viewer.activity.toggleMenu()
+                        ViewerNavigation.NavigationRegion.NEXT -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveToNext()
+                        }
+                        ViewerNavigation.NavigationRegion.PREV -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveToPrevious()
+                        }
+                        ViewerNavigation.NavigationRegion.RIGHT -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveRight()
+                        }
+                        ViewerNavigation.NavigationRegion.LEFT -> {
+                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
+                            viewer.moveLeft()
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxSize(),
             )
         }
