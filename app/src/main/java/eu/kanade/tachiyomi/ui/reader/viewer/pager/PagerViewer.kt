@@ -452,12 +452,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     /** Moves to the page at the top (or previous). */
     protected open fun moveUp() {
-        moveLeft()
+        moveToPrevious()
     }
 
     /** Moves to the page at the bottom (or next). */
     protected open fun moveDown() {
-        moveRight()
+        moveToNext()
     }
 
     /**

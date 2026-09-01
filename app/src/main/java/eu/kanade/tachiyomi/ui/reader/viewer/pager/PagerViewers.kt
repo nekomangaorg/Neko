@@ -49,26 +49,4 @@ class VerticalPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
     override fun createPager(): Pager {
         return Pager(activity, isHorizontal = false)
     }
-
-    override fun moveToNext() {
-        val current = requestedPagePosition?.first ?: currentPagePosition
-        val item = adapter.joinedItems.getOrNull(current)
-        val unwrapped = if (item is Pair<*, *>) item.first else item
-        if (unwrapped is ChapterTransition.Next && unwrapped.to != null) {
-            triggerLoadChapter(unwrapped.to.chapter)
-            return
-        }
-        moveDown()
-    }
-
-    override fun moveToPrevious() {
-        val current = requestedPagePosition?.first ?: currentPagePosition
-        val item = adapter.joinedItems.getOrNull(current)
-        val unwrapped = if (item is Pair<*, *>) item.first else item
-        if (unwrapped is ChapterTransition.Prev && unwrapped.to != null) {
-            triggerLoadChapter(unwrapped.to.chapter)
-            return
-        }
-        moveUp()
-    }
 }
