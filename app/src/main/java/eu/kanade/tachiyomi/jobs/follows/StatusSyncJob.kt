@@ -18,16 +18,17 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
@@ -118,7 +119,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
             TimberKt.e(e) { "error syncing follows" }
             return@coroutineScope Result.failure()
         } finally {
-            launchIO {
+            withContext(NonCancellable + Dispatchers.IO) {
                 delay(3.seconds.inWholeMilliseconds)
                 context.notificationManager.cancel(Notifications.Id.Status.Progress)
                 context.notificationManager.cancel(Notifications.Id.Status.Complete)
@@ -135,9 +136,9 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
         )
     }
 
-    private fun completeNotificationToDex(total: Int) {
+    private suspend fun completeNotificationToDex(total: Int) {
         completeNotification(R.string.sync_follows_complete)
-        launchUI {
+        withUIContext {
             applicationContext.toast(
                 applicationContext.getString(R.string.push_favorites_to_mangadex_toast, total),
                 Toast.LENGTH_LONG,

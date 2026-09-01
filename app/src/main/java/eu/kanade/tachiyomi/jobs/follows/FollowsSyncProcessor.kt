@@ -16,6 +16,8 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
@@ -138,7 +140,7 @@ class FollowsSyncProcessor {
     /** Syncs Library manga to MangaDex as Reading and puts them on the follows list */
     suspend fun toMangaDex(
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
-        completeNotification: (total: Int) -> Unit,
+        completeNotification: suspend (total: Int) -> Unit,
         ids: String? = null,
     ) {
         withContext(Dispatchers.IO) {
@@ -153,6 +155,17 @@ class FollowsSyncProcessor {
                     ?.flatMap { chunk -> mangaRepository.getMangaByIds(chunk) }
                     ?.toList() ?: mangaRepository.getLibraryList()
 
+            val mangaIds = listManga.mapNotNull { it.id }
+            val mdListTracksByMangaId =
+                mangaIds
+                    .chunked(900)
+                    .map { chunk -> async { trackRepository.getTracksForMangaByIds(chunk) } }
+                    .awaitAll()
+                    .flatten()
+                    .filter { it.sync_id == TrackManager.MDLIST }
+                    .associateBy { it.manga_id }
+                    .toMutableMap()
+
             // only add if the current tracker is not set to reading
 
             listManga
@@ -161,16 +174,14 @@ class FollowsSyncProcessor {
                     updateNotification(manga.title, count.andIncrement, listManga.size)
 
                     // Get this manga's trackers from the database
-                    var mdListTrack =
-                        trackRepository.getTrackByMangaIdAndTrackServiceId(
-                            manga.id!!,
-                            TrackManager.MDLIST,
-                        )
+                    var mdListTrack = mdListTracksByMangaId[manga.id]
 
                     // create mdList if missing
                     if (mdListTrack == null) {
                         mdListTrack = trackManager.mdList.createInitialTracker(manga)
-                        trackRepository.insertTrack(mdListTrack)
+                        val insertedId = trackRepository.insertTrack(mdListTrack)
+                        mdListTrack.id = insertedId
+                        mdListTracksByMangaId[manga.id!!] = mdListTrack
                     }
 
                     if (mdListTrack.status == FollowStatus.UNFOLLOWED.int) {

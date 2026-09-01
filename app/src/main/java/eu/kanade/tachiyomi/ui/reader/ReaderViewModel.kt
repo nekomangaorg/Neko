@@ -65,7 +65,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
@@ -203,10 +202,10 @@ constructor(
     private val statusHandler: StatusHandler by injectLazy()
 
     private var hasTrackers: Boolean = false
-    private val checkTrackers: (Manga) -> Unit = { manga ->
-        val tracks = runBlocking { trackRepository.getTracksForManga(manga.id!!) }
 
-        hasTrackers = tracks.size > 0
+    private suspend fun checkTrackers(manga: Manga) {
+        val tracks = trackRepository.getTracksForManga(manga.id!!)
+        hasTrackers = tracks.isNotEmpty()
     }
 
     init {
@@ -1157,7 +1156,7 @@ constructor(
                 newChapterRead,
                 true,
                 onError = { service, message ->
-                    launchIO {
+                    viewModelScope.launchIO {
                         eventChannel.send(Event.ShareTrackingError(listOf(service to message)))
                     }
                 },
