@@ -2,15 +2,11 @@ package eu.kanade.tachiyomi.ui.reader.viewer
 
 import android.view.KeyEvent
 import android.view.MotionEvent
-import android.view.View
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 
 /** Interface for implementing a viewer. */
 interface BaseViewer {
-
-    /** Returns the view this viewer uses. */
-    fun getView(): View
 
     /** Destroys this viewer. Called when leaving the reader or swapping viewers. */
     fun destroy() {}

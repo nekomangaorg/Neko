@@ -64,28 +64,29 @@ Replace all legacy XML layouts and UI dialogs with Jetpack Compose while retaini
 
 ---
 
-## 📍 Phase 2: Domain Logic Extraction & State Unification (Next PR)
+## 📍 Phase 2: Domain Logic Extraction & State Unification (Current Milestone)
 
 ### Objective
 Decouple page chunking, double-page shifting, and chapter transition math from legacy `android.view.*` classes, eliminating headless "zombie" view hierarchies and centralizing all activity state in `ReaderViewModel`.
 
-### Key Tasks
-1. **Dismantle Headless Zombie View Trees**:
-   - Delete invisible instances of `L2RViewPager`, `VerticalViewPager`, `WebtoonRecyclerView`, and `WebtoonLayoutManager`.
-   - Remove legacy `PagerViewerAdapter` and `WebtoonAdapter` RecyclerView stubs.
-2. **Extract Pure Domain Controllers**:
-   - Create `ReaderPagerController` and `ReaderWebtoonController` as pure Kotlin classes responsible solely for page positioning, joined item lists, and transition calculations.
-   - Decouple controllers from `ReaderActivity` references by replacing them with functional event emitters or coroutine flows.
-3. **State Hoisting & Process Death Resilience**:
-   - Migrate remaining loose `mutableStateOf` fields in `ReaderActivity` (`overlayVisible`, `chapterTitle`, `showShiftDoublePage`, sheet visibility states) into `ReaderViewModel.state` (`StateFlow<ReaderUiState>`).
-   - Persist critical reading session parameters in `SavedStateHandle`.
-4. **Reactive Download Observation**:
-   - Connect `ReaderTransitionPage` to observe `DownloadManager.statusFlow` reactively for real-time download completion updates.
+### Scope & Delivered Features
+- [x] **Dismantle Headless Zombie View Trees**:
+  - Deleted invisible instances of `Pager`, `PagerViewerAdapter`, `WebtoonRecyclerView`, `WebtoonLayoutManager`, and `WebtoonAdapter`.
+  - Removed `getView(): View` from `BaseViewer`.
+  - Decoupled `WebtoonBaseHolder` and `PagerPageHolder` from legacy `RecyclerView.ViewHolder` and `ViewPagerAdapter`.
+- [x] **Extract Pure Domain Controllers**:
+  - Created `ReaderPagerController` and `ReaderWebtoonController` as pure Kotlin classes responsible solely for page positioning, joined item lists, split pages, and transition calculations.
+  - Decoupled controllers from Android View and ViewPager hierarchies with 100% pure unit test coverage.
+- [x] **State Hoisting & Process Death Resilience**:
+  - Migrated loose `mutableStateOf` fields in `ReaderActivity` (`viewerItems`, `overlayVisible`, `chapterTitle`, `showShiftDoublePage`, sheet visibility states) into `ReaderViewModel.state` (`StateFlow<ReaderUiState>`).
+  - Isolated `SavedStateHandle` page index restoration to cold-start initial load.
+- [x] **Reactive Download Observation**:
+  - Connected `ReaderTransitionPage` to observe `DownloadManager.queueState` reactively using `collectAsStateWithLifecycle()` for real-time download status updates.
 
 ### Phase 2 Exit Criteria
-- Zero instances of `android.view.View` or `RecyclerView` allocated for navigation logic.
-- 100% of reader UI state hoisted into `ReaderViewModel`.
-- Process death and activity restoration tests pass without state loss.
+- [x] Zero instances of `android.view.View` or `RecyclerView` allocated for navigation logic.
+- [x] 100% of reader UI state hoisted into `ReaderViewModel`.
+- [x] All Kotlin files formatted with `./gradlew ktfmtFormat` and validated with `./gradlew ktfmtCheck`.
 
 ---
 

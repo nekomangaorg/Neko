@@ -62,7 +62,7 @@ class ReaderUiItemTest {
     }
 
     @Test
-    fun `transitions between same chapters generate distinct keys for prev and next`() {
+    fun `transitions between same chapters generate symmetric keys across directions`() {
         val chapter1 = createReaderChapter(100L)
         val chapter2 = createReaderChapter(200L)
 
@@ -72,9 +72,31 @@ class ReaderUiItemTest {
         val prevItem = ReaderUiItem.Transition(prevTransition)
         val nextItem = ReaderUiItem.Transition(nextTransition)
 
-        assertEquals("pager_transition_prev_200_100", prevItem.key("pager"))
-        assertEquals("pager_transition_next_100_200", nextItem.key("pager"))
-        assertNotEquals(prevItem.key("pager"), nextItem.key("pager"))
+        assertEquals("pager_transition_100_200", prevItem.key("pager"))
+        assertEquals("pager_transition_100_200", nextItem.key("pager"))
+        assertEquals(prevItem.key("pager"), nextItem.key("pager"))
+    }
+
+    @Test
+    fun `reader ui items expose polymorphic chapterId and pageIndex`() {
+        val page = createReaderPage(chapterId = 102992L, index = 3)
+        val split = ReaderPageSplit(page = page, topOffset = 0, splitHeight = 1000)
+        val chapter1 = createReaderChapter(100L)
+        val chapter2 = createReaderChapter(200L)
+        val transition = ChapterTransition.Next(from = chapter1, to = chapter2)
+
+        val pageItem = ReaderUiItem.Page(page)
+        val splitItem = ReaderUiItem.SplitPage(split)
+        val transitionItem = ReaderUiItem.Transition(transition)
+
+        assertEquals(102992L, pageItem.chapterId)
+        assertEquals(3, pageItem.pageIndex)
+
+        assertEquals(102992L, splitItem.chapterId)
+        assertEquals(3, splitItem.pageIndex)
+
+        assertEquals(200L, transitionItem.chapterId)
+        assertEquals(null, transitionItem.pageIndex)
     }
 
     @Test

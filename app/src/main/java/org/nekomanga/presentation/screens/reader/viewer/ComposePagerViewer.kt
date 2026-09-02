@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.reader.viewer
 
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
@@ -57,7 +56,7 @@ fun ComposePagerViewer(
     modifier: Modifier = Modifier,
 ) {
     val currentChapterId =
-        (viewer.adapter.currentChapter
+        (viewer.currentChapter
                 ?: items
                     .firstOrNull { it is ReaderUiItem.Page }
                     ?.let { (it as ReaderUiItem.Page).page.chapter })
@@ -105,8 +104,8 @@ fun ComposePagerViewer(
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(currentChapterId) {
-            viewer.adapter.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
-            viewer.adapter.nextTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
+            viewer.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
+            viewer.nextTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
         }
 
         LaunchedEffect(items) {
@@ -127,7 +126,7 @@ fun ComposePagerViewer(
                                 activeItem.transition.from.chapter.id &&
                             item.transition.to?.chapter?.id == activeItem.transition.to?.chapter?.id
                     } else {
-                        item == activeItem
+                        false
                     }
                 }
                 if (newIndex != -1 && newIndex != pagerState.currentPage) {
@@ -145,62 +144,54 @@ fun ComposePagerViewer(
                 ReaderTheme.fromPreference(readerTheme).color(themeBackground)
             }
 
+        // Sync programmatic page changes (slider, TOC, etc.)
         LaunchedEffect(viewer.requestedPagePosition) {
             val req = viewer.requestedPagePosition ?: return@LaunchedEffect
-            try {
-                if (pagerState.pageCount > 0) {
-                    val target = req.first.coerceIn(0, pagerState.pageCount - 1)
-                    if (target != pagerState.currentPage) {
-                        val useAnimation = req.second && animatedTransitions
-                        if (useAnimation) {
-                            pagerState.animateScrollToPage(target)
-                        } else {
-                            pagerState.scrollToPage(target)
-                        }
+            val target = req.first
+            if (target in items.indices) {
+                if (pagerState.currentPage != target) {
+                    val useAnimation = req.second && animatedTransitions
+                    if (useAnimation) {
+                        pagerState.animateScrollToPage(target)
+                    } else {
+                        pagerState.scrollToPage(target)
                     }
                 }
-            } finally {
                 viewer.requestedPagePosition = null
             }
         }
 
-        LaunchedEffect(pagerState.interactionSource) {
-            pagerState.interactionSource.interactions.collect { interaction ->
-                if (interaction is DragInteraction.Start && viewer.activity.menuVisible) {
-                    viewer.activity.hideMenu()
-                }
-            }
-        }
-
+        // Track active page changes
         LaunchedEffect(pagerState, items) {
             snapshotFlow { pagerState.currentPage }
                 .distinctUntilChanged()
                 .collect { pageIndex ->
-                    viewer.onPageChange(pageIndex)
                     val item = items.getOrNull(pageIndex)
                     if (item != null) {
                         lastActiveItem = item
                         when (item) {
                             is ReaderUiItem.Page -> {
+                                onPageSelected(item.page, item.extraPage != null)
                                 val pages = item.page.chapter.pages
-                                if (
-                                    pages != null &&
-                                        item.page.chapter == viewer.adapter.currentChapter
-                                ) {
+                                if (pages != null && item.page.chapter == viewer.currentChapter) {
                                     if (pages.size - item.page.number < 5) {
-                                        viewer.adapter.nextTransition?.to?.let {
+                                        viewer.nextTransition?.to?.let {
                                             viewer.activity.requestPreloadChapter(it)
                                         }
                                     }
                                     if (item.page.number <= 5) {
-                                        viewer.adapter.prevTransition?.to?.let {
+                                        viewer.prevTransition?.to?.let {
                                             viewer.activity.requestPreloadChapter(it)
                                         }
                                     }
                                 }
                             }
-                            is ReaderUiItem.Transition -> Unit
-                            is ReaderUiItem.SplitPage -> Unit
+                            is ReaderUiItem.SplitPage -> {
+                                onPageSelected(item.page, false)
+                            }
+                            is ReaderUiItem.Transition -> {
+                                onTransitionSelected(item.transition)
+                            }
                         }
                     }
                 }

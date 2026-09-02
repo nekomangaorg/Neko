@@ -37,9 +37,11 @@ import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
@@ -209,18 +211,21 @@ constructor(
     }
 
     init {
+        var isInitialChapter = true
         state
             .map { it.viewerChapters?.currChapter }
             .distinctUntilChanged()
             .filterNotNull()
             .onEach { currentChapter ->
-                if (chapterPageIndex >= 0) {
-                    // Restore from SavedState
+                if (isInitialChapter && chapterPageIndex >= 0) {
+                    // Restore from SavedState on initial load
                     currentChapter.requestedPage = chapterPageIndex
+                    isInitialChapter = false
                 } else if (!currentChapter.chapter.read) {
                     currentChapter.requestedPage = currentChapter.chapter.last_page_read
                 }
                 chapterId = currentChapter.chapter.id!!
+                setChapterTitle(currentChapter.chapter.name)
             }
             .launchIn(viewModelScope)
     }
@@ -1226,6 +1231,62 @@ constructor(
         }
     }
 
+    fun setViewerItems(items: List<ReaderUiItem>) {
+        mutableState.update { it.copy(viewerItems = items) }
+    }
+
+    fun setChapterTitle(title: String) {
+        mutableState.update { it.copy(chapterTitle = title) }
+    }
+
+    fun setShiftDoublePageState(show: Boolean, iconRes: Int? = null) {
+        mutableState.update {
+            it.copy(showShiftDoublePage = show, shiftDoublePageIconRes = iconRes)
+        }
+    }
+
+    fun setSettingsSheetVisibility(visible: Boolean) {
+        mutableState.update { it.copy(settingsSheetVisible = visible) }
+    }
+
+    fun setChaptersSheetVisibility(visible: Boolean) {
+        mutableState.update { it.copy(chaptersSheetVisible = visible) }
+    }
+
+    fun setPageActionsPage(page: Pair<ReaderPage, ReaderPage?>?) {
+        mutableState.update { it.copy(pageActionsPage = page) }
+    }
+
+    fun setOverlayNavigation(
+        navigation: ViewerNavigation?,
+        visible: Boolean,
+        isLtr: Boolean,
+        invertMode: ViewerNavigation.TappingInvertMode,
+    ) {
+        mutableState.update {
+            it.copy(
+                overlayNavigation = navigation,
+                overlayVisible = visible,
+                overlayIsLtr = isLtr,
+                overlayInvertMode = invertMode,
+            )
+        }
+    }
+
+    fun setOverlayVisibility(visible: Boolean) {
+        mutableState.update { it.copy(overlayVisible = visible) }
+    }
+
+    fun setColorFilterOverlay(color: Int, mode: Int) {
+        mutableState.update {
+            it.copy(colorFilterOverlayColor = color, colorFilterOverlayMode = mode)
+        }
+    }
+
+    fun setBrightnessOverlayAlpha(alpha: Float) {
+        mutableState.update { it.copy(brightnessOverlayAlpha = alpha) }
+    }
+
     data class State(
         val manga: MangaItem? = null,
         val viewerChapters: ViewerChapters? = null,
@@ -1241,6 +1302,22 @@ constructor(
         val pageNumberVisible: Boolean = true,
         val isLoading: Boolean = false,
         val chapters: List<ReaderChapterItem> = emptyList(),
+        // Hoisted UI state from ReaderActivity
+        val viewerItems: List<ReaderUiItem> = emptyList(),
+        val chapterTitle: String = "",
+        val showShiftDoublePage: Boolean = false,
+        val shiftDoublePageIconRes: Int? = null,
+        val settingsSheetVisible: Boolean = false,
+        val chaptersSheetVisible: Boolean = false,
+        val pageActionsPage: Pair<ReaderPage, ReaderPage?>? = null,
+        val overlayNavigation: ViewerNavigation? = null,
+        val overlayVisible: Boolean = false,
+        val overlayIsLtr: Boolean = true,
+        val overlayInvertMode: ViewerNavigation.TappingInvertMode =
+            ViewerNavigation.TappingInvertMode.NONE,
+        val brightnessOverlayAlpha: Float = 0f,
+        val colorFilterOverlayColor: Int = 0,
+        val colorFilterOverlayMode: Int = 0,
     )
 
     sealed class Event {
