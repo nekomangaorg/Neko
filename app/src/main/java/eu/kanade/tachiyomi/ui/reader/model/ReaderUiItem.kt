@@ -65,39 +65,4 @@ sealed interface ReaderUiItem {
             return "${prefix}_transition_${minId}_${maxId}"
         }
     }
-
-    companion object {
-        /**
-         * Converts a legacy PagerViewerAdapter joined item (Pair<Any, Any?> or Any) to
-         * [ReaderUiItem].
-         */
-        fun fromPagerItem(item: Any): ReaderUiItem? {
-            return when (item) {
-                is Pair<*, *> -> {
-                    val first = item.first
-                    val second = item.second
-                    when (first) {
-                        is ReaderPage -> Page(first, second as? ReaderPage)
-                        is ChapterTransition -> Transition(first)
-                        else -> null
-                    }
-                }
-                is ReaderPage -> Page(item)
-                is ChapterTransition -> Transition(item)
-                is ReaderUiItem -> item
-                else -> null
-            }
-        }
-
-        /** Converts a legacy WebtoonAdapter item to [ReaderUiItem]. */
-        fun fromWebtoonItem(item: Any): ReaderUiItem? {
-            return when (item) {
-                is ReaderPage -> Page(item)
-                is ReaderPageSplit -> SplitPage(item)
-                is ChapterTransition -> Transition(item)
-                is ReaderUiItem -> item
-                else -> null
-            }
-        }
-    }
 }

@@ -38,7 +38,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
-import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
@@ -60,16 +59,16 @@ import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
-/** View of the ViewPager that contains a page of a chapter. */
+/** View that contains a page of a chapter. */
 @SuppressLint("ViewConstructor")
 class PagerPageHolder(
     val viewer: PagerViewer,
     val page: ReaderPage,
     private var extraPage: ReaderPage? = null,
-) : ReaderPageImageView(viewer.activity), ViewPagerAdapter.PositionableView {
+) : ReaderPageImageView(viewer.activity) {
 
-    /** Item that identifies this view. Needed by the adapter to not recreate views. */
-    override val item
+    /** Item that identifies this view. */
+    val item
         get() = page to extraPage
 
     /** Loading progress bar to indicate the current progress. */

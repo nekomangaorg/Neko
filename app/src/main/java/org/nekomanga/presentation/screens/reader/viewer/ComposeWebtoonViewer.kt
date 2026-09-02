@@ -76,7 +76,7 @@ fun ComposeWebtoonViewer(
     modifier: Modifier = Modifier,
 ) {
     val currentChapterId =
-        (viewer.adapter.currentChapter
+        (viewer.currentChapter
                 ?: items
                     .firstOrNull { it is ReaderUiItem.Page }
                     ?.let { (it as ReaderUiItem.Page).page.chapter })
@@ -119,8 +119,8 @@ fun ComposeWebtoonViewer(
         val currentItems by rememberUpdatedState(items)
 
         LaunchedEffect(currentChapterId) {
-            viewer.adapter.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
-            viewer.adapter.nextTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
+            viewer.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
+            viewer.nextTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
         }
 
         // Sync programmatic page jumps (slider, TOC, etc.)
@@ -187,16 +187,14 @@ fun ComposeWebtoonViewer(
                         is ReaderUiItem.Page -> {
                             onPageSelected(item.page)
                             val pages = item.page.chapter.pages
-                            if (
-                                pages != null && item.page.chapter == viewer.adapter.currentChapter
-                            ) {
+                            if (pages != null && item.page.chapter == viewer.currentChapter) {
                                 if (pages.size - item.page.number < 5) {
-                                    viewer.adapter.nextTransition?.to?.let {
+                                    viewer.nextTransition?.to?.let {
                                         viewer.activity.requestPreloadChapter(it)
                                     }
                                 }
                                 if (item.page.number <= 5) {
-                                    viewer.adapter.prevTransition?.to?.let {
+                                    viewer.prevTransition?.to?.let {
                                         viewer.activity.requestPreloadChapter(it)
                                     }
                                 }

@@ -1303,13 +1303,11 @@ class ReaderActivity : BaseMainActivity() {
                     setDoublePageMode(newViewer)
                 }
                 lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
-                pagedViewerItems =
-                    newViewer.adapter.joinedItems.mapNotNull { ReaderUiItem.fromPagerItem(it) }
+                pagedViewerItems = newViewer.items
                 webtoonViewerItems = emptyList()
             } else if (newViewer is WebtoonViewer) {
                 pagedViewerItems = emptyList()
-                webtoonViewerItems =
-                    newViewer.adapter.items.mapNotNull { ReaderUiItem.fromWebtoonItem(it) }
+                webtoonViewerItems = newViewer.items
             } else {
                 pagedViewerItems = emptyList()
                 webtoonViewerItems = emptyList()
@@ -1341,17 +1339,11 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     fun updatePagedViewerItems() {
-        (viewer as? PagerViewer)?.let { pViewer ->
-            pagedViewerItems =
-                pViewer.adapter.joinedItems.mapNotNull { item -> ReaderUiItem.fromPagerItem(item) }
-        }
+        (viewer as? PagerViewer)?.let { pViewer -> pagedViewerItems = pViewer.items }
     }
 
     fun updateWebtoonViewerItems() {
-        (viewer as? WebtoonViewer)?.let { wViewer ->
-            webtoonViewerItems =
-                wViewer.adapter.items.mapNotNull { item -> ReaderUiItem.fromWebtoonItem(item) }
-        }
+        (viewer as? WebtoonViewer)?.let { wViewer -> webtoonViewerItems = wViewer.items }
     }
 
     fun reloadChapters(doublePages: Boolean, force: Boolean = false) {

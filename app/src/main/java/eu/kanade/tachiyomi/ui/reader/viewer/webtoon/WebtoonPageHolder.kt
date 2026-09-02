@@ -360,7 +360,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         }
 
         if (insertPages.isNotEmpty()) {
-            withContext(Dispatchers.Main) { viewer.adapter.notifyPageSplit(page!!, insertPages) }
+            withContext(Dispatchers.Main) { viewer.splitPage(page!!, insertPages) }
             regionTop = 0
             regionHeight = optimalSplitHeight
         }

@@ -3,10 +3,8 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup.LayoutParams
-import androidx.recyclerview.widget.RecyclerView
 
-abstract class WebtoonBaseHolder(view: View, protected val viewer: WebtoonViewer) :
-    RecyclerView.ViewHolder(view) {
+abstract class WebtoonBaseHolder(val itemView: View, protected val viewer: WebtoonViewer) {
 
     /** Context getter because it's used often. */
     val context: Context
