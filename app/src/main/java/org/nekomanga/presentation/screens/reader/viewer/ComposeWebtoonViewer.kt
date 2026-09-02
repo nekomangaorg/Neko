@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -117,6 +118,141 @@ fun ComposeWebtoonViewer(
             }
 
         val currentItems by rememberUpdatedState(items)
+        var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
+        var prevItems by remember { mutableStateOf(items) }
+
+        LaunchedEffect(items) {
+            val oldItems = prevItems
+            prevItems = items
+            if (oldItems.isNotEmpty() && items.isNotEmpty() && oldItems != items) {
+                if (viewer.requestedPagePosition == null) {
+                    val oldFirstIndex = lazyListState.firstVisibleItemIndex
+                    val oldFirstItem = oldItems.getOrNull(oldFirstIndex)
+                    val oldFirstKey = oldFirstItem?.key("webtoon")
+
+                    val newIndexForOldFirst =
+                        if (oldFirstKey != null) {
+                            items.indexOfFirst { it.key("webtoon") == oldFirstKey }
+                        } else -1
+
+                    if (newIndexForOldFirst == -1) {
+                        // The item previously at firstVisibleItemIndex was removed from the new
+                        // items list.
+                        // Compose LazyList would otherwise keep the stale numeric index (e.g. index
+                        // 20,
+                        // which might now be page 18 of the next chapter instead of page 1).
+                        // Find the appropriate item in the new list to anchor to.
+
+                        // 1. First check if any other visible item in the viewport is present in
+                        // the new items
+                        val visibleInfos = lazyListState.layoutInfo.visibleItemsInfo
+                        var targetIndex = -1
+                        var targetOffset = 0
+
+                        for (info in visibleInfos) {
+                            val visibleItem = oldItems.getOrNull(info.index) ?: continue
+                            val visibleKey = visibleItem.key("webtoon")
+                            val idx = items.indexOfFirst { it.key("webtoon") == visibleKey }
+                            if (idx != -1) {
+                                targetIndex = idx
+                                targetOffset = if (info.offset < 0) -info.offset else 0
+                                break
+                            }
+                        }
+
+                        // 2. Fallback to the activeItem or oldFirstItem if no visible item matched
+                        if (targetIndex == -1) {
+                            val anchorItem = lastActiveItem ?: oldFirstItem
+                            when (anchorItem) {
+                                is ReaderUiItem.Transition -> {
+                                    val trans = anchorItem.transition
+                                    if (trans is ChapterTransition.Next && trans.to != null) {
+                                        // Transitioning forward to next chapter -> target first
+                                        // page of next chapter
+                                        targetIndex = items.indexOfFirst {
+                                            (it as? ReaderUiItem.Page)
+                                                ?.page
+                                                ?.chapter
+                                                ?.chapter
+                                                ?.id == trans.to.chapter.id ||
+                                                (it as? ReaderUiItem.SplitPage)
+                                                    ?.page
+                                                    ?.chapter
+                                                    ?.chapter
+                                                    ?.id == trans.to.chapter.id
+                                        }
+                                    } else if (
+                                        trans is ChapterTransition.Prev && trans.to != null
+                                    ) {
+                                        // Transitioning backward to prev chapter -> target last
+                                        // page of prev chapter
+                                        targetIndex = items.indexOfLast {
+                                            (it as? ReaderUiItem.Page)
+                                                ?.page
+                                                ?.chapter
+                                                ?.chapter
+                                                ?.id == trans.to.chapter.id ||
+                                                (it as? ReaderUiItem.SplitPage)
+                                                    ?.page
+                                                    ?.chapter
+                                                    ?.chapter
+                                                    ?.id == trans.to.chapter.id
+                                        }
+                                    }
+                                }
+                                is ReaderUiItem.Page -> {
+                                    val targetChapterId = anchorItem.page.chapter.chapter.id
+                                    val pageIndex = anchorItem.page.index
+                                    // Try matching same page index in same chapter
+                                    targetIndex = items.indexOfFirst {
+                                        (it as? ReaderUiItem.Page)?.page?.let { p ->
+                                            p.chapter.chapter.id == targetChapterId &&
+                                                p.index == pageIndex
+                                        } == true
+                                    }
+                                    if (targetIndex == -1) {
+                                        targetIndex = items.indexOfFirst {
+                                            (it as? ReaderUiItem.Page)
+                                                ?.page
+                                                ?.chapter
+                                                ?.chapter
+                                                ?.id == targetChapterId
+                                        }
+                                    }
+                                }
+                                is ReaderUiItem.SplitPage -> {
+                                    val targetChapterId = anchorItem.page.chapter.chapter.id
+                                    targetIndex = items.indexOfFirst {
+                                        (it as? ReaderUiItem.Page)?.page?.chapter?.chapter?.id ==
+                                            targetChapterId ||
+                                            (it as? ReaderUiItem.SplitPage)
+                                                ?.page
+                                                ?.chapter
+                                                ?.chapter
+                                                ?.id == targetChapterId
+                                    }
+                                }
+                                null -> {}
+                            }
+                        }
+
+                        // 3. Fallback to the first page of the current chapter
+                        if (targetIndex == -1 && currentChapterId != null) {
+                            targetIndex = items.indexOfFirst {
+                                (it as? ReaderUiItem.Page)?.page?.chapter?.chapter?.id ==
+                                    currentChapterId ||
+                                    (it as? ReaderUiItem.SplitPage)?.page?.chapter?.chapter?.id ==
+                                        currentChapterId
+                            }
+                        }
+
+                        if (targetIndex != -1 && targetIndex in items.indices) {
+                            lazyListState.scrollToItem(targetIndex, targetOffset)
+                        }
+                    }
+                }
+            }
+        }
 
         LaunchedEffect(currentChapterId) {
             viewer.adapter.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
@@ -183,6 +319,7 @@ fun ComposeWebtoonViewer(
                 .filterNotNull()
                 .distinctUntilChanged()
                 .collect { item ->
+                    lastActiveItem = item
                     when (item) {
                         is ReaderUiItem.Page -> {
                             onPageSelected(item.page)

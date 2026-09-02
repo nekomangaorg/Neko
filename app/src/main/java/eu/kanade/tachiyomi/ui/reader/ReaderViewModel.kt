@@ -209,14 +209,16 @@ constructor(
     }
 
     init {
+        var isInitialChapter = true
         state
             .map { it.viewerChapters?.currChapter }
             .distinctUntilChanged()
             .filterNotNull()
             .onEach { currentChapter ->
-                if (chapterPageIndex >= 0) {
-                    // Restore from SavedState
+                if (isInitialChapter && chapterPageIndex >= 0) {
+                    // Restore from SavedState on initial load
                     currentChapter.requestedPage = chapterPageIndex
+                    isInitialChapter = false
                 } else if (!currentChapter.chapter.read) {
                     currentChapter.requestedPage = currentChapter.chapter.last_page_read
                 }
@@ -444,6 +446,8 @@ constructor(
 
         flushReadTimer()
         restartReadTimer()
+
+        chapterPageIndex = -1
 
         withIOContext {
             try {
