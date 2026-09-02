@@ -83,7 +83,6 @@ import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
@@ -263,14 +262,6 @@ class ReaderActivity : BaseMainActivity() {
         get() = viewModel.state.value.colorFilterOverlayMode
         set(value) = viewModel.setColorFilterOverlay(colorFilterOverlayColor, value)
 
-    var pagedViewerItems: List<ReaderUiItem>
-        get() = viewModel.state.value.viewerItems
-        set(value) = viewModel.setViewerItems(value)
-
-    var webtoonViewerItems: List<ReaderUiItem>
-        get() = viewModel.state.value.viewerItems
-        set(value) = viewModel.setViewerItems(value)
-
     val scope = lifecycleScope
 
     /** Viewer used to display the pages (pager, webtoon, ...). */
@@ -376,10 +367,18 @@ class ReaderActivity : BaseMainActivity() {
                 Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
                     // Native Compose Viewers
                     val currentViewer = viewer
-                    if (currentViewer is PagerViewer && state.viewerItems.isNotEmpty()) {
+                    val items =
+                        state.viewerItems.ifEmpty {
+                            when (currentViewer) {
+                                is PagerViewer -> currentViewer.items
+                                is WebtoonViewer -> currentViewer.items
+                                else -> emptyList()
+                            }
+                        }
+                    if (currentViewer is PagerViewer && items.isNotEmpty()) {
                         ComposePagerViewer(
                             viewer = currentViewer,
-                            items = state.viewerItems,
+                            items = items,
                             isRtl = currentViewer is R2LPagerViewer,
                             isVertical = currentViewer is VerticalPagerViewer,
                             manga = viewModel.manga,
@@ -393,10 +392,10 @@ class ReaderActivity : BaseMainActivity() {
                             onRetryTransition = { chapter -> requestPreloadChapter(chapter) },
                             modifier = Modifier.fillMaxSize(),
                         )
-                    } else if (currentViewer is WebtoonViewer && state.viewerItems.isNotEmpty()) {
+                    } else if (currentViewer is WebtoonViewer && items.isNotEmpty()) {
                         ComposeWebtoonViewer(
                             viewer = currentViewer,
-                            items = state.viewerItems,
+                            items = items,
                             manga = viewModel.manga,
                             downloadManager = Injekt.get<DownloadManager>(),
                             onPageSelected = { page -> onPageSelected(page, false) },
@@ -1370,14 +1369,11 @@ class ReaderActivity : BaseMainActivity() {
                     setDoublePageMode(newViewer)
                 }
                 lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
-                pagedViewerItems = newViewer.items
-                webtoonViewerItems = emptyList()
+                viewModel.setViewerItems(newViewer.items)
             } else if (newViewer is WebtoonViewer) {
-                pagedViewerItems = emptyList()
-                webtoonViewerItems = newViewer.items
+                viewModel.setViewerItems(newViewer.items)
             } else {
-                pagedViewerItems = emptyList()
-                webtoonViewerItems = emptyList()
+                viewModel.setViewerItems(emptyList())
             }
         }
 
@@ -1406,11 +1402,11 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     fun updatePagedViewerItems() {
-        (viewer as? PagerViewer)?.let { pViewer -> pagedViewerItems = pViewer.items }
+        (viewer as? PagerViewer)?.let { pViewer -> viewModel.setViewerItems(pViewer.items) }
     }
 
     fun updateWebtoonViewerItems() {
-        (viewer as? WebtoonViewer)?.let { wViewer -> webtoonViewerItems = wViewer.items }
+        (viewer as? WebtoonViewer)?.let { wViewer -> viewModel.setViewerItems(wViewer.items) }
     }
 
     fun reloadChapters(doublePages: Boolean, force: Boolean = false) {
@@ -1471,9 +1467,7 @@ class ReaderActivity : BaseMainActivity() {
         viewer?.setChapters(viewerChapters)
         if (viewer is PagerViewer) {
             updatePagedViewerItems()
-            webtoonViewerItems = emptyList()
         } else if (viewer is WebtoonViewer) {
-            pagedViewerItems = emptyList()
             updateWebtoonViewerItems()
         }
         intentPageNumber?.let { moveToPageIndex(it) }
