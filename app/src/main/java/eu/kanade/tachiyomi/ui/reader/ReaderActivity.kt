@@ -190,21 +190,86 @@ class ReaderActivity : BaseMainActivity() {
 
     val viewModel by viewModels<ReaderViewModel>()
 
-    var overlayNavigation by mutableStateOf<ViewerNavigation?>(null)
-    var overlayVisible by mutableStateOf(false)
-    var overlayIsLtr by mutableStateOf(true)
-    var overlayInvertMode by mutableStateOf(ViewerNavigation.TappingInvertMode.NONE)
-    var chapterTitle by mutableStateOf("")
-    var showShiftDoublePage by mutableStateOf(false)
-    var shiftDoublePageIconRes by mutableStateOf<Int?>(null)
-    var settingsSheetVisible by mutableStateOf(false)
-    var chaptersSheetVisible by mutableStateOf(false)
-    var pageActionsPage by mutableStateOf<Pair<ReaderPage, ReaderPage?>?>(null)
-    var brightnessOverlayAlpha by mutableStateOf(0f)
-    var colorFilterOverlayColor by mutableStateOf(0)
-    var colorFilterOverlayMode by mutableStateOf(0)
-    var pagedViewerItems by mutableStateOf<List<ReaderUiItem>>(emptyList())
-    var webtoonViewerItems by mutableStateOf<List<ReaderUiItem>>(emptyList())
+    var overlayNavigation: ViewerNavigation?
+        get() = viewModel.state.value.overlayNavigation
+        set(value) {
+            viewModel.setOverlayNavigation(
+                value,
+                overlayVisible,
+                overlayIsLtr,
+                overlayInvertMode,
+            )
+        }
+
+    var overlayVisible: Boolean
+        get() = viewModel.state.value.overlayVisible
+        set(value) = viewModel.setOverlayVisibility(value)
+
+    var overlayIsLtr: Boolean
+        get() = viewModel.state.value.overlayIsLtr
+        set(value) {
+            viewModel.setOverlayNavigation(
+                overlayNavigation,
+                overlayVisible,
+                value,
+                overlayInvertMode,
+            )
+        }
+
+    var overlayInvertMode: ViewerNavigation.TappingInvertMode
+        get() = viewModel.state.value.overlayInvertMode
+        set(value) {
+            viewModel.setOverlayNavigation(
+                overlayNavigation,
+                overlayVisible,
+                overlayIsLtr,
+                value,
+            )
+        }
+
+    var chapterTitle: String
+        get() = viewModel.state.value.chapterTitle
+        set(value) = viewModel.setChapterTitle(value)
+
+    var showShiftDoublePage: Boolean
+        get() = viewModel.state.value.showShiftDoublePage
+        set(value) = viewModel.setShiftDoublePageState(value, shiftDoublePageIconRes)
+
+    var shiftDoublePageIconRes: Int?
+        get() = viewModel.state.value.shiftDoublePageIconRes
+        set(value) = viewModel.setShiftDoublePageState(showShiftDoublePage, value)
+
+    var settingsSheetVisible: Boolean
+        get() = viewModel.state.value.settingsSheetVisible
+        set(value) = viewModel.setSettingsSheetVisibility(value)
+
+    var chaptersSheetVisible: Boolean
+        get() = viewModel.state.value.chaptersSheetVisible
+        set(value) = viewModel.setChaptersSheetVisibility(value)
+
+    var pageActionsPage: Pair<ReaderPage, ReaderPage?>?
+        get() = viewModel.state.value.pageActionsPage
+        set(value) = viewModel.setPageActionsPage(value)
+
+    var brightnessOverlayAlpha: Float
+        get() = viewModel.state.value.brightnessOverlayAlpha
+        set(value) = viewModel.setBrightnessOverlayAlpha(value)
+
+    var colorFilterOverlayColor: Int
+        get() = viewModel.state.value.colorFilterOverlayColor
+        set(value) = viewModel.setColorFilterOverlay(value, colorFilterOverlayMode)
+
+    var colorFilterOverlayMode: Int
+        get() = viewModel.state.value.colorFilterOverlayMode
+        set(value) = viewModel.setColorFilterOverlay(colorFilterOverlayColor, value)
+
+    var pagedViewerItems: List<ReaderUiItem>
+        get() = viewModel.state.value.viewerItems
+        set(value) = viewModel.setViewerItems(value)
+
+    var webtoonViewerItems: List<ReaderUiItem>
+        get() = viewModel.state.value.viewerItems
+        set(value) = viewModel.setViewerItems(value)
 
     val scope = lifecycleScope
 
@@ -311,10 +376,10 @@ class ReaderActivity : BaseMainActivity() {
                 Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
                     // Native Compose Viewers
                     val currentViewer = viewer
-                    if (currentViewer is PagerViewer && pagedViewerItems.isNotEmpty()) {
+                    if (currentViewer is PagerViewer && state.viewerItems.isNotEmpty()) {
                         ComposePagerViewer(
                             viewer = currentViewer,
-                            items = pagedViewerItems,
+                            items = state.viewerItems,
                             isRtl = currentViewer is R2LPagerViewer,
                             isVertical = currentViewer is VerticalPagerViewer,
                             manga = viewModel.manga,
@@ -328,10 +393,10 @@ class ReaderActivity : BaseMainActivity() {
                             onRetryTransition = { chapter -> requestPreloadChapter(chapter) },
                             modifier = Modifier.fillMaxSize(),
                         )
-                    } else if (currentViewer is WebtoonViewer && webtoonViewerItems.isNotEmpty()) {
+                    } else if (currentViewer is WebtoonViewer && state.viewerItems.isNotEmpty()) {
                         ComposeWebtoonViewer(
                             viewer = currentViewer,
-                            items = webtoonViewerItems,
+                            items = state.viewerItems,
                             manga = viewModel.manga,
                             downloadManager = Injekt.get<DownloadManager>(),
                             onPageSelected = { page -> onPageSelected(page, false) },
@@ -344,17 +409,17 @@ class ReaderActivity : BaseMainActivity() {
                     }
 
                     // Color Filter Overlay
-                    if (colorFilterOverlayColor != 0) {
+                    if (state.colorFilterOverlayColor != 0) {
                         Box(
                             modifier =
                                 Modifier.fillMaxSize().drawWithContent {
                                     drawRect(
                                         color =
                                             androidx.compose.ui.graphics.Color(
-                                                colorFilterOverlayColor
+                                                state.colorFilterOverlayColor
                                             ),
                                         blendMode =
-                                            when (colorFilterOverlayMode) {
+                                            when (state.colorFilterOverlayMode) {
                                                 1 -> BlendMode.Multiply
                                                 2 -> BlendMode.Screen
                                                 3 -> BlendMode.Overlay
@@ -368,23 +433,23 @@ class ReaderActivity : BaseMainActivity() {
                     }
 
                     // Brightness Overlay
-                    if (brightnessOverlayAlpha > 0f) {
+                    if (state.brightnessOverlayAlpha > 0f) {
                         Box(
                             modifier =
                                 Modifier.fillMaxSize()
                                     .background(
                                         androidx.compose.ui.graphics.Color.Black.copy(
-                                            alpha = brightnessOverlayAlpha
+                                            alpha = state.brightnessOverlayAlpha
                                         )
                                     )
                         )
                     }
 
                     GestureNavigationOverlay(
-                        navigation = overlayNavigation,
-                        isLtr = overlayIsLtr,
-                        invertMode = overlayInvertMode,
-                        visible = overlayVisible,
+                        navigation = state.overlayNavigation,
+                        isLtr = state.overlayIsLtr,
+                        invertMode = state.overlayInvertMode,
+                        visible = state.overlayVisible,
                         onDismiss = { overlayVisible = false },
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -393,10 +458,10 @@ class ReaderActivity : BaseMainActivity() {
                             state.manga?.userTitle?.takeIf { it.isNotBlank() }
                                 ?: state.manga?.title
                                 ?: "",
-                        subtitle = chapterTitle,
+                        subtitle = state.chapterTitle,
                         onBack = { finish() },
-                        showShiftDoublePage = showShiftDoublePage,
-                        shiftDoublePageIconRes = shiftDoublePageIconRes,
+                        showShiftDoublePage = state.showShiftDoublePage,
+                        shiftDoublePageIconRes = state.shiftDoublePageIconRes,
                         onShiftDoublePage = { shiftDoublePages() },
                         visible = state.menuVisible || state.menuStickyVisible,
                         onMangaClick = {
@@ -523,7 +588,9 @@ class ReaderActivity : BaseMainActivity() {
                         onSkipPrevious = { loadAdjacentChapter(false) },
                         onSkipNext = { loadAdjacentChapter(true) },
                         visible =
-                            state.menuVisible && !chaptersSheetVisible && !settingsSheetVisible,
+                            state.menuVisible &&
+                                !state.chaptersSheetVisible &&
+                                !state.settingsSheetVisible,
                         isLoading = state.isLoadingAdjacentChapter,
                         pageNumberVisible = state.pageNumberVisible,
                         isChaptersVisible = isChaptersVisible,
@@ -560,7 +627,7 @@ class ReaderActivity : BaseMainActivity() {
                         },
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
-                    if (settingsSheetVisible) {
+                    if (state.settingsSheetVisible) {
                         ModalBottomSheet(
                             onDismissRequest = {
                                 settingsSheetVisible = false
@@ -601,7 +668,7 @@ class ReaderActivity : BaseMainActivity() {
                             )
                         }
                     }
-                    if (chaptersSheetVisible) {
+                    if (state.chaptersSheetVisible) {
                         ModalBottomSheet(
                             onDismissRequest = {
                                 chaptersSheetVisible = false
@@ -611,8 +678,8 @@ class ReaderActivity : BaseMainActivity() {
                                 rememberModalBottomSheetState(skipPartiallyExpanded = true),
                         ) {
                             // Load chapters when visible
-                            LaunchedEffect(chaptersSheetVisible) {
-                                if (chaptersSheetVisible) {
+                            LaunchedEffect(state.chaptersSheetVisible) {
+                                if (state.chaptersSheetVisible) {
                                     viewModel.getChapters()
                                 }
                             }
@@ -682,8 +749,8 @@ class ReaderActivity : BaseMainActivity() {
                             )
                         }
                     }
-                    if (pageActionsPage != null) {
-                        val pages = pageActionsPage
+                    if (state.pageActionsPage != null) {
+                        val pages = state.pageActionsPage
                         val page = pages?.first
                         val extraPage = pages?.second
                         if (page != null) {
