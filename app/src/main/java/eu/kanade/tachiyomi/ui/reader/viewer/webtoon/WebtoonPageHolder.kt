@@ -24,6 +24,7 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
+import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -68,9 +69,9 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
     /** Error layout to show when the image fails to decode. */
     private var decodeErrorLayout: ViewGroup? = null
 
-    /** Getter to retrieve the height of the recycler view. */
+    /** Getter to retrieve the height of the screen / container. */
     private val parentHeight
-        get() = viewer.recycler.height
+        get() = viewer.activity.resources.displayMetrics.heightPixels
 
     /** Page of a chapter. */
     private var page: ReaderPage? = null
@@ -320,17 +321,17 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
         val imageBytes = stream.readByteArray()
 
-        if (viewer.adapter.tallSplitPages.contains(page)) {
+        if (viewer.controller.tallSplitPages.contains(page)) {
             val firstSplit =
-                viewer.adapter.items.filterIsInstance<ReaderPageSplit>().firstOrNull {
-                    it.page == page
+                viewer.items.filterIsInstance<ReaderUiItem.SplitPage>().firstOrNull {
+                    it.split.page == page
                 }
             if (firstSplit != null) {
                 regionTop = 0
-                regionHeight = firstSplit.topOffset
+                regionHeight = firstSplit.split.topOffset
                 return decodeRegion(imageBytes, 0, regionHeight)
             }
-            viewer.adapter.tallSplitPages.remove(page)
+            viewer.controller.tallSplitPages.remove(page)
         }
 
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
@@ -344,7 +345,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         }
 
         val screenHeight = Resources.getSystem().displayMetrics.heightPixels
-        val displayMaxHeight = maxOf(viewer.recycler.height, screenHeight) * 2
+        val displayMaxHeight = screenHeight * 2
         if (options.outHeight <= displayMaxHeight) {
             return Buffer().write(imageBytes)
         }

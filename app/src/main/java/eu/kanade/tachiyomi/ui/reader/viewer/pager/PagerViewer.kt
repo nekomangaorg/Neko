@@ -126,6 +126,20 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         }
     }
 
+    fun setChaptersDoubleShift(chapters: ViewerChapters) {
+        setChapters(chapters)
+    }
+
+    fun splitDoublePages(page: ReaderPage) {
+        activity.viewModel.state.value.viewerChapters?.let { setChapters(it) }
+    }
+
+    fun hideMenuIfVisible(item: Any? = null) {
+        if (activity.menuVisible) {
+            activity.hideMenu()
+        }
+    }
+
     /** Tells this viewer to move to the given [page]. */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
         TimberKt.d { "moveToPage ${page.number}" }
