@@ -9,10 +9,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonPageHolder
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
@@ -36,8 +37,24 @@ fun WebtoonPageItem(
     val invertDoublePages by readerPreferences.webtoonInvertDoublePages().collectAsState()
     val readerTheme by readerPreferences.readerTheme().collectAsState()
 
+    val itemKey =
+        when (item) {
+            is ReaderPage -> "page_${item.chapter.chapter.id}_${item.index}"
+            is ReaderPageSplit ->
+                "split_${item.page.chapter.chapter.id}_${item.page.index}_${item.topOffset}"
+            else -> item.toString()
+        }
+
     val pageHolder =
-        remember(item, webtoonPageLayout, invertDoublePages, readerTheme) {
+        remember(
+            itemKey,
+            webtoonPageLayout,
+            invertDoublePages,
+            readerTheme,
+            cropBordersWebtoon,
+            cropBorders,
+            sidePadding,
+        ) {
             val imageView =
                 ReaderPageImageView(viewer.activity, isWebtoon = true).apply {
                     layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
@@ -47,22 +64,11 @@ fun WebtoonPageItem(
 
     DisposableEffect(pageHolder) { onDispose { pageHolder.recycle() } }
 
-    key(pageHolder) {
-        Box(modifier = modifier.fillMaxWidth().heightIn(min = Size.extraLarge * 10)) {
-            AndroidView(
-                factory = { pageHolder.itemView },
-                update = { holder ->
-                    // Trigger layout & config update when observed preferences change
-                    if (
-                        sidePadding >= 0 &&
-                            (cropBordersWebtoon || !cropBordersWebtoon) &&
-                            (cropBorders || !cropBorders)
-                    ) {
-                        pageHolder.updateImageProperties()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+    Box(modifier = modifier.fillMaxWidth().heightIn(min = Size.extraLarge * 10)) {
+        AndroidView(
+            factory = { pageHolder.itemView },
+            update = {},
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }

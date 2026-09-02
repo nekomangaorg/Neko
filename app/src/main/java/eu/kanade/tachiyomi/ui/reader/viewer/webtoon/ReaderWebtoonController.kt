@@ -45,17 +45,7 @@ class ReaderWebtoonController {
         if (chapters.prevChapter != null) {
             val prevPages = chapters.prevChapter.pages
             if (prevPages != null) {
-                var accumulatedHeight = 0
-                var pagesToTake = 0
-                for (page in prevPages.reversed()) {
-                    if (page.renderedHeight > 0) {
-                        accumulatedHeight += page.renderedHeight
-                        pagesToTake++
-                        if (screenHeight > 0 && accumulatedHeight >= screenHeight) break
-                    }
-                }
-                val takeCount = maxOf(2, pagesToTake)
-                newItems.addAll(prevPages.takeLast(takeCount).map { ReaderUiItem.Page(it) })
+                newItems.addAll(prevPages.map { ReaderUiItem.Page(it) })
             }
         }
 
@@ -94,7 +84,7 @@ class ReaderWebtoonController {
         if (chapters.nextChapter != null) {
             val nextPages = chapters.nextChapter.pages
             if (nextPages != null) {
-                newItems.addAll(nextPages.take(2).map { ReaderUiItem.Page(it) })
+                newItems.addAll(nextPages.map { ReaderUiItem.Page(it) })
             }
         }
 

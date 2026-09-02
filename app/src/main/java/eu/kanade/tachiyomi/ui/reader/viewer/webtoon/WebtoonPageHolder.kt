@@ -107,21 +107,25 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
     }
 
     fun bind(item: Any) {
+        val defaultPlaceholderHeight = (parentHeight / 2).coerceAtLeast(300.dpToPx)
         when (item) {
             is ReaderPage -> {
                 page = item
                 regionTop = 0
                 regionHeight = 0
                 splitPage = null
+                val targetHeight =
+                    if (item.renderedHeight > 0) item.renderedHeight else defaultPlaceholderHeight
+                progressContainer.layoutParams?.height = targetHeight
             }
             is ReaderPageSplit -> {
                 page = item.page
                 regionTop = item.topOffset
                 regionHeight = item.splitHeight
                 splitPage = item
-                if (item.displayedHeight > 0) {
-                    progressContainer.layoutParams?.height = item.displayedHeight
-                }
+                val targetHeight =
+                    if (item.displayedHeight > 0) item.displayedHeight else defaultPlaceholderHeight
+                progressContainer.layoutParams?.height = targetHeight
             }
         }
         launchLoadJob()
@@ -466,16 +470,14 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
     @SuppressLint("PrivateResource")
     private fun createProgressBar(): ReaderProgressBar {
         progressContainer = FrameLayout(context)
-        frame.addView(progressContainer, MATCH_PARENT, parentHeight)
+        val defaultPlaceholderHeight = (parentHeight / 2).coerceAtLeast(300.dpToPx)
+        frame.addView(progressContainer, MATCH_PARENT, defaultPlaceholderHeight)
 
         val progress =
             ReaderProgressBar(context).apply {
                 val size = 48.dpToPx
                 layoutParams =
-                    FrameLayout.LayoutParams(size, size).apply {
-                        gravity = Gravity.CENTER_HORIZONTAL
-                        setMargins(0, parentHeight / 4, 0, 0)
-                    }
+                    FrameLayout.LayoutParams(size, size).apply { gravity = Gravity.CENTER }
             }
         progressContainer.addView(progress)
         return progress

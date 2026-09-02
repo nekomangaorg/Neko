@@ -79,6 +79,8 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         scope.cancel()
     }
 
+    private var isInitialLoad = true
+
     /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
         TimberKt.d { "setChapters" }
@@ -87,10 +89,13 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         items = controller.buildItems(chapters, forceTransition, screenHeight)
         activity.updateWebtoonViewerItems()
 
-        val pages = chapters.currChapter.pages ?: return
-        val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
-        if (requestedIndex in pages.indices) {
-            moveToPage(pages[requestedIndex], false)
+        if (isInitialLoad) {
+            isInitialLoad = false
+            val pages = chapters.currChapter.pages ?: return
+            val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
+            if (requestedIndex in pages.indices) {
+                moveToPage(pages[requestedIndex], false)
+            }
         }
     }
 
