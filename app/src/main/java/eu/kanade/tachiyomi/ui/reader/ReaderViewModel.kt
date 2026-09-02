@@ -450,8 +450,6 @@ constructor(
         flushReadTimer()
         restartReadTimer()
 
-        chapterPageIndex = -1
-
         withIOContext {
             try {
                 loadChapter(loader, chapter)
