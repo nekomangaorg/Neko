@@ -162,7 +162,7 @@ fun ComposePagerViewer(
         }
 
         // Track active page changes
-        LaunchedEffect(pagerState) {
+        LaunchedEffect(pagerState, items) {
             snapshotFlow { pagerState.currentPage }
                 .distinctUntilChanged()
                 .collect { pageIndex ->
@@ -171,6 +171,7 @@ fun ComposePagerViewer(
                         lastActiveItem = item
                         when (item) {
                             is ReaderUiItem.Page -> {
+                                onPageSelected(item.page, item.extraPage != null)
                                 val pages = item.page.chapter.pages
                                 if (pages != null && item.page.chapter == viewer.currentChapter) {
                                     if (pages.size - item.page.number < 5) {
@@ -185,8 +186,12 @@ fun ComposePagerViewer(
                                     }
                                 }
                             }
-                            is ReaderUiItem.Transition -> Unit
-                            is ReaderUiItem.SplitPage -> Unit
+                            is ReaderUiItem.SplitPage -> {
+                                onPageSelected(item.page, false)
+                            }
+                            is ReaderUiItem.Transition -> {
+                                onTransitionSelected(item.transition)
+                            }
                         }
                     }
                 }
