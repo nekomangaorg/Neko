@@ -6,6 +6,9 @@ package eu.kanade.tachiyomi.ui.reader.model
  */
 sealed interface ReaderUiItem {
 
+    val chapterId: Long?
+    val pageIndex: Int?
+
     fun key(prefix: String): String
 
     /** A single page or paired double-page spread. */
@@ -13,6 +16,12 @@ sealed interface ReaderUiItem {
         val page: ReaderPage,
         val extraPage: ReaderPage? = null,
     ) : ReaderUiItem {
+        override val chapterId: Long?
+            get() = page.chapter.chapter.id
+
+        override val pageIndex: Int
+            get() = page.index
+
         override fun key(prefix: String): String {
             val firstHalfSuffix = page.firstHalf?.let { "_half_$it" } ?: ""
             return if (extraPage != null) {
@@ -29,6 +38,12 @@ sealed interface ReaderUiItem {
         val page: ReaderPage
             get() = split.page
 
+        override val chapterId: Long?
+            get() = page.chapter.chapter.id
+
+        override val pageIndex: Int
+            get() = page.index
+
         override fun key(prefix: String): String {
             return "${prefix}_split_${page.chapter.chapter.id}_${page.index}_${split.topOffset}"
         }
@@ -36,11 +51,18 @@ sealed interface ReaderUiItem {
 
     /** A transition page between adjacent chapters. */
     data class Transition(val transition: ChapterTransition) : ReaderUiItem {
+        override val chapterId: Long?
+            get() = transition.to?.chapter?.id ?: transition.from.chapter.id
+
+        override val pageIndex: Int?
+            get() = null
+
         override fun key(prefix: String): String {
-            val type = if (transition is ChapterTransition.Prev) "prev" else "next"
-            val fromId = transition.from.chapter.id
-            val toId = transition.to?.chapter?.id
-            return "${prefix}_transition_${type}_${fromId}_${toId}"
+            val fromId = transition.from.chapter.id ?: 0L
+            val toId = transition.to?.chapter?.id ?: 0L
+            val minId = minOf(fromId, toId)
+            val maxId = maxOf(fromId, toId)
+            return "${prefix}_transition_${minId}_${maxId}"
         }
     }
 

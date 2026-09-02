@@ -75,6 +75,9 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Layout manager of the recycler view. */
     private val layoutManager = WebtoonLayoutManager(activity)
 
+    /** Controller used for pure domain item building and split page calculations. */
+    val controller = ReaderWebtoonController()
+
     /** Adapter of the recycler view. */
     val adapter = WebtoonAdapter(this)
 

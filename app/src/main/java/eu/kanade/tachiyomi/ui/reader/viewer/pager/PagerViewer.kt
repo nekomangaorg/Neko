@@ -52,6 +52,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      */
     val config = PagerConfig(scope, this)
 
+    /** Controller used for pure domain item building, page pairing, and transitions. */
+    val controller = ReaderPagerController()
+
     /** Adapter of the pager. */
     val adapter = PagerViewerAdapter(this)
 
