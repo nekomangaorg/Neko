@@ -44,22 +44,22 @@ class ReaderWebtoonControllerTest {
         val items =
             controller.buildItems(viewerChapters, forceTransition = false, screenHeight = 1000)
 
-        // Previous chapter: takes last 2 pages (pages 3, 4)
+        // Previous chapter: all 5 pages (pages 0..4)
         // No prev transition because prevChapter is loaded and no missing chapters
         // Current chapter: all 10 pages (pages 0..9)
         // No next transition because nextChapter is loaded and no missing chapters
-        // Next chapter: first 2 pages (pages 0, 1)
-        // Total = 2 + 10 + 2 = 14 items
-        assertEquals(14, items.size)
+        // Next chapter: all 5 pages (pages 0..4)
+        // Total = 5 + 10 + 5 = 20 items
+        assertEquals(20, items.size)
         assertTrue(items[0] is ReaderUiItem.Page)
         assertEquals(1L, items[0].chapterId)
-        assertEquals(3, items[0].pageIndex)
+        assertEquals(0, items[0].pageIndex)
 
-        assertEquals(2L, items[2].chapterId)
-        assertEquals(0, items[2].pageIndex)
+        assertEquals(2L, items[5].chapterId)
+        assertEquals(0, items[5].pageIndex)
 
-        assertEquals(3L, items[12].chapterId)
-        assertEquals(0, items[12].pageIndex)
+        assertEquals(3L, items[15].chapterId)
+        assertEquals(0, items[15].pageIndex)
     }
 
     @Test
@@ -74,13 +74,13 @@ class ReaderWebtoonControllerTest {
         val items = controller.buildItems(viewerChapters, forceTransition = true)
 
         // With forceTransition = true:
-        // prev pages (2) + prev transition (1) + curr pages (10) + next transition (1) + next pages
-        // (2) = 16
-        assertEquals(16, items.size)
-        assertTrue(items[2] is ReaderUiItem.Transition)
-        assertTrue((items[2] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
-        assertTrue(items[13] is ReaderUiItem.Transition)
-        assertTrue((items[13] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
+        // prev pages (5) + prev transition (1) + curr pages (10) + next transition (1) = 17 items
+        // (next is Wait so 0 pages)
+        assertEquals(17, items.size)
+        assertTrue(items[5] is ReaderUiItem.Transition)
+        assertTrue((items[5] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
+        assertTrue(items[16] is ReaderUiItem.Transition)
+        assertTrue((items[16] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
     }
 
     @Test
