@@ -69,14 +69,7 @@ fun WebtoonPageItem(
         }
     }
 
-    val model =
-        remember(item, pageStatus) {
-            if (pageStatus == Page.State.READY) {
-                ImageRequest.Builder(context).data(item).crossfade(true).build()
-            } else {
-                null
-            }
-        }
+    val model = remember(item) { ImageRequest.Builder(context).data(item).crossfade(true).build() }
 
     Box(
         modifier =

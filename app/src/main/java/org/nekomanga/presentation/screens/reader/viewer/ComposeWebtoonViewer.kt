@@ -44,6 +44,9 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.platform.LocalContext
+import coil3.imageLoader
+import coil3.request.ImageRequest
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -173,58 +176,118 @@ fun ComposeWebtoonViewer(
             }
         }
 
-        // Track active visible page
+        val context = LocalContext.current
+
+        // Preload initial batch of pages when items are loaded or updated
+        LaunchedEffect(items) {
+            val startIndex =
+                (viewer.requestedPagePosition?.targetPage ?: defaultPageIndex).coerceIn(
+                    0,
+                    (items.size - 1).coerceAtLeast(0),
+                )
+            val preloadEnd = minOf(items.size - 1, startIndex + 6)
+            for (i in startIndex..preloadEnd) {
+                val item = items.getOrNull(i) ?: continue
+                val page =
+                    when (item) {
+                        is ReaderUiItem.Page -> item.page
+                        is ReaderUiItem.SplitPage -> item.page
+                        is ReaderUiItem.Transition -> null
+                    }
+                page?.let { p -> launch { p.chapter.pageLoader?.loadPage(p) } }
+                val data =
+                    when (item) {
+                        is ReaderUiItem.Page -> item.page
+                        is ReaderUiItem.SplitPage -> item.split
+                        is ReaderUiItem.Transition -> null
+                    }
+                if (data != null) {
+                    val request = ImageRequest.Builder(context).data(data).build()
+                    context.imageLoader.enqueue(request)
+                }
+            }
+        }
+
+        // Track active visible page and preload upcoming/previous pages
         LaunchedEffect(lazyListState) {
             snapshotFlow {
                 val layoutInfo = lazyListState.layoutInfo
                 val visibleItems = layoutInfo.visibleItemsInfo
-                if (visibleItems.isNotEmpty()) {
-                    val viewportMiddle =
-                        (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-                    val activeItemInfo =
-                        visibleItems.firstOrNull { item ->
-                            val itemTop = item.offset
-                            val itemBottom = item.offset + item.size
-                            viewportMiddle in itemTop until itemBottom
-                        }
-                            ?: visibleItems.minByOrNull { item ->
-                                val itemMiddle = item.offset + item.size / 2
-                                abs(itemMiddle - viewportMiddle)
+                val activeIndex =
+                    if (visibleItems.isNotEmpty()) {
+                        val viewportMiddle =
+                            (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+                        val activeItemInfo =
+                            visibleItems.firstOrNull { item ->
+                                val itemTop = item.offset
+                                val itemBottom = item.offset + item.size
+                                viewportMiddle in itemTop until itemBottom
                             }
-                            ?: visibleItems.first()
-                    currentItems.getOrNull(activeItemInfo.index)
-                } else {
-                    currentItems.getOrNull(lazyListState.firstVisibleItemIndex)
-                }
+                                ?: visibleItems.minByOrNull { item ->
+                                    val itemMiddle = item.offset + item.size / 2
+                                    abs(itemMiddle - viewportMiddle)
+                                }
+                                ?: visibleItems.first()
+                        activeItemInfo.index
+                    } else {
+                        lazyListState.firstVisibleItemIndex
+                    }
+                activeIndex to currentItems.getOrNull(activeIndex)
             }
                 .filterNotNull()
-                .distinctUntilChanged()
-                .collect { item ->
-                    when (item) {
-                        is ReaderUiItem.Page -> {
-                            onPageSelected(item.page)
-                            val pages = item.page.chapter.pages
-                            if (pages != null && item.page.chapter == viewer.currentChapter) {
-                                if (pages.size - item.page.number < 5) {
-                                    viewer.nextTransition?.to?.let {
-                                        viewer.activity.requestPreloadChapter(it)
+                .distinctUntilChanged { old, new -> old.first == new.first }
+                .collect { (activeIndex, item) ->
+                    if (item != null) {
+                        when (item) {
+                            is ReaderUiItem.Page -> {
+                                onPageSelected(item.page)
+                                val pages = item.page.chapter.pages
+                                if (pages != null && item.page.chapter == viewer.currentChapter) {
+                                    if (pages.size - item.page.number < 5) {
+                                        viewer.nextTransition?.to?.let {
+                                            viewer.activity.requestPreloadChapter(it)
+                                        }
                                     }
-                                }
-                                if (item.page.number <= 5) {
-                                    viewer.prevTransition?.to?.let {
-                                        viewer.activity.requestPreloadChapter(it)
+                                    if (item.page.number <= 5) {
+                                        viewer.prevTransition?.to?.let {
+                                            viewer.activity.requestPreloadChapter(it)
+                                        }
                                     }
                                 }
                             }
+                            is ReaderUiItem.SplitPage -> {
+                                onPageSelected(item.page)
+                            }
+                            is ReaderUiItem.Transition -> {
+                                onTransitionSelected(item.transition)
+                                val toChapter = item.transition.to
+                                if (toChapter != null) {
+                                    viewer.activity.requestPreloadChapter(toChapter)
+                                }
+                            }
                         }
-                        is ReaderUiItem.SplitPage -> {
-                            onPageSelected(item.page)
-                        }
-                        is ReaderUiItem.Transition -> {
-                            onTransitionSelected(item.transition)
-                            val toChapter = item.transition.to
-                            if (toChapter != null) {
-                                viewer.activity.requestPreloadChapter(toChapter)
+
+                        // Preload window: 2 pages behind, 6 pages ahead
+                        val preloadStart = (activeIndex - 2).coerceAtLeast(0)
+                        val preloadEnd = (activeIndex + 6).coerceAtMost(currentItems.lastIndex)
+                        for (i in preloadStart..preloadEnd) {
+                            val preloadItem = currentItems.getOrNull(i) ?: continue
+                            val preloadPage =
+                                when (preloadItem) {
+                                    is ReaderUiItem.Page -> preloadItem.page
+                                    is ReaderUiItem.SplitPage -> preloadItem.page
+                                    is ReaderUiItem.Transition -> null
+                                }
+                            preloadPage?.let { p -> launch { p.chapter.pageLoader?.loadPage(p) } }
+                            val data =
+                                when (preloadItem) {
+                                    is ReaderUiItem.Page -> preloadItem.page
+                                    is ReaderUiItem.SplitPage -> preloadItem.split
+                                    is ReaderUiItem.Transition -> null
+                                }
+                            if (data != null) {
+                                val request = ImageRequest.Builder(context).data(data).build()
+                                context.imageLoader.enqueue(request)
                             }
                         }
                     }

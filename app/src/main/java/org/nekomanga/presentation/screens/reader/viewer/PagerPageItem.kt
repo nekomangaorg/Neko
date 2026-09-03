@@ -119,13 +119,7 @@ fun PagerPageItem(
             val zoomableState = rememberZoomableState()
             val imageState = rememberZoomableImageState(zoomableState)
             val model =
-                remember(page, pageStatus) {
-                    if (pageStatus == Page.State.READY) {
-                        ImageRequest.Builder(context).data(page).crossfade(true).build()
-                    } else {
-                        null
-                    }
-                }
+                remember(page) { ImageRequest.Builder(context).data(page).crossfade(true).build() }
 
             ZoomableAsyncImage(
                 model = model,
@@ -171,20 +165,12 @@ fun PagerPageItem(
             val second = if (invertDoublePages) page else extraPage
 
             val firstModel =
-                remember(first, pageStatus, extraPageStatus) {
-                    if (isReady) {
-                        ImageRequest.Builder(context).data(first).crossfade(true).build()
-                    } else {
-                        null
-                    }
+                remember(first) {
+                    first?.let { ImageRequest.Builder(context).data(it).crossfade(true).build() }
                 }
             val secondModel =
-                remember(second, pageStatus, extraPageStatus) {
-                    if (isReady) {
-                        ImageRequest.Builder(context).data(second).crossfade(true).build()
-                    } else {
-                        null
-                    }
+                remember(second) {
+                    second?.let { ImageRequest.Builder(context).data(it).crossfade(true).build() }
                 }
 
             Row(
