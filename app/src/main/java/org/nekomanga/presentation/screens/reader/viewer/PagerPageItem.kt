@@ -1,7 +1,10 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
 import android.graphics.PointF
+import android.view.ViewConfiguration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -13,7 +16,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,7 +33,9 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import kotlin.math.hypot
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.withTimeout
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
@@ -48,6 +58,13 @@ fun PagerPageItem(
     val doublePageGap by readerPreferences.doublePageGap().collectAsState()
     val invertDoublePages by readerPreferences.invertDoublePages().collectAsState()
     val readerThemePref by readerPreferences.readerTheme().collectAsState()
+
+    val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
+    val touchSlopPx = remember(viewConfiguration) { viewConfiguration.scaledTouchSlop.toDouble() }
+    val doubleTapSlopPx =
+        remember(viewConfiguration) { viewConfiguration.scaledDoubleTapSlop.toDouble() }
+    val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
+    val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
     // Trigger page loading
     LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
@@ -109,12 +126,127 @@ fun PagerPageItem(
     }
 
     BoxWithConstraints(
-        modifier = modifier.fillMaxSize().background(backgroundColor),
+        modifier =
+            modifier.fillMaxSize().background(backgroundColor).pointerInput(
+                viewer,
+                page,
+                extraPage,
+            ) {
+                var lastTapTime = 0L
+                var lastTapOffset = Offset.Zero
+
+                awaitEachGesture {
+                    val down =
+                        awaitFirstDown(
+                            requireUnconsumed = false,
+                            pass = PointerEventPass.Initial,
+                        )
+                    val downPos = down.position
+                    var isLongPressTriggered = false
+                    var pointerUp: PointerInputChange? = null
+
+                    try {
+                        withTimeout(longPressTimeoutMs) {
+                            while (true) {
+                                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                                val change = event.changes.firstOrNull { it.id == down.id }
+                                if (change == null) break
+                                if (!change.pressed) {
+                                    pointerUp = change
+                                    break
+                                }
+                            }
+                        }
+                    } catch (_: PointerEventTimeoutCancellationException) {
+                        if (viewer.activity.menuVisible || viewer.config.longTapEnabled) {
+                            viewer.activity.onPageLongTap(page, extraPage)
+                            isLongPressTriggered = true
+                        }
+                        do {
+                            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                        } while (event.changes.any { it.pressed })
+                    }
+
+                    if (!isLongPressTriggered && pointerUp != null) {
+                        val up = pointerUp!!
+                        val upPos = up.position
+                        val upTime = System.currentTimeMillis()
+                        val distance =
+                            hypot(
+                                (upPos.x - downPos.x).toDouble(),
+                                (upPos.y - downPos.y).toDouble(),
+                            )
+
+                        if (distance < touchSlopPx) {
+                            val screenWidth = size.width.toFloat()
+                            val screenHeight = size.height.toFloat()
+
+                            if (screenWidth > 0 && screenHeight > 0) {
+                                val pos =
+                                    PointF(
+                                        upPos.x / screenWidth,
+                                        upPos.y / screenHeight,
+                                    )
+                                val navigator = viewer.config.navigator
+                                val action = navigator.getAction(pos)
+
+                                val isDoubleTap =
+                                    (upTime - lastTapTime < doubleTapTimeoutMs) &&
+                                        (hypot(
+                                            (upPos.x - lastTapOffset.x).toDouble(),
+                                            (upPos.y - lastTapOffset.y).toDouble(),
+                                        ) < doubleTapSlopPx) &&
+                                        (viewer.config.doubleTapAnimDuration > 0)
+
+                                if (
+                                    isDoubleTap && action == ViewerNavigation.NavigationRegion.MENU
+                                ) {
+                                    if (viewer.activity.menuVisible) {
+                                        viewer.activity.hideMenu()
+                                    }
+                                    lastTapTime = 0L
+                                    lastTapOffset = Offset.Zero
+                                } else {
+                                    lastTapTime = upTime
+                                    lastTapOffset = upPos
+
+                                    when (action) {
+                                        ViewerNavigation.NavigationRegion.NEXT -> {
+                                            if (viewer.activity.menuVisible) {
+                                                viewer.activity.hideMenu()
+                                            }
+                                            viewer.moveToNext()
+                                        }
+                                        ViewerNavigation.NavigationRegion.PREV -> {
+                                            if (viewer.activity.menuVisible) {
+                                                viewer.activity.hideMenu()
+                                            }
+                                            viewer.moveToPrevious()
+                                        }
+                                        ViewerNavigation.NavigationRegion.RIGHT -> {
+                                            if (viewer.activity.menuVisible) {
+                                                viewer.activity.hideMenu()
+                                            }
+                                            viewer.moveRight()
+                                        }
+                                        ViewerNavigation.NavigationRegion.LEFT -> {
+                                            if (viewer.activity.menuVisible) {
+                                                viewer.activity.hideMenu()
+                                            }
+                                            viewer.moveLeft()
+                                        }
+                                        ViewerNavigation.NavigationRegion.MENU -> {
+                                            viewer.activity.toggleMenu()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
         contentAlignment = Alignment.Center,
     ) {
-        val widthPx = constraints.maxWidth.toFloat().coerceAtLeast(1f)
-        val heightPx = constraints.maxHeight.toFloat().coerceAtLeast(1f)
-
         if (extraPage == null) {
             val zoomableState = rememberZoomableState()
             val imageState = rememberZoomableImageState(zoomableState)
@@ -126,38 +258,6 @@ fun PagerPageItem(
                 contentDescription = null,
                 contentScale = contentScale,
                 state = imageState,
-                onClick = { offset ->
-                    val pos =
-                        PointF(
-                            offset.x / widthPx,
-                            offset.y / heightPx,
-                        )
-                    val navigator = viewer.config.navigator
-                    when (navigator.getAction(pos)) {
-                        ViewerNavigation.NavigationRegion.MENU -> viewer.activity.toggleMenu()
-                        ViewerNavigation.NavigationRegion.NEXT -> {
-                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
-                            viewer.moveToNext()
-                        }
-                        ViewerNavigation.NavigationRegion.PREV -> {
-                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
-                            viewer.moveToPrevious()
-                        }
-                        ViewerNavigation.NavigationRegion.RIGHT -> {
-                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
-                            viewer.moveRight()
-                        }
-                        ViewerNavigation.NavigationRegion.LEFT -> {
-                            if (viewer.activity.menuVisible) viewer.activity.hideMenu()
-                            viewer.moveLeft()
-                        }
-                    }
-                },
-                onLongClick = {
-                    if (viewer.activity.menuVisible || viewer.config.longTapEnabled) {
-                        viewer.activity.onPageLongTap(page, null)
-                    }
-                },
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
@@ -183,22 +283,12 @@ fun PagerPageItem(
                     contentDescription = null,
                     contentScale = contentScale,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onLongClick = {
-                        if (viewer.activity.menuVisible || viewer.config.longTapEnabled) {
-                            viewer.activity.onPageLongTap(page, extraPage)
-                        }
-                    },
                 )
                 ZoomableAsyncImage(
                     model = secondModel,
                     contentDescription = null,
                     contentScale = contentScale,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onLongClick = {
-                        if (viewer.activity.menuVisible || viewer.config.longTapEnabled) {
-                            viewer.activity.onPageLongTap(page, extraPage)
-                        }
-                    },
                 )
             }
         }

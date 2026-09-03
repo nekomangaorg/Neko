@@ -11,7 +11,6 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -443,18 +442,30 @@ fun ComposeWebtoonViewer(
                         .pointerInput(viewer) {
                             var lastTapTime = 0L
                             var lastTapOffset = Offset.Zero
-                            var pendingMenuJob: Job? = null
 
                             awaitEachGesture {
-                                val down = awaitFirstDown(requireUnconsumed = false)
-                                val downTime = System.currentTimeMillis()
+                                val down =
+                                    awaitFirstDown(
+                                        requireUnconsumed = false,
+                                        pass = PointerEventPass.Initial,
+                                    )
                                 val downPos = down.position
                                 var isLongPressTriggered = false
                                 var pointerUp: PointerInputChange? = null
 
                                 try {
                                     withTimeout(longPressTimeoutMs) {
-                                        pointerUp = waitForUpOrCancellation()
+                                        while (true) {
+                                            val event =
+                                                awaitPointerEvent(pass = PointerEventPass.Initial)
+                                            val change =
+                                                event.changes.firstOrNull { it.id == down.id }
+                                            if (change == null) break
+                                            if (!change.pressed) {
+                                                pointerUp = change
+                                                break
+                                            }
+                                        }
                                     }
                                 } catch (_: PointerEventTimeoutCancellationException) {
                                     if (
@@ -477,7 +488,8 @@ fun ComposeWebtoonViewer(
                                         }
                                     }
                                     do {
-                                        val event = awaitPointerEvent()
+                                        val event =
+                                            awaitPointerEvent(pass = PointerEventPass.Initial)
                                     } while (event.changes.any { it.pressed })
                                 }
 
@@ -513,7 +525,9 @@ fun ComposeWebtoonViewer(
                                                     (viewer.config.doubleTapAnimDuration > 0)
 
                                             if (isDoubleTap) {
-                                                pendingMenuJob?.cancel()
+                                                if (viewer.activity.menuVisible) {
+                                                    viewer.activity.hideMenu()
+                                                }
                                                 lastTapTime = 0L
                                                 lastTapOffset = Offset.Zero
                                                 val animDuration =
@@ -578,21 +592,10 @@ fun ComposeWebtoonViewer(
 
                                                 when (action) {
                                                     ViewerNavigation.NavigationRegion.MENU -> {
-                                                        if (
-                                                            viewer.config.doubleTapAnimDuration > 0
-                                                        ) {
-                                                            pendingMenuJob?.cancel()
-                                                            pendingMenuJob = coroutineScope.launch {
-                                                                delay(200)
-                                                                viewer.activity.toggleMenu()
-                                                            }
-                                                        } else {
-                                                            viewer.activity.toggleMenu()
-                                                        }
+                                                        viewer.activity.toggleMenu()
                                                     }
                                                     ViewerNavigation.NavigationRegion.NEXT,
                                                     ViewerNavigation.NavigationRegion.RIGHT -> {
-                                                        pendingMenuJob?.cancel()
                                                         if (viewer.activity.menuVisible) {
                                                             viewer.activity.hideMenu()
                                                         }
@@ -600,7 +603,6 @@ fun ComposeWebtoonViewer(
                                                     }
                                                     ViewerNavigation.NavigationRegion.PREV,
                                                     ViewerNavigation.NavigationRegion.LEFT -> {
-                                                        pendingMenuJob?.cancel()
                                                         if (viewer.activity.menuVisible) {
                                                             viewer.activity.hideMenu()
                                                         }
