@@ -9,8 +9,8 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,8 +35,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -49,6 +52,9 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.abs
+import kotlin.math.hypot
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -344,115 +350,20 @@ fun ComposeWebtoonViewer(
                             }
                         }
                         .pointerInput(viewer) {
-                            detectTapGestures(
-                                onDoubleTap = { offset ->
-                                    val screenWidth = size.width.toFloat()
-                                    val screenHeight = size.height.toFloat()
-                                    val isNavigationRegion =
-                                        if (screenWidth > 0 && screenHeight > 0) {
-                                            val pos =
-                                                PointF(
-                                                    offset.x / screenWidth,
-                                                    offset.y / screenHeight,
-                                                )
-                                            val navigator = viewer.config.navigator
-                                            when (navigator.getAction(pos)) {
-                                                ViewerNavigation.NavigationRegion.NEXT,
-                                                ViewerNavigation.NavigationRegion.RIGHT -> {
-                                                    if (viewer.activity.menuVisible) {
-                                                        viewer.activity.hideMenu()
-                                                    }
-                                                    viewer.moveToNext()
-                                                    true
-                                                }
-                                                ViewerNavigation.NavigationRegion.PREV,
-                                                ViewerNavigation.NavigationRegion.LEFT -> {
-                                                    if (viewer.activity.menuVisible) {
-                                                        viewer.activity.hideMenu()
-                                                    }
-                                                    viewer.moveToPrevious()
-                                                    true
-                                                }
-                                                ViewerNavigation.NavigationRegion.MENU -> false
-                                            }
-                                        } else {
-                                            false
-                                        }
+                            var lastTapTime = 0L
+                            var lastTapOffset = Offset.Zero
+                            var pendingMenuJob: Job? = null
 
-                                    if (!isNavigationRegion) {
-                                        coroutineScope.launch {
-                                            if (scale > 1.05f || scale < 0.95f) {
-                                                val animScale = Animatable(scale)
-                                                val animX = Animatable(offsetX)
-                                                launch {
-                                                    animScale.animateTo(1f, tween(250)) {
-                                                        scale = value
-                                                    }
-                                                }
-                                                launch {
-                                                    animX.animateTo(0f, tween(250)) {
-                                                        offsetX = value
-                                                    }
-                                                }
-                                            } else {
-                                                val targetScale = 2.5f
-                                                val targetX =
-                                                    ((size.width / 2f) - offset.x) *
-                                                        (targetScale - 1f)
-                                                val maxOffsetX =
-                                                    (size.width * (targetScale - 1f)) / 2f
-                                                val boundedX =
-                                                    targetX.coerceIn(-maxOffsetX, maxOffsetX)
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                val downTime = System.currentTimeMillis()
+                                val downPos = down.position
+                                var isLongPressTriggered = false
+                                var pointerUp: PointerInputChange? = null
 
-                                                val animScale = Animatable(scale)
-                                                val animX = Animatable(offsetX)
-                                                launch {
-                                                    animScale.animateTo(targetScale, tween(250)) {
-                                                        scale = value
-                                                    }
-                                                }
-                                                launch {
-                                                    animX.animateTo(boundedX, tween(250)) {
-                                                        offsetX = value
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                onTap = { offset ->
-                                    val screenWidth = size.width.toFloat()
-                                    val screenHeight = size.height.toFloat()
-                                    if (screenWidth > 0 && screenHeight > 0) {
-                                        val pos =
-                                            PointF(
-                                                offset.x / screenWidth,
-                                                offset.y / screenHeight,
-                                            )
-                                        val navigator = viewer.config.navigator
-                                        when (navigator.getAction(pos)) {
-                                            ViewerNavigation.NavigationRegion.MENU ->
-                                                viewer.activity.toggleMenu()
-                                            ViewerNavigation.NavigationRegion.NEXT,
-                                            ViewerNavigation.NavigationRegion.RIGHT -> {
-                                                if (viewer.activity.menuVisible) {
-                                                    viewer.activity.hideMenu()
-                                                }
-                                                viewer.moveToNext()
-                                            }
-                                            ViewerNavigation.NavigationRegion.PREV,
-                                            ViewerNavigation.NavigationRegion.LEFT -> {
-                                                if (viewer.activity.menuVisible) {
-                                                    viewer.activity.hideMenu()
-                                                }
-                                                viewer.moveToPrevious()
-                                            }
-                                        }
-                                    } else {
-                                        viewer.activity.toggleMenu()
-                                    }
-                                },
-                                onLongPress = {
+                                try {
+                                    withTimeout(450L) { pointerUp = waitForUpOrCancellation() }
+                                } catch (_: PointerEventTimeoutCancellationException) {
                                     if (
                                         viewer.activity.menuVisible || viewer.config.longTapEnabled
                                     ) {
@@ -469,10 +380,147 @@ fun ComposeWebtoonViewer(
                                             }
                                         if (page != null) {
                                             viewer.activity.onPageLongTap(page)
+                                            isLongPressTriggered = true
                                         }
                                     }
-                                },
-                            )
+                                    do {
+                                        val event = awaitPointerEvent()
+                                    } while (event.changes.any { it.pressed })
+                                }
+
+                                if (!isLongPressTriggered && pointerUp != null) {
+                                    val up = pointerUp!!
+                                    val upPos = up.position
+                                    val upTime = System.currentTimeMillis()
+                                    val distance =
+                                        hypot(
+                                            (upPos.x - downPos.x).toDouble(),
+                                            (upPos.y - downPos.y).toDouble(),
+                                        )
+
+                                    if (distance < 40.0) {
+                                        val screenWidth = size.width.toFloat()
+                                        val screenHeight = size.height.toFloat()
+
+                                        if (screenWidth > 0 && screenHeight > 0) {
+                                            val pos =
+                                                PointF(
+                                                    upPos.x / screenWidth,
+                                                    upPos.y / screenHeight,
+                                                )
+                                            val navigator = viewer.config.navigator
+                                            val action = navigator.getAction(pos)
+
+                                            val isDoubleTap =
+                                                (upTime - lastTapTime < 280) &&
+                                                    (hypot(
+                                                        (upPos.x - lastTapOffset.x).toDouble(),
+                                                        (upPos.y - lastTapOffset.y).toDouble(),
+                                                    ) < 100.0) &&
+                                                    (viewer.config.doubleTapAnimDuration > 0)
+
+                                            if (isDoubleTap) {
+                                                pendingMenuJob?.cancel()
+                                                lastTapTime = 0L
+                                                lastTapOffset = Offset.Zero
+                                                val animDuration =
+                                                    viewer.config.doubleTapAnimDuration
+                                                        .coerceAtLeast(100)
+                                                coroutineScope.launch {
+                                                    if (scale > 1.05f || scale < 0.95f) {
+                                                        val animScale = Animatable(scale)
+                                                        val animX = Animatable(offsetX)
+                                                        launch {
+                                                            animScale.animateTo(
+                                                                1f,
+                                                                tween(animDuration),
+                                                            ) {
+                                                                scale = value
+                                                            }
+                                                        }
+                                                        launch {
+                                                            animX.animateTo(
+                                                                0f,
+                                                                tween(animDuration),
+                                                            ) {
+                                                                offsetX = value
+                                                            }
+                                                        }
+                                                    } else {
+                                                        val targetScale = 2.5f
+                                                        val targetX =
+                                                            ((size.width / 2f) - upPos.x) *
+                                                                (targetScale - 1f)
+                                                        val maxOffsetX =
+                                                            (size.width * (targetScale - 1f)) / 2f
+                                                        val boundedX =
+                                                            targetX.coerceIn(
+                                                                -maxOffsetX,
+                                                                maxOffsetX,
+                                                            )
+
+                                                        val animScale = Animatable(scale)
+                                                        val animX = Animatable(offsetX)
+                                                        launch {
+                                                            animScale.animateTo(
+                                                                targetScale,
+                                                                tween(animDuration),
+                                                            ) {
+                                                                scale = value
+                                                            }
+                                                        }
+                                                        launch {
+                                                            animX.animateTo(
+                                                                boundedX,
+                                                                tween(animDuration),
+                                                            ) {
+                                                                offsetX = value
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                lastTapTime = upTime
+                                                lastTapOffset = upPos
+
+                                                when (action) {
+                                                    ViewerNavigation.NavigationRegion.MENU -> {
+                                                        if (
+                                                            viewer.config.doubleTapAnimDuration > 0
+                                                        ) {
+                                                            pendingMenuJob?.cancel()
+                                                            pendingMenuJob = coroutineScope.launch {
+                                                                delay(200)
+                                                                viewer.activity.toggleMenu()
+                                                            }
+                                                        } else {
+                                                            viewer.activity.toggleMenu()
+                                                        }
+                                                    }
+                                                    ViewerNavigation.NavigationRegion.NEXT,
+                                                    ViewerNavigation.NavigationRegion.RIGHT -> {
+                                                        pendingMenuJob?.cancel()
+                                                        if (viewer.activity.menuVisible) {
+                                                            viewer.activity.hideMenu()
+                                                        }
+                                                        viewer.moveToNext()
+                                                    }
+                                                    ViewerNavigation.NavigationRegion.PREV,
+                                                    ViewerNavigation.NavigationRegion.LEFT -> {
+                                                        pendingMenuJob?.cancel()
+                                                        if (viewer.activity.menuVisible) {
+                                                            viewer.activity.hideMenu()
+                                                        }
+                                                        viewer.moveToPrevious()
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            viewer.activity.toggleMenu()
+                                        }
+                                    }
+                                }
+                            }
                         },
                 contentPadding = PaddingValues(bottom = if (hasMargins) Size.medium else Size.none),
             ) {
