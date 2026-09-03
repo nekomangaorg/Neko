@@ -186,6 +186,8 @@ fun ComposeWebtoonViewer(
         val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
         val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
+        val preloadedKeys = remember { mutableSetOf<String>() }
+
         // Preload initial batch of pages when items are loaded or updated
         LaunchedEffect(items) {
             val startIndex =
@@ -196,28 +198,32 @@ fun ComposeWebtoonViewer(
             val preloadEnd = minOf(items.size - 1, startIndex + 6)
             for (i in startIndex..preloadEnd) {
                 val item = items.getOrNull(i) ?: continue
-                val page =
-                    when (item) {
-                        is ReaderUiItem.Page -> item.page
-                        is ReaderUiItem.SplitPage -> item.page
-                        is ReaderUiItem.Transition -> null
+                val key = item.key("webtoon")
+                if (preloadedKeys.add(key)) {
+                    val page =
+                        when (item) {
+                            is ReaderUiItem.Page -> item.page
+                            is ReaderUiItem.SplitPage -> item.page
+                            is ReaderUiItem.Transition -> null
+                        }
+                    page?.let { p -> launch { p.chapter.pageLoader?.loadPage(p) } }
+                    val data =
+                        when (item) {
+                            is ReaderUiItem.Page -> item.page
+                            is ReaderUiItem.SplitPage -> item.split
+                            is ReaderUiItem.Transition -> null
+                        }
+                    if (data != null) {
+                        val request = ImageRequest.Builder(context).data(data).build()
+                        context.imageLoader.enqueue(request)
                     }
-                page?.let { p -> launch { p.chapter.pageLoader?.loadPage(p) } }
-                val data =
-                    when (item) {
-                        is ReaderUiItem.Page -> item.page
-                        is ReaderUiItem.SplitPage -> item.split
-                        is ReaderUiItem.Transition -> null
-                    }
-                if (data != null) {
-                    val request = ImageRequest.Builder(context).data(data).build()
-                    context.imageLoader.enqueue(request)
                 }
             }
         }
 
-        // Track active visible page and preload upcoming/previous pages
+        // Track active visible page and preload upcoming/previous pages with debouncing
         LaunchedEffect(lazyListState) {
+            var preloadJob: Job? = null
             snapshotFlow {
                 val layoutInfo = lazyListState.layoutInfo
                 val visibleItems = layoutInfo.visibleItemsInfo
@@ -275,27 +281,37 @@ fun ComposeWebtoonViewer(
                             }
                         }
 
-                        // Preload window: 2 pages behind, 6 pages ahead
-                        val preloadStart = (activeIndex - 2).coerceAtLeast(0)
-                        val preloadEnd = (activeIndex + 6).coerceAtMost(currentItems.lastIndex)
-                        for (i in preloadStart..preloadEnd) {
-                            val preloadItem = currentItems.getOrNull(i) ?: continue
-                            val preloadPage =
-                                when (preloadItem) {
-                                    is ReaderUiItem.Page -> preloadItem.page
-                                    is ReaderUiItem.SplitPage -> preloadItem.page
-                                    is ReaderUiItem.Transition -> null
+                        // Debounced, cancellable preload window: 2 pages behind, 6 pages ahead
+                        preloadJob?.cancel()
+                        preloadJob = launch {
+                            delay(50L)
+                            val preloadStart = (activeIndex - 2).coerceAtLeast(0)
+                            val preloadEnd = (activeIndex + 6).coerceAtMost(currentItems.lastIndex)
+                            for (i in preloadStart..preloadEnd) {
+                                val preloadItem = currentItems.getOrNull(i) ?: continue
+                                val key = preloadItem.key("webtoon")
+                                if (preloadedKeys.add(key)) {
+                                    val preloadPage =
+                                        when (preloadItem) {
+                                            is ReaderUiItem.Page -> preloadItem.page
+                                            is ReaderUiItem.SplitPage -> preloadItem.page
+                                            is ReaderUiItem.Transition -> null
+                                        }
+                                    preloadPage?.let { p ->
+                                        launch { p.chapter.pageLoader?.loadPage(p) }
+                                    }
+                                    val data =
+                                        when (preloadItem) {
+                                            is ReaderUiItem.Page -> preloadItem.page
+                                            is ReaderUiItem.SplitPage -> preloadItem.split
+                                            is ReaderUiItem.Transition -> null
+                                        }
+                                    if (data != null) {
+                                        val request =
+                                            ImageRequest.Builder(context).data(data).build()
+                                        context.imageLoader.enqueue(request)
+                                    }
                                 }
-                            preloadPage?.let { p -> launch { p.chapter.pageLoader?.loadPage(p) } }
-                            val data =
-                                when (preloadItem) {
-                                    is ReaderUiItem.Page -> preloadItem.page
-                                    is ReaderUiItem.SplitPage -> preloadItem.split
-                                    is ReaderUiItem.Transition -> null
-                                }
-                            if (data != null) {
-                                val request = ImageRequest.Builder(context).data(data).build()
-                                context.imageLoader.enqueue(request)
                             }
                         }
                     }
