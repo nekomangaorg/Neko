@@ -624,8 +624,7 @@ fun ComposeWebtoonViewer(
                     when (item) {
                         is ReaderUiItem.Page -> {
                             WebtoonPageItem(
-                                viewer = viewer,
-                                item = item.page,
+                                page = item.page,
                                 modifier =
                                     if (horizontalPadding > Size.none) {
                                         Modifier.padding(horizontal = horizontalPadding)
@@ -636,8 +635,7 @@ fun ComposeWebtoonViewer(
                         }
                         is ReaderUiItem.SplitPage -> {
                             WebtoonPageItem(
-                                viewer = viewer,
-                                item = item.split,
+                                split = item.split,
                                 modifier =
                                     if (horizontalPadding > Size.none) {
                                         Modifier.padding(horizontal = horizontalPadding)

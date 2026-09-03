@@ -21,9 +21,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.system.ThemeUtil
-import kotlinx.coroutines.flow.emptyFlow
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
@@ -32,25 +30,42 @@ import uy.kohesive.injekt.api.get
 
 @Composable
 fun WebtoonPageItem(
-    viewer: WebtoonViewer,
-    item: Any,
+    page: ReaderPage,
+    modifier: Modifier = Modifier,
+) {
+    WebtoonPageContent(
+        page = page,
+        imageData = page,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun WebtoonPageItem(
+    split: ReaderPageSplit,
+    modifier: Modifier = Modifier,
+) {
+    WebtoonPageContent(
+        page = split.page,
+        imageData = split,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun WebtoonPageContent(
+    page: ReaderPage,
+    imageData: Any,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val readerPreferences: ReaderPreferences = remember { Injekt.get() }
     val readerThemePref by readerPreferences.readerTheme().collectAsState()
 
-    val page = (item as? ReaderPage) ?: (item as? ReaderPageSplit)?.page
+    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
 
-    LaunchedEffect(page) {
-        if (page != null) {
-            page.chapter.pageLoader?.loadPage(page)
-        }
-    }
-
-    val pageStatus by
-        (page?.statusFlow ?: emptyFlow()).collectAsStateWithLifecycle(Page.State.QUEUE)
-    val pageProgress by (page?.progressFlow ?: emptyFlow()).collectAsStateWithLifecycle(0)
+    val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
+    val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
 
     val isError = pageStatus == Page.State.ERROR
 
@@ -63,13 +78,12 @@ fun WebtoonPageItem(
             }
         }
 
-    val onRetry: () -> Unit = {
-        if (page != null) {
-            page.chapter.pageLoader?.retryPage(page)
-        }
-    }
+    val onRetry: () -> Unit = { page.chapter.pageLoader?.retryPage(page) }
 
-    val model = remember(item) { ImageRequest.Builder(context).data(item).crossfade(true).build() }
+    val model =
+        remember(imageData) {
+            ImageRequest.Builder(context).data(imageData).crossfade(true).build()
+        }
 
     Box(
         modifier =
