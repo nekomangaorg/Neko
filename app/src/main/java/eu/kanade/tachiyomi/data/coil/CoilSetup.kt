@@ -37,6 +37,8 @@ fun coilImageLoader(context: Context) =
                 add(ArtworkFactory(lazy(diskCacheInit)))
                 add(MergeArtworkFactory())
                 add(ArtworkKeyer())
+                add(ReaderPageKeyer())
+                add(ReaderPageSplitKeyer())
                 add(BufferedSourceFetcher.Factory())
                 add(ReaderPageFetcher.Factory())
                 add(ReaderPageSplitFetcher.Factory())

@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -11,9 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import eu.kanade.tachiyomi.source.model.Page
@@ -23,9 +26,6 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import kotlinx.coroutines.flow.emptyFlow
-import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
-import me.saket.telephoto.zoomable.rememberZoomableImageState
-import me.saket.telephoto.zoomable.rememberZoomableState
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
@@ -71,28 +71,40 @@ fun WebtoonPageItem(
         }
     }
 
-    val zoomableState = rememberZoomableState()
-    val imageState = rememberZoomableImageState(zoomableState)
+    val model =
+        remember(item, pageStatus) {
+            if (pageStatus == Page.State.READY) {
+                ImageRequest.Builder(context).data(item).crossfade(true).build()
+            } else {
+                null
+            }
+        }
 
     Box(
         modifier =
             modifier
                 .fillMaxWidth()
                 .heightIn(min = Size.extraLarge * 10)
-                .background(backgroundColor),
+                .background(backgroundColor)
+                .pointerInput(page) {
+                    detectTapGestures(
+                        onLongPress = {
+                            if (
+                                page != null &&
+                                    (viewer.activity.menuVisible || viewer.config.longTapEnabled)
+                            ) {
+                                viewer.activity.onPageLongTap(page, null)
+                            }
+                        }
+                    )
+                },
         contentAlignment = Alignment.Center,
     ) {
-        ZoomableAsyncImage(
-            model = ImageRequest.Builder(context).data(item).crossfade(true).build(),
+        AsyncImage(
+            model = model,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
-            state = imageState,
             modifier = Modifier.fillMaxWidth(),
-            onLongClick = {
-                if (page != null && (viewer.activity.menuVisible || viewer.config.longTapEnabled)) {
-                    viewer.activity.onPageLongTap(page, null)
-                }
-            },
         )
 
         ReaderPageLoadingOverlay(status = pageStatus, progress = pageProgress)

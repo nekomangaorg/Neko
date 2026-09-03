@@ -118,9 +118,17 @@ fun PagerPageItem(
         if (extraPage == null) {
             val zoomableState = rememberZoomableState()
             val imageState = rememberZoomableImageState(zoomableState)
+            val model =
+                remember(page, pageStatus) {
+                    if (pageStatus == Page.State.READY) {
+                        ImageRequest.Builder(context).data(page).crossfade(true).build()
+                    } else {
+                        null
+                    }
+                }
 
             ZoomableAsyncImage(
-                model = ImageRequest.Builder(context).data(page).crossfade(true).build(),
+                model = model,
                 contentDescription = null,
                 contentScale = contentScale,
                 state = imageState,
@@ -162,13 +170,30 @@ fun PagerPageItem(
             val first = if (invertDoublePages) extraPage else page
             val second = if (invertDoublePages) page else extraPage
 
+            val firstModel =
+                remember(first, pageStatus, extraPageStatus) {
+                    if (isReady) {
+                        ImageRequest.Builder(context).data(first).crossfade(true).build()
+                    } else {
+                        null
+                    }
+                }
+            val secondModel =
+                remember(second, pageStatus, extraPageStatus) {
+                    if (isReady) {
+                        ImageRequest.Builder(context).data(second).crossfade(true).build()
+                    } else {
+                        null
+                    }
+                }
+
             Row(
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(Size.tiny * doublePageGap),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ZoomableAsyncImage(
-                    model = ImageRequest.Builder(context).data(first).crossfade(true).build(),
+                    model = firstModel,
                     contentDescription = null,
                     contentScale = contentScale,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -179,7 +204,7 @@ fun PagerPageItem(
                     },
                 )
                 ZoomableAsyncImage(
-                    model = ImageRequest.Builder(context).data(second).crossfade(true).build(),
+                    model = secondModel,
                     contentDescription = null,
                     contentScale = contentScale,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
