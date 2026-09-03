@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
 import android.graphics.PointF
+import android.view.ViewConfiguration
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -177,6 +178,13 @@ fun ComposeWebtoonViewer(
         }
 
         val context = LocalContext.current
+        val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
+        val touchSlopPx =
+            remember(viewConfiguration) { viewConfiguration.scaledTouchSlop.toDouble() }
+        val doubleTapSlopPx =
+            remember(viewConfiguration) { viewConfiguration.scaledDoubleTapSlop.toDouble() }
+        val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
+        val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
         // Preload initial batch of pages when items are loaded or updated
         LaunchedEffect(items) {
@@ -429,7 +437,9 @@ fun ComposeWebtoonViewer(
                                 var pointerUp: PointerInputChange? = null
 
                                 try {
-                                    withTimeout(450L) { pointerUp = waitForUpOrCancellation() }
+                                    withTimeout(longPressTimeoutMs) {
+                                        pointerUp = waitForUpOrCancellation()
+                                    }
                                 } catch (_: PointerEventTimeoutCancellationException) {
                                     if (
                                         viewer.activity.menuVisible || viewer.config.longTapEnabled
@@ -465,7 +475,7 @@ fun ComposeWebtoonViewer(
                                             (upPos.y - downPos.y).toDouble(),
                                         )
 
-                                    if (distance < 40.0) {
+                                    if (distance < touchSlopPx) {
                                         val screenWidth = size.width.toFloat()
                                         val screenHeight = size.height.toFloat()
 
@@ -479,11 +489,11 @@ fun ComposeWebtoonViewer(
                                             val action = navigator.getAction(pos)
 
                                             val isDoubleTap =
-                                                (upTime - lastTapTime < 280) &&
+                                                (upTime - lastTapTime < doubleTapTimeoutMs) &&
                                                     (hypot(
                                                         (upPos.x - lastTapOffset.x).toDouble(),
                                                         (upPos.y - lastTapOffset.y).toDouble(),
-                                                    ) < 100.0) &&
+                                                    ) < doubleTapSlopPx) &&
                                                     (viewer.config.doubleTapAnimDuration > 0)
 
                                             if (isDoubleTap) {
