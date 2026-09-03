@@ -12,7 +12,10 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import java.io.ByteArrayInputStream
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import okio.buffer
 import okio.source
 
@@ -21,8 +24,13 @@ class ReaderPageFetcher(private val page: ReaderPage, private val options: Optio
     override suspend fun fetch(): FetchResult {
         var streamFn = page.stream
         if (streamFn == null) {
-            page.chapter.pageLoader?.loadPage(page)
-            page.statusFlow.first { it == Page.State.READY || it == Page.State.ERROR }
+            val loadJob =
+                CoroutineScope(Dispatchers.IO).launch { page.chapter.pageLoader?.loadPage(page) }
+            try {
+                page.statusFlow.first { it == Page.State.READY || it == Page.State.ERROR }
+            } finally {
+                loadJob.cancel()
+            }
             streamFn = page.stream
         }
 
@@ -57,8 +65,17 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             } else {
                 var streamFn = split.page.stream
                 if (streamFn == null) {
-                    split.page.chapter.pageLoader?.loadPage(split.page)
-                    split.page.statusFlow.first { it == Page.State.READY || it == Page.State.ERROR }
+                    val loadJob =
+                        CoroutineScope(Dispatchers.IO).launch {
+                            split.page.chapter.pageLoader?.loadPage(split.page)
+                        }
+                    try {
+                        split.page.statusFlow.first {
+                            it == Page.State.READY || it == Page.State.ERROR
+                        }
+                    } finally {
+                        loadJob.cancel()
+                    }
                     streamFn = split.page.stream
                 }
                 val actualStream =

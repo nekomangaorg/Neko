@@ -167,7 +167,7 @@ fun ComposePagerViewer(
         }
 
         val context = LocalContext.current
-        val preloadedKeys = remember { mutableSetOf<String>() }
+        val preloadedKeys = remember(items) { mutableSetOf<String>() }
 
         // Preload initial batch of pages when items are loaded or updated
         LaunchedEffect(items) {

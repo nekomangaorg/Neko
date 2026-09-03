@@ -186,7 +186,7 @@ fun ComposeWebtoonViewer(
         val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
         val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
-        val preloadedKeys = remember { mutableSetOf<String>() }
+        val preloadedKeys = remember(items) { mutableSetOf<String>() }
 
         // Preload initial batch of pages when items are loaded or updated
         LaunchedEffect(items) {
