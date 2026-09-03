@@ -2,12 +2,15 @@ package org.nekomanga.presentation.screens.reader.viewer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,6 +72,8 @@ private fun WebtoonPageContent(
 
     val isError = pageStatus == Page.State.ERROR
 
+    var intrinsicRatio by remember(imageData) { mutableFloatStateOf(0f) }
+
     val backgroundColor =
         remember(readerThemePref) {
             val theme = ReaderTheme.fromPreference(readerThemePref)
@@ -85,12 +90,15 @@ private fun WebtoonPageContent(
             ImageRequest.Builder(context).data(imageData).crossfade(true).build()
         }
 
+    val sizeModifier =
+        if (intrinsicRatio > 0f) {
+            Modifier.aspectRatio(intrinsicRatio)
+        } else {
+            Modifier.heightIn(min = Size.extraLarge * 10)
+        }
+
     Box(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .heightIn(min = Size.extraLarge * 10)
-                .background(backgroundColor),
+        modifier = modifier.fillMaxWidth().then(sizeModifier).background(backgroundColor),
         contentAlignment = Alignment.Center,
     ) {
         AsyncImage(
@@ -98,6 +106,15 @@ private fun WebtoonPageContent(
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
             modifier = Modifier.fillMaxWidth(),
+            onSuccess = { state ->
+                val img = state.result.image
+                if (img.width > 0 && img.height > 0) {
+                    intrinsicRatio = img.width.toFloat() / img.height.toFloat()
+                    if (imageData is ReaderPageSplit) {
+                        imageData.displayedHeight = img.height
+                    }
+                }
+            },
         )
 
         ReaderPageLoadingOverlay(status = pageStatus, progress = pageProgress)
