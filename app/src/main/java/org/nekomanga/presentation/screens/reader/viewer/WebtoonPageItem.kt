@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -12,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -85,19 +83,7 @@ fun WebtoonPageItem(
             modifier
                 .fillMaxWidth()
                 .heightIn(min = Size.extraLarge * 10)
-                .background(backgroundColor)
-                .pointerInput(page) {
-                    detectTapGestures(
-                        onLongPress = {
-                            if (
-                                page != null &&
-                                    (viewer.activity.menuVisible || viewer.config.longTapEnabled)
-                            ) {
-                                viewer.activity.onPageLongTap(page, null)
-                            }
-                        }
-                    )
-                },
+                .background(backgroundColor),
         contentAlignment = Alignment.Center,
     ) {
         AsyncImage(
