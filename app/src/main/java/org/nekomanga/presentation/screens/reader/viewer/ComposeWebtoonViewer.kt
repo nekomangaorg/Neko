@@ -3,6 +3,7 @@ package org.nekomanga.presentation.screens.reader.viewer
 import android.graphics.PointF
 import android.view.ViewConfiguration
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -377,7 +378,7 @@ fun ComposeWebtoonViewer(
                                         if (newScale > 1f) {
                                             val maxOffsetX = (size.width * (newScale - 1f)) / 2f
                                             offsetX =
-                                                (offsetX + panChange.x).coerceIn(
+                                                (offsetX + panChange.x * newScale).coerceIn(
                                                     -maxOffsetX,
                                                     maxOffsetX,
                                                 )
@@ -398,7 +399,9 @@ fun ComposeWebtoonViewer(
                                         )
 
                                         if (scale > 1.05f) {
-                                            val panX = change.position.x - change.previousPosition.x
+                                            val panX =
+                                                (change.position.x - change.previousPosition.x) *
+                                                    scale
                                             if (panX != 0f) {
                                                 val maxOffsetX = (size.width * (scale - 1f)) / 2f
                                                 offsetX =
@@ -424,16 +427,26 @@ fun ComposeWebtoonViewer(
                                     }
                                 } else if (scale > 1.05f) {
                                     val velocity = velocityTracker.calculateVelocity()
-                                    if (abs(velocity.x) > 100f) {
+                                    val velocityX = velocity.x * scale
+                                    if (abs(velocityX) > 100f) {
                                         coroutineScope.launch {
                                             val maxOffsetX = (size.width * (scale - 1f)) / 2f
                                             val animX = Animatable(offsetX)
                                             val targetX =
-                                                (offsetX + velocity.x * 0.15f).coerceIn(
+                                                (offsetX + velocityX * 0.25f).coerceIn(
                                                     -maxOffsetX,
                                                     maxOffsetX,
                                                 )
-                                            animX.animateTo(targetX, tween(200)) { offsetX = value }
+                                            animX.animateTo(
+                                                targetValue = targetX,
+                                                animationSpec =
+                                                    tween(
+                                                        durationMillis = 300,
+                                                        easing = LinearOutSlowInEasing,
+                                                    ),
+                                            ) {
+                                                offsetX = value
+                                            }
                                         }
                                     }
                                 }
