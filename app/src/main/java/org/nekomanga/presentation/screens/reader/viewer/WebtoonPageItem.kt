@@ -1,22 +1,31 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.widget.FrameLayout
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
-import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonPageHolder
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
+import eu.kanade.tachiyomi.util.system.ThemeUtil
+import kotlinx.coroutines.flow.emptyFlow
+import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
+import me.saket.telephoto.zoomable.rememberZoomableImageState
+import me.saket.telephoto.zoomable.rememberZoomableState
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
@@ -29,46 +38,65 @@ fun WebtoonPageItem(
     item: Any,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-    val cropBordersWebtoon by readerPreferences.cropBordersWebtoon().collectAsState()
-    val cropBorders by readerPreferences.cropBorders().collectAsState()
-    val sidePadding by readerPreferences.webtoonSidePadding().collectAsState()
-    val webtoonPageLayout by readerPreferences.webtoonPageLayout().collectAsState()
-    val invertDoublePages by readerPreferences.webtoonInvertDoublePages().collectAsState()
-    val readerTheme by readerPreferences.readerTheme().collectAsState()
+    val readerThemePref by readerPreferences.readerTheme().collectAsState()
 
-    val itemKey =
-        when (item) {
-            is ReaderPage -> "page_${item.chapter.chapter.id}_${item.index}"
-            is ReaderPageSplit ->
-                "split_${item.page.chapter.chapter.id}_${item.page.index}_${item.topOffset}"
-            else -> item.toString()
+    val page = (item as? ReaderPage) ?: (item as? ReaderPageSplit)?.page
+
+    LaunchedEffect(page) {
+        if (page != null) {
+            page.chapter.pageLoader?.loadPage(page)
+        }
+    }
+
+    val pageStatus by
+        (page?.statusFlow ?: emptyFlow()).collectAsStateWithLifecycle(Page.State.QUEUE)
+    val pageProgress by (page?.progressFlow ?: emptyFlow()).collectAsStateWithLifecycle(0)
+
+    val isError = pageStatus == Page.State.ERROR
+
+    val backgroundColor =
+        remember(readerThemePref) {
+            val theme = ReaderTheme.fromPreference(readerThemePref)
+            when (theme) {
+                ReaderTheme.SMART_BY_THEME -> Color.Transparent
+                else -> Color(ThemeUtil.readerBackgroundColor(readerThemePref, context))
+            }
         }
 
-    val pageHolder =
-        remember(
-            itemKey,
-            webtoonPageLayout,
-            invertDoublePages,
-            readerTheme,
-            cropBordersWebtoon,
-            cropBorders,
-            sidePadding,
-        ) {
-            val imageView =
-                ReaderPageImageView(viewer.activity, isWebtoon = true).apply {
-                    layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-                }
-            WebtoonPageHolder(imageView, viewer).apply { bind(item) }
+    val onRetry: () -> Unit = {
+        if (page != null) {
+            page.chapter.pageLoader?.retryPage(page)
         }
+    }
 
-    DisposableEffect(pageHolder) { onDispose { pageHolder.recycle() } }
+    val zoomableState = rememberZoomableState()
+    val imageState = rememberZoomableImageState(zoomableState)
 
-    Box(modifier = modifier.fillMaxWidth().heightIn(min = Size.extraLarge * 10)) {
-        AndroidView(
-            factory = { pageHolder.itemView },
-            update = {},
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .heightIn(min = Size.extraLarge * 10)
+                .background(backgroundColor),
+        contentAlignment = Alignment.Center,
+    ) {
+        ZoomableAsyncImage(
+            model = ImageRequest.Builder(context).data(item).crossfade(true).build(),
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            state = imageState,
             modifier = Modifier.fillMaxWidth(),
+            onLongClick = {
+                if (page != null && (viewer.activity.menuVisible || viewer.config.longTapEnabled)) {
+                    viewer.activity.onPageLongTap(page, null)
+                }
+            },
         )
+
+        ReaderPageLoadingOverlay(status = pageStatus, progress = pageProgress)
+
+        ReaderPageErrorOverlay(visible = isError, onRetry = onRetry)
     }
 }

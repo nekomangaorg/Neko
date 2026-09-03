@@ -123,9 +123,6 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.tachi.unifile)
 
-    // Modified dependencies
-    implementation(libs.subsample) { exclude(module = "image-decoder") }
-
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)
     implementation(androidx.profileinstaller)
@@ -157,6 +154,7 @@ dependencies {
 
     // Image library
     implementation(libs.bundles.coil)
+    implementation(libs.telephoto.zoomable.image.coil)
 
     // Logging
     implementation(libs.timber)
@@ -164,7 +162,6 @@ dependencies {
     // UI
     implementation(libs.bundles.fastadapter)
 
-    implementation(libs.photoView)
     implementation(libs.cascade)
     implementation(libs.cascade.compose)
 

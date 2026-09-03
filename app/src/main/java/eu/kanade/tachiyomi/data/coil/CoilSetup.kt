@@ -38,6 +38,8 @@ fun coilImageLoader(context: Context) =
                 add(MergeArtworkFactory())
                 add(ArtworkKeyer())
                 add(BufferedSourceFetcher.Factory())
+                add(ReaderPageFetcher.Factory())
+                add(ReaderPageSplitFetcher.Factory())
             }
             diskCache(diskCacheInit)
             memoryCache { MemoryCache.Builder().maxSizePercent(context, 0.40).build() }
