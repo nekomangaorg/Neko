@@ -12,6 +12,7 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -115,6 +116,7 @@ fun ComposeWebtoonViewer(
         val webtoonSidePadding by readerPreferences.webtoonSidePadding().collectAsState()
         val animatedTransitions by
             readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
+        val disableGaps by readerPreferences.webtoonDisableGaps().collectAsState()
         val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsState()
         val themeBackground = MaterialTheme.colorScheme.background
         val backgroundColor =
@@ -239,7 +241,7 @@ fun ComposeWebtoonViewer(
         }
 
         val sidePaddingPercent = webtoonSidePadding / 100f
-        val hasMargins = viewer.hasMargins
+        val hasMargins = viewer.noWebtoonTag && !disableGaps
 
         BoxWithConstraints(
             contentAlignment = Alignment.Center,
@@ -249,6 +251,8 @@ fun ComposeWebtoonViewer(
             val columnHeight = if (scale < 1f) maxHeight / scale else maxHeight
             LazyColumn(
                 state = lazyListState,
+                verticalArrangement =
+                    Arrangement.spacedBy(if (hasMargins) Size.medium else Size.none),
                 userScrollEnabled = true,
                 modifier =
                     (if (scale < 1f) {
