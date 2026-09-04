@@ -478,6 +478,14 @@ fun ComposeWebtoonViewer(
                                                 pointerUp = change
                                                 break
                                             }
+                                            val moveDistance =
+                                                hypot(
+                                                    (change.position.x - downPos.x).toDouble(),
+                                                    (change.position.y - downPos.y).toDouble(),
+                                                ) * scale
+                                            if (moveDistance > touchSlopPx) {
+                                                break
+                                            }
                                         }
                                     }
                                 } catch (_: PointerEventTimeoutCancellationException) {
@@ -500,6 +508,13 @@ fun ComposeWebtoonViewer(
                                             isLongPressTriggered = true
                                         }
                                     }
+                                    do {
+                                        val event =
+                                            awaitPointerEvent(pass = PointerEventPass.Initial)
+                                    } while (event.changes.any { it.pressed })
+                                }
+
+                                if (pointerUp == null && !isLongPressTriggered) {
                                     do {
                                         val event =
                                             awaitPointerEvent(pass = PointerEventPass.Initial)
