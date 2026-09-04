@@ -24,12 +24,12 @@ class ReaderPageFetcher(private val page: ReaderPage, private val options: Optio
     override suspend fun fetch(): FetchResult {
         var streamFn = page.stream
         if (streamFn == null) {
-            val loadJob =
-                CoroutineScope(Dispatchers.IO).launch { page.chapter.pageLoader?.loadPage(page) }
-            try {
-                page.statusFlow.first { it == Page.State.READY || it == Page.State.ERROR }
-            } finally {
-                loadJob.cancel()
+            val loader = page.chapter.pageLoader
+            if (loader != null && page.status == Page.State.QUEUE) {
+                CoroutineScope(Dispatchers.IO).launch { loader.loadPage(page) }
+            }
+            page.statusFlow.first {
+                (it == Page.State.READY && page.stream != null) || it == Page.State.ERROR
             }
             streamFn = page.stream
         }
@@ -65,16 +65,13 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             } else {
                 var streamFn = split.page.stream
                 if (streamFn == null) {
-                    val loadJob =
-                        CoroutineScope(Dispatchers.IO).launch {
-                            split.page.chapter.pageLoader?.loadPage(split.page)
-                        }
-                    try {
-                        split.page.statusFlow.first {
-                            it == Page.State.READY || it == Page.State.ERROR
-                        }
-                    } finally {
-                        loadJob.cancel()
+                    val loader = split.page.chapter.pageLoader
+                    if (loader != null && split.page.status == Page.State.QUEUE) {
+                        CoroutineScope(Dispatchers.IO).launch { loader.loadPage(split.page) }
+                    }
+                    split.page.statusFlow.first {
+                        (it == Page.State.READY && split.page.stream != null) ||
+                            it == Page.State.ERROR
                     }
                     streamFn = split.page.stream
                 }

@@ -86,7 +86,7 @@ private fun WebtoonPageContent(
     val onRetry: () -> Unit = { page.chapter.pageLoader?.retryPage(page) }
 
     val model =
-        remember(imageData) {
+        remember(imageData, pageStatus) {
             ImageRequest.Builder(context).data(imageData).crossfade(true).build()
         }
 
@@ -105,7 +105,11 @@ private fun WebtoonPageContent(
             model = model,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .then(
+                        if (intrinsicRatio > 0f) Modifier.aspectRatio(intrinsicRatio) else Modifier
+                    ),
             onSuccess = { state ->
                 val img = state.result.image
                 if (img.width > 0 && img.height > 0) {
