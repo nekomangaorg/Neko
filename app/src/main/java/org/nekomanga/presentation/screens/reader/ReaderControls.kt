@@ -470,6 +470,7 @@ private fun VerticalFloatingSlider(
                 } else {
                     ToolTipButton(
                         toolTipLabel = stringResource(R.string.previous_chapter),
+                        modifier = Modifier.rotate(90f),
                         icon = SkipPrevious,
                         enabledTint = MaterialTheme.colorScheme.primary,
                         onClick = onSkipPrevious,
