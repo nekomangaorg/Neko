@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,24 +50,14 @@ fun ReaderPageLoadingOverlay(
                 verticalArrangement = Arrangement.spacedBy(Size.small),
             ) {
                 if (progress > 0) {
-                    CircularProgressIndicator(
-                        progress = { progress / 100f },
-                        modifier = Modifier.size(Size.huge),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
-                        strokeWidth = Size.extraTiny,
-                    )
+                    ContainedLoadingIndicator(progress = { progress / 100f })
                     Text(
                         text = "$progress%",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 } else {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(Size.huge),
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = Size.extraTiny,
-                    )
+                    ContainedLoadingIndicator()
                 }
             }
         }
