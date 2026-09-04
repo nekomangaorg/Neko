@@ -28,7 +28,7 @@ class ModifyMangaUseCase(
             mangaRepository.updateManga(dbManga)
 
             val provider = DownloadProvider(preferences.context)
-            provider.renameMangaFolder(previousEffectiveTitle, newEffectiveTitle)
+            provider.renameMangaFolder(dbManga, previousEffectiveTitle)
             downloadManager.updateDownloadCacheForManga(dbManga)
             storageManager.renamePagesAndCoverDirectory(previousEffectiveTitle, newEffectiveTitle)
         }
