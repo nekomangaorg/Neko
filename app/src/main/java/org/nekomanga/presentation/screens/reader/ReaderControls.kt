@@ -8,10 +8,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +17,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -38,10 +34,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalSlider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,13 +49,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -65,7 +60,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.roundToInt
 import org.nekomanga.R
@@ -494,26 +488,49 @@ private fun VerticalFloatingSlider(
                 )
 
                 val targetMax = maxOf(totalPages.toFloat(), 1f)
-                val displayValue =
-                    (draggingValue ?: currentPageIndex.toFloat()).coerceIn(0f, targetMax)
+                val sliderState =
+                    remember(targetMax) {
+                        SliderState(
+                            value = (targetMax - currentPageIndex).coerceIn(0f, targetMax),
+                            valueRange = 0f..targetMax,
+                            onValueChangeFinished = {
+                                val finalValue = lastValue
+                                draggingValue = null
+                                onPageChange(finalValue)
+                            },
+                        )
+                    }
+
+                LaunchedEffect(currentPageIndex, targetMax) {
+                    val expectedSliderValue = (targetMax - currentPageIndex).coerceIn(0f, targetMax)
+                    if (
+                        draggingValue == null &&
+                            sliderState.value.roundToInt() != expectedSliderValue.roundToInt()
+                    ) {
+                        sliderState.value = expectedSliderValue
+                    }
+                }
+
+                LaunchedEffect(sliderState.value, targetMax) {
+                    val rawPage = (targetMax - sliderState.value).coerceIn(0f, targetMax)
+                    val roundedPage = rawPage.roundToInt()
+                    if (roundedPage != lastValue) {
+                        draggingValue = rawPage
+                        lastValue = roundedPage
+                        view.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE)
+                        onPageChange(roundedPage)
+                    }
+                }
 
                 VerticalSlider(
-                    value = displayValue,
-                    onValueChange = { value ->
-                        draggingValue = value
-                        val roundedValue = value.roundToInt()
-                        if (roundedValue != lastValue) {
-                            lastValue = roundedValue
-                            view.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE)
-                            onPageChange(roundedValue)
-                        }
-                    },
-                    onValueChangeFinished = {
-                        val finalValue = lastValue
-                        draggingValue = null
-                        onPageChange(finalValue)
-                    },
-                    valueRange = 0f..targetMax,
+                    state = sliderState,
+                    colors =
+                        SliderDefaults.colors(
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor =
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                        ),
                     modifier = Modifier.weight(1f).padding(vertical = Size.small),
                 )
 
@@ -547,103 +564,6 @@ private fun VerticalFloatingSlider(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun VerticalSlider(
-    value: Float,
-    onValueChange: (Float) -> Unit,
-    onValueChangeFinished: () -> Unit,
-    valueRange: ClosedFloatingPointRange<Float>,
-    modifier: Modifier = Modifier,
-    trackWidth: Dp = Size.tiny,
-    thumbRadius: Dp = Size.small + Size.extraTiny,
-    activeTrackColor: Color = MaterialTheme.colorScheme.primary,
-    inactiveTrackColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
-    thumbColor: Color = MaterialTheme.colorScheme.primary,
-) {
-    val density = LocalDensity.current
-    val trackWidthPx = with(density) { trackWidth.toPx() }
-    val thumbRadiusPx = with(density) { thumbRadius.toPx() }
-
-    Box(
-        modifier =
-            modifier.width(Size.huge - Size.small).pointerInput(valueRange) {
-                awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    val heightPx = size.height.toFloat()
-                    val usableHeight = maxOf(1f, heightPx - 2 * thumbRadiusPx)
-                    val rangeSpan = valueRange.endInclusive - valueRange.start
-
-                    fun updateValue(y: Float) {
-                        val fraction = ((y - thumbRadiusPx) / usableHeight).coerceIn(0f, 1f)
-                        val newValue = valueRange.start + fraction * rangeSpan
-                        onValueChange(newValue)
-                    }
-
-                    updateValue(down.position.y)
-
-                    val pointerId = down.id
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val pointer = event.changes.firstOrNull { it.id == pointerId } ?: break
-                        if (pointer.isConsumed) {
-                            break
-                        }
-                        if (pointer.pressed) {
-                            pointer.consume()
-                            updateValue(pointer.position.y)
-                        } else {
-                            pointer.consume()
-                            break
-                        }
-                    }
-                    onValueChangeFinished()
-                }
-            },
-        contentAlignment = Alignment.Center,
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val centerX = size.width / 2f
-            val heightPx = size.height
-            val usableHeight = maxOf(1f, heightPx - 2 * thumbRadiusPx)
-            val rangeSpan = valueRange.endInclusive - valueRange.start
-            val progress =
-                if (rangeSpan > 0f) {
-                    ((value - valueRange.start) / rangeSpan).coerceIn(0f, 1f)
-                } else {
-                    0f
-                }
-            val thumbY = thumbRadiusPx + progress * usableHeight
-
-            // Draw inactive track (full vertical line)
-            drawLine(
-                color = inactiveTrackColor,
-                start = Offset(centerX, thumbRadiusPx),
-                end = Offset(centerX, heightPx - thumbRadiusPx),
-                strokeWidth = trackWidthPx,
-                cap = StrokeCap.Round,
-            )
-
-            // Draw active track (from top down to thumb position)
-            if (progress > 0f) {
-                drawLine(
-                    color = activeTrackColor,
-                    start = Offset(centerX, thumbRadiusPx),
-                    end = Offset(centerX, thumbY),
-                    strokeWidth = trackWidthPx,
-                    cap = StrokeCap.Round,
-                )
-            }
-
-            // Draw thumb circle
-            drawCircle(
-                color = thumbColor,
-                radius = thumbRadiusPx,
-                center = Offset(centerX, thumbY),
-            )
         }
     }
 }
