@@ -17,6 +17,9 @@ open class ReaderPage(
     /** Rendered height after image is decoded and laid out (pixels at fit-width). */
     var renderedHeight: Int = 0
 
+    /** Cached aspect ratio (width / height) to prevent layout shifts. */
+    var aspectRatio: Float = 0f
+
     /** Value to check if this page is used to as if it was too wide */
     var shiftedPage: Boolean = false
 
@@ -57,4 +60,5 @@ data class ReaderPageSplit(
     val splitHeight: Int,
     var cachedBytes: ByteArray? = null,
     var displayedHeight: Int = 0,
+    var aspectRatio: Float = 0f,
 )

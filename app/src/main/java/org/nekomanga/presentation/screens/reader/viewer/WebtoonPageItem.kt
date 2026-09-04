@@ -38,6 +38,8 @@ fun WebtoonPageItem(
 ) {
     WebtoonPageContent(
         page = page,
+        initialRatio = page.aspectRatio,
+        onRatioCalculated = { ratio, _ -> page.aspectRatio = ratio },
         imageData = page,
         modifier = modifier,
     )
@@ -50,6 +52,11 @@ fun WebtoonPageItem(
 ) {
     WebtoonPageContent(
         page = split.page,
+        initialRatio = split.aspectRatio,
+        onRatioCalculated = { ratio, height ->
+            split.aspectRatio = ratio
+            split.displayedHeight = height
+        },
         imageData = split,
         modifier = modifier,
     )
@@ -58,6 +65,8 @@ fun WebtoonPageItem(
 @Composable
 private fun WebtoonPageContent(
     page: ReaderPage,
+    initialRatio: Float,
+    onRatioCalculated: (Float, Int) -> Unit,
     imageData: Any,
     modifier: Modifier = Modifier,
 ) {
@@ -72,7 +81,7 @@ private fun WebtoonPageContent(
 
     val isError = pageStatus == Page.State.ERROR
 
-    var intrinsicRatio by remember(imageData) { mutableFloatStateOf(0f) }
+    var intrinsicRatio by remember(imageData) { mutableFloatStateOf(initialRatio) }
 
     val backgroundColor =
         remember(readerThemePref) {
@@ -113,10 +122,9 @@ private fun WebtoonPageContent(
             onSuccess = { state ->
                 val img = state.result.image
                 if (img.width > 0 && img.height > 0) {
-                    intrinsicRatio = img.width.toFloat() / img.height.toFloat()
-                    if (imageData is ReaderPageSplit) {
-                        imageData.displayedHeight = img.height
-                    }
+                    val ratio = img.width.toFloat() / img.height.toFloat()
+                    intrinsicRatio = ratio
+                    onRatioCalculated(ratio, img.height)
                 }
             },
         )

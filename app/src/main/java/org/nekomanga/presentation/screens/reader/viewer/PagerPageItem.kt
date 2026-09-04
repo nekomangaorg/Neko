@@ -25,6 +25,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import eu.kanade.tachiyomi.source.model.Page
@@ -39,6 +40,7 @@ import kotlinx.coroutines.withTimeout
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
@@ -277,35 +279,41 @@ fun PagerPageItem(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
+            val zoomableState = rememberZoomableState()
             val first = if (invertDoublePages) extraPage else page
             val second = if (invertDoublePages) page else extraPage
 
             val firstModel =
                 remember(first, pageStatus, extraPageStatus) {
-                    first?.let { ImageRequest.Builder(context).data(it).crossfade(true).build() }
+                    ImageRequest.Builder(context).data(first).crossfade(true).build()
                 }
             val secondModel =
                 remember(second, pageStatus, extraPageStatus) {
-                    second?.let { ImageRequest.Builder(context).data(it).crossfade(true).build() }
+                    ImageRequest.Builder(context).data(second).crossfade(true).build()
                 }
 
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(Size.tiny * doublePageGap),
-                verticalAlignment = Alignment.CenterVertically,
+            Box(
+                modifier = Modifier.fillMaxSize().zoomable(zoomableState),
+                contentAlignment = Alignment.Center,
             ) {
-                ZoomableAsyncImage(
-                    model = firstModel,
-                    contentDescription = null,
-                    contentScale = contentScale,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                )
-                ZoomableAsyncImage(
-                    model = secondModel,
-                    contentDescription = null,
-                    contentScale = contentScale,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                )
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(Size.tiny * doublePageGap),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AsyncImage(
+                        model = firstModel,
+                        contentDescription = null,
+                        contentScale = contentScale,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                    )
+                    AsyncImage(
+                        model = secondModel,
+                        contentDescription = null,
+                        contentScale = contentScale,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                    )
+                }
             }
         }
 
