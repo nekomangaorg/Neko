@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import java.io.ByteArrayInputStream
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okio.buffer
@@ -21,22 +21,29 @@ import okio.source
 
 class ReaderPageFetcher(private val page: ReaderPage, private val options: Options) : Fetcher {
 
-    override suspend fun fetch(): FetchResult {
+    override suspend fun fetch(): FetchResult = coroutineScope {
         var streamFn = page.stream
         if (streamFn == null) {
             val loader = page.chapter.pageLoader
-            if (loader != null && page.status == Page.State.QUEUE) {
-                CoroutineScope(Dispatchers.IO).launch { loader.loadPage(page) }
-            }
-            page.statusFlow.first {
-                (it == Page.State.READY && page.stream != null) || it == Page.State.ERROR
+            val loadJob =
+                if (loader != null && page.status == Page.State.QUEUE) {
+                    launch(Dispatchers.IO) { loader.loadPage(page) }
+                } else {
+                    null
+                }
+            try {
+                page.statusFlow.first {
+                    (it == Page.State.READY && page.stream != null) || it == Page.State.ERROR
+                }
+            } finally {
+                loadJob?.cancel()
             }
             streamFn = page.stream
         }
 
         val actualStream = streamFn ?: error("Page stream not available for page ${page.index}")
         val source = actualStream().source().buffer()
-        return SourceFetchResult(
+        SourceFetchResult(
             source = ImageSource(source = source, fileSystem = options.fileSystem),
             mimeType = null,
             dataSource = DataSource.MEMORY,
@@ -57,7 +64,7 @@ class ReaderPageFetcher(private val page: ReaderPage, private val options: Optio
 class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val options: Options) :
     Fetcher {
 
-    override suspend fun fetch(): FetchResult {
+    override suspend fun fetch(): FetchResult = coroutineScope {
         val bytes = split.cachedBytes
         val source =
             if (bytes != null) {
@@ -66,12 +73,19 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 var streamFn = split.page.stream
                 if (streamFn == null) {
                     val loader = split.page.chapter.pageLoader
-                    if (loader != null && split.page.status == Page.State.QUEUE) {
-                        CoroutineScope(Dispatchers.IO).launch { loader.loadPage(split.page) }
-                    }
-                    split.page.statusFlow.first {
-                        (it == Page.State.READY && split.page.stream != null) ||
-                            it == Page.State.ERROR
+                    val loadJob =
+                        if (loader != null && split.page.status == Page.State.QUEUE) {
+                            launch(Dispatchers.IO) { loader.loadPage(split.page) }
+                        } else {
+                            null
+                        }
+                    try {
+                        split.page.statusFlow.first {
+                            (it == Page.State.READY && split.page.stream != null) ||
+                                it == Page.State.ERROR
+                        }
+                    } finally {
+                        loadJob?.cancel()
                     }
                     streamFn = split.page.stream
                 }
@@ -79,7 +93,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                     streamFn ?: error("Page stream not available for page ${split.page.index}")
                 actualStream().source().buffer()
             }
-        return SourceFetchResult(
+        SourceFetchResult(
             source = ImageSource(source = source, fileSystem = options.fileSystem),
             mimeType = null,
             dataSource = DataSource.MEMORY,
