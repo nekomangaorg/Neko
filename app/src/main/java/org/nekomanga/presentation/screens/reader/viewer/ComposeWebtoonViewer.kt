@@ -680,27 +680,7 @@ fun ComposeWebtoonViewer(
                                 manga = manga,
                                 downloadManager = downloadManager,
                                 onRetry = onRetryTransition,
-                                onTap = { pos ->
-                                    val navigator = viewer.config.navigator
-                                    when (navigator.getAction(pos)) {
-                                        ViewerNavigation.NavigationRegion.MENU ->
-                                            viewer.activity.toggleMenu()
-                                        ViewerNavigation.NavigationRegion.NEXT,
-                                        ViewerNavigation.NavigationRegion.RIGHT -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveToNext()
-                                        }
-                                        ViewerNavigation.NavigationRegion.PREV,
-                                        ViewerNavigation.NavigationRegion.LEFT -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveToPrevious()
-                                        }
-                                    }
-                                },
+                                onTap = { viewer.activity.toggleMenu() },
                                 modifier =
                                     Modifier.fillMaxWidth()
                                         .padding(
