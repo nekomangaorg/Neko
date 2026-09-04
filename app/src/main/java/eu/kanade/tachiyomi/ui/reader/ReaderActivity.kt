@@ -580,6 +580,7 @@ class ReaderActivity : BaseMainActivity() {
                         currentPageIndex = state.currentPageIndex,
                         totalPages = state.totalPages,
                         isRtl = viewer is R2LPagerViewer,
+                        isVertical = viewer is WebtoonViewer || viewer is VerticalPagerViewer,
                         onPageChange = { index -> moveToPageIndex(index, animated = false) },
                         onSkipPrevious = { loadAdjacentChapter(false) },
                         onSkipNext = { loadAdjacentChapter(true) },
@@ -621,7 +622,7 @@ class ReaderActivity : BaseMainActivity() {
                             settingsSheetVisible = true
                             reEnableBackPressedCallBack()
                         },
-                        modifier = Modifier.align(Alignment.BottomCenter),
+                        modifier = Modifier.fillMaxSize(),
                     )
                     if (state.settingsSheetVisible) {
                         ModalBottomSheet(
@@ -771,10 +772,19 @@ class ReaderActivity : BaseMainActivity() {
                             }
                         }
                     }
-                    if (
-                        state.pageNumberVisible &&
-                            state.currentPageText.isNotEmpty() &&
-                            state.totalPagesText.isNotEmpty()
+                    AnimatedVisibility(
+                        visible =
+                            !state.menuVisible &&
+                                !state.menuStickyVisible &&
+                                state.pageNumberVisible &&
+                                state.currentPageText.isNotEmpty() &&
+                                state.totalPagesText.isNotEmpty(),
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                        modifier =
+                            Modifier.align(Alignment.BottomCenter)
+                                .navigationBarsPadding()
+                                .padding(bottom = Size.smedium),
                     ) {
                         val pageNumberText =
                             if (resources.isLTR) {
@@ -782,13 +792,7 @@ class ReaderActivity : BaseMainActivity() {
                             } else {
                                 "${state.totalPagesText}/${state.currentPageText}"
                             }
-                        PageNumberIndicator(
-                            text = pageNumberText,
-                            modifier =
-                                Modifier.align(Alignment.BottomCenter)
-                                    .navigationBarsPadding()
-                                    .padding(bottom = Size.smedium),
-                        )
+                        PageNumberIndicator(text = pageNumberText)
                     }
                     AnimatedVisibility(
                         visible = state.isLoading,
