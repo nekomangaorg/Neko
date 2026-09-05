@@ -498,6 +498,11 @@ constructor(
     suspend fun loadChapter(chapter: ReaderChapter): Int? {
         val loader = loader ?: return -1
 
+        flushReadTimer()
+        restartReadTimer()
+
+        getCurrentChapter()?.let { saveReadingProgress(it) }
+
         val chapterList = getChapterList()
         val targetChapter = chapterList.find { it.chapter.id == chapter.chapter.id } ?: chapter
 
@@ -653,6 +658,7 @@ constructor(
         if (!securityPreferences.incognitoMode().get()) {
             if (!readerChapter.chapter.read) {
                 readerChapter.chapter.read = true
+                saveReadingProgress(readerChapter)
                 updateTrackChapterAfterReading(readerChapter)
                 updateReadingStatus(readerChapter)
                 deleteChapterIfNeeded(readerChapter)
