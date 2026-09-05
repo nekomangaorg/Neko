@@ -119,8 +119,6 @@ dependencies {
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.serialization.okio)
     implementation(libs.bundles.ok)
-    implementation(libs.tokenbucket)
-    implementation(libs.timber)
     implementation(libs.tachi.unifile)
 
     implementation(libs.bundles.tachiyomi)
