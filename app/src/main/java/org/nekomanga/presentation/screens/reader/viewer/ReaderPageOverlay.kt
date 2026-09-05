@@ -15,12 +15,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import eu.kanade.tachiyomi.source.model.Page
+import kotlinx.coroutines.delay
 import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
@@ -28,6 +34,7 @@ import org.nekomanga.presentation.theme.Size
 fun ReaderPageLoadingOverlay(
     status: Page.State,
     progress: Int,
+    delayMs: Long = 250L,
     modifier: Modifier = Modifier,
 ) {
     val isLoading =
@@ -35,8 +42,20 @@ fun ReaderPageLoadingOverlay(
             status == Page.State.LOAD_PAGE ||
             status == Page.State.DOWNLOAD_IMAGE
 
+    var showIndicator by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isLoading) {
+        if (isLoading) {
+            showIndicator = false
+            delay(delayMs)
+            showIndicator = true
+        } else {
+            showIndicator = false
+        }
+    }
+
     AnimatedVisibility(
-        visible = isLoading,
+        visible = isLoading && showIndicator,
         enter = fadeIn(),
         exit = fadeOut(),
         modifier = modifier,
