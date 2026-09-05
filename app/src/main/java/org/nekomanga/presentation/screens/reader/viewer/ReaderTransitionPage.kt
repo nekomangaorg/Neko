@@ -52,26 +52,33 @@ fun ReaderTransitionPage(
     manga: MangaItem?,
     downloadManager: DownloadManager,
     onRetry: (ReaderChapter) -> Unit,
-    onTap: (PointF) -> Unit,
     modifier: Modifier = Modifier,
+    onTap: ((PointF) -> Unit)? = null,
 ) {
+    val tapModifier =
+        if (onTap != null) {
+            Modifier.pointerInput(onTap) {
+                detectTapGestures(
+                    onTap = { offset ->
+                        val screenWidth = size.width.toFloat()
+                        val screenHeight = size.height.toFloat()
+                        if (screenWidth > 0 && screenHeight > 0) {
+                            val pos = PointF(offset.x / screenWidth, offset.y / screenHeight)
+                            onTap(pos)
+                        } else {
+                            onTap(PointF(0.5f, 0.5f))
+                        }
+                    }
+                )
+            }
+        } else {
+            Modifier
+        }
+
     Box(
         modifier =
             modifier
-                .pointerInput(onTap) {
-                    detectTapGestures(
-                        onTap = { offset ->
-                            val screenWidth = size.width.toFloat()
-                            val screenHeight = size.height.toFloat()
-                            if (screenWidth > 0 && screenHeight > 0) {
-                                val pos = PointF(offset.x / screenWidth, offset.y / screenHeight)
-                                onTap(pos)
-                            } else {
-                                onTap(PointF(0.5f, 0.5f))
-                            }
-                        }
-                    )
-                }
+                .then(tapModifier)
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .padding(

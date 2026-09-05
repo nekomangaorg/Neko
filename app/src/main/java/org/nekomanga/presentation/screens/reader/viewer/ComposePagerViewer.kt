@@ -23,8 +23,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
+import coil3.imageLoader
+import coil3.request.ImageRequest
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -33,6 +36,8 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
@@ -161,8 +166,49 @@ fun ComposePagerViewer(
             }
         }
 
-        // Track active page changes
+        val context = LocalContext.current
+        val preloadedKeys = remember(items) { mutableSetOf<String>() }
+
+        // Preload initial batch of pages when items are loaded or updated
+        LaunchedEffect(items) {
+            val startIndex =
+                (viewer.requestedPagePosition?.first ?: defaultPageIndex).coerceIn(
+                    0,
+                    (items.size - 1).coerceAtLeast(0),
+                )
+            val preloadEnd = minOf(items.size - 1, startIndex + 4)
+            for (i in startIndex..preloadEnd) {
+                val item = items.getOrNull(i) ?: continue
+                val key = item.key("pager")
+                if (preloadedKeys.add(key)) {
+                    when (item) {
+                        is ReaderUiItem.Page -> {
+                            launch { item.page.chapter.pageLoader?.loadPage(item.page) }
+                            context.imageLoader.enqueue(
+                                ImageRequest.Builder(context).data(item.page).build()
+                            )
+                            item.extraPage?.let { extra ->
+                                launch { extra.chapter.pageLoader?.loadPage(extra) }
+                                context.imageLoader.enqueue(
+                                    ImageRequest.Builder(context).data(extra).build()
+                                )
+                            }
+                        }
+                        is ReaderUiItem.SplitPage -> {
+                            launch { item.page.chapter.pageLoader?.loadPage(item.page) }
+                            context.imageLoader.enqueue(
+                                ImageRequest.Builder(context).data(item.split).build()
+                            )
+                        }
+                        is ReaderUiItem.Transition -> Unit
+                    }
+                }
+            }
+        }
+
+        // Track active page changes and preload upcoming/previous pages with debouncing
         LaunchedEffect(pagerState, items) {
+            var preloadJob: Job? = null
             snapshotFlow { pagerState.currentPage }
                 .distinctUntilChanged()
                 .collect { pageIndex ->
@@ -191,6 +237,55 @@ fun ComposePagerViewer(
                             }
                             is ReaderUiItem.Transition -> {
                                 onTransitionSelected(item.transition)
+                            }
+                        }
+
+                        // Debounced, cancellable preload window: 2 pages behind, 4 pages ahead
+                        preloadJob?.cancel()
+                        preloadJob = launch {
+                            delay(50L)
+                            val preloadStart = (pageIndex - 2).coerceAtLeast(0)
+                            val preloadEnd = (pageIndex + 4).coerceAtMost(items.lastIndex)
+                            for (i in preloadStart..preloadEnd) {
+                                val preloadItem = items.getOrNull(i) ?: continue
+                                val key = preloadItem.key("pager")
+                                if (preloadedKeys.add(key)) {
+                                    when (preloadItem) {
+                                        is ReaderUiItem.Page -> {
+                                            launch {
+                                                preloadItem.page.chapter.pageLoader?.loadPage(
+                                                    preloadItem.page
+                                                )
+                                            }
+                                            context.imageLoader.enqueue(
+                                                ImageRequest.Builder(context)
+                                                    .data(preloadItem.page)
+                                                    .build()
+                                            )
+                                            preloadItem.extraPage?.let { extra ->
+                                                launch { extra.chapter.pageLoader?.loadPage(extra) }
+                                                context.imageLoader.enqueue(
+                                                    ImageRequest.Builder(context)
+                                                        .data(extra)
+                                                        .build()
+                                                )
+                                            }
+                                        }
+                                        is ReaderUiItem.SplitPage -> {
+                                            launch {
+                                                preloadItem.page.chapter.pageLoader?.loadPage(
+                                                    preloadItem.page
+                                                )
+                                            }
+                                            context.imageLoader.enqueue(
+                                                ImageRequest.Builder(context)
+                                                    .data(preloadItem.split)
+                                                    .build()
+                                            )
+                                        }
+                                        is ReaderUiItem.Transition -> Unit
+                                    }
+                                }
                             }
                         }
                     }

@@ -1,7 +1,9 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
 import android.graphics.PointF
+import android.view.ViewConfiguration
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -9,14 +11,15 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -34,11 +37,17 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.platform.LocalContext
+import coil3.imageLoader
+import coil3.request.ImageRequest
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -48,6 +57,9 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.abs
+import kotlin.math.hypot
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -108,6 +120,7 @@ fun ComposeWebtoonViewer(
         val webtoonSidePadding by readerPreferences.webtoonSidePadding().collectAsState()
         val animatedTransitions by
             readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
+        val disableGaps by readerPreferences.webtoonDisableGaps().collectAsState()
         val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsState()
         val themeBackground = MaterialTheme.colorScheme.background
         val backgroundColor =
@@ -164,58 +177,141 @@ fun ComposeWebtoonViewer(
             }
         }
 
-        // Track active visible page
+        val context = LocalContext.current
+        val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
+        val touchSlopPx =
+            remember(viewConfiguration) { viewConfiguration.scaledTouchSlop.toDouble() }
+        val doubleTapSlopPx =
+            remember(viewConfiguration) { viewConfiguration.scaledDoubleTapSlop.toDouble() }
+        val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
+        val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
+
+        val preloadedKeys = remember(items) { mutableSetOf<String>() }
+
+        // Preload initial batch of pages when items are loaded or updated
+        LaunchedEffect(items) {
+            val startIndex =
+                (viewer.requestedPagePosition?.targetPage ?: defaultPageIndex).coerceIn(
+                    0,
+                    (items.size - 1).coerceAtLeast(0),
+                )
+            val preloadEnd = minOf(items.size - 1, startIndex + 6)
+            for (i in startIndex..preloadEnd) {
+                val item = items.getOrNull(i) ?: continue
+                val key = item.key("webtoon")
+                if (preloadedKeys.add(key)) {
+                    val page =
+                        when (item) {
+                            is ReaderUiItem.Page -> item.page
+                            is ReaderUiItem.SplitPage -> item.page
+                            is ReaderUiItem.Transition -> null
+                        }
+                    page?.let { p -> launch { p.chapter.pageLoader?.loadPage(p) } }
+                    val data =
+                        when (item) {
+                            is ReaderUiItem.Page -> item.page
+                            is ReaderUiItem.SplitPage -> item.split
+                            is ReaderUiItem.Transition -> null
+                        }
+                    if (data != null) {
+                        val request = ImageRequest.Builder(context).data(data).build()
+                        context.imageLoader.enqueue(request)
+                    }
+                }
+            }
+        }
+
+        // Track active visible page and preload upcoming/previous pages with debouncing
         LaunchedEffect(lazyListState) {
+            var preloadJob: Job? = null
             snapshotFlow {
                 val layoutInfo = lazyListState.layoutInfo
                 val visibleItems = layoutInfo.visibleItemsInfo
-                if (visibleItems.isNotEmpty()) {
-                    val viewportMiddle =
-                        (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-                    val activeItemInfo =
-                        visibleItems.firstOrNull { item ->
-                            val itemTop = item.offset
-                            val itemBottom = item.offset + item.size
-                            viewportMiddle in itemTop until itemBottom
-                        }
-                            ?: visibleItems.minByOrNull { item ->
-                                val itemMiddle = item.offset + item.size / 2
-                                abs(itemMiddle - viewportMiddle)
+                val activeIndex =
+                    if (visibleItems.isNotEmpty()) {
+                        val viewportMiddle =
+                            (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+                        val activeItemInfo =
+                            visibleItems.firstOrNull { item ->
+                                val itemTop = item.offset
+                                val itemBottom = item.offset + item.size
+                                viewportMiddle in itemTop until itemBottom
                             }
-                            ?: visibleItems.first()
-                    currentItems.getOrNull(activeItemInfo.index)
-                } else {
-                    currentItems.getOrNull(lazyListState.firstVisibleItemIndex)
-                }
+                                ?: visibleItems.minByOrNull { item ->
+                                    val itemMiddle = item.offset + item.size / 2
+                                    abs(itemMiddle - viewportMiddle)
+                                }
+                                ?: visibleItems.first()
+                        activeItemInfo.index
+                    } else {
+                        lazyListState.firstVisibleItemIndex
+                    }
+                activeIndex to currentItems.getOrNull(activeIndex)
             }
                 .filterNotNull()
-                .distinctUntilChanged()
-                .collect { item ->
-                    when (item) {
-                        is ReaderUiItem.Page -> {
-                            onPageSelected(item.page)
-                            val pages = item.page.chapter.pages
-                            if (pages != null && item.page.chapter == viewer.currentChapter) {
-                                if (pages.size - item.page.number < 5) {
-                                    viewer.nextTransition?.to?.let {
-                                        viewer.activity.requestPreloadChapter(it)
+                .distinctUntilChanged { old, new -> old.first == new.first }
+                .collect { (activeIndex, item) ->
+                    if (item != null) {
+                        when (item) {
+                            is ReaderUiItem.Page -> {
+                                onPageSelected(item.page)
+                                val pages = item.page.chapter.pages
+                                if (pages != null && item.page.chapter == viewer.currentChapter) {
+                                    if (pages.size - item.page.number < 5) {
+                                        viewer.nextTransition?.to?.let {
+                                            viewer.activity.requestPreloadChapter(it)
+                                        }
                                     }
-                                }
-                                if (item.page.number <= 5) {
-                                    viewer.prevTransition?.to?.let {
-                                        viewer.activity.requestPreloadChapter(it)
+                                    if (item.page.number <= 5) {
+                                        viewer.prevTransition?.to?.let {
+                                            viewer.activity.requestPreloadChapter(it)
+                                        }
                                     }
                                 }
                             }
+                            is ReaderUiItem.SplitPage -> {
+                                onPageSelected(item.page)
+                            }
+                            is ReaderUiItem.Transition -> {
+                                onTransitionSelected(item.transition)
+                                val toChapter = item.transition.to
+                                if (toChapter != null) {
+                                    viewer.activity.requestPreloadChapter(toChapter)
+                                }
+                            }
                         }
-                        is ReaderUiItem.SplitPage -> {
-                            onPageSelected(item.page)
-                        }
-                        is ReaderUiItem.Transition -> {
-                            onTransitionSelected(item.transition)
-                            val toChapter = item.transition.to
-                            if (toChapter != null) {
-                                viewer.activity.requestPreloadChapter(toChapter)
+
+                        // Debounced, cancellable preload window: 2 pages behind, 6 pages ahead
+                        preloadJob?.cancel()
+                        preloadJob = launch {
+                            delay(50L)
+                            val preloadStart = (activeIndex - 2).coerceAtLeast(0)
+                            val preloadEnd = (activeIndex + 6).coerceAtMost(currentItems.lastIndex)
+                            for (i in preloadStart..preloadEnd) {
+                                val preloadItem = currentItems.getOrNull(i) ?: continue
+                                val key = preloadItem.key("webtoon")
+                                if (preloadedKeys.add(key)) {
+                                    val preloadPage =
+                                        when (preloadItem) {
+                                            is ReaderUiItem.Page -> preloadItem.page
+                                            is ReaderUiItem.SplitPage -> preloadItem.page
+                                            is ReaderUiItem.Transition -> null
+                                        }
+                                    preloadPage?.let { p ->
+                                        launch { p.chapter.pageLoader?.loadPage(p) }
+                                    }
+                                    val data =
+                                        when (preloadItem) {
+                                            is ReaderUiItem.Page -> preloadItem.page
+                                            is ReaderUiItem.SplitPage -> preloadItem.split
+                                            is ReaderUiItem.Transition -> null
+                                        }
+                                    if (data != null) {
+                                        val request =
+                                            ImageRequest.Builder(context).data(data).build()
+                                        context.imageLoader.enqueue(request)
+                                    }
+                                }
                             }
                         }
                     }
@@ -232,7 +328,7 @@ fun ComposeWebtoonViewer(
         }
 
         val sidePaddingPercent = webtoonSidePadding / 100f
-        val hasMargins = viewer.hasMargins
+        val hasMargins = viewer.noWebtoonTag && !disableGaps
 
         BoxWithConstraints(
             contentAlignment = Alignment.Center,
@@ -242,6 +338,8 @@ fun ComposeWebtoonViewer(
             val columnHeight = if (scale < 1f) maxHeight / scale else maxHeight
             LazyColumn(
                 state = lazyListState,
+                verticalArrangement =
+                    Arrangement.spacedBy(if (hasMargins) Size.medium else Size.none),
                 userScrollEnabled = true,
                 modifier =
                     (if (scale < 1f) {
@@ -280,7 +378,7 @@ fun ComposeWebtoonViewer(
                                         if (newScale > 1f) {
                                             val maxOffsetX = (size.width * (newScale - 1f)) / 2f
                                             offsetX =
-                                                (offsetX + panChange.x).coerceIn(
+                                                (offsetX + panChange.x * newScale).coerceIn(
                                                     -maxOffsetX,
                                                     maxOffsetX,
                                                 )
@@ -301,7 +399,9 @@ fun ComposeWebtoonViewer(
                                         )
 
                                         if (scale > 1.05f) {
-                                            val panX = change.position.x - change.previousPosition.x
+                                            val panX =
+                                                (change.position.x - change.previousPosition.x) *
+                                                    scale
                                             if (panX != 0f) {
                                                 val maxOffsetX = (size.width * (scale - 1f)) / 2f
                                                 offsetX =
@@ -327,131 +427,68 @@ fun ComposeWebtoonViewer(
                                     }
                                 } else if (scale > 1.05f) {
                                     val velocity = velocityTracker.calculateVelocity()
-                                    if (abs(velocity.x) > 100f) {
+                                    val velocityX = velocity.x * scale
+                                    if (abs(velocityX) > 100f) {
                                         coroutineScope.launch {
                                             val maxOffsetX = (size.width * (scale - 1f)) / 2f
                                             val animX = Animatable(offsetX)
                                             val targetX =
-                                                (offsetX + velocity.x * 0.15f).coerceIn(
+                                                (offsetX + velocityX * 0.25f).coerceIn(
                                                     -maxOffsetX,
                                                     maxOffsetX,
                                                 )
-                                            animX.animateTo(targetX, tween(200)) { offsetX = value }
+                                            animX.animateTo(
+                                                targetValue = targetX,
+                                                animationSpec =
+                                                    tween(
+                                                        durationMillis = 300,
+                                                        easing = LinearOutSlowInEasing,
+                                                    ),
+                                            ) {
+                                                offsetX = value
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                         .pointerInput(viewer) {
-                            detectTapGestures(
-                                onDoubleTap = { offset ->
-                                    val screenWidth = size.width.toFloat()
-                                    val screenHeight = size.height.toFloat()
-                                    val isNavigationRegion =
-                                        if (screenWidth > 0 && screenHeight > 0) {
-                                            val pos =
-                                                PointF(
-                                                    offset.x / screenWidth,
-                                                    offset.y / screenHeight,
-                                                )
-                                            val navigator = viewer.config.navigator
-                                            when (navigator.getAction(pos)) {
-                                                ViewerNavigation.NavigationRegion.NEXT,
-                                                ViewerNavigation.NavigationRegion.RIGHT -> {
-                                                    if (viewer.activity.menuVisible) {
-                                                        viewer.activity.hideMenu()
-                                                    }
-                                                    viewer.moveToNext()
-                                                    true
-                                                }
-                                                ViewerNavigation.NavigationRegion.PREV,
-                                                ViewerNavigation.NavigationRegion.LEFT -> {
-                                                    if (viewer.activity.menuVisible) {
-                                                        viewer.activity.hideMenu()
-                                                    }
-                                                    viewer.moveToPrevious()
-                                                    true
-                                                }
-                                                ViewerNavigation.NavigationRegion.MENU -> false
+                            var lastTapTime = 0L
+                            var lastTapOffset = Offset.Zero
+
+                            awaitEachGesture {
+                                val down =
+                                    awaitFirstDown(
+                                        requireUnconsumed = false,
+                                        pass = PointerEventPass.Initial,
+                                    )
+                                val downPos = down.position
+                                var isLongPressTriggered = false
+                                var pointerUp: PointerInputChange? = null
+
+                                try {
+                                    withTimeout(longPressTimeoutMs) {
+                                        while (true) {
+                                            val event =
+                                                awaitPointerEvent(pass = PointerEventPass.Initial)
+                                            val change =
+                                                event.changes.firstOrNull { it.id == down.id }
+                                            if (change == null) break
+                                            if (!change.pressed) {
+                                                pointerUp = change
+                                                break
                                             }
-                                        } else {
-                                            false
-                                        }
-
-                                    if (!isNavigationRegion) {
-                                        coroutineScope.launch {
-                                            if (scale > 1.05f || scale < 0.95f) {
-                                                val animScale = Animatable(scale)
-                                                val animX = Animatable(offsetX)
-                                                launch {
-                                                    animScale.animateTo(1f, tween(250)) {
-                                                        scale = value
-                                                    }
-                                                }
-                                                launch {
-                                                    animX.animateTo(0f, tween(250)) {
-                                                        offsetX = value
-                                                    }
-                                                }
-                                            } else {
-                                                val targetScale = 2.5f
-                                                val targetX =
-                                                    ((size.width / 2f) - offset.x) *
-                                                        (targetScale - 1f)
-                                                val maxOffsetX =
-                                                    (size.width * (targetScale - 1f)) / 2f
-                                                val boundedX =
-                                                    targetX.coerceIn(-maxOffsetX, maxOffsetX)
-
-                                                val animScale = Animatable(scale)
-                                                val animX = Animatable(offsetX)
-                                                launch {
-                                                    animScale.animateTo(targetScale, tween(250)) {
-                                                        scale = value
-                                                    }
-                                                }
-                                                launch {
-                                                    animX.animateTo(boundedX, tween(250)) {
-                                                        offsetX = value
-                                                    }
-                                                }
+                                            val moveDistance =
+                                                hypot(
+                                                    (change.position.x - downPos.x).toDouble(),
+                                                    (change.position.y - downPos.y).toDouble(),
+                                                ) * scale
+                                            if (moveDistance > touchSlopPx) {
+                                                break
                                             }
                                         }
                                     }
-                                },
-                                onTap = { offset ->
-                                    val screenWidth = size.width.toFloat()
-                                    val screenHeight = size.height.toFloat()
-                                    if (screenWidth > 0 && screenHeight > 0) {
-                                        val pos =
-                                            PointF(
-                                                offset.x / screenWidth,
-                                                offset.y / screenHeight,
-                                            )
-                                        val navigator = viewer.config.navigator
-                                        when (navigator.getAction(pos)) {
-                                            ViewerNavigation.NavigationRegion.MENU ->
-                                                viewer.activity.toggleMenu()
-                                            ViewerNavigation.NavigationRegion.NEXT,
-                                            ViewerNavigation.NavigationRegion.RIGHT -> {
-                                                if (viewer.activity.menuVisible) {
-                                                    viewer.activity.hideMenu()
-                                                }
-                                                viewer.moveToNext()
-                                            }
-                                            ViewerNavigation.NavigationRegion.PREV,
-                                            ViewerNavigation.NavigationRegion.LEFT -> {
-                                                if (viewer.activity.menuVisible) {
-                                                    viewer.activity.hideMenu()
-                                                }
-                                                viewer.moveToPrevious()
-                                            }
-                                        }
-                                    } else {
-                                        viewer.activity.toggleMenu()
-                                    }
-                                },
-                                onLongPress = {
+                                } catch (_: PointerEventTimeoutCancellationException) {
                                     if (
                                         viewer.activity.menuVisible || viewer.config.longTapEnabled
                                     ) {
@@ -468,10 +505,145 @@ fun ComposeWebtoonViewer(
                                             }
                                         if (page != null) {
                                             viewer.activity.onPageLongTap(page)
+                                            isLongPressTriggered = true
                                         }
                                     }
-                                },
-                            )
+                                    do {
+                                        val event =
+                                            awaitPointerEvent(pass = PointerEventPass.Initial)
+                                    } while (event.changes.any { it.pressed })
+                                }
+
+                                if (pointerUp == null && !isLongPressTriggered) {
+                                    do {
+                                        val event =
+                                            awaitPointerEvent(pass = PointerEventPass.Initial)
+                                    } while (event.changes.any { it.pressed })
+                                }
+
+                                if (!isLongPressTriggered && pointerUp != null) {
+                                    val up = pointerUp!!
+                                    val upPos = up.position
+                                    val upTime = System.currentTimeMillis()
+                                    val distance =
+                                        hypot(
+                                            (upPos.x - downPos.x).toDouble(),
+                                            (upPos.y - downPos.y).toDouble(),
+                                        )
+
+                                    if (distance < touchSlopPx) {
+                                        val screenWidth = size.width.toFloat()
+                                        val screenHeight = size.height.toFloat()
+
+                                        if (screenWidth > 0 && screenHeight > 0) {
+                                            val pos =
+                                                PointF(
+                                                    upPos.x / screenWidth,
+                                                    upPos.y / screenHeight,
+                                                )
+                                            val navigator = viewer.config.navigator
+                                            val action = navigator.getAction(pos)
+
+                                            val isDoubleTap =
+                                                (upTime - lastTapTime < doubleTapTimeoutMs) &&
+                                                    (hypot(
+                                                        (upPos.x - lastTapOffset.x).toDouble(),
+                                                        (upPos.y - lastTapOffset.y).toDouble(),
+                                                    ) < doubleTapSlopPx) &&
+                                                    (viewer.config.doubleTapAnimDuration > 0)
+
+                                            if (isDoubleTap) {
+                                                if (viewer.activity.menuVisible) {
+                                                    viewer.activity.hideMenu()
+                                                }
+                                                lastTapTime = 0L
+                                                lastTapOffset = Offset.Zero
+                                                val animDuration =
+                                                    viewer.config.doubleTapAnimDuration
+                                                        .coerceAtLeast(100)
+                                                coroutineScope.launch {
+                                                    if (scale > 1.05f || scale < 0.95f) {
+                                                        val animScale = Animatable(scale)
+                                                        val animX = Animatable(offsetX)
+                                                        launch {
+                                                            animScale.animateTo(
+                                                                1f,
+                                                                tween(animDuration),
+                                                            ) {
+                                                                scale = value
+                                                            }
+                                                        }
+                                                        launch {
+                                                            animX.animateTo(
+                                                                0f,
+                                                                tween(animDuration),
+                                                            ) {
+                                                                offsetX = value
+                                                            }
+                                                        }
+                                                    } else {
+                                                        val targetScale = 2.5f
+                                                        val targetX =
+                                                            ((size.width / 2f) - upPos.x) *
+                                                                (targetScale - 1f)
+                                                        val maxOffsetX =
+                                                            (size.width * (targetScale - 1f)) / 2f
+                                                        val boundedX =
+                                                            targetX.coerceIn(
+                                                                -maxOffsetX,
+                                                                maxOffsetX,
+                                                            )
+
+                                                        val animScale = Animatable(scale)
+                                                        val animX = Animatable(offsetX)
+                                                        launch {
+                                                            animScale.animateTo(
+                                                                targetScale,
+                                                                tween(animDuration),
+                                                            ) {
+                                                                scale = value
+                                                            }
+                                                        }
+                                                        launch {
+                                                            animX.animateTo(
+                                                                boundedX,
+                                                                tween(animDuration),
+                                                            ) {
+                                                                offsetX = value
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                lastTapTime = upTime
+                                                lastTapOffset = upPos
+
+                                                when (action) {
+                                                    ViewerNavigation.NavigationRegion.MENU -> {
+                                                        viewer.activity.toggleMenu()
+                                                    }
+                                                    ViewerNavigation.NavigationRegion.NEXT,
+                                                    ViewerNavigation.NavigationRegion.RIGHT -> {
+                                                        if (viewer.activity.menuVisible) {
+                                                            viewer.activity.hideMenu()
+                                                        }
+                                                        viewer.moveToNext()
+                                                    }
+                                                    ViewerNavigation.NavigationRegion.PREV,
+                                                    ViewerNavigation.NavigationRegion.LEFT -> {
+                                                        if (viewer.activity.menuVisible) {
+                                                            viewer.activity.hideMenu()
+                                                        }
+                                                        viewer.moveToPrevious()
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            viewer.activity.toggleMenu()
+                                        }
+                                    }
+                                }
+                            }
                         },
                 contentPadding = PaddingValues(bottom = if (hasMargins) Size.medium else Size.none),
             ) {
@@ -482,8 +654,7 @@ fun ComposeWebtoonViewer(
                     when (item) {
                         is ReaderUiItem.Page -> {
                             WebtoonPageItem(
-                                viewer = viewer,
-                                item = item.page,
+                                page = item.page,
                                 modifier =
                                     if (horizontalPadding > Size.none) {
                                         Modifier.padding(horizontal = horizontalPadding)
@@ -494,8 +665,7 @@ fun ComposeWebtoonViewer(
                         }
                         is ReaderUiItem.SplitPage -> {
                             WebtoonPageItem(
-                                viewer = viewer,
-                                item = item.split,
+                                split = item.split,
                                 modifier =
                                     if (horizontalPadding > Size.none) {
                                         Modifier.padding(horizontal = horizontalPadding)
@@ -510,27 +680,7 @@ fun ComposeWebtoonViewer(
                                 manga = manga,
                                 downloadManager = downloadManager,
                                 onRetry = onRetryTransition,
-                                onTap = { pos ->
-                                    val navigator = viewer.config.navigator
-                                    when (navigator.getAction(pos)) {
-                                        ViewerNavigation.NavigationRegion.MENU ->
-                                            viewer.activity.toggleMenu()
-                                        ViewerNavigation.NavigationRegion.NEXT,
-                                        ViewerNavigation.NavigationRegion.RIGHT -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveToNext()
-                                        }
-                                        ViewerNavigation.NavigationRegion.PREV,
-                                        ViewerNavigation.NavigationRegion.LEFT -> {
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
-                                            }
-                                            viewer.moveToPrevious()
-                                        }
-                                    }
-                                },
+                                onTap = { viewer.activity.toggleMenu() },
                                 modifier =
                                     Modifier.fillMaxWidth()
                                         .padding(

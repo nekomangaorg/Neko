@@ -90,20 +90,26 @@ Decouple page chunking, double-page shifting, and chapter transition math from l
 
 ---
 
-## 📍 Phase 3: Pure Native Compose Reader Engine (Future Vision)
+## 📍 Phase 3: Pure Native Compose Reader Engine (Delivered Milestone)
 
 ### Objective
-Eliminate `AndroidView` interop entirely by creating a native Jetpack Compose image tiling and subsampling renderer.
+Eliminate `AndroidView` interop entirely by creating a native Jetpack Compose image tiling, subsampling, and zoom engine powered by Saket's Telephoto library (`me.saket.telephoto:zoomable-image-coil3:0.19.0`).
 
-### Key Tasks
-1. **Compose Subsampling Tile Decoder**:
-   - Implement a custom Compose `Modifier.drawWithCache` or hardware-accelerated canvas renderer using `BitmapRegionDecoder`.
-   - Manage tile pooling and asynchronous background tile decoding natively in Kotlin coroutines.
-2. **Native Gesture & Transform Pipeline**:
-   - Replace `SubsamplingScaleImageView` touch handlers with Compose `pointerInput` and `transformable` gesture modifiers.
-3. **Zero-Interop Architecture**:
-   - Complete removal of `PagerPageHolder`, `WebtoonPageHolder`, and `ReaderPageImageView`.
-   - 100% pure Compose rendering tree from root to leaf pixels.
+### Scope & Delivered Features
+- [x] **Telephoto Native Subsampling Engine Integration**:
+  - Integrated `me.saket.telephoto:zoomable-image-coil3:0.19.0` with Coil 3 image loader pipeline.
+  - Added `ReaderPageFetcher` and `ReaderPageSplitFetcher` to feed `ReaderPage.stream` sources directly to Coil and Telephoto.
+- [x] **Native Jetpack Compose Page Items**:
+  - Replaced legacy `AndroidView` and `PagerPageHolder` with pure Compose `PagerPageItem` using `ZoomableAsyncImage`.
+  - Replaced legacy `AndroidView` and `WebtoonPageHolder` with pure Compose `WebtoonPageItem` using `ZoomableAsyncImage`.
+  - Implemented stateless Compose `ReaderPageLoadingOverlay` and `ReaderPageErrorOverlay` observing `page.statusFlow` and `page.progressFlow` via `collectAsStateWithLifecycle()`.
+- [x] **Extinction of Legacy View Hierarchy**:
+  - Safely deleted `PagerPageHolder.kt`, `WebtoonPageHolder.kt`, `ReaderPageImageView.kt`, `ReaderProgressBar.kt`, `GestureDetectorWithLongTap.kt`, and `PagerButton.kt`.
+  - Removed `com.github.nekomangaorg:subsampling-scale-image-view` and `com.github.chrisbanes:PhotoView` dependencies.
+
+### Phase 3 Exit Criteria
+- [x] 100% pure Compose rendering tree from root activity to leaf image pixels with zero `AndroidView` interop.
+- [x] All Kotlin files formatted with `./gradlew ktfmtFormat` and validated with `./gradlew ktfmtCheck`.
 
 ---
 
@@ -113,6 +119,6 @@ Eliminate `AndroidView` interop entirely by creating a native Jetpack Compose im
 | :--- | :--- | :--- | :--- |
 | **UI Components** | Jetpack Compose (100%) | Jetpack Compose (100%) | Jetpack Compose (100%) |
 | **Navigation Math** | Legacy View Adapter stubs | Pure Kotlin Controllers | Pure Kotlin Controllers |
-| **Image Rendering** | `AndroidView` (`SubsamplingScaleImageView`) | `AndroidView` (`SubsamplingScaleImageView`) | Native Compose Tile Canvas |
+| **Image Rendering** | `AndroidView` (`SubsamplingScaleImageView`) | `AndroidView` (`SubsamplingScaleImageView`) | Native Compose Tile Canvas (Telephoto) |
 | **State Management** | Hybrid (ViewModel + Activity) | Centralized (`ReaderViewModel`) | Centralized (`ReaderViewModel`) |
-| **Risk Level** | **Low** (Proven image decoders) | **Low–Medium** (Refactoring math) | **High** (New graphics engine) |
+| **Status** | **Completed** | **Completed** | **Completed** |

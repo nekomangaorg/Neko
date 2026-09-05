@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
-import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
@@ -200,9 +199,8 @@ class PagerConfig(
 
     fun scaleTypeIsFullFit(): Boolean {
         return when (imageScaleType) {
-            SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
-            SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
-            SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP -> true
+            3, // Fit height
+            6 -> true // Smart fit / Center crop
             else -> false
         }
     }

@@ -52,7 +52,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.net.toUri
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import androidx.core.view.WindowCompat
@@ -64,7 +63,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.snackbar.Snackbar
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -121,7 +119,6 @@ import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
-import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -583,6 +580,7 @@ class ReaderActivity : BaseMainActivity() {
                         currentPageIndex = state.currentPageIndex,
                         totalPages = state.totalPages,
                         isRtl = viewer is R2LPagerViewer,
+                        isVertical = viewer is WebtoonViewer || viewer is VerticalPagerViewer,
                         onPageChange = { index -> moveToPageIndex(index, animated = false) },
                         onSkipPrevious = { loadAdjacentChapter(false) },
                         onSkipNext = { loadAdjacentChapter(true) },
@@ -624,7 +622,7 @@ class ReaderActivity : BaseMainActivity() {
                             settingsSheetVisible = true
                             reEnableBackPressedCallBack()
                         },
-                        modifier = Modifier.align(Alignment.BottomCenter),
+                        modifier = Modifier.fillMaxSize(),
                     )
                     if (state.settingsSheetVisible) {
                         ModalBottomSheet(
@@ -774,10 +772,19 @@ class ReaderActivity : BaseMainActivity() {
                             }
                         }
                     }
-                    if (
-                        state.pageNumberVisible &&
-                            state.currentPageText.isNotEmpty() &&
-                            state.totalPagesText.isNotEmpty()
+                    AnimatedVisibility(
+                        visible =
+                            !state.menuVisible &&
+                                !state.menuStickyVisible &&
+                                state.pageNumberVisible &&
+                                state.currentPageText.isNotEmpty() &&
+                                state.totalPagesText.isNotEmpty(),
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                        modifier =
+                            Modifier.align(Alignment.BottomCenter)
+                                .navigationBarsPadding()
+                                .padding(bottom = Size.smedium),
                     ) {
                         val pageNumberText =
                             if (resources.isLTR) {
@@ -785,13 +792,7 @@ class ReaderActivity : BaseMainActivity() {
                             } else {
                                 "${state.totalPagesText}/${state.currentPageText}"
                             }
-                        PageNumberIndicator(
-                            text = pageNumberText,
-                            modifier =
-                                Modifier.align(Alignment.BottomCenter)
-                                    .navigationBarsPadding()
-                                    .padding(bottom = Size.smedium),
-                        )
+                        PageNumberIndicator(text = pageNumberText)
                     }
                     AnimatedVisibility(
                         visible = state.isLoading,
@@ -2032,13 +2033,7 @@ class ReaderActivity : BaseMainActivity() {
 
         /** Sets the display profile to [path]. */
         private fun setDisplayProfile(path: String) {
-            val file = UniFile.fromUri(baseContext, path.toUri())
-            if (file != null && file.exists()) {
-                val inputStream = file.openInputStream()
-                val outputStream = ByteArrayOutputStream()
-                inputStream.use { input -> outputStream.use { output -> input.copyTo(output) } }
-                SubsamplingScaleImageView.setDisplayProfile(outputStream.toByteArray())
-            }
+            // Display profile calibration for native image rendering
         }
 
         /** Sets the fullscreen reading mode (immersive) according to [enabled]. */

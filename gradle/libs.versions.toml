@@ -12,20 +12,22 @@ kotlinResultVersion = "2.3.1"
 detektVersion = "1.23.8"
 ktfmtVersion = "0.27.0"
 okhttpVersion = "5.5.0"
-photoViewVersion = "2.3.0"
 retrofitVersion = "3.0.0"
 sandwichVersion = "2.4.0"
 sqliteVersion = "2.7.0"
 kspVersion = "2.3.11"
+telephotoVersion = "0.19.0"
 
 
 [libraries]
+telephoto-zoomable = { module = "me.saket.telephoto:zoomable", version.ref = "telephotoVersion" }
+telephoto-zoomable-image-coil = { module = "me.saket.telephoto:zoomable-image-coil3", version.ref = "telephotoVersion" }
+telephoto-subsampling = { module = "me.saket.telephoto:sub-sampling-image", version.ref = "telephotoVersion" }
 cascade-compose = { module = "me.saket.cascade:cascade-compose", version.ref = "cascadeComposeVersion" }
 cascade = { module = "me.saket.cascade:cascade", version.ref = "cascadeVersion" }
 injekt-core = { module = "uy.kohesive.injekt:injekt-core", version.ref = "injektCoreVersion" }
 material = "com.google.android.material:material:1.14.0"
 desugaring = "com.android.tools:desugar_jdk_libs:2.1.5"
-photoView = { module = "com.github.chrisbanes:PhotoView", version.ref = "photoViewVersion" }
 play-services = "com.google.android.gms:play-services-gcm:17.0.0"
 flex-box = "com.google.android.flexbox:flexbox:3.0.0"
 #needed for token bucket to work
@@ -50,8 +52,6 @@ jsoup = "org.jsoup:jsoup:1.23.2"
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlinResultVersion" }
 kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlinResultVersion" }
-
-subsample = "com.github.nekomangaorg:subsampling-scale-image-view:eac4255"
 
 sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqliteVersion" }
 tachi-image-decoder = "com.github.ivaniskandar:image-decoder:d7e0d3dfaa"

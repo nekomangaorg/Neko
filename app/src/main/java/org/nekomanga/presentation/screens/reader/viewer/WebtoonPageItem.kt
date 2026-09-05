@@ -1,22 +1,30 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.widget.FrameLayout
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
-import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonPageHolder
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
@@ -25,50 +33,104 @@ import uy.kohesive.injekt.api.get
 
 @Composable
 fun WebtoonPageItem(
-    viewer: WebtoonViewer,
-    item: Any,
+    page: ReaderPage,
     modifier: Modifier = Modifier,
 ) {
+    WebtoonPageContent(
+        page = page,
+        initialRatio = page.aspectRatio,
+        onRatioCalculated = { ratio, _ -> page.aspectRatio = ratio },
+        imageData = page,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun WebtoonPageItem(
+    split: ReaderPageSplit,
+    modifier: Modifier = Modifier,
+) {
+    WebtoonPageContent(
+        page = split.page,
+        initialRatio = split.aspectRatio,
+        onRatioCalculated = { ratio, height ->
+            split.aspectRatio = ratio
+            split.displayedHeight = height
+        },
+        imageData = split,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun WebtoonPageContent(
+    page: ReaderPage,
+    initialRatio: Float,
+    onRatioCalculated: (Float, Int) -> Unit,
+    imageData: Any,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
     val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-    val cropBordersWebtoon by readerPreferences.cropBordersWebtoon().collectAsState()
-    val cropBorders by readerPreferences.cropBorders().collectAsState()
-    val sidePadding by readerPreferences.webtoonSidePadding().collectAsState()
-    val webtoonPageLayout by readerPreferences.webtoonPageLayout().collectAsState()
-    val invertDoublePages by readerPreferences.webtoonInvertDoublePages().collectAsState()
-    val readerTheme by readerPreferences.readerTheme().collectAsState()
+    val readerThemePref by readerPreferences.readerTheme().collectAsState()
 
-    val itemKey =
-        when (item) {
-            is ReaderPage -> "page_${item.chapter.chapter.id}_${item.index}"
-            is ReaderPageSplit ->
-                "split_${item.page.chapter.chapter.id}_${item.page.index}_${item.topOffset}"
-            else -> item.toString()
+    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
+
+    val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
+    val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
+
+    val isError = pageStatus == Page.State.ERROR
+
+    var intrinsicRatio by remember(imageData) { mutableFloatStateOf(initialRatio) }
+
+    val backgroundColor =
+        remember(readerThemePref) {
+            val theme = ReaderTheme.fromPreference(readerThemePref)
+            when (theme) {
+                ReaderTheme.SMART_BY_THEME -> Color.Transparent
+                else -> Color(ThemeUtil.readerBackgroundColor(readerThemePref, context))
+            }
         }
 
-    val pageHolder =
-        remember(
-            itemKey,
-            webtoonPageLayout,
-            invertDoublePages,
-            readerTheme,
-            cropBordersWebtoon,
-            cropBorders,
-            sidePadding,
-        ) {
-            val imageView =
-                ReaderPageImageView(viewer.activity, isWebtoon = true).apply {
-                    layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+    val onRetry: () -> Unit = { page.chapter.pageLoader?.retryPage(page) }
+
+    val model =
+        remember(imageData, pageStatus) {
+            ImageRequest.Builder(context).data(imageData).crossfade(true).build()
+        }
+
+    val sizeModifier =
+        if (intrinsicRatio > 0f) {
+            Modifier.aspectRatio(intrinsicRatio)
+        } else {
+            Modifier.heightIn(min = Size.extraLarge * 10)
+        }
+
+    Box(
+        modifier = modifier.fillMaxWidth().then(sizeModifier).background(backgroundColor),
+        contentAlignment = Alignment.Center,
+    ) {
+        AsyncImage(
+            model = model,
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .then(
+                        if (intrinsicRatio > 0f) Modifier.aspectRatio(intrinsicRatio) else Modifier
+                    ),
+            onSuccess = { state ->
+                val img = state.result.image
+                if (img.width > 0 && img.height > 0) {
+                    val ratio = img.width.toFloat() / img.height.toFloat()
+                    intrinsicRatio = ratio
+                    onRatioCalculated(ratio, img.height)
                 }
-            WebtoonPageHolder(imageView, viewer).apply { bind(item) }
-        }
-
-    DisposableEffect(pageHolder) { onDispose { pageHolder.recycle() } }
-
-    Box(modifier = modifier.fillMaxWidth().heightIn(min = Size.extraLarge * 10)) {
-        AndroidView(
-            factory = { pageHolder.itemView },
-            update = {},
-            modifier = Modifier.fillMaxWidth(),
+            },
         )
+
+        ReaderPageLoadingOverlay(status = pageStatus, progress = pageProgress)
+
+        ReaderPageErrorOverlay(visible = isError, onRetry = onRetry)
     }
 }
