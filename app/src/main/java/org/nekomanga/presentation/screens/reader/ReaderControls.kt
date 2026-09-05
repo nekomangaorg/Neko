@@ -15,9 +15,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -301,116 +301,137 @@ private fun HorizontalFloatingSlider(
 
     val isPagesVisible = currentPageText.isNotEmpty() && totalPagesText.isNotEmpty()
 
-    Box(
-        modifier =
-            modifier
-                .background(
-                    MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                    shape = RoundedCornerShape(Shapes.coverRadius),
-                )
-                .padding(horizontal = Size.smedium, vertical = Size.small - Size.extraTiny)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Size.small),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier.size(Size.extraHuge)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(Shapes.coverRadius),
+                    ),
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(Size.huge - Size.small),
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(Size.large),
-                        strokeWidth = Size.extraTiny,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                } else {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.previous_chapter),
-                        icon = SkipPrevious,
-                        enabledTint = MaterialTheme.colorScheme.primary,
-                        onClick = onSkipPrevious,
-                    )
-                }
-            }
-
-            if (isPagesVisible) {
-                val leftText = if (isRtl) totalPagesText else currentPageText
-                val rightText = if (isRtl) currentPageText else totalPagesText
-
-                Text(
-                    text = leftText,
-                    style = MaterialTheme.typography.bodyMedium,
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(Size.large),
+                    strokeWidth = Size.extraTiny,
                     color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(Size.huge - Size.tiny),
-                )
-
-                val sliderLayoutDirection = if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
-                CompositionLocalProvider(LocalLayoutDirection provides sliderLayoutDirection) {
-                    val targetMax = maxOf(totalPages.toFloat(), 1f)
-                    val displayValue =
-                        (draggingValue ?: currentPageIndex.toFloat()).coerceIn(
-                            0f,
-                            targetMax,
-                        )
-                    Slider(
-                        value = displayValue,
-                        onValueChange = { value ->
-                            draggingValue = value
-                            val roundedValue = value.roundToInt()
-                            if (roundedValue != lastValue) {
-                                lastValue = roundedValue
-                                view.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE)
-                                onPageChange(roundedValue)
-                            }
-                        },
-                        onValueChangeFinished = {
-                            val finalValue = lastValue
-                            draggingValue = null
-                            onPageChange(finalValue)
-                        },
-                        valueRange = 0f..targetMax,
-                        colors =
-                            SliderDefaults.colors(
-                                activeTrackColor = MaterialTheme.colorScheme.primary,
-                                inactiveTrackColor =
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
-                                thumbColor = MaterialTheme.colorScheme.primary,
-                            ),
-                        modifier = Modifier.weight(1f).padding(horizontal = Size.small),
-                    )
-                }
-
-                Text(
-                    text = rightText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(Size.huge - Size.tiny),
                 )
             } else {
-                Spacer(modifier = Modifier.weight(1f).fillMaxWidth())
+                ToolTipButton(
+                    toolTipLabel = stringResource(R.string.previous_chapter),
+                    icon = SkipPrevious,
+                    iconModifier = Modifier.size(Size.largePlus),
+                    enabledTint = MaterialTheme.colorScheme.primary,
+                    onClick = onSkipPrevious,
+                )
             }
+        }
 
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(Size.huge - Size.small),
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(Size.large),
-                        strokeWidth = Size.extraTiny,
-                        color = MaterialTheme.colorScheme.primary,
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier.weight(1f)
+                    .height(Size.extraHuge)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(Shapes.coverRadius),
                     )
-                } else {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.next_chapter),
-                        icon = SkipNext,
-                        enabledTint = MaterialTheme.colorScheme.primary,
-                        onClick = onSkipNext,
+                    .padding(horizontal = Size.smedium),
+        ) {
+            if (isPagesVisible) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    val leftText = if (isRtl) totalPagesText else currentPageText
+                    val rightText = if (isRtl) currentPageText else totalPagesText
+
+                    Text(
+                        text = leftText,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(Size.huge - Size.tiny),
+                    )
+
+                    val sliderLayoutDirection =
+                        if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
+                    CompositionLocalProvider(LocalLayoutDirection provides sliderLayoutDirection) {
+                        val targetMax = maxOf(totalPages.toFloat(), 1f)
+                        val displayValue =
+                            (draggingValue ?: currentPageIndex.toFloat()).coerceIn(
+                                0f,
+                                targetMax,
+                            )
+                        Slider(
+                            value = displayValue,
+                            onValueChange = { value ->
+                                draggingValue = value
+                                val roundedValue = value.roundToInt()
+                                if (roundedValue != lastValue) {
+                                    lastValue = roundedValue
+                                    view.performHapticFeedback(
+                                        HapticFeedbackConstants.TEXT_HANDLE_MOVE
+                                    )
+                                    onPageChange(roundedValue)
+                                }
+                            },
+                            onValueChangeFinished = {
+                                val finalValue = lastValue
+                                draggingValue = null
+                                onPageChange(finalValue)
+                            },
+                            valueRange = 0f..targetMax,
+                            colors =
+                                SliderDefaults.colors(
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor =
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            modifier = Modifier.weight(1f).padding(horizontal = Size.small),
+                        )
+                    }
+
+                    Text(
+                        text = rightText,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(Size.huge - Size.tiny),
                     )
                 }
+            }
+        }
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier.size(Size.extraHuge)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(Shapes.coverRadius),
+                    ),
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(Size.large),
+                    strokeWidth = Size.extraTiny,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            } else {
+                ToolTipButton(
+                    toolTipLabel = stringResource(R.string.next_chapter),
+                    icon = SkipNext,
+                    iconModifier = Modifier.size(Size.largePlus),
+                    enabledTint = MaterialTheme.colorScheme.primary,
+                    onClick = onSkipNext,
+                )
             }
         }
     }
@@ -434,135 +455,151 @@ private fun VerticalFloatingSlider(
 
     val isPagesVisible = currentPageText.isNotEmpty() && totalPagesText.isNotEmpty()
 
-    Box(
-        modifier =
-            modifier
-                .width(Size.extraHuge)
-                .fillMaxHeight(0.5f)
-                .background(
-                    MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                    shape = RoundedCornerShape(Shapes.coverRadius),
-                )
-                .padding(vertical = Size.small, horizontal = Size.tiny),
-        contentAlignment = Alignment.Center,
+    Column(
+        verticalArrangement = Arrangement.spacedBy(Size.small),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier.fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier.size(Size.extraHuge)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(Shapes.coverRadius),
+                    ),
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(Size.huge - Size.small),
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(Size.large),
-                        strokeWidth = Size.extraTiny,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                } else {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.previous_chapter),
-                        modifier = Modifier.rotate(90f),
-                        icon = SkipPrevious,
-                        enabledTint = MaterialTheme.colorScheme.primary,
-                        onClick = onSkipPrevious,
-                    )
-                }
-            }
-
-            if (isPagesVisible) {
-                val displayCurrentPage =
-                    if (draggingValue != null) {
-                        (draggingValue!!.roundToInt() + 1).toString()
-                    } else {
-                        currentPageText
-                    }
-
-                Text(
-                    text = displayCurrentPage,
-                    style = MaterialTheme.typography.bodyMedium,
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(Size.large),
+                    strokeWidth = Size.extraTiny,
                     color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
-                )
-
-                val targetMax = maxOf(totalPages.toFloat(), 1f)
-                val sliderState =
-                    remember(targetMax) {
-                        SliderState(
-                            value = (targetMax - currentPageIndex).coerceIn(0f, targetMax),
-                            valueRange = 0f..targetMax,
-                            onValueChangeFinished = {
-                                val finalValue = lastValue
-                                draggingValue = null
-                                onPageChange(finalValue)
-                            },
-                        )
-                    }
-
-                LaunchedEffect(currentPageIndex, targetMax) {
-                    val expectedSliderValue = (targetMax - currentPageIndex).coerceIn(0f, targetMax)
-                    if (
-                        draggingValue == null &&
-                            sliderState.value.roundToInt() != expectedSliderValue.roundToInt()
-                    ) {
-                        sliderState.value = expectedSliderValue
-                    }
-                }
-
-                LaunchedEffect(sliderState.value, targetMax) {
-                    val rawPage = (targetMax - sliderState.value).coerceIn(0f, targetMax)
-                    val roundedPage = rawPage.roundToInt()
-                    if (roundedPage != lastValue) {
-                        draggingValue = rawPage
-                        lastValue = roundedPage
-                        view.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE)
-                        onPageChange(roundedPage)
-                    }
-                }
-
-                VerticalSlider(
-                    state = sliderState,
-                    colors =
-                        SliderDefaults.colors(
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            inactiveTrackColor =
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                        ),
-                    modifier = Modifier.weight(1f).padding(vertical = Size.small),
-                )
-
-                Text(
-                    text = totalPagesText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
                 )
             } else {
-                Spacer(modifier = Modifier.weight(1f))
+                ToolTipButton(
+                    toolTipLabel = stringResource(R.string.previous_chapter),
+                    modifier = Modifier.rotate(90f),
+                    iconModifier = Modifier.size(Size.largePlus),
+                    icon = SkipPrevious,
+                    enabledTint = MaterialTheme.colorScheme.primary,
+                    onClick = onSkipPrevious,
+                )
             }
+        }
 
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(Size.huge - Size.small),
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(Size.large),
-                        strokeWidth = Size.extraTiny,
-                        color = MaterialTheme.colorScheme.primary,
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier.width(Size.extraHuge)
+                    .height(Size.squareCoverLarge * 2.5f)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(Shapes.coverRadius),
                     )
-                } else {
-                    ToolTipButton(
-                        modifier = Modifier.rotate(90f),
-                        toolTipLabel = stringResource(R.string.next_chapter),
-                        icon = SkipNext,
-                        enabledTint = MaterialTheme.colorScheme.primary,
-                        onClick = onSkipNext,
+                    .padding(vertical = Size.smedium, horizontal = Size.tiny),
+        ) {
+            if (isPagesVisible) {
+                Column(
+                    modifier = Modifier.fillMaxHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    val displayCurrentPage =
+                        if (draggingValue != null) {
+                            (draggingValue!!.roundToInt() + 1).toString()
+                        } else {
+                            currentPageText
+                        }
+
+                    Text(
+                        text = displayCurrentPage,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                    )
+
+                    val targetMax = maxOf(totalPages.toFloat(), 1f)
+                    val sliderState =
+                        remember(targetMax) {
+                            SliderState(
+                                value = (targetMax - currentPageIndex).coerceIn(0f, targetMax),
+                                valueRange = 0f..targetMax,
+                                onValueChangeFinished = {
+                                    val finalValue = lastValue
+                                    draggingValue = null
+                                    onPageChange(finalValue)
+                                },
+                            )
+                        }
+
+                    LaunchedEffect(currentPageIndex, targetMax) {
+                        val expectedSliderValue =
+                            (targetMax - currentPageIndex).coerceIn(0f, targetMax)
+                        if (
+                            draggingValue == null &&
+                                sliderState.value.roundToInt() != expectedSliderValue.roundToInt()
+                        ) {
+                            sliderState.value = expectedSliderValue
+                        }
+                    }
+
+                    LaunchedEffect(sliderState.value, targetMax) {
+                        val rawPage = (targetMax - sliderState.value).coerceIn(0f, targetMax)
+                        val roundedPage = rawPage.roundToInt()
+                        if (roundedPage != lastValue) {
+                            draggingValue = rawPage
+                            lastValue = roundedPage
+                            view.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE)
+                            onPageChange(roundedPage)
+                        }
+                    }
+
+                    VerticalSlider(
+                        state = sliderState,
+                        colors =
+                            SliderDefaults.colors(
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor =
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                            ),
+                        modifier = Modifier.weight(1f).padding(vertical = Size.small),
+                    )
+
+                    Text(
+                        text = totalPagesText,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
                     )
                 }
+            }
+        }
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier.size(Size.extraHuge)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(Shapes.coverRadius),
+                    ),
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(Size.large),
+                    strokeWidth = Size.extraTiny,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            } else {
+                ToolTipButton(
+                    modifier = Modifier.rotate(90f),
+                    toolTipLabel = stringResource(R.string.next_chapter),
+                    iconModifier = Modifier.size(Size.largePlus),
+                    icon = SkipNext,
+                    enabledTint = MaterialTheme.colorScheme.primary,
+                    onClick = onSkipNext,
+                )
             }
         }
     }
@@ -606,12 +643,12 @@ private fun BottomActionSheet(
                     MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
                     shape =
                         RoundedCornerShape(
-                            topStart = Shapes.coverRadius,
-                            topEnd = Shapes.coverRadius,
+                            topStart = Size.largePlus,
+                            topEnd = Size.largePlus,
                         ),
                 )
                 .navigationBarsPadding()
-                .padding(horizontal = Size.smedium, vertical = Size.small)
+                .padding(horizontal = Size.smedium, vertical = Size.smedium)
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             Row(
