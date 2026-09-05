@@ -127,7 +127,6 @@ dependencies {
     implementation(libs.bundles.google)
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
-    implementation(libs.bundles.ok)
 
     // TLS 1.3 support for Android < 10
     implementation(libs.conscrypt)
