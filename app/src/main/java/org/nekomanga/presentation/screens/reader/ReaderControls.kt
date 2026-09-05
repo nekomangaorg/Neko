@@ -491,7 +491,7 @@ private fun VerticalFloatingSlider(
             contentAlignment = Alignment.Center,
             modifier =
                 Modifier.width(Size.extraHuge)
-                    .height(Size.squareCoverLarge * 2.5f)
+                    .height(Size.squareCoverLarge * 3.5f)
                     .background(
                         MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
                         shape = RoundedCornerShape(Shapes.coverRadius),
@@ -522,7 +522,7 @@ private fun VerticalFloatingSlider(
                     val sliderState =
                         remember(targetMax) {
                             SliderState(
-                                value = (targetMax - currentPageIndex).coerceIn(0f, targetMax),
+                                value = currentPageIndex.toFloat().coerceIn(0f, targetMax),
                                 valueRange = 0f..targetMax,
                                 onValueChangeFinished = {
                                     val finalValue = lastValue
@@ -533,8 +533,7 @@ private fun VerticalFloatingSlider(
                         }
 
                     LaunchedEffect(currentPageIndex, targetMax) {
-                        val expectedSliderValue =
-                            (targetMax - currentPageIndex).coerceIn(0f, targetMax)
+                        val expectedSliderValue = currentPageIndex.toFloat().coerceIn(0f, targetMax)
                         if (
                             draggingValue == null &&
                                 sliderState.value.roundToInt() != expectedSliderValue.roundToInt()
@@ -544,7 +543,7 @@ private fun VerticalFloatingSlider(
                     }
 
                     LaunchedEffect(sliderState.value, targetMax) {
-                        val rawPage = (targetMax - sliderState.value).coerceIn(0f, targetMax)
+                        val rawPage = sliderState.value.coerceIn(0f, targetMax)
                         val roundedPage = rawPage.roundToInt()
                         if (roundedPage != lastValue) {
                             draggingValue = rawPage
