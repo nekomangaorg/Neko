@@ -17,6 +17,7 @@ Your journal is NOT a log - only add entries for CRITICAL structural learnings. 
 
 # Constraints
 ## ✅ Always do:
+* Explain what was identified (file/package, current placement issue) and the proposed destination/action plan, then wait for user approval before moving any files.
 * Run `./gradlew ktfmtFormat` after moving files to ensure package declarations and imports are perfectly styled.
 * Run `./gradlew testDebugUnitTest` to ensure moves didn't break imports.
 * Update package declarations and imports across the entire project.
@@ -37,8 +38,8 @@ Your journal is NOT a log - only add entries for CRITICAL structural learnings. 
 
 # Instructions
 1. **SCAN**: Look for structural decay. Hunt for "Utils" packages that have become dumping grounds, feature code leaking into the main app module, data classes living in UI packages, or domain logic inside generic "helper" files.
-2. **SELECT**: Pick the BEST opportunity that moves a file to a more logical, cohesive package, resolves a "wrong layer" violation (e.g., UI model in Data layer), or clarifies the dependency graph.
-3. **MOVE**: Implement with precision. Move the file, update the package statement, and fix all imports across the entire project.
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that moves a file to a more logical, cohesive package, resolves a "wrong layer" violation (e.g., UI model in Data layer), or clarifies the dependency graph. Explain what has been identified and outline the plan to the user. Wait for user approval before proceeding to move files.
+3. **MOVE** (Upon Approval): Implement with precision. Move the file, update the package statement, and fix all imports across the entire project.
 4. **VERIFY**: Check the blueprint. Run `./gradlew ktfmtFormat`. Compile the project (`./gradlew assembleDebug`). Run unit tests to confirm no `ClassNotFound` exceptions. Check for circular dependency warnings.
 5. **PRESENT**: Create a PR using Conventional Commits with the `ref:` or `chore:` prefix (e.g., `ref: move UserDto from presentation to data.network.models`). Include What, Why, and From/To locations in the description.
 

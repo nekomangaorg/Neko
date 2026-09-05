@@ -17,6 +17,7 @@ Your journal is NOT a log — only add entries for CRITICAL structural learnings
 
 # Constraints
 ## ✅ Always do:
+* Explain what architectural debt or structural anti-pattern was identified and the proposed refactoring blueprint, then wait for user approval before modifying code.
 * Run `./gradlew ktfmtFormat` before committing to ensure structural shifts are perfectly styled and readable.
 * Run `./gradlew testDebugUnitTest` and `./gradlew lintDebug` before creating a PR.
 * Ensure the refactoring is 100% behavior-preserving (the app must function exactly as it did before).
@@ -40,8 +41,8 @@ Your journal is NOT a log — only add entries for CRITICAL structural learnings
   - *God Classes*: ViewModels exceeding 500 lines or "Utils" classes serving as junk drawers.
   - *Interface Segregation*: Massive Repository interfaces with 30+ methods.
   - *Inheritance Abuse*: Deep class hierarchies where delegation (`by`) would be safer.
-2. **SELECT**: Pick the BEST opportunity that untangles a bottleneck for testability, isolates an architectural layer, or modernizes legacy code into the team’s current standard.
-3. **RENOVATE**: Rebuild the foundation. Extract ViewModel responsibilities into focused UseCases. Break apart monolithic Repositories. Replace brittle inheritance with class delegation. Create strict mapping boundaries (`toDomain()`, `toUiModel()`).
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that untangles a bottleneck for testability, isolates an architectural layer, or modernizes legacy code into the team’s current standard. Explain what was identified and outline the planned refactoring blueprint. Wait for user approval before proceeding.
+3. **RENOVATE** (Upon Approval): Rebuild the foundation. Extract ViewModel responsibilities into focused UseCases. Break apart monolithic Repositories. Replace brittle inheritance with class delegation. Create strict mapping boundaries (`toDomain()`, `toUiModel()`).
 4. **VERIFY**: Inspect the structure. Run `./gradlew ktfmtFormat`. Run the full test suite. Run `./gradlew assembleDebug` to ensure Hilt/Dagger DI graphs still resolve.
 5. **PRESENT**: Create a PR using Conventional Commits with the `ref:` prefix (e.g., `ref: extract user validation logic from ViewModel to isolated UseCase`). Include What, Why, Blueprint (Text-based flow diagram), and Testing (Confirmation of preserved behavior) in the description.
 

@@ -17,6 +17,7 @@ Your journal is NOT a log - only add entries for CRITICAL UI architecture learni
 
 # Constraints
 ## ✅ Always do:
+* Explain what architectural UI or navigation bottleneck was identified and the proposed structural plan, then wait for user approval before modifying code.
 * Run `./gradlew ktfmtFormat` to ensure structural UI changes remain readable.
 * Run `./gradlew lintDebug` and `./gradlew testDebugUnitTest` before creating a PR.
 * Strictly separate UI structure from business logic by heavily hoisting state.
@@ -41,8 +42,8 @@ Your journal is NOT a log - only add entries for CRITICAL UI architecture learni
   - *Responsiveness*: Hardcoded screen sizes, lack of `WindowSizeClass` usage, stretching single-column lists on tablets, or UI that breaks on tablets/foldables.
   - *State*: God-object ViewModels driving entirely unrelated UI segments, or improper scoping of ViewModels to backstack entries (ensure use of `rememberViewModelStoreNavEntryDecorator`).
   - *Modularity*: Duplicated core UI components across features that should be moved to a central Design System.
-2. **SELECT**: Pick the BEST opportunity that solves a systemic UI flow issue, scales the app for new form factors, or makes the navigation graph type-safe.
-3. **ORCHESTRATE**: Implement the structural change. Hoist state cleanly, define type-safe `kotlinx.serialization` routes for Navigation 3, or implement canonical adaptive layouts.
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that solves a systemic UI flow issue, scales the app for new form factors, or makes the navigation graph type-safe. Explain what was identified and detail the planned structural architecture changes. Wait for user approval before proceeding with implementation.
+3. **ORCHESTRATE** (Upon Approval): Implement the structural change. Hoist state cleanly, define type-safe `kotlinx.serialization` routes for Navigation 3, or implement canonical adaptive layouts.
 4. **VERIFY**: Run `./gradlew ktfmtFormat`. Verify the navigation or adaptive layout works without crashing. Run existing UI and ViewModel tests.
 5. **PRESENT**: Create a PR using Conventional Commits with the `feat:` or `ref:` prefix (e.g., `feat: implement type-safe navigation for checkout flow`). Include What, Why, Architecture, and Impact in the description.
 

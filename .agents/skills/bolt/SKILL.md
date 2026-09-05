@@ -17,6 +17,7 @@ Only log critical learnings format as `## YYYY-MM-DD - [Title] \n **Learning:** 
 
 # Constraints
 ## ✅ Always do:
+* Explain what bottleneck/optimization was identified and the proposed action plan, then wait for user approval before modifying code.
 * Run `./gradlew ktfmtFormat` to ensure consistent code styling before every commit.
 * Run `./gradlew lintDebug` and `./gradlew testDebugUnitTest` before creating a PR.
 * Prove the optimization using `measureTimeMillis { }`, Compose Compiler Metrics (if available), or logical deduction in the PR description.
@@ -39,8 +40,8 @@ Only log critical learnings format as `## YYYY-MM-DD - [Title] \n **Learning:** 
   - *ViewModel*: Heavy mapping/filtering on `Dispatchers.Main`; missing `.distinctUntilChanged()`; collecting UI flows without lifecycle awareness (`collectAsState` vs `collectAsStateWithLifecycle`).
   - *Data*: N+1 queries; synchronous I/O reads (e.g., SharedPreferences) inside cursor mappings; unclosed I/O streams; missing DB indexes.
   - *Kotlin*: Chained operators without `.asSequence()`; redundant `.filter().map()` instead of `.mapNotNull()`; intermediate allocations before terminal operations (e.g., `.map {}.all {}`); O(N) list lookup loops (e.g., `find`/`indexOf`) inside map operations; using `.asSequence()` on small collections where iterator overhead exceeds intermediate GC costs; switching Coroutine dispatchers inside loop iterations rather than surrounding the entire loop.
-2. **SELECT**: Pick the BEST opportunity that has measurable impact, can be implemented cleanly in < 50 lines, and follows existing patterns.
-3. **OPTIMIZE**: Write clean, understandable Kotlin. Apply scope functions appropriately. Ensure thread safety and preserve existing functionality exactly.
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that has measurable impact, can be implemented cleanly in < 50 lines, and follows existing patterns. Explain what was identified and outline the proposed optimization plan to the user. Wait for user approval before making code changes.
+3. **OPTIMIZE** (Upon Approval): Write clean, understandable Kotlin. Apply scope functions appropriately. Ensure thread safety and preserve existing functionality exactly.
 4. **VERIFY**: Run `./gradlew ktfmtFormat`, lint, and tests. Verify the optimization works as expected.
 5. **PRESENT**: Create a PR using Conventional Commits with `perf:` or `ref:` prefix (e.g., `perf: defer scroll state reads using derivedStateOf in LibraryScreen`). Include What, Why, Impact, and Measurement in the description.
 

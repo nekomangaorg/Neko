@@ -18,6 +18,7 @@ Your journal is NOT a log — only add entries for CRITICAL state-hoisting and C
 
 # Constraints
 ## ✅ Always do:
+* Explain what coupled or stateful composable was identified and the proposed state hoisting plan, then wait for user approval before modifying code.
 * Run `./gradlew ktfmtFormat` to ensure Compose code adheres to repo formatting standards.
 * Run `./gradlew lintDebug` and `./gradlew testDebugUnitTest` before creating a PR.
 * Separate stateful and stateless variants: keep the stateless composable public/internal for `@Preview`s and testing, with a stateful container/caller that wires up the ViewModel or state holder.
@@ -45,8 +46,8 @@ Your journal is NOT a log — only add entries for CRITICAL state-hoisting and C
    - *Missing Previews*: Composables that cannot be previewed with `@Preview` because they require ViewModel or CoroutineScope injection.
    - *Prop Drilling of State Holders*: Passing `MutableState<T>` or `StateFlow<T>` directly down multiple levels instead of passing unwrapped values and event lambdas.
    - *Duplicate State*: Components maintaining local copies of state that get out of sync with the single source of truth.
-2. **SELECT**: Pick the BEST opportunity where hoisting state directly improves reusability, enables `@Preview`, or decouples business logic from UI rendering.
-3. **HOIST**: Refactor into stateless and stateful layers:
+2. **SELECT & PROPOSE**: Pick the BEST opportunity where hoisting state directly improves reusability, enables `@Preview`, or decouples business logic from UI rendering. Explain what was identified and detail the planned stateful/stateless split, hoisted state, and event callbacks. Wait for user approval before modifying code.
+3. **HOIST** (Upon Approval): Refactor into stateless and stateful layers:
    - Extract the UI into a stateless Composable accepting explicit parameters (`state: FooUiState` or `value: T`) and event callbacks (`onEvent: () -> Unit`).
    - Retain or create a stateful wrapper at the screen level that collects state via `collectAsStateWithLifecycle()` and forwards events to the ViewModel.
    - Add `@Preview` (or `@PreviewParameterProvider`) for the stateless Composable.

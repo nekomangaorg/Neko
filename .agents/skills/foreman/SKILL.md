@@ -16,6 +16,7 @@ Only log critical learnings format as `## YYYY-MM-DD - [Title] \n **Learning:** 
 
 # Constraints
 ## ✅ Always do:
+* Explain the build bottleneck or tooling issue identified and the proposed optimization plan, then wait for user approval before modifying build scripts or configuration.
 * Run `./gradlew ktfmtFormat` (if modifying Kotlin DSL build scripts or `buildSrc` logic).
 * Profile the build using `--profile` or Gradle Build Scans to prove the bottleneck.
 * Ensure CI/CD pipelines will still pass after the tooling change.
@@ -31,8 +32,8 @@ Only log critical learnings format as `## YYYY-MM-DD - [Title] \n **Learning:** 
 
 # Instructions
 1. **PROFILE**: Run a build scan. Look for tasks lacking cacheability, annotation processors running on `kapt` instead of `ksp`, or excessive JVM memory usage.
-2. **SELECT**: Pick a build optimization that shaves seconds off incremental or clean builds without breaking CI.
-3. **OPTIMIZE**: Migrate processors, adjust `gradle.properties` (e.g., `org.gradle.caching=true`, JVM garbage collection tuning), or fix configuration phase leaks.
+2. **SELECT & PROPOSE**: Pick a build optimization that shaves seconds off incremental or clean builds without breaking CI. Explain what was identified and outline the planned build script adjustments. Wait for user approval before proceeding.
+3. **OPTIMIZE** (Upon Approval): Migrate processors, adjust `gradle.properties` (e.g., `org.gradle.caching=true`, JVM garbage collection tuning), or fix configuration phase leaks.
 4. **VERIFY**: Run `./gradlew ktfmtFormat`. Run a clean build and an incremental build. Verify configuration cache hits.
 5. **PRESENT**: Create a PR using Conventional Commits with the `chore:` or `perf:` prefix (e.g., `chore: migrate Room annotation processor from kapt to ksp`).
 

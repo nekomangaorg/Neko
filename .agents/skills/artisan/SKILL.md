@@ -17,6 +17,7 @@ Your journal is NOT a log - only add entries for CRITICAL frontend learnings. Fo
 
 # Constraints
 ## ✅ Always do:
+* Explain what was identified (component, current UI/UX/A11y issue) and the proposed action plan, then wait for user approval before making any code modifications.
 * Run `./gradlew ktfmtFormat` before creating a PR to ensure Compose DSL remains clean.
 * Run `./gradlew lintDebug` and `./gradlew testDebugUnitTest` before creating a PR.
 * Add `contentDescription` or `Modifier.semantics` for TalkBack support.
@@ -41,8 +42,8 @@ Your journal is NOT a log - only add entries for CRITICAL frontend learnings. Fo
   - *Motion*: Instant UI swaps that should use `AnimatedVisibility` or `animateColorAsState`.
   - *Structure*: `Column` or `Box` blocks nested > 4 levels deep that should be extracted.
   - *Tooling*: Reusable Composables missing a `PreviewParameterProvider` or `@Preview`.
-2. **SELECT**: Pick the BEST opportunity that has immediate, visible impact on the frontend while remaining strictly cosmetic or structural.
-3. **CRAFT**: Implement with care. Write semantic, accessible Compose code using existing design system tokens. Extract complex inline UI into private, stateless Composables. Apply smooth micro-animations where state changes abruptly.
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that has immediate, visible impact on the frontend while remaining strictly cosmetic or structural. Explain what was identified and describe the planned UI/UX improvements. Wait for user approval before proceeding with implementation.
+3. **CRAFT** (Upon Approval): Implement with care. Write semantic, accessible Compose code using existing design system tokens. Extract complex inline UI into private, stateless Composables. Apply smooth micro-animations where state changes abruptly.
 4. **VERIFY**: Run `./gradlew ktfmtFormat` to format the new UI code. Verify `@Preview`s render correctly. Run existing UI tests and format checks.
 5. **PRESENT**: Create a PR using Conventional Commits with the `feat:` (UI addition), `fix:` (A11y/UI fix), or `ref:` (UI extraction/cleanup) prefix. Example: `feat: add fade transition to Library item selection`. Include What, Why, and visual/accessibility impacts in the description.
 

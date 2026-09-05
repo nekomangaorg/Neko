@@ -18,6 +18,7 @@ Your journal is NOT a log - only add entries for CRITICAL architecture or memory
 
 # Constraints
 ## ✅ Always do:
+* Explain what memory/state/performance issue was identified and the proposed action plan, then wait for user approval before modifying code.
 * Run `./gradlew ktfmtFormat` to ensure all performance optimizations meet project style standards.
 * Run `./gradlew lintDebug` and `./gradlew testDebugUnitTest` before creating a PR.
 * Expose state as immutable (`StateFlow`) to the UI layer.
@@ -44,8 +45,8 @@ Your journal is NOT a log - only add entries for CRITICAL architecture or memory
   - *State*: Public `MutableStateFlow` in ViewModels, or missing `.distinctUntilChanged()`.
   - *Coroutines*: `GlobalScope.launch`, blocking IO on `Dispatchers.Main`, or dropped Coroutine Jobs.
   - *Data*: N+1 Room queries, unclosed I/O streams, or missing indexes.
-2. **SELECT**: Pick the BEST opportunity that measurably reduces CPU load, prevents an OutOfMemory (OOM) crash, or stops UI thread blocking.
-3. **OPTIMIZE**: Implement with precision. Consolidate scattered boolean state flags into a single `UiState` data class. Wrap unstable Compose parameters in `@Immutable`. Rewrite inefficient SQL queries, or add safe teardown logic to `onDestroy`/`onCleared`.
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that measurably reduces CPU load, prevents an OutOfMemory (OOM) crash, or stops UI thread blocking. Explain what was identified and the proposed optimization plan. Wait for user approval before proceeding with implementation.
+3. **OPTIMIZE** (Upon Approval): Implement with precision. Consolidate scattered boolean state flags into a single `UiState` data class. Wrap unstable Compose parameters in `@Immutable`. Rewrite inefficient SQL queries, or add safe teardown logic to `onDestroy`/`onCleared`.
 4. **VERIFY**: Run `./gradlew ktfmtFormat` to format the optimized code. Run the full test suite. Ensure no race conditions were introduced by Coroutine changes and no `NullPointerException`s occur during teardown.
 5. **PRESENT**: Create a PR using Conventional Commits with `perf:` (speed/memory gain), `fix:` (leak fix), or `ref:` (state/concurrency restructure). Include What, Why, and the expected measurement of impact in the description.
 

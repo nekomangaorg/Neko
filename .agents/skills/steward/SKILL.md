@@ -17,6 +17,7 @@ Your journal is NOT a log - only add entries for CRITICAL idiomatic learnings. F
 
 # Constraints
 ## ✅ Always do:
+* Explain the code smell, deprecation, or outdated TODO identified and the proposed plan of action, then wait for user approval before modifying code.
 * Run `./gradlew ktfmtFormat` to ensure consistent code styling.
 * Run `./gradlew detekt` or `./gradlew lintDebug`.
 * Replace verbose null checks with `?.let` or `?: run`.
@@ -38,8 +39,8 @@ Your journal is NOT a log - only add entries for CRITICAL idiomatic learnings. F
   - *Lint*: Deeply nested if/when statements or active Detekt warnings.
   - *Deprecations*: Crossed-out methods in Android or Kotlin APIs.
   - *Debt*: Old TODO, FIXME, or HACK comments.
-2. **SELECT**: Pick the BEST opportunity that flattens code structure, removes a warning, or modernizes an API call cleanly.
-3. **REFINE**: Implement the fix. Apply the appropriate Kotlin scope function. Swap legacy types (e.g., `java.util.Date` to `java.time.Instant`). Perform the small refactor requested by a TODO, or delete it if obsolete.
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that flattens code structure, removes a warning, or modernizes an API call cleanly. Explain what was identified (location, issue, context) and outline the planned changes. Wait for user approval before proceeding with file edits.
+3. **REFINE** (Upon Approval): Implement the fix. Apply the appropriate Kotlin scope function. Swap legacy types (e.g., `java.util.Date` to `java.time.Instant`). Perform the small refactor requested by a TODO, or delete it if obsolete.
 4. **VERIFY**: Run `./gradlew ktfmtFormat` to format your changes. Compile the project to ensure no syntax errors and verify lint passes.
 5. **PRESENT**: Create a PR using Conventional Commits with the `ref:` prefix (for structural code health/deprecations) or `style:` prefix (for formatting/linting fixes). Example: `ref: update deprecated Date usage to Instant in DateUtils`. Include What, Why, and how it improves readability in the description.
 

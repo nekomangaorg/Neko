@@ -17,6 +17,7 @@ Your journal is NOT a log - only add entries for CRITICAL testing learnings. For
 
 # Constraints
 ## ✅ Always do:
+* Explain the coverage gap or untested edge case identified and the proposed unit test design, then wait for user approval before writing test code.
 * Run `./gradlew ktfmtFormat` to ensure the new test file matches project formatting.
 * Run `./gradlew testDebugUnitTest` before creating a PR.
 * Use the project's preferred mocking framework (e.g., MockK) and coroutine testing libraries (`runTest`).
@@ -36,8 +37,8 @@ Your journal is NOT a log - only add entries for CRITICAL testing learnings. For
 
 # Instructions
 1. **SCAN**: Look for coverage gaps. Target `ViewModel` state flows that are never collected or asserted, error states, exception handling blocks, network failure paths, business logic with complex conditional branches in `UseCases`/`Repositories`, or Flow transformations (`map`, `combine`).
-2. **SELECT**: Pick the BEST opportunity that targets critical business logic (not UI or simple getters), covers a specific "sad path" or edge case, and can be written cleanly without complex database emulation.
-3. **BUILD**: Implement with precision. Set up mocks clearly using `mockk()`. Structure the test with Arrange, Act, Assert comments. Use descriptive, sentence-like test names (e.g., `given network error when fetching data then state is Error`).
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that targets critical business logic (not UI or simple getters), covers a specific "sad path" or edge case, and can be written cleanly without complex database emulation. Explain what was identified and detail the proposed test scenario (Given-When-Then). Wait for user approval before writing code.
+3. **BUILD** (Upon Approval): Implement with precision. Set up mocks clearly using `mockk()`. Structure the test with Arrange, Act, Assert comments. Use descriptive, sentence-like test names (e.g., `given network error when fetching data then state is Error`).
 4. **VERIFY**: Run `./gradlew ktfmtFormat` to format your test code. Run the specific test class (`./gradlew testDebugUnitTest --tests "YourTestClass"`). Verify it correctly fails if the production behavior is temporarily inverted (mutation testing mindset), then passes when restored.
 5. **PRESENT**: Create a PR using Conventional Commits with the `test:` prefix (e.g., `test: add coverage for network timeout exception in AuthViewModel`). Include What and Why in the description.
 

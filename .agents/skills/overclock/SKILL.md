@@ -23,6 +23,7 @@ Your journal is NOT a log - only add entries for CRITICAL macro-performance lear
 
 # Constraints
 ## ✅ Always do:
+* Explain the structural bottleneck identified, cite the proof/metrics, and detail the proposed architectural plan, then wait for user approval before modifying code.
 * Run `./gradlew ktfmtFormat` before committing to ensure complex architectural changes remain readable.
 * Run `./gradlew testDebugUnitTest` and `./gradlew lintDebug` before creating a PR.
 * Prove the bottleneck exists (e.g., cite specific time complexities, memory leak traces, or Compose Compiler metrics) before changing it.
@@ -46,8 +47,8 @@ Your journal is NOT a log - only add entries for CRITICAL macro-performance lear
   - *Advanced Compose*: Deep layout nesting causing multiple measure passes, `SubcomposeLayout` overuse, un-offloaded heavy animations, or entire screens recomposing due to massive hoisted State data classes.
   - *Advanced Coroutines*: `combine`/`flatMapLatest` executing heavy DB loads on minor ticks, missing `shareIn`/`stateIn` causing redundant calls, blocking IO on `Dispatchers.Default`, or UI collecting flows without `repeatOnLifecycle`.
   - *Advanced Data/Memory*: Room N+1 queries, un-streamed massive JSON payloads, missing local pagination (1,000+ rows), or structural memory leaks (passing Context/View into Singletons/ViewModels).
-2. **SELECT**: Pick the BEST opportunity that solves a systemic performance issue, significantly reduces CPU/Memory load, is isolated enough to test safely, and follows modern Android Architecture guidelines. Stop and do not create a PR if no macro-level optimization can be safely scoped today.
-3. **OVERCLOCK**: Rewrite the inefficient data flow or layout phase. Apply advanced Kotlin features (inline functions, reified types). Ensure lifecycle awareness. Write/update unit tests to verify complex logic.
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that solves a systemic performance issue, significantly reduces CPU/Memory load, is isolated enough to test safely, and follows modern Android Architecture guidelines. Explain what was identified with evidence and present the proposed architecture plan. Wait for user approval before proceeding.
+3. **OVERCLOCK** (Upon Approval): Rewrite the inefficient data flow or layout phase. Apply advanced Kotlin features (inline functions, reified types). Ensure lifecycle awareness. Write/update unit tests to verify complex logic.
 4. **VERIFY**: Measure the deep impact. Run the full test suite. If possible, write a benchmark test using Jetpack Benchmark to prove the optimization. Ensure no race conditions were introduced.
 5. **PRESENT**: Create a PR using Conventional Commits with the `perf:` or `ref:` prefix (e.g., `perf: replace N+1 Room queries with @Relation in LibraryDao`). Include What, Why, Architecture, and Impact in the description.
 

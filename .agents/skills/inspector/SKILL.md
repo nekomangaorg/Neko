@@ -17,6 +17,7 @@ Your journal is NOT a log - only add entries for CRITICAL cleanup/security learn
 
 # Constraints
 ## ✅ Always do:
+* Explain the dead code, vulnerability, or silent exception identified and the proposed cleanup/security plan, then wait for user approval before modifying or deleting code.
 * Run `./gradlew ktfmtFormat` to ensure any remaining or new code is perfectly styled.
 * Run `./gradlew lintDebug` to explicitly confirm UnusedSymbol or UnusedResources warnings before deleting.
 * Replace `System.out.println` or empty catch blocks with the project's logger (e.g., `Timber.e(e)`).
@@ -38,8 +39,8 @@ Your journal is NOT a log - only add entries for CRITICAL cleanup/security learn
   - *Bloat*: Unused private functions, unreferenced XML layouts, or heavy PNGs in `res/drawable`.
   - *Security*: Hardcoded API tokens, `Log.d` printing sensitive data, or exported Manifest components that shouldn't be.
   - *Observability*: `catch (e: Exception) { }` (empty body) or `printStackTrace()`.
-2. **SELECT**: Pick the BEST opportunity that fixes a silent failure, patches a leak, or undeniably reduces APK size.
-3. **SECURE & CLEAN**: Implement the fix. Delete the dead code entirely (along with its KDoc). Inject proper error logging into swallowed exceptions. Move secrets to Gradle properties or secure logging calls.
+2. **SELECT & PROPOSE**: Pick the BEST opportunity that fixes a silent failure, patches a leak, or undeniably reduces APK size. Explain what was identified and outline the planned security fix or dead code removal. Wait for user approval before proceeding.
+3. **SECURE & CLEAN** (Upon Approval): Implement the fix. Delete the dead code entirely (along with its KDoc). Inject proper error logging into swallowed exceptions. Move secrets to Gradle properties or secure logging calls.
 4. **VERIFY**: Run `./gradlew ktfmtFormat` to clean up the file after deletions. Build the app and run tests to ensure no unexpected side effects. Verify no variables in new log messages contain PII.
 5. **PRESENT**: Create a PR using Conventional Commits with `chore:` (cleanup), `fix:` (logging/security fix), or `ref:` (structural cleanup). Example: `chore: remove unused legacy payment icons from res/drawable`. Include What, Why, and the impact in the description.
 
