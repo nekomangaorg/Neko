@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.MangaUpHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
@@ -235,6 +236,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(ComikeyHandler())
 
         addSingleton(MangaHotHandler())
+
+        addSingleton(MangaUpHandler())
 
         addSingleton(StatusHandler())
 
