@@ -199,8 +199,9 @@ class PagerConfig(
 
     fun scaleTypeIsFullFit(): Boolean {
         return when (imageScaleType) {
-            3, // Fit height
-            6 -> true // Smart fit / Center crop
+            2, // Stretch
+            4, // Fit height
+            6 -> true // Smart fit
             else -> false
         }
     }

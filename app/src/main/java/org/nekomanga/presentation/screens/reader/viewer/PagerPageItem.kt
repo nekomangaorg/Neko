@@ -17,13 +17,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size as ComposeSize
+import androidx.compose.ui.geometry.isEmpty
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -32,7 +37,10 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import kotlin.math.hypot
 import kotlinx.coroutines.flow.emptyFlow
@@ -101,14 +109,85 @@ fun PagerPageItem(
     val combinedProgress =
         if (extraPage == null) pageProgress else (pageProgress + extraPageProgress) / 2
 
+    val zoomStart by readerPreferences.zoomStart().collectAsState()
+
+    val imageAlignment =
+        remember(zoomStart, viewer) {
+            val zoomType =
+                when (zoomStart) {
+                    // Auto
+                    1 ->
+                        when (viewer) {
+                            is L2RPagerViewer -> PagerConfig.ZoomType.Left
+                            is R2LPagerViewer -> PagerConfig.ZoomType.Right
+                            else -> PagerConfig.ZoomType.Center
+                        }
+                    2 -> PagerConfig.ZoomType.Left
+                    3 -> PagerConfig.ZoomType.Right
+                    else -> PagerConfig.ZoomType.Center
+                }
+
+            Alignment { size, space, _ ->
+                val x =
+                    if (size.width > space.width) {
+                        when (zoomType) {
+                            PagerConfig.ZoomType.Left -> 0
+                            PagerConfig.ZoomType.Right -> space.width - size.width
+                            PagerConfig.ZoomType.Center -> (space.width - size.width) / 2
+                        }
+                    } else {
+                        (space.width - size.width) / 2
+                    }
+
+                val y =
+                    if (size.height > space.height) {
+                        0
+                    } else {
+                        (space.height - size.height) / 2
+                    }
+
+                IntOffset(x, y)
+            }
+        }
+
     val contentScale =
         remember(imageScaleType) {
             when (imageScaleType) {
                 1 -> ContentScale.Fit // Fit screen
-                2 -> ContentScale.FillWidth // Fit width
-                3 -> ContentScale.FillHeight // Fit height
-                4 -> ContentScale.FillBounds // Stretch
-                5 -> ContentScale.Inside // Original / Center
+                2 -> ContentScale.FillBounds // Stretch
+                3 -> ContentScale.FillWidth // Fit width
+                4 -> ContentScale.FillHeight // Fit height
+                5 -> ContentScale.None // Original size (1:1)
+                6 ->
+                    object : ContentScale {
+                        override fun computeScaleFactor(
+                            srcSize: ComposeSize,
+                            dstSize: ComposeSize,
+                        ): ScaleFactor {
+                            return if (srcSize.isSpecified && !srcSize.isEmpty()) {
+                                if (srcSize.height > srcSize.width) {
+                                    ContentScale.FillWidth.computeScaleFactor(srcSize, dstSize)
+                                } else {
+                                    ContentScale.FillHeight.computeScaleFactor(srcSize, dstSize)
+                                }
+                            } else {
+                                ContentScale.Fit.computeScaleFactor(srcSize, dstSize)
+                            }
+                        }
+                    } // Smart fit
+                else -> ContentScale.Fit
+            }
+        }
+
+    val doublePageContentScale =
+        remember(imageScaleType) {
+            when (imageScaleType) {
+                1 -> ContentScale.Fit
+                2 -> ContentScale.FillBounds
+                3 -> ContentScale.FillWidth
+                4 -> ContentScale.FillHeight
+                5 -> ContentScale.None
+                6 -> ContentScale.Fit
                 else -> ContentScale.Fit
             }
         }
@@ -275,6 +354,7 @@ fun PagerPageItem(
                 model = model,
                 contentDescription = null,
                 contentScale = contentScale,
+                alignment = imageAlignment,
                 state = imageState,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -304,13 +384,13 @@ fun PagerPageItem(
                     AsyncImage(
                         model = firstModel,
                         contentDescription = null,
-                        contentScale = contentScale,
+                        contentScale = doublePageContentScale,
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                     AsyncImage(
                         model = secondModel,
                         contentDescription = null,
-                        contentScale = contentScale,
+                        contentScale = doublePageContentScale,
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                 }

@@ -462,7 +462,7 @@ private fun LayoutSettingsTab(
                 )
             }
 
-            if (imageScaleType - 1 == 3) { // Center Inside
+            if (imageScaleType == 1) { // Fit screen / Center Inside
                 ReaderSwitchSetting(
                     label = stringResource(R.string.zoom_double_page_spreads),
                     checked = landscapeZoom,
@@ -490,7 +490,7 @@ private fun LayoutSettingsTab(
                 )
             }
 
-            val isFullFit = imageScaleType - 1 in listOf(0, 1, 5)
+            val isFullFit = imageScaleType in listOf(2, 4, 6)
             if (isFullFit && hasCutout && keepScreenOn) {
                 val cutoutOptions = stringArrayResource(id = R.array.cutout_behavior).toList()
                 ReaderChipsSelector(
