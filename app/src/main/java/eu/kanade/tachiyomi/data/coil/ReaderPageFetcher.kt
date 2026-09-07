@@ -18,7 +18,9 @@ import coil3.request.Options
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
+import eu.kanade.tachiyomi.util.system.GLUtil
 import java.io.ByteArrayInputStream
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -26,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.source
+import org.nekomanga.logging.TimberKt
 
 class ReaderPageFetcher(private val page: ReaderPage, private val options: Options) : Fetcher {
 
@@ -141,19 +144,17 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                     @Suppress("DEPRECATION")
                     BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
                 }
-            } catch (_: Exception) {
-                val fullBitmap =
-                    BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return null
-                val cropHeight = minOf(height, fullBitmap.height - top)
-                if (cropHeight <= 0 || top >= fullBitmap.height) {
-                    return fullBitmap
+            } catch (e: IOException) {
+                TimberKt.e(e) {
+                    "Failed to create BitmapRegionDecoder for page ${split.page.index}, slice offset $top"
                 }
-                val cropped = Bitmap.createBitmap(fullBitmap, 0, top, fullBitmap.width, cropHeight)
-                if (cropped != fullBitmap) {
-                    fullBitmap.recycle()
+                return fallbackDecodeRegion(imageBytes, top, height)
+            } catch (e: IllegalArgumentException) {
+                TimberKt.e(e) {
+                    "Illegal arguments creating BitmapRegionDecoder for page ${split.page.index}, slice offset $top"
                 }
-                return cropped
-            }
+                return fallbackDecodeRegion(imageBytes, top, height)
+            } ?: return fallbackDecodeRegion(imageBytes, top, height)
 
         return try {
             val bottom = minOf(decoder.height, top + height)
@@ -168,6 +169,59 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             }
         } finally {
             decoder.recycle()
+        }
+    }
+
+    private fun fallbackDecodeRegion(
+        imageBytes: ByteArray,
+        top: Int,
+        height: Int,
+    ): Bitmap? {
+        val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, boundsOptions)
+        val imageWidth = boundsOptions.outWidth
+        val imageHeight = boundsOptions.outHeight
+
+        if (imageWidth <= 0 || imageHeight <= 0) {
+            TimberKt.e {
+                "Cannot fallback decode region: invalid image dimensions ($imageWidth x $imageHeight)"
+            }
+            return null
+        }
+
+        // Avoid allocating massive uncompressed bitmaps in memory to prevent OutOfMemoryError
+        val estimatedMemoryBytes = imageWidth.toLong() * imageHeight.toLong() * 4L
+        val maxSafeMemoryBytes = 30L * 1024L * 1024L // 30 MB
+        if (estimatedMemoryBytes > maxSafeMemoryBytes || imageHeight > GLUtil.maxTextureSize) {
+            TimberKt.w {
+                "Skipping full bitmap fallback decode to avoid OutOfMemoryError: dimensions $imageWidth x $imageHeight ($estimatedMemoryBytes bytes), limit $maxSafeMemoryBytes bytes"
+            }
+            return null
+        }
+
+        return try {
+            val fullBitmap =
+                BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return null
+            val cropHeight = minOf(height, fullBitmap.height - top)
+            if (cropHeight <= 0 || top >= fullBitmap.height) {
+                fullBitmap
+            } else {
+                val cropped = Bitmap.createBitmap(fullBitmap, 0, top, fullBitmap.width, cropHeight)
+                if (cropped != fullBitmap) {
+                    fullBitmap.recycle()
+                }
+                cropped
+            }
+        } catch (e: OutOfMemoryError) {
+            TimberKt.e(e) {
+                "OutOfMemoryError during fallback decode for page ${split.page.index}, slice offset $top"
+            }
+            null
+        } catch (e: Exception) {
+            TimberKt.e(e) {
+                "Unexpected error during fallback decode for page ${split.page.index}, slice offset $top"
+            }
+            null
         }
     }
 

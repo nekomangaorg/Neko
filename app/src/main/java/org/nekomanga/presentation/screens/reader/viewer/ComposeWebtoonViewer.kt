@@ -192,7 +192,7 @@ fun ComposeWebtoonViewer(
         val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
         val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
-        val preloadedKeys = remember(viewer.currentChapter) { mutableSetOf<String>() }
+        val preloadedKeys = remember { mutableSetOf<String>() }
 
         val checkAndSplitTallPage: (ReaderPage) -> Unit = { p ->
             if (viewer.config.splitTallPages && !viewer.controller.tallSplitPages.contains(p)) {
