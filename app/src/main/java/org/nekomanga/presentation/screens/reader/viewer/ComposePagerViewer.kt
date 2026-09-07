@@ -1,6 +1,8 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -103,6 +105,7 @@ fun ComposePagerViewer(
                 initialPage = initialPage,
                 pageCount = { items.size },
             )
+        viewer.currentPagePosition = pagerState.currentPage
 
         var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
         var isTransitioning by remember { mutableStateOf(false) }
@@ -136,6 +139,7 @@ fun ComposePagerViewer(
                 }
                 if (newIndex != -1 && newIndex != pagerState.currentPage) {
                     pagerState.scrollToPage(newIndex)
+                    viewer.currentPagePosition = newIndex
                 }
             }
         }
@@ -153,16 +157,23 @@ fun ComposePagerViewer(
         LaunchedEffect(viewer.requestedPagePosition) {
             val req = viewer.requestedPagePosition ?: return@LaunchedEffect
             val target = req.first
-            if (target in items.indices) {
-                if (pagerState.currentPage != target) {
+            try {
+                if (target in items.indices && pagerState.currentPage != target) {
                     val useAnimation = req.second && animatedTransitions
                     if (useAnimation) {
-                        pagerState.animateScrollToPage(target)
+                        pagerState.animateScrollToPage(
+                            page = target,
+                            animationSpec =
+                                tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                        )
                     } else {
                         pagerState.scrollToPage(target)
                     }
                 }
-                viewer.requestedPagePosition = null
+            } finally {
+                if (viewer.requestedPagePosition == req) {
+                    viewer.requestedPagePosition = null
+                }
             }
         }
 
@@ -212,6 +223,7 @@ fun ComposePagerViewer(
             snapshotFlow { pagerState.currentPage }
                 .distinctUntilChanged()
                 .collect { pageIndex ->
+                    viewer.currentPagePosition = pageIndex
                     val item = items.getOrNull(pageIndex)
                     if (item != null) {
                         lastActiveItem = item

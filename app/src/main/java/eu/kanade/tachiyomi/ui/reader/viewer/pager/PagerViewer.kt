@@ -162,7 +162,11 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     /** Moves to the page at the right. */
     open fun moveRight() {
-        val current = requestedPagePosition?.first ?: currentPagePosition
+        val current =
+            (requestedPagePosition?.first ?: currentPagePosition).coerceIn(
+                0,
+                (items.size - 1).coerceAtLeast(0),
+            )
         val item = items.getOrNull(current)
         if (
             item is ReaderUiItem.Transition &&
@@ -182,7 +186,11 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     /** Moves to the page at the left. */
     open fun moveLeft() {
-        val current = requestedPagePosition?.first ?: currentPagePosition
+        val current =
+            (requestedPagePosition?.first ?: currentPagePosition).coerceIn(
+                0,
+                (items.size - 1).coerceAtLeast(0),
+            )
         val item = items.getOrNull(current)
         if (
             item is ReaderUiItem.Transition &&
