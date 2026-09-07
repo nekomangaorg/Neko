@@ -233,10 +233,6 @@ fun PagerPageItem(
                                     val event = awaitPointerEvent(pass = PointerEventPass.Initial)
                                     val change = event.changes.firstOrNull { it.id == down.id }
                                     if (change == null) break
-                                    if (!change.pressed) {
-                                        pointerUp = change
-                                        break
-                                    }
                                     val moveDistance =
                                         hypot(
                                             (change.position.x - downPos.x).toDouble(),
@@ -244,6 +240,10 @@ fun PagerPageItem(
                                         )
                                     if (moveDistance > touchSlopPx) {
                                         isMovementPastSlop = true
+                                        break
+                                    }
+                                    if (!change.pressed) {
+                                        pointerUp = change
                                         break
                                     }
                                 }
@@ -256,38 +256,18 @@ fun PagerPageItem(
                                 viewer.activity.onPageLongTap(page, extraPage)
                                 isLongPressTriggered = true
                             }
-                            do {
-                                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                            } while (event.changes.any { it.pressed })
-                        }
-
-                        if (pointerUp == null && !isLongPressTriggered) {
-                            while (true) {
-                                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                                val change = event.changes.firstOrNull { it.id == down.id }
-                                if (change == null) break
-                                if (!change.pressed) {
-                                    pointerUp = change
-                                    break
-                                }
-                                val moveDistance =
-                                    hypot(
-                                        (change.position.x - downPos.x).toDouble(),
-                                        (change.position.y - downPos.y).toDouble(),
-                                    )
-                                if (moveDistance > touchSlopPx * 2.0) {
-                                    break
-                                }
+                            while (currentEvent.changes.any { it.pressed }) {
+                                awaitPointerEvent(pass = PointerEventPass.Initial)
                             }
                         }
 
                         if (pointerUp == null && !isLongPressTriggered) {
-                            do {
-                                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                            } while (event.changes.any { it.pressed })
+                            while (currentEvent.changes.any { it.pressed }) {
+                                awaitPointerEvent(pass = PointerEventPass.Initial)
+                            }
                         }
 
-                        if (!isLongPressTriggered && pointerUp != null) {
+                        if (!isLongPressTriggered && !isMovementPastSlop && pointerUp != null) {
                             val up = pointerUp!!
                             val upPos = up.position
                             val upTime = System.currentTimeMillis()
