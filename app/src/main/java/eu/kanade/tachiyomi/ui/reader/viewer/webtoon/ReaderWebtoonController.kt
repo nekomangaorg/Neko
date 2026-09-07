@@ -7,6 +7,11 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
+import eu.kanade.tachiyomi.util.system.GLUtil
+import eu.kanade.tachiyomi.util.system.ImageUtil
+import java.util.Collections
+import okio.buffer
+import okio.source
 
 /**
  * Pure domain controller for Webtoon reader item generation, transitions, and tall-page splitting.
@@ -24,7 +29,8 @@ class ReaderWebtoonController {
         private set
 
     /** Tracks which pages have already been tall-split to prevent re-splitting on rebind. */
-    val tallSplitPages = mutableSetOf<ReaderPage>()
+    val tallSplitPages: MutableSet<ReaderPage> =
+        Collections.synchronizedSet(mutableSetOf<ReaderPage>())
 
     /**
      * Builds the list of [ReaderUiItem] for the given [chapters]. Handles previous chapter padding
@@ -76,7 +82,7 @@ class ReaderWebtoonController {
             chapters.nextChapter == null ||
                 nextHasMissingChapters ||
                 forceTransition ||
-                chapters.nextChapter?.state !is ReaderChapter.State.Loaded
+                chapters.nextChapter.state !is ReaderChapter.State.Loaded
         ) {
             newItems.add(ReaderUiItem.Transition(nextTrans))
         }
@@ -92,8 +98,9 @@ class ReaderWebtoonController {
     }
 
     /**
-     * Inserts [insertPages] after [originalPage] in the [currentItems] list. Called when a tall
-     * page is split into multiple chunks.
+     * Splits [originalPage] into [insertPages] within [currentItems]. If [insertPages] begins at
+     * topOffset == 0, it replaces the monolithic [originalPage]. Otherwise, it inserts the slices
+     * directly after [originalPage].
      */
     fun splitPage(
         currentItems: List<ReaderUiItem>,
@@ -107,9 +114,31 @@ class ReaderWebtoonController {
 
         val newItems = currentItems.toMutableList()
         val splitItems = insertPages.map { ReaderUiItem.SplitPage(it) }
-        newItems.addAll(position + 1, splitItems)
+        if (insertPages.isNotEmpty() && insertPages.first().topOffset == 0) {
+            newItems.removeAt(position)
+            newItems.addAll(position, splitItems)
+        } else {
+            newItems.addAll(position + 1, splitItems)
+        }
         tallSplitPages.add(originalPage)
         return newItems
+    }
+
+    /**
+     * Inspects [page] image headers and determines if it exceeds height thresholds. Returns the
+     * list of [ReaderPageSplit] slices if the page should be split, or null otherwise.
+     */
+    fun checkTallPage(
+        page: ReaderPage,
+        screenHeight: Int,
+        maxTextureSize: Int = GLUtil.maxTextureSize,
+    ): List<ReaderPageSplit>? {
+        if (tallSplitPages.contains(page)) return null
+        val splits = checkTallPage(page, screenHeight, maxTextureSize)
+        if (splits != null) {
+            tallSplitPages.add(page)
+        }
+        return splits
     }
 
     /** Finds the index of [page] in [items]. */
@@ -120,6 +149,73 @@ class ReaderWebtoonController {
                 is ReaderUiItem.SplitPage -> it.page == page
                 is ReaderUiItem.Transition -> false
             }
+        }
+    }
+
+    companion object {
+        /**
+         * Inspects [page] image headers and calculates [ReaderPageSplit] slices if the image is
+         * taller than [screenHeight] * 2 or exceeds [maxTextureSize].
+         */
+        fun checkTallPage(
+            page: ReaderPage,
+            screenHeight: Int,
+            maxTextureSize: Int = GLUtil.maxTextureSize,
+        ): List<ReaderPageSplit>? {
+            val streamFn = page.stream ?: return null
+            val options =
+                try {
+                    streamFn().source().buffer().use { ImageUtil.extractImageOptions(it) }
+                } catch (_: Exception) {
+                    return null
+                }
+            return computeSplits(
+                page,
+                options.outWidth,
+                options.outHeight,
+                screenHeight,
+                maxTextureSize,
+            )
+        }
+
+        /**
+         * Pure function that calculates optimal slice splits given dimensions and maximum texture
+         * sizes.
+         */
+        fun computeSplits(
+            page: ReaderPage,
+            outWidth: Int,
+            outHeight: Int,
+            screenHeight: Int,
+            maxTextureSize: Int = GLUtil.maxTextureSize,
+        ): List<ReaderPageSplit>? {
+            if (outHeight <= 0 || outWidth <= 0) return null
+            val displayMaxHeight = maxOf(screenHeight * 2, maxTextureSize)
+            val isTall = (outHeight / outWidth > 3) || (outHeight > maxTextureSize)
+            if (!isTall || outHeight <= displayMaxHeight) {
+                return null
+            }
+
+            val maxSliceHeight = minOf(displayMaxHeight, maxTextureSize)
+            val partCount = (outHeight - 1) / maxSliceHeight + 1
+            if (partCount <= 1) return null
+
+            val optimalSplitHeight = outHeight / partCount
+            val splits = mutableListOf<ReaderPageSplit>()
+            for (i in 0 until partCount) {
+                val topOffset = i * optimalSplitHeight
+                val splitH =
+                    if (i == partCount - 1) {
+                        outHeight - topOffset
+                    } else {
+                        optimalSplitHeight
+                    }
+                val split =
+                    ReaderPageSplit(page = page, topOffset = topOffset, splitHeight = splitH)
+                split.aspectRatio = outWidth.toFloat() / splitH.toFloat()
+                splits.add(split)
+            }
+            return splits
         }
     }
 }

@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -84,7 +86,7 @@ class ReaderWebtoonControllerTest {
     }
 
     @Test
-    fun `splitPage correctly inserts split slices into item list`() {
+    fun `splitPage replaces monolithic page when slices start at offset 0`() {
         val controller = ReaderWebtoonController()
         val currChapter = createChapter(1L, pageCount = 3)
         val viewerChapters = ViewerChapters(currChapter, null, null)
@@ -96,12 +98,69 @@ class ReaderWebtoonControllerTest {
         val split2 = ReaderPageSplit(targetPage, 1000, 1000)
 
         val updatedItems = controller.splitPage(items, targetPage, listOf(split1, split2))
-        assertEquals(5, updatedItems.size)
+        assertEquals(4, updatedItems.size)
         assertTrue(updatedItems[0] is ReaderUiItem.Page)
-        assertTrue(updatedItems[1] is ReaderUiItem.Page) // original page
+        assertTrue(updatedItems[1] is ReaderUiItem.SplitPage)
+        assertEquals(0, (updatedItems[1] as ReaderUiItem.SplitPage).split.topOffset)
         assertTrue(updatedItems[2] is ReaderUiItem.SplitPage)
-        assertTrue(updatedItems[3] is ReaderUiItem.SplitPage)
-        assertTrue(updatedItems[4] is ReaderUiItem.Page)
+        assertEquals(1000, (updatedItems[2] as ReaderUiItem.SplitPage).split.topOffset)
+        assertTrue(updatedItems[3] is ReaderUiItem.Page)
+        assertTrue(controller.tallSplitPages.contains(targetPage))
+    }
+
+    @Test
+    fun `splitPage inserts slices after original page when topOffset is greater than 0`() {
+        val controller = ReaderWebtoonController()
+        val currChapter = createChapter(1L, pageCount = 3)
+        val viewerChapters = ViewerChapters(currChapter, null, null)
+        val items = controller.buildItems(viewerChapters, forceTransition = false)
+
+        assertEquals(3, items.size)
+        val targetPage = currChapter.pages!![1]
+        val split1 = ReaderPageSplit(targetPage, 1000, 1000)
+
+        val updatedItems = controller.splitPage(items, targetPage, listOf(split1))
+        assertEquals(4, updatedItems.size)
+        assertTrue(updatedItems[0] is ReaderUiItem.Page)
+        assertTrue(updatedItems[1] is ReaderUiItem.Page)
+        assertTrue(updatedItems[2] is ReaderUiItem.SplitPage)
+        assertTrue(updatedItems[3] is ReaderUiItem.Page)
+    }
+
+    @Test
+    fun `computeSplits returns null for normal proportion images`() {
+        val chapter = createChapter(1L, pageCount = 1)
+        val page = chapter.pages!![0]
+        val splits = ReaderWebtoonController.computeSplits(page, 1000, 1500, 1000, 4096)
+        assertNull(splits)
+    }
+
+    @Test
+    fun `computeSplits calculates correct slices for tall images`() {
+        val chapter = createChapter(1L, pageCount = 1)
+        val page = chapter.pages!![0]
+        val splits = ReaderWebtoonController.computeSplits(page, 1000, 12000, 1000, 4096)
+        assertNotNull(splits)
+        assertEquals(3, splits!!.size)
+        assertEquals(0, splits[0].topOffset)
+        assertEquals(4000, splits[0].splitHeight)
+        assertEquals(4000, splits[1].topOffset)
+        assertEquals(4000, splits[1].splitHeight)
+        assertEquals(8000, splits[2].topOffset)
+        assertEquals(4000, splits[2].splitHeight)
+    }
+
+    @Test
+    fun `computeSplits handles images that exceed maxTextureSize`() {
+        val chapter = createChapter(1L, pageCount = 1)
+        val page = chapter.pages!![0]
+        val splits = ReaderWebtoonController.computeSplits(page, 2000, 5000, 3000, 4096)
+        assertNotNull(splits)
+        assertEquals(2, splits!!.size)
+        assertEquals(0, splits[0].topOffset)
+        assertEquals(2500, splits[0].splitHeight)
+        assertEquals(2500, splits[1].topOffset)
+        assertEquals(2500, splits[1].splitHeight)
     }
 
     @Test
