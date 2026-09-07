@@ -158,36 +158,7 @@ fun PagerPageItem(
                 3 -> ContentScale.FillWidth // Fit width
                 4 -> ContentScale.FillHeight // Fit height
                 5 -> ContentScale.None // Original size (1:1)
-                6 ->
-                    object : ContentScale {
-                        override fun computeScaleFactor(
-                            srcSize: ComposeSize,
-                            dstSize: ComposeSize,
-                        ): ScaleFactor {
-                            return if (srcSize.isSpecified && !srcSize.isEmpty()) {
-                                if (srcSize.height > srcSize.width) {
-                                    ContentScale.FillWidth.computeScaleFactor(srcSize, dstSize)
-                                } else {
-                                    ContentScale.FillHeight.computeScaleFactor(srcSize, dstSize)
-                                }
-                            } else {
-                                ContentScale.Fit.computeScaleFactor(srcSize, dstSize)
-                            }
-                        }
-                    } // Smart fit
-                else -> ContentScale.Fit
-            }
-        }
-
-    val doublePageContentScale =
-        remember(imageScaleType) {
-            when (imageScaleType) {
-                1 -> ContentScale.Fit
-                2 -> ContentScale.FillBounds
-                3 -> ContentScale.FillWidth
-                4 -> ContentScale.FillHeight
-                5 -> ContentScale.None
-                6 -> ContentScale.Fit
+                6 -> SmartFitContentScale // Smart fit
                 else -> ContentScale.Fit
             }
         }
@@ -384,13 +355,13 @@ fun PagerPageItem(
                     AsyncImage(
                         model = firstModel,
                         contentDescription = null,
-                        contentScale = doublePageContentScale,
+                        contentScale = contentScale,
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                     AsyncImage(
                         model = secondModel,
                         contentDescription = null,
-                        contentScale = doublePageContentScale,
+                        contentScale = contentScale,
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                 }
@@ -400,5 +371,22 @@ fun PagerPageItem(
         ReaderPageLoadingOverlay(status = combinedStatus, progress = combinedProgress)
 
         ReaderPageErrorOverlay(visible = isError, onRetry = onRetry)
+    }
+}
+
+private object SmartFitContentScale : ContentScale {
+    override fun computeScaleFactor(
+        srcSize: ComposeSize,
+        dstSize: ComposeSize,
+    ): ScaleFactor {
+        return if (srcSize.isSpecified && !srcSize.isEmpty()) {
+            if (srcSize.height > srcSize.width) {
+                ContentScale.FillWidth.computeScaleFactor(srcSize, dstSize)
+            } else {
+                ContentScale.FillHeight.computeScaleFactor(srcSize, dstSize)
+            }
+        } else {
+            ContentScale.Fit.computeScaleFactor(srcSize, dstSize)
+        }
     }
 }
