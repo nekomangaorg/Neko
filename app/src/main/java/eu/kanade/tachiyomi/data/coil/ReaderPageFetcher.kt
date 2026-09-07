@@ -1,10 +1,17 @@
 package eu.kanade.tachiyomi.data.coil
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.BitmapRegionDecoder
+import android.graphics.Rect
+import android.os.Build
 import coil3.ImageLoader
+import coil3.asImage
 import coil3.decode.DataSource
 import coil3.decode.ImageSource
 import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
+import coil3.fetch.ImageFetchResult
 import coil3.fetch.SourceFetchResult
 import coil3.key.Keyer
 import coil3.request.Options
@@ -16,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.source
 
@@ -66,38 +74,101 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
 
     override suspend fun fetch(): FetchResult = coroutineScope {
         val bytes = split.cachedBytes
-        val source =
-            if (bytes != null) {
-                ByteArrayInputStream(bytes).source().buffer()
-            } else {
-                var streamFn = split.page.stream
-                if (streamFn == null) {
-                    val loader = split.page.chapter.pageLoader
-                    val loadJob =
-                        if (loader != null && split.page.status == Page.State.QUEUE) {
-                            launch(Dispatchers.IO) { loader.loadPage(split.page) }
-                        } else {
-                            null
-                        }
-                    try {
-                        split.page.statusFlow.first {
-                            (it == Page.State.READY && split.page.stream != null) ||
-                                it == Page.State.ERROR
-                        }
-                    } finally {
-                        loadJob?.cancel()
-                    }
-                    streamFn = split.page.stream
+        if (bytes != null) {
+            val source = ByteArrayInputStream(bytes).source().buffer()
+            return@coroutineScope SourceFetchResult(
+                source = ImageSource(source = source, fileSystem = options.fileSystem),
+                mimeType = null,
+                dataSource = DataSource.MEMORY,
+            )
+        }
+
+        var streamFn = split.page.stream
+        if (streamFn == null) {
+            val loader = split.page.chapter.pageLoader
+            val loadJob =
+                if (loader != null && split.page.status == Page.State.QUEUE) {
+                    launch(Dispatchers.IO) { loader.loadPage(split.page) }
+                } else {
+                    null
                 }
-                val actualStream =
-                    streamFn ?: error("Page stream not available for page ${split.page.index}")
-                actualStream().source().buffer()
+            try {
+                split.page.statusFlow.first {
+                    (it == Page.State.READY && split.page.stream != null) || it == Page.State.ERROR
+                }
+            } finally {
+                loadJob?.cancel()
             }
-        SourceFetchResult(
-            source = ImageSource(source = source, fileSystem = options.fileSystem),
-            mimeType = null,
-            dataSource = DataSource.MEMORY,
-        )
+            streamFn = split.page.stream
+        }
+        val actualStream =
+            streamFn ?: error("Page stream not available for page ${split.page.index}")
+
+        val imageBytes = withContext(Dispatchers.IO) { actualStream().use { it.readBytes() } }
+        val bitmap =
+            withContext(Dispatchers.IO) {
+                decodeRegion(imageBytes, split.topOffset, split.splitHeight)
+            }
+        if (bitmap != null) {
+            ImageFetchResult(
+                image = bitmap.asImage(),
+                isSampled = false,
+                dataSource = DataSource.MEMORY,
+            )
+        } else {
+            SourceFetchResult(
+                source =
+                    ImageSource(
+                        source = ByteArrayInputStream(imageBytes).source().buffer(),
+                        fileSystem = options.fileSystem,
+                    ),
+                mimeType = null,
+                dataSource = DataSource.MEMORY,
+            )
+        }
+    }
+
+    private fun decodeRegion(
+        imageBytes: ByteArray,
+        top: Int,
+        height: Int,
+    ): Bitmap? {
+        val decoder =
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size)
+                } else {
+                    @Suppress("DEPRECATION")
+                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
+                }
+            } catch (_: Exception) {
+                val fullBitmap =
+                    BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return null
+                val cropHeight = minOf(height, fullBitmap.height - top)
+                if (cropHeight <= 0 || top >= fullBitmap.height) {
+                    return fullBitmap
+                }
+                val cropped = Bitmap.createBitmap(fullBitmap, 0, top, fullBitmap.width, cropHeight)
+                if (cropped != fullBitmap) {
+                    fullBitmap.recycle()
+                }
+                return cropped
+            }
+
+        return try {
+            val bottom = minOf(decoder.height, top + height)
+            if (top >= decoder.height || bottom <= top) {
+                null
+            } else {
+                val region = Rect(0, top, decoder.width, bottom)
+                decoder.decodeRegion(
+                    region,
+                    BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 },
+                )
+            }
+        } finally {
+            decoder.recycle()
+        }
     }
 
     class Factory : Fetcher.Factory<ReaderPageSplit> {

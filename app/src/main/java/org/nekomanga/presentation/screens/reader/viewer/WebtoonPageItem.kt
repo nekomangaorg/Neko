@@ -14,17 +14,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.size.Precision
+import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.ReaderWebtoonController
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
@@ -34,6 +40,7 @@ import uy.kohesive.injekt.api.get
 @Composable
 fun WebtoonPageItem(
     page: ReaderPage,
+    onSplitPage: ((List<ReaderPageSplit>) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     WebtoonPageContent(
@@ -41,6 +48,7 @@ fun WebtoonPageItem(
         initialRatio = page.aspectRatio,
         onRatioCalculated = { ratio, _ -> page.aspectRatio = ratio },
         imageData = page,
+        onSplitPage = onSplitPage,
         modifier = modifier,
     )
 }
@@ -58,6 +66,7 @@ fun WebtoonPageItem(
             split.displayedHeight = height
         },
         imageData = split,
+        onSplitPage = null,
         modifier = modifier,
     )
 }
@@ -68,6 +77,7 @@ private fun WebtoonPageContent(
     initialRatio: Float,
     onRatioCalculated: (Float, Int) -> Unit,
     imageData: Any,
+    onSplitPage: ((List<ReaderPageSplit>) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -78,6 +88,19 @@ private fun WebtoonPageContent(
 
     val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
     val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
+
+    LaunchedEffect(page, pageStatus) {
+        if (pageStatus == Page.State.READY && onSplitPage != null) {
+            val screenHeight = context.resources.displayMetrics.heightPixels
+            val splits =
+                withContext(Dispatchers.IO) {
+                    ReaderWebtoonController.checkTallPage(page, screenHeight)
+                }
+            if (splits != null) {
+                onSplitPage(splits)
+            }
+        }
+    }
 
     val isError = pageStatus == Page.State.ERROR
 
@@ -96,7 +119,12 @@ private fun WebtoonPageContent(
 
     val model =
         remember(imageData, pageStatus) {
-            ImageRequest.Builder(context).data(imageData).crossfade(true).build()
+            ImageRequest.Builder(context)
+                .data(imageData)
+                .size(CoilSize.ORIGINAL)
+                .precision(Precision.EXACT)
+                .crossfade(true)
+                .build()
         }
 
     val sizeModifier =
@@ -114,6 +142,7 @@ private fun WebtoonPageContent(
             model = model,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
+            filterQuality = FilterQuality.High,
             modifier =
                 Modifier.fillMaxWidth()
                     .then(
