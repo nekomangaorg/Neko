@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -18,6 +19,14 @@ import okio.source
  * Decoupled from Android View and RecyclerView hierarchies.
  */
 class ReaderWebtoonController {
+
+    sealed interface TallSplitResult {
+        data class Split(val splits: List<ReaderPageSplit>) : TallSplitResult
+
+        data object NotTall : TallSplitResult
+
+        data object AlreadySplit : TallSplitResult
+    }
 
     var prevTransition: ChapterTransition.Prev? = null
         private set
@@ -51,7 +60,7 @@ class ReaderWebtoonController {
         if (chapters.prevChapter != null) {
             val prevPages = chapters.prevChapter.pages
             if (prevPages != null) {
-                newItems.addAll(prevPages.map { ReaderUiItem.Page(it) })
+                newItems.addAll(mapPagesToItems(prevPages, screenHeight))
             }
         }
 
@@ -70,7 +79,7 @@ class ReaderWebtoonController {
         // Add current chapter pages
         val currPages = chapters.currChapter.pages
         if (currPages != null) {
-            newItems.addAll(currPages.map { ReaderUiItem.Page(it) })
+            newItems.addAll(mapPagesToItems(currPages, screenHeight))
         }
 
         currentChapter = chapters.currChapter
@@ -90,11 +99,23 @@ class ReaderWebtoonController {
         if (chapters.nextChapter != null) {
             val nextPages = chapters.nextChapter.pages
             if (nextPages != null) {
-                newItems.addAll(nextPages.map { ReaderUiItem.Page(it) })
+                newItems.addAll(mapPagesToItems(nextPages, screenHeight))
             }
         }
 
         return newItems
+    }
+
+    private fun mapPagesToItems(pages: List<ReaderPage>, screenHeight: Int): List<ReaderUiItem> {
+        return pages.flatMap { page ->
+            if (screenHeight > 0 && page.status == Page.State.READY && page.stream != null) {
+                val result = checkAndTrackTallPage(page, screenHeight)
+                if (result is TallSplitResult.Split) {
+                    return@flatMap result.splits.map { ReaderUiItem.SplitPage(it) }
+                }
+            }
+            listOf(ReaderUiItem.Page(page))
+        }
     }
 
     /**
@@ -125,20 +146,23 @@ class ReaderWebtoonController {
     }
 
     /**
-     * Inspects [page] image headers and determines if it exceeds height thresholds. Returns the
-     * list of [ReaderPageSplit] slices if the page should be split, or null otherwise.
+     * Inspects [page] image headers and determines if it exceeds height thresholds. Returns
+     * [TallSplitResult.AlreadySplit] if the page was already split, [TallSplitResult.Split] with
+     * slices if the page is tall, or [TallSplitResult.NotTall] otherwise.
      */
-    fun checkTallPage(
+    fun checkAndTrackTallPage(
         page: ReaderPage,
         screenHeight: Int,
         maxTextureSize: Int = GLUtil.maxTextureSize,
-    ): List<ReaderPageSplit>? {
-        if (tallSplitPages.contains(page)) return null
+    ): TallSplitResult {
+        if (tallSplitPages.contains(page)) return TallSplitResult.AlreadySplit
         val splits = Companion.checkTallPage(page, screenHeight, maxTextureSize)
-        if (splits != null) {
+        return if (splits != null) {
             tallSplitPages.add(page)
+            TallSplitResult.Split(splits)
+        } else {
+            TallSplitResult.NotTall
         }
-        return splits
     }
 
     /** Finds the index of [page] in [items]. */

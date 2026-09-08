@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.graphics.BitmapRegionDecoder
 import android.graphics.Rect
 import android.os.Build
+import android.util.LruCache
 import coil3.ImageLoader
 import coil3.asImage
 import coil3.decode.DataSource
@@ -75,6 +76,13 @@ class ReaderPageFetcher(private val page: ReaderPage, private val options: Optio
 class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val options: Options) :
     Fetcher {
 
+    companion object {
+        private val rawBytesCache =
+            object : LruCache<String, ByteArray>(16 * 1024 * 1024) {
+                override fun sizeOf(key: String, value: ByteArray): Int = value.size
+            }
+    }
+
     override suspend fun fetch(): FetchResult = coroutineScope {
         val bytes = split.cachedBytes
         if (bytes != null) {
@@ -107,7 +115,18 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         val actualStream =
             streamFn ?: error("Page stream not available for page ${split.page.index}")
 
-        val imageBytes = withContext(Dispatchers.IO) { actualStream().use { it.readBytes() } }
+        val cacheKey = "${split.page.chapter.chapter.id}_${split.page.index}"
+        val imageBytes =
+            rawBytesCache.get(cacheKey)
+                ?: withContext(Dispatchers.IO) {
+                    synchronized(split.page) {
+                        rawBytesCache.get(cacheKey)
+                            ?: actualStream()
+                                .use { it.readBytes() }
+                                .also { rawBytesCache.put(cacheKey, it) }
+                    }
+                }
+
         val bitmap =
             withContext(Dispatchers.IO) {
                 decodeRegion(imageBytes, split.topOffset, split.splitHeight)
@@ -154,7 +173,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                     "Illegal arguments creating BitmapRegionDecoder for page ${split.page.index}, slice offset $top"
                 }
                 return fallbackDecodeRegion(imageBytes, top, height)
-            } ?: return fallbackDecodeRegion(imageBytes, top, height)
+            }
 
         return try {
             val bottom = minOf(decoder.height, top + height)

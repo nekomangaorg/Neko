@@ -86,7 +86,12 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         TimberKt.d { "setChapters" }
         val forceTransition = config.alwaysShowChapterTransition
         val screenHeight = activity.resources.displayMetrics.heightPixels
-        items = controller.buildItems(chapters, forceTransition, screenHeight)
+        items =
+            controller.buildItems(
+                chapters,
+                forceTransition,
+                if (config.splitTallPages) screenHeight else 0,
+            )
         activity.updateWebtoonViewerItems()
 
         if (isInitialLoad) {

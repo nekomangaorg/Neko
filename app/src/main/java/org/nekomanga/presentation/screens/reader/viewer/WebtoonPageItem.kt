@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,14 +43,56 @@ import uy.kohesive.injekt.api.get
 fun WebtoonPageItem(
     page: ReaderPage,
     onSplitPage: ((List<ReaderPageSplit>) -> Unit)? = null,
+    checkTallPage: (suspend (ReaderPage) -> ReaderWebtoonController.TallSplitResult)? = null,
     modifier: Modifier = Modifier,
 ) {
+    val isSplitCheckRequired = onSplitPage != null || checkTallPage != null
+    var isSplitChecked by remember(page) { mutableStateOf(!isSplitCheckRequired) }
+    val context = LocalContext.current
+
+    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
+
+    val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
+    val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
+
+    LaunchedEffect(page, pageStatus) {
+        if (pageStatus == Page.State.READY && isSplitCheckRequired && !isSplitChecked) {
+            val result =
+                withContext(Dispatchers.IO) {
+                    checkTallPage?.invoke(page)
+                        ?: run {
+                            val screenHeight = context.resources.displayMetrics.heightPixels
+                            val splits = ReaderWebtoonController.checkTallPage(page, screenHeight)
+                            if (splits != null) {
+                                ReaderWebtoonController.TallSplitResult.Split(splits)
+                            } else {
+                                ReaderWebtoonController.TallSplitResult.NotTall
+                            }
+                        }
+                }
+            when (result) {
+                is ReaderWebtoonController.TallSplitResult.Split -> {
+                    onSplitPage?.invoke(result.splits)
+                }
+                is ReaderWebtoonController.TallSplitResult.AlreadySplit -> {
+                    // Already split, do nothing and wait for list update
+                }
+                is ReaderWebtoonController.TallSplitResult.NotTall -> {
+                    isSplitChecked = true
+                }
+            }
+        } else if (pageStatus == Page.State.ERROR) {
+            isSplitChecked = true
+        }
+    }
+
     WebtoonPageContent(
         page = page,
         initialRatio = page.aspectRatio,
         onRatioCalculated = { ratio, _ -> page.aspectRatio = ratio },
-        imageData = page,
-        onSplitPage = onSplitPage,
+        imageData = if (isSplitChecked) page else null,
+        pageStatus = pageStatus,
+        pageProgress = pageProgress,
         modifier = modifier,
     )
 }
@@ -59,15 +102,22 @@ fun WebtoonPageItem(
     split: ReaderPageSplit,
     modifier: Modifier = Modifier,
 ) {
+    val page = split.page
+    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
+
+    val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
+    val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
+
     WebtoonPageContent(
-        page = split.page,
+        page = page,
         initialRatio = split.aspectRatio,
         onRatioCalculated = { ratio, height ->
             split.aspectRatio = ratio
             split.displayedHeight = height
         },
         imageData = split,
-        onSplitPage = null,
+        pageStatus = pageStatus,
+        pageProgress = pageProgress,
         modifier = modifier,
     )
 }
@@ -77,31 +127,14 @@ private fun WebtoonPageContent(
     page: ReaderPage,
     initialRatio: Float,
     onRatioCalculated: (Float, Int) -> Unit,
-    imageData: Any,
-    onSplitPage: ((List<ReaderPageSplit>) -> Unit)? = null,
+    imageData: Any?,
+    pageStatus: Page.State,
+    pageProgress: Int,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val readerPreferences: ReaderPreferences = remember { Injekt.get() }
     val readerThemePref by readerPreferences.readerTheme().collectAsState()
-
-    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
-
-    val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
-    val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
-
-    LaunchedEffect(page, pageStatus) {
-        if (pageStatus == Page.State.READY && onSplitPage != null) {
-            val screenHeight = context.resources.displayMetrics.heightPixels
-            val splits =
-                withContext(Dispatchers.IO) {
-                    ReaderWebtoonController.checkTallPage(page, screenHeight)
-                }
-            if (splits != null) {
-                onSplitPage(splits)
-            }
-        }
-    }
 
     val isError = pageStatus == Page.State.ERROR
 
@@ -120,13 +153,15 @@ private fun WebtoonPageContent(
 
     val model =
         remember(imageData, pageStatus) {
-            ImageRequest.Builder(context)
-                .data(imageData)
-                .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize.ORIGINAL)
-                .precision(Precision.EXACT)
-                .crossfade(true)
-                .build()
+            imageData?.let { data ->
+                ImageRequest.Builder(context)
+                    .data(data)
+                    .size(CoilSize.ORIGINAL)
+                    .maxBitmapSize(CoilSize.ORIGINAL)
+                    .precision(Precision.EXACT)
+                    .crossfade(true)
+                    .build()
+            }
         }
 
     val sizeModifier =
@@ -140,25 +175,28 @@ private fun WebtoonPageContent(
         modifier = modifier.fillMaxWidth().then(sizeModifier).background(backgroundColor),
         contentAlignment = Alignment.Center,
     ) {
-        AsyncImage(
-            model = model,
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            filterQuality = FilterQuality.High,
-            modifier =
-                Modifier.fillMaxWidth()
-                    .then(
-                        if (intrinsicRatio > 0f) Modifier.aspectRatio(intrinsicRatio) else Modifier
-                    ),
-            onSuccess = { state ->
-                val img = state.result.image
-                if (img.width > 0 && img.height > 0) {
-                    val ratio = img.width.toFloat() / img.height.toFloat()
-                    intrinsicRatio = ratio
-                    onRatioCalculated(ratio, img.height)
-                }
-            },
-        )
+        if (model != null) {
+            AsyncImage(
+                model = model,
+                contentDescription = null,
+                contentScale = ContentScale.FillWidth,
+                filterQuality = FilterQuality.High,
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .then(
+                            if (intrinsicRatio > 0f) Modifier.aspectRatio(intrinsicRatio)
+                            else Modifier
+                        ),
+                onSuccess = { state ->
+                    val img = state.result.image
+                    if (img.width > 0 && img.height > 0) {
+                        val ratio = img.width.toFloat() / img.height.toFloat()
+                        intrinsicRatio = ratio
+                        onRatioCalculated(ratio, img.height)
+                    }
+                },
+            )
+        }
 
         ReaderPageLoadingOverlay(status = pageStatus, progress = pageProgress)
 

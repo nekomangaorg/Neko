@@ -187,4 +187,26 @@ class ReaderWebtoonControllerTest {
         val index = controller.findPageIndex(items, targetPage)
         assertEquals(3, index)
     }
+
+    @Test
+    fun `checkAndTrackTallPage returns AlreadySplit when page was previously tracked`() {
+        val controller = ReaderWebtoonController()
+        val chapter = createChapter(1L, pageCount = 1)
+        val page = chapter.pages!![0]
+        controller.tallSplitPages.add(page)
+
+        val result = controller.checkAndTrackTallPage(page, screenHeight = 1000)
+        assertEquals(ReaderWebtoonController.TallSplitResult.AlreadySplit, result)
+    }
+
+    @Test
+    fun `checkAndTrackTallPage returns NotTall when page stream is null`() {
+        val controller = ReaderWebtoonController()
+        val chapter = createChapter(1L, pageCount = 1)
+        val page = chapter.pages!![0]
+
+        val result = controller.checkAndTrackTallPage(page, screenHeight = 1000)
+        assertEquals(ReaderWebtoonController.TallSplitResult.NotTall, result)
+        assertTrue(!controller.tallSplitPages.contains(page))
+    }
 }
