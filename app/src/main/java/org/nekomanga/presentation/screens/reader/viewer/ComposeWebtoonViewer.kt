@@ -298,7 +298,12 @@ fun ComposeWebtoonViewer(
                                 currentChapterVisibleItems.isNotEmpty() -> {
                                     val lastItem = currentChapterVisibleItems.last()
                                     if (viewportMiddle >= lastItem.offset + lastItem.size) {
-                                        currentChapterVisibleItems.first()
+                                        val nonPrecedingItems = visibleItems.filter {
+                                            it.index >= currentChapterVisibleItems.first().index
+                                        }
+                                        nonPrecedingItems.minByOrNull { item ->
+                                            abs(item.offset + item.size / 2 - viewportMiddle)
+                                        } ?: lastItem
                                     } else {
                                         currentChapterVisibleItems.minByOrNull { item ->
                                             abs(item.offset + item.size / 2 - viewportMiddle)
@@ -721,10 +726,7 @@ fun ComposeWebtoonViewer(
                                 }
                             }
                         },
-                contentPadding =
-                    PaddingValues(
-                        bottom = columnHeight + (if (hasMargins) Size.medium else Size.none)
-                    ),
+                contentPadding = PaddingValues(bottom = if (hasMargins) Size.medium else Size.none),
             ) {
                 items(
                     items = items,
