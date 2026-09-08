@@ -16,6 +16,7 @@ import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -725,6 +726,7 @@ fun ComposeWebtoonViewer(
                                 onTap = { viewer.activity.toggleMenu() },
                                 modifier =
                                     Modifier.fillMaxWidth()
+                                        .defaultMinSize(minHeight = columnHeight / 2)
                                         .padding(
                                             top =
                                                 if (
