@@ -264,21 +264,17 @@ fun ComposeWebtoonViewer(
                         val viewportMiddle =
                             (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
 
-                        val currentChapterVisibleItems =
-                            if (activeChapterId != null) {
-                                visibleItems.filter { itemInfo ->
-                                    val item = currentItems.getOrNull(itemInfo.index)
-                                    when (item) {
-                                        is ReaderUiItem.Page ->
-                                            item.page.chapter.chapter.id == activeChapterId
-                                        is ReaderUiItem.SplitPage ->
-                                            item.page.chapter.chapter.id == activeChapterId
-                                        else -> false
-                                    }
-                                }
-                            } else {
-                                emptyList()
+                        fun ReaderUiItem?.belongsToActiveChapter(): Boolean =
+                            when (this) {
+                                is ReaderUiItem.Page -> page.chapter.chapter.id == activeChapterId
+                                is ReaderUiItem.SplitPage ->
+                                    page.chapter.chapter.id == activeChapterId
+                                else -> false
                             }
+
+                        val currentChapterVisibleItems = visibleItems.filter { itemInfo ->
+                            currentItems.getOrNull(itemInfo.index).belongsToActiveChapter()
+                        }
 
                         val itemSpanningMiddle = visibleItems.firstOrNull { item ->
                             val itemTop = item.offset
@@ -286,40 +282,32 @@ fun ComposeWebtoonViewer(
                             viewportMiddle in itemTop until itemBottom
                         }
 
+                        // Ignore items preceding the current chapter while current chapter pages
+                        // are still visible to prevent jumping back to the previous chapter.
+                        val isPrecedingItemWhileChapterVisible =
+                            currentChapterVisibleItems.isNotEmpty() &&
+                                itemSpanningMiddle != null &&
+                                itemSpanningMiddle.index < currentChapterVisibleItems.first().index
+
                         val activeItemInfo =
                             when {
-                                itemSpanningMiddle != null -> {
-                                    val isPrevItem =
-                                        currentChapterVisibleItems.isNotEmpty() &&
-                                            itemSpanningMiddle.index <
-                                                currentChapterVisibleItems.first().index
-
-                                    if (isPrevItem) {
-                                        currentChapterVisibleItems.first()
-                                    } else {
-                                        itemSpanningMiddle
-                                    }
+                                itemSpanningMiddle != null &&
+                                    !isPrecedingItemWhileChapterVisible -> {
+                                    itemSpanningMiddle
                                 }
                                 currentChapterVisibleItems.isNotEmpty() -> {
-                                    val firstItem = currentChapterVisibleItems.first()
                                     val lastItem = currentChapterVisibleItems.last()
-                                    val lastItemBottom = lastItem.offset + lastItem.size
-                                    if (
-                                        viewportMiddle >= lastItemBottom ||
-                                            viewportMiddle < firstItem.offset
-                                    ) {
-                                        firstItem
+                                    if (viewportMiddle >= lastItem.offset + lastItem.size) {
+                                        currentChapterVisibleItems.first()
                                     } else {
                                         currentChapterVisibleItems.minByOrNull { item ->
-                                            val itemMiddle = item.offset + item.size / 2
-                                            abs(itemMiddle - viewportMiddle)
-                                        } ?: firstItem
+                                            abs(item.offset + item.size / 2 - viewportMiddle)
+                                        } ?: currentChapterVisibleItems.first()
                                     }
                                 }
                                 else -> {
                                     visibleItems.minByOrNull { item ->
-                                        val itemMiddle = item.offset + item.size / 2
-                                        abs(itemMiddle - viewportMiddle)
+                                        abs(item.offset + item.size / 2 - viewportMiddle)
                                     } ?: visibleItems.first()
                                 }
                             }
