@@ -136,6 +136,7 @@ fun ComposeWebtoonViewer(
             }
 
         val currentItems by rememberUpdatedState(items)
+        val activeChapterId by rememberUpdatedState(currentChapterId)
 
         LaunchedEffect(currentChapterId) {
             viewer.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
@@ -263,17 +264,59 @@ fun ComposeWebtoonViewer(
                     if (visibleItems.isNotEmpty()) {
                         val viewportMiddle =
                             (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-                        val activeItemInfo =
-                            visibleItems.firstOrNull { item ->
-                                val itemTop = item.offset
-                                val itemBottom = item.offset + item.size
-                                viewportMiddle in itemTop until itemBottom
+
+                        fun ReaderUiItem?.belongsToActiveChapter(): Boolean =
+                            when (this) {
+                                is ReaderUiItem.Page -> page.chapter.chapter.id == activeChapterId
+                                is ReaderUiItem.SplitPage ->
+                                    page.chapter.chapter.id == activeChapterId
+                                else -> false
                             }
-                                ?: visibleItems.minByOrNull { item ->
-                                    val itemMiddle = item.offset + item.size / 2
-                                    abs(itemMiddle - viewportMiddle)
+
+                        val currentChapterVisibleItems = visibleItems.filter { itemInfo ->
+                            currentItems.getOrNull(itemInfo.index).belongsToActiveChapter()
+                        }
+
+                        val itemSpanningMiddle = visibleItems.firstOrNull { item ->
+                            val itemTop = item.offset
+                            val itemBottom = item.offset + item.size
+                            viewportMiddle in itemTop until itemBottom
+                        }
+
+                        // Ignore items preceding the current chapter while current chapter pages
+                        // are still visible to prevent jumping back to the previous chapter.
+                        val isPrecedingItemWhileChapterVisible =
+                            currentChapterVisibleItems.isNotEmpty() &&
+                                itemSpanningMiddle != null &&
+                                itemSpanningMiddle.index < currentChapterVisibleItems.first().index
+
+                        val activeItemInfo =
+                            when {
+                                itemSpanningMiddle != null &&
+                                    !isPrecedingItemWhileChapterVisible -> {
+                                    itemSpanningMiddle
                                 }
-                                ?: visibleItems.first()
+                                currentChapterVisibleItems.isNotEmpty() -> {
+                                    val lastItem = currentChapterVisibleItems.last()
+                                    if (viewportMiddle >= lastItem.offset + lastItem.size) {
+                                        val nonPrecedingItems = visibleItems.filter {
+                                            it.index >= currentChapterVisibleItems.first().index
+                                        }
+                                        nonPrecedingItems.minByOrNull { item ->
+                                            abs(item.offset + item.size / 2 - viewportMiddle)
+                                        } ?: lastItem
+                                    } else {
+                                        currentChapterVisibleItems.minByOrNull { item ->
+                                            abs(item.offset + item.size / 2 - viewportMiddle)
+                                        } ?: currentChapterVisibleItems.first()
+                                    }
+                                }
+                                else -> {
+                                    visibleItems.minByOrNull { item ->
+                                        abs(item.offset + item.size / 2 - viewportMiddle)
+                                    } ?: visibleItems.first()
+                                }
+                            }
                         activeItemInfo.index
                     } else {
                         lazyListState.firstVisibleItemIndex
