@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.LayoutDirection
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderSliderPosition
 import kotlin.math.roundToInt
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ToolTipButton
@@ -123,6 +124,7 @@ fun ReaderBottomControls(
     totalPages: Int,
     isRtl: Boolean,
     isVertical: Boolean = false,
+    sliderPosition: ReaderSliderPosition = ReaderSliderPosition.RIGHT,
     onPageChange: (Int) -> Unit,
     onSkipPrevious: () -> Unit,
     onSkipNext: () -> Unit,
@@ -157,13 +159,51 @@ fun ReaderBottomControls(
     onSettingsClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    val showVerticalSlider = isVertical && sliderPosition != ReaderSliderPosition.HORIZONTAL
+
+    val bottomActionSheetContent =
+        @Composable {
+            BottomActionSheet(
+                isChaptersVisible = isChaptersVisible,
+                isCommentsVisible = isCommentsVisible,
+                isWebViewVisible = isWebViewVisible,
+                isReadingModeVisible = isReadingModeVisible,
+                isRotationVisible = isRotationVisible,
+                isCropBordersVisible = isCropBordersVisible,
+                isGrayscaleVisible = isGrayscaleVisible,
+                isDoublePageVisible = isDoublePageVisible,
+                isShiftPageVisible = isShiftPageVisible,
+                isSettingsVisible = isSettingsVisible,
+                cropBorders = cropBorders,
+                grayscale = grayscale,
+                readingModeIconRes = readingModeIconRes,
+                rotationIconRes = rotationIconRes,
+                doublePageIconRes = doublePageIconRes,
+                shiftPageIconRes = shiftPageIconRes,
+                onChaptersClick = onChaptersClick,
+                onCommentsClick = onCommentsClick,
+                onWebviewClick = onWebviewClick,
+                onReadingModeClick = onReadingModeClick,
+                onRotationClick = onRotationClick,
+                onCropBordersClick = onCropBordersClick,
+                onGrayscaleClick = onGrayscaleClick,
+                onDoublePageClick = onDoublePageClick,
+                onShiftPageClick = onShiftPageClick,
+                onSettingsClick = onSettingsClick,
+            )
+        }
+
     Box(modifier = modifier) {
-        if (isVertical) {
+        if (showVerticalSlider) {
+            val isLeft = sliderPosition == ReaderSliderPosition.LEFT
             AnimatedVisibility(
                 visible = visible,
-                enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
-                exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
-                modifier = Modifier.align(Alignment.CenterEnd),
+                enter =
+                    slideInHorizontally(initialOffsetX = { if (isLeft) -it else it }) + fadeIn(),
+                exit =
+                    slideOutHorizontally(targetOffsetX = { if (isLeft) -it else it }) + fadeOut(),
+                modifier =
+                    Modifier.align(if (isLeft) Alignment.CenterStart else Alignment.CenterEnd),
             ) {
                 VerticalFloatingSlider(
                     currentPageText = currentPageText,
@@ -176,7 +216,8 @@ fun ReaderBottomControls(
                     isLoading = isLoading,
                     modifier =
                         Modifier.padding(
-                            end = Size.smedium,
+                            start = if (isLeft) Size.smedium else Size.none,
+                            end = if (isLeft) Size.none else Size.smedium,
                             top = Size.appBarHeight + Size.large,
                             bottom = Size.huge + Size.large,
                         ),
@@ -189,34 +230,7 @@ fun ReaderBottomControls(
                 exit = slideOutVertically(targetOffsetY = { it }),
                 modifier = Modifier.align(Alignment.BottomCenter),
             ) {
-                BottomActionSheet(
-                    isChaptersVisible = isChaptersVisible,
-                    isCommentsVisible = isCommentsVisible,
-                    isWebViewVisible = isWebViewVisible,
-                    isReadingModeVisible = isReadingModeVisible,
-                    isRotationVisible = isRotationVisible,
-                    isCropBordersVisible = isCropBordersVisible,
-                    isGrayscaleVisible = isGrayscaleVisible,
-                    isDoublePageVisible = isDoublePageVisible,
-                    isShiftPageVisible = isShiftPageVisible,
-                    isSettingsVisible = isSettingsVisible,
-                    cropBorders = cropBorders,
-                    grayscale = grayscale,
-                    readingModeIconRes = readingModeIconRes,
-                    rotationIconRes = rotationIconRes,
-                    doublePageIconRes = doublePageIconRes,
-                    shiftPageIconRes = shiftPageIconRes,
-                    onChaptersClick = onChaptersClick,
-                    onCommentsClick = onCommentsClick,
-                    onWebviewClick = onWebviewClick,
-                    onReadingModeClick = onReadingModeClick,
-                    onRotationClick = onRotationClick,
-                    onCropBordersClick = onCropBordersClick,
-                    onGrayscaleClick = onGrayscaleClick,
-                    onDoublePageClick = onDoublePageClick,
-                    onShiftPageClick = onShiftPageClick,
-                    onSettingsClick = onSettingsClick,
-                )
+                bottomActionSheetContent()
             }
         } else {
             AnimatedVisibility(
@@ -248,34 +262,7 @@ fun ReaderBottomControls(
                                 ),
                     )
 
-                    BottomActionSheet(
-                        isChaptersVisible = isChaptersVisible,
-                        isCommentsVisible = isCommentsVisible,
-                        isWebViewVisible = isWebViewVisible,
-                        isReadingModeVisible = isReadingModeVisible,
-                        isRotationVisible = isRotationVisible,
-                        isCropBordersVisible = isCropBordersVisible,
-                        isGrayscaleVisible = isGrayscaleVisible,
-                        isDoublePageVisible = isDoublePageVisible,
-                        isShiftPageVisible = isShiftPageVisible,
-                        isSettingsVisible = isSettingsVisible,
-                        cropBorders = cropBorders,
-                        grayscale = grayscale,
-                        readingModeIconRes = readingModeIconRes,
-                        rotationIconRes = rotationIconRes,
-                        doublePageIconRes = doublePageIconRes,
-                        shiftPageIconRes = shiftPageIconRes,
-                        onChaptersClick = onChaptersClick,
-                        onCommentsClick = onCommentsClick,
-                        onWebviewClick = onWebviewClick,
-                        onReadingModeClick = onReadingModeClick,
-                        onRotationClick = onRotationClick,
-                        onCropBordersClick = onCropBordersClick,
-                        onGrayscaleClick = onGrayscaleClick,
-                        onDoublePageClick = onDoublePageClick,
-                        onShiftPageClick = onShiftPageClick,
-                        onSettingsClick = onSettingsClick,
-                    )
+                    bottomActionSheetContent()
                 }
             }
         }
@@ -835,7 +822,7 @@ private fun ReaderBottomControlsPreview(
                     isLoading = false,
                     pageNumberVisible = true,
                 )
-                // Vertical normal page state
+                // Vertical right-aligned page state
                 ReaderBottomControls(
                     currentPageText = "1",
                     totalPagesText = "24",
@@ -843,6 +830,39 @@ private fun ReaderBottomControlsPreview(
                     totalPages = 23,
                     isRtl = false,
                     isVertical = true,
+                    sliderPosition = ReaderSliderPosition.RIGHT,
+                    onPageChange = {},
+                    onSkipPrevious = {},
+                    onSkipNext = {},
+                    visible = true,
+                    isLoading = false,
+                    pageNumberVisible = true,
+                )
+                // Vertical left-aligned page state
+                ReaderBottomControls(
+                    currentPageText = "1",
+                    totalPagesText = "24",
+                    currentPageIndex = 0,
+                    totalPages = 23,
+                    isRtl = false,
+                    isVertical = true,
+                    sliderPosition = ReaderSliderPosition.LEFT,
+                    onPageChange = {},
+                    onSkipPrevious = {},
+                    onSkipNext = {},
+                    visible = true,
+                    isLoading = false,
+                    pageNumberVisible = true,
+                )
+                // Vertical horizontal-slider page state
+                ReaderBottomControls(
+                    currentPageText = "1",
+                    totalPagesText = "24",
+                    currentPageIndex = 0,
+                    totalPages = 23,
+                    isRtl = false,
+                    isVertical = true,
+                    sliderPosition = ReaderSliderPosition.HORIZONTAL,
                     onPageChange = {},
                     onSkipPrevious = {},
                     onSkipNext = {},

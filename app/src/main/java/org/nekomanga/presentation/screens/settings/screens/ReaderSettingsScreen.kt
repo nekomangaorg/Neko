@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderSliderPosition
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -355,6 +356,14 @@ internal class ReaderSettingsScreen(
             title = stringResource(R.string.webtoon),
             preferenceItems =
                 listOf(
+                    Preference.PreferenceItem.ListPreference(
+                        pref = readerPreferences.sliderPosition(),
+                        title = stringResource(R.string.slider_position),
+                        entries =
+                            ReaderSliderPosition.entries.associateWith {
+                                stringResource(it.stringRes)
+                            },
+                    ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.navigationModeWebtoon(),
                         title = stringResource(R.string.tap_zones),

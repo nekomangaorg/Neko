@@ -523,6 +523,10 @@
     <string name="save_combined_pages">Save combined pages</string>
 
     <!-- Reader settings -->
+    <string name="slider_position">Slider position</string>
+    <string name="left_align">Left align</string>
+    <string name="horizontal">Horizontal</string>
+    <string name="right_align">Right align</string>
     <string name="fullscreen">Fullscreen</string>
     <string name="animate_page_transitions">Animate page transitions</string>
     <string name="enable_zoom_out">Enable zoom out</string>

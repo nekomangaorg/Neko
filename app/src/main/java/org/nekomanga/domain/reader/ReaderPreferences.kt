@@ -3,6 +3,7 @@ package org.nekomanga.domain.reader
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderSliderPosition
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -160,4 +161,10 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
     fun alwaysShowChapterTransition() =
         this.preferenceStore.getBoolean("always_show_chapter_transition", true)
+
+    fun sliderPosition() =
+        this.preferenceStore.getEnum(
+            "reader_slider_position",
+            ReaderSliderPosition.RIGHT,
+        )
 }

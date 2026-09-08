@@ -525,6 +525,8 @@ class ReaderActivity : BaseMainActivity() {
                     val rotationIconRes = orientation.iconRes
 
                     val pageLayout by readerPreferences.pageLayout().preferenceCollectAsState()
+                    val sliderPosition by
+                        readerPreferences.sliderPosition().preferenceCollectAsState()
                     val isDoublePage =
                         pageLayout == PageLayout.DOUBLE_PAGES.value ||
                             (pageLayout == PageLayout.AUTOMATIC.value &&
@@ -581,6 +583,7 @@ class ReaderActivity : BaseMainActivity() {
                         totalPages = state.totalPages,
                         isRtl = viewer is R2LPagerViewer,
                         isVertical = viewer is WebtoonViewer || viewer is VerticalPagerViewer,
+                        sliderPosition = sliderPosition,
                         onPageChange = { index -> moveToPageIndex(index, animated = false) },
                         onSkipPrevious = { loadAdjacentChapter(false) },
                         onSkipNext = { loadAdjacentChapter(true) },
