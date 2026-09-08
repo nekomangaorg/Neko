@@ -208,5 +208,6 @@ class ReaderWebtoonControllerTest {
         val result = controller.checkAndTrackTallPage(page, screenHeight = 1000)
         assertEquals(ReaderWebtoonController.TallSplitResult.NotTall, result)
         assertTrue(!controller.tallSplitPages.contains(page))
+        assertTrue(controller.isNonTall(page))
     }
 }

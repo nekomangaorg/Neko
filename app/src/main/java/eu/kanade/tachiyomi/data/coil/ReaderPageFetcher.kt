@@ -77,8 +77,13 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
     Fetcher {
 
     companion object {
+        private val maxCacheSizeBytes =
+            (Runtime.getRuntime().maxMemory() / 16)
+                .coerceIn(16L * 1024 * 1024, 64L * 1024 * 1024)
+                .toInt()
+
         private val rawBytesCache =
-            object : LruCache<String, ByteArray>(16 * 1024 * 1024) {
+            object : LruCache<String, ByteArray>(maxCacheSizeBytes) {
                 override fun sizeOf(key: String, value: ByteArray): Int = value.size
             }
     }
@@ -119,7 +124,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         val imageBytes =
             rawBytesCache.get(cacheKey)
                 ?: withContext(Dispatchers.IO) {
-                    synchronized(split.page) {
+                    synchronized(rawBytesCache) {
                         rawBytesCache.get(cacheKey)
                             ?: actualStream()
                                 .use { it.readBytes() }

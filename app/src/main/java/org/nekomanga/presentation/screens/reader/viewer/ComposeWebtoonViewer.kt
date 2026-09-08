@@ -788,6 +788,9 @@ fun ComposeWebtoonViewer(
                                             viewer.controller.checkAndTrackTallPage(p, screenHeight)
                                         }
                                     } else null,
+                                isAlreadyChecked =
+                                    !viewer.config.splitTallPages ||
+                                        viewer.controller.isNonTall(item.page),
                                 modifier =
                                     if (horizontalPadding > Size.none) {
                                         Modifier.padding(horizontal = horizontalPadding)

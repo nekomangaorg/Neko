@@ -44,9 +44,10 @@ fun WebtoonPageItem(
     page: ReaderPage,
     onSplitPage: ((List<ReaderPageSplit>) -> Unit)? = null,
     checkTallPage: (suspend (ReaderPage) -> ReaderWebtoonController.TallSplitResult)? = null,
+    isAlreadyChecked: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val isSplitCheckRequired = onSplitPage != null || checkTallPage != null
+    val isSplitCheckRequired = (onSplitPage != null || checkTallPage != null) && !isAlreadyChecked
     var isSplitChecked by remember(page) { mutableStateOf(!isSplitCheckRequired) }
     val context = LocalContext.current
 
@@ -153,15 +154,13 @@ private fun WebtoonPageContent(
 
     val model =
         remember(imageData, pageStatus) {
-            imageData?.let { data ->
-                ImageRequest.Builder(context)
-                    .data(data)
-                    .size(CoilSize.ORIGINAL)
-                    .maxBitmapSize(CoilSize.ORIGINAL)
-                    .precision(Precision.EXACT)
-                    .crossfade(true)
-                    .build()
-            }
+            ImageRequest.Builder(context)
+                .data(imageData)
+                .size(CoilSize.ORIGINAL)
+                .maxBitmapSize(CoilSize.ORIGINAL)
+                .precision(Precision.EXACT)
+                .crossfade(true)
+                .build()
         }
 
     val sizeModifier =
@@ -175,28 +174,25 @@ private fun WebtoonPageContent(
         modifier = modifier.fillMaxWidth().then(sizeModifier).background(backgroundColor),
         contentAlignment = Alignment.Center,
     ) {
-        if (model != null) {
-            AsyncImage(
-                model = model,
-                contentDescription = null,
-                contentScale = ContentScale.FillWidth,
-                filterQuality = FilterQuality.High,
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .then(
-                            if (intrinsicRatio > 0f) Modifier.aspectRatio(intrinsicRatio)
-                            else Modifier
-                        ),
-                onSuccess = { state ->
-                    val img = state.result.image
-                    if (img.width > 0 && img.height > 0) {
-                        val ratio = img.width.toFloat() / img.height.toFloat()
-                        intrinsicRatio = ratio
-                        onRatioCalculated(ratio, img.height)
-                    }
-                },
-            )
-        }
+        AsyncImage(
+            model = model,
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            filterQuality = FilterQuality.High,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .then(
+                        if (intrinsicRatio > 0f) Modifier.aspectRatio(intrinsicRatio) else Modifier
+                    ),
+            onSuccess = { state ->
+                val img = state.result.image
+                if (img.width > 0 && img.height > 0) {
+                    val ratio = img.width.toFloat() / img.height.toFloat()
+                    intrinsicRatio = ratio
+                    onRatioCalculated(ratio, img.height)
+                }
+            },
+        )
 
         ReaderPageLoadingOverlay(status = pageStatus, progress = pageProgress)
 
