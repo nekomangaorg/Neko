@@ -164,6 +164,19 @@ class ReaderWebtoonControllerTest {
     }
 
     @Test
+    fun `computeSplits calculates optimal slices on modern high-res screens`() {
+        val chapter = createChapter(1L, pageCount = 1)
+        val page = chapter.pages!![0]
+        val splits = ReaderWebtoonController.computeSplits(page, 1080, 7000, 2400, 8192)
+        assertNotNull(splits)
+        assertEquals(2, splits!!.size)
+        assertEquals(0, splits[0].topOffset)
+        assertEquals(3500, splits[0].splitHeight)
+        assertEquals(3500, splits[1].topOffset)
+        assertEquals(3500, splits[1].splitHeight)
+    }
+
+    @Test
     fun `findPageIndex locates page in list`() {
         val controller = ReaderWebtoonController()
         val currChapter = createChapter(1L, pageCount = 5)

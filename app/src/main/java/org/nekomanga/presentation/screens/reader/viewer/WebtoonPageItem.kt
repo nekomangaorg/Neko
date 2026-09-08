@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.request.maxBitmapSize
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.source.model.Page
@@ -122,6 +123,7 @@ private fun WebtoonPageContent(
             ImageRequest.Builder(context)
                 .data(imageData)
                 .size(CoilSize.ORIGINAL)
+                .maxBitmapSize(CoilSize.ORIGINAL)
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .build()

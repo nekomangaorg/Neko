@@ -34,6 +34,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.request.maxBitmapSize
+import coil3.size.Precision
+import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
@@ -336,7 +339,13 @@ fun PagerPageItem(
             val imageState = rememberZoomableImageState(zoomableState)
             val model =
                 remember(page, pageStatus) {
-                    ImageRequest.Builder(context).data(page).crossfade(true).build()
+                    ImageRequest.Builder(context)
+                        .data(page)
+                        .size(CoilSize.ORIGINAL)
+                        .maxBitmapSize(CoilSize.ORIGINAL)
+                        .precision(Precision.EXACT)
+                        .crossfade(true)
+                        .build()
                 }
 
             ZoomableAsyncImage(
@@ -355,11 +364,23 @@ fun PagerPageItem(
 
             val firstModel =
                 remember(first, pageStatus, extraPageStatus) {
-                    ImageRequest.Builder(context).data(first).crossfade(true).build()
+                    ImageRequest.Builder(context)
+                        .data(first)
+                        .size(CoilSize.ORIGINAL)
+                        .maxBitmapSize(CoilSize.ORIGINAL)
+                        .precision(Precision.EXACT)
+                        .crossfade(true)
+                        .build()
                 }
             val secondModel =
                 remember(second, pageStatus, extraPageStatus) {
-                    ImageRequest.Builder(context).data(second).crossfade(true).build()
+                    ImageRequest.Builder(context)
+                        .data(second)
+                        .size(CoilSize.ORIGINAL)
+                        .maxBitmapSize(CoilSize.ORIGINAL)
+                        .precision(Precision.EXACT)
+                        .crossfade(true)
+                        .build()
                 }
 
             Box(

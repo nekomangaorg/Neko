@@ -190,7 +190,12 @@ class ReaderWebtoonController {
             maxTextureSize: Int = GLUtil.maxTextureSize,
         ): List<ReaderPageSplit>? {
             if (outHeight <= 0 || outWidth <= 0) return null
-            val displayMaxHeight = maxOf(screenHeight * 2, maxTextureSize)
+            val displayMaxHeight =
+                if (screenHeight > 0) {
+                    minOf(maxOf(screenHeight * 2, 4096), maxTextureSize)
+                } else {
+                    maxTextureSize
+                }
             val isTall = (outHeight / outWidth > 3) || (outHeight > maxTextureSize)
             if (!isTall || outHeight <= displayMaxHeight) {
                 return null

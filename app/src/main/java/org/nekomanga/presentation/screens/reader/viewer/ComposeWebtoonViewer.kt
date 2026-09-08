@@ -49,6 +49,7 @@ import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.platform.LocalContext
 import coil3.imageLoader
 import coil3.request.ImageRequest
+import coil3.request.maxBitmapSize
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -246,6 +247,7 @@ fun ComposeWebtoonViewer(
                             ImageRequest.Builder(context)
                                 .data(data)
                                 .size(CoilSize.ORIGINAL)
+                                .maxBitmapSize(CoilSize.ORIGINAL)
                                 .precision(Precision.EXACT)
                                 .build()
                         context.imageLoader.enqueue(request)
@@ -389,6 +391,7 @@ fun ComposeWebtoonViewer(
                                             ImageRequest.Builder(context)
                                                 .data(data)
                                                 .size(CoilSize.ORIGINAL)
+                                                .maxBitmapSize(CoilSize.ORIGINAL)
                                                 .precision(Precision.EXACT)
                                                 .build()
                                         context.imageLoader.enqueue(request)
