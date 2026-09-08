@@ -9,6 +9,12 @@
         <item>@string/webtoon</item>
     </string-array>
 
+    <string-array name="slider_position">
+        <item>@string/left_align</item>
+        <item>@string/horizontal</item>
+        <item>@string/right_align</item>
+    </string-array>
+
     <string-array name="reader_themes">
         <item>@string/white</item>
         <item>@string/black</item>

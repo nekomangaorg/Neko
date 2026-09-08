@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderSliderPosition
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlin.math.roundToInt
@@ -241,6 +242,17 @@ private fun GeneralSettingsTab(
             options = themeOptions,
             selectedIndex = readerTheme,
             onSelected = { index -> readerPreferences.readerTheme().set(index) },
+        )
+
+        val sliderPosition by readerPreferences.sliderPosition().collectAsState()
+        val sliderOptions = stringArrayResource(id = R.array.slider_position).toList()
+        ReaderChipsSelector(
+            label = stringResource(R.string.slider_position),
+            options = sliderOptions,
+            selectedIndex = sliderPosition.prefValue,
+            onSelected = { index ->
+                readerPreferences.sliderPosition().set(ReaderSliderPosition.fromSpinner(index))
+            },
         )
 
         ReaderSwitchSetting(
