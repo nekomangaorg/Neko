@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -45,6 +46,7 @@ import eu.kanade.tachiyomi.util.system.ThemeUtil
 import kotlin.math.hypot
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withTimeout
+import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
@@ -177,6 +179,15 @@ fun PagerPageItem(
         extraPage?.chapter?.pageLoader?.retryPage(extraPage)
     }
 
+    val doubleClickToZoomListener =
+        remember(viewer.config.doubleTapAnimDuration) {
+            if (viewer.config.doubleTapAnimDuration > 0) {
+                DoubleClickToZoomListener.cycle()
+            } else {
+                DoubleClickToZoomListener { _, _ -> }
+            }
+        }
+
     Box(
         modifier =
             modifier.fillMaxSize().background(backgroundColor).pointerInput(
@@ -195,6 +206,7 @@ fun PagerPageItem(
                         )
                     val downPos = down.position
                     var isLongPressTriggered = false
+                    var isMovementPastSlop = false
                     var pointerUp: PointerInputChange? = null
 
                     try {
@@ -203,37 +215,41 @@ fun PagerPageItem(
                                 val event = awaitPointerEvent(pass = PointerEventPass.Initial)
                                 val change = event.changes.firstOrNull { it.id == down.id }
                                 if (change == null) break
-                                if (!change.pressed) {
-                                    pointerUp = change
-                                    break
-                                }
                                 val moveDistance =
                                     hypot(
                                         (change.position.x - downPos.x).toDouble(),
                                         (change.position.y - downPos.y).toDouble(),
                                     )
                                 if (moveDistance > touchSlopPx) {
+                                    isMovementPastSlop = true
+                                    break
+                                }
+                                if (!change.pressed) {
+                                    pointerUp = change
                                     break
                                 }
                             }
                         }
                     } catch (_: PointerEventTimeoutCancellationException) {
-                        if (viewer.activity.menuVisible || viewer.config.longTapEnabled) {
+                        if (
+                            !isMovementPastSlop &&
+                                (viewer.activity.menuVisible || viewer.config.longTapEnabled)
+                        ) {
                             viewer.activity.onPageLongTap(page, extraPage)
                             isLongPressTriggered = true
                         }
-                        do {
-                            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                        } while (event.changes.any { it.pressed })
+                        while (currentEvent.changes.any { it.pressed }) {
+                            awaitPointerEvent(pass = PointerEventPass.Initial)
+                        }
                     }
 
                     if (pointerUp == null && !isLongPressTriggered) {
-                        do {
-                            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                        } while (event.changes.any { it.pressed })
+                        while (currentEvent.changes.any { it.pressed }) {
+                            awaitPointerEvent(pass = PointerEventPass.Initial)
+                        }
                     }
 
-                    if (!isLongPressTriggered && pointerUp != null) {
+                    if (!isLongPressTriggered && !isMovementPastSlop && pointerUp != null) {
                         val up = pointerUp!!
                         val upPos = up.position
                         val upTime = System.currentTimeMillis()
@@ -243,7 +259,7 @@ fun PagerPageItem(
                                 (upPos.y - downPos.y).toDouble(),
                             )
 
-                        if (distance < touchSlopPx) {
+                        if (distance < touchSlopPx * 1.5) {
                             val screenWidth = size.width.toFloat()
                             val screenHeight = size.height.toFloat()
 
@@ -264,9 +280,7 @@ fun PagerPageItem(
                                         ) < doubleTapSlopPx) &&
                                         (viewer.config.doubleTapAnimDuration > 0)
 
-                                if (
-                                    isDoubleTap && action == ViewerNavigation.NavigationRegion.MENU
-                                ) {
+                                if (isDoubleTap) {
                                     if (viewer.activity.menuVisible) {
                                         viewer.activity.hideMenu()
                                     }
@@ -278,24 +292,28 @@ fun PagerPageItem(
 
                                     when (action) {
                                         ViewerNavigation.NavigationRegion.NEXT -> {
+                                            up.consume()
                                             if (viewer.activity.menuVisible) {
                                                 viewer.activity.hideMenu()
                                             }
                                             viewer.moveToNext()
                                         }
                                         ViewerNavigation.NavigationRegion.PREV -> {
+                                            up.consume()
                                             if (viewer.activity.menuVisible) {
                                                 viewer.activity.hideMenu()
                                             }
                                             viewer.moveToPrevious()
                                         }
                                         ViewerNavigation.NavigationRegion.RIGHT -> {
+                                            up.consume()
                                             if (viewer.activity.menuVisible) {
                                                 viewer.activity.hideMenu()
                                             }
                                             viewer.moveRight()
                                         }
                                         ViewerNavigation.NavigationRegion.LEFT -> {
+                                            up.consume()
                                             if (viewer.activity.menuVisible) {
                                                 viewer.activity.hideMenu()
                                             }
@@ -327,6 +345,7 @@ fun PagerPageItem(
                 contentScale = contentScale,
                 alignment = imageAlignment,
                 state = imageState,
+                onDoubleClick = doubleClickToZoomListener,
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
@@ -344,7 +363,12 @@ fun PagerPageItem(
                 }
 
             Box(
-                modifier = Modifier.fillMaxSize().zoomable(zoomableState),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .zoomable(
+                            state = zoomableState,
+                            onDoubleClick = doubleClickToZoomListener,
+                        ),
                 contentAlignment = Alignment.Center,
             ) {
                 Row(
