@@ -134,7 +134,7 @@ class ReaderWebtoonController {
         maxTextureSize: Int = GLUtil.maxTextureSize,
     ): List<ReaderPageSplit>? {
         if (tallSplitPages.contains(page)) return null
-        val splits = checkTallPage(page, screenHeight, maxTextureSize)
+        val splits = Companion.checkTallPage(page, screenHeight, maxTextureSize)
         if (splits != null) {
             tallSplitPages.add(page)
         }
