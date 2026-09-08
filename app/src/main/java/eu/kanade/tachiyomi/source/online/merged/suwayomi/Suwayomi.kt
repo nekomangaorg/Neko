@@ -854,7 +854,7 @@ class Suwayomi : MergedServerSource() {
                 "spin-off",
                 "afterword",
             )
-        val edgeNumberCase = listOf(Regex("(special)? se ?[0-9]"))
+        val edgeNumberCase = listOf(Regex("([Ss]pecial)? SE ?[0-9]"))
     }
 }
 
