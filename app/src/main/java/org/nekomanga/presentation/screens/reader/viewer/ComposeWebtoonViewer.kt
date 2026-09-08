@@ -62,6 +62,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.ReaderWebtoonController
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
+import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlinx.coroutines.Dispatchers
@@ -197,41 +198,63 @@ fun ComposeWebtoonViewer(
         val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
         val preloadedKeys = remember { mutableSetOf<String>() }
+        val maxTextureBitmapSize = remember {
+            CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize)
+        }
 
-        val checkAndSplitTallPage: (ReaderPage) -> Unit = { p ->
-            if (viewer.config.splitTallPages && !viewer.controller.tallSplitPages.contains(p)) {
-                coroutineScope.launch(Dispatchers.IO) {
-                    try {
-                        p.statusFlow.first { it == Page.State.READY }
-                        val screenHeight = context.resources.displayMetrics.heightPixels
-                        val result = viewer.controller.checkAndTrackTallPage(p, screenHeight)
-                        when (result) {
-                            is ReaderWebtoonController.TallSplitResult.Split -> {
-                                withContext(Dispatchers.Main) { viewer.splitPage(p, result.splits) }
-                                result.splits.forEach { split ->
-                                    val request =
-                                        ImageRequest.Builder(context)
-                                            .data(split)
-                                            .size(CoilSize.ORIGINAL)
-                                            .maxBitmapSize(CoilSize.ORIGINAL)
-                                            .precision(Precision.EXACT)
-                                            .build()
-                                    context.imageLoader.enqueue(request)
-                                }
-                            }
-                            is ReaderWebtoonController.TallSplitResult.NotTall -> {
+        val onCheckAndSplitPage: suspend (ReaderPage) -> Boolean = { p ->
+            if (viewer.config.splitTallPages) {
+                try {
+                    val screenHeight = context.resources.displayMetrics.heightPixels
+                    val result =
+                        withContext(Dispatchers.IO) {
+                            viewer.controller.checkAndTrackTallPage(p, screenHeight)
+                        }
+                    when (result) {
+                        is ReaderWebtoonController.TallSplitResult.Split -> {
+                            withContext(Dispatchers.Main) { viewer.splitPage(p, result.splits) }
+                            result.splits.forEach { split ->
                                 val request =
                                     ImageRequest.Builder(context)
-                                        .data(p)
+                                        .data(split)
                                         .size(CoilSize.ORIGINAL)
-                                        .maxBitmapSize(CoilSize.ORIGINAL)
+                                        .maxBitmapSize(maxTextureBitmapSize)
                                         .precision(Precision.EXACT)
                                         .build()
                                 context.imageLoader.enqueue(request)
                             }
-                            is ReaderWebtoonController.TallSplitResult.AlreadySplit -> {
-                                // Already split, no-op
-                            }
+                            true
+                        }
+                        is ReaderWebtoonController.TallSplitResult.AlreadySplit -> true
+                        is ReaderWebtoonController.TallSplitResult.NotTall -> false
+                    }
+                } catch (_: Exception) {
+                    false
+                }
+            } else {
+                false
+            }
+        }
+
+        val checkAndSplitTallPage: (ReaderPage) -> Unit = { p ->
+            if (
+                viewer.config.splitTallPages &&
+                    !viewer.controller.tallSplitPages.contains(p) &&
+                    !viewer.controller.isNonTall(p)
+            ) {
+                coroutineScope.launch(Dispatchers.IO) {
+                    try {
+                        p.statusFlow.first { it == Page.State.READY }
+                        val wasSplit = onCheckAndSplitPage(p)
+                        if (!wasSplit) {
+                            val request =
+                                ImageRequest.Builder(context)
+                                    .data(p)
+                                    .size(CoilSize.ORIGINAL)
+                                    .maxBitmapSize(maxTextureBitmapSize)
+                                    .precision(Precision.EXACT)
+                                    .build()
+                            context.imageLoader.enqueue(request)
                         }
                     } catch (_: Exception) {}
                 }
@@ -260,7 +283,7 @@ fun ComposeWebtoonViewer(
                                     ImageRequest.Builder(context)
                                         .data(item.page)
                                         .size(CoilSize.ORIGINAL)
-                                        .maxBitmapSize(CoilSize.ORIGINAL)
+                                        .maxBitmapSize(maxTextureBitmapSize)
                                         .precision(Precision.EXACT)
                                         .build()
                                 context.imageLoader.enqueue(request)
@@ -272,7 +295,7 @@ fun ComposeWebtoonViewer(
                                 ImageRequest.Builder(context)
                                     .data(item.split)
                                     .size(CoilSize.ORIGINAL)
-                                    .maxBitmapSize(CoilSize.ORIGINAL)
+                                    .maxBitmapSize(maxTextureBitmapSize)
                                     .precision(Precision.EXACT)
                                     .build()
                             context.imageLoader.enqueue(request)
@@ -409,7 +432,7 @@ fun ComposeWebtoonViewer(
                                                     ImageRequest.Builder(context)
                                                         .data(preloadItem.page)
                                                         .size(CoilSize.ORIGINAL)
-                                                        .maxBitmapSize(CoilSize.ORIGINAL)
+                                                        .maxBitmapSize(maxTextureBitmapSize)
                                                         .precision(Precision.EXACT)
                                                         .build()
                                                 context.imageLoader.enqueue(request)
@@ -425,7 +448,7 @@ fun ComposeWebtoonViewer(
                                                 ImageRequest.Builder(context)
                                                     .data(preloadItem.split)
                                                     .size(CoilSize.ORIGINAL)
-                                                    .maxBitmapSize(CoilSize.ORIGINAL)
+                                                    .maxBitmapSize(maxTextureBitmapSize)
                                                     .precision(Precision.EXACT)
                                                     .build()
                                             context.imageLoader.enqueue(request)
@@ -776,18 +799,8 @@ fun ComposeWebtoonViewer(
                         is ReaderUiItem.Page -> {
                             WebtoonPageItem(
                                 page = item.page,
-                                onSplitPage =
-                                    if (viewer.config.splitTallPages)
-                                        { splits -> viewer.splitPage(item.page, splits) }
-                                    else null,
-                                checkTallPage =
-                                    if (viewer.config.splitTallPages) {
-                                        { p ->
-                                            val screenHeight =
-                                                context.resources.displayMetrics.heightPixels
-                                            viewer.controller.checkAndTrackTallPage(p, screenHeight)
-                                        }
-                                    } else null,
+                                onCheckAndSplitPage =
+                                    if (viewer.config.splitTallPages) onCheckAndSplitPage else null,
                                 isAlreadyChecked =
                                     !viewer.config.splitTallPages ||
                                         viewer.controller.isNonTall(item.page),

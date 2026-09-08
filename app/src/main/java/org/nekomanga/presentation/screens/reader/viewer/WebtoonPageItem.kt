@@ -29,27 +29,30 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.ReaderWebtoonController
+import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+/** Strongly typed target for webtoon rendering to avoid untyped Any? smuggling. */
+sealed interface WebtoonImageTarget {
+    data class Page(val page: ReaderPage) : WebtoonImageTarget
+
+    data class Slice(val split: ReaderPageSplit) : WebtoonImageTarget
+}
+
 @Composable
 fun WebtoonPageItem(
     page: ReaderPage,
-    onSplitPage: ((List<ReaderPageSplit>) -> Unit)? = null,
-    checkTallPage: (suspend (ReaderPage) -> ReaderWebtoonController.TallSplitResult)? = null,
+    onCheckAndSplitPage: (suspend (ReaderPage) -> Boolean)? = null,
     isAlreadyChecked: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val isSplitCheckRequired = (onSplitPage != null || checkTallPage != null) && !isAlreadyChecked
+    val isSplitCheckRequired = onCheckAndSplitPage != null && !isAlreadyChecked
     var isSplitChecked by remember(page) { mutableStateOf(!isSplitCheckRequired) }
-    val context = LocalContext.current
 
     LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
 
@@ -58,29 +61,9 @@ fun WebtoonPageItem(
 
     LaunchedEffect(page, pageStatus) {
         if (pageStatus == Page.State.READY && isSplitCheckRequired && !isSplitChecked) {
-            val result =
-                withContext(Dispatchers.IO) {
-                    checkTallPage?.invoke(page)
-                        ?: run {
-                            val screenHeight = context.resources.displayMetrics.heightPixels
-                            val splits = ReaderWebtoonController.checkTallPage(page, screenHeight)
-                            if (splits != null) {
-                                ReaderWebtoonController.TallSplitResult.Split(splits)
-                            } else {
-                                ReaderWebtoonController.TallSplitResult.NotTall
-                            }
-                        }
-                }
-            when (result) {
-                is ReaderWebtoonController.TallSplitResult.Split -> {
-                    onSplitPage?.invoke(result.splits)
-                }
-                is ReaderWebtoonController.TallSplitResult.AlreadySplit -> {
-                    // Already split, do nothing and wait for list update
-                }
-                is ReaderWebtoonController.TallSplitResult.NotTall -> {
-                    isSplitChecked = true
-                }
+            val wasSplit = onCheckAndSplitPage(page)
+            if (!wasSplit) {
+                isSplitChecked = true
             }
         } else if (pageStatus == Page.State.ERROR) {
             isSplitChecked = true
@@ -91,7 +74,7 @@ fun WebtoonPageItem(
         page = page,
         initialRatio = page.aspectRatio,
         onRatioCalculated = { ratio, _ -> page.aspectRatio = ratio },
-        imageData = if (isSplitChecked) page else null,
+        target = if (isSplitChecked) WebtoonImageTarget.Page(page) else null,
         pageStatus = pageStatus,
         pageProgress = pageProgress,
         modifier = modifier,
@@ -116,7 +99,7 @@ fun WebtoonPageItem(
             split.aspectRatio = ratio
             split.displayedHeight = height
         },
-        imageData = split,
+        target = WebtoonImageTarget.Slice(split),
         pageStatus = pageStatus,
         pageProgress = pageProgress,
         modifier = modifier,
@@ -128,7 +111,7 @@ private fun WebtoonPageContent(
     page: ReaderPage,
     initialRatio: Float,
     onRatioCalculated: (Float, Int) -> Unit,
-    imageData: Any?,
+    target: WebtoonImageTarget?,
     pageStatus: Page.State,
     pageProgress: Int,
     modifier: Modifier = Modifier,
@@ -139,7 +122,7 @@ private fun WebtoonPageContent(
 
     val isError = pageStatus == Page.State.ERROR
 
-    var intrinsicRatio by remember(imageData) { mutableFloatStateOf(initialRatio) }
+    var intrinsicRatio by remember(target) { mutableFloatStateOf(initialRatio) }
 
     val backgroundColor =
         remember(readerThemePref) {
@@ -153,11 +136,17 @@ private fun WebtoonPageContent(
     val onRetry: () -> Unit = { page.chapter.pageLoader?.retryPage(page) }
 
     val model =
-        remember(imageData, pageStatus) {
+        remember(target) {
+            val modelData =
+                when (target) {
+                    is WebtoonImageTarget.Page -> target.page
+                    is WebtoonImageTarget.Slice -> target.split
+                    null -> null
+                }
             ImageRequest.Builder(context)
-                .data(imageData)
+                .data(modelData)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize.ORIGINAL)
+                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .build()

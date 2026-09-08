@@ -20,9 +20,11 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.util.system.GLUtil
-import java.io.ByteArrayInputStream
 import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -86,19 +88,16 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             object : LruCache<String, ByteArray>(maxCacheSizeBytes) {
                 override fun sizeOf(key: String, value: ByteArray): Int = value.size
             }
+
+        private val activeFetches = ConcurrentHashMap<String, Deferred<ByteArray>>()
+
+        fun clearCache() {
+            rawBytesCache.evictAll()
+            activeFetches.clear()
+        }
     }
 
     override suspend fun fetch(): FetchResult = coroutineScope {
-        val bytes = split.cachedBytes
-        if (bytes != null) {
-            val source = ByteArrayInputStream(bytes).source().buffer()
-            return@coroutineScope SourceFetchResult(
-                source = ImageSource(source = source, fileSystem = options.fileSystem),
-                mimeType = null,
-                dataSource = DataSource.MEMORY,
-            )
-        }
-
         var streamFn = split.page.stream
         if (streamFn == null) {
             val loader = split.page.chapter.pageLoader
@@ -123,36 +122,36 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         val cacheKey = "${split.page.chapter.chapter.id}_${split.page.index}"
         val imageBytes =
             rawBytesCache.get(cacheKey)
-                ?: withContext(Dispatchers.IO) {
-                    synchronized(rawBytesCache) {
-                        rawBytesCache.get(cacheKey)
-                            ?: actualStream()
-                                .use { it.readBytes() }
-                                .also { rawBytesCache.put(cacheKey, it) }
-                    }
+                ?: run {
+                    val deferred =
+                        activeFetches.compute(cacheKey) { _, existing ->
+                            existing?.takeIf { it.isActive }
+                                ?: async(Dispatchers.IO) {
+                                    try {
+                                        actualStream()
+                                            .use { it.readBytes() }
+                                            .also { rawBytesCache.put(cacheKey, it) }
+                                    } finally {
+                                        activeFetches.remove(cacheKey)
+                                    }
+                                }
+                        }!!
+                    deferred.await()
                 }
 
         val bitmap =
             withContext(Dispatchers.IO) {
                 decodeRegion(imageBytes, split.topOffset, split.splitHeight)
             }
-        if (bitmap != null) {
-            ImageFetchResult(
-                image = bitmap.asImage(),
-                isSampled = false,
-                dataSource = DataSource.MEMORY,
-            )
-        } else {
-            SourceFetchResult(
-                source =
-                    ImageSource(
-                        source = ByteArrayInputStream(imageBytes).source().buffer(),
-                        fileSystem = options.fileSystem,
-                    ),
-                mimeType = null,
-                dataSource = DataSource.MEMORY,
-            )
-        }
+                ?: error(
+                    "Failed to decode webtoon slice for page ${split.page.index} at offset ${split.topOffset}"
+                )
+
+        ImageFetchResult(
+            image = bitmap.asImage(),
+            isSampled = false,
+            dataSource = DataSource.MEMORY,
+        )
     }
 
     private fun decodeRegion(

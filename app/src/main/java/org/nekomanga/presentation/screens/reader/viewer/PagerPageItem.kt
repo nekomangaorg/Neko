@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
+import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import kotlin.math.hypot
 import kotlinx.coroutines.flow.emptyFlow
@@ -338,11 +339,11 @@ fun PagerPageItem(
             val zoomableState = rememberZoomableState()
             val imageState = rememberZoomableImageState(zoomableState)
             val model =
-                remember(page, pageStatus) {
+                remember(page) {
                     ImageRequest.Builder(context)
                         .data(page)
                         .size(CoilSize.ORIGINAL)
-                        .maxBitmapSize(CoilSize.ORIGINAL)
+                        .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
                         .precision(Precision.EXACT)
                         .crossfade(true)
                         .build()
@@ -363,21 +364,21 @@ fun PagerPageItem(
             val second = if (invertDoublePages) page else extraPage
 
             val firstModel =
-                remember(first, pageStatus, extraPageStatus) {
+                remember(first) {
                     ImageRequest.Builder(context)
                         .data(first)
                         .size(CoilSize.ORIGINAL)
-                        .maxBitmapSize(CoilSize.ORIGINAL)
+                        .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
                         .precision(Precision.EXACT)
                         .crossfade(true)
                         .build()
                 }
             val secondModel =
-                remember(second, pageStatus, extraPageStatus) {
+                remember(second) {
                     ImageRequest.Builder(context)
                         .data(second)
                         .size(CoilSize.ORIGINAL)
-                        .maxBitmapSize(CoilSize.ORIGINAL)
+                        .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
                         .precision(Precision.EXACT)
                         .crossfade(true)
                         .build()

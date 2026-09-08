@@ -5,6 +5,7 @@ import android.view.MotionEvent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import eu.kanade.tachiyomi.data.coil.ReaderPageSplitFetcher
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
@@ -77,6 +78,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     override fun destroy() {
         super.destroy()
         scope.cancel()
+        ReaderPageSplitFetcher.clearCache()
     }
 
     private var isInitialLoad = true

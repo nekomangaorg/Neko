@@ -45,6 +45,8 @@ class ReaderWebtoonController {
     val nonTallPages: MutableSet<ReaderPage> =
         Collections.synchronizedSet(mutableSetOf<ReaderPage>())
 
+    private val splitCheckLock = Any()
+
     /**
      * Builds the list of [ReaderUiItem] for the given [chapters]. Handles previous chapter padding
      * pages, transition pages, and next chapter peek pages.
@@ -160,15 +162,17 @@ class ReaderWebtoonController {
         screenHeight: Int,
         maxTextureSize: Int = GLUtil.maxTextureSize,
     ): TallSplitResult {
-        if (tallSplitPages.contains(page)) return TallSplitResult.AlreadySplit
-        if (nonTallPages.contains(page)) return TallSplitResult.NotTall
-        val splits = Companion.checkTallPage(page, screenHeight, maxTextureSize)
-        return if (splits != null) {
-            tallSplitPages.add(page)
-            TallSplitResult.Split(splits)
-        } else {
-            nonTallPages.add(page)
-            TallSplitResult.NotTall
+        synchronized(splitCheckLock) {
+            if (tallSplitPages.contains(page)) return TallSplitResult.AlreadySplit
+            if (nonTallPages.contains(page)) return TallSplitResult.NotTall
+            val splits = Companion.checkTallPage(page, screenHeight, maxTextureSize)
+            return if (splits != null) {
+                tallSplitPages.add(page)
+                TallSplitResult.Split(splits)
+            } else {
+                nonTallPages.add(page)
+                TallSplitResult.NotTall
+            }
         }
     }
 
@@ -230,7 +234,8 @@ class ReaderWebtoonController {
                 } else {
                     maxTextureSize
                 }
-            val isTall = (outHeight / outWidth > 3) || (outHeight > maxTextureSize)
+            val isTall =
+                (outHeight.toFloat() / outWidth.toFloat() > 3f) || (outHeight > maxTextureSize)
             if (!isTall || outHeight <= displayMaxHeight) {
                 return null
             }
