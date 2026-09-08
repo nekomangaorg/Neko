@@ -107,6 +107,9 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun sourceUrl(source: Source) = this.preferenceStore.getString(Keys.sourceUrl(source.id), "")
 
+    fun sourceWafCookie(source: Source) =
+        this.preferenceStore.getString(Keys.sourceWafCookie(source.id), "")
+
     fun setSourceCredentials(source: Source, username: String, password: String, url: String) {
         this.preferenceStore.getString(Keys.sourceUsername(source.id)).set(username)
         this.preferenceStore.getString(Keys.sourcePassword(source.id)).set(password)

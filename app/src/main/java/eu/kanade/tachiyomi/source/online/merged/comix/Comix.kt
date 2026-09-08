@@ -2,8 +2,11 @@ package eu.kanade.tachiyomi.source.online.merged.comix
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -12,6 +15,7 @@ import android.webkit.WebViewClient
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -21,13 +25,22 @@ import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
+import org.jsoup.nodes.Document
 import org.nekomanga.core.network.GET
+import org.nekomanga.core.network.POST
 import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
@@ -35,6 +48,7 @@ import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class Comix : ReducedHttpSource() {
 
@@ -44,6 +58,15 @@ class Comix : ReducedHttpSource() {
     override val client =
         network.cloudFlareClient
             .newBuilder()
+            .addInterceptor { chain ->
+                val request = chain.request()
+                val cookie = storedWafCookie()
+                if (cookie.isNullOrBlank() || request.header("Cookie") != null) {
+                    chain.proceed(request)
+                } else {
+                    chain.proceed(request.newBuilder().header("Cookie", cookie).build())
+                }
+            }
             .addInterceptor(ComixDescrambler.interceptor)
             .addInterceptor { chain ->
                 val request = chain.request()
@@ -79,6 +102,127 @@ class Comix : ReducedHttpSource() {
         coerceInputValues = true
     }
 
+    @Volatile private var cipher: ComixCipher? = null
+
+    private val preferences: PreferencesHelper by injectLazy()
+
+    private var cachedWafCookie: String? = null
+    private val wafMutex = Mutex()
+
+    private fun storedWafCookie(): String? {
+        cachedWafCookie?.let {
+            return it
+        }
+        return preferences
+            .sourceWafCookie(this)
+            .get()
+            .ifBlank { null }
+            ?.also { cachedWafCookie = it }
+    }
+
+    private fun saveWafCookie(cookie: String?) {
+        cachedWafCookie = cookie
+        preferences.sourceWafCookie(this).set(cookie.orEmpty())
+    }
+
+    private suspend fun obtainWafCookie(forceRefresh: Boolean): String? = wafMutex.withLock {
+        if (!forceRefresh) {
+            storedWafCookie()?.let {
+                return@withLock it
+            }
+        }
+        repeat(WAF_MAX_ATTEMPTS) {
+            trySolveWafChallenge()?.let { cookie ->
+                saveWafCookie(cookie)
+                runCatching {
+                    android.webkit.CookieManager.getInstance().setCookie(baseUrl, cookie)
+                }
+                return@withLock cookie
+            }
+        }
+        saveWafCookie(null)
+        null
+    }
+
+    private suspend fun trySolveWafChallenge(): String? {
+        val apiHeaders =
+            headers.newBuilder().removeAll("Cookie").set("Accept", "application/json").build()
+        return try {
+            val challenge =
+                client.newCall(GET("$baseUrl/@waf/generate", apiHeaders)).await().use { response ->
+                    json.decodeFromString<WafChallengeResponse>(response.body.string())
+                }
+            val original = decodeDataUri(challenge.imageBase64)
+            val rotatedCrop = decodeDataUri(challenge.thumbBase64)
+            if (original == null || rotatedCrop == null) {
+                original?.recycle()
+                rotatedCrop?.recycle()
+                return null
+            }
+            try {
+                val angle = ComixWafSolver.estimateRotationAngle(original, rotatedCrop)
+                val body =
+                    json
+                        .encodeToString(
+                            WafVerifyRequest.serializer(),
+                            WafVerifyRequest(challenge.captchaId, angle % 360),
+                        )
+                        .toRequestBody("application/json;charset=UTF-8".toMediaType())
+                client.newCall(POST("$baseUrl/@waf/verify", apiHeaders, body)).await().use {
+                    response ->
+                    val cookie =
+                        response
+                            .headers("Set-Cookie")
+                            .firstOrNull { it.startsWith("waf_pass=") }
+                            ?.substringBefore(";")
+                    val verified = json.decodeFromString<WafVerifyResponse>(response.body.string())
+                    if (verified.success) {
+                        cookie
+                    } else {
+                        null
+                    }
+                }
+            } finally {
+                original.recycle()
+                rotatedCrop.recycle()
+            }
+        } catch (e: Exception) {
+            TimberKt.w(e) { "Failed to solve comix WAF challenge" }
+            null
+        }
+    }
+
+    private fun decodeDataUri(uri: String): Bitmap? = runCatching {
+        val bytes = Base64.decode(uri.substringAfter(','), Base64.DEFAULT)
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }
+        .getOrNull()
+
+    private suspend fun fetchPage(url: String): Document = fetchPage(GET(url, headers))
+
+    private suspend fun fetchPage(request: Request): Document {
+        suspend fun get(): Document {
+            val response = client.newCall(request).await()
+            if (!response.isSuccessful) {
+                response.close()
+                throw Exception("HTTP error ${response.code}")
+            }
+            val document = response.asJsoup()
+            response.close()
+            return document
+        }
+
+        val document = get()
+        if (!document.isWafChallenge()) return document
+        obtainWafCookie(forceRefresh = true)
+        val retry = get()
+        if (retry.isWafChallenge()) throw Exception("WAF challenge could not be solved")
+        return retry
+    }
+
+    private fun Document.isWafChallenge(): Boolean =
+        selectFirst("title")?.text().orEmpty() == "Security check" || selectFirst("#stage") != null
+
     override suspend fun searchManga(query: String): List<SManga> {
         val url =
             baseUrl
@@ -105,14 +249,7 @@ class Comix : ReducedHttpSource() {
         request: Request,
         expectedKeyword: String = "",
     ): List<SManga> {
-        val response = client.newCall(request).await()
-        if (!response.isSuccessful) {
-            response.close()
-            throw Exception("HTTP error ${response.code}")
-        }
-
-        val document = response.asJsoup()
-        response.close()
+        val document = fetchPage(request)
 
         // 1. Try static extraction first via script#initial-data
         val searchResponse =
@@ -254,13 +391,7 @@ class Comix : ReducedHttpSource() {
 
         try {
             val mangaPageUrl = getMangaUrl(mangaUrl)
-            val response = client.newCall(GET(mangaPageUrl, headers)).await()
-            if (!response.isSuccessful) {
-                response.close()
-                return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
-            }
-            val document = response.asJsoup()
-            response.close()
+            val document = fetchPage(mangaPageUrl)
 
             val payload =
                 runInWebView(document) { interfaceName ->
@@ -373,16 +504,13 @@ class Comix : ReducedHttpSource() {
     }
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
-        val chapterUrl = "$baseUrl/${chapter.url}"
-
-        val response = client.newCall(GET(chapterUrl, headers)).await()
-        if (!response.isSuccessful) {
-            response.close()
-            throw Exception("HTTP error ${response.code}")
+        getNativePageList(chapter)?.let {
+            return it
         }
 
-        val document = response.asJsoup()
-        response.close()
+        val chapterUrl = "$baseUrl/${chapter.url}"
+
+        val document = fetchPage(chapterUrl)
 
         val payload =
             runInWebView(document) { interfaceName ->
@@ -427,7 +555,12 @@ class Comix : ReducedHttpSource() {
                     .trimIndent()
             }
 
-        val pages = json.decodeFromString<ChapterResponse>(payload).result?.pages
+        val response = json.decodeFromString<ChapterResponse>(payload)
+        return buildPages(response)
+    }
+
+    private fun buildPages(response: ChapterResponse): List<Page> {
+        val pages = response.result?.pages
         val base = pages?.baseUrl?.trimEnd('/') ?: return emptyList()
 
         return pages.items.mapIndexed { index, img ->
@@ -459,6 +592,64 @@ class Comix : ReducedHttpSource() {
         }
     }
 
+    private suspend fun getNativePageList(chapter: SChapter): List<Page>? {
+        if (cipher == null) return null
+        val chapterId = chapterApiId(chapter) ?: return null
+        return getSigned<ChapterResponse>("/api/v1/chapters/$chapterId", emptyMap())
+            ?.let(::buildPages)
+    }
+
+    private fun chapterApiId(chapter: SChapter): Int? =
+        CHAPTER_ID_REGEX.find(chapter.url)?.groupValues?.get(1)?.toIntOrNull()
+
+    private suspend inline fun <reified T> getSigned(
+        path: String,
+        params: Map<String, List<String>>,
+    ): T? {
+        val currentCipher = cipher ?: return null
+        return runCatching {
+            val entries = canonicalEntries(params)
+            val query = entries.joinToString("&") { (name, value) -> "$name=${value.trim()}" }
+            val url =
+                baseUrl
+                    .toHttpUrl()
+                    .newBuilder()
+                    .addPathSegments(path.trimStart('/'))
+                    .apply {
+                        entries.forEach { (name, value) -> addQueryParameter(name, value) }
+                        addQueryParameter("_", currentCipher.sign(path, query))
+                    }
+                    .build()
+            val response = client.newCall(GET(url.toString(), headers)).await()
+            val root = response.use { json.decodeFromString<JsonElement>(it.body.string()) }
+            val decoded: JsonElement =
+                if (root is JsonObject && "e" in root) {
+                    val payload = json.decodeFromJsonElement<EncryptedResponse>(root)
+                    json.parseToJsonElement(currentCipher.decrypt(payload.e))
+                } else {
+                    root
+                }
+            json.decodeFromJsonElement<T>(decoded)
+        }
+            .getOrElse {
+                if (cipher === currentCipher) cipher = null
+                TimberKt.w(it) { "Comix signed request failed" }
+                null
+            }
+    }
+
+    private fun canonicalEntries(params: Map<String, List<String>>): List<Pair<String, String>> =
+        buildList {
+            params.toSortedMap().forEach { (rawName, values) ->
+                val name = rawName.removeSuffix("[]")
+                if (values.size == 1 && !rawName.endsWith("[]")) {
+                    add(name to values.single())
+                } else {
+                    values.forEachIndexed { index, value -> add("$name[$index]" to value) }
+                }
+            }
+        }
+
     override fun imageRequest(page: Page): Request {
         val imageUrl = page.imageUrl ?: return super.imageRequest(page)
         val urlWithoutFragment = imageUrl.substringBefore('#')
@@ -483,6 +674,18 @@ class Comix : ReducedHttpSource() {
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
         return "$baseUrl/${simpleChapter.url}"
     }
+
+    private fun parseCipherMaterial(raw: String?): CipherMaterial? = runCatching {
+        if (raw.isNullOrBlank() || raw == "null") return null
+        val inner = org.json.JSONArray("[$raw]").getString(0)
+        val arrays = json.decodeFromString<List<List<Int>>>(inner)
+        CipherMaterial(
+                sboxes = arrays.filter { it.size == 256 }.take(3),
+                keys = arrays.filter { it.size == 24 || it.size == 32 }.take(3),
+            )
+            .takeIf { it.isValid() }
+    }
+        .getOrNull()
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun runInWebView(
@@ -588,10 +791,17 @@ class Comix : ReducedHttpSource() {
                     document
                         .clone()
                         .apply {
-                            initializationScript?.let { head().prependElement("script").append(it) }
+                            head()
+                                .prependElement("script")
+                                .append(CIPHER_BOOTSTRAP_SCRIPT + (initializationScript.orEmpty()))
                         }
                         .outerHtml()
 
+                runCatching {
+                    storedWafCookie()?.let {
+                        android.webkit.CookieManager.getInstance().setCookie(baseUrl, it)
+                    }
+                }
                 view.loadDataWithBaseURL(
                     document.location(),
                     html,
@@ -607,6 +817,24 @@ class Comix : ReducedHttpSource() {
             }
         }
 
+        fun readCipherMaterial() {
+            val latch = Semaphore(0)
+            var raw: String? = null
+            handler.post {
+                runCatching {
+                    webView?.evaluateJavascript(
+                        "JSON.stringify(window.__comixCipherCaptures||null)"
+                    ) { value ->
+                        raw = value
+                        latch.release()
+                    }
+                }
+                    .onFailure { latch.release() }
+            }
+            latch.tryAcquire(10L, TimeUnit.SECONDS)
+            parseCipherMaterial(raw)?.let { cipher = ComixCipher(it) }
+        }
+
         val completed =
             try {
                 if (!started.tryAcquire(120L, TimeUnit.SECONDS)) {
@@ -615,7 +843,9 @@ class Comix : ReducedHttpSource() {
                 startupError.get()?.let {
                     throw Exception("Failed to start WebView (url=$lastUrl)", it)
                 }
-                jsInterface.await(90L, TimeUnit.SECONDS)
+                jsInterface.await(90L, TimeUnit.SECONDS).also { success ->
+                    if (success) readCipherMaterial()
+                }
             } finally {
                 active.set(false)
                 handler.post {
@@ -667,6 +897,28 @@ class Comix : ReducedHttpSource() {
         const val name = "Comix"
         const val baseUrl = "https://comix.to"
 
+        private const val WAF_MAX_ATTEMPTS = 3
+        private const val HEX = "0123456789ABCDEF"
+        private const val URI_COMPONENT_SAFE_CHARS = "-_.!~*'()"
         private val SCRAMBLE_PATH_FALLBACK_REGEX = Regex("/(?:i5|s?i+)/")
+        private val CHAPTER_ID_REGEX = Regex("""/(\d+)-chapter-""")
+
+        private const val CIPHER_BOOTSTRAP_SCRIPT =
+            """
+            (function () {
+                const captures = window.__comixCipherCaptures = [];
+                const originalAtob = window.atob.bind(window);
+                window.atob = function (value) {
+                    const decoded = originalAtob(value);
+                    try {
+                        const bytes = Array.from(decoded, char => char.charCodeAt(0) & 255);
+                        if (bytes.length === 256 || bytes.length === 24 || bytes.length === 32) {
+                            captures.push(bytes);
+                        }
+                    } catch (e) {}
+                    return decoded;
+                };
+            })();
+            """
     }
 }
