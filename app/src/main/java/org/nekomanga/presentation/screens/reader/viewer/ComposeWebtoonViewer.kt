@@ -135,6 +135,7 @@ fun ComposeWebtoonViewer(
             }
 
         val currentItems by rememberUpdatedState(items)
+        val activeChapterId by rememberUpdatedState(currentChapterId)
 
         LaunchedEffect(currentChapterId) {
             viewer.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
@@ -262,17 +263,66 @@ fun ComposeWebtoonViewer(
                     if (visibleItems.isNotEmpty()) {
                         val viewportMiddle =
                             (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-                        val activeItemInfo =
-                            visibleItems.firstOrNull { item ->
-                                val itemTop = item.offset
-                                val itemBottom = item.offset + item.size
-                                viewportMiddle in itemTop until itemBottom
-                            }
-                                ?: visibleItems.minByOrNull { item ->
-                                    val itemMiddle = item.offset + item.size / 2
-                                    abs(itemMiddle - viewportMiddle)
+
+                        val currentChapterVisibleItems =
+                            if (activeChapterId != null) {
+                                visibleItems.filter { itemInfo ->
+                                    val item = currentItems.getOrNull(itemInfo.index)
+                                    when (item) {
+                                        is ReaderUiItem.Page ->
+                                            item.page.chapter.chapter.id == activeChapterId
+                                        is ReaderUiItem.SplitPage ->
+                                            item.page.chapter.chapter.id == activeChapterId
+                                        else -> false
+                                    }
                                 }
-                                ?: visibleItems.first()
+                            } else {
+                                emptyList()
+                            }
+
+                        val itemSpanningMiddle = visibleItems.firstOrNull { item ->
+                            val itemTop = item.offset
+                            val itemBottom = item.offset + item.size
+                            viewportMiddle in itemTop until itemBottom
+                        }
+
+                        val activeItemInfo =
+                            when {
+                                itemSpanningMiddle != null -> {
+                                    val isPrevItem =
+                                        currentChapterVisibleItems.isNotEmpty() &&
+                                            itemSpanningMiddle.index <
+                                                currentChapterVisibleItems.first().index
+
+                                    if (isPrevItem) {
+                                        currentChapterVisibleItems.first()
+                                    } else {
+                                        itemSpanningMiddle
+                                    }
+                                }
+                                currentChapterVisibleItems.isNotEmpty() -> {
+                                    val firstItem = currentChapterVisibleItems.first()
+                                    val lastItem = currentChapterVisibleItems.last()
+                                    val lastItemBottom = lastItem.offset + lastItem.size
+                                    if (
+                                        viewportMiddle >= lastItemBottom ||
+                                            viewportMiddle < firstItem.offset
+                                    ) {
+                                        firstItem
+                                    } else {
+                                        currentChapterVisibleItems.minByOrNull { item ->
+                                            val itemMiddle = item.offset + item.size / 2
+                                            abs(itemMiddle - viewportMiddle)
+                                        } ?: firstItem
+                                    }
+                                }
+                                else -> {
+                                    visibleItems.minByOrNull { item ->
+                                        val itemMiddle = item.offset + item.size / 2
+                                        abs(itemMiddle - viewportMiddle)
+                                    } ?: visibleItems.first()
+                                }
+                            }
                         activeItemInfo.index
                     } else {
                         lazyListState.firstVisibleItemIndex
@@ -683,7 +733,10 @@ fun ComposeWebtoonViewer(
                                 }
                             }
                         },
-                contentPadding = PaddingValues(bottom = if (hasMargins) Size.medium else Size.none),
+                contentPadding =
+                    PaddingValues(
+                        bottom = columnHeight + (if (hasMargins) Size.medium else Size.none)
+                    ),
             ) {
                 items(
                     items = items,
