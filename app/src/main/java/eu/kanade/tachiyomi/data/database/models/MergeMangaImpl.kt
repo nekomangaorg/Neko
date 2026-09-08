@@ -18,6 +18,7 @@ data class SourceMergeManga(
     val url: String,
     val title: String,
     val mergeType: MergeType,
+    val language: String? = null,
 ) {
     fun toMergeMangaImpl(mangaId: Long): MergeMangaImpl {
         return MergeMangaImpl(
@@ -77,6 +78,12 @@ enum class MergeType(
         id = 11,
         scanlatorName = eu.kanade.tachiyomi.source.online.merged.atsumaru.Atsumaru.name,
         baseUrl = eu.kanade.tachiyomi.source.online.merged.atsumaru.Atsumaru.baseUrl,
+    ),
+    Kagane(
+        id = 12,
+        scanlatorName = eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.name,
+        baseUrl = eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.baseUrl,
+        multiMerge = true,
     );
 
     companion object {
@@ -95,6 +102,7 @@ enum class MergeType(
                 ProjectSuki.scanlatorName -> ProjectSuki
                 Comix.scanlatorName -> Comix
                 Atsumaru.scanlatorName -> Atsumaru
+                Kagane.scanlatorName -> Kagane
                 else -> null
             }
         }
@@ -113,6 +121,7 @@ enum class MergeType(
                 ProjectSuki -> sourceManager.projectSuki
                 Comix -> sourceManager.comix
                 Atsumaru -> sourceManager.atsumaru
+                Kagane -> sourceManager.kagane
                 Invalid -> sourceManager.invalidMergeSource
             }
         }

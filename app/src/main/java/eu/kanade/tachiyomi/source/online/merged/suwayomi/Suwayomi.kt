@@ -323,6 +323,7 @@ class Suwayomi : MergedServerSource() {
                             listOf(manga.id, manga.source.name, manga.source.lang)
                                 .joinToString(Constants.SEPARATOR)
                         this.thumbnail_url = manga.thumbnailUrl?.let { hostUrl() + it }
+                        this.lang_flag = fromSuwayomiLang(manga.source.lang)
                     }
                 }
             }
@@ -499,7 +500,8 @@ class Suwayomi : MergedServerSource() {
         if (
             previous.chapter != null &&
                 previous.chapter > chaperNumber &&
-                edgeCases.any { rawName.contains(it, true) }
+                (edgeCases.any { rawName.contains(it, true) } ||
+                    edgeNumberCase.any { rawName.contains(it) })
         ) {
             var chapterNumber = previous.chapter.toLong()
             val half =
@@ -522,7 +524,8 @@ class Suwayomi : MergedServerSource() {
                 chapterNumber.toFloat(),
                 chtxt,
                 rawName,
-                !edgeCases.any { rawName.contains(it, true) },
+                !edgeCases.any { rawName.contains(it, true) } &&
+                    !edgeNumberCase.any { rawName.contains(it) },
             )
         }
 
@@ -844,12 +847,14 @@ class Suwayomi : MergedServerSource() {
                 "epilogue",
                 "original story",
                 "side story",
+                "special chapter",
                 "special episode",
                 "episode special",
                 "finale",
                 "spin-off",
                 "afterword",
             )
+        val edgeNumberCase = listOf(Regex("(special)? se ?[0-9]"))
     }
 }
 
