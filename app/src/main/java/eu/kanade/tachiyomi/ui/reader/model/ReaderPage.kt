@@ -58,7 +58,7 @@ data class ReaderPageSplit(
     val page: ReaderPage,
     val topOffset: Int,
     val splitHeight: Int,
-    var cachedBytes: ByteArray? = null,
-    var displayedHeight: Int = 0,
-    var aspectRatio: Float = 0f,
-)
+) {
+    var displayedHeight: Int = 0
+    var aspectRatio: Float = 0f
+}

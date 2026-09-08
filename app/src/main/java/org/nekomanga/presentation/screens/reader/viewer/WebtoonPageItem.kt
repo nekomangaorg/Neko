@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -21,34 +22,61 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.request.maxBitmapSize
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.ReaderWebtoonController
+import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+/** Strongly typed target for webtoon rendering to avoid untyped Any? smuggling. */
+sealed interface WebtoonImageTarget {
+    data class Page(val page: ReaderPage) : WebtoonImageTarget
+
+    data class Slice(val split: ReaderPageSplit) : WebtoonImageTarget
+}
+
 @Composable
 fun WebtoonPageItem(
     page: ReaderPage,
-    onSplitPage: ((List<ReaderPageSplit>) -> Unit)? = null,
+    onCheckAndSplitPage: (suspend (ReaderPage) -> Boolean)? = null,
+    isAlreadyChecked: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    val isSplitCheckRequired = onCheckAndSplitPage != null && !isAlreadyChecked
+    var isSplitChecked by remember(page) { mutableStateOf(!isSplitCheckRequired) }
+
+    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
+
+    val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
+    val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
+
+    LaunchedEffect(page, pageStatus) {
+        if (pageStatus == Page.State.READY && isSplitCheckRequired && !isSplitChecked) {
+            val wasSplit = onCheckAndSplitPage(page)
+            if (!wasSplit) {
+                isSplitChecked = true
+            }
+        } else if (pageStatus == Page.State.ERROR) {
+            isSplitChecked = true
+        }
+    }
+
     WebtoonPageContent(
         page = page,
         initialRatio = page.aspectRatio,
         onRatioCalculated = { ratio, _ -> page.aspectRatio = ratio },
-        imageData = page,
-        onSplitPage = onSplitPage,
+        target = if (isSplitChecked) WebtoonImageTarget.Page(page) else null,
+        pageStatus = pageStatus,
+        pageProgress = pageProgress,
         modifier = modifier,
     )
 }
@@ -58,15 +86,22 @@ fun WebtoonPageItem(
     split: ReaderPageSplit,
     modifier: Modifier = Modifier,
 ) {
+    val page = split.page
+    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
+
+    val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
+    val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
+
     WebtoonPageContent(
-        page = split.page,
+        page = page,
         initialRatio = split.aspectRatio,
         onRatioCalculated = { ratio, height ->
             split.aspectRatio = ratio
             split.displayedHeight = height
         },
-        imageData = split,
-        onSplitPage = null,
+        target = WebtoonImageTarget.Slice(split),
+        pageStatus = pageStatus,
+        pageProgress = pageProgress,
         modifier = modifier,
     )
 }
@@ -76,35 +111,18 @@ private fun WebtoonPageContent(
     page: ReaderPage,
     initialRatio: Float,
     onRatioCalculated: (Float, Int) -> Unit,
-    imageData: Any,
-    onSplitPage: ((List<ReaderPageSplit>) -> Unit)? = null,
+    target: WebtoonImageTarget?,
+    pageStatus: Page.State,
+    pageProgress: Int,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val readerPreferences: ReaderPreferences = remember { Injekt.get() }
     val readerThemePref by readerPreferences.readerTheme().collectAsState()
 
-    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
-
-    val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
-    val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
-
-    LaunchedEffect(page, pageStatus) {
-        if (pageStatus == Page.State.READY && onSplitPage != null) {
-            val screenHeight = context.resources.displayMetrics.heightPixels
-            val splits =
-                withContext(Dispatchers.IO) {
-                    ReaderWebtoonController.checkTallPage(page, screenHeight)
-                }
-            if (splits != null) {
-                onSplitPage(splits)
-            }
-        }
-    }
-
     val isError = pageStatus == Page.State.ERROR
 
-    var intrinsicRatio by remember(imageData) { mutableFloatStateOf(initialRatio) }
+    var intrinsicRatio by remember(target) { mutableFloatStateOf(initialRatio) }
 
     val backgroundColor =
         remember(readerThemePref) {
@@ -118,10 +136,17 @@ private fun WebtoonPageContent(
     val onRetry: () -> Unit = { page.chapter.pageLoader?.retryPage(page) }
 
     val model =
-        remember(imageData, pageStatus) {
+        remember(target) {
+            val modelData =
+                when (target) {
+                    is WebtoonImageTarget.Page -> target.page
+                    is WebtoonImageTarget.Slice -> target.split
+                    null -> null
+                }
             ImageRequest.Builder(context)
-                .data(imageData)
+                .data(modelData)
                 .size(CoilSize.ORIGINAL)
+                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .build()

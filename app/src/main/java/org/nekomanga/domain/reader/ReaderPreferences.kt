@@ -145,7 +145,7 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
     fun splitTallImagesReader() =
         this.preferenceStore.getBoolean(
             "split_tall_images_reader",
-            this.preferenceStore.getBoolean("split_tall_images").get(),
+            this.preferenceStore.getBoolean("split_tall_images", true).get(),
         )
 
     fun doublePageRotate() = this.preferenceStore.getBoolean("double_page_rotate")
