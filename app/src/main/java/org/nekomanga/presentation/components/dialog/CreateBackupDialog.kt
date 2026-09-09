@@ -35,13 +35,14 @@ data class CreateBackupDialogState(
 ) {
     /** Converts the selected options into a bitmask of [BackupConst] flags. */
     fun toBackupFlags(): Int {
-        var flags = 0
-        if (categories) flags = flags or BackupConst.BACKUP_CATEGORY
-        if (chapters) flags = flags or BackupConst.BACKUP_CHAPTER
-        if (tracking) flags = flags or BackupConst.BACKUP_TRACK
-        if (history) flags = flags or BackupConst.BACKUP_HISTORY
-        if (allReadManga) flags = flags or BackupConst.BACKUP_READ_MANGA
-        return flags
+        return listOf(
+                categories to BackupConst.BACKUP_CATEGORY,
+                chapters to BackupConst.BACKUP_CHAPTER,
+                tracking to BackupConst.BACKUP_TRACK,
+                history to BackupConst.BACKUP_HISTORY,
+                allReadManga to BackupConst.BACKUP_READ_MANGA,
+            )
+            .fold(0) { acc, (checked, flag) -> if (checked) acc or flag else acc }
     }
 }
 
