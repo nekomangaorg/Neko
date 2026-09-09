@@ -2,7 +2,6 @@ package org.nekomanga.presentation.components.sheets
 
 import Header
 import androidx.annotation.DrawableRes
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -65,7 +64,6 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.MergeType
@@ -425,15 +423,9 @@ private fun SuccessResults(
                     }
                 if (flagRes != null) {
                     Image(
-                        painter =
-                            rememberDrawablePainter(
-                                drawable =
-                                    AppCompatResources.getDrawable(
-                                        LocalContext.current,
-                                        flagRes,
-                                    )
-                            ),
-                        contentDescription = null,
+                        painter = painterResource(id = flagRes),
+                        contentDescription =
+                            item.language?.let { MdLang.fromIsoCode(it)?.prettyPrint },
                         modifier =
                             Modifier.align(Alignment.TopStart)
                                 .padding(Size.tiny)
