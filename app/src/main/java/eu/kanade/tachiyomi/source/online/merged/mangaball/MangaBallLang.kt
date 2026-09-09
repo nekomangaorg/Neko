@@ -27,8 +27,8 @@ enum class MangaBallLang(val mangadex: String, val mangaball: List<String>) {
     DUTCH("nl", listOf("nl", "nl-be")),
     NORWEGIAN("no", listOf("no")),
     POLISH("pl", listOf("pl")),
-    PORTUGUESE_BRAZIL("pt-br", listOf("pt-br", "pt-pt")),
-    PORTUGUESE("pt", listOf("pt")),
+    PORTUGUESE_BRAZIL("pt-br", listOf("pt-br")),
+    PORTUGUESE("pt", listOf("pt", "pt-pt")),
     ROMANIAN("ro", listOf("ro")),
     RUSSIAN("ru", listOf("ru")),
     SLOVAK("sk", listOf("sk")),
@@ -39,13 +39,23 @@ enum class MangaBallLang(val mangadex: String, val mangaball: List<String>) {
     TURKISH("tr", listOf("tr")),
     UKRAINIAN("uk", listOf("uk")),
     VIETNAMESE("vi", listOf("vi")),
-    CHINESE_SIMPLIFIED("zh", listOf("zh", "zh-cn", "zh-hk", "zh-mo", "zh-sg", "zh-tw"));
+    CHINESE_SIMPLIFIED("zh", listOf("zh", "zh-cn", "zh-sg")),
+    CHINESE_TRADITIONAL("zh-hk", listOf("zh-hk", "zh-mo", "zh-tw"));
 
     companion object {
+        private val mangadexToSites: Map<String, List<String>> = entries.associate {
+            it.mangadex to it.mangaball
+        }
+
+        private val siteToMangadex: Map<String, String> =
+            entries
+                .flatMap { entry -> entry.mangaball.map { it.lowercase() to entry.mangadex } }
+                .toMap()
+
         fun fromMangadexLang(mangadexLang: String): List<String> =
-            entries.firstOrNull { it.mangadex == mangadexLang }?.mangaball.orEmpty()
+            mangadexToSites[mangadexLang].orEmpty()
 
         fun fromMangaBallLang(mangaballLang: String): String? =
-            entries.firstOrNull { mangaballLang in it.mangaball }?.mangadex
+            siteToMangadex[mangaballLang.lowercase()]
     }
 }
