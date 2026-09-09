@@ -147,4 +147,90 @@ class ReaderPagerControllerTest {
         assertEquals(itemsLtr.first().key("pager"), itemsRtl.last().key("pager"))
         assertEquals(itemsLtr.last().key("pager"), itemsRtl.first().key("pager"))
     }
+
+    @Test
+    fun `getDoublePageOrder in RTL mode without invert places extraPage on the left and page on the right`() {
+        val controller = ReaderPagerController()
+        val currChapter = createChapter(1L, pageCount = 2)
+        val pages = currChapter.pages!!
+        val page1 = pages[0]
+        val page2 = pages[1]
+
+        val (first, second) =
+            controller.getDoublePageOrder(
+                page = page1,
+                extraPage = page2,
+                isRtl = true,
+                invertDoublePages = false,
+            )
+
+        // In RTL mode, reading is right-to-left:
+        // page1 (first read) is on the right, page2 is on the left -> [2][1]
+        assertEquals(page2, first)
+        assertEquals(page1, second)
+    }
+
+    @Test
+    fun `getDoublePageOrder in RTL mode with invert places page on the left and extraPage on the right`() {
+        val controller = ReaderPagerController()
+        val currChapter = createChapter(1L, pageCount = 2)
+        val pages = currChapter.pages!!
+        val page1 = pages[0]
+        val page2 = pages[1]
+
+        val (first, second) =
+            controller.getDoublePageOrder(
+                page = page1,
+                extraPage = page2,
+                isRtl = true,
+                invertDoublePages = true,
+            )
+
+        // Inverted RTL mode -> [1][2]
+        assertEquals(page1, first)
+        assertEquals(page2, second)
+    }
+
+    @Test
+    fun `getDoublePageOrder in LTR mode without invert places page on the left and extraPage on the right`() {
+        val controller = ReaderPagerController()
+        val currChapter = createChapter(1L, pageCount = 2)
+        val pages = currChapter.pages!!
+        val page1 = pages[0]
+        val page2 = pages[1]
+
+        val (first, second) =
+            controller.getDoublePageOrder(
+                page = page1,
+                extraPage = page2,
+                isRtl = false,
+                invertDoublePages = false,
+            )
+
+        // In LTR mode, reading is left-to-right:
+        // page1 is on the left, page2 is on the right -> [1][2]
+        assertEquals(page1, first)
+        assertEquals(page2, second)
+    }
+
+    @Test
+    fun `getDoublePageOrder in LTR mode with invert places extraPage on the left and page on the right`() {
+        val controller = ReaderPagerController()
+        val currChapter = createChapter(1L, pageCount = 2)
+        val pages = currChapter.pages!!
+        val page1 = pages[0]
+        val page2 = pages[1]
+
+        val (first, second) =
+            controller.getDoublePageOrder(
+                page = page1,
+                extraPage = page2,
+                isRtl = false,
+                invertDoublePages = true,
+            )
+
+        // Inverted LTR mode -> [2][1]
+        assertEquals(page2, first)
+        assertEquals(page1, second)
+    }
 }

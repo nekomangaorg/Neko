@@ -360,8 +360,13 @@ fun PagerPageItem(
             )
         } else {
             val zoomableState = rememberZoomableState()
-            val first = if (invertDoublePages) extraPage else page
-            val second = if (invertDoublePages) page else extraPage
+            val (first, second) =
+                viewer.controller.getDoublePageOrder(
+                    page = page,
+                    extraPage = extraPage,
+                    isRtl = viewer.isRtl,
+                    invertDoublePages = invertDoublePages,
+                )
 
             val firstModel =
                 remember(first) {

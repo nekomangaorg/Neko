@@ -286,4 +286,21 @@ class ReaderPagerController {
             }
         }
     }
+
+    /**
+     * Resolves the left-to-right display ordering of [page] and [extraPage] in double-page mode.
+     */
+    fun getDoublePageOrder(
+        page: ReaderPage,
+        extraPage: ReaderPage,
+        isRtl: Boolean,
+        invertDoublePages: Boolean,
+    ): Pair<ReaderPage, ReaderPage> {
+        val isLTR = (!isRtl).xor(invertDoublePages)
+        return if (isLTR) {
+            page to extraPage
+        } else {
+            extraPage to page
+        }
+    }
 }
