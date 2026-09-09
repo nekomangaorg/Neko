@@ -497,12 +497,8 @@ class Suwayomi : MergedServerSource() {
 
         // This is for bato.to normalization, and some other sources
         val edgeCases = edgeCases.toMutableList()
-        if (
-            previous.chapter != null &&
-                previous.chapter > chaperNumber &&
-                (edgeCases.any { rawName.contains(it, true) } ||
-                    edgeNumberCase.any { rawName.contains(it) })
-        ) {
+        val isNumberedEdgeCase = numberedEdgeCase.any { rawName.contains(it) }
+        if (previous.chapter != null && previous.chapter > chaperNumber && (isNumberedEdgeCase || edgeCases.any { rawName.contains(it, true) })) {
             var chapterNumber = previous.chapter.toLong()
             val half =
                 if (rawName.contains("season", true) && rawName.contains("announcement", true)) {
@@ -518,14 +514,15 @@ class Suwayomi : MergedServerSource() {
             val title = removeEndTag(rawName)
             val name = listOf(chtxt, "-", title).joinToString(" ")
             edgeCases.remove("season")
+            val isFinalEdgeCase = isNumberedEdgeCase ||
+                edgeCases.any { rawName.contains(it, true) }
             return Name.Sanitized(
                 name,
                 previous.volume,
                 chapterNumber.toFloat(),
                 chtxt,
                 rawName,
-                !edgeCases.any { rawName.contains(it, true) } &&
-                    !edgeNumberCase.any { rawName.contains(it) },
+                !isFinalEdgeCase,
             )
         }
 
@@ -854,7 +851,7 @@ class Suwayomi : MergedServerSource() {
                 "spin-off",
                 "afterword",
             )
-        val edgeNumberCase = listOf(Regex("([Ss]pecial)? SE ?[0-9]"))
+        val numberedEdgeCase = listOf(Regex("""(?i)(?:special\s+)?se\s*\d+"""))
     }
 }
 
