@@ -9,6 +9,21 @@ import kotlinx.serialization.Serializable
 import org.nekomanga.constants.Constants
 
 @Serializable
+class WafChallengeResponse(
+    @SerialName("captcha_id") val captchaId: String,
+    @SerialName("image_base64") val imageBase64: String,
+    @SerialName("thumb_base64") val thumbBase64: String,
+)
+
+@Serializable
+class WafVerifyRequest(
+    @SerialName("captcha_id") val captchaId: String,
+    val angle: Int,
+)
+
+@Serializable class WafVerifyResponse(val success: Boolean)
+
+@Serializable
 class Manga(
     @SerialName("hid") private val hashId: String,
     private val title: String,

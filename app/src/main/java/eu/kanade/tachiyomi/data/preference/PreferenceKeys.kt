@@ -58,6 +58,8 @@ object PreferenceKeys {
 
     fun sourceUrl(sourceId: Long) = "pref_source_url_$sourceId"
 
+    fun sourceWafCookie(sourceId: Long) = "pref_source_waf_cookie_$sourceId"
+
     const val autoAddTracker = "auto_add_tracker"
 
     const val thumbnailQuality = "mangadex_thumbnail_quality"
