@@ -498,7 +498,11 @@ class Suwayomi : MergedServerSource() {
         // This is for bato.to normalization, and some other sources
         val edgeCases = edgeCases.toMutableList()
         val isNumberedEdgeCase = numberedEdgeCase.any { rawName.contains(it) }
-        if (previous.chapter != null && previous.chapter > chaperNumber && (isNumberedEdgeCase || edgeCases.any { rawName.contains(it, true) })) {
+        if (
+            previous.chapter != null &&
+                previous.chapter > chaperNumber &&
+                (isNumberedEdgeCase || edgeCases.any { rawName.contains(it, true) })
+        ) {
             var chapterNumber = previous.chapter.toLong()
             val half =
                 if (rawName.contains("season", true) && rawName.contains("announcement", true)) {
@@ -514,8 +518,7 @@ class Suwayomi : MergedServerSource() {
             val title = removeEndTag(rawName)
             val name = listOf(chtxt, "-", title).joinToString(" ")
             edgeCases.remove("season")
-            val isFinalEdgeCase = isNumberedEdgeCase ||
-                edgeCases.any { rawName.contains(it, true) }
+            val isFinalEdgeCase = isNumberedEdgeCase || edgeCases.any { rawName.contains(it, true) }
             return Name.Sanitized(
                 name,
                 previous.volume,
