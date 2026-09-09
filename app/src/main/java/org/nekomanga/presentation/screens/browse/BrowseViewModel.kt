@@ -6,7 +6,6 @@ import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
@@ -41,6 +40,7 @@ import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import org.nekomanga.usecases.category.CategoryUseCases
+import org.nekomanga.usecases.filter.CalculateDexFilterUseCase
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
@@ -62,6 +62,7 @@ class BrowseViewModel : ViewModel() {
     private val mangaRepository: MangaRepository = Injekt.get()
 
     private val mangaUseCases: MangaUseCases by injectLazy()
+    private val calculateDexFilter: CalculateDexFilterUseCase by injectLazy()
 
     private val _browseScreenState =
         MutableStateFlow(
@@ -538,147 +539,9 @@ class BrowseViewModel : ViewModel() {
 
     fun filterChanged(newFilter: Filter) {
         viewModelScope.launchIO {
-            val updatedFilters =
-                when (newFilter) {
-                    is Filter.ContentRating -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.contentRatings.toList(),
-                                { it.rating == newFilter.rating },
-                                newFilter,
-                            )
-                        if (list.none { it.state }) {
-                            val default =
-                                lookupAndReplaceEntry(
-                                    list,
-                                    { it.rating == MangaContentRating.Safe },
-                                    Filter.ContentRating(MangaContentRating.Safe, true),
-                                )
-                            browseScreenState.value.filters.copy(contentRatings = default)
-                        } else {
-                            browseScreenState.value.filters.copy(contentRatings = list)
-                        }
-                    }
-
-                    is Filter.OriginalLanguage -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.originalLanguage.toList(),
-                                { it.language == newFilter.language },
-                                newFilter,
-                            )
-                        browseScreenState.value.filters.copy(originalLanguage = list)
-                    }
-
-                    is Filter.PublicationDemographic -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.publicationDemographics.toList(),
-                                { it.demographic == newFilter.demographic },
-                                newFilter,
-                            )
-                        browseScreenState.value.filters.copy(publicationDemographics = list)
-                    }
-
-                    is Filter.Status -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.statuses.toList(),
-                                { it.status == newFilter.status },
-                                newFilter,
-                            )
-                        browseScreenState.value.filters.copy(statuses = list)
-                    }
-
-                    is Filter.Tag -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.tags.toList(),
-                                { it.tag == newFilter.tag },
-                                newFilter,
-                            )
-                        browseScreenState.value.filters.copy(tags = list)
-                    }
-
-                    is Filter.Sort -> {
-                        val filterMode =
-                            when (newFilter.state) {
-                                true -> newFilter.sort
-                                false -> MdSort.Best
-                            }
-
-                        browseScreenState.value.filters.copy(
-                            sort = Filter.Sort.getSortList(filterMode).toList()
-                        )
-                    }
-
-                    is Filter.HasAvailableChapters -> {
-                        browseScreenState.value.filters.copy(hasAvailableChapters = newFilter)
-                    }
-
-                    is Filter.TagInclusionMode -> {
-                        browseScreenState.value.filters.copy(tagInclusionMode = newFilter)
-                    }
-
-                    is Filter.TagExclusionMode -> {
-                        browseScreenState.value.filters.copy(tagExclusionMode = newFilter)
-                    }
-
-                    is Filter.Query -> {
-                        when (newFilter.type) {
-                            QueryType.Title -> {
-                                browseScreenState.value.filters.copy(
-                                    queryMode = QueryType.Title,
-                                    query = newFilter,
-                                )
-                            }
-
-                            QueryType.Author -> {
-                                browseScreenState.value.filters.copy(
-                                    queryMode = QueryType.Author,
-                                    query = newFilter,
-                                )
-                            }
-
-                            QueryType.Group -> {
-                                browseScreenState.value.filters.copy(
-                                    queryMode = QueryType.Group,
-                                    query = newFilter,
-                                )
-                            }
-
-                            QueryType.List -> {
-                                browseScreenState.value.filters.copy(
-                                    queryMode = QueryType.List,
-                                    query = newFilter,
-                                )
-                            }
-                        }
-                    }
-
-                    is Filter.AuthorId -> {
-                        browseScreenState.value.filters.copy(authorId = newFilter)
-                    }
-
-                    is Filter.GroupId -> {
-                        browseScreenState.value.filters.copy(groupId = newFilter)
-                    }
-                }
-
-            _browseScreenState.update { it.copy(filters = updatedFilters) }
-        }
-    }
-
-    private fun <T> lookupAndReplaceEntry(
-        list: List<T>,
-        indexMethod: (T) -> Boolean,
-        newEntry: T,
-    ): List<T> {
-        val index = list.indexOfFirst { indexMethod(it) }
-        if (index == -1) return list
-        return buildList {
-            addAll(list)
-            set(index, newEntry)
+            _browseScreenState.update {
+                it.copy(filters = calculateDexFilter(it.filters, newFilter))
+            }
         }
     }
 

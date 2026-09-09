@@ -86,6 +86,7 @@ import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.chapters.CalculateChapterFilterUseCase
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.chapters.ParseChapterNameUseCase
+import org.nekomanga.usecases.filter.CalculateDexFilterUseCase
 import org.nekomanga.usecases.library.FilterLibraryMangaUseCase
 import org.nekomanga.usecases.library.ShouldUpdateMangaUseCase
 import org.nekomanga.usecases.manga.MangaUseCases
@@ -258,6 +259,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(CalculateChapterFilterUseCase())
         addSingleton(ParseChapterNameUseCase())
         addSingleton(ChapterUseCases())
+
+        addSingleton(CalculateDexFilterUseCase())
 
         addSingleton(FilterLibraryMangaUseCase())
         addSingleton(ShouldUpdateMangaUseCase())

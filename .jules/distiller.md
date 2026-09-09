@@ -32,5 +32,6 @@
 **Learning:** Duplicate business logic for toggling favorites and setting categories across Browse, Display, and Similar ViewModels can be unified into a single Use Case. By using a lambda/callback `categoriesProvider` to dynamically fetch screen-specific categories, we avoid exposing mutable screen states to the domain layer while keeping the Use Case pure and highly testable.
 **Action:** When extracting favorite or bookmark toggling logic from view models, consolidate them in the `manga` use cases folder and resolve circular dependencies by passing child Use Cases directly in the constructor.
 
-
-
+## 2026-09-09 - Extracting CalculateDexFilter Use Case
+**Learning:** Complex filter transformation logic in `BrowseViewModel` handling MangaDex query parameters and filter variants can be decoupled into a pure domain `CalculateDexFilterUseCase` without UI state side effects. On this development host, binary transforms like AAPT2 cannot execute through CLI Gradle tasks due to the dynamic linker environment, so avoid running host/nix troubleshooting commands and rely on standard Kotlin formatting (`./gradlew ktfmtFormat`) and IDE/CI for build pipeline verification.
+**Action:** Extract filter state calculations into pure domain Use Cases registered as singletons in `AppModule.kt`, keep all git modifications unstaged, and do not attempt to run or inspect nix system commands.
