@@ -45,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -283,8 +284,15 @@ private fun HorizontalFloatingSlider(
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
+    val currentOnPageChange by rememberUpdatedState(onPageChange)
     var draggingValue by remember { mutableStateOf<Float?>(null) }
-    var lastValue by remember(currentPageIndex) { mutableIntStateOf(currentPageIndex) }
+    var lastValue by remember { mutableIntStateOf(currentPageIndex) }
+
+    LaunchedEffect(currentPageIndex) {
+        if (draggingValue == null) {
+            lastValue = currentPageIndex
+        }
+    }
 
     val isPagesVisible = currentPageText.isNotEmpty() && totalPagesText.isNotEmpty()
 
@@ -365,13 +373,13 @@ private fun HorizontalFloatingSlider(
                                     view.performHapticFeedback(
                                         HapticFeedbackConstants.TEXT_HANDLE_MOVE
                                     )
-                                    onPageChange(roundedValue)
+                                    currentOnPageChange(roundedValue)
                                 }
                             },
                             onValueChangeFinished = {
                                 val finalValue = lastValue
                                 draggingValue = null
-                                onPageChange(finalValue)
+                                currentOnPageChange(finalValue)
                             },
                             valueRange = 0f..targetMax,
                             colors =
@@ -437,8 +445,17 @@ private fun VerticalFloatingSlider(
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
+    val currentOnPageChange by rememberUpdatedState(onPageChange)
+    val currentView by rememberUpdatedState(view)
+
     var draggingValue by remember { mutableStateOf<Float?>(null) }
-    var lastValue by remember(currentPageIndex) { mutableIntStateOf(currentPageIndex) }
+    var lastValue by remember { mutableIntStateOf(currentPageIndex) }
+
+    LaunchedEffect(currentPageIndex) {
+        if (draggingValue == null) {
+            lastValue = currentPageIndex
+        }
+    }
 
     val isPagesVisible = currentPageText.isNotEmpty() && totalPagesText.isNotEmpty()
 
@@ -511,32 +528,37 @@ private fun VerticalFloatingSlider(
                             SliderState(
                                 value = currentPageIndex.toFloat().coerceIn(0f, targetMax),
                                 valueRange = 0f..targetMax,
-                                onValueChangeFinished = {
-                                    val finalValue = lastValue
-                                    draggingValue = null
-                                    onPageChange(finalValue)
-                                },
                             )
                         }
+
+                    sliderState.onValueChange = { value ->
+                        val coercedValue = value.coerceIn(0f, targetMax)
+                        sliderState.value = coercedValue
+                        draggingValue = coercedValue
+                        val roundedValue = coercedValue.roundToInt()
+                        if (roundedValue != lastValue) {
+                            lastValue = roundedValue
+                            currentView.performHapticFeedback(
+                                HapticFeedbackConstants.TEXT_HANDLE_MOVE
+                            )
+                            currentOnPageChange(roundedValue)
+                        }
+                    }
+
+                    sliderState.onValueChangeFinished = {
+                        val finalValue = lastValue
+                        draggingValue = null
+                        currentOnPageChange(finalValue)
+                    }
 
                     LaunchedEffect(currentPageIndex, targetMax) {
                         val expectedSliderValue = currentPageIndex.toFloat().coerceIn(0f, targetMax)
                         if (
                             draggingValue == null &&
+                                !sliderState.isDragging &&
                                 sliderState.value.roundToInt() != expectedSliderValue.roundToInt()
                         ) {
                             sliderState.value = expectedSliderValue
-                        }
-                    }
-
-                    LaunchedEffect(sliderState.value, targetMax) {
-                        val rawPage = sliderState.value.coerceIn(0f, targetMax)
-                        val roundedPage = rawPage.roundToInt()
-                        if (roundedPage != lastValue) {
-                            draggingValue = rawPage
-                            lastValue = roundedPage
-                            view.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE)
-                            onPageChange(roundedPage)
                         }
                     }
 
