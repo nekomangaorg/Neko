@@ -61,6 +61,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.ReaderWebtoonController
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonActiveItemResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlin.math.abs
@@ -311,68 +312,16 @@ fun ComposeWebtoonViewer(
             var preloadJob: Job? = null
             snapshotFlow {
                 val layoutInfo = lazyListState.layoutInfo
-                val visibleItems = layoutInfo.visibleItemsInfo
                 val activeIndex =
-                    if (visibleItems.isNotEmpty()) {
-                        val viewportMiddle =
-                            (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-
-                        fun ReaderUiItem?.belongsToActiveChapter(): Boolean =
-                            when (this) {
-                                is ReaderUiItem.Page -> page.chapter.chapter.id == activeChapterId
-                                is ReaderUiItem.SplitPage ->
-                                    page.chapter.chapter.id == activeChapterId
-                                else -> false
-                            }
-
-                        val currentChapterVisibleItems = visibleItems.filter { itemInfo ->
-                            currentItems.getOrNull(itemInfo.index).belongsToActiveChapter()
-                        }
-
-                        val itemSpanningMiddle = visibleItems.firstOrNull { item ->
-                            val itemTop = item.offset
-                            val itemBottom = item.offset + item.size
-                            viewportMiddle in itemTop until itemBottom
-                        }
-
-                        // Ignore items preceding the current chapter while current chapter pages
-                        // are still visible to prevent jumping back to the previous chapter.
-                        val isPrecedingItemWhileChapterVisible =
-                            currentChapterVisibleItems.isNotEmpty() &&
-                                itemSpanningMiddle != null &&
-                                itemSpanningMiddle.index < currentChapterVisibleItems.first().index
-
-                        val activeItemInfo =
-                            when {
-                                itemSpanningMiddle != null &&
-                                    !isPrecedingItemWhileChapterVisible -> {
-                                    itemSpanningMiddle
-                                }
-                                currentChapterVisibleItems.isNotEmpty() -> {
-                                    val lastItem = currentChapterVisibleItems.last()
-                                    if (viewportMiddle >= lastItem.offset + lastItem.size) {
-                                        val nonPrecedingItems = visibleItems.filter {
-                                            it.index >= currentChapterVisibleItems.first().index
-                                        }
-                                        nonPrecedingItems.minByOrNull { item ->
-                                            abs(item.offset + item.size / 2 - viewportMiddle)
-                                        } ?: lastItem
-                                    } else {
-                                        currentChapterVisibleItems.minByOrNull { item ->
-                                            abs(item.offset + item.size / 2 - viewportMiddle)
-                                        } ?: currentChapterVisibleItems.first()
-                                    }
-                                }
-                                else -> {
-                                    visibleItems.minByOrNull { item ->
-                                        abs(item.offset + item.size / 2 - viewportMiddle)
-                                    } ?: visibleItems.first()
-                                }
-                            }
-                        activeItemInfo.index
-                    } else {
-                        lazyListState.firstVisibleItemIndex
-                    }
+                    WebtoonActiveItemResolver.resolveActiveIndex(
+                        visibleItems = layoutInfo.visibleItemsInfo,
+                        currentItems = currentItems,
+                        activeChapterId = activeChapterId,
+                        viewportStartOffset = layoutInfo.viewportStartOffset,
+                        viewportEndOffset = layoutInfo.viewportEndOffset,
+                        firstVisibleIndex = lazyListState.firstVisibleItemIndex,
+                        firstVisibleScrollOffset = lazyListState.firstVisibleItemScrollOffset,
+                    )
                 activeIndex to currentItems.getOrNull(activeIndex)
             }
                 .filterNotNull()
