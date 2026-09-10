@@ -323,6 +323,7 @@ class Suwayomi : MergedServerSource() {
                             listOf(manga.id, manga.source.name, manga.source.lang)
                                 .joinToString(Constants.SEPARATOR)
                         this.thumbnail_url = manga.thumbnailUrl?.let { hostUrl() + it }
+                        this.lang_flag = fromSuwayomiLang(manga.source.lang)
                     }
                 }
             }
@@ -496,10 +497,11 @@ class Suwayomi : MergedServerSource() {
 
         // This is for bato.to normalization, and some other sources
         val edgeCases = edgeCases.toMutableList()
+        val isNumberedEdgeCase = numberedEdgeCase.any { rawName.contains(it) }
         if (
             previous.chapter != null &&
                 previous.chapter > chaperNumber &&
-                edgeCases.any { rawName.contains(it, true) }
+                (isNumberedEdgeCase || edgeCases.any { rawName.contains(it, true) })
         ) {
             var chapterNumber = previous.chapter.toLong()
             val half =
@@ -516,13 +518,14 @@ class Suwayomi : MergedServerSource() {
             val title = removeEndTag(rawName)
             val name = listOf(chtxt, "-", title).joinToString(" ")
             edgeCases.remove("season")
+            val isFinalEdgeCase = isNumberedEdgeCase || edgeCases.any { rawName.contains(it, true) }
             return Name.Sanitized(
                 name,
                 previous.volume,
                 chapterNumber.toFloat(),
                 chtxt,
                 rawName,
-                !edgeCases.any { rawName.contains(it, true) },
+                !isFinalEdgeCase,
             )
         }
 
@@ -844,12 +847,14 @@ class Suwayomi : MergedServerSource() {
                 "epilogue",
                 "original story",
                 "side story",
+                "special chapter",
                 "special episode",
                 "episode special",
                 "finale",
                 "spin-off",
                 "afterword",
             )
+        val numberedEdgeCase = listOf(Regex("""(?i)(?:special\s+)?se\s*\d+"""))
     }
 }
 

@@ -31,6 +31,7 @@ class SearchMergedManga(private val sourceManager: SourceManager) {
                         title = it.title,
                         url = url,
                         mergeType = mergeType,
+                        language = it.lang_flag,
                     )
                 }
             }

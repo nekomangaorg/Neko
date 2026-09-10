@@ -23,6 +23,7 @@ import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import tachiyomi.core.network.await
 import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.injectLazy
@@ -33,6 +34,18 @@ class MangaBall : ReducedHttpSource() {
     override val baseUrl = MangaBall.baseUrl
 
     private val json: Json by injectLazy()
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
+
+    /** Neko's enabled chapter languages mapped onto MangaBall site language codes. */
+    private fun siteLangs(): List<String> {
+        val langs =
+            mangaDexPreferences
+                .enabledChapterLanguages()
+                .get()
+                .flatMap { MangaBallLang.fromMangadexLang(it) }
+                .distinct()
+        return langs.ifEmpty { listOf("en") }
+    }
 
     override val headers: Headers = Headers.Builder().apply { add("Referer", "$baseUrl/") }.build()
 
@@ -89,7 +102,7 @@ class MangaBall : ReducedHttpSource() {
             FormBody.Builder()
                 .apply {
                     add("search_input", query.trim())
-                    add("filters[translatedLanguage][]", "en")
+                    siteLangs().forEach { add("filters[translatedLanguage][]", it) }
                 }
                 .build()
 
@@ -133,11 +146,13 @@ class MangaBall : ReducedHttpSource() {
     private fun parseChapters(response: Response): Result<List<SChapterStatusPair>, ResultError> {
 
         val data = with(json) { response.parseAs<ChapterListResponse>() }
+        val enabledSiteLangs = siteLangs()
 
         val chapters =
             data.chapters.flatMap { chapter ->
                 chapter.translations.mapNotNull { translation ->
-                    if (translation.language == "en") {
+                    val language = MangaBallLang.fromMangaBallLang(translation.language)
+                    if (translation.language in enabledSiteLangs && language != null) {
                         SChapter.create().apply {
                             url = translation.id
                             val chapterName = mutableListOf<String>()
@@ -172,6 +187,7 @@ class MangaBall : ReducedHttpSource() {
                             }
 
                             scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
+                            this.language = language
                         }
                     } else {
                         null

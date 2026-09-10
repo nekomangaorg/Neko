@@ -69,6 +69,7 @@ import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.source.online.MergedServerSource
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import jp.wasabeef.gap.Gap
@@ -414,6 +415,25 @@ private fun SuccessResults(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                val flagRes =
+                    remember(item.language) {
+                        item.language
+                            ?.takeUnless { it.equals("en", ignoreCase = true) }
+                            ?.let { MdLang.fromIsoCode(it)?.iconResId }
+                    }
+                if (flagRes != null) {
+                    Image(
+                        painter = painterResource(id = flagRes),
+                        contentDescription =
+                            item.language?.let { MdLang.fromIsoCode(it)?.prettyPrint },
+                        modifier =
+                            Modifier.align(Alignment.TopStart)
+                                .padding(Size.tiny)
+                                .height(Size.mediumLarge)
+                                .clip(RoundedCornerShape(Size.tiny)),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
                 Column(
                     Modifier.fillMaxWidth()
                         .align(Alignment.BottomStart)
@@ -513,5 +533,6 @@ fun MergeType.toDrawableRes(): Int =
         MergeType.ProjectSuki -> R.drawable.ic_projectsuki_logo
         MergeType.Comix -> R.drawable.ic_comix_logo
         MergeType.Atsumaru -> R.drawable.ic_atsumaru_logo
+        MergeType.Kagane -> R.drawable.ic_kagane_logo
         MergeType.Invalid -> R.drawable.ic_neko_yokai
     }

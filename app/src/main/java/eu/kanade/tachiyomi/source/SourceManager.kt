@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.InvalidHttpSource
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.Atsumaru
 import eu.kanade.tachiyomi.source.online.merged.comix.Comix
+import eu.kanade.tachiyomi.source.online.merged.kagane.Kagane
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall
 import eu.kanade.tachiyomi.source.online.merged.projectsuki.ProjectSuki
@@ -37,6 +38,8 @@ open class SourceManager {
 
     val projectSuki: ProjectSuki by lazy { ProjectSuki() }
 
+    val kagane: Kagane by lazy { Kagane() }
+
     open fun get(sourceKey: Long): Source? {
         return mangaDex
     }
@@ -58,6 +61,7 @@ open class SourceManager {
                 Comix.name,
                 ProjectSuki.name,
                 Atsumaru.name,
+                Kagane.name,
             )
 
         val possibleIds = MdLang.entries.map { getId(it.lang) }
