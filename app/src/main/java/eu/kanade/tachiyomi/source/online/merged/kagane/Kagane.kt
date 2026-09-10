@@ -62,9 +62,12 @@ class Kagane : ReducedHttpSource() {
         }
 
         val segments = url.pathSegments
-        val chapterId = segments.getOrNull(4)?.let {
-            if (it == "datasaver") segments.getOrNull(5) else it
-        } ?: return chain.proceed(request)
+        val chapterId =
+            if (segments.getOrNull(4) == "datasaver") {
+                segments.getOrNull(5)
+            } else {
+                segments.getOrNull(4)
+            } ?: return chain.proceed(request)
 
         var response = chain.proceed(request)
         if (response.code == 401 || response.code == 403 || response.code == 507) {
