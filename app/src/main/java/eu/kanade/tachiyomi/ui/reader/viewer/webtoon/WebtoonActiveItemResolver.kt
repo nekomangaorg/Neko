@@ -189,7 +189,7 @@ object WebtoonActiveItemResolver {
                 else lastCurrentItemIndex
             }
 
-            return if (closestCurrentIndex != -1) closestCurrentIndex else firstCurrentItemIndex
+            return closestCurrentIndex
         }
 
         // Scenario 4: Current chapter completely scrolled off-screen

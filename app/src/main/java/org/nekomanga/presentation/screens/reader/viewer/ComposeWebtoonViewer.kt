@@ -588,25 +588,15 @@ fun ComposeWebtoonViewer(
                                         val layoutInfo = lazyListState.layoutInfo
                                         val visibleItems = layoutInfo.visibleItemsInfo
                                         val downY = downPos.y.toInt()
-                                        val hitItem = visibleItems.firstOrNull { item ->
-                                            downY in item.offset until (item.offset + item.size)
-                                        }
-                                        val tappedIndex =
-                                            hitItem?.index
-                                                ?: WebtoonActiveItemResolver.resolveActiveIndex(
-                                                    visibleItems = visibleItems,
-                                                    currentItems = currentItems,
-                                                    activeChapterId = activeChapterId,
-                                                    viewportStartOffset =
-                                                        layoutInfo.viewportStartOffset,
-                                                    viewportEndOffset =
-                                                        layoutInfo.viewportEndOffset,
-                                                    firstVisibleIndex =
-                                                        lazyListState.firstVisibleItemIndex,
-                                                    firstVisibleScrollOffset =
-                                                        lazyListState.firstVisibleItemScrollOffset,
-                                                )
-                                        val activeItem = currentItems.getOrNull(tappedIndex)
+                                        val hitItem =
+                                            visibleItems.firstOrNull { item ->
+                                                downY in item.offset until (item.offset + item.size)
+                                            }
+                                                ?: visibleItems.minByOrNull { item ->
+                                                    abs((item.offset + item.size / 2) - downY)
+                                                }
+                                        val activeItem =
+                                            hitItem?.index?.let { currentItems.getOrNull(it) }
                                         val page =
                                             when (activeItem) {
                                                 is ReaderUiItem.Page -> activeItem.page
