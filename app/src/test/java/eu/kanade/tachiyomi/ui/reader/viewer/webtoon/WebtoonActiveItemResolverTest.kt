@@ -210,7 +210,7 @@ class WebtoonActiveItemResolverTest {
 
         val activeIndex =
             WebtoonActiveItemResolver.resolveActiveIndex(
-                visibleItems = emptyList(),
+                visibleItems = emptyList<VisibleItemBounds>(),
                 currentItems = currentItems,
                 activeChapterId = 1L,
                 viewportStartOffset = 0,
