@@ -71,14 +71,27 @@ fun ComposePagerViewer(
             ?.id
 
     key(viewer, currentChapterId, isRtl, isVertical) {
+        val currentChapter = viewer.currentChapter
         val defaultPageIndex =
-            items
-                .indexOfFirst { item ->
-                    item is ReaderUiItem.Page &&
-                        item.page.chapter.chapter.id == currentChapterId &&
-                        (item.page.index == 0 || item.extraPage?.index == 0)
-                }
-                .takeIf { it != -1 }
+            if (currentChapter != null && currentChapter.requestedPage > 0) {
+                items
+                    .indexOfFirst { item ->
+                        item is ReaderUiItem.Page &&
+                            item.page.chapter.chapter.id == currentChapterId &&
+                            (item.page.index == currentChapter.requestedPage ||
+                                item.extraPage?.index == currentChapter.requestedPage)
+                    }
+                    .takeIf { it != -1 }
+            } else {
+                null
+            }
+                ?: items
+                    .indexOfFirst { item ->
+                        item is ReaderUiItem.Page &&
+                            item.page.chapter.chapter.id == currentChapterId &&
+                            (item.page.index == 0 || item.extraPage?.index == 0)
+                    }
+                    .takeIf { it != -1 }
                 ?: items
                     .mapIndexedNotNull { index, item ->
                         if (
@@ -340,7 +353,13 @@ fun ComposePagerViewer(
                                     isTransitioning = true
                                     coroutineScope.launch {
                                         try {
-                                            viewer.activity.loadChapter(toChapter.chapter)
+                                            val fromEnd =
+                                                transition is ChapterTransition.Prev &&
+                                                    toChapter.chapter.read
+                                            viewer.activity.loadChapter(
+                                                toChapter.chapter,
+                                                fromEnd = fromEnd,
+                                            )
                                         } finally {
                                             isTransitioning = false
                                         }

@@ -32,7 +32,10 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
                 item.transition is ChapterTransition.Prev &&
                 item.transition.to != null
         ) {
-            triggerLoadChapter(item.transition.to.chapter)
+            triggerLoadChapter(
+                item.transition.to.chapter,
+                fromEnd = item.transition.to.chapter.read,
+            )
             return
         }
         if (current < items.size - 1) {
@@ -55,7 +58,7 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
                 item.transition is ChapterTransition.Next &&
                 item.transition.to != null
         ) {
-            triggerLoadChapter(item.transition.to.chapter)
+            triggerLoadChapter(item.transition.to.chapter, fromEnd = false)
             return
         }
         if (current > 0) {

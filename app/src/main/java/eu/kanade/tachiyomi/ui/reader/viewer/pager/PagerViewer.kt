@@ -92,12 +92,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             page ?: (items.getOrNull(currentPagePosition) as? ReaderUiItem.Page)?.page
     }
 
-    fun triggerLoadChapter(chapter: Chapter) {
+    fun triggerLoadChapter(chapter: Chapter, fromEnd: Boolean = false) {
         if (isTransitioning) return
         isTransitioning = true
         activity.lifecycleScope.launch {
             try {
-                activity.loadChapter(chapter)
+                activity.loadChapter(chapter, fromEnd)
             } finally {
                 isTransitioning = false
             }
@@ -173,7 +173,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 item.transition is ChapterTransition.Next &&
                 item.transition.to != null
         ) {
-            triggerLoadChapter(item.transition.to.chapter)
+            triggerLoadChapter(item.transition.to.chapter, fromEnd = false)
             return
         }
         if (current < items.size - 1) {
@@ -197,7 +197,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 item.transition is ChapterTransition.Prev &&
                 item.transition.to != null
         ) {
-            triggerLoadChapter(item.transition.to.chapter)
+            triggerLoadChapter(
+                item.transition.to.chapter,
+                fromEnd = item.transition.to.chapter.read,
+            )
             return
         }
         if (current > 0) {

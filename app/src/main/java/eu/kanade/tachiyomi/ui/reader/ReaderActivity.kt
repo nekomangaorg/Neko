@@ -585,8 +585,8 @@ class ReaderActivity : BaseMainActivity() {
                         isVertical = viewer is WebtoonViewer || viewer is VerticalPagerViewer,
                         sliderPosition = sliderPosition,
                         onPageChange = { index -> moveToPageIndex(index, animated = false) },
-                        onSkipPrevious = { loadAdjacentChapter(false) },
-                        onSkipNext = { loadAdjacentChapter(true) },
+                        onSkipPrevious = { loadAdjacentChapter(next = false) },
+                        onSkipNext = { loadAdjacentChapter(next = true) },
                         visible =
                             state.menuVisible &&
                                 !state.chaptersSheetVisible &&
@@ -708,7 +708,7 @@ class ReaderActivity : BaseMainActivity() {
                                     ) {
                                         isScrollingThroughPagesOrChapters = true
                                         lifecycleScope.launch {
-                                            loadChapter(item.chapter)
+                                            loadChapter(item.chapter, fromEnd = false)
                                             chaptersSheetVisible = false
                                             reEnableBackPressedCallBack()
                                         }
@@ -1082,27 +1082,21 @@ class ReaderActivity : BaseMainActivity() {
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
             KeyEvent.KEYCODE_N -> {
-                if (viewer is R2LPagerViewer) {
-                    loadAdjacentChapter(false)
-                } else {
-                    loadAdjacentChapter(true)
-                }
+                loadAdjacentChapter(next = true)
                 return true
             }
             KeyEvent.KEYCODE_P -> {
-                if (viewer !is R2LPagerViewer) {
-                    loadAdjacentChapter(false)
-                } else {
-                    loadAdjacentChapter(true)
-                }
+                loadAdjacentChapter(next = false)
                 return true
             }
             KeyEvent.KEYCODE_L -> {
-                loadAdjacentChapter(false)
+                val next = viewer is R2LPagerViewer
+                loadAdjacentChapter(next = next)
                 return true
             }
             KeyEvent.KEYCODE_R -> {
-                loadAdjacentChapter(true)
+                val next = viewer !is R2LPagerViewer
+                loadAdjacentChapter(next = next)
                 return true
             }
             KeyEvent.KEYCODE_E -> {
@@ -1167,19 +1161,18 @@ class ReaderActivity : BaseMainActivity() {
         }
     }
 
-    private fun loadAdjacentChapter(rightButton: Boolean) {
+    private fun loadAdjacentChapter(next: Boolean) {
         if (isLoading) {
             return
         }
         isScrollingThroughPagesOrChapters = true
         lifecycleScope.launch {
-            val getNextChapter = (viewer is R2LPagerViewer).xor(rightButton)
-            val adjChapter = viewModel.adjacentChapter(getNextChapter)
+            val adjChapter = viewModel.adjacentChapter(next)
             if (adjChapter != null) {
-                loadChapter(adjChapter)
+                loadChapter(adjChapter, fromEnd = !next && adjChapter.chapter.read)
             } else {
                 toast(
-                    if (getNextChapter) {
+                    if (next) {
                         R.string.theres_no_next_chapter
                     } else {
                         R.string.theres_no_previous_chapter
@@ -1189,15 +1182,15 @@ class ReaderActivity : BaseMainActivity() {
         }
     }
 
-    suspend fun loadChapter(chapter: Chapter) {
-        loadChapter(ReaderChapter(chapter))
+    suspend fun loadChapter(chapter: Chapter, fromEnd: Boolean = false) {
+        loadChapter(ReaderChapter(chapter), fromEnd)
     }
 
-    private suspend fun loadChapter(chapter: ReaderChapter) {
-        val lastPage = viewModel.loadChapter(chapter) ?: return
+    private suspend fun loadChapter(chapter: ReaderChapter, fromEnd: Boolean = false) {
+        val targetPage = viewModel.loadChapter(chapter, fromEnd) ?: return
         isScrollingThroughPagesOrChapters = false
-        if (lastPage >= 0) {
-            moveToPageIndex(lastPage, false, chapterChange = true)
+        if (targetPage >= 0) {
+            moveToPageIndex(targetPage, false, chapterChange = true)
         }
         refreshChapters()
     }
