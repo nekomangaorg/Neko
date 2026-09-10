@@ -2,24 +2,16 @@ package eu.kanade.tachiyomi.source.online.merged.kagane
 
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.util.system.tryParse
-import java.text.SimpleDateFormat
+import java.text.DecimalFormat
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.jsoup.Jsoup
-
-@Serializable
-class GenreDto(
-    val id: String,
-    @SerialName("genre_name") val genreName: String,
-)
-
-@Serializable
-class TagDto(
-    val id: String,
-    @SerialName("tag_name") val tagName: String,
-)
+import org.nekomanga.constants.Constants
+import org.nekomanga.logging.TimberKt
 
 @Serializable class SourcesDto(val sources: List<SourceDto>)
 
@@ -34,18 +26,13 @@ data class SourceDto(
 class SearchDto(
     val content: List<SearchBook> = emptyList(),
     val last: Boolean = true,
-    @SerialName("total_elements") val totalElements: Int = 0,
-    @SerialName("total_pages") val totalPages: Int = 0,
 ) {
     @Serializable
     class SearchBook(
         @SerialName("series_id") val id: String,
         val title: String,
         @SerialName("source_id") val sourceId: String? = null,
-        @SerialName("current_books") val booksCount: Int = 0,
-        @SerialName("start_year") val startYear: Int? = null,
         @SerialName("cover_image_id") val coverImage: String? = null,
-        @SerialName("alternate_titles") val alternateTitles: List<String> = emptyList(),
         @SerialName("translated_language") val translatedLanguage: String? = null,
     ) {
         fun toSManga(apiUrl: String, sourceName: String?): SManga =
@@ -58,7 +45,7 @@ class SearchDto(
                     }
                         .trim()
                 url = id
-                lang_flag = KaganeLang.fromKaganeLang(lang ?: "en")
+                lang_flag = lang?.let { KaganeLang.fromKaganeLang(it) }
                 thumbnail_url = coverImage?.let { "$apiUrl/image/$it" }
             }
     }
@@ -68,127 +55,113 @@ class SearchDto(
 class DetailsDto(
     val title: String,
     val description: String?,
-    @SerialName("upload_status") val publicationStatus: String,
     @SerialName("translated_language") val translatedLanguage: String? = null,
     val format: String?,
     @SerialName("source_id") val sourceId: String?,
-    @SerialName("series_staff") val seriesStaff: List<SeriesStaff> = emptyList(),
-    val genres: List<Genre> = emptyList(),
-    val tags: List<Tag> = emptyList(),
-    @SerialName("series_alternate_titles")
-    val seriesAlternateTitles: List<AlternateTitle> = emptyList(),
     @SerialName("series_books") val seriesBooks: List<ChapterBook> = emptyList(),
-    @SerialName("edition_info") val editionInfo: String? = null,
-    @SerialName("tracker_id") val trackerId: String? = null,
     @SerialName("series_covers") val covers: List<SeriesCover> = emptyList(),
 ) {
-    @Serializable class SeriesStaff(val name: String, val role: String)
-
-    @Serializable class Genre(@SerialName("genre_name") val genreName: String)
-
-    @Serializable class Tag(@SerialName("tag_name") val tagName: String)
-
-    @Serializable class AlternateTitle(val title: String, val label: String? = null)
 
     @Serializable class SeriesCover(@SerialName("image_id") val imageId: String)
-
-    fun toSManga(apiUrl: String, sourceName: String? = null, baseUrl: String = ""): SManga =
-        SManga.create().apply {
-            title = this@DetailsDto.title.trim()
-            thumbnail_url = covers.firstOrNull()?.imageId?.let { "$apiUrl/image/$it" }
-            val desc = StringBuilder()
-            this@DetailsDto.description
-                ?.takeIf { it.isNotBlank() }
-                ?.let {
-                    desc.append(Jsoup.parse(it.trim().replace("\n", "<br>")).wholeText())
-                    desc.append("\n")
-                }
-            if (sourceName != null && this@DetailsDto.sourceId != null) {
-                if (desc.isNotEmpty()) desc.append("\n")
-                desc.append("Source: [$sourceName]($baseUrl/sources/${this@DetailsDto.sourceId})\n")
-            }
-            if (seriesAlternateTitles.isNotEmpty()) {
-                if (desc.isNotEmpty()) desc.append("\n")
-                desc.append("Associated Name(s):\n")
-                seriesAlternateTitles.forEach { desc.append("• ${it.title}\n") }
-            }
-            val authors =
-                seriesStaff
-                    .filter {
-                        it.role.contains("Author", ignoreCase = true) ||
-                            it.role.contains("Story", ignoreCase = true)
-                    }
-                    .map { it.name }
-                    .distinct()
-            val artists =
-                seriesStaff
-                    .filter {
-                        it.role.contains("Artist", ignoreCase = true) ||
-                            it.role.contains("Art", ignoreCase = true)
-                    }
-                    .map { it.name }
-                    .distinct()
-                    .joinToString(", ")
-            artist = artists
-            author = authors.joinToString()
-            description = desc.toString().trim()
-            genre =
-                buildList {
-                    this@DetailsDto.format?.takeIf { it.isNotBlank() }?.let { add(it) }
-                    addAll(genres.map { it.genreName })
-                }
-                    .joinToString()
-            status = this@DetailsDto.publicationStatus.toStatus()
-        }
-
-    private fun String.toStatus(): Int =
-        when (this.uppercase()) {
-            "ONGOING" -> SManga.ONGOING
-            "COMPLETED" -> SManga.COMPLETED
-            "HIATUS" -> SManga.HIATUS
-            "ABANDONED" -> SManga.CANCELLED
-            else -> SManga.UNKNOWN
-        }
 }
 
 @Serializable
 class ChapterBook(
     @SerialName("book_id") val id: String,
-    @SerialName("series_id") val seriesId: String? = null,
     val title: String,
     @SerialName("created_at") val createdAt: String?,
-    @SerialName("page_count") val pagesCount: Int = 0,
     @SerialName("sort_no") val number: Float = 0f,
     @SerialName("chapter_no") val chapterNo: String?,
     @SerialName("volume_no") val volumeNo: String?,
     val groups: List<ChapterGroup> = emptyList(),
 ) {
-    fun toSChapter(actualSeriesId: String, sourceName: String, language: String?): SChapter =
-        SChapter.create().apply {
+    fun toSChapter(actualSeriesId: String, sourceName: String, language: String?): SChapter {
+        // A "Chapter X [- Volume Y]" title, when present, is the source of truth.
+        // Else, use the value parsed from "chapter_no" (that may contain letters).
+        // Or "sort_no" as a hail mary lol
+        val parsedTitle = getParsedTitle()
+        TimberKt.d { "$parsedTitle" }
+        val chnum = parsedTitle?.first ?: getChapterNumber() ?: number
+        val chtxt = "Ch.${chnum.formatFloat()}"
+        val vol = parsedTitle?.second ?: volumeNo.orEmpty()
+        val name = mutableListOf<String>()
+        if (vol.isNotBlank()) {
+            name.add("Vol.$vol")
+        }
+        name.add(chtxt)
+        if (parsedTitle != null) {
+            val rest = parsedTitle.third.trim()
+            if (rest.isNotEmpty()) {
+                name.add("-")
+                name.add(rest)
+            }
+        } else if (title.isNotEmpty()) {
+            name.add("-")
+            name.add(title)
+        }
+        TimberKt.d { "$chnum | $chtxt | ${name.joinToString(" ")} | $title" }
+        return SChapter.create().apply {
             url = "/series/$actualSeriesId/reader/$id"
-            name = buildChapterName()
-            date_upload = dateFormat.tryParse(createdAt)
+            this.vol = vol
+            chapter_number = chnum
+            chapter_title = parsedTitle?.third?.trim() ?: title
+            chapter_txt = chtxt
+            this.name = name.joinToString(" ")
+            date_upload = parseDate(createdAt)
             scanlator =
                 (listOf(sourceName) + groups.map { it.title })
                     .filter { it.isNotBlank() }
-                    .joinToString(org.nekomanga.constants.Constants.SCANLATOR_SEPARATOR)
+                    .joinToString(Constants.SCANLATOR_SEPARATOR)
             this.language = language
         }
+    }
 
-    private fun buildChapterName(): String {
-        val trimmedTitle = title.trim()
-        return when {
-            trimmedTitle.isEmpty() && chapterNo.isNullOrBlank() && !volumeNo.isNullOrBlank() ->
-                "Vol.$volumeNo"
-            trimmedTitle.isEmpty() && !chapterNo.isNullOrBlank() -> "Ch.$chapterNo"
-            else -> trimmedTitle
-        }
+    private fun getChapterNumber(): Float? {
+        val raw = chapterNo?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        val match = CHAPTER_NO_REGEX.find(raw) ?: return null
+        return match.groupValues[1].toFloatOrNull()
+    }
+
+    private fun getParsedTitle(): Triple<Float, String?, String>? {
+        val match = TITLE_NUMBER_REGEX.find(title.trim()) ?: return null
+        val chnum = match.groupValues[1].toFloatOrNull() ?: return null
+        return Triple(chnum, match.groupValues[2].takeIf { it.isNotEmpty() }, match.groupValues[3])
+    }
+
+    fun Float.formatFloat(): String {
+        val df = DecimalFormat("#.###")
+        df.minimumFractionDigits = 0
+        df.maximumFractionDigits = 3
+        df.isGroupingUsed = false
+        return df.format(this.toBigDecimal().stripTrailingZeros())
     }
 
     @Serializable class ChapterGroup(val title: String)
 
     companion object {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)
+        private val CHAPTER_NO_REGEX = Regex("""^(\d+(?:\.\d+)?)""")
+        private val TITLE_NUMBER_REGEX =
+            Regex(
+                """(?i)^ch(?:apter)?\.?\s*(\d+(?:\.\d+)?)\s*(?:-\s*vol(?:ume)?\.?\s*(\d+(?:\.\d+)?))?(.*)$"""
+            )
+
+        private val dateFormatter =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)
+
+        fun parseDate(createdAt: String?): Long {
+            if (createdAt.isNullOrBlank()) return 0L
+            runCatching {
+                return OffsetDateTime.parse(createdAt, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                    .toInstant()
+                    .toEpochMilli()
+            }
+            return runCatching {
+                    LocalDateTime.parse(createdAt.take(19), dateFormatter)
+                        .toInstant(ZoneOffset.UTC)
+                        .toEpochMilli()
+                }
+                .getOrDefault(0L)
+        }
     }
 }
 

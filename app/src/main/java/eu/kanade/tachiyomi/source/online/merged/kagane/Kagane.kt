@@ -8,11 +8,16 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
+import java.io.IOException
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
+import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
@@ -36,14 +41,55 @@ class Kagane : ReducedHttpSource() {
     private val json: Json by injectLazy()
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
-    override val client = network.cloudFlareClient.newBuilder().rateLimit(3).build()
+    override val client =
+        network.cloudFlareClient
+            .newBuilder()
+            .addInterceptor(::refreshTokenInterceptor)
+            .rateLimit(3)
+            .build()
 
-    override val headers: okhttp3.Headers =
-        okhttp3.Headers.Builder().add("Referer", "$baseUrl/").build()
+    override val headers: Headers = Headers.Builder().add("Referer", "$baseUrl/").build()
 
-    private var accessToken: String = ""
     private var integrityToken: String = ""
     private var integrityExp = 0L
+    private val integrityMutex = Mutex()
+
+    private fun refreshTokenInterceptor(chain: okhttp3.Interceptor.Chain): okhttp3.Response {
+        val request = chain.request()
+        val url = request.url
+        if (!url.queryParameterNames.contains("token")) {
+            return chain.proceed(request)
+        }
+
+        val segments = url.pathSegments
+        val chapterId =
+            if (segments.getOrNull(4) == "datasaver") {
+                segments.getOrNull(5)
+            } else {
+                segments.getOrNull(4)
+            } ?: return chain.proceed(request)
+
+        var response = chain.proceed(request)
+        if (response.code == 401 || response.code == 403 || response.code == 507) {
+            response.close()
+            val token =
+                runBlocking { runCatching { getChallengeResponse(chapterId).accessToken } }
+                    .getOrNull() ?: throw IOException("Failed to retrieve token")
+            response =
+                chain.proceed(
+                    request
+                        .newBuilder()
+                        .url(url.newBuilder().setQueryParameter("token", token).build())
+                        .build()
+                )
+        }
+        return response
+    }
+
+    private fun invalidateIntegrityToken() {
+        integrityToken = ""
+        integrityExp = 0L
+    }
 
     private fun jsonBody(value: String) =
         value.toRequestBody("application/json;charset=UTF-8".toMediaType())
@@ -89,8 +135,6 @@ class Kagane : ReducedHttpSource() {
     }
 
     override suspend fun searchManga(query: String): List<SManga> {
-        // Single request: content_lang is a list, and each result carries its
-        // own translated_language plus source_id.
         val body = buildJsonObject {
             if (query.isNotBlank()) put("title", query)
             putJsonArray("content_rating") {
@@ -145,7 +189,7 @@ class Kagane : ReducedHttpSource() {
             return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
         }
         val dto = with(json) { response.parseAs<DetailsDto>() }
-        val language = KaganeLang.fromKaganeLang(dto.translatedLanguage ?: "en")
+        val language = dto.translatedLanguage?.let { KaganeLang.fromKaganeLang(it) }
         val chapters =
             dto.seriesBooks.map { it.toSChapter(mangaUrl, Kagane.name, language) to false }
         return Ok(chapters.reversed())
@@ -153,9 +197,9 @@ class Kagane : ReducedHttpSource() {
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         if (";" in chapter.url) error("Outdated chapter URL. Please refresh the chapter list")
-        val chapterId = "$baseUrl${chapter.url}".toHttpUrl().pathSegments.last()
+        val chapterId = chapter.url.trimEnd('/').substringAfterLast('/')
         val challenge = getChallengeResponse(chapterId)
-        accessToken = challenge.accessToken
+        val token = challenge.accessToken
         val cacheUrl = challenge.cacheUrl
         return (challenge.manifest?.pages ?: emptyList()).map { page ->
             val pageUrl =
@@ -165,7 +209,7 @@ class Kagane : ReducedHttpSource() {
                     .apply {
                         addPathSegment(chapterId)
                         addPathSegment("${page.pageUuid}.${page.ext ?: "jxl"}")
-                        addQueryParameter("token", accessToken)
+                        addQueryParameter("token", token)
                     }
                     .build()
                     .toString()
@@ -174,15 +218,26 @@ class Kagane : ReducedHttpSource() {
     }
 
     private suspend fun getIntegrityToken(): String {
-        if (integrityExp < System.currentTimeMillis()) {
+        if (System.currentTimeMillis() < integrityExp && integrityToken.isNotBlank()) {
+            return integrityToken
+        }
+        return integrityMutex.withLock {
+            if (System.currentTimeMillis() < integrityExp && integrityToken.isNotBlank()) {
+                return@withLock integrityToken
+            }
             client.newCall(GET("$baseUrl/", headers)).await().closeQuietly()
             val response =
                 client.newCall(POST("$baseUrl/api/integrity", headers, jsonBody(""))).await()
+            if (!response.isSuccessful) {
+                response.closeQuietly()
+                invalidateIntegrityToken()
+                throw IOException("Failed to obtain integrity token: HTTP ${response.code}")
+            }
             val dto = with(json) { response.parseAs<IntegrityDto>() }
             integrityToken = dto.token
             integrityExp = dto.exp * 1000
+            integrityToken
         }
-        return integrityToken
     }
 
     private suspend fun getChallengeResponse(chapterId: String): ChallengeDto {
@@ -196,6 +251,11 @@ class Kagane : ReducedHttpSource() {
                 .toString()
         val reqHeaders = headers.newBuilder().add("x-integrity-token", token).build()
         val response = client.newCall(POST(url, reqHeaders, jsonBody("{}"))).await()
+        if (!response.isSuccessful) {
+            response.closeQuietly()
+            invalidateIntegrityToken()
+            throw IOException("Failed to retrieve book challenge: HTTP ${response.code}")
+        }
         return with(json) { response.parseAs<ChallengeDto>() }
     }
 
