@@ -62,12 +62,9 @@ class Kagane : ReducedHttpSource() {
         }
 
         val segments = url.pathSegments
-        val chapterId =
-            if (segments.getOrNull(4) == "datasaver") {
-                segments.getOrNull(5)
-            } else {
-                segments.getOrNull(4)
-            } ?: return chain.proceed(request)
+        val chapterId = segments.getOrNull(4)?.let {
+            if (it == "datasaver") segments.getOrNull(5) else it
+        } ?: return chain.proceed(request)
 
         var response = chain.proceed(request)
         if (response.code == 401 || response.code == 403 || response.code == 507) {
@@ -190,10 +187,16 @@ class Kagane : ReducedHttpSource() {
         }
         val dto = with(json) { response.parseAs<DetailsDto>() }
         val language = dto.translatedLanguage?.let { KaganeLang.fromKaganeLang(it) }
+        val scanlatorSource = dto.sourceId?.let { sourceNames()[it] }
         val chapters =
-            dto.seriesBooks.map { it.toSChapter(mangaUrl, Kagane.name, language) to false }
+            dto.seriesBooks.map {
+                it.toSChapter(mangaUrl, Kagane.name, scanlatorSource, language) to false
+            }
         return Ok(chapters.reversed())
     }
+
+    private val dataSaver: Boolean
+        get() = mangaDexPreferences.dataSaver().get()
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         if (";" in chapter.url) error("Outdated chapter URL. Please refresh the chapter list")
@@ -207,6 +210,9 @@ class Kagane : ReducedHttpSource() {
                     .toHttpUrl()
                     .newBuilder()
                     .apply {
+                        if (dataSaver) {
+                            addPathSegment("datasaver")
+                        }
                         addPathSegment(chapterId)
                         addPathSegment("${page.pageUuid}.${page.ext ?: "jxl"}")
                         addQueryParameter("token", token)
@@ -246,7 +252,7 @@ class Kagane : ReducedHttpSource() {
             "$apiUrl/books/$chapterId"
                 .toHttpUrl()
                 .newBuilder()
-                .addQueryParameter("is_datasaver", "false")
+                .addQueryParameter("is_datasaver", dataSaver.toString())
                 .build()
                 .toString()
         val reqHeaders = headers.newBuilder().add("x-integrity-token", token).build()

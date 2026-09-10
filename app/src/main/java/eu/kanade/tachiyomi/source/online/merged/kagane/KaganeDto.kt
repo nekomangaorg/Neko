@@ -54,16 +54,10 @@ class SearchDto(
 @Serializable
 class DetailsDto(
     val title: String,
-    val description: String?,
     @SerialName("translated_language") val translatedLanguage: String? = null,
-    val format: String?,
     @SerialName("source_id") val sourceId: String?,
     @SerialName("series_books") val seriesBooks: List<ChapterBook> = emptyList(),
-    @SerialName("series_covers") val covers: List<SeriesCover> = emptyList(),
-) {
-
-    @Serializable class SeriesCover(@SerialName("image_id") val imageId: String)
-}
+)
 
 @Serializable
 class ChapterBook(
@@ -75,7 +69,12 @@ class ChapterBook(
     @SerialName("volume_no") val volumeNo: String?,
     val groups: List<ChapterGroup> = emptyList(),
 ) {
-    fun toSChapter(actualSeriesId: String, sourceName: String, language: String?): SChapter {
+    fun toSChapter(
+        actualSeriesId: String,
+        sourceName: String,
+        scanlatorSource: String?,
+        language: String?,
+    ): SChapter {
         // A "Chapter X [- Volume Y]" title, when present, is the source of truth.
         // Else, use the value parsed from "chapter_no" (that may contain letters).
         // Or "sort_no" as a hail mary lol
@@ -109,7 +108,7 @@ class ChapterBook(
             this.name = name.joinToString(" ")
             date_upload = parseDate(createdAt)
             scanlator =
-                (listOf(sourceName) + groups.map { it.title })
+                (listOfNotNull(sourceName, scanlatorSource) + groups.map { it.title })
                     .filter { it.isNotBlank() }
                     .joinToString(Constants.SCANLATOR_SEPARATOR)
             this.language = language
