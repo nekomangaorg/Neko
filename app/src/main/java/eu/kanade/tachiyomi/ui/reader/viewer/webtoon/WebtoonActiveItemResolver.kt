@@ -110,6 +110,9 @@ object WebtoonActiveItemResolver {
         var closestNonPrecedingDistance = Int.MAX_VALUE
         var closestNonPrecedingIndex = -1
 
+        var closestCurrentDistance = Int.MAX_VALUE
+        var closestCurrentIndex = -1
+
         for (i in 0 until itemCount) {
             val itemIndex = getItemIndex(i)
             val itemOffset = getItemOffset(i)
@@ -120,11 +123,11 @@ object WebtoonActiveItemResolver {
             val uiItem = currentItems.getOrNull(itemIndex)
 
             val isCurrentChapterPage =
-                when (uiItem) {
-                    is ReaderUiItem.Page -> uiItem.page.chapter.chapter.id == activeChapterId
-                    is ReaderUiItem.SplitPage -> uiItem.page.chapter.chapter.id == activeChapterId
-                    else -> false
-                }
+                activeChapterId != null &&
+                    (uiItem is ReaderUiItem.Page || uiItem is ReaderUiItem.SplitPage) &&
+                    uiItem.chapterId == activeChapterId
+
+            val dist = abs(itemMiddle - viewportMiddle)
 
             if (isCurrentChapterPage) {
                 if (firstCurrentItemIndex == -1) {
@@ -132,6 +135,18 @@ object WebtoonActiveItemResolver {
                 }
                 lastCurrentItemIndex = itemIndex
                 lastCurrentItemBottom = itemBottom
+
+                if (dist < closestCurrentDistance) {
+                    closestCurrentDistance = dist
+                    closestCurrentIndex = itemIndex
+                }
+            }
+
+            if (firstCurrentItemIndex != -1 && itemIndex >= firstCurrentItemIndex) {
+                if (dist < closestNonPrecedingDistance) {
+                    closestNonPrecedingDistance = dist
+                    closestNonPrecedingIndex = itemIndex
+                }
             }
 
             // Check if item spans viewport middle
@@ -140,7 +155,6 @@ object WebtoonActiveItemResolver {
             }
 
             // Track closest item to viewport middle overall
-            val dist = abs(itemMiddle - viewportMiddle)
             if (dist < closestDistanceToMiddle) {
                 closestDistanceToMiddle = dist
                 closestItemIndex = itemIndex
@@ -171,41 +185,11 @@ object WebtoonActiveItemResolver {
         // Scenario 3: Viewport middle is beyond the current chapter content
         if (hasCurrentChapterItems) {
             if (viewportMiddle >= lastCurrentItemBottom) {
-                // Find closest non-preceding item (forward progression)
-                for (i in 0 until itemCount) {
-                    val itemIndex = getItemIndex(i)
-                    if (itemIndex >= firstCurrentItemIndex) {
-                        val itemOffset = getItemOffset(i)
-                        val itemSize = getItemSize(i)
-                        val itemMiddle = itemOffset + itemSize / 2
-                        val dist = abs(itemMiddle - viewportMiddle)
-                        if (dist < closestNonPrecedingDistance) {
-                            closestNonPrecedingDistance = dist
-                            closestNonPrecedingIndex = itemIndex
-                        }
-                    }
-                }
                 return if (closestNonPrecedingIndex != -1) closestNonPrecedingIndex
                 else lastCurrentItemIndex
             }
 
-            // Inside current chapter bounds: find closest current chapter item
-            var closestCurrentDistance = Int.MAX_VALUE
-            var closestCurrentIndex = firstCurrentItemIndex
-            for (i in 0 until itemCount) {
-                val itemIndex = getItemIndex(i)
-                if (itemIndex in firstCurrentItemIndex..lastCurrentItemIndex) {
-                    val itemOffset = getItemOffset(i)
-                    val itemSize = getItemSize(i)
-                    val itemMiddle = itemOffset + itemSize / 2
-                    val dist = abs(itemMiddle - viewportMiddle)
-                    if (dist < closestCurrentDistance) {
-                        closestCurrentDistance = dist
-                        closestCurrentIndex = itemIndex
-                    }
-                }
-            }
-            return closestCurrentIndex
+            return if (closestCurrentIndex != -1) closestCurrentIndex else firstCurrentItemIndex
         }
 
         // Scenario 4: Current chapter completely scrolled off-screen

@@ -585,10 +585,28 @@ fun ComposeWebtoonViewer(
                                     if (
                                         viewer.activity.menuVisible || viewer.config.longTapEnabled
                                     ) {
-                                        val activeItem =
-                                            currentItems.getOrNull(
-                                                lazyListState.firstVisibleItemIndex
-                                            )
+                                        val layoutInfo = lazyListState.layoutInfo
+                                        val visibleItems = layoutInfo.visibleItemsInfo
+                                        val downY = downPos.y.toInt()
+                                        val hitItem = visibleItems.firstOrNull { item ->
+                                            downY in item.offset until (item.offset + item.size)
+                                        }
+                                        val tappedIndex =
+                                            hitItem?.index
+                                                ?: WebtoonActiveItemResolver.resolveActiveIndex(
+                                                    visibleItems = visibleItems,
+                                                    currentItems = currentItems,
+                                                    activeChapterId = activeChapterId,
+                                                    viewportStartOffset =
+                                                        layoutInfo.viewportStartOffset,
+                                                    viewportEndOffset =
+                                                        layoutInfo.viewportEndOffset,
+                                                    firstVisibleIndex =
+                                                        lazyListState.firstVisibleItemIndex,
+                                                    firstVisibleScrollOffset =
+                                                        lazyListState.firstVisibleItemScrollOffset,
+                                                )
+                                        val activeItem = currentItems.getOrNull(tappedIndex)
                                         val page =
                                             when (activeItem) {
                                                 is ReaderUiItem.Page -> activeItem.page

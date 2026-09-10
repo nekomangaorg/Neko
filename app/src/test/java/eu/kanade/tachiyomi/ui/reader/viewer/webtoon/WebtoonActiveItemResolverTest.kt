@@ -292,4 +292,31 @@ class WebtoonActiveItemResolverTest {
 
         assertEquals(1, activeIndex)
     }
+
+    @Test
+    fun `resolveActiveIndex handles null activeChapterId safely without throwing`() {
+        val currChapter = createChapter(1L, pageCount = 3)
+        val currentItems = currChapter.pages!!.map { ReaderUiItem.Page(it) }
+
+        val visibleBounds =
+            listOf(
+                VisibleItemBounds(index = 0, offset = -200, size = 1000),
+                VisibleItemBounds(index = 1, offset = 800, size = 1000), // Spans 1200
+                VisibleItemBounds(index = 2, offset = 1800, size = 1000),
+            )
+
+        val activeIndex =
+            WebtoonActiveItemResolver.resolveActiveIndex(
+                visibleItems = visibleBounds,
+                currentItems = currentItems,
+                activeChapterId = null,
+                viewportStartOffset = 0,
+                viewportEndOffset = 2400,
+                firstVisibleIndex = 0,
+                firstVisibleScrollOffset = 200,
+            )
+
+        // Falls back to item spanning middle since no chapter matches null ID
+        assertEquals(1, activeIndex)
+    }
 }
