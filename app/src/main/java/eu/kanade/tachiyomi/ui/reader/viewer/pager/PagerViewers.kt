@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 
@@ -32,7 +33,7 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
                 item.transition is ChapterTransition.Prev &&
                 item.transition.to != null
         ) {
-            triggerLoadChapter(item.transition.to.chapter)
+            triggerLoadChapter(item.transition.to.chapter, navTarget = ChapterNavTarget.End)
             return
         }
         if (current < items.size - 1) {
@@ -55,7 +56,7 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
                 item.transition is ChapterTransition.Next &&
                 item.transition.to != null
         ) {
-            triggerLoadChapter(item.transition.to.chapter)
+            triggerLoadChapter(item.transition.to.chapter, navTarget = ChapterNavTarget.Start)
             return
         }
         if (current > 0) {

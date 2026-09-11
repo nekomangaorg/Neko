@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -92,12 +93,15 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             page ?: (items.getOrNull(currentPagePosition) as? ReaderUiItem.Page)?.page
     }
 
-    fun triggerLoadChapter(chapter: Chapter) {
+    fun triggerLoadChapter(
+        chapter: Chapter,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
+    ) {
         if (isTransitioning) return
         isTransitioning = true
         activity.lifecycleScope.launch {
             try {
-                activity.loadChapter(chapter)
+                activity.loadChapter(chapter, navTarget)
             } finally {
                 isTransitioning = false
             }
@@ -173,7 +177,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 item.transition is ChapterTransition.Next &&
                 item.transition.to != null
         ) {
-            triggerLoadChapter(item.transition.to.chapter)
+            triggerLoadChapter(item.transition.to.chapter, navTarget = ChapterNavTarget.Start)
             return
         }
         if (current < items.size - 1) {
@@ -197,7 +201,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 item.transition is ChapterTransition.Prev &&
                 item.transition.to != null
         ) {
-            triggerLoadChapter(item.transition.to.chapter)
+            triggerLoadChapter(item.transition.to.chapter, navTarget = ChapterNavTarget.End)
             return
         }
         if (current > 0) {

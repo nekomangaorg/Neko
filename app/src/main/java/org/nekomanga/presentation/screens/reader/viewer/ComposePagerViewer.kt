@@ -18,6 +18,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -30,7 +31,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
 import coil3.imageLoader
 import coil3.request.ImageRequest
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -59,6 +62,8 @@ fun ComposePagerViewer(
     downloadManager: DownloadManager,
     onPageSelected: (ReaderPage, Boolean) -> Unit,
     onTransitionSelected: (ChapterTransition) -> Unit,
+    onNavigateToChapter: (Chapter, ChapterNavTarget) -> Unit,
+    onRequestPreloadChapter: (ReaderChapter) -> Unit,
     onRetryTransition: (ReaderChapter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -71,29 +76,50 @@ fun ComposePagerViewer(
             ?.id
 
     key(viewer, currentChapterId, isRtl, isVertical) {
+        val currentChapter = viewer.currentChapter
         val defaultPageIndex =
-            items
-                .indexOfFirst { item ->
-                    item is ReaderUiItem.Page &&
-                        item.page.chapter.chapter.id == currentChapterId &&
-                        (item.page.index == 0 || item.extraPage?.index == 0)
-                }
-                .takeIf { it != -1 }
-                ?: items
-                    .mapIndexedNotNull { index, item ->
-                        if (
+            remember(items, currentChapterId, currentChapter?.requestedPage) {
+                if (currentChapter != null && currentChapter.requestedPage > 0) {
+                    items
+                        .indexOfFirst { item ->
                             item is ReaderUiItem.Page &&
-                                item.page.chapter.chapter.id == currentChapterId
-                        ) {
-                            index to minOf(item.page.index, item.extraPage?.index ?: Int.MAX_VALUE)
-                        } else {
-                            null
+                                item.page.chapter.chapter.id == currentChapterId &&
+                                (item.page.index == currentChapter.requestedPage ||
+                                    item.extraPage?.index == currentChapter.requestedPage)
                         }
+                        .takeIf { it != -1 }
+                } else {
+                    null
+                }
+                    ?: items
+                        .indexOfFirst { item ->
+                            item is ReaderUiItem.Page &&
+                                item.page.chapter.chapter.id == currentChapterId &&
+                                (item.page.index == 0 || item.extraPage?.index == 0)
+                        }
+                        .takeIf { it != -1 }
+                    ?: run {
+                        var minPageIndex = Int.MAX_VALUE
+                        var targetItemIndex = -1
+                        for (i in items.indices) {
+                            val item = items[i]
+                            if (
+                                item is ReaderUiItem.Page &&
+                                    item.page.chapter.chapter.id == currentChapterId
+                            ) {
+                                val pageMin =
+                                    minOf(item.page.index, item.extraPage?.index ?: Int.MAX_VALUE)
+                                if (pageMin < minPageIndex) {
+                                    minPageIndex = pageMin
+                                    targetItemIndex = i
+                                }
+                            }
+                        }
+                        targetItemIndex.takeIf { it != -1 }
                     }
-                    .minByOrNull { it.second }
-                    ?.first
-                ?: items.indexOfFirst { it is ReaderUiItem.Page }.takeIf { it != -1 }
-                ?: 0
+                    ?: items.indexOfFirst { it is ReaderUiItem.Page }.takeIf { it != -1 }
+                    ?: 0
+            }
 
         val initialPage =
             (viewer.requestedPagePosition?.first ?: defaultPageIndex).coerceIn(
@@ -105,15 +131,17 @@ fun ComposePagerViewer(
                 initialPage = initialPage,
                 pageCount = { items.size },
             )
-        viewer.currentPagePosition = pagerState.currentPage
 
         var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
         var isTransitioning by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
+        val currentOnNavigateToChapter by rememberUpdatedState(onNavigateToChapter)
+        val currentOnRequestPreloadChapter by rememberUpdatedState(onRequestPreloadChapter)
+        val currentItems by rememberUpdatedState(items)
 
         LaunchedEffect(currentChapterId) {
-            viewer.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
-            viewer.nextTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
+            viewer.prevTransition?.to?.let { currentOnRequestPreloadChapter(it) }
+            viewer.nextTransition?.to?.let { currentOnRequestPreloadChapter(it) }
         }
 
         LaunchedEffect(items) {
@@ -234,12 +262,12 @@ fun ComposePagerViewer(
                                 if (pages != null && item.page.chapter == viewer.currentChapter) {
                                     if (pages.size - item.page.number < 5) {
                                         viewer.nextTransition?.to?.let {
-                                            viewer.activity.requestPreloadChapter(it)
+                                            currentOnRequestPreloadChapter(it)
                                         }
                                     }
                                     if (item.page.number <= 5) {
                                         viewer.prevTransition?.to?.let {
-                                            viewer.activity.requestPreloadChapter(it)
+                                            currentOnRequestPreloadChapter(it)
                                         }
                                     }
                                 }
@@ -308,13 +336,13 @@ fun ComposePagerViewer(
         val thresholdPx = with(density) { Size.huge.toPx() }
 
         val nestedScrollConnection =
-            remember(pagerState, items, isVertical, isRtl, thresholdPx) {
+            remember(pagerState, isVertical, isRtl, thresholdPx) {
                 object : NestedScrollConnection {
                     var accumulatedOverscroll = 0f
 
                     private fun checkAndTrigger(delta: Float) {
                         val currentIndex = pagerState.currentPage
-                        val currentItem = items.getOrNull(currentIndex)
+                        val currentItem = currentItems.getOrNull(currentIndex)
 
                         if (currentItem is ReaderUiItem.Transition) {
                             val transition = currentItem.transition
@@ -340,7 +368,17 @@ fun ComposePagerViewer(
                                     isTransitioning = true
                                     coroutineScope.launch {
                                         try {
-                                            viewer.activity.loadChapter(toChapter.chapter)
+                                            val navTarget =
+                                                if (transition is ChapterTransition.Prev) {
+                                                    ChapterNavTarget.End
+                                                } else {
+                                                    ChapterNavTarget.Start
+                                                }
+                                            currentOnNavigateToChapter(
+                                                toChapter.chapter,
+                                                navTarget,
+                                            )
+                                            delay(500L)
                                         } finally {
                                             isTransitioning = false
                                         }

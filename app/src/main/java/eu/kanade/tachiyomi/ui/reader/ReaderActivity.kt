@@ -78,6 +78,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Success
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -88,6 +89,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderKeyNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
@@ -386,6 +388,23 @@ class ReaderActivity : BaseMainActivity() {
                             onTransitionSelected = { transition ->
                                 onTransitionSelected(transition)
                             },
+                            onNavigateToChapter = { chapter, navTarget ->
+                                if (
+                                    !isScrollingThroughPagesOrChapters &&
+                                        !isLoading &&
+                                        !viewModel.state.value.isLoadingAdjacentChapter
+                                ) {
+                                    isScrollingThroughPagesOrChapters = true
+                                    lifecycleScope.launch {
+                                        try {
+                                            loadChapter(chapter, navTarget)
+                                        } finally {
+                                            isScrollingThroughPagesOrChapters = false
+                                        }
+                                    }
+                                }
+                            },
+                            onRequestPreloadChapter = { chapter -> requestPreloadChapter(chapter) },
                             onRetryTransition = { chapter -> requestPreloadChapter(chapter) },
                             modifier = Modifier.fillMaxSize(),
                         )
@@ -585,8 +604,8 @@ class ReaderActivity : BaseMainActivity() {
                         isVertical = viewer is WebtoonViewer || viewer is VerticalPagerViewer,
                         sliderPosition = sliderPosition,
                         onPageChange = { index -> moveToPageIndex(index, animated = false) },
-                        onSkipPrevious = { loadAdjacentChapter(false) },
-                        onSkipNext = { loadAdjacentChapter(true) },
+                        onSkipPrevious = { loadAdjacentChapter(next = false) },
+                        onSkipNext = { loadAdjacentChapter(next = true) },
                         visible =
                             state.menuVisible &&
                                 !state.chaptersSheetVisible &&
@@ -708,9 +727,13 @@ class ReaderActivity : BaseMainActivity() {
                                     ) {
                                         isScrollingThroughPagesOrChapters = true
                                         lifecycleScope.launch {
-                                            loadChapter(item.chapter)
-                                            chaptersSheetVisible = false
-                                            reEnableBackPressedCallBack()
+                                            try {
+                                                loadChapter(item.chapter, ChapterNavTarget.Resume)
+                                                chaptersSheetVisible = false
+                                                reEnableBackPressedCallBack()
+                                            } finally {
+                                                isScrollingThroughPagesOrChapters = false
+                                            }
                                         }
                                     } else {
                                         chaptersSheetVisible = false
@@ -1080,31 +1103,16 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        val next =
+            ReaderKeyNavigation.resolveAdjacentDirection(
+                keyCode = keyCode,
+                isRtl = viewer is R2LPagerViewer,
+            )
+        if (next != null) {
+            loadAdjacentChapter(next = next)
+            return true
+        }
         when (keyCode) {
-            KeyEvent.KEYCODE_N -> {
-                if (viewer is R2LPagerViewer) {
-                    loadAdjacentChapter(false)
-                } else {
-                    loadAdjacentChapter(true)
-                }
-                return true
-            }
-            KeyEvent.KEYCODE_P -> {
-                if (viewer !is R2LPagerViewer) {
-                    loadAdjacentChapter(false)
-                } else {
-                    loadAdjacentChapter(true)
-                }
-                return true
-            }
-            KeyEvent.KEYCODE_L -> {
-                loadAdjacentChapter(false)
-                return true
-            }
-            KeyEvent.KEYCODE_R -> {
-                loadAdjacentChapter(true)
-                return true
-            }
             KeyEvent.KEYCODE_E -> {
                 viewer?.moveToNext()
                 return true
@@ -1167,39 +1175,52 @@ class ReaderActivity : BaseMainActivity() {
         }
     }
 
-    private fun loadAdjacentChapter(rightButton: Boolean) {
-        if (isLoading) {
+    private fun loadAdjacentChapter(next: Boolean) {
+        if (isLoading || viewModel.state.value.isLoadingAdjacentChapter) {
             return
         }
         isScrollingThroughPagesOrChapters = true
         lifecycleScope.launch {
-            val getNextChapter = (viewer is R2LPagerViewer).xor(rightButton)
-            val adjChapter = viewModel.adjacentChapter(getNextChapter)
-            if (adjChapter != null) {
-                loadChapter(adjChapter)
-            } else {
-                toast(
-                    if (getNextChapter) {
-                        R.string.theres_no_next_chapter
-                    } else {
-                        R.string.theres_no_previous_chapter
-                    }
-                )
+            try {
+                val adjChapter = viewModel.adjacentChapter(next)
+                if (adjChapter != null) {
+                    val target = if (next) ChapterNavTarget.Start else ChapterNavTarget.End
+                    loadChapter(adjChapter, target)
+                } else {
+                    toast(
+                        if (next) {
+                            R.string.theres_no_next_chapter
+                        } else {
+                            R.string.theres_no_previous_chapter
+                        }
+                    )
+                }
+            } finally {
+                isScrollingThroughPagesOrChapters = false
             }
         }
     }
 
-    suspend fun loadChapter(chapter: Chapter) {
-        loadChapter(ReaderChapter(chapter))
+    suspend fun loadChapter(
+        chapter: Chapter,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
+    ) {
+        loadChapter(ReaderChapter(chapter), navTarget)
     }
 
-    private suspend fun loadChapter(chapter: ReaderChapter) {
-        val lastPage = viewModel.loadChapter(chapter) ?: return
-        isScrollingThroughPagesOrChapters = false
-        if (lastPage >= 0) {
-            moveToPageIndex(lastPage, false, chapterChange = true)
+    private suspend fun loadChapter(
+        chapter: ReaderChapter,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
+    ) {
+        try {
+            val targetPage = viewModel.loadChapter(chapter, navTarget) ?: return
+            if (targetPage >= 0) {
+                moveToPageIndex(targetPage, false, chapterChange = true)
+            }
+            refreshChapters()
+        } finally {
+            isScrollingThroughPagesOrChapters = false
         }
-        refreshChapters()
     }
 
     fun setNavColor(insets: WindowInsetsCompat) {
