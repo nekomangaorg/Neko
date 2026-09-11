@@ -25,6 +25,7 @@ Proposals focused on reader performance, Jetpack Compose viewers, navigation lif
 | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math. | Neko 3.x Reader Decoupling |
 | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math. | Neko 3.x Reader Decoupling |
 | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Neko Performance |
+| [**Unified Reader Preloader Engine & Two-Tier Pipeline**](reader/reader_preloader_engine_proposal.md) | Extracts inline preloading logic from Compose viewers into a testable domain engine with two-tier disk/memory pipelining. | Neko Reader Phase 2 |
 | [**Zen Focus Reading Mode & Touch Shield**](reader/zen_focus_reading_mode_proposal.md) | Adds a distraction-free reading mode with accidental touch prevention. | Neko Feature |
 
 ---
