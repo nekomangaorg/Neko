@@ -193,6 +193,6 @@ object WebtoonActiveItemResolver {
         }
 
         // Scenario 4: Current chapter completely scrolled off-screen
-        return if (closestItemIndex != -1) closestItemIndex else getItemIndex(0)
+        return closestItemIndex
     }
 }
