@@ -18,7 +18,7 @@ sealed interface ChapterNavTarget {
         pageCount: Int,
         isRead: Boolean,
         lastPageRead: Int,
-        pagesLeft: Int,
+        pagesLeft: Int = 0,
     ): Int {
         val lastIndex = (pageCount - 1).coerceAtLeast(0)
         return when (this) {
@@ -26,7 +26,7 @@ sealed interface ChapterNavTarget {
             Start -> 0
             Resume -> {
                 if (!isRead) {
-                    if (pagesLeft <= 1) 0 else lastPageRead.coerceIn(0, lastIndex)
+                    lastPageRead.coerceIn(0, lastIndex)
                 } else {
                     0
                 }

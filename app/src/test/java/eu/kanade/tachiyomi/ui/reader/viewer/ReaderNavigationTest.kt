@@ -208,7 +208,7 @@ class ReaderNavigationTest {
     }
 
     @Test
-    fun `given ChapterNavTarget Resume for chapter with 1 page left, when resolving target page, then restarts at 0`() {
+    fun `given ChapterNavTarget Resume for chapter with 1 page left but not read, when resolving target page, then preserves lastPageRead`() {
         // Arrange
         val target = ChapterNavTarget.Resume
 
@@ -222,7 +222,7 @@ class ReaderNavigationTest {
             )
 
         // Assert
-        assertEquals(0, page)
+        assertEquals(29, page)
     }
 
     @Test
