@@ -527,29 +527,9 @@ private fun VerticalFloatingSlider(
                         remember(targetMax) {
                             SliderState(
                                 value = currentPageIndex.toFloat().coerceIn(0f, targetMax),
-                                valueRange = 0f..targetMax,
+                                trackRange = 0f..targetMax,
                             )
                         }
-
-                    sliderState.onValueChange = { value ->
-                        val coercedValue = value.coerceIn(0f, targetMax)
-                        sliderState.value = coercedValue
-                        draggingValue = coercedValue
-                        val roundedValue = coercedValue.roundToInt()
-                        if (roundedValue != lastValue) {
-                            lastValue = roundedValue
-                            currentView.performHapticFeedback(
-                                HapticFeedbackConstants.TEXT_HANDLE_MOVE
-                            )
-                            currentOnPageChange(roundedValue)
-                        }
-                    }
-
-                    sliderState.onValueChangeFinished = {
-                        val finalValue = lastValue
-                        draggingValue = null
-                        currentOnPageChange(finalValue)
-                    }
 
                     LaunchedEffect(currentPageIndex, targetMax) {
                         val expectedSliderValue = currentPageIndex.toFloat().coerceIn(0f, targetMax)
@@ -564,6 +544,25 @@ private fun VerticalFloatingSlider(
 
                     VerticalSlider(
                         state = sliderState,
+                        modifier = Modifier.weight(1f).padding(vertical = Size.small),
+                        onValueChange = { value ->
+                            val coercedValue = value.coerceIn(0f, targetMax)
+                            sliderState.value = coercedValue
+                            draggingValue = coercedValue
+                            val roundedValue = coercedValue.roundToInt()
+                            if (roundedValue != lastValue) {
+                                lastValue = roundedValue
+                                currentView.performHapticFeedback(
+                                    HapticFeedbackConstants.TEXT_HANDLE_MOVE
+                                )
+                                currentOnPageChange(roundedValue)
+                            }
+                        },
+                        onValueChangeFinished = {
+                            val finalValue = lastValue
+                            draggingValue = null
+                            currentOnPageChange(finalValue)
+                        },
                         colors =
                             SliderDefaults.colors(
                                 activeTrackColor = MaterialTheme.colorScheme.primary,
@@ -571,7 +570,6 @@ private fun VerticalFloatingSlider(
                                     MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
                                 thumbColor = MaterialTheme.colorScheme.primary,
                             ),
-                        modifier = Modifier.weight(1f).padding(vertical = Size.small),
                     )
 
                     Text(
