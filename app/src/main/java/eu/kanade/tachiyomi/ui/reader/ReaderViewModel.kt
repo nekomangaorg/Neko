@@ -478,23 +478,13 @@ constructor(
 
         loader.loadChapter(targetChapter)
 
-        when (navTarget) {
-            ChapterNavTarget.End -> {
-                targetChapter.requestedPage = targetChapter.pages?.lastIndex ?: 0
-            }
-            ChapterNavTarget.Start -> {
-                targetChapter.requestedPage = 0
-            }
-            ChapterNavTarget.Resume -> {
-                targetChapter.requestedPage =
-                    if (!targetChapter.chapter.read) {
-                        if (targetChapter.chapter.pages_left <= 1) 0
-                        else targetChapter.chapter.last_page_read
-                    } else {
-                        0
-                    }
-            }
-        }
+        targetChapter.requestedPage =
+            navTarget.resolveRequestedPage(
+                pageCount = targetChapter.pages?.size ?: 0,
+                isRead = targetChapter.chapter.read,
+                lastPageRead = targetChapter.chapter.last_page_read,
+                pagesLeft = targetChapter.chapter.pages_left,
+            )
 
         val chapterPos = chapterList.indexOf(targetChapter)
         val newChapters =

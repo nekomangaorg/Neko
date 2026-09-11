@@ -12,4 +12,25 @@ sealed interface ChapterNavTarget {
      * Resuming a chapter (e.g. Table of Contents / chapter selector) -> saved progress or start.
      */
     data object Resume : ChapterNavTarget
+
+    /** Resolves the target page index for the chapter given its total pages and read progress. */
+    fun resolveRequestedPage(
+        pageCount: Int,
+        isRead: Boolean,
+        lastPageRead: Int,
+        pagesLeft: Int,
+    ): Int {
+        val lastIndex = (pageCount - 1).coerceAtLeast(0)
+        return when (this) {
+            End -> lastIndex
+            Start -> 0
+            Resume -> {
+                if (!isRead) {
+                    if (pagesLeft <= 1) 0 else lastPageRead.coerceIn(0, lastIndex)
+                } else {
+                    0
+                }
+            }
+        }
+    }
 }

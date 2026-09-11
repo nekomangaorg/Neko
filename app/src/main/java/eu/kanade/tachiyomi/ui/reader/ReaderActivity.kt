@@ -89,6 +89,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderKeyNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
@@ -1085,25 +1086,16 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        val next =
+            ReaderKeyNavigation.resolveAdjacentDirection(
+                keyCode = keyCode,
+                isRtl = viewer is R2LPagerViewer,
+            )
+        if (next != null) {
+            loadAdjacentChapter(next = next)
+            return true
+        }
         when (keyCode) {
-            KeyEvent.KEYCODE_N -> {
-                loadAdjacentChapter(next = true)
-                return true
-            }
-            KeyEvent.KEYCODE_P -> {
-                loadAdjacentChapter(next = false)
-                return true
-            }
-            KeyEvent.KEYCODE_L -> {
-                val next = viewer is R2LPagerViewer
-                loadAdjacentChapter(next = next)
-                return true
-            }
-            KeyEvent.KEYCODE_R -> {
-                val next = viewer !is R2LPagerViewer
-                loadAdjacentChapter(next = next)
-                return true
-            }
             KeyEvent.KEYCODE_E -> {
                 viewer?.moveToNext()
                 return true
