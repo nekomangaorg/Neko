@@ -389,7 +389,11 @@ class ReaderActivity : BaseMainActivity() {
                                 onTransitionSelected(transition)
                             },
                             onNavigateToChapter = { chapter, navTarget ->
-                                if (!isScrollingThroughPagesOrChapters) {
+                                if (
+                                    !isScrollingThroughPagesOrChapters &&
+                                        !isLoading &&
+                                        !viewModel.state.value.isLoadingAdjacentChapter
+                                ) {
                                     isScrollingThroughPagesOrChapters = true
                                     lifecycleScope.launch {
                                         try {

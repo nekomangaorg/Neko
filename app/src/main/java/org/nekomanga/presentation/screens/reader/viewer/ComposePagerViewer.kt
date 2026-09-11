@@ -78,46 +78,48 @@ fun ComposePagerViewer(
     key(viewer, currentChapterId, isRtl, isVertical) {
         val currentChapter = viewer.currentChapter
         val defaultPageIndex =
-            if (currentChapter != null && currentChapter.requestedPage > 0) {
-                items
-                    .indexOfFirst { item ->
-                        item is ReaderUiItem.Page &&
-                            item.page.chapter.chapter.id == currentChapterId &&
-                            (item.page.index == currentChapter.requestedPage ||
-                                item.extraPage?.index == currentChapter.requestedPage)
-                    }
-                    .takeIf { it != -1 }
-            } else {
-                null
-            }
-                ?: items
-                    .indexOfFirst { item ->
-                        item is ReaderUiItem.Page &&
-                            item.page.chapter.chapter.id == currentChapterId &&
-                            (item.page.index == 0 || item.extraPage?.index == 0)
-                    }
-                    .takeIf { it != -1 }
-                ?: run {
-                    var minPageIndex = Int.MAX_VALUE
-                    var targetItemIndex = -1
-                    for (i in items.indices) {
-                        val item = items[i]
-                        if (
+            remember(items, currentChapterId, currentChapter?.requestedPage) {
+                if (currentChapter != null && currentChapter.requestedPage > 0) {
+                    items
+                        .indexOfFirst { item ->
                             item is ReaderUiItem.Page &&
-                                item.page.chapter.chapter.id == currentChapterId
-                        ) {
-                            val pageMin =
-                                minOf(item.page.index, item.extraPage?.index ?: Int.MAX_VALUE)
-                            if (pageMin < minPageIndex) {
-                                minPageIndex = pageMin
-                                targetItemIndex = i
+                                item.page.chapter.chapter.id == currentChapterId &&
+                                (item.page.index == currentChapter.requestedPage ||
+                                    item.extraPage?.index == currentChapter.requestedPage)
+                        }
+                        .takeIf { it != -1 }
+                } else {
+                    null
+                }
+                    ?: items
+                        .indexOfFirst { item ->
+                            item is ReaderUiItem.Page &&
+                                item.page.chapter.chapter.id == currentChapterId &&
+                                (item.page.index == 0 || item.extraPage?.index == 0)
+                        }
+                        .takeIf { it != -1 }
+                    ?: run {
+                        var minPageIndex = Int.MAX_VALUE
+                        var targetItemIndex = -1
+                        for (i in items.indices) {
+                            val item = items[i]
+                            if (
+                                item is ReaderUiItem.Page &&
+                                    item.page.chapter.chapter.id == currentChapterId
+                            ) {
+                                val pageMin =
+                                    minOf(item.page.index, item.extraPage?.index ?: Int.MAX_VALUE)
+                                if (pageMin < minPageIndex) {
+                                    minPageIndex = pageMin
+                                    targetItemIndex = i
+                                }
                             }
                         }
+                        targetItemIndex.takeIf { it != -1 }
                     }
-                    targetItemIndex.takeIf { it != -1 }
-                }
-                ?: items.indexOfFirst { it is ReaderUiItem.Page }.takeIf { it != -1 }
-                ?: 0
+                    ?: items.indexOfFirst { it is ReaderUiItem.Page }.takeIf { it != -1 }
+                    ?: 0
+            }
 
         val initialPage =
             (viewer.requestedPagePosition?.first ?: defaultPageIndex).coerceIn(
@@ -135,6 +137,7 @@ fun ComposePagerViewer(
         val coroutineScope = rememberCoroutineScope()
         val currentOnNavigateToChapter by rememberUpdatedState(onNavigateToChapter)
         val currentOnRequestPreloadChapter by rememberUpdatedState(onRequestPreloadChapter)
+        val currentItems by rememberUpdatedState(items)
 
         LaunchedEffect(currentChapterId) {
             viewer.prevTransition?.to?.let { currentOnRequestPreloadChapter(it) }
@@ -333,13 +336,13 @@ fun ComposePagerViewer(
         val thresholdPx = with(density) { Size.huge.toPx() }
 
         val nestedScrollConnection =
-            remember(pagerState, items, isVertical, isRtl, thresholdPx) {
+            remember(pagerState, isVertical, isRtl, thresholdPx) {
                 object : NestedScrollConnection {
                     var accumulatedOverscroll = 0f
 
                     private fun checkAndTrigger(delta: Float) {
                         val currentIndex = pagerState.currentPage
-                        val currentItem = items.getOrNull(currentIndex)
+                        val currentItem = currentItems.getOrNull(currentIndex)
 
                         if (currentItem is ReaderUiItem.Transition) {
                             val transition = currentItem.transition

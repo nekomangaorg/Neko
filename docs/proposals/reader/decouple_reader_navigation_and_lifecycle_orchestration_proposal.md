@@ -4,7 +4,7 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
-**Implementation State:** 🟡 Partially Decoupled Baseline (Hardened with [`ChapterNavTarget`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/model/ChapterNavTarget.kt), but adjacent navigation remains bound to Activity `lifecycleScope`, Compose directly invokes `viewer.activity.loadChapter`, and page positioning relies on mutable state bridge)  
+**Implementation State:** 🟡 Phase 1 Stabilization Complete (Hoisted `onNavigateToChapter` and `onRequestPreloadChapter`, memoized `defaultPageIndex`, stabilized `nestedScrollConnection`, and aligned concurrency checks; transition execution remains in Activity `lifecycleScope` awaiting Phase 2 ViewModel engine)  
 
 ---
 
@@ -15,8 +15,10 @@
 > Following the Compose reader migration in Neko 3.7.1 and subsequent hardening for brand-new chapter page jumps:
 > - **Activity-Bound Coroutine Lifecycle ([`ReaderActivity.kt#L1161-L1185`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt#L1161-L1185))**:
 >   `loadAdjacentChapter(next: Boolean)` launches inside `lifecycleScope.launch`. When the user rotates the device, unfolds a foldable device (e.g. Pixel Fold / Galaxy Fold), or switches apps during a chapter transition, the activity is destroyed/recreated and `lifecycleScope` is cancelled mid-flight. This risks interrupted downloads, incomplete progress commits, or stuck loading states.
-> - **Direct Activity Callbacks from Compose ([`ComposePagerViewer.kt#L368-L371`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt#L368-L371))**:
->   When overscroll thresholds are reached on transition pages or when preloading adjacent chapters ([`ComposePagerViewer.kt#L134-L135`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt#L134-L135)), the Composable directly invokes `viewer.activity.loadChapter(...)` and `viewer.activity.requestPreloadChapter(...)` through the legacy viewer instance instead of hoisting pure UI events.
+> - **Compose Navigation Hoisting & Timer Lock Gap ([`ComposePagerViewer.kt#L370-L384`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt#L370-L384))**:
+>   `onNavigateToChapter` and `onRequestPreloadChapter` have been hoisted out of `ComposePagerViewer`. However, until `ReaderChapterTransitionState.Loading` is wired into `ReaderViewModel`, overscroll transitions still rely on an internal `isTransitioning` guard with `delay(500L)`. On high-latency loads (>500ms), the guard releases prematurely; on instantaneous cache hits (<50ms), gestures are blocked unnecessarily.
+> - **Compose Recomposition & Touch Slop Stabilization**:
+>   `defaultPageIndex` calculation originally performed up to three unmemoized O(N) list scans on every Compose recomposition pass. Additionally, `nestedScrollConnection` previously held `items` in its `remember` keys, resetting `accumulatedOverscroll` to `0f` mid-gesture when background download statuses updated. These are stabilized via `remember(items, ...)` and `rememberUpdatedState(items)`.
 > - **Fragile Imperative Event Bus via Mutable State ([`PagerViewer.kt#L35`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/PagerViewer.kt#L35))**:
 >   Programmatic page navigation (slider scrub, TOC selection, bookmark jumps) sets `viewer.requestedPagePosition = Pair<Int, Boolean>?`. Compose catches this via `LaunchedEffect(viewer.requestedPagePosition)` ([`ComposePagerViewer.kt#L176-L197`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt#L176-L197)) and clears it in a `finally` block. This mutable side-channel is vulnerable to race conditions, missed frames, and timing-dependent bugs.
 > - **Split Concurrency Locks & Dispatch Gaps**:
@@ -299,6 +301,20 @@ fun ComposePagerViewer(
     // (nestedScrollConnection overscroll threshold triggers onNavigateToChapter instead of viewer.activity.loadChapter)
 }
 ```
+
+### 5.2 Transition State Observation vs. Timer Debounce
+In the interim Phase 1 implementation, Compose prevents rapid overscroll re-triggers via a local `isTransitioning` boolean and a fallback `delay(500L)` timer. In Phase 2, this timer hack is completely superseded by observing `ReaderChapterTransitionState` directly from `ReaderViewModel`:
+
+```kotlin
+val transitionState by viewModel.transitionState.collectAsStateWithLifecycle()
+val isNavigating = transitionState is ReaderChapterTransitionState.Loading
+
+// nestedScrollConnection gates overscroll gestures on live state:
+if (isTrigger && !isNavigating) {
+    onNavigateToChapter(toChapter.chapter, navTarget)
+}
+```
+This guarantees that overscroll locks match the actual network/disk loading lifecycle without arbitrary timeouts.
 
 ---
 
