@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -48,7 +49,9 @@ import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.platform.LocalContext
 import coil3.imageLoader
+import coil3.request.Disposable
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import coil3.request.maxBitmapSize
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
@@ -66,6 +69,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlin.math.abs
 import kotlin.math.hypot
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -133,6 +137,7 @@ fun ComposeWebtoonViewer(
             readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
         val disableGaps by readerPreferences.webtoonDisableGaps().collectAsState()
         val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsState()
+        val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsState()
         val themeBackground = MaterialTheme.colorScheme.background
         val backgroundColor =
             remember(readerTheme, themeBackground) {
@@ -198,12 +203,21 @@ fun ComposeWebtoonViewer(
         val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
         val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
-        val preloadedKeys = remember { mutableSetOf<String>() }
+        val preloadedDiskKeys = remember { mutableSetOf<String>() }
+        val preloadedMemoryKeys = remember { mutableSetOf<String>() }
+        val activeDisposables = remember { mutableMapOf<String, Disposable>() }
         val maxTextureBitmapSize = remember {
             CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize)
         }
 
-        val onCheckAndSplitPage: suspend (ReaderPage) -> Boolean = { p ->
+        DisposableEffect(Unit) {
+            onDispose {
+                activeDisposables.values.forEach { it.dispose() }
+                activeDisposables.clear()
+            }
+        }
+
+        val onCheckAndSplitPage: suspend (ReaderPage, Boolean) -> Boolean = { p, preloadMemory ->
             if (viewer.config.splitTallPages) {
                 try {
                     val screenHeight = context.resources.displayMetrics.heightPixels
@@ -214,15 +228,24 @@ fun ComposeWebtoonViewer(
                     when (result) {
                         is ReaderWebtoonController.TallSplitResult.Split -> {
                             withContext(Dispatchers.Main) { viewer.splitPage(p, result.splits) }
-                            result.splits.forEach { split ->
-                                val request =
-                                    ImageRequest.Builder(context)
-                                        .data(split)
-                                        .size(CoilSize.ORIGINAL)
-                                        .maxBitmapSize(maxTextureBitmapSize)
-                                        .precision(Precision.EXACT)
-                                        .build()
-                                context.imageLoader.enqueue(request)
+                            if (preloadMemory) {
+                                result.splits.forEach { split ->
+                                    val splitKey =
+                                        "webtoon_split_${split.page.chapter.chapter.id}_${split.page.index}_${split.topOffset}"
+                                    if (preloadedMemoryKeys.add(splitKey)) {
+                                        val request =
+                                            ImageRequest.Builder(context)
+                                                .data(split)
+                                                .size(CoilSize.ORIGINAL)
+                                                .maxBitmapSize(maxTextureBitmapSize)
+                                                .precision(Precision.EXACT)
+                                                .crossfade(true)
+                                                .build()
+                                        activeDisposables[splitKey]?.dispose()
+                                        activeDisposables[splitKey] =
+                                            context.imageLoader.enqueue(request)
+                                    }
+                                }
                             }
                             true
                         }
@@ -237,7 +260,7 @@ fun ComposeWebtoonViewer(
             }
         }
 
-        val checkAndSplitTallPage: (ReaderPage) -> Unit = { p ->
+        val checkAndSplitTallPage: (ReaderPage, Boolean) -> Unit = { p, preloadMemory ->
             if (
                 viewer.config.splitTallPages &&
                     !viewer.controller.tallSplitPages.contains(p) &&
@@ -246,69 +269,118 @@ fun ComposeWebtoonViewer(
                 coroutineScope.launch(Dispatchers.IO) {
                     try {
                         p.statusFlow.first { it == Page.State.READY }
-                        val wasSplit = onCheckAndSplitPage(p)
-                        if (!wasSplit) {
-                            val request =
-                                ImageRequest.Builder(context)
-                                    .data(p)
-                                    .size(CoilSize.ORIGINAL)
-                                    .maxBitmapSize(maxTextureBitmapSize)
-                                    .precision(Precision.EXACT)
-                                    .build()
-                            context.imageLoader.enqueue(request)
+                        val wasSplit = onCheckAndSplitPage(p, preloadMemory)
+                        if (!wasSplit && preloadMemory) {
+                            val key =
+                                p.chapter.chapter.id?.let { cid ->
+                                    "webtoon_page_${cid}_${p.index}"
+                                }
+                            if (key != null && preloadedMemoryKeys.add(key)) {
+                                val request =
+                                    ImageRequest.Builder(context)
+                                        .data(p)
+                                        .size(CoilSize.ORIGINAL)
+                                        .maxBitmapSize(maxTextureBitmapSize)
+                                        .precision(Precision.EXACT)
+                                        .crossfade(true)
+                                        .build()
+                                activeDisposables[key]?.dispose()
+                                activeDisposables[key] = context.imageLoader.enqueue(request)
+                            }
                         }
                     } catch (_: Exception) {}
                 }
             }
         }
 
+        val preloadItem: (ReaderUiItem, Boolean) -> Unit = { item, preloadMemory ->
+            val key = item.key("webtoon")
+            // 1. Disk Preload: full preloadPageAmount window (network -> disk cache via PageLoader)
+            if (preloadedDiskKeys.add(key)) {
+                when (item) {
+                    is ReaderUiItem.Page -> {
+                        coroutineScope.launch {
+                            try {
+                                item.page.chapter.pageLoader?.loadPage(item.page)
+                            } catch (e: Exception) {
+                                if (e !is CancellationException) {
+                                    preloadedDiskKeys.remove(key)
+                                }
+                            }
+                        }
+                        if (viewer.config.splitTallPages) {
+                            checkAndSplitTallPage(item.page, preloadMemory)
+                        }
+                    }
+                    is ReaderUiItem.SplitPage -> {
+                        coroutineScope.launch {
+                            try {
+                                item.page.chapter.pageLoader?.loadPage(item.page)
+                            } catch (e: Exception) {
+                                if (e !is CancellationException) {
+                                    preloadedDiskKeys.remove(key)
+                                }
+                            }
+                        }
+                    }
+                    is ReaderUiItem.Transition -> Unit
+                }
+            }
+
+            // 2. Memory Preload: strictly bounded to immediate window (1-2 pages ahead) to prevent
+            // OOM
+            if (preloadMemory && preloadedMemoryKeys.add(key)) {
+                when (item) {
+                    is ReaderUiItem.Page -> {
+                        if (
+                            !viewer.config.splitTallPages || viewer.controller.isNonTall(item.page)
+                        ) {
+                            val request =
+                                ImageRequest.Builder(context)
+                                    .data(item.page)
+                                    .size(CoilSize.ORIGINAL)
+                                    .maxBitmapSize(maxTextureBitmapSize)
+                                    .precision(Precision.EXACT)
+                                    .crossfade(true)
+                                    .build()
+                            activeDisposables[key]?.dispose()
+                            activeDisposables[key] = context.imageLoader.enqueue(request)
+                        }
+                    }
+                    is ReaderUiItem.SplitPage -> {
+                        val request =
+                            ImageRequest.Builder(context)
+                                .data(item.split)
+                                .size(CoilSize.ORIGINAL)
+                                .maxBitmapSize(maxTextureBitmapSize)
+                                .precision(Precision.EXACT)
+                                .crossfade(true)
+                                .build()
+                        activeDisposables[key]?.dispose()
+                        activeDisposables[key] = context.imageLoader.enqueue(request)
+                    }
+                    is ReaderUiItem.Transition -> Unit
+                }
+            }
+        }
+
         // Preload initial batch of pages when items are loaded or updated
-        LaunchedEffect(items) {
+        LaunchedEffect(items, preloadPageAmount) {
             val startIndex =
                 (viewer.requestedPagePosition?.targetPage ?: defaultPageIndex).coerceIn(
                     0,
                     (items.size - 1).coerceAtLeast(0),
                 )
-            val preloadEnd = minOf(items.size - 1, startIndex + 6)
+            val preloadEnd = minOf(items.size - 1, startIndex + preloadPageAmount)
+            val memoryEnd = minOf(items.size - 1, startIndex + 2)
             for (i in startIndex..preloadEnd) {
                 val item = items.getOrNull(i) ?: continue
-                val key = item.key("webtoon")
-                if (preloadedKeys.add(key)) {
-                    when (item) {
-                        is ReaderUiItem.Page -> {
-                            launch { item.page.chapter.pageLoader?.loadPage(item.page) }
-                            if (viewer.config.splitTallPages) {
-                                checkAndSplitTallPage(item.page)
-                            } else {
-                                val request =
-                                    ImageRequest.Builder(context)
-                                        .data(item.page)
-                                        .size(CoilSize.ORIGINAL)
-                                        .maxBitmapSize(maxTextureBitmapSize)
-                                        .precision(Precision.EXACT)
-                                        .build()
-                                context.imageLoader.enqueue(request)
-                            }
-                        }
-                        is ReaderUiItem.SplitPage -> {
-                            launch { item.page.chapter.pageLoader?.loadPage(item.page) }
-                            val request =
-                                ImageRequest.Builder(context)
-                                    .data(item.split)
-                                    .size(CoilSize.ORIGINAL)
-                                    .maxBitmapSize(maxTextureBitmapSize)
-                                    .precision(Precision.EXACT)
-                                    .build()
-                            context.imageLoader.enqueue(request)
-                        }
-                        is ReaderUiItem.Transition -> {}
-                    }
-                }
+                preloadItem(item, i <= memoryEnd)
             }
         }
 
         // Track active visible page and preload upcoming/previous pages with debouncing
-        LaunchedEffect(lazyListState) {
+        LaunchedEffect(lazyListState, preloadPageAmount) {
             var preloadJob: Job? = null
             snapshotFlow {
                 val layoutInfo = lazyListState.layoutInfo
@@ -333,12 +405,13 @@ fun ComposeWebtoonViewer(
                                 onPageSelected(item.page)
                                 val pages = item.page.chapter.pages
                                 if (pages != null && item.page.chapter == viewer.currentChapter) {
-                                    if (pages.size - item.page.number < 5) {
+                                    val threshold = maxOf(5, preloadPageAmount)
+                                    if (pages.size - item.page.number < threshold) {
                                         viewer.nextTransition?.to?.let {
                                             viewer.activity.requestPreloadChapter(it)
                                         }
                                     }
-                                    if (item.page.number <= 5) {
+                                    if (item.page.number <= threshold) {
                                         viewer.prevTransition?.to?.let {
                                             viewer.activity.requestPreloadChapter(it)
                                         }
@@ -357,54 +430,19 @@ fun ComposeWebtoonViewer(
                             }
                         }
 
-                        // Debounced, cancellable preload window: 2 pages behind, 6 pages ahead
+                        // Debounced preload window: 2 pages behind, preloadPageAmount ahead
                         preloadJob?.cancel()
                         preloadJob = launch {
                             delay(50L)
                             val preloadStart = (activeIndex - 2).coerceAtLeast(0)
-                            val preloadEnd = (activeIndex + 6).coerceAtMost(currentItems.lastIndex)
+                            val preloadEnd =
+                                (activeIndex + preloadPageAmount).coerceAtMost(
+                                    currentItems.lastIndex
+                                )
+                            val memoryEnd = minOf(currentItems.lastIndex, activeIndex + 2)
                             for (i in preloadStart..preloadEnd) {
                                 val preloadItem = currentItems.getOrNull(i) ?: continue
-                                val key = preloadItem.key("webtoon")
-                                if (preloadedKeys.add(key)) {
-                                    when (preloadItem) {
-                                        is ReaderUiItem.Page -> {
-                                            launch {
-                                                preloadItem.page.chapter.pageLoader?.loadPage(
-                                                    preloadItem.page
-                                                )
-                                            }
-                                            if (viewer.config.splitTallPages) {
-                                                checkAndSplitTallPage(preloadItem.page)
-                                            } else {
-                                                val request =
-                                                    ImageRequest.Builder(context)
-                                                        .data(preloadItem.page)
-                                                        .size(CoilSize.ORIGINAL)
-                                                        .maxBitmapSize(maxTextureBitmapSize)
-                                                        .precision(Precision.EXACT)
-                                                        .build()
-                                                context.imageLoader.enqueue(request)
-                                            }
-                                        }
-                                        is ReaderUiItem.SplitPage -> {
-                                            launch {
-                                                preloadItem.page.chapter.pageLoader?.loadPage(
-                                                    preloadItem.page
-                                                )
-                                            }
-                                            val request =
-                                                ImageRequest.Builder(context)
-                                                    .data(preloadItem.split)
-                                                    .size(CoilSize.ORIGINAL)
-                                                    .maxBitmapSize(maxTextureBitmapSize)
-                                                    .precision(Precision.EXACT)
-                                                    .build()
-                                            context.imageLoader.enqueue(request)
-                                        }
-                                        is ReaderUiItem.Transition -> {}
-                                    }
-                                }
+                                preloadItem(preloadItem, i in activeIndex..memoryEnd)
                             }
                         }
                     }
@@ -757,7 +795,11 @@ fun ComposeWebtoonViewer(
                             WebtoonPageItem(
                                 page = item.page,
                                 onCheckAndSplitPage =
-                                    if (viewer.config.splitTallPages) onCheckAndSplitPage else null,
+                                    if (viewer.config.splitTallPages) {
+                                        { p -> onCheckAndSplitPage(p, false) }
+                                    } else {
+                                        null
+                                    },
                                 isAlreadyChecked =
                                     !viewer.config.splitTallPages ||
                                         viewer.controller.isNonTall(item.page),

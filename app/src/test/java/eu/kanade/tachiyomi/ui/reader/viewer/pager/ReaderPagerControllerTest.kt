@@ -233,4 +233,73 @@ class ReaderPagerControllerTest {
         assertEquals(page2, first)
         assertEquals(page1, second)
     }
+
+    @Test
+    fun `getPreloadIndices in LTR mode returns current page, forward pages up to preloadAmount, and up to 2 behind`() {
+        // totalItems = 20, preloadAmount = 6, currentIndex = 5, isRtl = false
+        val indices =
+            ReaderPagerController.getPreloadIndices(
+                currentIndex = 5,
+                preloadAmount = 6,
+                totalItems = 20,
+                isRtl = false,
+            )
+
+        // Expected: 5 (current), 6, 7, 8, 9, 10, 11 (ahead), 4, 3 (behind)
+        assertEquals(listOf(5, 6, 7, 8, 9, 10, 11, 4, 3), indices)
+    }
+
+    @Test
+    fun `getPreloadIndices in RTL mode returns current page, decreasing ahead pages up to preloadAmount, and increasing behind pages`() {
+        // totalItems = 20, preloadAmount = 6, currentIndex = 15, isRtl = true
+        val indices =
+            ReaderPagerController.getPreloadIndices(
+                currentIndex = 15,
+                preloadAmount = 6,
+                totalItems = 20,
+                isRtl = true,
+            )
+
+        // In RTL, reading ahead goes down toward 0:
+        // Expected: 15 (current), 14, 13, 12, 11, 10, 9 (ahead), 16, 17 (behind)
+        assertEquals(listOf(15, 14, 13, 12, 11, 10, 9, 16, 17), indices)
+    }
+
+    @Test
+    fun `getPreloadIndices in RTL mode at chapter start clamps to bounds and preloads ahead correctly`() {
+        // In RTL, chapter start is at the end of items list (e.g. index 19 of 20 items)
+        val indices =
+            ReaderPagerController.getPreloadIndices(
+                currentIndex = 19,
+                preloadAmount = 6,
+                totalItems = 20,
+                isRtl = true,
+            )
+
+        // Expected: 19 (current), 18, 17, 16, 15, 14, 13 (ahead), behind is out of bounds (20, 21
+        // clamped)
+        assertEquals(listOf(19, 18, 17, 16, 15, 14, 13), indices)
+    }
+
+    @Test
+    fun `getPreloadIndices in LTR mode at chapter start clamps to bounds and preloads ahead correctly`() {
+        // In LTR, chapter start is at index 0
+        val indices =
+            ReaderPagerController.getPreloadIndices(
+                currentIndex = 0,
+                preloadAmount = 4,
+                totalItems = 20,
+                isRtl = false,
+            )
+
+        // Expected: 0 (current), 1, 2, 3, 4 (ahead), behind is out of bounds (-1, -2 clamped)
+        assertEquals(listOf(0, 1, 2, 3, 4), indices)
+    }
+
+    @Test
+    fun `getPreloadIndices with invalid inputs returns empty list`() {
+        assertTrue(ReaderPagerController.getPreloadIndices(0, 4, 0, false).isEmpty())
+        assertTrue(ReaderPagerController.getPreloadIndices(-1, 4, 10, false).isEmpty())
+        assertTrue(ReaderPagerController.getPreloadIndices(10, 4, 10, false).isEmpty())
+    }
 }

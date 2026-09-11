@@ -303,4 +303,43 @@ class ReaderPagerController {
             extraPage to page
         }
     }
+
+    companion object {
+        /**
+         * Resolves the list of item indices that should be preloaded around [currentIndex], taking
+         * into account reading direction ([isRtl]) and [preloadAmount].
+         *
+         * Indices are prioritized in order:
+         * 1. [currentIndex]
+         * 2. Ahead pages (in reading direction) up to [preloadAmount]
+         * 3. Behind pages (in opposite direction) up to 2
+         */
+        fun getPreloadIndices(
+            currentIndex: Int,
+            preloadAmount: Int,
+            totalItems: Int,
+            isRtl: Boolean,
+        ): List<Int> {
+            if (totalItems <= 0 || currentIndex !in 0 until totalItems) return emptyList()
+            val indices = LinkedHashSet<Int>()
+            indices.add(currentIndex)
+
+            val aheadStep = if (isRtl) -1 else 1
+            val behindStep = if (isRtl) 1 else -1
+
+            for (step in 1..preloadAmount) {
+                val target = currentIndex + step * aheadStep
+                if (target in 0 until totalItems) {
+                    indices.add(target)
+                }
+            }
+            for (step in 1..2) {
+                val target = currentIndex + step * behindStep
+                if (target in 0 until totalItems) {
+                    indices.add(target)
+                }
+            }
+            return indices.toList()
+        }
+    }
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -30,7 +31,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
 import coil3.imageLoader
+import coil3.request.Disposable
 import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.request.maxBitmapSize
+import coil3.size.Precision
+import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
@@ -41,6 +47,9 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.ReaderPagerController
+import eu.kanade.tachiyomi.util.system.GLUtil
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -175,6 +184,7 @@ fun ComposePagerViewer(
         val readerPreferences: ReaderPreferences = remember { Injekt.get() }
         val animatedTransitions by readerPreferences.animatedPageTransitions().collectAsState()
         val readerTheme by readerPreferences.readerTheme().collectAsState()
+        val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsState()
         val themeBackground = MaterialTheme.colorScheme.background
         val backgroundColor =
             remember(readerTheme, themeBackground) {
@@ -206,47 +216,140 @@ fun ComposePagerViewer(
         }
 
         val context = LocalContext.current
-        val preloadedKeys = remember(items) { mutableSetOf<String>() }
+        val preloadedDiskKeys = remember { mutableSetOf<String>() }
+        val preloadedMemoryKeys = remember { mutableSetOf<String>() }
+        val activeDisposables = remember { mutableMapOf<String, Disposable>() }
+        val maxTextureBitmapSize = remember {
+            CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize)
+        }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                activeDisposables.values.forEach { it.dispose() }
+                activeDisposables.clear()
+            }
+        }
+
+        val preloadItem: (ReaderUiItem, Boolean) -> Unit = { item, preloadMemory ->
+            val key = item.key("pager")
+            // 1. Disk Preload: full preloadPageAmount window (network -> disk cache via PageLoader)
+            if (preloadedDiskKeys.add(key)) {
+                when (item) {
+                    is ReaderUiItem.Page -> {
+                        coroutineScope.launch {
+                            try {
+                                item.page.chapter.pageLoader?.loadPage(item.page)
+                            } catch (e: Exception) {
+                                if (e !is CancellationException) {
+                                    preloadedDiskKeys.remove(key)
+                                }
+                            }
+                        }
+                        item.extraPage?.let { extra ->
+                            coroutineScope.launch {
+                                try {
+                                    extra.chapter.pageLoader?.loadPage(extra)
+                                } catch (e: Exception) {
+                                    if (e !is CancellationException) {
+                                        preloadedDiskKeys.remove(key)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    is ReaderUiItem.SplitPage -> {
+                        coroutineScope.launch {
+                            try {
+                                item.page.chapter.pageLoader?.loadPage(item.page)
+                            } catch (e: Exception) {
+                                if (e !is CancellationException) {
+                                    preloadedDiskKeys.remove(key)
+                                }
+                            }
+                        }
+                    }
+                    is ReaderUiItem.Transition -> Unit
+                }
+            }
+
+            // 2. Memory Preload: strictly bounded to immediate window (1-2 pages ahead) to prevent
+            // OOM
+            if (preloadMemory && preloadedMemoryKeys.add(key)) {
+                when (item) {
+                    is ReaderUiItem.Page -> {
+                        val request =
+                            ImageRequest.Builder(context)
+                                .data(item.page)
+                                .size(CoilSize.ORIGINAL)
+                                .maxBitmapSize(maxTextureBitmapSize)
+                                .precision(Precision.EXACT)
+                                .crossfade(true)
+                                .build()
+                        activeDisposables[key]?.dispose()
+                        activeDisposables[key] = context.imageLoader.enqueue(request)
+
+                        item.extraPage?.let { extra ->
+                            val extraKey = "${key}_extra"
+                            val extraRequest =
+                                ImageRequest.Builder(context)
+                                    .data(extra)
+                                    .size(CoilSize.ORIGINAL)
+                                    .maxBitmapSize(maxTextureBitmapSize)
+                                    .precision(Precision.EXACT)
+                                    .crossfade(true)
+                                    .build()
+                            activeDisposables[extraKey]?.dispose()
+                            activeDisposables[extraKey] = context.imageLoader.enqueue(extraRequest)
+                        }
+                    }
+                    is ReaderUiItem.SplitPage -> {
+                        val request =
+                            ImageRequest.Builder(context)
+                                .data(item.split)
+                                .size(CoilSize.ORIGINAL)
+                                .maxBitmapSize(maxTextureBitmapSize)
+                                .precision(Precision.EXACT)
+                                .crossfade(true)
+                                .build()
+                        activeDisposables[key]?.dispose()
+                        activeDisposables[key] = context.imageLoader.enqueue(request)
+                    }
+                    is ReaderUiItem.Transition -> Unit
+                }
+            }
+        }
 
         // Preload initial batch of pages when items are loaded or updated
-        LaunchedEffect(items) {
+        LaunchedEffect(items, preloadPageAmount) {
             val startIndex =
                 (viewer.requestedPagePosition?.first ?: defaultPageIndex).coerceIn(
                     0,
                     (items.size - 1).coerceAtLeast(0),
                 )
-            val preloadEnd = minOf(items.size - 1, startIndex + 4)
-            for (i in startIndex..preloadEnd) {
+            val preloadIndices =
+                ReaderPagerController.getPreloadIndices(
+                    currentIndex = startIndex,
+                    preloadAmount = preloadPageAmount,
+                    totalItems = items.size,
+                    isRtl = isRtl,
+                )
+            val memoryIndices =
+                ReaderPagerController.getPreloadIndices(
+                        currentIndex = startIndex,
+                        preloadAmount = 2,
+                        totalItems = items.size,
+                        isRtl = isRtl,
+                    )
+                    .toSet()
+
+            for (i in preloadIndices) {
                 val item = items.getOrNull(i) ?: continue
-                val key = item.key("pager")
-                if (preloadedKeys.add(key)) {
-                    when (item) {
-                        is ReaderUiItem.Page -> {
-                            launch { item.page.chapter.pageLoader?.loadPage(item.page) }
-                            context.imageLoader.enqueue(
-                                ImageRequest.Builder(context).data(item.page).build()
-                            )
-                            item.extraPage?.let { extra ->
-                                launch { extra.chapter.pageLoader?.loadPage(extra) }
-                                context.imageLoader.enqueue(
-                                    ImageRequest.Builder(context).data(extra).build()
-                                )
-                            }
-                        }
-                        is ReaderUiItem.SplitPage -> {
-                            launch { item.page.chapter.pageLoader?.loadPage(item.page) }
-                            context.imageLoader.enqueue(
-                                ImageRequest.Builder(context).data(item.split).build()
-                            )
-                        }
-                        is ReaderUiItem.Transition -> Unit
-                    }
-                }
+                preloadItem(item, i in memoryIndices)
             }
         }
 
         // Track active page changes and preload upcoming/previous pages with debouncing
-        LaunchedEffect(pagerState, items) {
+        LaunchedEffect(pagerState, items, preloadPageAmount) {
             var preloadJob: Job? = null
             snapshotFlow { pagerState.currentPage }
                 .distinctUntilChanged()
@@ -260,12 +363,13 @@ fun ComposePagerViewer(
                                 onPageSelected(item.page, item.extraPage != null)
                                 val pages = item.page.chapter.pages
                                 if (pages != null && item.page.chapter == viewer.currentChapter) {
-                                    if (pages.size - item.page.number < 5) {
+                                    val threshold = maxOf(5, preloadPageAmount)
+                                    if (pages.size - item.page.number < threshold) {
                                         viewer.nextTransition?.to?.let {
                                             currentOnRequestPreloadChapter(it)
                                         }
                                     }
-                                    if (item.page.number <= 5) {
+                                    if (item.page.number <= threshold) {
                                         viewer.prevTransition?.to?.let {
                                             currentOnRequestPreloadChapter(it)
                                         }
@@ -280,52 +384,29 @@ fun ComposePagerViewer(
                             }
                         }
 
-                        // Debounced, cancellable preload window: 2 pages behind, 4 pages ahead
+                        // Debounced preload window based on reading direction and preference
                         preloadJob?.cancel()
                         preloadJob = launch {
                             delay(50L)
-                            val preloadStart = (pageIndex - 2).coerceAtLeast(0)
-                            val preloadEnd = (pageIndex + 4).coerceAtMost(items.lastIndex)
-                            for (i in preloadStart..preloadEnd) {
+                            val preloadIndices =
+                                ReaderPagerController.getPreloadIndices(
+                                    currentIndex = pageIndex,
+                                    preloadAmount = preloadPageAmount,
+                                    totalItems = items.size,
+                                    isRtl = isRtl,
+                                )
+                            val memoryIndices =
+                                ReaderPagerController.getPreloadIndices(
+                                        currentIndex = pageIndex,
+                                        preloadAmount = 2,
+                                        totalItems = items.size,
+                                        isRtl = isRtl,
+                                    )
+                                    .toSet()
+
+                            for (i in preloadIndices) {
                                 val preloadItem = items.getOrNull(i) ?: continue
-                                val key = preloadItem.key("pager")
-                                if (preloadedKeys.add(key)) {
-                                    when (preloadItem) {
-                                        is ReaderUiItem.Page -> {
-                                            launch {
-                                                preloadItem.page.chapter.pageLoader?.loadPage(
-                                                    preloadItem.page
-                                                )
-                                            }
-                                            context.imageLoader.enqueue(
-                                                ImageRequest.Builder(context)
-                                                    .data(preloadItem.page)
-                                                    .build()
-                                            )
-                                            preloadItem.extraPage?.let { extra ->
-                                                launch { extra.chapter.pageLoader?.loadPage(extra) }
-                                                context.imageLoader.enqueue(
-                                                    ImageRequest.Builder(context)
-                                                        .data(extra)
-                                                        .build()
-                                                )
-                                            }
-                                        }
-                                        is ReaderUiItem.SplitPage -> {
-                                            launch {
-                                                preloadItem.page.chapter.pageLoader?.loadPage(
-                                                    preloadItem.page
-                                                )
-                                            }
-                                            context.imageLoader.enqueue(
-                                                ImageRequest.Builder(context)
-                                                    .data(preloadItem.split)
-                                                    .build()
-                                            )
-                                        }
-                                        is ReaderUiItem.Transition -> Unit
-                                    }
-                                }
+                                preloadItem(preloadItem, i in memoryIndices)
                             }
                         }
                     }
