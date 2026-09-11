@@ -388,6 +388,19 @@ class ReaderActivity : BaseMainActivity() {
                             onTransitionSelected = { transition ->
                                 onTransitionSelected(transition)
                             },
+                            onNavigateToChapter = { chapter, navTarget ->
+                                if (!isScrollingThroughPagesOrChapters) {
+                                    isScrollingThroughPagesOrChapters = true
+                                    lifecycleScope.launch {
+                                        try {
+                                            loadChapter(chapter, navTarget)
+                                        } finally {
+                                            isScrollingThroughPagesOrChapters = false
+                                        }
+                                    }
+                                }
+                            },
+                            onRequestPreloadChapter = { chapter -> requestPreloadChapter(chapter) },
                             onRetryTransition = { chapter -> requestPreloadChapter(chapter) },
                             modifier = Modifier.fillMaxSize(),
                         )

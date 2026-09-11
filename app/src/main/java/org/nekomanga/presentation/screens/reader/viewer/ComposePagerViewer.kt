@@ -18,6 +18,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
 import coil3.imageLoader
 import coil3.request.ImageRequest
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
@@ -60,6 +62,8 @@ fun ComposePagerViewer(
     downloadManager: DownloadManager,
     onPageSelected: (ReaderPage, Boolean) -> Unit,
     onTransitionSelected: (ChapterTransition) -> Unit,
+    onNavigateToChapter: (Chapter, ChapterNavTarget) -> Unit,
+    onRequestPreloadChapter: (ReaderChapter) -> Unit,
     onRetryTransition: (ReaderChapter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -129,10 +133,12 @@ fun ComposePagerViewer(
         var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
         var isTransitioning by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
+        val currentOnNavigateToChapter by rememberUpdatedState(onNavigateToChapter)
+        val currentOnRequestPreloadChapter by rememberUpdatedState(onRequestPreloadChapter)
 
         LaunchedEffect(currentChapterId) {
-            viewer.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
-            viewer.nextTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
+            viewer.prevTransition?.to?.let { currentOnRequestPreloadChapter(it) }
+            viewer.nextTransition?.to?.let { currentOnRequestPreloadChapter(it) }
         }
 
         LaunchedEffect(items) {
@@ -253,12 +259,12 @@ fun ComposePagerViewer(
                                 if (pages != null && item.page.chapter == viewer.currentChapter) {
                                     if (pages.size - item.page.number < 5) {
                                         viewer.nextTransition?.to?.let {
-                                            viewer.activity.requestPreloadChapter(it)
+                                            currentOnRequestPreloadChapter(it)
                                         }
                                     }
                                     if (item.page.number <= 5) {
                                         viewer.prevTransition?.to?.let {
-                                            viewer.activity.requestPreloadChapter(it)
+                                            currentOnRequestPreloadChapter(it)
                                         }
                                     }
                                 }
@@ -365,10 +371,11 @@ fun ComposePagerViewer(
                                                 } else {
                                                     ChapterNavTarget.Start
                                                 }
-                                            viewer.activity.loadChapter(
+                                            currentOnNavigateToChapter(
                                                 toChapter.chapter,
-                                                navTarget = navTarget,
+                                                navTarget,
                                             )
+                                            delay(500L)
                                         } finally {
                                             isTransitioning = false
                                         }
