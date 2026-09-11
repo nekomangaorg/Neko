@@ -4,7 +4,7 @@ lifecycle_version = "2.11.0"
 room_version = "2.8.5"
 baselineprofile_version = "1.5.0-rc02"
 uiautomator_version = "2.4.0"
-benchmark_version = "1.4.1"
+benchmark_version = "1.5.0"
 profileinstaller_version = "1.4.1"
 
 [libraries]
