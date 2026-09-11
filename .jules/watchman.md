@@ -1,1 +1,0 @@
-## 2024-05-18 - Discovering BackupCreatorJob **Learning:** Discovered `BackupCreatorJob` using legacy `Worker` and doing synchronous DB/IO operations, missing constraints like `RequiresDeviceIdle` or `RequiresBatteryNotLow`. **Action:** Migrate `BackupCreatorJob` to `CoroutineWorker` and add appropriate battery-friendly constraints.
