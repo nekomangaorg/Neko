@@ -78,6 +78,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Success
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -708,9 +709,13 @@ class ReaderActivity : BaseMainActivity() {
                                     ) {
                                         isScrollingThroughPagesOrChapters = true
                                         lifecycleScope.launch {
-                                            loadChapter(item.chapter, fromEnd = false)
-                                            chaptersSheetVisible = false
-                                            reEnableBackPressedCallBack()
+                                            try {
+                                                loadChapter(item.chapter, ChapterNavTarget.Resume)
+                                                chaptersSheetVisible = false
+                                                reEnableBackPressedCallBack()
+                                            } finally {
+                                                isScrollingThroughPagesOrChapters = false
+                                            }
                                         }
                                     } else {
                                         chaptersSheetVisible = false
@@ -1162,37 +1167,51 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     private fun loadAdjacentChapter(next: Boolean) {
-        if (isLoading) {
+        if (isLoading || viewModel.state.value.isLoadingAdjacentChapter) {
             return
         }
         isScrollingThroughPagesOrChapters = true
         lifecycleScope.launch {
-            val adjChapter = viewModel.adjacentChapter(next)
-            if (adjChapter != null) {
-                loadChapter(adjChapter, fromEnd = !next && adjChapter.chapter.read)
-            } else {
-                toast(
-                    if (next) {
-                        R.string.theres_no_next_chapter
-                    } else {
-                        R.string.theres_no_previous_chapter
-                    }
-                )
+            try {
+                val adjChapter = viewModel.adjacentChapter(next)
+                if (adjChapter != null) {
+                    val target = if (next) ChapterNavTarget.Start else ChapterNavTarget.End
+                    loadChapter(adjChapter, target)
+                } else {
+                    toast(
+                        if (next) {
+                            R.string.theres_no_next_chapter
+                        } else {
+                            R.string.theres_no_previous_chapter
+                        }
+                    )
+                }
+            } finally {
+                isScrollingThroughPagesOrChapters = false
             }
         }
     }
 
-    suspend fun loadChapter(chapter: Chapter, fromEnd: Boolean = false) {
-        loadChapter(ReaderChapter(chapter), fromEnd)
+    suspend fun loadChapter(
+        chapter: Chapter,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
+    ) {
+        loadChapter(ReaderChapter(chapter), navTarget)
     }
 
-    private suspend fun loadChapter(chapter: ReaderChapter, fromEnd: Boolean = false) {
-        val targetPage = viewModel.loadChapter(chapter, fromEnd) ?: return
-        isScrollingThroughPagesOrChapters = false
-        if (targetPage >= 0) {
-            moveToPageIndex(targetPage, false, chapterChange = true)
+    private suspend fun loadChapter(
+        chapter: ReaderChapter,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
+    ) {
+        try {
+            val targetPage = viewModel.loadChapter(chapter, navTarget) ?: return
+            if (viewer is WebtoonViewer && targetPage >= 0) {
+                moveToPageIndex(targetPage, false, chapterChange = true)
+            }
+            refreshChapters()
+        } finally {
+            isScrollingThroughPagesOrChapters = false
         }
-        refreshChapters()
     }
 
     fun setNavColor(insets: WindowInsetsCompat) {

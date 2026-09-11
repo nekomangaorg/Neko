@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
@@ -469,7 +470,7 @@ constructor(
     private suspend fun loadChapter(
         loader: ChapterLoader,
         chapter: ReaderChapter,
-        fromEnd: Boolean = false,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
     ): ViewerChapters {
         val chapterList = getChapterList()
         val targetChapter = chapterList.find { it.chapter.id == chapter.chapter.id } ?: chapter
@@ -477,15 +478,22 @@ constructor(
 
         loader.loadChapter(targetChapter)
 
-        val isBrandNew = !targetChapter.chapter.read && targetChapter.chapter.last_page_read == 0
-        if (fromEnd && !isBrandNew) {
-            targetChapter.requestedPage = targetChapter.pages?.lastIndex ?: 0
-        } else if (!targetChapter.chapter.read) {
-            targetChapter.requestedPage =
-                if (targetChapter.chapter.pages_left <= 1) 0
-                else targetChapter.chapter.last_page_read
-        } else {
-            targetChapter.requestedPage = 0
+        when (navTarget) {
+            ChapterNavTarget.End -> {
+                targetChapter.requestedPage = targetChapter.pages?.lastIndex ?: 0
+            }
+            ChapterNavTarget.Start -> {
+                targetChapter.requestedPage = 0
+            }
+            ChapterNavTarget.Resume -> {
+                targetChapter.requestedPage =
+                    if (!targetChapter.chapter.read) {
+                        if (targetChapter.chapter.pages_left <= 1) 0
+                        else targetChapter.chapter.last_page_read
+                    } else {
+                        0
+                    }
+            }
         }
 
         val chapterPos = chapterList.indexOf(targetChapter)
@@ -513,7 +521,10 @@ constructor(
      * Called when the user is going to load the prev/next chapter through the menu button or
      * transitions.
      */
-    suspend fun loadChapter(chapter: ReaderChapter, fromEnd: Boolean = false): Int? {
+    suspend fun loadChapter(
+        chapter: ReaderChapter,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
+    ): Int? {
         val loader = loader ?: return -1
 
         flushReadTimer()
@@ -525,13 +536,11 @@ constructor(
         val targetChapter = chapterList.find { it.chapter.id == chapter.chapter.id } ?: chapter
 
         TimberKt.d { "Loading adjacent ${targetChapter.chapter.url}" }
-        val isBrandNew = !targetChapter.chapter.read && targetChapter.chapter.last_page_read == 0
-        val actualFromEnd = fromEnd && !isBrandNew
 
         mutableState.update { it.copy(isLoadingAdjacentChapter = true) }
         var targetPage: Int? = null
         try {
-            val newChapters = withIOContext { loadChapter(loader, targetChapter, actualFromEnd) }
+            val newChapters = withIOContext { loadChapter(loader, targetChapter, navTarget) }
             targetPage = newChapters.currChapter.requestedPage
         } catch (e: Throwable) {
             if (e is CancellationException) {

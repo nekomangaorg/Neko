@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.Velocity
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -92,19 +93,25 @@ fun ComposePagerViewer(
                             (item.page.index == 0 || item.extraPage?.index == 0)
                     }
                     .takeIf { it != -1 }
-                ?: items
-                    .mapIndexedNotNull { index, item ->
+                ?: run {
+                    var minPageIndex = Int.MAX_VALUE
+                    var targetItemIndex = -1
+                    for (i in items.indices) {
+                        val item = items[i]
                         if (
                             item is ReaderUiItem.Page &&
                                 item.page.chapter.chapter.id == currentChapterId
                         ) {
-                            index to minOf(item.page.index, item.extraPage?.index ?: Int.MAX_VALUE)
-                        } else {
-                            null
+                            val pageMin =
+                                minOf(item.page.index, item.extraPage?.index ?: Int.MAX_VALUE)
+                            if (pageMin < minPageIndex) {
+                                minPageIndex = pageMin
+                                targetItemIndex = i
+                            }
                         }
                     }
-                    .minByOrNull { it.second }
-                    ?.first
+                    targetItemIndex.takeIf { it != -1 }
+                }
                 ?: items.indexOfFirst { it is ReaderUiItem.Page }.takeIf { it != -1 }
                 ?: 0
 
@@ -118,7 +125,6 @@ fun ComposePagerViewer(
                 initialPage = initialPage,
                 pageCount = { items.size },
             )
-        viewer.currentPagePosition = pagerState.currentPage
 
         var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
         var isTransitioning by remember { mutableStateOf(false) }
@@ -353,12 +359,15 @@ fun ComposePagerViewer(
                                     isTransitioning = true
                                     coroutineScope.launch {
                                         try {
-                                            val fromEnd =
-                                                transition is ChapterTransition.Prev &&
-                                                    toChapter.chapter.read
+                                            val navTarget =
+                                                if (transition is ChapterTransition.Prev) {
+                                                    ChapterNavTarget.End
+                                                } else {
+                                                    ChapterNavTarget.Start
+                                                }
                                             viewer.activity.loadChapter(
                                                 toChapter.chapter,
-                                                fromEnd = fromEnd,
+                                                navTarget = navTarget,
                                             )
                                         } finally {
                                             isTransitioning = false
