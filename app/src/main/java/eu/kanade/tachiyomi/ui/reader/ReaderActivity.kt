@@ -1197,7 +1197,7 @@ class ReaderActivity : BaseMainActivity() {
     ) {
         try {
             val targetPage = viewModel.loadChapter(chapter, navTarget) ?: return
-            if (viewer is WebtoonViewer && targetPage >= 0) {
+            if (targetPage >= 0) {
                 moveToPageIndex(targetPage, false, chapterChange = true)
             }
             refreshChapters()
