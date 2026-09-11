@@ -24,7 +24,6 @@ Proposals focused on reader performance, Jetpack Compose viewers, navigation lif
 | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags. | Neko 3.x Reader Decoupling |
 | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math. | Neko 3.x Reader Decoupling |
 | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math. | Neko 3.x Reader Decoupling |
-| [**Zero-Allocation Webtoon Active Page Resolver**](reader/webtoon_active_item_resolver_proposal.md) | Implements an allocation-free active page resolver for Webtoon reading mode to eliminate scroll stutter. | Neko Performance |
 | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Neko Performance |
 | [**Zen Focus Reading Mode & Touch Shield**](reader/zen_focus_reading_mode_proposal.md) | Adds a distraction-free reading mode with accidental touch prevention. | Neko Feature |
 
