@@ -299,6 +299,8 @@ suspend fun List<DisplayManga>.resyncDisplayManga(
             else ->
                 displayManga.copy(
                     inLibrary = dbManga.favorite,
+                    originalTitle = dbManga.title,
+                    userTitle = dbManga.user_title ?: "",
                     currentArtwork =
                         displayManga.currentArtwork.copy(
                             cover = dbManga.user_cover ?: "",
