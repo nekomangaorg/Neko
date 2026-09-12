@@ -45,6 +45,8 @@ import com.mikepenz.markdown.model.NoOpImageTransformerImpl
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownPadding
 import com.mikepenz.markdown.model.rememberMarkdownState
+import org.intellij.markdown.MarkdownTokenTypes
+import org.intellij.markdown.ast.getTextInNode
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkMarkerProcessor
@@ -61,12 +63,29 @@ import org.nekomanga.presentation.theme.Size
 
 const val MARKDOWN_INLINE_IMAGE_TAG = "MARKDOWN_INLINE_IMAGE"
 
+/**
+ * The renderer drops inline html tokens, so `[Original Webtoon <Webtoon kakao>](url)` would lose
+ * everything from `<` on. MangaDex shows such tags as plain text, and html blocks are already
+ * rendered as text (see [SimpleMarkdownMarkerProcessor]), so inline tags get the same treatment.
+ */
+fun nekoMarkdownAnnotator(): MarkdownAnnotator =
+    markdownAnnotator(
+        annotate = { content, child ->
+            if (child.type == MarkdownTokenTypes.HTML_TAG) {
+                append(child.getTextInNode(content))
+                true
+            } else {
+                false
+            }
+        }
+    )
+
 @Composable
 fun MarkdownRender(
     content: String,
     modifier: Modifier = Modifier,
     flavour: MarkdownFlavourDescriptor = SimpleMarkdownFlavourDescriptor,
-    annotator: MarkdownAnnotator = remember { markdownAnnotator() },
+    annotator: MarkdownAnnotator = remember { nekoMarkdownAnnotator() },
     loadImages: Boolean = true,
 ) {
     Markdown(
@@ -94,7 +113,7 @@ fun MarkdownRender(
 fun MarkdownRender(
     markdownState: MarkdownState,
     modifier: Modifier = Modifier,
-    annotator: MarkdownAnnotator = remember { markdownAnnotator() },
+    annotator: MarkdownAnnotator = remember { nekoMarkdownAnnotator() },
     loadImages: Boolean = true,
 ) {
     Markdown(
