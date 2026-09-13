@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
+import androidx.core.net.toUri
 import androidx.work.WorkManager
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
@@ -32,6 +33,8 @@ import eu.kanade.tachiyomi.util.system.getParcelableExtraCompat
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
+import java.io.File
 import kotlinx.coroutines.coroutineScope
 import org.nekomanga.BuildConfig.APPLICATION_ID as ID
 import org.nekomanga.R
@@ -65,13 +68,28 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             // Clear the download
             ACTION_CLEAR_DOWNLOADS -> downloadManager.clearQueue()
-            // Delete image from path and dismiss notification
-            ACTION_DELETE_IMAGE ->
-                deleteImage(
-                    context,
-                    intent.getParcelableExtraCompat<Uri>(EXTRA_URI)!!,
-                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
-                )
+            // Delete image and dismiss notification
+            ACTION_DELETE_IMAGE -> {
+                val pendingResult = goAsync()
+                launchIO {
+                    try {
+                        val uri =
+                            intent.getParcelableExtraCompat<Uri>(EXTRA_URI)
+                                ?: intent.getStringExtra(EXTRA_FILE_LOCATION)?.let { path ->
+                                    if (path.startsWith("content://")) Uri.parse(path)
+                                    else File(path).toUri()
+                                }
+                        val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                        if (uri != null) {
+                            deleteImage(context, uri, notificationId)
+                        } else {
+                            TimberKt.e { "ACTION_DELETE_IMAGE received with null URI extra" }
+                        }
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
+            }
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
             ACTION_CANCEL_TRACKING_SYNC -> cancelTrackingSync(context)
@@ -86,12 +104,15 @@ class NotificationReceiver : BroadcastReceiver() {
                 AppDownloadInstallJob.start(context, url, notifyOnInstall, version = version)
             }
             // Share backup file
-            ACTION_SHARE_BACKUP ->
-                shareBackup(
-                    context,
-                    intent.getParcelableExtraCompat<Uri>(EXTRA_URI)!!,
-                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
-                )
+            ACTION_SHARE_BACKUP -> {
+                val uri = intent.getParcelableExtraCompat<Uri>(EXTRA_URI)
+                val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                if (uri != null) {
+                    shareBackup(context, uri, notificationId)
+                } else {
+                    TimberKt.e { "ACTION_SHARE_BACKUP received with null URI extra" }
+                }
+            }
             // Open reader activity
             ACTION_OPEN_CHAPTER -> {
                 val pendingResult = goAsync()
@@ -244,19 +265,16 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param uri uri of the saved image
      * @param notificationId id of notification
      */
-    private fun deleteImage(context: Context, uri: Uri, notificationId: Int) {
-        // Dismiss notification
-        dismissNotification(context, notificationId)
-
-        // Delete file
+    private suspend fun deleteImage(context: Context, uri: Uri, notificationId: Int) {
         val deleted = UniFile.fromUri(context, uri)?.delete() == true
-        if (!deleted) {
+        if (deleted) {
+            // Dismiss notification only after successful deletion
+            dismissNotification(context, notificationId)
+            DiskUtil.scanMedia(context, uri)
+        } else {
             TimberKt.e { "Could not delete saved page $uri" }
-            context.toast(R.string.could_not_delete_picture)
-            return
+            withUIContext { context.toast(R.string.could_not_delete_picture) }
         }
-
-        DiskUtil.scanMedia(context, uri)
     }
 
     /**
@@ -403,6 +421,9 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Value containing uri.
         private const val EXTRA_URI = "$ID.$NAME.URI"
+
+        // Value containing file location (legacy compatibility for in-flight notifications).
+        private const val EXTRA_FILE_LOCATION = "$ID.$NAME.FILE_LOCATION"
 
         // Value containing notification id.
         private const val EXTRA_NOTIFICATION_ID = "$ID.$NAME.NOTIFICATION_ID"
@@ -551,10 +572,15 @@ class NotificationReceiver : BroadcastReceiver() {
                     clipData = ClipData.newRawUri(null, stream)
                     type = "image/*"
                 }
+            val chooser =
+                Intent.createChooser(shareIntent, context.getString(R.string.share)).apply {
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    clipData = shareIntent.clipData
+                }
             return PendingIntent.getActivity(
                 context,
                 0,
-                shareIntent,
+                chooser,
                 PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }

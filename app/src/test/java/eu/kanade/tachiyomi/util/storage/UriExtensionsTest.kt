@@ -53,4 +53,29 @@ class UriExtensionsTest {
 
         assertSame(provided, uri.getUriWithAuthority(context))
     }
+
+    @Test
+    fun testNonContentNonFileUriIsReturnedAsIs() {
+        val uri = mockk<Uri>()
+        every { uri.scheme } returns "https"
+
+        assertSame(uri, uri.getUriWithAuthority(context))
+    }
+
+    @Test
+    fun testNullSchemeUriIsReturnedAsIs() {
+        val uri = mockk<Uri>()
+        every { uri.scheme } returns null
+
+        assertSame(uri, uri.getUriWithAuthority(context))
+    }
+
+    @Test
+    fun testFileUriConversionFailureFallsBackToOriginalUri() {
+        val uri = mockk<Uri>()
+        every { uri.scheme } returns "file"
+        every { uri.path } returns null
+
+        assertSame(uri, uri.getUriWithAuthority(context))
+    }
 }

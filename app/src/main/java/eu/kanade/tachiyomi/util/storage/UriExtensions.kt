@@ -11,6 +11,10 @@ import androidx.core.net.toFile
  * by the app's [androidx.core.content.FileProvider].
  */
 fun Uri.getUriWithAuthority(context: Context): Uri {
-    if (scheme == ContentResolver.SCHEME_CONTENT) return this
-    return this.toFile().getUriCompat(context)
+    return when (scheme) {
+        ContentResolver.SCHEME_CONTENT -> this
+        ContentResolver.SCHEME_FILE ->
+            runCatching { this.toFile().getUriCompat(context) }.getOrDefault(this)
+        else -> this
+    }
 }
