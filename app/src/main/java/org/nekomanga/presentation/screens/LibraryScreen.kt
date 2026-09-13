@@ -358,7 +358,9 @@ private fun LibraryWrapper(
                         if (!libraryScreenState.searchQuery.isNullOrBlank()) PaddingValues(0.dp)
                         else recyclerPadding
 
-                    if (libraryScreenState.items.isEmpty()) {
+                    // Groups are kept while filters hide their manga, so an empty group list
+                    // is not the only empty state
+                    if (libraryScreenState.items.all { it.libraryItems.isEmpty() }) {
                         EmptyLibrary(libraryScreenState = libraryScreenState)
                     } else {
                         if (libraryScreenState.horizontalCategories) {
@@ -425,8 +427,11 @@ private fun EmptyLibrary(libraryScreenState: LibraryScreenState) {
         if (libraryScreenState.isFirstLoad) {
             ContainedLoadingIndicator()
         } else if (!libraryScreenState.searchQuery.isNullOrBlank()) {
-
             EmptyScreen(message = UiText.StringResource(resourceId = R.string.no_results_found))
+        } else if (libraryScreenState.hasActiveFilters) {
+            EmptyScreen(
+                message = UiText.StringResource(resourceId = R.string.no_matches_for_filters)
+            )
         } else {
             EmptyScreen(
                 message =
