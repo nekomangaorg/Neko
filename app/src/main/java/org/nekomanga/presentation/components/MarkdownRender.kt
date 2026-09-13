@@ -66,13 +66,19 @@ const val MARKDOWN_INLINE_IMAGE_TAG = "MARKDOWN_INLINE_IMAGE"
 /**
  * The renderer drops inline html tokens, so `[Original Webtoon <Webtoon kakao>](url)` would lose
  * everything from `<` on. MangaDex shows such tags as plain text, and html blocks are already
- * rendered as text (see [SimpleMarkdownMarkerProcessor]), so inline tags get the same treatment.
+ * rendered as text (see [SimpleMarkdownMarkerProcessor]), so inline tags get the same treatment,
+ * with html line breaks (`<br>`, `<br/>`, `<br />`) converted into newlines.
  */
-fun nekoMarkdownAnnotator(): MarkdownAnnotator =
+internal val NekoMarkdownAnnotator: MarkdownAnnotator =
     markdownAnnotator(
         annotate = { content, child ->
             if (child.type == MarkdownTokenTypes.HTML_TAG) {
-                append(child.getTextInNode(content))
+                val tag = child.getTextInNode(content)
+                if (tag.isHtmlLineBreak()) {
+                    append('\n')
+                } else {
+                    append(tag)
+                }
                 true
             } else {
                 false
@@ -80,12 +86,19 @@ fun nekoMarkdownAnnotator(): MarkdownAnnotator =
         }
     )
 
+private fun CharSequence.isHtmlLineBreak(): Boolean {
+    val trimmed = trim()
+    if (!trimmed.startsWith("<br", ignoreCase = true) || !trimmed.endsWith(">")) return false
+    val remainder = trimmed.substring(3, trimmed.length - 1).trim()
+    return remainder.isEmpty() || remainder == "/"
+}
+
 @Composable
 fun MarkdownRender(
     content: String,
     modifier: Modifier = Modifier,
     flavour: MarkdownFlavourDescriptor = SimpleMarkdownFlavourDescriptor,
-    annotator: MarkdownAnnotator = remember { nekoMarkdownAnnotator() },
+    annotator: MarkdownAnnotator = NekoMarkdownAnnotator,
     loadImages: Boolean = true,
 ) {
     Markdown(
@@ -113,7 +126,7 @@ fun MarkdownRender(
 fun MarkdownRender(
     markdownState: MarkdownState,
     modifier: Modifier = Modifier,
-    annotator: MarkdownAnnotator = remember { nekoMarkdownAnnotator() },
+    annotator: MarkdownAnnotator = NekoMarkdownAnnotator,
     loadImages: Boolean = true,
 ) {
     Markdown(

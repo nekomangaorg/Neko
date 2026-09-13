@@ -53,6 +53,19 @@ class MarkdownRenderTest {
     }
 
     @Test
+    fun htmlLineBreakTagsRenderAsNewlines() {
+        renderText(
+            "First line<br>Second line<br/>Third line<br />Fourth line<BR>Fifth line"
+        ) shouldBe "First line\nSecond line\nThird line\nFourth line\nFifth line"
+    }
+
+    @Test
+    fun htmlTagsThatAreNotLineBreaksAreKeptAsText() {
+        renderText("<span>text</span> and <branch>not a break</branch>") shouldBe
+            "<span>text</span> and <branch>not a break</branch>"
+    }
+
+    @Test
     fun bracketedTextIsRenderedVerbatim() {
         val text = renderText(issue1277Description)
 
@@ -91,7 +104,7 @@ class MarkdownRenderTest {
         DefaultAnnotatorSettings(
             linkTextSpanStyle = TextLinkStyles(),
             codeSpanStyle = SpanStyle(),
-            annotator = nekoMarkdownAnnotator(),
+            annotator = NekoMarkdownAnnotator,
             referenceLinkHandler = ReferenceLinkHandlerImpl(),
         )
 
