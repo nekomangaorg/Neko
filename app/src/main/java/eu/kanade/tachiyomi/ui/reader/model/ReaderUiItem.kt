@@ -58,10 +58,17 @@ sealed interface ReaderUiItem {
             get() = null
 
         override fun key(prefix: String): String {
-            val type = if (transition is ChapterTransition.Prev) "prev" else "next"
-            val fromId = transition.from.chapter.id ?: 0L
-            val toId = transition.to?.chapter?.id ?: 0L
-            return "${prefix}_transition_${type}_${fromId}_${toId}"
+            val to = transition.to
+            return if (to != null) {
+                val fromId = transition.from.chapter.id ?: 0L
+                val toId = to.chapter.id ?: 0L
+                val (minId, maxId) = if (fromId <= toId) fromId to toId else toId to fromId
+                "${prefix}_transition_${minId}_${maxId}"
+            } else {
+                val type = if (transition is ChapterTransition.Prev) "prev" else "next"
+                val fromId = transition.from.chapter.id ?: 0L
+                "${prefix}_transition_${type}_${fromId}"
+            }
         }
     }
 }

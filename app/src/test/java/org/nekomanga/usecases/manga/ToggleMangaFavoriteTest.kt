@@ -7,7 +7,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -42,6 +41,9 @@ class ToggleMangaFavoriteTest {
         libraryPreferences = mockk()
         updateMangaAggregate = mockk()
 
+        val mockDefaultCategoryPref = mockk<Preference<Int>> { every { get() } returns -1 }
+        every { libraryPreferences.defaultCategory() } returns mockDefaultCategoryPref
+
         toggleMangaFavorite =
             ToggleMangaFavorite(
                 mangaRepository = mangaRepository,
@@ -73,12 +75,13 @@ class ToggleMangaFavoriteTest {
     fun `given favorite manga when toggling favorite then updates to unfavorite`() = runTest {
         // Arrange
         val mangaId = 1L
-        val mockManga = mockk<Manga>(relaxed = true)
-        every { mockManga.id } returns mangaId
-        every { mockManga.favorite } returns true
-        every { mockManga.url } returns "/manga/1"
-        coEvery { mangaRepository.getMangaById(mangaId) } returns mockManga
-        coEvery { mangaRepository.updateManga(mockManga) } just runs
+        val manga =
+            Manga.create("/manga/1", "Test").apply {
+                id = mangaId
+                favorite = true
+            }
+        coEvery { mangaRepository.getMangaById(mangaId) } returns manga
+        coEvery { mangaRepository.updateManga(manga) } just runs
         coEvery { updateMangaAggregate(mangaId, "/manga/1", false) } just runs
 
         // Act
@@ -86,9 +89,9 @@ class ToggleMangaFavoriteTest {
 
         // Assert
         assertEquals(false, result)
-        verify(exactly = 1) { mockManga.favorite = false }
-        verify(exactly = 1) { mockManga.date_added = 0L }
-        coVerify(exactly = 1) { mangaRepository.updateManga(mockManga) }
+        assertEquals(false, manga.favorite)
+        assertEquals(0L, manga.date_added)
+        coVerify(exactly = 1) { mangaRepository.updateManga(manga) }
         coVerify(exactly = 1) { updateMangaAggregate(mangaId, "/manga/1", false) }
     }
 
@@ -97,12 +100,13 @@ class ToggleMangaFavoriteTest {
         runTest {
             // Arrange
             val mangaId = 1L
-            val mockManga = mockk<Manga>(relaxed = true)
-            every { mockManga.id } returns mangaId
-            every { mockManga.favorite } returns false
-            every { mockManga.url } returns "/manga/1"
-            coEvery { mangaRepository.getMangaById(mangaId) } returns mockManga
-            coEvery { mangaRepository.updateManga(mockManga) } just runs
+            val manga =
+                Manga.create("/manga/1", "Test").apply {
+                    id = mangaId
+                    favorite = false
+                }
+            coEvery { mangaRepository.getMangaById(mangaId) } returns manga
+            coEvery { mangaRepository.updateManga(manga) } just runs
             coEvery { updateMangaAggregate(mangaId, "/manga/1", true) } just runs
 
             val category =
@@ -119,8 +123,8 @@ class ToggleMangaFavoriteTest {
 
             // Assert
             assertEquals(true, result)
-            verify(exactly = 1) { mockManga.favorite = true }
-            coVerify(exactly = 1) { mangaRepository.updateManga(mockManga) }
+            assertEquals(true, manga.favorite)
+            coVerify(exactly = 1) { mangaRepository.updateManga(manga) }
             coVerify(exactly = 1) { updateMangaAggregate(mangaId, "/manga/1", true) }
             coVerify(exactly = 1) { categoryRepository.setMangaCategories(any(), listOf(mangaId)) }
         }
@@ -130,12 +134,13 @@ class ToggleMangaFavoriteTest {
         runTest {
             // Arrange
             val mangaId = 1L
-            val mockManga = mockk<Manga>(relaxed = true)
-            every { mockManga.id } returns mangaId
-            every { mockManga.favorite } returns false
-            every { mockManga.url } returns "/manga/1"
-            coEvery { mangaRepository.getMangaById(mangaId) } returns mockManga
-            coEvery { mangaRepository.updateManga(mockManga) } just runs
+            val manga =
+                Manga.create("/manga/1", "Test").apply {
+                    id = mangaId
+                    favorite = false
+                }
+            coEvery { mangaRepository.getMangaById(mangaId) } returns manga
+            coEvery { mangaRepository.updateManga(manga) } just runs
             coEvery { updateMangaAggregate(mangaId, "/manga/1", true) } just runs
 
             val mockDefaultCategoryPref = mockk<Preference<Int>>()
@@ -156,8 +161,8 @@ class ToggleMangaFavoriteTest {
 
             // Assert
             assertEquals(true, result)
-            verify(exactly = 1) { mockManga.favorite = true }
-            coVerify(exactly = 1) { mangaRepository.updateManga(mockManga) }
+            assertEquals(true, manga.favorite)
+            coVerify(exactly = 1) { mangaRepository.updateManga(manga) }
             coVerify(exactly = 1) { updateMangaAggregate(mangaId, "/manga/1", true) }
             coVerify(exactly = 1) { categoryRepository.setMangaCategories(any(), listOf(mangaId)) }
         }

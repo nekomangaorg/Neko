@@ -190,6 +190,30 @@ dependencies {
 
 tasks.withType<Test> { useJUnit() }
 
+open class UnitTestForwarderTask : DefaultTask() {
+    @set:org.gradle.api.tasks.options.Option(
+        option = "tests",
+        description = "Sets test class or method name to be included in the test run.",
+    )
+    @get:Internal
+    var testFilters: List<String> = emptyList()
+        set(value) {
+            field = value
+            project.tasks.named<Test>("testStandardDebugUnitTest").configure {
+                value.forEach { filter.includeTestsMatching(it) }
+            }
+        }
+
+    init {
+        dependsOn("testStandardDebugUnitTest")
+    }
+}
+
+tasks.register<UnitTestForwarderTask>("testDebugUnitTest") {
+    description = "Run unit tests for the standardDebug build."
+    group = "verification"
+}
+
 tasks.withType<KotlinCompile> {
     compilerOptions {
         freeCompilerArgs.addAll(

@@ -12,49 +12,53 @@ class GLUtil private constructor() {
 
         val maxTextureSize: Int
             get() {
-                // Get EGL Display
-                val egl = EGLContext.getEGL() as EGL10
-                val display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY)
+                return try {
+                    // Get EGL Display
+                    val egl = EGLContext.getEGL() as? EGL10 ?: return IMAGE_MAX_BITMAP_DIMENSION
+                    val display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY)
 
-                // Initialise
-                val version = IntArray(2)
-                egl.eglInitialize(display, version)
+                    // Initialise
+                    val version = IntArray(2)
+                    egl.eglInitialize(display, version)
 
-                // Query total number of configurations
-                val totalConfigurations = IntArray(1)
-                egl.eglGetConfigs(display, null, 0, totalConfigurations)
+                    // Query total number of configurations
+                    val totalConfigurations = IntArray(1)
+                    egl.eglGetConfigs(display, null, 0, totalConfigurations)
 
-                // Query actual list configurations
-                val configurationsList = arrayOfNulls<EGLConfig>(totalConfigurations[0])
-                egl.eglGetConfigs(
-                    display,
-                    configurationsList,
-                    totalConfigurations[0],
-                    totalConfigurations,
-                )
-
-                val textureSize = IntArray(1)
-                var maximumTextureSize = 0
-
-                // Iterate through all the configurations to located the maximum texture size
-                for (i in 0 until totalConfigurations[0]) {
-                    // Only need to check for width since opengl textures are always squared
-                    egl.eglGetConfigAttrib(
+                    // Query actual list configurations
+                    val configurationsList = arrayOfNulls<EGLConfig>(totalConfigurations[0])
+                    egl.eglGetConfigs(
                         display,
-                        configurationsList[i],
-                        EGL10.EGL_MAX_PBUFFER_WIDTH,
-                        textureSize,
+                        configurationsList,
+                        totalConfigurations[0],
+                        totalConfigurations,
                     )
 
-                    // Keep track of the maximum texture size
-                    if (maximumTextureSize < textureSize[0]) maximumTextureSize = textureSize[0]
+                    val textureSize = IntArray(1)
+                    var maximumTextureSize = 0
+
+                    // Iterate through all the configurations to located the maximum texture size
+                    for (i in 0 until totalConfigurations[0]) {
+                        // Only need to check for width since opengl textures are always squared
+                        egl.eglGetConfigAttrib(
+                            display,
+                            configurationsList[i],
+                            EGL10.EGL_MAX_PBUFFER_WIDTH,
+                            textureSize,
+                        )
+
+                        // Keep track of the maximum texture size
+                        if (maximumTextureSize < textureSize[0]) maximumTextureSize = textureSize[0]
+                    }
+
+                    // Release
+                    egl.eglTerminate(display)
+
+                    // Return largest texture size found, or default
+                    max(maximumTextureSize, IMAGE_MAX_BITMAP_DIMENSION)
+                } catch (_: Throwable) {
+                    IMAGE_MAX_BITMAP_DIMENSION
                 }
-
-                // Release
-                egl.eglTerminate(display)
-
-                // Return largest texture size found, or default
-                return max(maximumTextureSize, IMAGE_MAX_BITMAP_DIMENSION)
             }
     }
 

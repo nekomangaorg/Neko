@@ -31,7 +31,9 @@ import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.usecases.preferences.GetFormattedBuildTimeUseCase
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.api.addSingleton
+import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AboutViewModelTest {
@@ -47,6 +49,7 @@ class AboutViewModelTest {
 
     @Before
     fun setup() {
+        Injekt = InjektScope(DefaultRegistrar())
         Dispatchers.setMain(testDispatcher)
 
         mockPreferences = mockk()
@@ -71,31 +74,7 @@ class AboutViewModelTest {
     fun tearDown() {
         Dispatchers.resetMain()
         unmockkAll()
-        try {
-            val fields = Injekt::class.java.declaredFields
-            for (field in fields) {
-                if (field.name == "registrars") {
-                    field.isAccessible = true
-                    val map = field.get(Injekt) as MutableMap<*, *>
-                    map.clear()
-                } else if (field.name.contains("delegate")) {
-                    field.isAccessible = true
-                    val delegate = field.get(Injekt)
-                    if (delegate != null) {
-                        val delegateFields = delegate.javaClass.declaredFields
-                        for (df in delegateFields) {
-                            if (df.name == "registrars") {
-                                df.isAccessible = true
-                                val map = df.get(delegate) as MutableMap<*, *>
-                                map.clear()
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        Injekt = InjektScope(DefaultRegistrar())
     }
 
     @Test

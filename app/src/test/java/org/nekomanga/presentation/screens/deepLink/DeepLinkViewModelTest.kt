@@ -19,7 +19,9 @@ import org.junit.Before
 import org.junit.Test
 import org.nekomanga.data.database.repository.MangaRepository
 import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.api.addSingleton
+import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DeepLinkViewModelTest {
@@ -35,6 +37,7 @@ class DeepLinkViewModelTest {
 
     @Before
     fun setup() {
+        Injekt = InjektScope(DefaultRegistrar())
         Dispatchers.setMain(testDispatcher)
 
         mockMangaMappings = mockk()
@@ -54,14 +57,7 @@ class DeepLinkViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
-        val fields = Injekt::class.java.declaredFields
-        for (field in fields) {
-            if (field.name == "registrars") {
-                field.isAccessible = true
-                val map = field.get(Injekt) as MutableMap<*, *>
-                map.clear()
-            }
-        }
+        Injekt = InjektScope(DefaultRegistrar())
     }
 
     @Test
