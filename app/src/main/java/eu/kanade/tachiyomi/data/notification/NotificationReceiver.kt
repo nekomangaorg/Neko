@@ -8,6 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import androidx.work.WorkManager
+import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -26,18 +27,18 @@ import eu.kanade.tachiyomi.ui.main.DeepLinks
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
-import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getParcelableExtraCompat
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
-import java.io.File
 import kotlinx.coroutines.coroutineScope
 import org.nekomanga.BuildConfig.APPLICATION_ID as ID
 import org.nekomanga.R
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -68,7 +69,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_DELETE_IMAGE ->
                 deleteImage(
                     context,
-                    intent.getStringExtra(EXTRA_FILE_LOCATION)!!,
+                    intent.getParcelableExtraCompat<Uri>(EXTRA_URI)!!,
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
             // Cancel library update and dismiss notification
@@ -240,18 +241,22 @@ class NotificationReceiver : BroadcastReceiver() {
     /**
      * Called to delete image
      *
-     * @param path path of file
+     * @param uri uri of the saved image
      * @param notificationId id of notification
      */
-    private fun deleteImage(context: Context, path: String, notificationId: Int) {
+    private fun deleteImage(context: Context, uri: Uri, notificationId: Int) {
         // Dismiss notification
         dismissNotification(context, notificationId)
 
         // Delete file
-        val file = File(path)
-        file.delete()
+        val deleted = UniFile.fromUri(context, uri)?.delete() == true
+        if (!deleted) {
+            TimberKt.e { "Could not delete saved page $uri" }
+            context.toast(R.string.could_not_delete_picture)
+            return
+        }
 
-        DiskUtil.scanMedia(context, file)
+        DiskUtil.scanMedia(context, uri)
     }
 
     /**
@@ -383,9 +388,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to download a chapter
         private const val ACTION_DOWNLOAD_CHAPTER = "$ID.$NAME.ACTION_DOWNLOAD_CHAPTER"
-
-        // Value containing file location.
-        private const val EXTRA_FILE_LOCATION = "$ID.$NAME.FILE_LOCATION"
 
         // Called to resume downloads.
         private const val ACTION_RESUME_DOWNLOADS = "$ID.$NAME.ACTION_RESUME_DOWNLOADS"
@@ -532,21 +534,21 @@ class NotificationReceiver : BroadcastReceiver() {
          * share activity
          *
          * @param context context of application
-         * @param path location path of file
+         * @param uri uri of the saved image
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
         internal fun shareImagePendingBroadcast(
             context: Context,
-            path: String,
+            uri: Uri,
             notificationId: Int,
         ): PendingIntent {
             val shareIntent =
                 Intent(Intent.ACTION_SEND).apply {
-                    val uri = File(path).getUriCompat(context)
-                    putExtra(Intent.EXTRA_STREAM, uri)
+                    val stream = uri.getUriWithAuthority(context)
+                    putExtra(Intent.EXTRA_STREAM, stream)
                     flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    clipData = ClipData.newRawUri(null, uri)
+                    clipData = ClipData.newRawUri(null, stream)
                     type = "image/*"
                 }
             return PendingIntent.getActivity(
@@ -561,19 +563,19 @@ class NotificationReceiver : BroadcastReceiver() {
          * Returns [PendingIntent] that starts a service which removes an image from disk
          *
          * @param context context of application
-         * @param path location path of file
+         * @param uri uri of the saved image
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
         internal fun deleteImagePendingBroadcast(
             context: Context,
-            path: String,
+            uri: Uri,
             notificationId: Int,
         ): PendingIntent {
             val intent =
                 Intent(context, NotificationReceiver::class.java).apply {
                     action = ACTION_DELETE_IMAGE
-                    putExtra(EXTRA_FILE_LOCATION, path)
+                    putExtra(EXTRA_URI, uri)
                     putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                 }
             return PendingIntent.getBroadcast(
