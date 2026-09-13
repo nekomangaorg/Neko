@@ -1058,6 +1058,8 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     private fun openMangaScreen() {
+        // The manga is null while the chapter is still loading or failed to load, the library is
+        // the closest place to land then
         val intent =
             viewModel.manga?.id?.let { MainActivity.openMangaIntent(this, it) }
                 ?: Intent(this, MainActivity::class.java)
