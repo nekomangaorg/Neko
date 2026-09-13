@@ -113,6 +113,7 @@ import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.setThemeByPref
 import eu.kanade.tachiyomi.util.system.toast
@@ -1802,7 +1803,10 @@ class ReaderActivity : BaseMainActivity() {
                         if (threadId == null) {
                             toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
                         } else {
-                            this@ReaderActivity.openInBrowser(MdConstants.forumUrl + threadId)
+                            this@ReaderActivity.openInWebView(
+                                MdConstants.forumUrl + threadId,
+                                title = getString(R.string.comments),
+                            )
                         }
                     }
                 }
