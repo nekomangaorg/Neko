@@ -56,11 +56,11 @@ class CalculateDexFilterUseCaseTest {
     @Test
     fun `when original language is toggled, updates matching language state`() {
         val current = createDefaultDexFilters()
-        val newFilter = Filter.OriginalLanguage(MdLang.Japanese, true)
+        val newFilter = Filter.OriginalLanguage(MdLang.JAPANESE, true)
 
         val result = useCase(current, newFilter)
 
-        val japanese = result.originalLanguage.first { it.language == MdLang.Japanese }
+        val japanese = result.originalLanguage.first { it.language == MdLang.JAPANESE }
         assertTrue(japanese.state)
     }
 
@@ -90,7 +90,7 @@ class CalculateDexFilterUseCaseTest {
     @Test
     fun `when tag is updated, updates matching tag state`() {
         val current = createDefaultDexFilters()
-        val targetTag = MangaTag.Action
+        val targetTag = MangaTag.ACTION
         val newFilter = Filter.Tag(targetTag, ToggleableState.On)
 
         val result = useCase(current, newFilter)
@@ -102,19 +102,20 @@ class CalculateDexFilterUseCaseTest {
     @Test
     fun `when sort is selected with true state, enables the chosen sort option`() {
         val current = createDefaultDexFilters()
-        val newFilter = Filter.Sort(MdSort.Rating, true)
+        val newFilter = Filter.Sort(MdSort.HighestRating, true)
 
         val result = useCase(current, newFilter)
 
         val activeSort = result.sort.first { it.state }
-        assertEquals(MdSort.Rating, activeSort.sort)
+        assertEquals(MdSort.HighestRating, activeSort.sort)
     }
 
     @Test
     fun `when sort is unselected with false state, falls back to MdSort Best`() {
         val current =
-            createDefaultDexFilters().copy(sort = Filter.Sort.getSortList(MdSort.Rating).toList())
-        val newFilter = Filter.Sort(MdSort.Rating, false)
+            createDefaultDexFilters()
+                .copy(sort = Filter.Sort.getSortList(MdSort.HighestRating).toList())
+        val newFilter = Filter.Sort(MdSort.HighestRating, false)
 
         val result = useCase(current, newFilter)
 
@@ -223,9 +224,9 @@ class CalculateDexFilterUseCaseTest {
     @Test
     fun `when item to replace does not exist in the list, returns list unchanged`() {
         // Construct a filter list that does not contain English
-        val customLanguages = listOf(Filter.OriginalLanguage(MdLang.Japanese, false))
+        val customLanguages = listOf(Filter.OriginalLanguage(MdLang.JAPANESE, false))
         val current = createDefaultDexFilters().copy(originalLanguage = customLanguages)
-        val newFilter = Filter.OriginalLanguage(MdLang.English, true)
+        val newFilter = Filter.OriginalLanguage(MdLang.ENGLISH, true)
 
         val result = useCase(current, newFilter)
 

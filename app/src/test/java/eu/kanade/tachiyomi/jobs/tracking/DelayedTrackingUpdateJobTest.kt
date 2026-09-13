@@ -23,7 +23,9 @@ import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.domain.track.store.DelayedTrackingStore.DelayedTrackingItem
 import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.api.addSingleton
+import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
 class DelayedTrackingUpdateJobTest {
 
@@ -36,6 +38,7 @@ class DelayedTrackingUpdateJobTest {
 
     @Before
     fun setup() {
+        Injekt = InjektScope(DefaultRegistrar())
         Dispatchers.setMain(testDispatcher)
         mockTrackRepository = mockk(relaxed = true)
         trackManager = mockk(relaxed = true)
@@ -51,14 +54,7 @@ class DelayedTrackingUpdateJobTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
-        val fields = Injekt::class.java.declaredFields
-        for (field in fields) {
-            if (field.name == "registrars") {
-                field.isAccessible = true
-                val map = field.get(Injekt) as MutableMap<*, *>
-                map.clear()
-            }
-        }
+        Injekt = InjektScope(DefaultRegistrar())
     }
 
     @Test

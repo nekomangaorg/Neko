@@ -92,19 +92,21 @@ class ReaderWebtoonControllerTest {
         val viewerChapters = ViewerChapters(currChapter, null, null)
         val items = controller.buildItems(viewerChapters, forceTransition = false)
 
-        assertEquals(3, items.size)
+        assertEquals(5, items.size)
         val targetPage = currChapter.pages!![1]
         val split1 = ReaderPageSplit(targetPage, 0, 1000)
         val split2 = ReaderPageSplit(targetPage, 1000, 1000)
 
         val updatedItems = controller.splitPage(items, targetPage, listOf(split1, split2))
-        assertEquals(4, updatedItems.size)
-        assertTrue(updatedItems[0] is ReaderUiItem.Page)
-        assertTrue(updatedItems[1] is ReaderUiItem.SplitPage)
-        assertEquals(0, (updatedItems[1] as ReaderUiItem.SplitPage).split.topOffset)
+        assertEquals(6, updatedItems.size)
+        assertTrue(updatedItems[0] is ReaderUiItem.Transition)
+        assertTrue(updatedItems[1] is ReaderUiItem.Page)
         assertTrue(updatedItems[2] is ReaderUiItem.SplitPage)
-        assertEquals(1000, (updatedItems[2] as ReaderUiItem.SplitPage).split.topOffset)
-        assertTrue(updatedItems[3] is ReaderUiItem.Page)
+        assertEquals(0, (updatedItems[2] as ReaderUiItem.SplitPage).split.topOffset)
+        assertTrue(updatedItems[3] is ReaderUiItem.SplitPage)
+        assertEquals(1000, (updatedItems[3] as ReaderUiItem.SplitPage).split.topOffset)
+        assertTrue(updatedItems[4] is ReaderUiItem.Page)
+        assertTrue(updatedItems[5] is ReaderUiItem.Transition)
         assertTrue(controller.tallSplitPages.contains(targetPage))
     }
 
@@ -115,16 +117,18 @@ class ReaderWebtoonControllerTest {
         val viewerChapters = ViewerChapters(currChapter, null, null)
         val items = controller.buildItems(viewerChapters, forceTransition = false)
 
-        assertEquals(3, items.size)
+        assertEquals(5, items.size)
         val targetPage = currChapter.pages!![1]
         val split1 = ReaderPageSplit(targetPage, 1000, 1000)
 
         val updatedItems = controller.splitPage(items, targetPage, listOf(split1))
-        assertEquals(4, updatedItems.size)
-        assertTrue(updatedItems[0] is ReaderUiItem.Page)
+        assertEquals(6, updatedItems.size)
+        assertTrue(updatedItems[0] is ReaderUiItem.Transition)
         assertTrue(updatedItems[1] is ReaderUiItem.Page)
-        assertTrue(updatedItems[2] is ReaderUiItem.SplitPage)
-        assertTrue(updatedItems[3] is ReaderUiItem.Page)
+        assertTrue(updatedItems[2] is ReaderUiItem.Page)
+        assertTrue(updatedItems[3] is ReaderUiItem.SplitPage)
+        assertTrue(updatedItems[4] is ReaderUiItem.Page)
+        assertTrue(updatedItems[5] is ReaderUiItem.Transition)
     }
 
     @Test
@@ -185,7 +189,7 @@ class ReaderWebtoonControllerTest {
 
         val targetPage = currChapter.pages!![3]
         val index = controller.findPageIndex(items, targetPage)
-        assertEquals(3, index)
+        assertEquals(4, index)
     }
 
     @Test

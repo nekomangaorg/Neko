@@ -10,10 +10,10 @@ class GLUtil private constructor() {
         // Safe minimum default size
         private const val IMAGE_MAX_BITMAP_DIMENSION = 2048
 
-        val maxTextureSize: Int
-            get() {
+        val maxTextureSize: Int by lazy {
+            try {
                 // Get EGL Display
-                val egl = EGLContext.getEGL() as EGL10
+                val egl = EGLContext.getEGL() as? EGL10 ?: return@lazy IMAGE_MAX_BITMAP_DIMENSION
                 val display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY)
 
                 // Initialise
@@ -54,8 +54,11 @@ class GLUtil private constructor() {
                 egl.eglTerminate(display)
 
                 // Return largest texture size found, or default
-                return max(maximumTextureSize, IMAGE_MAX_BITMAP_DIMENSION)
+                max(maximumTextureSize, IMAGE_MAX_BITMAP_DIMENSION)
+            } catch (_: Throwable) {
+                IMAGE_MAX_BITMAP_DIMENSION
             }
+        }
     }
 
     init {

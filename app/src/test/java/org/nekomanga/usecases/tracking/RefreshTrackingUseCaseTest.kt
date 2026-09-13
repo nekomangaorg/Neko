@@ -22,7 +22,9 @@ import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.api.addSingleton
+import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
 class RefreshTrackingUseCaseTest {
 
@@ -36,6 +38,7 @@ class RefreshTrackingUseCaseTest {
 
     @Before
     fun setup() {
+        Injekt = InjektScope(DefaultRegistrar())
         Dispatchers.setMain(testDispatcher)
         mockTrackRepository = mockk()
         mockChapterRepository = mockk()
@@ -60,14 +63,7 @@ class RefreshTrackingUseCaseTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
-        val fields = Injekt::class.java.declaredFields
-        for (field in fields) {
-            if (field.name == "registrars") {
-                field.isAccessible = true
-                val map = field.get(Injekt) as MutableMap<*, *>
-                map.clear()
-            }
-        }
+        Injekt = InjektScope(DefaultRegistrar())
     }
 
     @Test

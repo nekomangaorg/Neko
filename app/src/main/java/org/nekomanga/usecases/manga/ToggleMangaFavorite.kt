@@ -33,23 +33,25 @@ class ToggleMangaFavorite(
         updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
         if (editManga.favorite) {
-            val defaultCategory = libraryPreferences.defaultCategory().get()
-
-            if (categoryItems.isEmpty() && defaultCategory != -1) {
-                categoriesProvider()
-                    .firstOrNull { defaultCategory == it.id }
-                    ?.let {
-                        val categories = listOf(MangaCategory.create(editManga, it.toDbCategory()))
-                        categoryRepository.setMangaCategories(
-                            categories,
-                            listOfNotNull(editManga.id),
-                        )
-                    }
-            } else if (categoryItems.isNotEmpty()) {
+            if (categoryItems.isNotEmpty()) {
                 val categories = categoryItems.map {
                     MangaCategory.create(editManga, it.toDbCategory())
                 }
                 categoryRepository.setMangaCategories(categories, listOfNotNull(editManga.id))
+            } else {
+                val defaultCategory = libraryPreferences.defaultCategory().get()
+                if (defaultCategory != -1) {
+                    categoriesProvider()
+                        .firstOrNull { defaultCategory == it.id }
+                        ?.let {
+                            val categories =
+                                listOf(MangaCategory.create(editManga, it.toDbCategory()))
+                            categoryRepository.setMangaCategories(
+                                categories,
+                                listOfNotNull(editManga.id),
+                            )
+                        }
+                }
             }
         }
 
