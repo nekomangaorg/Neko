@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.options.Option
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -191,7 +192,7 @@ dependencies {
 tasks.withType<Test> { useJUnit() }
 
 open class UnitTestForwarderTask : DefaultTask() {
-    @set:org.gradle.api.tasks.options.Option(
+    @set:Option(
         option = "tests",
         description = "Sets test class or method name to be included in the test run.",
     )
