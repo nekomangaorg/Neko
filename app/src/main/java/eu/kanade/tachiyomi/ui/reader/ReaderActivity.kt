@@ -315,6 +315,8 @@ class ReaderActivity : BaseMainActivity() {
             settingsSheetVisible = false
         } else if (pageActionsPage != null) {
             pageActionsPage = null
+        } else {
+            navigateUp()
         }
         reEnableBackPressedCallBack()
     }
@@ -474,28 +476,12 @@ class ReaderActivity : BaseMainActivity() {
                                 ?: state.manga?.title
                                 ?: "",
                         subtitle = state.chapterTitle,
-                        onBack = { finish() },
+                        onBack = { navigateUp() },
                         showShiftDoublePage = state.showShiftDoublePage,
                         shiftDoublePageIconRes = state.shiftDoublePageIconRes,
                         onShiftDoublePage = { shiftDoublePages() },
                         visible = state.menuVisible || state.menuStickyVisible,
-                        onMangaClick = {
-                            if (fromUrl) {
-                                viewModel.manga?.id?.let { id ->
-                                    val intent =
-                                        MainActivity.openMangaIntent(this@ReaderActivity, id)
-                                            .apply {
-                                                flags =
-                                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                                        Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                            }
-                                    startActivity(intent)
-                                    finishAfterTransition()
-                                }
-                            } else {
-                                finish()
-                            }
-                        },
+                        onMangaClick = { if (fromUrl) openMangaScreen() else navigateUp() },
                     )
                     val enabledButtons by
                         readerPreferences.readerBottomButtons().preferenceCollectAsState()
@@ -1059,23 +1045,31 @@ class ReaderActivity : BaseMainActivity() {
         }
     }
 
-    private fun popToMain() {
-        if (fromUrl) {
-            val intent =
-                Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-            startActivity(intent)
-            finishAfterTransition()
+    /**
+     * Leaves the reader. When it is the only activity in its task, like after a notification or
+     * shortcut launch, going back would exit the app, so it opens the manga screen instead.
+     */
+    private fun navigateUp() {
+        if (isTaskRoot) {
+            openMangaScreen()
         } else {
-            backPressedCallback?.isEnabled = false
-            onBackPressedDispatcher.onBackPressed()
+            finish()
         }
     }
 
+    private fun openMangaScreen() {
+        val intent =
+            viewModel.manga?.id?.let { MainActivity.openMangaIntent(this, it) }
+                ?: Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
+        finishAfterTransition()
+    }
+
     fun reEnableBackPressedCallBack() {
+        // Stays enabled while the reader is the task root so back reaches navigateUp
         backPressedCallback?.isEnabled =
-            chaptersSheetVisible || settingsSheetVisible || pageActionsPage != null
+            chaptersSheetVisible || settingsSheetVisible || pageActionsPage != null || isTaskRoot
     }
 
     override fun finishAfterTransition() {
