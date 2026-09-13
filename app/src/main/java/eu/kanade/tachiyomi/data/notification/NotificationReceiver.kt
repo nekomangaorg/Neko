@@ -38,6 +38,7 @@ import org.nekomanga.R
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -248,7 +249,12 @@ class NotificationReceiver : BroadcastReceiver() {
         dismissNotification(context, notificationId)
 
         // Delete file
-        UniFile.fromUri(context, uri)?.delete()
+        val deleted = UniFile.fromUri(context, uri)?.delete() == true
+        if (!deleted) {
+            TimberKt.e { "Could not delete saved page $uri" }
+            context.toast(R.string.could_not_delete_picture)
+            return
+        }
 
         DiskUtil.scanMedia(context, uri)
     }

@@ -1347,6 +1347,7 @@
     <string name="options">Options</string>
     <string name="pause">Pause</string>
     <string name="picture_saved">Picture saved</string>
+    <string name="could_not_delete_picture">Could not delete picture</string>
     <string name="pin">Pin</string>
     <string name="pinned">Pinned</string>
     <string name="preview">Preview</string>
