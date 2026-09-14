@@ -385,7 +385,6 @@ class MainActivity : BaseMainActivity() {
                                             nextUnreadChapter.chapter.toDbChapter(),
                                         )
                                     startActivity(activity)
-                                    finish()
                                 }
                             }
                         }
@@ -428,8 +427,6 @@ class MainActivity : BaseMainActivity() {
     }
 
     companion object {
-        var chapterIdToExitTo = 0L
-
         fun openMangaIntent(context: Context, id: Long?, canReturnToMain: Boolean = false) =
             Intent(context, MainActivity::class.java).apply {
                 action =

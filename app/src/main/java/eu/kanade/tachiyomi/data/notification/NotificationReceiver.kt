@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
+import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
 import androidx.work.WorkManager
 import com.hippo.unifile.UniFile
@@ -227,11 +228,16 @@ class NotificationReceiver : BroadcastReceiver() {
             val manga = mangaRepository.getMangaById(mangaId)
             val chapter = chapterRepository.getChapterById(chapterId)
             if (manga != null && chapter != null) {
-                val intent =
-                    ReaderActivity.newIntent(context, manga, chapter).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                val mangaIntent =
+                    MainActivity.openMangaIntent(context, manga.id).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     }
-                context.startActivity(intent)
+                val readerIntent = ReaderActivity.newIntent(context, manga, chapter)
+                TaskStackBuilder.create(context).run {
+                    addNextIntent(mangaIntent)
+                    addNextIntent(readerIntent)
+                    startActivities()
+                }
             } else {
                 context.toast(context.getString(R.string.next_chapter_not_found))
             }
@@ -624,13 +630,21 @@ class NotificationReceiver : BroadcastReceiver() {
             manga: Manga,
             chapter: Chapter,
         ): PendingIntent {
-            val newIntent = ReaderActivity.newIntent(context, manga, chapter)
-            return PendingIntent.getActivity(
-                context,
-                manga.id.hashCode(),
-                newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
+            val mangaIntent =
+                MainActivity.openMangaIntent(context, manga.id).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                }
+            val readerIntent = ReaderActivity.newIntent(context, manga, chapter)
+            return TaskStackBuilder.create(context).run {
+                addNextIntent(mangaIntent)
+                addNextIntent(readerIntent)
+                checkNotNull(
+                    getPendingIntent(
+                        manga.id.hashCode(),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    )
+                )
+            }
         }
 
         /**

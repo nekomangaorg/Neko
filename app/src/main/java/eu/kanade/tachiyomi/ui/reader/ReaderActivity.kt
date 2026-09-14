@@ -305,8 +305,6 @@ class ReaderActivity : BaseMainActivity() {
     val isSplitScreen: Boolean
         get() = isInMultiWindowMode
 
-    var didTransistionFromChapter = false
-    var visibleChapterRange = longArrayOf()
     private var backPressedCallback: OnBackPressedCallback? = null
 
     private val backCallback = {
@@ -316,6 +314,8 @@ class ReaderActivity : BaseMainActivity() {
             settingsSheetVisible = false
         } else if (pageActionsPage != null) {
             pageActionsPage = null
+        } else {
+            navigateUp()
         }
         reEnableBackPressedCallBack()
     }
@@ -475,28 +475,12 @@ class ReaderActivity : BaseMainActivity() {
                                 ?: state.manga?.title
                                 ?: "",
                         subtitle = state.chapterTitle,
-                        onBack = { finish() },
+                        onBack = { navigateUp() },
                         showShiftDoublePage = state.showShiftDoublePage,
                         shiftDoublePageIconRes = state.shiftDoublePageIconRes,
                         onShiftDoublePage = { shiftDoublePages() },
                         visible = state.menuVisible || state.menuStickyVisible,
-                        onMangaClick = {
-                            if (fromUrl) {
-                                viewModel.manga?.id?.let { id ->
-                                    val intent =
-                                        MainActivity.openMangaIntent(this@ReaderActivity, id)
-                                            .apply {
-                                                flags =
-                                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                                        Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                            }
-                                    startActivity(intent)
-                                    finishAfterTransition()
-                                }
-                            } else {
-                                finish()
-                            }
-                        },
+                        onMangaClick = { openMangaScreen() },
                     )
                     val enabledButtons by
                         readerPreferences.readerBottomButtons().preferenceCollectAsState()
@@ -850,7 +834,7 @@ class ReaderActivity : BaseMainActivity() {
         wic.isAppearanceLightStatusBars = lightStatusBar
         wic.isAppearanceLightNavigationBars = lightStatusBar
 
-        backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
+        backPressedCallback = onBackPressedDispatcher.addCallback(this) { backCallback() }
         if (viewModel.needsInit()) {
             fromUrl = handleIntentAction(intent)
             if (!fromUrl) {
@@ -1060,36 +1044,48 @@ class ReaderActivity : BaseMainActivity() {
         }
     }
 
-    private fun popToMain() {
-        if (fromUrl) {
-            val intent =
-                Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-            startActivity(intent)
-            finishAfterTransition()
+    /**
+     * Leaves the reader by navigating up the hierarchy. When it is the only activity in its task
+     * (e.g. launched externally via deep link), it opens the manga screen on top of the library.
+     * Otherwise, it finishes the activity to return to the previous screen.
+     */
+    private fun navigateUp() {
+        if (isTaskRoot) {
+            openMangaScreen()
         } else {
-            backPressedCallback?.isEnabled = false
-            onBackPressedDispatcher.onBackPressed()
+            finish()
         }
+    }
+
+    private fun resolveMangaId(): Long? {
+        return viewModel.manga?.id ?: intent.extras?.getLong("manga", -1L)?.takeIf { it != -1L }
+    }
+
+    private fun openMangaScreen() {
+        val mangaId = resolveMangaId()
+        val intent =
+            if (mangaId != null) {
+                MainActivity.openMangaIntent(this, mangaId)
+            } else {
+                Intent(this, MainActivity::class.java)
+            }
+        intent.flags =
+            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
     }
 
     fun reEnableBackPressedCallBack() {
+        // Stays enabled while the reader is the task root so back reaches navigateUp
         backPressedCallback?.isEnabled =
-            chaptersSheetVisible || settingsSheetVisible || pageActionsPage != null
+            chaptersSheetVisible || settingsSheetVisible || pageActionsPage != null || isTaskRoot
     }
 
     override fun finishAfterTransition() {
-        if (
-            didTransistionFromChapter &&
-                visibleChapterRange.isNotEmpty() &&
-                MainActivity.chapterIdToExitTo !in visibleChapterRange
-        ) {
-            finish()
-        } else {
-            viewModel.onActivityFinish()
-            super.finishAfterTransition()
-        }
+        viewModel.onActivityFinish()
+        super.finishAfterTransition()
     }
 
     override fun finish() {
@@ -1509,9 +1505,6 @@ class ReaderActivity : BaseMainActivity() {
                 viewerChapters.currChapter.chapter.name
             }
         chapterTitle = subtitleText ?: ""
-        if (didTransistionFromChapter) {
-            MainActivity.chapterIdToExitTo = viewerChapters.currChapter.chapter.id ?: 0L
-        }
     }
 
     /**
