@@ -17,6 +17,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Lock
@@ -68,6 +71,10 @@ fun ChapterRow(
     themeColor: ThemeColorState,
     chapterItem: ChapterItem,
     shouldHideChapterTitles: Boolean = false,
+    swipeRightAction: MangaConstants.ChapterSwipeAction =
+        MangaConstants.ChapterSwipeAction.ToggleBookmark,
+    swipeLeftAction: MangaConstants.ChapterSwipeAction =
+        MangaConstants.ChapterSwipeAction.ToggleRead,
     onClick: (ChapterItem) -> Unit,
     onBookmark: (ChapterItem) -> Unit,
     onRead: (ChapterItem) -> Unit,
@@ -78,49 +85,37 @@ fun ChapterRow(
     markPrevious: (ChapterItem, Boolean) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleConfiguration provides themeColor.rippleConfiguration) {
-        val (readIcon, readTextRes) =
-            if (chapterItem.chapter.read) Icons.Default.VisibilityOff to R.string.mark_as_unread
-            else Icons.Default.Visibility to R.string.mark_as_read
-        val (bookmarkIcon, bookmarkTextRes) =
-            if (chapterItem.chapter.bookmark)
-                Icons.Default.BookmarkRemove to R.string.remove_bookmark
-            else Icons.Default.BookmarkAdd to R.string.add_bookmark
-
         val swipeActionBackgroundColor =
             MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
                 themeColor.primaryColor,
                 Size.small,
             )
 
-        val markReadSwipeAction =
-            SwipeAction(
-                icon = {
-                    SwipeIcon(
-                        icon = readIcon,
-                        text = stringResource(readTextRes),
-                        contentColor = themeColor.primaryColor,
-                    )
-                },
+        val rightSwipeAction =
+            chapterSwipeAction(
+                action = swipeRightAction,
+                chapterItem = chapterItem,
+                themeColor = themeColor,
                 background = swipeActionBackgroundColor,
-                onSwipe = { onRead(chapterItem) },
+                onBookmark = onBookmark,
+                onRead = onRead,
+                onDownload = onDownload,
+            )
+        val leftSwipeAction =
+            chapterSwipeAction(
+                action = swipeLeftAction,
+                chapterItem = chapterItem,
+                themeColor = themeColor,
+                background = swipeActionBackgroundColor,
+                onBookmark = onBookmark,
+                onRead = onRead,
+                onDownload = onDownload,
             )
 
-        val markBookmarkAction =
-            SwipeAction(
-                icon = {
-                    SwipeIcon(
-                        icon = bookmarkIcon,
-                        text = stringResource(bookmarkTextRes),
-                        contentColor = themeColor.primaryColor,
-                    )
-                },
-                background = swipeActionBackgroundColor,
-                onSwipe = { onBookmark(chapterItem) },
-            )
-
+        // The app theme forces LTR, so swiping right reveals the start actions.
         ChapterSwipe(
-            startSwipeActions = listOf(markBookmarkAction),
-            endSwipeActions = listOf(markReadSwipeAction),
+            startSwipeActions = listOfNotNull(rightSwipeAction),
+            endSwipeActions = listOfNotNull(leftSwipeAction),
         ) {
             ChapterRowContent(
                 themeColorState = themeColor,
@@ -135,6 +130,74 @@ fun ChapterRow(
             )
         }
     }
+}
+
+/** Swipe action for one side of the row, or null when that side should do nothing. */
+@Composable
+private fun chapterSwipeAction(
+    action: MangaConstants.ChapterSwipeAction,
+    chapterItem: ChapterItem,
+    themeColor: ThemeColorState,
+    background: Color,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
+    onDownload: (List<ChapterItem>, MangaConstants.DownloadAction) -> Unit,
+): SwipeAction? {
+    val (icon, textRes, onSwipe) =
+        when (action) {
+            MangaConstants.ChapterSwipeAction.Disabled -> return null
+            MangaConstants.ChapterSwipeAction.ToggleRead -> {
+                val (readIcon, readTextRes) =
+                    if (chapterItem.chapter.read)
+                        Icons.Default.VisibilityOff to R.string.mark_as_unread
+                    else Icons.Default.Visibility to R.string.mark_as_read
+                Triple(readIcon, readTextRes) { onRead(chapterItem) }
+            }
+            MangaConstants.ChapterSwipeAction.ToggleBookmark -> {
+                val (bookmarkIcon, bookmarkTextRes) =
+                    if (chapterItem.chapter.bookmark)
+                        Icons.Default.BookmarkRemove to R.string.remove_bookmark
+                    else Icons.Default.BookmarkAdd to R.string.add_bookmark
+                Triple(bookmarkIcon, bookmarkTextRes) { onBookmark(chapterItem) }
+            }
+            MangaConstants.ChapterSwipeAction.Download -> {
+                when (chapterItem.downloadState) {
+                    Download.State.DOWNLOADED ->
+                        Triple(Icons.Default.Delete, R.string.remove) {
+                            onDownload(listOf(chapterItem), MangaConstants.DownloadAction.Remove)
+                        }
+                    Download.State.QUEUE,
+                    Download.State.DOWNLOADING,
+                    Download.State.ERROR ->
+                        Triple(Icons.Default.Cancel, R.string.cancel) {
+                            onDownload(listOf(chapterItem), MangaConstants.DownloadAction.Cancel)
+                        }
+                    Download.State.NOT_DOWNLOADED -> {
+                        val isLocked =
+                            chapterItem.chapter.isUnavailable ||
+                                MdConstants.UnsupportedOfficialGroupList.contains(
+                                    chapterItem.chapter.scanlator
+                                )
+                        if (isLocked) return null
+                        Triple(Icons.Default.Download, R.string.download) {
+                            onDownload(listOf(chapterItem), MangaConstants.DownloadAction.Download)
+                        }
+                    }
+                }
+            }
+        }
+
+    return SwipeAction(
+        icon = {
+            SwipeIcon(
+                icon = icon,
+                text = stringResource(textRes),
+                contentColor = themeColor.primaryColor,
+            )
+        },
+        background = background,
+        onSwipe = onSwipe,
+    )
 }
 
 @Composable

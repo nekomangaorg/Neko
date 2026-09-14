@@ -47,6 +47,8 @@ object MangaConstants {
         val hideButtonText: Boolean = false,
         val backdropSize: BackdropSize = BackdropSize.Default,
         val wrapAltTitles: Boolean = false,
+        val chapterSwipeRightAction: ChapterSwipeAction = ChapterSwipeAction.ToggleBookmark,
+        val chapterSwipeLeftAction: ChapterSwipeAction = ChapterSwipeAction.ToggleRead,
         val searchChapters: List<ChapterItem> = listOf(),
         val removedChapters: List<ChapterItem> = listOf(),
     )
@@ -355,5 +357,12 @@ object MangaConstants {
         Small,
         Default,
         Large,
+    }
+
+    enum class ChapterSwipeAction {
+        ToggleRead,
+        ToggleBookmark,
+        Download,
+        Disabled,
     }
 }

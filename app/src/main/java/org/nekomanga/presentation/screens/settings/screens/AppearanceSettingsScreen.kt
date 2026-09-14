@@ -137,7 +137,28 @@ internal class AppearanceSettingsScreen(
                         pref = mangaDetailsPreferences.wrapAltTitles(),
                         title = stringResource(R.string.wrap_alt_titles),
                     ),
+                    Preference.PreferenceItem.ListPreference(
+                        pref = mangaDetailsPreferences.chapterSwipeRightAction(),
+                        title = stringResource(R.string.chapter_swipe_right_action),
+                        entries = chapterSwipeActionEntries(),
+                    ),
+                    Preference.PreferenceItem.ListPreference(
+                        pref = mangaDetailsPreferences.chapterSwipeLeftAction(),
+                        title = stringResource(R.string.chapter_swipe_left_action),
+                        entries = chapterSwipeActionEntries(),
+                    ),
                 ),
+        )
+    }
+
+    @Composable
+    private fun chapterSwipeActionEntries(): Map<MangaConstants.ChapterSwipeAction, String> {
+        return mapOf(
+            MangaConstants.ChapterSwipeAction.Disabled to stringResource(R.string.disabled),
+            MangaConstants.ChapterSwipeAction.ToggleRead to stringResource(R.string.mark_as_read),
+            MangaConstants.ChapterSwipeAction.ToggleBookmark to
+                stringResource(R.string.add_bookmark),
+            MangaConstants.ChapterSwipeAction.Download to stringResource(R.string.download),
         )
     }
 

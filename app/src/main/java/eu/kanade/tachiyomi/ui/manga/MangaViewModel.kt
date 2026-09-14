@@ -1145,6 +1145,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             forcePortrait = mangaDetailsPreferences.forcePortrait().get(),
                             themeBasedOffCovers = mangaDetailsPreferences.autoThemeByCover().get(),
                             wrapAltTitles = mangaDetailsPreferences.wrapAltTitles().get(),
+                            chapterSwipeRightAction =
+                                mangaDetailsPreferences.chapterSwipeRightAction().get(),
+                            chapterSwipeLeftAction =
+                                mangaDetailsPreferences.chapterSwipeLeftAction().get(),
                         ),
                     track = it.track.copy(loggedInTrackService = loggedInServices),
                     manga =
