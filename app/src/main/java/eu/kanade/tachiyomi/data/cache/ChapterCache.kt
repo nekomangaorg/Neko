@@ -193,8 +193,10 @@ class ChapterCache(private val context: Context) {
         val files = cacheDir.listFiles()?.iterator() ?: return 0L
         while (files.hasNext()) {
             val file = files.next()
-            deletedSize += file.length()
-            file.delete()
+            val fileSize = file.length()
+            if (file.delete()) {
+                deletedSize += fileSize
+            }
         }
         return deletedSize
     }
