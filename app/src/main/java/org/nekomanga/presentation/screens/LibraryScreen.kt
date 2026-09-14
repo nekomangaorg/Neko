@@ -358,8 +358,13 @@ private fun LibraryWrapper(
                         if (!libraryScreenState.searchQuery.isNullOrBlank()) PaddingValues(0.dp)
                         else recyclerPadding
 
-                    if (libraryScreenState.items.isEmpty()) {
-                        EmptyLibrary(libraryScreenState = libraryScreenState)
+                    // Groups are kept while filters hide their manga, so an empty group list
+                    // is not the only empty state
+                    if (libraryScreenState.items.all { it.libraryItems.isEmpty() }) {
+                        EmptyLibrary(
+                            libraryScreenState = libraryScreenState,
+                            clearActiveFilters = libraryScreenActions.clearActiveFilters,
+                        )
                     } else {
                         if (libraryScreenState.horizontalCategories) {
                             HorizontalCategoriesPage(
@@ -420,13 +425,33 @@ private fun GlobalSearchRow(
 }
 
 @Composable
-private fun EmptyLibrary(libraryScreenState: LibraryScreenState) {
+private fun EmptyLibrary(libraryScreenState: LibraryScreenState, clearActiveFilters: () -> Unit) {
+    // Filters still apply while searching, so an empty search result may only be hidden manga.
+    // The button makes that visible without leaving the search
+    val clearFiltersAction =
+        if (libraryScreenState.hasActiveFilters) {
+            listOf(
+                Action(
+                    text = UiText.StringResource(resourceId = R.string.clear_filters),
+                    onClick = clearActiveFilters,
+                )
+            )
+        } else {
+            emptyList()
+        }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (libraryScreenState.isFirstLoad) {
             ContainedLoadingIndicator()
         } else if (!libraryScreenState.searchQuery.isNullOrBlank()) {
-
-            EmptyScreen(message = UiText.StringResource(resourceId = R.string.no_results_found))
+            EmptyScreen(
+                message = UiText.StringResource(resourceId = R.string.no_results_found),
+                actions = clearFiltersAction,
+            )
+        } else if (libraryScreenState.hasActiveFilters) {
+            EmptyScreen(
+                message = UiText.StringResource(resourceId = R.string.no_matches_for_filters),
+                actions = clearFiltersAction,
+            )
         } else {
             EmptyScreen(
                 message =
