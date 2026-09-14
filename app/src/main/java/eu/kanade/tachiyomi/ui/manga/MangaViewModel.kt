@@ -2136,6 +2136,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         return chapter.getHttpSource(sourceManager).getChapterUrl(chapter)
     }
 
+    fun openLinksInBrowser(): Boolean = preferences.openLinksInBrowser().get()
+
     fun blockScanlator(blockType: MangaConstants.BlockType, name: String) {
         viewModelScope.launchIO {
             mangaUseCases.blockScanlator.block(blockType, name, this)

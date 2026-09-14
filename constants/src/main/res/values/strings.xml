@@ -881,6 +881,8 @@
     <string name="last_used_library_recents">Last used (Library or Feed)</string>
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
+    <string name="open_links_in_browser">Open links in browser</string>
+    <string name="open_links_in_browser_summary">Use the device browser instead of the in-app WebView</string>
     <string name="manage_notifications">Manage notifications</string>
     <string name="check_for_updates">Check for updates</string>
     <string name="app_updates">App updates</string>

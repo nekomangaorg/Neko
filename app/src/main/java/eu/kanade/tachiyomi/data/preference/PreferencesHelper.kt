@@ -153,6 +153,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun dateFormatPreference() = this.preferenceStore.getString(Keys.dateFormat, "")
 
+    fun openLinksInBrowser() = this.preferenceStore.getBoolean("open_links_in_browser", false)
+
     fun downloadOnlyOverUnmetered() =
         this.preferenceStore.getBoolean("pref_download_only_over_wifi_key", true)
 

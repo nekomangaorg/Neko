@@ -45,6 +45,11 @@ internal class GeneralSettingsScreen(
                         "yyyy-MM-dd" to "yyyy-MM-dd",
                     ),
             ),
+            Preference.PreferenceItem.SwitchPreference(
+                pref = preferencesHelper.openLinksInBrowser(),
+                title = stringResource(R.string.open_links_in_browser),
+                subtitle = stringResource(R.string.open_links_in_browser_summary),
+            ),
             Preference.PreferenceItem.TextPreference(
                 title = stringResource(R.string.manage_notifications),
                 enabled = showNotificationSetting,
