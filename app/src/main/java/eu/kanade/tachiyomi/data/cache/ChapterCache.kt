@@ -187,15 +187,23 @@ class ChapterCache(private val context: Context) {
         return File(diskCache.directory, imageName)
     }
 
-    /** Clear chapter cache */
-    suspend fun deleteCache() {
+    /** Delete every cached page and return the number of bytes freed. */
+    fun clear(): Long {
         var deletedSize = 0L
-        val files = cacheDir.listFiles()?.iterator() ?: return
+        val files = cacheDir.listFiles()?.iterator() ?: return 0L
         while (files.hasNext()) {
             val file = files.next()
-            deletedSize += file.length()
-            file.delete()
+            val fileSize = file.length()
+            if (file.delete()) {
+                deletedSize += fileSize
+            }
         }
+        return deletedSize
+    }
+
+    /** Clear chapter cache and toast the freed size */
+    suspend fun deleteCache() {
+        val deletedSize = clear()
         withContext(Dispatchers.Main) {
             context.toast(
                 context.getString(R.string.deleted_, Formatter.formatFileSize(context, deletedSize))
