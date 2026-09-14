@@ -30,7 +30,7 @@ import org.nekomanga.presentation.theme.Size
 fun ExternalLinksSheet(
     themeColorState: ThemeColorState,
     externalLinks: List<ExternalLink>,
-    onLinkClick: (String, String) -> Unit,
+    onLinkClick: (ExternalLink) -> Unit,
 ) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
@@ -64,10 +64,10 @@ fun ExternalLinksSheet(
 private fun LinkCard(
     modifier: Modifier = Modifier,
     externalLink: ExternalLink,
-    onLinkClick: (String, String) -> Unit,
+    onLinkClick: (ExternalLink) -> Unit,
 ) {
     OutlinedCard(
-        onClick = { onLinkClick(externalLink.getUrl(), externalLink.name) },
+        onClick = { onLinkClick(externalLink) },
         modifier = modifier.height(Size.huge),
         colors = CardDefaults.outlinedCardColors(containerColor = Color(externalLink.logoColor)),
     ) {
