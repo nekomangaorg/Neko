@@ -324,6 +324,10 @@ internal class DataStorageSettingsScreen(
                         subtitle = stringResource(R.string.used_, cacheData.chapterDiskCacheSize),
                         onClick = { clearCache(CacheType.ChapterDisk) },
                     ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        title = stringResource(R.string.auto_clear_chapter_cache),
+                        pref = storagePreferences.autoClearChapterCache(),
+                    ),
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(R.string.cover_cache),
                         subtitle = stringResource(R.string.used_, cacheData.coverCacheSize),
@@ -381,6 +385,10 @@ internal class DataStorageSettingsScreen(
                 ),
                 SearchTerm(
                     title = stringResource(R.string.chapter_disk_cache),
+                    group = stringResource(R.string.cache),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.auto_clear_chapter_cache),
                     group = stringResource(R.string.cache),
                 ),
                 SearchTerm(

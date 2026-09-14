@@ -37,6 +37,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.Migrations
+import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -48,6 +49,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
@@ -57,6 +59,7 @@ import org.nekomanga.core.R
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.dialog.WhatsNewDialog
@@ -66,10 +69,13 @@ import org.nekomanga.presentation.screens.main.BottomBar
 import org.nekomanga.presentation.screens.main.NavigationSideBar
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class MainActivity : BaseMainActivity() {
 
     private val viewModel: MainActivityViewModel by viewModels()
+    private val storagePreferences: StoragePreferences by injectLazy()
+    private val chapterCache: ChapterCache by injectLazy()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,6 +117,11 @@ class MainActivity : BaseMainActivity() {
             if (!BuildConfig.DEBUG && !isBenchmark) {
                 viewModel.setWhatsNewDialog(true)
             }
+        }
+
+        // Fresh launch only, so a rotation or a restore after process death keeps the pages.
+        if (savedInstanceState == null && storagePreferences.autoClearChapterCache().get()) {
+            lifecycleScope.launchIO { chapterCache.clear() }
         }
 
         setComposeContent {
