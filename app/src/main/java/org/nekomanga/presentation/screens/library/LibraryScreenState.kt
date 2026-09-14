@@ -19,6 +19,17 @@ import org.nekomanga.presentation.screens.library.filter.FilterUnavailable
 import org.nekomanga.presentation.screens.library.filter.FilterUnread
 import org.nekomanga.presentation.screens.library.filter.LibraryFilterType
 
+const val VERTICAL_SCROLL_INDEX = -1
+
+@Immutable
+enum class LibraryEmptyType {
+    None,
+    Loading,
+    EmptyLibrary,
+    NoFilterMatches,
+    NoSearchMatches,
+}
+
 /**
  * ⚡ BOLT OPTIMIZATION: Added @Immutable to mark this large data class containing standard Map types
  * as stable for Compose, preventing severe recomposition issues across the entire Library screen.
@@ -29,6 +40,7 @@ data class LibraryScreenState(
     val initialSearch: String = "",
     val libraryDisplayMode: LibraryDisplayMode = LibraryDisplayMode.ComfortableGrid,
     val hasActiveFilters: Boolean = false,
+    val emptyType: LibraryEmptyType = LibraryEmptyType.Loading,
     val useVividColorHeaders: Boolean = true,
     val libraryFilters: LibraryFilters = LibraryFilters(),
     val rawColumnCount: Float = 3f,

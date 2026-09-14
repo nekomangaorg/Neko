@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +59,20 @@ fun VerticalCategoriesPage(
     libraryCategoryActions: LibraryCategoryActions,
     categorySortClick: (CategoryItem) -> Unit,
 ) {
-    val lazyListState = rememberLazyListState()
+    val lazyListState =
+        rememberLazyListState(
+            initialFirstVisibleItemIndex =
+                libraryScreenState.scrollPositions[VERTICAL_SCROLL_INDEX] ?: 0
+        )
+
+    DisposableEffect(libraryScreenActions) {
+        onDispose {
+            libraryScreenActions.scrollPositionChanged(
+                VERTICAL_SCROLL_INDEX,
+                lazyListState.firstVisibleItemIndex,
+            )
+        }
+    }
 
     val columns = numberOfColumns(rawValue = libraryScreenState.rawColumnCount)
 

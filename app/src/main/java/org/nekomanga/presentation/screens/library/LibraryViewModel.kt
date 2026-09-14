@@ -103,12 +103,17 @@ class LibraryViewModel() : ViewModel() {
     val groupLibraryManga = GroupLibraryMangaUseCase()
     val categoryUseCases: CategoryUseCases = Injekt.get()
 
-    private val initialState =
+    private val initialState = run {
+        val cachedItems = lastLibraryCategoryItems
         LibraryScreenState(
-            items = lastLibraryCategoryItems?.toList() ?: listOf(),
+            items = cachedItems?.toList() ?: listOf(),
+            emptyType =
+                if (cachedItems == null) LibraryEmptyType.Loading
+                else if (cachedItems.any { it.libraryItems.isNotEmpty() }) LibraryEmptyType.None
+                else LibraryEmptyType.EmptyLibrary,
             pagerIndex = lastPagerIndex ?: 0,
             scrollPositions = lastScrollPositions ?: emptyMap(),
-            isFirstLoad = lastLibraryCategoryItems == null,
+            isFirstLoad = cachedItems == null,
             rawColumnCount = libraryPreferences.gridSize().get(),
             libraryDisplayMode = libraryPreferences.layout().get(),
             outlineCovers = libraryPreferences.outlineOnCovers().get(),
@@ -122,6 +127,7 @@ class LibraryViewModel() : ViewModel() {
             showUnavailableFilter = mangadexPreferences.includeUnavailableChapters().get(),
             useVividColorHeaders = preferences.useVividColorHeaders().get(),
         )
+    }
 
     private val _internalLibraryScreenState = MutableStateFlow(initialState)
 
@@ -210,6 +216,12 @@ class LibraryViewModel() : ViewModel() {
     private val rawLibraryMangaListFlow =
         mangaRepository
             .observeLibrary()
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    private val hasMangaInLibraryFlow =
+        rawLibraryMangaListFlow
+            .map { it.isNotEmpty() }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
@@ -590,6 +602,7 @@ class LibraryViewModel() : ViewModel() {
         val layout: LibraryDisplayMode,
         val filters: LibraryFilters,
         val recentSearches: List<String>,
+        val hasMangaInLibrary: Boolean,
     )
 
     private val uiSettingsFlow =
@@ -608,8 +621,9 @@ class LibraryViewModel() : ViewModel() {
                         }
                     }
                     .distinctUntilChanged(),
-            ) { gridSize, layout, filters, recentSearches ->
-                UiSettings(gridSize, layout, filters, recentSearches)
+                hasMangaInLibraryFlow,
+            ) { gridSize, layout, filters, recentSearches, hasMangaInLibrary ->
+                UiSettings(gridSize, layout, filters, recentSearches, hasMangaInLibrary)
             }
             .distinctUntilChanged()
 
@@ -630,8 +644,19 @@ class LibraryViewModel() : ViewModel() {
                 viewPrefs,
                 uiSettings,
                 hasLoggedTrackers ->
+                val hasVisibleItems = itemsWithRefreshing.any { it.libraryItems.isNotEmpty() }
+                val emptyType =
+                    when {
+                        hasVisibleItems -> LibraryEmptyType.None
+                        !state.searchQuery.isNullOrBlank() -> LibraryEmptyType.NoSearchMatches
+                        uiSettings.hasMangaInLibrary && uiSettings.filters.hasActiveFilter() ->
+                            LibraryEmptyType.NoFilterMatches
+                        else -> LibraryEmptyType.EmptyLibrary
+                    }
+
                 state.copy(
                     items = itemsWithRefreshing,
+                    emptyType = emptyType,
                     allCollapsed = allCollapsed,
                     libraryDisplayMode = uiSettings.layout,
                     rawColumnCount = uiSettings.gridSize,

@@ -52,6 +52,7 @@ import org.nekomanga.presentation.screens.library.HorizontalCategoriesPage
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
 import org.nekomanga.presentation.screens.library.LibraryBottomSheetScreen
 import org.nekomanga.presentation.screens.library.LibraryCategoryActions
+import org.nekomanga.presentation.screens.library.LibraryEmptyType
 import org.nekomanga.presentation.screens.library.LibraryScreenActions
 import org.nekomanga.presentation.screens.library.LibraryScreenState
 import org.nekomanga.presentation.screens.library.LibraryScreenTopBar
@@ -358,12 +359,12 @@ private fun LibraryWrapper(
                         if (!libraryScreenState.searchQuery.isNullOrBlank()) PaddingValues(0.dp)
                         else recyclerPadding
 
-                    // Groups are kept while filters hide their manga, so an empty group list
-                    // is not the only empty state
-                    if (libraryScreenState.items.all { it.libraryItems.isEmpty() }) {
+                    if (libraryScreenState.emptyType != LibraryEmptyType.None) {
                         EmptyLibrary(
-                            libraryScreenState = libraryScreenState,
-                            clearActiveFilters = libraryScreenActions.clearActiveFilters,
+                            emptyType = libraryScreenState.emptyType,
+                            hasActiveFilters = libraryScreenState.hasActiveFilters,
+                            contentPadding = listPadding,
+                            onClearActiveFilters = libraryScreenActions.clearActiveFilters,
                         )
                     } else {
                         if (libraryScreenState.horizontalCategories) {
@@ -425,38 +426,52 @@ private fun GlobalSearchRow(
 }
 
 @Composable
-private fun EmptyLibrary(libraryScreenState: LibraryScreenState, clearActiveFilters: () -> Unit) {
-    // Filters still apply while searching, so an empty search result may only be hidden manga.
-    // The button makes that visible without leaving the search
+private fun EmptyLibrary(
+    emptyType: LibraryEmptyType,
+    hasActiveFilters: Boolean,
+    contentPadding: PaddingValues,
+    onClearActiveFilters: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val clearFiltersAction =
-        if (libraryScreenState.hasActiveFilters) {
+        remember(onClearActiveFilters) {
             listOf(
                 Action(
                     text = UiText.StringResource(resourceId = R.string.clear_filters),
-                    onClick = clearActiveFilters,
+                    onClick = onClearActiveFilters,
                 )
             )
-        } else {
-            emptyList()
         }
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        if (libraryScreenState.isFirstLoad) {
-            ContainedLoadingIndicator()
-        } else if (!libraryScreenState.searchQuery.isNullOrBlank()) {
-            EmptyScreen(
-                message = UiText.StringResource(resourceId = R.string.no_results_found),
-                actions = clearFiltersAction,
-            )
-        } else if (libraryScreenState.hasActiveFilters) {
-            EmptyScreen(
-                message = UiText.StringResource(resourceId = R.string.no_matches_for_filters),
-                actions = clearFiltersAction,
-            )
-        } else {
-            EmptyScreen(
-                message =
-                    UiText.StringResource(resourceId = R.string.library_is_empty_add_from_browse)
-            )
+
+    Box(
+        modifier = modifier.fillMaxSize().padding(contentPadding),
+        contentAlignment = Alignment.Center,
+    ) {
+        when (emptyType) {
+            LibraryEmptyType.Loading -> {
+                ContainedLoadingIndicator()
+            }
+            LibraryEmptyType.NoSearchMatches -> {
+                EmptyScreen(
+                    message = UiText.StringResource(resourceId = R.string.no_results_found),
+                    actions = if (hasActiveFilters) clearFiltersAction else emptyList(),
+                )
+            }
+            LibraryEmptyType.NoFilterMatches -> {
+                EmptyScreen(
+                    message = UiText.StringResource(resourceId = R.string.no_matches_for_filters),
+                    actions = clearFiltersAction,
+                )
+            }
+            LibraryEmptyType.EmptyLibrary -> {
+                EmptyScreen(
+                    message =
+                        UiText.StringResource(
+                            resourceId = R.string.library_is_empty_add_from_browse
+                        )
+                )
+            }
+            LibraryEmptyType.None -> Unit
         }
     }
 }
