@@ -58,6 +58,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.dialog.TrackingSwitchDialog
 import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.extensions.clearFocusOnTap
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -81,7 +82,10 @@ fun TrackingSearchSheet(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration,
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
-        Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().imePadding()) {
+        Column(
+            modifier =
+                Modifier.fillMaxWidth().navigationBarsPadding().imePadding().clearFocusOnTap()
+        ) {
             Header(stringResource(id = R.string.select_an_entry), cancelClick)
 
             when (trackSearchResult) {

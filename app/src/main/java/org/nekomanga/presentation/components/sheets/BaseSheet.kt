@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.extensions.clearFocusOnTap
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -45,6 +46,7 @@ fun BaseSheet(
                     .fillMaxWidth()
                     .requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp)
                     .verticalScroll(scrollState)
+                    .clearFocusOnTap()
         ) {
             content()
             Gap(bottomPaddingAroundContent)

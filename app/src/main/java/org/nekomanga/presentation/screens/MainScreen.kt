@@ -8,7 +8,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -19,8 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -92,15 +89,7 @@ fun MainScreen(
         Unit
     }
 
-    val focusManager = LocalFocusManager.current
-    Box(
-        modifier =
-            Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                // Taps that no child consumed end up here, so a tap on empty space clears the
-                // search field focus and closes the keyboard
-                .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
-    ) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         NavDisplay(
             backStack = backStack,
             onBack = { backStack.removeLastOrNull() },

@@ -106,6 +106,7 @@ fun WebViewWrapper(
 
     ChildScreenScaffold(
         scrollBehavior = scrollBehavior,
+        clearFocusOnTap = false,
         topBar = {
             WebviewTopBar(
                 state = state,

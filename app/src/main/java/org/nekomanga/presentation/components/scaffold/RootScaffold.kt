@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import org.nekomanga.presentation.components.PullRefresh
+import org.nekomanga.presentation.extensions.clearFocusOnTap
 
 @Composable
 fun RootScaffold(
@@ -37,7 +38,8 @@ fun RootScaffold(
                 modifier =
                     Modifier.fillMaxSize()
                         .weight(1f)
-                        .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        .nestedScroll(scrollBehavior.nestedScrollConnection)
+                        .clearFocusOnTap(),
                 topBar = topBar,
                 bottomBar = bottomBar,
             ) { contentPadding ->

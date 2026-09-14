@@ -1,9 +1,14 @@
 package org.nekomanga.presentation.extensions
 
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 /** Allows a conditional to be checked to apply a modifier */
 fun Modifier.conditional(condition: Boolean, modifier: Modifier.() -> Modifier): Modifier {
@@ -30,3 +35,19 @@ fun Modifier.runOnEnterKeyPressed(action: () -> Unit): Modifier =
             else -> false
         }
     }
+
+/**
+ * Clears focus and hides the software keyboard when a tap gesture occurs that is not consumed by
+ * child composables.
+ */
+@Composable
+fun Modifier.clearFocusOnTap(): Modifier {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    return this.pointerInput(focusManager, keyboardController) {
+        detectTapGestures {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
+    }
+}
