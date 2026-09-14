@@ -29,6 +29,7 @@ object PreferenceKeys {
     const val deleteRemovedChapters = "delete_removed_chapters"
 
     const val dateFormat = "app_date_format"
+    const val openLinksInBrowser = "open_links_in_browser"
     const val showDLsInRecents = "show_dls_in_recents"
     const val showRemHistoryInRecents = "show_rem_history_in_recents"
     const val showReadInAllRecents = "show_read_in_all_recents"
