@@ -185,8 +185,9 @@ class DownloadCache(
         // Optimization: Fetch once
         val allManga = mangaRepository.getMangaList()
 
-        // 3. Create lookup map for O(1) access
-        val mangaLookup = allManga.associateBy {
+        // 3. Create lookup map for O(1) access. Manga with the same title share one folder, so
+        // every one of them gets the folder's files.
+        val mangaLookup = allManga.groupBy {
             DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
         }
 
@@ -199,9 +200,8 @@ class DownloadCache(
                 .map { mangaDir ->
                     async {
                         val dirName = mangaDir.name ?: return@async
-                        val manga =
+                        val mangaList =
                             mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@async
-                        val id = manga.id ?: return@async
 
                         val files =
                             mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
@@ -213,7 +213,11 @@ class DownloadCache(
                                 it.takeLast(36).takeIf { uuid -> uuid.isUUID() }
                             }
 
-                        newMangaFiles[id] = MangaFiles(files, mangadexIds)
+                        mangaList.forEach { manga ->
+                            val id = manga.id ?: return@forEach
+                            newMangaFiles[id] =
+                                MangaFiles(files.toMutableSet(), mangadexIds.toMutableSet())
+                        }
                     }
                 }
                 .awaitAll()
