@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import kotlinx.coroutines.delay
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import uy.kohesive.injekt.Injekt
@@ -54,6 +55,8 @@ suspend fun updateTrackChapterRead(
         val trackManager = Injekt.get<TrackManager>()
         val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
 
+        if (isExcludedFromTrackingUpdates(mangaId, preferences)) return@withNonCancellableContext
+
         val trackList = trackRepository.getTracksForManga(mangaId)
         trackList.map { track ->
             val service = trackManager.getService(track.sync_id)
@@ -76,6 +79,24 @@ suspend fun updateTrackChapterRead(
             }
         }
     }
+}
+
+/**
+ * True when the manga sits in a category the user excluded from tracker progress updates. A manga
+ * with no category counts as the default category (id 0).
+ */
+private suspend fun isExcludedFromTrackingUpdates(
+    mangaId: Long,
+    preferences: PreferencesHelper,
+): Boolean {
+    val excludedIds = preferences.excludeCategoriesFromTrackingUpdates().get()
+    if (excludedIds.isEmpty()) return false
+    val categoryIds =
+        Injekt.get<CategoryRepository>()
+            .getCategoriesForManga(mangaId)
+            .mapNotNull { it.id }
+            .ifEmpty { listOf(0) }
+    return categoryIds.any { it.toString() in excludedIds }
 }
 
 private fun delayTrackingUpdate(context: Context, newChapterRead: Float, track: Track) {
