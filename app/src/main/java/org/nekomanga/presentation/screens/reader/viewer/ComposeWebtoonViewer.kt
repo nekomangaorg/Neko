@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -147,9 +148,78 @@ fun ComposeWebtoonViewer(
         val currentItems by rememberUpdatedState(items)
         val activeChapterId by rememberUpdatedState(currentChapterId)
 
+        var lastFirstVisibleItem by remember { mutableStateOf<ReaderUiItem?>(null) }
+        var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
+
         LaunchedEffect(currentChapterId) {
             viewer.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
             viewer.nextTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
+        }
+
+        LaunchedEffect(items) {
+            if (viewer.requestedPagePosition != null) return@LaunchedEffect
+            val firstItem = lastFirstVisibleItem
+            val activeItem = lastActiveItem
+
+            val targetIndex: Int
+            val targetOffset: Int
+
+            val firstItemNewIndex =
+                firstItem?.let { target -> items.indexOfFirst { areItemsEquivalent(it, target) } }
+                    ?: -1
+
+            if (firstItemNewIndex != -1) {
+                targetIndex = firstItemNewIndex
+                targetOffset = lazyListState.firstVisibleItemScrollOffset
+            } else if (activeItem != null) {
+                val activeItemNewIndex = items.indexOfFirst { areItemsEquivalent(it, activeItem) }
+                if (activeItemNewIndex != -1) {
+                    targetIndex = activeItemNewIndex
+                    targetOffset = 0
+                } else if (activeItem is ReaderUiItem.Transition) {
+                    val targetChapter = activeItem.transition.to ?: activeItem.transition.from
+                    targetIndex =
+                        if (activeItem.transition is ChapterTransition.Prev) {
+                            items.indexOfLast { item ->
+                                when (item) {
+                                    is ReaderUiItem.Page ->
+                                        isSameChapter(item.page.chapter, targetChapter)
+                                    is ReaderUiItem.SplitPage ->
+                                        isSameChapter(item.page.chapter, targetChapter)
+                                    is ReaderUiItem.Transition -> false
+                                }
+                            }
+                        } else {
+                            items.indexOfFirst { item ->
+                                when (item) {
+                                    is ReaderUiItem.Page ->
+                                        isSameChapter(item.page.chapter, targetChapter)
+                                    is ReaderUiItem.SplitPage ->
+                                        isSameChapter(item.page.chapter, targetChapter)
+                                    is ReaderUiItem.Transition -> false
+                                }
+                            }
+                        }
+                    targetOffset = 0
+                } else {
+                    targetIndex = -1
+                    targetOffset = 0
+                }
+            } else if (currentChapterId != null) {
+                targetIndex = defaultPageIndex
+                targetOffset = 0
+            } else {
+                targetIndex = -1
+                targetOffset = 0
+            }
+
+            if (
+                targetIndex != -1 &&
+                    (targetIndex != lazyListState.firstVisibleItemIndex ||
+                        targetOffset != lazyListState.firstVisibleItemScrollOffset)
+            ) {
+                lazyListState.scrollToItem(targetIndex, targetOffset)
+            }
         }
 
         // Sync programmatic page jumps (slider, TOC, etc.)
@@ -382,11 +452,21 @@ fun ComposeWebtoonViewer(
         // Track active visible page and preload upcoming/previous pages with debouncing
         LaunchedEffect(lazyListState, preloadPageAmount) {
             var preloadJob: Job? = null
+            var currentActiveIndex = -1
             snapshotFlow {
                 val layoutInfo = lazyListState.layoutInfo
+                val visibleItems = layoutInfo.visibleItemsInfo
+                if (visibleItems.isEmpty()) return@snapshotFlow null
+                if (layoutInfo.totalItemsCount != currentItems.size) return@snapshotFlow null
+                val isOutOfSync = visibleItems.any { info ->
+                    info.index !in currentItems.indices ||
+                        currentItems[info.index].key("webtoon") != info.key
+                }
+                if (isOutOfSync) return@snapshotFlow null
+
                 val activeIndex =
                     WebtoonActiveItemResolver.resolveActiveIndex(
-                        visibleItems = layoutInfo.visibleItemsInfo,
+                        visibleItems = visibleItems,
                         currentItems = currentItems,
                         activeChapterId = activeChapterId,
                         viewportStartOffset = layoutInfo.viewportStartOffset,
@@ -394,55 +474,67 @@ fun ComposeWebtoonViewer(
                         firstVisibleIndex = lazyListState.firstVisibleItemIndex,
                         firstVisibleScrollOffset = lazyListState.firstVisibleItemScrollOffset,
                     )
-                activeIndex to currentItems.getOrNull(activeIndex)
+                val firstVisibleItem = currentItems.getOrNull(lazyListState.firstVisibleItemIndex)
+                Triple(activeIndex, currentItems.getOrNull(activeIndex), firstVisibleItem)
             }
                 .filterNotNull()
-                .distinctUntilChanged { old, new -> old.first == new.first }
-                .collect { (activeIndex, item) ->
+                .distinctUntilChanged { old, new ->
+                    old.first == new.first && old.third?.key("webtoon") == new.third?.key("webtoon")
+                }
+                .collect { (activeIndex, item, firstVisibleItem) ->
+                    if (firstVisibleItem != null) {
+                        lastFirstVisibleItem = firstVisibleItem
+                    }
                     if (item != null) {
-                        when (item) {
-                            is ReaderUiItem.Page -> {
-                                onPageSelected(item.page)
-                                val pages = item.page.chapter.pages
-                                if (pages != null && item.page.chapter == viewer.currentChapter) {
-                                    val threshold = maxOf(5, preloadPageAmount)
-                                    if (pages.size - item.page.number < threshold) {
-                                        viewer.nextTransition?.to?.let {
-                                            viewer.activity.requestPreloadChapter(it)
+                        lastActiveItem = item
+                        if (currentActiveIndex != activeIndex) {
+                            currentActiveIndex = activeIndex
+                            when (item) {
+                                is ReaderUiItem.Page -> {
+                                    onPageSelected(item.page)
+                                    val pages = item.page.chapter.pages
+                                    if (
+                                        pages != null && item.page.chapter == viewer.currentChapter
+                                    ) {
+                                        val threshold = maxOf(5, preloadPageAmount)
+                                        if (pages.size - item.page.number < threshold) {
+                                            viewer.nextTransition?.to?.let {
+                                                viewer.activity.requestPreloadChapter(it)
+                                            }
                                         }
-                                    }
-                                    if (item.page.number <= threshold) {
-                                        viewer.prevTransition?.to?.let {
-                                            viewer.activity.requestPreloadChapter(it)
+                                        if (item.page.number <= threshold) {
+                                            viewer.prevTransition?.to?.let {
+                                                viewer.activity.requestPreloadChapter(it)
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            is ReaderUiItem.SplitPage -> {
-                                onPageSelected(item.page)
-                            }
-                            is ReaderUiItem.Transition -> {
-                                onTransitionSelected(item.transition)
-                                val toChapter = item.transition.to
-                                if (toChapter != null) {
-                                    viewer.activity.requestPreloadChapter(toChapter)
+                                is ReaderUiItem.SplitPage -> {
+                                    onPageSelected(item.page)
+                                }
+                                is ReaderUiItem.Transition -> {
+                                    onTransitionSelected(item.transition)
+                                    val toChapter = item.transition.to
+                                    if (toChapter != null) {
+                                        viewer.activity.requestPreloadChapter(toChapter)
+                                    }
                                 }
                             }
-                        }
 
-                        // Debounced preload window: 2 pages behind, preloadPageAmount ahead
-                        preloadJob?.cancel()
-                        preloadJob = launch {
-                            delay(50L)
-                            val preloadStart = (activeIndex - 2).coerceAtLeast(0)
-                            val preloadEnd =
-                                (activeIndex + preloadPageAmount).coerceAtMost(
-                                    currentItems.lastIndex
-                                )
-                            val memoryEnd = minOf(currentItems.lastIndex, activeIndex + 2)
-                            for (i in preloadStart..preloadEnd) {
-                                val preloadItem = currentItems.getOrNull(i) ?: continue
-                                preloadItem(preloadItem, i in activeIndex..memoryEnd)
+                            // Debounced preload window: 2 pages behind, preloadPageAmount ahead
+                            preloadJob?.cancel()
+                            preloadJob = launch {
+                                delay(50L)
+                                val preloadStart = (activeIndex - 2).coerceAtLeast(0)
+                                val preloadEnd =
+                                    (activeIndex + preloadPageAmount).coerceAtMost(
+                                        currentItems.lastIndex
+                                    )
+                                val memoryEnd = minOf(currentItems.lastIndex, activeIndex + 2)
+                                for (i in preloadStart..preloadEnd) {
+                                    val preloadItem = currentItems.getOrNull(i) ?: continue
+                                    preloadItem(preloadItem, i in activeIndex..memoryEnd)
+                                }
                             }
                         }
                     }
@@ -850,5 +942,42 @@ fun ComposeWebtoonViewer(
                 }
             }
         }
+    }
+}
+
+private fun isSameChapter(a: ReaderChapter, b: ReaderChapter): Boolean {
+    val aId = a.chapter.id
+    val bId = b.chapter.id
+    return if (aId != null && bId != null && aId > 0 && bId > 0) {
+        aId == bId
+    } else {
+        a.chapter.url == b.chapter.url
+    }
+}
+
+private fun areItemsEquivalent(a: ReaderUiItem, b: ReaderUiItem): Boolean {
+    return when {
+        a is ReaderUiItem.Page && b is ReaderUiItem.Page -> {
+            isSameChapter(a.page.chapter, b.page.chapter) && a.page.index == b.page.index
+        }
+        a is ReaderUiItem.SplitPage && b is ReaderUiItem.SplitPage -> {
+            isSameChapter(a.page.chapter, b.page.chapter) &&
+                a.page.index == b.page.index &&
+                a.split.topOffset == b.split.topOffset
+        }
+        a is ReaderUiItem.Page && b is ReaderUiItem.SplitPage -> {
+            isSameChapter(a.page.chapter, b.page.chapter) &&
+                a.page.index == b.page.index &&
+                b.split.topOffset == 0
+        }
+        a is ReaderUiItem.SplitPage && b is ReaderUiItem.Page -> {
+            isSameChapter(a.page.chapter, b.page.chapter) &&
+                a.page.index == b.page.index &&
+                a.split.topOffset == 0
+        }
+        a is ReaderUiItem.Transition && b is ReaderUiItem.Transition -> {
+            a.key("webtoon") == b.key("webtoon")
+        }
+        else -> false
     }
 }
