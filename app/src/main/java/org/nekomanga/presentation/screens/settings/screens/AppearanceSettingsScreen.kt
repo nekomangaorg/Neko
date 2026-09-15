@@ -245,6 +245,14 @@ internal class AppearanceSettingsScreen(
                     group = stringResource(R.string.details_page),
                 ),
                 SearchTerm(
+                    title = stringResource(R.string.chapter_swipe_right_action),
+                    group = stringResource(R.string.details_page),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.chapter_swipe_left_action),
+                    group = stringResource(R.string.details_page),
+                ),
+                SearchTerm(
                     title = stringResource(R.string.side_nav_icon_alignment),
                     group = stringResource(R.string.navigation),
                 ),
