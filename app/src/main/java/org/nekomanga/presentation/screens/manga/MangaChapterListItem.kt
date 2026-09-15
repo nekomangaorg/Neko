@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.components.ChapterRow
@@ -23,6 +24,8 @@ fun MangaChapterListItem(
     chapterActions: ChapterActions,
     onBookmark: (ChapterItem) -> Unit,
     onRead: (ChapterItem) -> Unit,
+    swipeRightAction: MangaConstants.ChapterSwipeAction,
+    swipeLeftAction: MangaConstants.ChapterSwipeAction,
 ) {
     val listCardType =
         when {
@@ -49,6 +52,8 @@ fun MangaChapterListItem(
             onDownload = chapterActions.download,
             markPrevious = chapterActions.markPrevious,
             blockScanlator = chapterActions.blockScanlator,
+            swipeRightAction = swipeRightAction,
+            swipeLeftAction = swipeLeftAction,
         )
     }
     if (listCardType != ListCardType.Bottom) {
