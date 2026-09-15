@@ -103,21 +103,7 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun update(track: Track, setToRead: Boolean): Track {
-        if (track.status != COMPLETED && setToRead) {
-            if (
-                track.total_chapters > 0 &&
-                    track.last_chapter_read.toLong() == track.total_chapters.toLong()
-            ) {
-                track.status = COMPLETED
-                track.finished_reading_date = System.currentTimeMillis()
-            } else if (track.status != REREADING) {
-                track.status = READING
-                if (track.last_chapter_read == 1.0f) {
-                    track.started_reading_date = System.currentTimeMillis()
-                }
-            }
-        }
-
+        updateTrackStatus(track, setToRead, mustReadToComplete = true)
         return api.updateLibManga(track)
     }
 

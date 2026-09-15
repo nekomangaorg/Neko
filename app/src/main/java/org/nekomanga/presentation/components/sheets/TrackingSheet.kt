@@ -360,8 +360,9 @@ private fun TrackRowTwo(
             TrackingBox(clickable = chapterClick) {
                 val chapterText =
                     when {
-                        track.totalChapters > 0 &&
-                            track.lastChapterRead.toInt() == track.totalChapters ->
+                        (track.totalChapters > 0 &&
+                            track.lastChapterRead.toInt() == track.totalChapters) ||
+                            service.isCompletedStatus(track.status) ->
                             stringResource(R.string.all_chapters_read)
                         track.totalChapters > 0 ->
                             stringResource(

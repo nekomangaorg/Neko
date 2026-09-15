@@ -283,7 +283,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
 
     private fun convertToIsoDate(epochTime: Long): String? {
         if (epochTime <= 0L) {
-            return ""
+            return null
         }
         return try {
             val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
