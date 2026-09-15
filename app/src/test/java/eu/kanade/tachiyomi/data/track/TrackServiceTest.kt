@@ -356,6 +356,37 @@ class TrackServiceTest {
             testService.updateTrackStatus(track, setToReadStatus = true, mustReadToComplete = true)
 
             assertEquals(testService.completedStatus(), track.status)
-            assertEquals(10, track.total_chapters)
+            assertEquals(11, track.total_chapters)
+        }
+
+    @Test
+    fun `given read chapters when getLastChapterRead called then returns chapter with highest smart_order`() =
+        runTest {
+            val track = Track.create(1).apply { manga_id = 90L }
+
+            val chapters =
+                listOf(
+                    mockk<Chapter>(relaxed = true) {
+                        every { chapter_number } returns 1f
+                        every { smart_order } returns 0
+                        every { read } returns true
+                        every { isRecognizedNumber } returns true
+                    },
+                    mockk<Chapter>(relaxed = true) {
+                        every { chapter_number } returns 2f
+                        every { smart_order } returns 1
+                        every { read } returns true
+                        every { isRecognizedNumber } returns true
+                    },
+                    mockk<Chapter>(relaxed = true) {
+                        every { chapter_number } returns 3f
+                        every { smart_order } returns 2
+                        every { read } returns false
+                        every { isRecognizedNumber } returns true
+                    },
+                )
+
+            val lastRead = testService.getLastChapterRead(track, chapters)
+            assertEquals(2f, lastRead)
         }
 }

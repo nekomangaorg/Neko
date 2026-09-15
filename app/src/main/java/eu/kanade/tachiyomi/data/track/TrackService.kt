@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -160,8 +161,8 @@ abstract class TrackService(val id: Int) {
                         ?: mangaChapters
                             .filter { it.isRecognizedNumber }
                             .maxOfOrNull { it.chapter_number }
-                            ?.toInt()
-                        ?: track.last_chapter_read.toInt().takeIf { it > 0 }
+                            ?.roundToInt()
+                        ?: track.last_chapter_read.roundToInt().takeIf { it > 0 }
                 if (total != null && total > 0) {
                     track.total_chapters = total
                 }
@@ -264,8 +265,8 @@ suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
                     ?: chapters
                         .filter { it.isRecognizedNumber }
                         .maxOfOrNull { it.chapter_number }
-                        ?.toInt()
-                    ?: track.last_chapter_read.toInt().takeIf { it > 0 }
+                        ?.roundToInt()
+                    ?: track.last_chapter_read.roundToInt().takeIf { it > 0 }
             if (total != null && total > 0) {
                 track.total_chapters = total
             }
@@ -312,6 +313,6 @@ suspend fun TrackService.getLastChapterRead(
 ): Float {
     if (track.manga_id == 0L) return 0f
     val mangaChapters = chapters ?: chapterRepository.getChaptersForManga(track.manga_id)
-    val lastChapterRead = mangaChapters.filter { it.read }.minByOrNull { it.smart_order }
+    val lastChapterRead = mangaChapters.filter { it.read }.maxByOrNull { it.smart_order }
     return lastChapterRead?.takeIf { it.isRecognizedNumber }?.chapter_number ?: 0f
 }
