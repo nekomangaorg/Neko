@@ -52,6 +52,7 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.DateFormat
@@ -1957,7 +1958,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             SnackbarState(messageRes = R.string.comments_unavailable)
                         )
                     } else {
-                        context.openInWebView(MdConstants.forumUrl + threadId, title = "Comments")
+                        val url = MdConstants.forumUrl + threadId
+                        if (openLinksInBrowser()) {
+                            context.openInBrowser(url, forceDefaultBrowser = true)
+                        } else {
+                            context.openInWebView(url, title = "Comments")
+                        }
                     }
                 }
             }
@@ -2135,6 +2141,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun getChapterUrl(chapter: SimpleChapter): String {
         return chapter.getHttpSource(sourceManager).getChapterUrl(chapter)
     }
+
+    fun openLinksInBrowser(): Boolean = preferences.openLinksInBrowser().get()
 
     fun blockScanlator(blockType: MangaConstants.BlockType, name: String) {
         viewModelScope.launchIO {
