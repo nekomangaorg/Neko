@@ -150,6 +150,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     // List containing skipped updates
     private val skippedUpdates = mutableMapOf<LibraryManga, String?>()
 
+    // List containing chapters that became unavailable
+    private val unavailableUpdates = mutableMapOf<LibraryManga, List<Chapter>>()
+
     val count = AtomicInteger(0)
 
     private val notificationMutex = Mutex()
@@ -506,7 +509,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     }
 
                     if (fetchedChapters.isNotEmpty()) {
-                        val newChapters =
+                        val syncResult =
                             syncChaptersWithSource(
                                 appDatabase,
                                 chapterRepository,
@@ -516,9 +519,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                 errorFromMerged,
                             )
 
-                        if (newChapters.first.isNotEmpty()) {
+                        if (syncResult.added.isNotEmpty()) {
                             if (shouldDownload) {
-                                var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
+                                var chaptersToDl = syncResult.added.sortedBy { it.chapter_number }
 
                                 if (manga.filtered_scanlators != null) {
                                     //  Ignored sources, groups and uploaders
@@ -547,13 +550,13 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                 hasDownloads = true
                             }
                             newUpdates[manga] =
-                                newChapters.first.sortedBy { it.chapter_number }.toTypedArray()
+                                syncResult.added.sortedBy { it.chapter_number }.toTypedArray()
                         }
-                        if (deleteRemoved && newChapters.second.isNotEmpty()) {
+                        if (deleteRemoved && syncResult.removed.isNotEmpty()) {
                             val removedChapters =
-                                newChapters.second.filter {
+                                syncResult.removed.filter {
                                     downloadManager.isChapterDownloaded(it, manga) &&
-                                        newChapters.first.none { newChapter ->
+                                        syncResult.added.none { newChapter ->
                                             newChapter.chapter_number == it.chapter_number &&
                                                 it.scanlator.isNullOrBlank()
                                         }
@@ -562,7 +565,10 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                 downloadManager.deleteChapters(manga, removedChapters)
                             }
                         }
-                        if (newChapters.first.size + newChapters.second.size > 0) {
+                        if (syncResult.nowUnavailable.isNotEmpty()) {
+                            unavailableUpdates[manga] = syncResult.nowUnavailable
+                        }
+                        if (syncResult.added.size + syncResult.removed.size > 0) {
                             sendUpdate(manga.id)
                         }
                     }
@@ -735,6 +741,19 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             notifier.showUpdateSkippedNotification(skippedUpdates.map { it.key.title }, skippedFile)
         }
         if (
+            unavailableUpdates.isNotEmpty() &&
+                Notifications.isNotificationChannelEnabled(
+                    context,
+                    Notifications.Channel.Library.Unavailable,
+                )
+        ) {
+            val unavailableFile = writeUnavailableFile(unavailableUpdates).getUriCompat(context)
+            notifier.showUnavailableChaptersNotification(
+                unavailableUpdates.map { it.key.title },
+                unavailableFile,
+            )
+        }
+        if (
             failedUpdates.isNotEmpty() &&
                 Notifications.isNotificationChannelEnabled(
                     context,
@@ -749,6 +768,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         }
         failedUpdates.clear()
         skippedUpdates.clear()
+        unavailableUpdates.clear()
 
         notifier.cancelProgressNotification()
     }
@@ -757,6 +777,26 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         // We don't want to start downloading while the library is updating, because websites
         // may don't like it and they could ban the user.
         downloadManager.downloadChapters(manga, chapters, false)
+    }
+
+    /** Writes the chapters that became unavailable, grouped by manga, to cache dir. */
+    private fun writeUnavailableFile(unavailable: Map<LibraryManga, List<Chapter>>): File {
+        try {
+            val file = context.createFileInCacheDir("neko_update_unavailable.txt")
+            file.bufferedWriter().use { out ->
+                // File format:
+                // ! Manga
+                //     - Chapter
+                unavailable.forEach { (manga, chapters) ->
+                    out.write("! ${manga.title}\n")
+                    chapters.forEach { out.write("    - ${it.name}\n") }
+                }
+            }
+            return file
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Error writing unavailable file" }
+        }
+        return File("")
     }
 
     /** Writes basic file of update errors to cache dir, null when it could not be written. */
