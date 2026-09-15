@@ -34,7 +34,6 @@ import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import com.hippo.unifile.UniFile
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.lang.orUnknownError
 import java.io.File
@@ -43,8 +42,6 @@ import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
 
@@ -272,10 +269,6 @@ fun Context.defaultBrowserPackageName(): String? {
 }
 
 fun Context.openInWebView(url: String, title: String = "") {
-    if (Injekt.get<PreferencesHelper>().openLinksInBrowser().get()) {
-        openInBrowser(url, forceDefaultBrowser = true)
-        return
-    }
     val intent = WebViewActivity.newIntent(this.applicationContext, url, title)
     startActivity(intent)
 }

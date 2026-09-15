@@ -1803,10 +1803,12 @@ class ReaderActivity : BaseMainActivity() {
                         if (threadId == null) {
                             toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
                         } else {
-                            this@ReaderActivity.openInWebView(
-                                MdConstants.forumUrl + threadId,
-                                title = getString(R.string.comments),
-                            )
+                            val url = MdConstants.forumUrl + threadId
+                            if (preferences.openLinksInBrowser().get()) {
+                                openInBrowser(url, forceDefaultBrowser = true)
+                            } else {
+                                openInWebView(url, title = getString(R.string.comments))
+                            }
                         }
                     }
                 }

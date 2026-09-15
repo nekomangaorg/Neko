@@ -106,6 +106,7 @@ internal class GeneralSettingsScreen(
             return listOf(
                 SearchTerm(title = stringResource(R.string.starting_screen)),
                 SearchTerm(title = stringResource(R.string.date_format)),
+                SearchTerm(title = stringResource(R.string.open_links_in_browser)),
                 SearchTerm(title = stringResource(R.string.manage_notifications)),
                 SearchTerm(
                     title = stringResource(R.string.show_recent_series),
