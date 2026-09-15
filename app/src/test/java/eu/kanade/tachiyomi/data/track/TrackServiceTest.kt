@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -63,8 +65,19 @@ class TrackServiceTest {
 
         override suspend fun add(track: Track): Track = track
 
-        override suspend fun update(track: Track, setToRead: Boolean): Track {
-            updateTrackStatus(track, setToRead, mustReadToComplete = true)
+        override suspend fun update(
+            track: Track,
+            setToRead: Boolean,
+            manga: Manga?,
+            chapters: List<Chapter>?,
+        ): Track {
+            updateTrackStatus(
+                track,
+                setToRead,
+                mustReadToComplete = true,
+                manga = manga,
+                chapters = chapters,
+            )
             return track
         }
 
@@ -224,5 +237,125 @@ class TrackServiceTest {
             assertEquals(testService.readingStatus(), track.status)
             assertTrue(track.started_reading_date > 0L)
             assertEquals(0L, track.finished_reading_date)
+        }
+
+    @Test
+    fun `given track when last chapter read is decimal greater than or equal to total chapters then status is completed`() =
+        runTest {
+            val track =
+                Track.create(1).apply {
+                    manga_id = 50L
+                    status = testService.readingStatus()
+                    last_chapter_read = 12.5f
+                    total_chapters = 12
+                    finished_reading_date = 0L
+                    started_reading_date = 0L
+                }
+
+            testService.updateTrackStatus(track, setToReadStatus = true, mustReadToComplete = true)
+
+            assertEquals(testService.completedStatus(), track.status)
+            assertTrue(track.finished_reading_date > 0L)
+            assertTrue(track.started_reading_date > 0L)
+        }
+
+    @Test
+    fun `given pre-fetched manga and chapters when updateTrackStatus called then repositories are not queried`() =
+        runTest {
+            val mangaId = 60L
+            val track =
+                Track.create(1).apply {
+                    manga_id = mangaId
+                    status = testService.readingStatus()
+                    last_chapter_read = 10f
+                    total_chapters = 0
+                    finished_reading_date = 0L
+                    started_reading_date = 0L
+                }
+
+            val mockManga =
+                mockk<Manga>(relaxed = true) {
+                    every { status } returns SManga.COMPLETED
+                    every { last_chapter_number } returns 10
+                }
+            val mockChapters =
+                (1..10).map { num ->
+                    mockk<Chapter>(relaxed = true) {
+                        every { chapter_number } returns num.toFloat()
+                        every { read } returns true
+                        every { isRecognizedNumber } returns true
+                        every { name } returns "Chapter $num"
+                    }
+                }
+
+            testService.updateTrackStatus(
+                track,
+                setToReadStatus = true,
+                mustReadToComplete = true,
+                manga = mockManga,
+                chapters = mockChapters,
+            )
+
+            assertEquals(testService.completedStatus(), track.status)
+            assertEquals(10, track.total_chapters)
+            coVerify(exactly = 0) { mangaRepository.getMangaById(any()) }
+            coVerify(exactly = 0) { chapterRepository.getChaptersForManga(any()) }
+        }
+
+    @Test
+    fun `given completed track needing dates when updateTrackStatus called then historyRepository is queried only once`() =
+        runTest {
+            val mangaId = 70L
+            val track =
+                Track.create(1).apply {
+                    manga_id = mangaId
+                    status = testService.readingStatus()
+                    last_chapter_read = 10f
+                    total_chapters = 10
+                    finished_reading_date = 0L
+                    started_reading_date = 0L
+                }
+
+            testService.updateTrackStatus(track, setToReadStatus = true, mustReadToComplete = true)
+
+            coVerify(exactly = 1) { historyRepository.getHistoryByMangaId(mangaId) }
+        }
+
+    @Test
+    fun `given decimal last chapter matching chapter number when updateTrackStatus then status is completed`() =
+        runTest {
+            val mangaId = 80L
+            val track =
+                Track.create(1).apply {
+                    manga_id = mangaId
+                    status = testService.readingStatus()
+                    last_chapter_read = 10.5f
+                    total_chapters = 0
+                    finished_reading_date = 0L
+                    started_reading_date = 0L
+                }
+
+            val mockManga =
+                mockk<Manga>(relaxed = true) {
+                    every { status } returns SManga.COMPLETED
+                    every { last_chapter_number } returns null
+                }
+            val mockChapters =
+                listOf(
+                    mockk<Chapter>(relaxed = true) {
+                        every { chapter_number } returns 10.5f
+                        every { read } returns true
+                        every { isRecognizedNumber } returns true
+                        every { name } returns "Chapter 10.5"
+                    }
+                )
+
+            coEvery { mangaRepository.getMangaById(mangaId) } returns mockManga
+            coEvery { chapterRepository.getChaptersForManga(mangaId) } returns mockChapters
+
+            testService.updateTrackStatus(track, setToReadStatus = true, mustReadToComplete = true)
+
+            assertEquals(testService.completedStatus(), track.status)
+            assertEquals(10, track.total_chapters)
         }
 }
