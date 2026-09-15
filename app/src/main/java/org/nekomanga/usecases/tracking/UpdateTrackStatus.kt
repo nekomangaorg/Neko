@@ -18,8 +18,19 @@ class UpdateTrackStatus(
             trackAndService.track.copy(status = trackAndService.service.statusList[statusIndex])
 
         val service = trackManager.getService(trackAndService.service.id)
-        if (service?.isCompletedStatus(statusIndex) == true && track.totalChapters > 0) {
-            track = track.copy(lastChapterRead = track.totalChapters.toFloat())
+        val isCompleted = service?.isCompletedStatus(statusIndex) == true
+        if (isCompleted) {
+            if (track.totalChapters > 0) {
+                track = track.copy(lastChapterRead = track.totalChapters.toFloat())
+            }
+            if (trackAndService.service.supportsReadingDates) {
+                if (track.finishedReadingDate <= 0L) {
+                    track = track.copy(finishedReadingDate = System.currentTimeMillis())
+                }
+                if (track.startedReadingDate <= 0L) {
+                    track = track.copy(startedReadingDate = System.currentTimeMillis())
+                }
+            }
         }
         return updateTrackingService.await(track, trackAndService.service)
     }

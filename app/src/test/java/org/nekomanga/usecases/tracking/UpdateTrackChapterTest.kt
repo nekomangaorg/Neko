@@ -26,7 +26,7 @@ class UpdateTrackChapterTest {
 
             val trackAndService = TrackingConstants.TrackAndService(initialTrack, service)
 
-            coEvery { updateTrackingService.await(expectedTrack, service) } returns
+            coEvery { updateTrackingService.await(expectedTrack, service, true) } returns
                 TrackingUpdate.Success
 
             val result = useCase.await(newChapterNumber, trackAndService)
