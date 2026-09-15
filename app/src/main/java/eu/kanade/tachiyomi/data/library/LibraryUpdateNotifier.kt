@@ -128,6 +128,47 @@ class LibraryUpdateNotifier(private val context: Context) {
     }
 
     /**
+     * Shows notification listing manga whose chapters became unavailable, with an action to open
+     * the full log.
+     *
+     * @param titles List of manga titles with chapters that became unavailable.
+     * @param uri Uri for the log file listing the chapters per manga.
+     */
+    fun showUnavailableChaptersNotification(titles: List<String>, uri: Uri) {
+        if (titles.isEmpty()) {
+            return
+        }
+
+        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
+
+        context.notificationManager.notify(
+            Notifications.Id.Library.Unavailable,
+            context
+                .notificationBuilder(Notifications.Channel.Library.Unavailable) {
+                    setContentTitle(
+                        context.getString(
+                            R.string.notification_chapters_unavailable,
+                            titles.size,
+                        )
+                    )
+                    setContentText(context.getString(R.string.tap_to_see_details))
+                    setStyle(
+                        NotificationCompat.BigTextStyle()
+                            .bigText(titles.joinToString("\n") { it.chop(TITLE_MAX_LEN) })
+                    )
+                    setContentIntent(pendingIntent)
+                    setSmallIcon(R.drawable.ic_neko_notification)
+                    addAction(
+                        R.drawable.ic_help_24dp,
+                        context.getString(R.string.open_log),
+                        pendingIntent,
+                    )
+                }
+                .build(),
+        )
+    }
+
+    /**
      * Shows notification containing update entries that were skipped with actions to open full log
      * and learn more.
      *
