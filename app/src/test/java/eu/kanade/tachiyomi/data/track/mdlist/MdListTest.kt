@@ -13,7 +13,8 @@ import io.mockk.mockk
 import java.io.IOException
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertThrows
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.nekomanga.data.database.repository.ChapterRepository
@@ -86,8 +87,13 @@ class MdListTest {
             coEvery { mangaDex.updateFollowStatus(any(), any()) } throws
                 IOException("Network error")
 
-            assertThrows(IOException::class.java) {
-                runTest { mdList.update(track, setToRead = true) }
+            var caught = false
+            try {
+                mdList.update(track, setToRead = true)
+            } catch (e: IOException) {
+                caught = true
+                assertEquals("Network error", e.message)
             }
+            assertTrue("Expected IOException to be thrown", caught)
         }
 }

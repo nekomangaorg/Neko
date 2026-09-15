@@ -275,6 +275,7 @@ class TrackServiceTest {
 
             val mockManga =
                 mockk<Manga>(relaxed = true) {
+                    coEvery { isOneShotOrCompleted(chapterRepository, any()) } returns true
                     every { status } returns SManga.COMPLETED
                     every { last_chapter_number } returns 10
                 }
@@ -337,6 +338,7 @@ class TrackServiceTest {
 
             val mockManga =
                 mockk<Manga>(relaxed = true) {
+                    coEvery { isOneShotOrCompleted(chapterRepository, any()) } returns true
                     every { status } returns SManga.COMPLETED
                     every { last_chapter_number } returns null
                 }
