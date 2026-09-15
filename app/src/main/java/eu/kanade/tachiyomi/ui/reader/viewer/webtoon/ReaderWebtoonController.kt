@@ -63,11 +63,13 @@ class ReaderWebtoonController {
         val prevHasMissingChapters = hasMissingChapters(chapters.currChapter, chapters.prevChapter)
         val nextHasMissingChapters = hasMissingChapters(chapters.nextChapter, chapters.currChapter)
 
-        // Add previous chapter pages
+        // Add previous chapter pages (only enough to fill ~1 screen height for padding)
         if (chapters.prevChapter != null) {
             val prevPages = chapters.prevChapter.pages
             if (prevPages != null) {
-                newItems.addAll(mapPagesToItems(prevPages, screenHeight))
+                val limitedPrevPages =
+                    limitPagesToScreenHeight(prevPages, screenHeight, fromEnd = true)
+                newItems.addAll(mapPagesToItems(limitedPrevPages, screenHeight))
             }
         }
 
@@ -106,7 +108,9 @@ class ReaderWebtoonController {
         if (chapters.nextChapter != null) {
             val nextPages = chapters.nextChapter.pages
             if (nextPages != null) {
-                newItems.addAll(mapPagesToItems(nextPages, screenHeight))
+                val limitedNextPages =
+                    limitPagesToScreenHeight(nextPages, screenHeight, fromEnd = false)
+                newItems.addAll(mapPagesToItems(limitedNextPages, screenHeight))
             }
         }
 
@@ -123,6 +127,32 @@ class ReaderWebtoonController {
             }
             listOf(ReaderUiItem.Page(page))
         }
+    }
+
+    /**
+     * Limits [pages] to approximately [screenHeight] worth of rendered content. If [fromEnd], takes
+     * pages from the tail (for prev chapter padding). Otherwise takes from the head (for next
+     * chapter peek). Always includes at least [minPages] pages.
+     */
+    private fun limitPagesToScreenHeight(
+        pages: List<ReaderPage>,
+        screenHeight: Int,
+        fromEnd: Boolean,
+        minPages: Int = 2,
+    ): List<ReaderPage> {
+        if (screenHeight <= 0) return pages
+        var accumulatedHeight = 0
+        var pagesToTake = 0
+        val ordered = if (fromEnd) pages.reversed() else pages
+        for (page in ordered) {
+            if (page.renderedHeight > 0) {
+                accumulatedHeight += page.renderedHeight
+                pagesToTake++
+                if (accumulatedHeight >= screenHeight) break
+            }
+        }
+        val count = maxOf(minPages, pagesToTake)
+        return if (fromEnd) pages.takeLast(count) else pages.take(count)
     }
 
     /**
