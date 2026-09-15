@@ -57,6 +57,7 @@ import java.util.Date
 import kotlin.random.Random
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -157,6 +158,15 @@ constructor(
 
     /** The time the chapter was started reading */
     private var chapterReadStartTime: Long? = null
+
+    /**
+     * Tracks the chapter ID currently being asynchronously loaded in onPageSelected to prevent
+     * duplicate concurrent loads.
+     */
+    private var loadingChapterId: Long? = null
+
+    /** Coroutine job for active chapter transition in onPageSelected */
+    private var loadNewChapterJob: Job? = null
 
     /** Relay used when loading prev/next chapter needed to lock the UI (with a dialog). */
     private var finished = false
@@ -610,11 +620,24 @@ constructor(
             updateChapterProgress(selectedChapter, page, hasExtraPage)
         }
 
-        // This logic remains the same, but the timer calls are gone
-        if (selectedChapter != currentChapters.currChapter) {
-            TimberKt.d { "Setting ${selectedChapter.chapter.url} as active" }
+        if (
+            selectedChapter != currentChapters.currChapter &&
+                loadingChapterId != selectedChapter.chapter.id
+        ) {
+            val chapterToLoad = selectedChapter
+            loadingChapterId = chapterToLoad.chapter.id
+            loadNewChapterJob?.cancel()
+            TimberKt.d { "Setting ${chapterToLoad.chapter.url} as active" }
             viewModelScope.launchNonCancellable { saveReadingProgress(currentChapters.currChapter) }
-            viewModelScope.launch { loadNewChapter(selectedChapter) }
+            loadNewChapterJob = viewModelScope.launch {
+                try {
+                    loadNewChapter(chapterToLoad)
+                } finally {
+                    if (loadingChapterId == chapterToLoad.chapter.id) {
+                        loadingChapterId = null
+                    }
+                }
+            }
         }
 
         // This logic is the same, but uses the 0.25 threshold from the new file
