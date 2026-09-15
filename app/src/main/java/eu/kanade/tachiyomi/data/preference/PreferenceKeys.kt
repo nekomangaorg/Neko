@@ -62,5 +62,7 @@ object PreferenceKeys {
 
     const val autoAddTracker = "auto_add_tracker"
 
+    const val excludeCategoriesFromTrackingUpdates = "exclude_categories_from_tracking_updates"
+
     const val thumbnailQuality = "mangadex_thumbnail_quality"
 }

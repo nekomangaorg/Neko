@@ -118,8 +118,9 @@ sealed class Preference {
                 (value: Set<String>, entries: Map<String, String>) -> String? =
                 { v, e ->
                     val combined =
-                        remember(v) { v.map { e[it] }.takeIf { it.isNotEmpty() }?.joinToString() }
-                            ?: stringResource(R.string.none)
+                        remember(v) {
+                            v.mapNotNull { e[it] }.takeIf { it.isNotEmpty() }?.joinToString()
+                        } ?: stringResource(R.string.none)
                     subtitle?.format(combined)
                 },
             val dialogTitle: String? = null,
