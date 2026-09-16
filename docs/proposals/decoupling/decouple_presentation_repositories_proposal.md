@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Architectural Decoupling  
+**Execution Order:** Phase 1 (Architectural Foundations & Isolated Wins) — Step 1 (Priority: Critical / Foundation)  
+**Prerequisites:** None (Root Data/Domain Layer Cleanup)  
+**Downstream Dependents:** [`decouple_feed_screen_jobs_and_actions_proposal.md`](decouple_feed_screen_jobs_and_actions_proposal.md), [`decouple_browse_and_display_screen_navigation_proposal.md`](decouple_browse_and_display_screen_navigation_proposal.md)  
 **Implementation State:** 🟡 Coupled Baseline (Repositories defined in `presentation` packages, importing Compose UI utilities, and directly returning UI state models)  
 
 ---
@@ -158,6 +161,14 @@ chapterList.any { it.isUnread }
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 1 (Architectural Foundations & Isolated Wins) — Step 1**  
+> **Prerequisites:** None (Root Data/Domain Layer Cleanup).  
+> **Unlocks:** Step 7 ([`decouple_feed_screen_jobs_and_actions_proposal.md`](decouple_feed_screen_jobs_and_actions_proposal.md)) and Step 9 ([`decouple_browse_and_display_screen_navigation_proposal.md`](decouple_browse_and_display_screen_navigation_proposal.md)).  
+>
+> Relocating `BrowseRepository` and `FeedRepository` out of presentation packages and into `org.nekomanga.data.repository`, while establishing clean domain return models (`BrowseHomeSection`, feed domain models), is the foundational step for all subsequent Browse and Feed screen refactorings.
 
 - [ ] **Step 1**: Create `BrowseHomeSection` domain model and define `BrowseRepository` interface in `org.nekomanga.data.repository`.
 - [ ] **Step 2**: Relocate `BrowseRepository` implementation, remove `HomePageManga` dependency, and add mapping in `BrowseViewModel`.

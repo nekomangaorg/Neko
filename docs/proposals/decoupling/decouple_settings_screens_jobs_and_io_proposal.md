@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 2 (Screen Jobs & Workflow Decoupling) — Step 5 (Priority: High / Background I/O Decoupling)  
+**Prerequisites:** None (Establishes ViewModel WorkManager Delegation Pattern)  
+**Downstream Dependents:** [`decouple_library_screen_job_dispatching_proposal.md`](decouple_library_screen_job_dispatching_proposal.md)  
 **Implementation State:** 🟡 Coupled Baseline (Passing ViewModel CoroutineScopes, Injekt calls, and Disk I/O inside Settings UI)  
 
 ---
@@ -153,6 +156,14 @@ The Composable simply renders `storageState.storages`.
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 2 (Screen Jobs & Workflow Decoupling) — Step 5**  
+> **Prerequisites:** None.  
+> **Unlocks:** Step 6 ([`decouple_library_screen_job_dispatching_proposal.md`](decouple_library_screen_job_dispatching_proposal.md)).  
+>
+> Eliminating `viewModelScope`, disk metric queries, and direct `LibraryUpdateJob.setupTask` / `BackupCreatorJob` invocations from Settings composables establishes the standard architecture for encapsulating WorkManager tasks within ViewModels, paving the way for LibraryScreen job decoupling.
 
 - [ ] **Step 1**: Remove `viewModelScope` parameter from `LibrarySettingsScreen` and route job setup to `LibrarySettingsViewModel`.
 - [ ] **Step 2**: Add background disk metric calculations to `DataStorageSettingsViewModel`.

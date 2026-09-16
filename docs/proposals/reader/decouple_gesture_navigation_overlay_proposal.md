@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
+**Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R7 (Priority: Low / Educational Overlay)  
+**Prerequisites:** None (Self-Contained Visual Overlay)  
+**Downstream Dependents:** None  
 **Implementation State:** 🟡 Coupled Baseline (Legacy ViewerNavigation classes, invert math, and ContextCompat color resolution in Compose)  
 
 ---
@@ -157,6 +160,14 @@ fun GestureNavigationOverlay(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R7**  
+> **Prerequisites:** None (Self-Contained).  
+> **Unlocks:** None (Completes Reader UI overlays decoupling).  
+>
+> Decoupling `GestureNavigationOverlay` isolates coordinate inversion math into `GetNavigationRegionsUseCase` and renders pure `NavigationRegionUiModel` boxes, enabling previewability without requiring runtime viewer instances.
 
 - [ ] **Step 1**: Define `NavigationRegionUiModel`.
 - [ ] **Step 2**: Implement `GetNavigationRegionsUseCase` with unit tests for LTR/RTL and invert modes.

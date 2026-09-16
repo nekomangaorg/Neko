@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 2 (Screen Jobs & Workflow Decoupling) — Step 6 (Priority: High / Screen Architecture)  
+**Prerequisites:** Step 2 ([`decouple_category_management_dialog_and_sheet_proposal.md`](decouple_category_management_dialog_and_sheet_proposal.md)), Step 5 ([`decouple_settings_screens_jobs_and_io_proposal.md`](decouple_settings_screens_jobs_and_io_proposal.md))  
+**Downstream Dependents:** None  
 **Implementation State:** 🟡 Coupled Baseline (WorkManager job launches, DB model mappings, and state queries in Compose)  
 
 ---
@@ -156,6 +159,14 @@ The share intent is received via an event collector in the host Activity/Screen 
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 2 (Screen Jobs & Workflow Decoupling) — Step 6**  
+> **Prerequisites:** Step 2 ([`decouple_category_management_dialog_and_sheet_proposal.md`](decouple_category_management_dialog_and_sheet_proposal.md)) for category models and Step 5 ([`decouple_settings_screens_jobs_and_io_proposal.md`](decouple_settings_screens_jobs_and_io_proposal.md)) for background job encapsulation patterns.  
+> **Unlocks:** None (Completes Library screen modernization).  
+>
+> Decoupling `LibraryScreen` eliminates direct WorkManager dispatches (`LibraryUpdateJob`), database entity mapping (`toDbCategory`, `toLibraryManga`), and intent creation from UI composables, leveraging `UpdateLibraryUseCase` and clean ViewModel action streams.
 
 - [ ] **Step 1**: Implement `UpdateLibraryUseCase` and unit tests.
 - [ ] **Step 2**: Add `refreshCategory(categoryId)` and `updateLibrary()` to `LibraryViewModel`.

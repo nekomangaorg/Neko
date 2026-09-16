@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x UI Decoupling  
+**Execution Order:** Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 10 (Priority: High / Subdomain Controller Contract)  
+**Prerequisites:** None  
+**Downstream Dependents:** Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md))  
 **Implementation State:** 🟡 Coupled Baseline (Internal mutable state for selection, inline Coil `ImageRequest.Builder` calls, and direct domain entity coupling)  
 
 ---
@@ -216,6 +219,14 @@ private fun ArtworkSheetContent(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 10**  
+> **Prerequisites:** None.  
+> **Unlocks:** Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md)) — directly forms the interface contract for `MangaArtworkController`.  
+>
+> As the lowest-complexity sheet in the Manga screen ecosystem, decoupling `ArtworkSheet` into `ArtworkSheetUiModel` and `ArtworkSheetAction` provides the first modular controller contract needed for deconstructing `MangaViewModel`.
 
 - [ ] **Step 1**: Define `ArtworkSheetUiModel`, `ArtworkItemUiModel`, and `ArtworkSheetAction`.
 - [ ] **Step 2**: Hoist active cover selection to `MangaViewModel` (or `MangaArtworkController`).

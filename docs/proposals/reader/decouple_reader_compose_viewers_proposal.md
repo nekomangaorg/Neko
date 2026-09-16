@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
+**Execution Order:** Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R3 (Priority: Critical / Viewer Decoupling)  
+**Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)), Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md))  
+**Downstream Dependents:** Reader Track Phase R2 Auxiliary Proposals (Steps R4–R7)  
 **Implementation State:** 🟡 Coupled Baseline (Passing legacy View instances, DownloadManager, and Injekt inside Compose Viewers)  
 
 ---
@@ -335,6 +338,14 @@ class ComposeWebtoonViewerTest {
 ---
 
 ## 7. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R3**  
+> **Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)) for hoisted nav callbacks and Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)) for transition page UI models.  
+> **Unlocks:** Reader Track Phase R2 (Auxiliary Sheets & Overlays, Steps R4–R7).  
+>
+> Decoupling `ComposePagerViewer` and `ComposeWebtoonViewer` from legacy View classes (`PagerViewer`, `WebtoonViewer`), `DownloadManager`, and `Injekt` isolates viewer rendering into pure Jetpack Compose components driven by `PagerViewerConfigUiModel` / `WebtoonViewerConfigUiModel`, completing core viewer decoupling.
 
 - [ ] **Step 1**: Define `PagerViewerConfigUiModel` and `WebtoonViewerConfigUiModel`.
 - [ ] **Step 2**: Implement `ReaderUiItem.isEquivalentTo` domain identity contract and pure JVM tests.

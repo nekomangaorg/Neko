@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 1 (Architectural Foundations & Isolated Wins) — Step 2 (Priority: High / Core Domain)  
+**Prerequisites:** None  
+**Downstream Dependents:** [`decouple_library_screen_job_dispatching_proposal.md`](decouple_library_screen_job_dispatching_proposal.md)  
 **Implementation State:** 🟡 Coupled Baseline (In-Composable name uniqueness checks, diff algorithms, and plural formatting)  
 
 ---
@@ -184,6 +187,14 @@ fun AddEditCategoryDialog(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 1 (Architectural Foundations & Isolated Wins) — Step 2**  
+> **Prerequisites:** None.  
+> **Unlocks:** Step 6 ([`decouple_library_screen_job_dispatching_proposal.md`](decouple_library_screen_job_dispatching_proposal.md)).  
+>
+> Extracting pure domain UseCases (`ValidateCategoryNameUseCase`, `CalculateCategoryDiffUseCase`) and making category dialogs/sheets purely stateless establishes clean category domain contracts that can be safely consumed by both Category Settings and the Library Screen.
 
 - [ ] **Step 1**: Implement `ValidateCategoryNameUseCase` and unit tests.
 - [ ] **Step 2**: Implement `CalculateCategoryDiffUseCase` and unit tests.

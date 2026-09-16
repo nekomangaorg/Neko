@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 12 (Priority: High / Subdomain Controller Contract)  
+**Prerequisites:** None  
+**Downstream Dependents:** Step 14 ([`decouple_manga_details_share_and_header_proposal.md`](decouple_manga_details_share_and_header_proposal.md)), Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md))  
 **Implementation State:** 🟡 Coupled Baseline (Injekt calls and source resolution logic present inside Composables)  
 
 ---
@@ -170,6 +173,14 @@ fun MergeSheet(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 12**  
+> **Prerequisites:** None.  
+> **Unlocks:** Step 14 ([`decouple_manga_details_share_and_header_proposal.md`](decouple_manga_details_share_and_header_proposal.md)) for header merge count badge and Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md)) — directly forms the interface contract for `MangaMergeController`.  
+>
+> Decoupling `MergeSheet` removes `Injekt.get<SourceManager>()` and source resolution logic from Compose, introducing `GetAvailableMergeSourcesUseCase` and defining the contract for `MangaMergeController`.
 
 - [ ] **Step 1**: Define `MergeSheetUiState`, `MergedItemUiModel`, and `MergeSourceUiModel` in `org.nekomanga.presentation.components.sheets`.
 - [ ] **Step 2**: Create and unit-test `GetAvailableMergeSourcesUseCase`.

@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 1 (Architectural Foundations & Isolated Wins) — Step 3 (Priority: Medium / Isolated Performance Win)  
+**Prerequisites:** None (Self-Contained Screen & ViewModel)  
+**Downstream Dependents:** None (Standalone Feature)  
 **Implementation State:** 🟡 Coupled Baseline (Heavy list grouping, $O(M \times C)$ filtering, and number formatting executed on UI thread in Composables)  
 
 ---
@@ -156,6 +159,14 @@ fun SimpleStats(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 1 (Architectural Foundations & Isolated Wins) — Step 3**  
+> **Prerequisites:** None (Self-Contained).  
+> **Unlocks:** None (Standalone Feature).  
+>
+> Offloading heavy mathematical transformations and $O(M \times C)$ category aggregations to `AggregateDetailedStatsUseCase` on `Dispatchers.Default` provides an immediate frame-rate improvement for large libraries with zero blast radius or external dependencies on other screens.
 
 - [ ] **Step 1**: Implement `AggregateDetailedStatsUseCase` with optimized index mapping and unit tests.
 - [ ] **Step 2**: Update `StatsViewModel` to output pre-computed `SimpleStatMetricUiModel` and `DetailedDistributionUiModel`.

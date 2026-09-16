@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
+**Execution Order:** Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R1 (Priority: Critical / Concurrency Backbone)  
+**Prerequisites:** None (Phase 1 Complete, Phase 2 in progress)  
+**Downstream Dependents:** Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)), Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
 **Implementation State:** 🟡 Phase 1 Stabilization Complete (Hoisted `onNavigateToChapter` and `onRequestPreloadChapter`, memoized `defaultPageIndex`, stabilized `nestedScrollConnection`, and aligned concurrency checks; transition execution remains in Activity `lifecycleScope` awaiting Phase 2 ViewModel engine)  
 
 ---
@@ -446,6 +449,14 @@ gantt
     Deprecate PagerViewer & BaseViewer           :         p3_1, after p2_2, 4d
     Delete PagerViewer and remove from Activity   :         p3_2, after p3_1, 5d
 ```
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R1**  
+> **Prerequisites:** None (Phase 1 Complete; Phase 2 in progress).  
+> **Unlocks:** Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)) and Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md)).  
+>
+> As the reader's central navigation and concurrency engine, moving chapter transitions into `ReaderViewModel.viewModelScope` guarded by `navigationMutex` and streaming `ReaderNavCommand` events is the foundational backbone of the Reader Decoupling track.
 
 ### Phase 1: Decouple Navigation & Preloading (Milestone 3.8.0)
 - Move `loadAdjacentChapter` execution completely into `ReaderViewModel.viewModelScope`.

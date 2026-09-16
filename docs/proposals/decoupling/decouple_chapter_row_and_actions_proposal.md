@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 13 (Priority: Critical / High-Frequency UI & Domain Action)  
+**Prerequisites:** Step 8 ([`decouple_download_screen_and_chapter_row_proposal.md`](decouple_download_screen_and_chapter_row_proposal.md)) recommended  
+**Downstream Dependents:** Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md))  
 **Implementation State:** 🟡 Coupled Baseline (Domain checks, DB entity conversions, and Intent building inside Compose)  
 
 ---
@@ -198,6 +201,14 @@ when (event) {
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 13**  
+> **Prerequisites:** Step 8 ([`decouple_download_screen_and_chapter_row_proposal.md`](decouple_download_screen_and_chapter_row_proposal.md)) recommended for shared download state representation.  
+> **Unlocks:** Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md)) — directly forms the interface contract for `MangaChapterController`.  
+>
+> Decoupling `ChapterRow` (the most frequently rendered component on `MangaScreen`) into `ChapterRowUiModel` and a unified `ChapterUiAction` handler, while extracting `OpenChapterUseCase`, defines the high-frequency contract required for `MangaChapterController`.
 
 - [ ] **Step 1**: Implement `OpenChapterUseCase` and write unit tests covering supported and unsupported scanlators.
 - [ ] **Step 2**: Create `ChapterRowUiModel` and `ChapterUiAction`.

@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
+**Execution Order:** Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R2 (Priority: High / Viewer Subcomponent)  
+**Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md))  
+**Downstream Dependents:** Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
 **Implementation State:** 🟡 Coupled Baseline (DownloadManager injected into Composable, legacy DB conversions, and gap math in UI)  
 
 ---
@@ -142,6 +145,14 @@ No `DownloadManager`, no `queueState.collectAsState()`, and no `toManga()` calls
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R2**  
+> **Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)).  
+> **Unlocks:** Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md)).  
+>
+> Decoupling `ReaderTransitionPage` into `ChapterTransitionUiModel` removes `DownloadManager` and legacy database model conversions from the viewer page item tree. This is a direct prerequisite for cleanly decoupling `ComposePagerViewer` and `ComposeWebtoonViewer` without leaking download manager dependencies.
 
 - [ ] **Step 1**: Define `ChapterTransitionUiModel`.
 - [ ] **Step 2**: Create transition mapping logic in `ReaderViewModel` combining chapter gap math and download status.

@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 14 (Priority: Medium-High / Screen Header & Intent Coordination)  
+**Prerequisites:** Step 11 ([`decouple_tracking_sheet_domain_logic_proposal.md`](decouple_tracking_sheet_domain_logic_proposal.md)), Step 12 ([`decouple_merge_sheet_domain_logic_proposal.md`](decouple_merge_sheet_domain_logic_proposal.md))  
+**Downstream Dependents:** Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md))  
 **Implementation State:** 🟡 Coupled Baseline (Network URL builders, cache I/O, and Intent creation embedded in Composables)  
 
 ---
@@ -187,6 +190,14 @@ fun ButtonBlock(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 14**  
+> **Prerequisites:** Step 11 ([`decouple_tracking_sheet_domain_logic_proposal.md`](decouple_tracking_sheet_domain_logic_proposal.md)) and Step 12 ([`decouple_merge_sheet_domain_logic_proposal.md`](decouple_merge_sheet_domain_logic_proposal.md)) for header tracking and merge count indicators.  
+> **Unlocks:** Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md)).  
+>
+> Decoupling `ButtonBlock` and extracting `PrepareMangaSharePayloadUseCase` establishes stateless header actions and intent delegation, preparing the remaining screen-level coordination logic before `MangaViewModel` decomposition.
 
 - [ ] **Step 1**: Implement and unit-test `PrepareMangaSharePayloadUseCase`.
 - [ ] **Step 2**: Add `uuid` and `headerActions` to `MangaConstants.MangaDetailScreenState`.

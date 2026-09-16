@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Architecture Overhaul  
+**Execution Order:** Phase 4 (Capstone Architecture Overhaul) — Step 15 (Priority: Critical / Subsystem Capstone)  
+**Prerequisites:** Step 10 ([`decouple_artwork_sheet_state_proposal.md`](decouple_artwork_sheet_state_proposal.md)), Step 11 ([`decouple_tracking_sheet_domain_logic_proposal.md`](decouple_tracking_sheet_domain_logic_proposal.md)), Step 12 ([`decouple_merge_sheet_domain_logic_proposal.md`](decouple_merge_sheet_domain_logic_proposal.md)), Step 13 ([`decouple_chapter_row_and_actions_proposal.md`](decouple_chapter_row_and_actions_proposal.md)), Step 14 ([`decouple_manga_details_share_and_header_proposal.md`](decouple_manga_details_share_and_header_proposal.md))  
+**Downstream Dependents:** None (Subsystem Decoupling Capstone)  
 **Implementation State:** 🟡 Coupled Baseline (2,387-line God ViewModel with 24+ injected dependencies orchestrating 6 distinct subdomains)  
 
 ---
@@ -180,6 +183,14 @@ class MangaViewModel(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 4 (Capstone Architecture Overhaul) — Step 15**  
+> **Prerequisites:** Steps 10 ([`decouple_artwork_sheet_state_proposal.md`](decouple_artwork_sheet_state_proposal.md)), 11 ([`decouple_tracking_sheet_domain_logic_proposal.md`](decouple_tracking_sheet_domain_logic_proposal.md)), 12 ([`decouple_merge_sheet_domain_logic_proposal.md`](decouple_merge_sheet_domain_logic_proposal.md)), 13 ([`decouple_chapter_row_and_actions_proposal.md`](decouple_chapter_row_and_actions_proposal.md)), and 14 ([`decouple_manga_details_share_and_header_proposal.md`](decouple_manga_details_share_and_header_proposal.md)).  
+> **Unlocks:** Subsystem Decoupling Milestone Completion.  
+>
+> Deconstructing the 2,387-line `MangaViewModel` God class is the capstone refactoring of the subsystem track. By executing Steps 10 through 14 first, the contracts for `MangaArtworkController`, `MangaTrackingController`, `MangaMergeController`, and `MangaChapterController` are already decoupled into stable UI models and use cases, allowing `MangaViewModel` to be reduced to a clean ~300-line flow coordinator without instability or rework.
 
 - [ ] **Step 1**: Define interfaces for `MangaTrackingController`, `MangaMergeController`, `MangaArtworkController`, and `MangaChapterController`.
 - [ ] **Step 2**: Extract `MangaArtworkController` and verify cover caching / selection.

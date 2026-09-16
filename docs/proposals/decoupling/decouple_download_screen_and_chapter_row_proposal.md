@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x UI Decoupling  
+**Execution Order:** Phase 2 (Screen Jobs & Workflow Decoupling) — Step 8 (Priority: Medium / UI Row Decoupling)  
+**Prerequisites:** None  
+**Downstream Dependents:** Step 13 ([`decouple_chapter_row_and_actions_proposal.md`](decouple_chapter_row_and_actions_proposal.md))  
 **Implementation State:** 🟡 Coupled Baseline (In-composable scanlator grouping, direct coupling to legacy `Download.State` enum, and inline dropdown allocations)  
 
 ---
@@ -205,6 +208,14 @@ fun DownloadChapterRow(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 2 (Screen Jobs & Workflow Decoupling) — Step 8**  
+> **Prerequisites:** None.  
+> **Unlocks:** Step 13 ([`decouple_chapter_row_and_actions_proposal.md`](decouple_chapter_row_and_actions_proposal.md)).  
+>
+> Decoupling `DownloadScreen` and `DownloadChapterRow` moves scanlator grouping up to the ViewModel layer and isolates the composables from the legacy `Download.State` enum, providing clean download UI models that serve as a blueprint for `ChapterRow` decoupling.
 
 - [ ] **Step 1**: Define `DownloadScreenUiModel`, `DownloadRowUiModel`, and `DownloadDisplayState`.
 - [ ] **Step 2**: Implement the mapping and grouping logic in the ViewModel layer.

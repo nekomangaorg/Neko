@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 2 (Screen Jobs & Workflow Decoupling) — Step 7 (Priority: High / Screen Architecture)  
+**Prerequisites:** Step 1 ([`decouple_presentation_repositories_proposal.md`](decouple_presentation_repositories_proposal.md))  
+**Downstream Dependents:** None  
 **Implementation State:** 🟡 Coupled Baseline (WorkManager lifecycle management, duplicate business rules, and StateFlow prop-drilling)  
 
 ---
@@ -160,6 +163,14 @@ No `StateFlow` types are passed into `FeedWrapper`. The child composable becomes
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 2 (Screen Jobs & Workflow Decoupling) — Step 7**  
+> **Prerequisites:** Step 1 ([`decouple_presentation_repositories_proposal.md`](decouple_presentation_repositories_proposal.md)) — `FeedRepository` must be relocated to `org.nekomanga.data.repository` and return domain entities before FeedScreen UI/ViewModel refactoring.  
+> **Unlocks:** None (Completes Feed screen modernization).  
+>
+> Decoupling `FeedScreen` isolates the UI from WorkManager lifecycle tracking (`LibraryUpdateJob`), removes `StateFlow` prop-drilling, and routes chapter download eligibility through `ValidateChapterDownloadUseCase`.
 
 - [ ] **Step 1**: Implement `ValidateChapterDownloadUseCase` and write unit tests.
 - [ ] **Step 2**: Add `toggleLibraryUpdate()` to `FeedViewModel`.

@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Architectural Decoupling  
+**Execution Order:** Phase 1 (Architectural Foundations & Isolated Wins) — Step 4 (Priority: Low-Medium / Isolated Flow)  
+**Prerequisites:** None (Self-Contained Onboarding Wizard)  
+**Downstream Dependents:** None (Independent Leaf Flow)  
 **Implementation State:** 🟡 Coupled Baseline (Service locator calls, internal mutable state, direct preference writes, and Activity recreation inside UI step objects)  
 
 ---
@@ -211,6 +214,14 @@ fun ThemeStepContent(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 1 (Architectural Foundations & Isolated Wins) — Step 4**  
+> **Prerequisites:** None (Self-Contained).  
+> **Unlocks:** None (Independent Leaf Flow).  
+>
+> Decoupling `StorageStep` and `ThemeStep` from `Injekt.get()`, `PreferencesHelper`, and `ActivityCompat.recreate()` modernizes the first-run onboarding sequence into pure stateless composables with zero blast radius on existing core workflows.
 
 - [ ] **Step 1**: Define `StorageStepUiState` and `ThemeStepUiState` models.
 - [ ] **Step 2**: Add state flows and theme update handlers to `OnboardingViewModel`.

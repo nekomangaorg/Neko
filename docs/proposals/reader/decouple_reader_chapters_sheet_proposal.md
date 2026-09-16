@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
+**Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R5 (Priority: Medium / UI Sheet Decoupling)  
+**Prerequisites:** Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
+**Downstream Dependents:** None  
 **Implementation State:** 🟡 Coupled Baseline (Injekt calls, 28 function parameters, Context-based color math in list items)  
 
 ---
@@ -180,6 +183,14 @@ private fun ChapterListItem(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R5**  
+> **Prerequisites:** Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md)).  
+> **Unlocks:** None (Completes reader chapters sheet modernization).  
+>
+> Decoupling `ReaderChaptersSheet` replaces 28 individual parameters, `Injekt.get()`, and Android `Context` color calculations with `ReaderChaptersSheetUiState` and `ReaderChaptersAction`, pre-mapping rows on background dispatchers.
 
 - [ ] **Step 1**: Define `ReaderChaptersSheetUiState`, `ReaderChapterRowUiModel`, and `ReaderChaptersAction`.
 - [ ] **Step 2**: Implement background mapper in `ReaderViewModel`.

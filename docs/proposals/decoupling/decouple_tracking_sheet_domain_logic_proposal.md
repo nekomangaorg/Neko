@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 11 (Priority: High / Subdomain Controller Contract)  
+**Prerequisites:** None  
+**Downstream Dependents:** Step 14 ([`decouple_manga_details_share_and_header_proposal.md`](decouple_manga_details_share_and_header_proposal.md)), Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md))  
 **Implementation State:** 🟡 Coupled Baseline (Functional lambda providers, domain object construction, and 6 mutable dialog states inside Composable)  
 
 ---
@@ -161,6 +164,14 @@ fun TrackingSheet(
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 3 (Manga Subdomain Components & Modal Sheets Decoupling) — Step 11**  
+> **Prerequisites:** None.  
+> **Unlocks:** Step 14 ([`decouple_manga_details_share_and_header_proposal.md`](decouple_manga_details_share_and_header_proposal.md)) for header tracking count badge and Step 15 ([`decouple_manga_viewmodel_god_class_proposal.md`](decouple_manga_viewmodel_god_class_proposal.md)) — directly forms the interface contract for `MangaTrackingController`.  
+>
+> Decoupling `TrackingSheet` replaces 6 internal mutable dialog states, functional lambda providers, and in-composable domain conversions with `TrackingSheetUiState` and `TrackingUiAction`, defining the contract for `MangaTrackingController`.
 
 - [ ] **Step 1**: Define `TrackingSheetUiState`, `TrackServiceCardUiModel`, and `TrackingUiAction`.
 - [ ] **Step 2**: Move tracking status formatting and date formatting to `MangaViewModel`.

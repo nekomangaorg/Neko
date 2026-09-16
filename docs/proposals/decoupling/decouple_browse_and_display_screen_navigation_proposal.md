@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
+**Execution Order:** Phase 2 (Screen Jobs & Workflow Decoupling) — Step 9 (Priority: High / Screen Architecture)  
+**Prerequisites:** Step 1 ([`decouple_presentation_repositories_proposal.md`](decouple_presentation_repositories_proposal.md))  
+**Downstream Dependents:** None  
 **Implementation State:** 🟡 Coupled Baseline (Database models in UI state, in-composable navigation logic, and StateFlow prop-drilling)  
 
 ---
@@ -167,6 +170,14 @@ ObserveAsEvents(viewModel.navigationEvent) { event ->
 ---
 
 ## 6. Implementation Plan & Milestones
+
+### Prerequisites & Sequential Placement
+> [!IMPORTANT]
+> **Execution Placement:** **Phase 2 (Screen Jobs & Workflow Decoupling) — Step 9**  
+> **Prerequisites:** Step 1 ([`decouple_presentation_repositories_proposal.md`](decouple_presentation_repositories_proposal.md)) — `BrowseRepository` must be relocated to `org.nekomanga.data.repository` and return domain `BrowseHomeSection` models before screen-level refactoring.  
+> **Unlocks:** None (Completes Browse and Display screen modernization).  
+>
+> Eliminating `BrowseFilterImpl` Room entities and in-UI navigation routing branches from `BrowseScreen` and `DisplayScreen` completes the browse subsystem decoupling, moving all routing into `DisplayViewModel` event channels.
 
 - [ ] **Step 1**: Create `SavedFilterUiModel` and update `BrowseScreenState` and `FilterActions`.
 - [ ] **Step 2**: Update `BrowseViewModel` to map Room entities to `SavedFilterUiModel`.

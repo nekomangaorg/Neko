@@ -15,15 +15,22 @@ Proposals are categorized by subsystem and scope to keep documentation organized
 
 Proposals focused on reader performance, Jetpack Compose viewers, navigation lifecycle orchestration, memory optimization, and UI controls decoupling.
 
+### Reader Decoupling Execution Track
+
+| Order | Proposal | Description | Prerequisites | Target Milestone |
+| :---: | :--- | :--- | :--- | :--- |
+| **R1** | [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, and guards key events with a `Mutex`. | None (Phase 1 Complete) | Neko 3.x Reader Decoupling |
+| **R2** | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math into `ChapterTransitionUiModel`. | Step R1 | Neko 3.x Reader Decoupling |
+| **R3** | [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, hoisting configurations into immutable UI models. | Steps R1, R2 | Neko 3.x Reader Decoupling |
+| **R4** | [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped `ReaderBottomControlsUiState` and `ReaderBottomBarAction`. | Step R3 | Neko 3.x Reader Decoupling |
+| **R5** | [**Decouple ReaderChaptersSheet**](reader/decouple_reader_chapters_sheet_proposal.md) | Decouples the chapter selection bottom sheet from direct preferences, context color resolvers, and inline repository calls. | Step R3 | Neko 3.x Reader Decoupling |
+| **R6** | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags into `ReaderSettingsUiState`. | Step R3 | Neko 3.x Reader Decoupling |
+| **R7** | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math into `NavigationRegionUiModel`. | None (Self-Contained) | Neko 3.x Reader Decoupling |
+
+### Reader Feature Proposals
+
 | Proposal | Description | Target Milestone |
 | :--- | :--- | :--- |
-| [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, guards rapid key events with a `Mutex`, and outlines the deprecation of legacy `PagerViewer`. | Neko 3.x Reader Decoupling |
-| [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, hoisting configurations into immutable UI models. | Neko 3.x Reader Decoupling |
-| [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped UI state models and event listeners. | Neko 3.x Reader Decoupling |
-| [**Decouple ReaderChaptersSheet**](reader/decouple_reader_chapters_sheet_proposal.md) | Decouples the chapter selection bottom sheet from direct preferences, context color resolvers, and inline repository calls. | Neko 3.x Reader Decoupling |
-| [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags. | Neko 3.x Reader Decoupling |
-| [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math. | Neko 3.x Reader Decoupling |
-| [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math. | Neko 3.x Reader Decoupling |
 | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Neko Performance |
 | [**Unified Reader Preloader Engine & Two-Tier Pipeline**](reader/reader_preloader_engine_proposal.md) | Extracts inline preloading logic from Compose viewers into a testable domain engine with two-tier disk/memory pipelining. | Neko Reader Phase 2 |
 | [**Zen Focus Reading Mode & Touch Shield**](reader/zen_focus_reading_mode_proposal.md) | Adds a distraction-free reading mode with accidental touch prevention. | Neko Feature |
@@ -32,25 +39,72 @@ Proposals focused on reader performance, Jetpack Compose viewers, navigation lif
 
 ## 🧩 Subsystem & UI Decoupling (`decoupling/`)
 
-Proposals focused on breaking down God classes, separating domain business logic from Jetpack Compose components, and removing service locator lookups.
+Proposals focused on breaking down God classes, separating domain business logic from Jetpack Compose components, eliminating layer inversion, and removing service locator lookups.
 
-| Proposal | Description | Target Milestone |
-| :--- | :--- | :--- |
-| [**Deconstructing MangaViewModel God Class**](decoupling/decouple_manga_viewmodel_god_class_proposal.md) | Breaks down the massive `MangaViewModel` God class into dedicated, cohesive domain controllers. | Neko Architecture |
-| [**Decouple Presentation Repositories & Eliminate Layer Inversion**](decoupling/decouple_presentation_repositories_proposal.md) | Fixes architectural layer inversion where UI presentation components depended on concrete repository implementations. | Clean Architecture |
-| [**Decouple ArtworkSheet State & Domain Entities**](decoupling/decouple_artwork_sheet_state_proposal.md) | Hoists internal selection state, Coil image builders, and database models from `ArtworkSheet`. | UI Decoupling |
-| [**Decouple Browse & Display Screens**](decoupling/decouple_browse_and_display_screen_navigation_proposal.md) | Decouples Browse and Display screens from database entities and in-UI navigation resolvers. | UI Decoupling |
-| [**Decouple Category Management Dialogs & Sheets**](decoupling/decouple_category_management_dialog_and_sheet_proposal.md) | Decouples category dialogs and sheets from validation and diff computation logic. | UI Decoupling |
-| [**Decouple ChapterRow & Chapter Actions**](decoupling/decouple_chapter_row_and_actions_proposal.md) | Decouples chapter list items from domain logic, download status, and database entities. | UI Decoupling |
-| [**Decouple DownloadScreen and DownloadChapterRow**](decoupling/decouple_download_screen_and_chapter_row_proposal.md) | Decouples download management screens from domain grouping and legacy download states. | UI Decoupling |
-| [**Decouple FeedScreen Jobs & Actions**](decoupling/decouple_feed_screen_jobs_and_actions_proposal.md) | Isolates feed screen from background job orchestration, duplicate filtering rules, and flow propagation. | UI Decoupling |
-| [**Decouple LibraryScreen Job Dispatching**](decoupling/decouple_library_screen_job_dispatching_proposal.md) | Decouples library screen from background jobs, database entity mapping, and share logic. | UI Decoupling |
-| [**Decouple Manga Details Screen**](decoupling/decouple_manga_details_share_and_header_proposal.md) | Decouples manga details screen from network request building and share intent assembly. | UI Decoupling |
-| [**Decouple MergeSheet Domain Logic**](decoupling/decouple_merge_sheet_domain_logic_proposal.md) | Decouples merge sheet from domain source resolvers and business merge rules. | UI Decoupling |
-| [**Decouple Onboarding Steps**](decoupling/decouple_onboarding_steps_proposal.md) | Decouples onboarding steps from service locators, direct preferences, and Activity lifecycle. | UI Decoupling |
-| [**Decouple Settings Screens Jobs & I/O**](decoupling/decouple_settings_screens_jobs_and_io_proposal.md) | Decouples settings screens from coroutine scopes, background work, and disk I/O. | UI Decoupling |
-| [**Decouple Statistics Aggregation**](decoupling/decouple_statistics_aggregation_and_formatting_proposal.md) | Offloads heavy stats computation and dataset transformations from Jetpack Compose rendering. | UI Decoupling |
-| [**Decouple TrackingSheet Domain Logic**](decoupling/decouple_tracking_sheet_domain_logic_proposal.md) | Decouples tracking sheet from domain models, functional providers, and dialog state multiplexing. | UI Decoupling |
+### Subsystem Decoupling Dependency & Execution Graph
+
+```mermaid
+flowchart TD
+    subgraph P1["Phase 1: Foundations & Isolated Wins"]
+        S1["Step 1: Decouple Presentation Repositories"]
+        S2["Step 2: Category Dialog & Sheet"]
+        S3["Step 3: Statistics Aggregation"]
+        S4["Step 4: Onboarding Steps"]
+    end
+
+    subgraph P2["Phase 2: Screen Jobs & Workflow Decoupling"]
+        S5["Step 5: Settings Jobs & Disk I/O"]
+        S6["Step 6: Library Job Dispatching"]
+        S7["Step 7: Feed Jobs & Actions"]
+        S8["Step 8: Download Screen & Row"]
+        S9["Step 9: Browse & Display Screen"]
+    end
+
+    subgraph P3["Phase 3: Manga Subdomain Components"]
+        S10["Step 10: ArtworkSheet State"]
+        S11["Step 11: TrackingSheet Logic"]
+        S12["Step 12: MergeSheet Domain Logic"]
+        S13["Step 13: ChapterRow & Actions"]
+        S14["Step 14: Manga Details Share & Header"]
+    end
+
+    subgraph P4["Phase 4: Capstone Architecture"]
+        S15["Step 15: Deconstruct MangaViewModel God Class"]
+    end
+
+    S1 --> S7
+    S1 --> S9
+    S2 --> S6
+    S5 --> S6
+    S8 -.-> S13
+    S11 --> S14
+    S12 --> S14
+    S10 --> S15
+    S11 --> S15
+    S12 --> S15
+    S13 --> S15
+    S14 --> S15
+```
+
+### Phased Execution Roadmap
+
+| Order | Proposal | Description | Prerequisites | Target Milestone |
+| :---: | :--- | :--- | :--- | :--- |
+| **Phase 1<br>Step 1** | [**Decouple Presentation Repositories & Eliminate Layer Inversion**](decoupling/decouple_presentation_repositories_proposal.md) | Relocates `BrowseRepository` and `FeedRepository` to `org.nekomanga.data.repository`, eliminates Compose imports in data layer, and introduces domain return models. | None (Root Data Layer Foundation) | Clean Architecture |
+| **Phase 1<br>Step 2** | [**Decouple Category Management Dialogs & Sheets**](decoupling/decouple_category_management_dialog_and_sheet_proposal.md) | Extracts `ValidateCategoryNameUseCase` and `CalculateCategoryDiffUseCase`, decoupling category dialogs and sheets from validation and diff computation logic. | None | UI Decoupling |
+| **Phase 1<br>Step 3** | [**Decouple Statistics Aggregation**](decoupling/decouple_statistics_aggregation_and_formatting_proposal.md) | Offloads heavy stats computation and $O(M \times C)$ dataset transformations from Jetpack Compose rendering to `AggregateDetailedStatsUseCase`. | None (Self-Contained) | UI Decoupling |
+| **Phase 1<br>Step 4** | [**Decouple Onboarding Steps**](decoupling/decouple_onboarding_steps_proposal.md) | Decouples onboarding steps from service locators, direct preferences, and Activity recreation into `StorageStepUiState` and `ThemeStepUiState`. | None (Self-Contained) | UI Decoupling |
+| **Phase 2<br>Step 5** | [**Decouple Settings Screens Jobs & I/O**](decoupling/decouple_settings_screens_jobs_and_io_proposal.md) | Decouples settings screens from `CoroutineScope`, background WorkManager workers (`LibraryUpdateJob`), and disk I/O. | None (Establishes Job Pattern) | UI Decoupling |
+| **Phase 2<br>Step 6** | [**Decouple LibraryScreen Job Dispatching**](decoupling/decouple_library_screen_job_dispatching_proposal.md) | Decouples library screen from background jobs (`UpdateLibraryUseCase`), database entity mapping, and share intent logic. | Steps 2, 5 | UI Decoupling |
+| **Phase 2<br>Step 7** | [**Decouple FeedScreen Jobs & Actions**](decoupling/decouple_feed_screen_jobs_and_actions_proposal.md) | Isolates feed screen from background job orchestration, duplicate filtering rules, and `StateFlow` prop-drilling via `ValidateChapterDownloadUseCase`. | Step 1 | UI Decoupling |
+| **Phase 2<br>Step 8** | [**Decouple DownloadScreen and DownloadChapterRow**](decoupling/decouple_download_screen_and_chapter_row_proposal.md) | Decouples download management screens from in-composable scanlator grouping and legacy `Download.State` enums. | None | UI Decoupling |
+| **Phase 2<br>Step 9** | [**Decouple Browse & Display Screens**](decoupling/decouple_browse_and_display_screen_navigation_proposal.md) | Decouples Browse and Display screens from Room database entities (`BrowseFilterImpl`) and in-UI navigation routing. | Step 1 | UI Decoupling |
+| **Phase 3<br>Step 10** | [**Decouple ArtworkSheet State & Domain Entities**](decoupling/decouple_artwork_sheet_state_proposal.md) | Hoists internal selection state, Coil image builders, and database models from `ArtworkSheet` into `ArtworkSheetUiModel` and `ArtworkSheetAction`. | None | UI Decoupling |
+| **Phase 3<br>Step 11** | [**Decouple TrackingSheet Domain Logic**](decoupling/decouple_tracking_sheet_domain_logic_proposal.md) | Decouples tracking sheet from domain models, functional lambda providers, and 6 mutable dialog states into `TrackingSheetUiState`. | None | UI Decoupling |
+| **Phase 3<br>Step 12** | [**Decouple MergeSheet Domain Logic**](decoupling/decouple_merge_sheet_domain_logic_proposal.md) | Decouples merge sheet from domain source resolvers and business merge rules via `GetAvailableMergeSourcesUseCase`. | None | UI Decoupling |
+| **Phase 3<br>Step 13** | [**Decouple ChapterRow & Chapter Actions**](decoupling/decouple_chapter_row_and_actions_proposal.md) | Decouples chapter list items from domain logic, download status, and database entities via `OpenChapterUseCase` and `ChapterRowUiModel`. | Step 8 recommended | UI Decoupling |
+| **Phase 3<br>Step 14** | [**Decouple Manga Details Screen**](decoupling/decouple_manga_details_share_and_header_proposal.md) | Decouples manga details screen from network request building and share intent assembly via `PrepareMangaSharePayloadUseCase`. | Steps 11, 12 | UI Decoupling |
+| **Phase 4<br>Step 15** | [**Deconstructing MangaViewModel God Class**](decoupling/decouple_manga_viewmodel_god_class_proposal.md) | Breaks down the massive 2,387-line `MangaViewModel` God class into dedicated domain controllers (`MangaArtworkController`, `MangaTrackingController`, `MangaMergeController`, `MangaChapterController`). | Steps 10, 11, 12, 13, 14 | Neko Architecture |
 
 ---
 
