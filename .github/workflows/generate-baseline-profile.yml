@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '25'
 
       - name: Generate Baseline Profile
         timeout-minutes: 20
