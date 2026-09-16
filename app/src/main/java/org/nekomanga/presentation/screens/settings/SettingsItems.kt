@@ -39,12 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.extensions.collectAsState
+import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Size.large as horizontalPadding
 import org.nekomanga.presentation.theme.Size.medium as verticalPadding
@@ -239,9 +241,12 @@ fun TriStateItem(
 
 @Composable
 fun TextItem(labelText: UiText, value: String, onChange: (String) -> Unit) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         modifier =
-            Modifier.fillMaxWidth().padding(horizontal = horizontalPadding, vertical = Size.tiny),
+            Modifier.fillMaxWidth()
+                .padding(horizontal = horizontalPadding, vertical = Size.tiny)
+                .runOnEnterKeyPressed { focusManager.clearFocus() },
         label = { Text(text = labelText.asString()) },
         value = value,
         onValueChange = onChange,

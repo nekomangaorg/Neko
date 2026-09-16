@@ -54,6 +54,7 @@ import org.nekomanga.presentation.components.FlexibleTopBar
 import org.nekomanga.presentation.components.FlexibleTopBarColors
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.icons.IncognitoIcon
+import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -114,6 +115,11 @@ fun SearchOutlineTopAppBar(
                 onExpandedChange = {},
                 inputField = {
                     SearchBarDefaults.InputField(
+                        modifier =
+                            Modifier.runOnEnterKeyPressed {
+                                onSearch(searchText)
+                                onSearchSubmit(searchText)
+                            },
                         query = searchText,
                         expanded = false,
                         onExpandedChange = {},

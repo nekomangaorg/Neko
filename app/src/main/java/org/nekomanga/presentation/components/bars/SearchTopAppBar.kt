@@ -45,6 +45,7 @@ import org.nekomanga.presentation.components.FlexibleTopBar
 import org.nekomanga.presentation.components.FlexibleTopBarColors
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.icons.IncognitoIcon
+import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -96,7 +97,8 @@ fun SearchTopAppBar(
                         modifier =
                             Modifier.weight(1f)
                                 .padding(horizontal = Size.small)
-                                .focusRequester(focusRequester),
+                                .focusRequester(focusRequester)
+                                .runOnEnterKeyPressed { onSearchText(searchText) },
                         value = searchText,
                         placeholder = {
                             Text(text = stringResource(id = R.string.search_chapters))
