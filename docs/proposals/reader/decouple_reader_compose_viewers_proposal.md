@@ -23,15 +23,18 @@
 >   - Passes background service directly: `downloadManager: DownloadManager`.
 >   - Calls Service Locator inside Compose: `val readerPreferences: ReaderPreferences = remember { Injekt.get() }`.
 >   - Collects preferences directly: `webtoonSidePadding`, `animatedTransitions`, `disableGaps`, `enableZoomOut`.
+> - **Untestable Viewport Synchronization & Re-anchoring ([Issue #3379](https://github.com/nekomangaorg/Neko/issues/3379))**:
+>   - Because `WebtoonViewer` requires an active `ReaderActivity` instance and `DisplayMetrics` in its constructor, its item assembly logic (`setChapters`) and list positioning cannot be run or verified in pure headless JVM unit tests.
+>   - Item equality and list re-anchoring when items are prepended currently rely on inline property checks in Compose rather than a pure domain model identity contract (`ReaderUiItem.isEquivalentTo`).
 >
 > **What This Proposal Solves:**
-> Removes all legacy `Viewer` object references, `DownloadManager` parameters, and `Injekt.get()` calls from `ComposePagerViewer` and `ComposeWebtoonViewer`. Viewer configuration is hoisted into immutable UI state models (`PagerViewerConfigUiModel`, `WebtoonViewerConfigUiModel`), making the viewers pure Compose layouts.
+> Removes all legacy `Viewer` object references, `DownloadManager` parameters, and `Injekt.get()` calls from `ComposePagerViewer` and `ComposeWebtoonViewer`. Viewer configuration is hoisted into immutable UI state models (`PagerViewerConfigUiModel`, `WebtoonViewerConfigUiModel`), item generation is extracted into a testable pure Kotlin interactor (`BuildWebtoonItemsUseCase`), and item equivalence is formalized to enable headless JVM unit testing.
 
 ---
 
 ## 1. Executive Summary & Vision
 
-Jetpack Compose viewers (`HorizontalPager`, `VerticalPager`, `LazyColumn`) should be decoupled from legacy Android `View` implementations and platform service locators. Passing legacy `PagerViewer` and `WebtoonViewer` objects down into Compose creates bidirectional coupling where Compose inspects requested positions from legacy adapters and calls back into invisible view hierarchies.
+Jetpack Compose viewers (`HorizontalPager`, `VerticalPager`, `LazyColumn`) should be decoupled from legacy Android `View` implementations, platform service locators, and concrete Activity lifecycles. Passing legacy `PagerViewer` and `WebtoonViewer` objects down into Compose creates bidirectional coupling where Compose inspects requested positions from legacy adapters and calls back into invisible view hierarchies. Furthermore, this coupling blocks writing fast, reliable pure JVM unit tests for page ordering, chapter seams, and scroll re-anchoring.
 
 ### The Objective
 Decouple [`ComposePagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt) and [`ComposeWebtoonViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposeWebtoonViewer.kt) by:
@@ -39,6 +42,7 @@ Decouple [`ComposePagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/w
 2. Removing `downloadManager: DownloadManager` from viewer parameter lists.
 3. Stripping `Injekt.get<ReaderPreferences>()` from both viewers.
 4. Hoisting all viewer configuration properties (paddings, gaps, zoom settings, theme background colors) into the screen-level `ReaderUiState`.
+5. Extracting list item assembly into a pure Kotlin domain interactor (`BuildWebtoonItemsUseCase`) with identity equivalence (`ReaderUiItem.isEquivalentTo`) to unlock 100% headless JVM testability.
 
 ---
 
@@ -87,6 +91,32 @@ data class WebtoonViewerConfigUiModel(
 )
 ```
 
+### 3.2 Domain Item Equivalence & Re-anchoring Contract
+
+When background chapter preloading prepends or appends items to `LazyColumn`, the list shifts items. To reliably re-anchor the viewport to the currently visible item without relying on volatile numeric indices, we define an identity equivalence contract:
+
+```kotlin
+package eu.kanade.tachiyomi.ui.reader.model
+
+/**
+ * Compares two reader UI items for semantic identity equivalence across list updates and preloads.
+ * Enables deterministic list re-anchoring and pure JVM test assertions without Android View models.
+ */
+fun ReaderUiItem.isEquivalentTo(target: ReaderUiItem?): Boolean {
+    if (target == null) return false
+    return when {
+        this is ReaderUiItem.Page && target is ReaderUiItem.Page -> {
+            this.page.page == target.page.page &&
+                this.page.chapter.chapter.id == target.page.chapter.chapter.id
+        }
+        this is ReaderUiItem.Transition && target is ReaderUiItem.Transition -> {
+            this.transition.chapter.chapter.id == target.transition.chapter.chapter.id
+        }
+        else -> false
+    }
+}
+```
+
 ---
 
 ## 4. UI / Compose Layer Refactoring
@@ -126,6 +156,51 @@ Both viewers:
 - Do not call `Injekt.get()`.
 - Do not touch `DownloadManager`.
 
+### 4.3 Decoupled Item Generation (`BuildWebtoonItemsUseCase`)
+
+Currently, `WebtoonViewer.setChapters` and `WebtoonViewer.items` assemble `ReaderUiItem` instances, but directly access `activity.updateWebtoonViewerItems()`, `activity.resources.displayMetrics`, and mutable internal state.
+
+We extract this mapping into a pure Kotlin interactor:
+
+```kotlin
+package eu.kanade.tachiyomi.ui.reader.domain
+
+import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
+import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+
+/**
+ * Pure Kotlin interactor mapping ViewerChapters into a sequential list of ReaderUiItem instances.
+ * Completely free of Android Views, DisplayMetrics, or Injekt lookups.
+ */
+class BuildWebtoonItemsUseCase {
+
+    operator fun invoke(chapters: ViewerChapters): List<ReaderUiItem> {
+        val items = mutableListOf<ReaderUiItem>()
+
+        // 1. Prepend prevChapter transition & pages
+        chapters.prevChapter?.let { prev ->
+            items.add(ReaderUiItem.Transition(ChapterTransition.Prev(prev)))
+            items.addAll(prev.pages?.map { ReaderUiItem.Page(it) }.orEmpty())
+        }
+
+        // 2. Add currentChapter pages
+        chapters.currentChapter?.let { current ->
+            items.addAll(current.pages?.map { ReaderUiItem.Page(it) }.orEmpty())
+        }
+
+        // 3. Append nextChapter transition & pages
+        chapters.nextChapter?.let { next ->
+            items.add(ReaderUiItem.Transition(ChapterTransition.Next(next)))
+            items.addAll(next.pages?.map { ReaderUiItem.Page(it) }.orEmpty())
+        }
+
+        return items
+    }
+}
+```
+This enables unit testing item assembly and index calculation without spinning up Android framework components.
+
 ---
 
 ## 5. Technical Footprint & Integration
@@ -133,13 +208,139 @@ Both viewers:
 1. **[`ComposePagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt)**: Replace `viewer` and `downloadManager` parameters with `config: PagerViewerConfigUiModel`; remove `Injekt.get()`.
 2. **[`ComposeWebtoonViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposeWebtoonViewer.kt)**: Replace `viewer` and `downloadManager` parameters with `config: WebtoonViewerConfigUiModel`; remove `Injekt.get()`.
 3. **[`ReaderActivity.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt)**: Pass assembled viewer configurations into Compose content.
+4. **[`BuildWebtoonItemsUseCase.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/domain/BuildWebtoonItemsUseCase.kt)**: Extract item composition into a testable pure Kotlin interactor.
+5. **[`ReaderUiItem.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/model/ReaderUiItem.kt)**: Add `isEquivalentTo(target)` identity contract.
 
 ---
 
-## 6. Implementation Plan & Milestones
+## 6. Decoupling for Testability & Pure JVM Testing Strategy
+
+### 6.1 Current Testing Bottlenecks
+
+Testing reader UI item positioning, preloading prepends, and index re-anchoring has historically been blocked because:
+- **`WebtoonViewer` constructor requires `activity: ReaderActivity`**, bringing in the entire Android Activity lifecycle and making pure JVM unit testing impossible.
+- **Injekt service locator lookups** inside Compose viewers and ViewModels throw `InjektException` when executed without mock injection registries.
+- **DisplayMetrics & WindowManager lookups** inside `WebtoonViewer.init` crash under standard JUnit test runners.
+
+### 6.2 Pure JVM Domain Unit Test Suite
+
+By extracting pure Kotlin interactors and value objects, the entire chapter item assembly and list re-anchoring flow can be verified with zero Android dependencies:
+
+#### 1. Webtoon Item Assembly Tests (`BuildWebtoonItemsUseCaseTest`)
+Located at `app/src/test/java/eu/kanade/tachiyomi/ui/reader/domain/BuildWebtoonItemsUseCaseTest.kt`:
+
+```kotlin
+class BuildWebtoonItemsUseCaseTest {
+
+    private val useCase = BuildWebtoonItemsUseCase()
+
+    @Test
+    fun `when only current chapter present, emits only current pages`() {
+        val ch = createReaderChapter(1L, pageCount = 5)
+        val items = useCase(ViewerChapters(currentChapter = ch))
+
+        assertThat(items).hasSize(5)
+        assertThat(items.filterIsInstance<ReaderUiItem.Page>()).hasSize(5)
+        assertThat(items.filterIsInstance<ReaderUiItem.Transition>()).isEmpty()
+    }
+
+    @Test
+    fun `when prevChapter is preloaded, prepends transition header and pages`() {
+        val prev = createReaderChapter(1L, pageCount = 10)
+        val current = createReaderChapter(2L, pageCount = 20)
+
+        val items = useCase(ViewerChapters(currentChapter = current, prevChapter = prev))
+
+        // 1 transition + 10 prev pages + 20 current pages = 31 items
+        assertThat(items).hasSize(31)
+        assertThat(items.first()).isInstanceOf(ReaderUiItem.Transition::class.java)
+        assertThat((items[1] as ReaderUiItem.Page).page.chapter.chapter.id).isEqualTo(1L)
+        assertThat((items[11] as ReaderUiItem.Page).page.chapter.chapter.id).isEqualTo(2L)
+    }
+
+    @Test
+    fun `when nextChapter is preloaded, appends transition footer and pages`() {
+        val current = createReaderChapter(2L, pageCount = 20)
+        val next = createReaderChapter(3L, pageCount = 15)
+
+        val items = useCase(ViewerChapters(currentChapter = current, nextChapter = next))
+
+        // 20 current pages + 1 transition + 15 next pages = 36 items
+        assertThat(items).hasSize(36)
+        assertThat(items[20]).isInstanceOf(ReaderUiItem.Transition::class.java)
+        assertThat((items[21] as ReaderUiItem.Page).page.chapter.chapter.id).isEqualTo(3L)
+    }
+}
+```
+
+#### 2. Item Equivalence & Re-anchoring Tests (`ReaderUiItemEquivalenceTest`)
+Located at `app/src/test/java/eu/kanade/tachiyomi/ui/reader/model/ReaderUiItemEquivalenceTest.kt`:
+
+```kotlin
+class ReaderUiItemEquivalenceTest {
+
+    @Test
+    fun `items with identical page and chapter are equivalent`() {
+        val pageA = ReaderUiItem.Page(createPage(index = 5, chapterId = 10L))
+        val pageB = ReaderUiItem.Page(createPage(index = 5, chapterId = 10L))
+
+        assertThat(pageA.isEquivalentTo(pageB)).isTrue()
+    }
+
+    @Test
+    fun `items with different chapters are not equivalent`() {
+        val pageA = ReaderUiItem.Page(createPage(index = 5, chapterId = 10L))
+        val pageB = ReaderUiItem.Page(createPage(index = 5, chapterId = 11L))
+
+        assertThat(pageA.isEquivalentTo(pageB)).isFalse()
+    }
+
+    @Test
+    fun `re-anchoring finds correct index when previous chapter is prepended`() {
+        val initialItems = listOf(
+            ReaderUiItem.Page(createPage(index = 0, chapterId = 2L)),
+            ReaderUiItem.Page(createPage(index = 1, chapterId = 2L)),
+        )
+        val anchorItem = initialItems[1]
+
+        // Prepend 50 pages from previous chapter
+        val prependedPages = (0 until 50).map { ReaderUiItem.Page(createPage(index = it, chapterId = 1L)) }
+        val updatedItems = prependedPages + initialItems
+
+        val reanchoredIndex = updatedItems.indexOfFirst { it.isEquivalentTo(anchorItem) }
+        assertThat(reanchoredIndex).isEqualTo(51)
+    }
+}
+```
+
+### 6.3 Compose UI Headless Testing
+
+Once decoupled from `WebtoonViewer`, `ComposeWebtoonViewer` can be rendered in headless Compose tests via `runComposeUiTest`:
+
+```kotlin
+@RunWith(AndroidJUnit4::class)
+class ComposeWebtoonViewerTest {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun whenPrependingItems_activeChapterItemRemainsInView() {
+        // Render stateless ComposeWebtoonViewer with mock configuration
+        // Verify LazyColumn re-anchoring behavior
+    }
+}
+```
+
+---
+
+## 7. Implementation Plan & Milestones
 
 - [ ] **Step 1**: Define `PagerViewerConfigUiModel` and `WebtoonViewerConfigUiModel`.
-- [ ] **Step 2**: Hoist preference observation from viewers to `ReaderViewModel`.
-- [ ] **Step 3**: Refactor `ComposePagerViewer.kt` to eliminate legacy view and service dependencies.
-- [ ] **Step 4**: Refactor `ComposeWebtoonViewer.kt` to eliminate legacy view and service dependencies.
-- [ ] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [ ] **Step 2**: Implement `ReaderUiItem.isEquivalentTo` domain identity contract and pure JVM tests.
+- [ ] **Step 3**: Extract `BuildWebtoonItemsUseCase` domain interactor and add `BuildWebtoonItemsUseCaseTest`.
+- [ ] **Step 4**: Hoist preference observation from viewers to `ReaderViewModel`.
+- [ ] **Step 5**: Refactor `ComposePagerViewer.kt` to eliminate legacy view and service dependencies.
+- [ ] **Step 6**: Refactor `ComposeWebtoonViewer.kt` to eliminate legacy view and service dependencies.
+- [ ] **Step 7**: Deprecate `WebtoonViewer` and `PagerViewer`.
+- [ ] **Step 8**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
