@@ -148,8 +148,8 @@ fun ComposeWebtoonViewer(
         val currentItems by rememberUpdatedState(items)
         val activeChapterId by rememberUpdatedState(currentChapterId)
 
-        var lastFirstVisibleItem by remember { mutableStateOf<ReaderUiItem?>(null) }
-        var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
+        var lastFirstVisibleItem by remember { mutableStateOf(items.getOrNull(initialItemIndex)) }
+        var lastActiveItem by remember { mutableStateOf(items.getOrNull(initialItemIndex)) }
 
         LaunchedEffect(currentChapterId) {
             viewer.prevTransition?.to?.let { viewer.activity.requestPreloadChapter(it) }
@@ -205,9 +205,6 @@ fun ComposeWebtoonViewer(
                     targetIndex = -1
                     targetOffset = 0
                 }
-            } else if (currentChapterId != null) {
-                targetIndex = defaultPageIndex
-                targetOffset = 0
             } else {
                 targetIndex = -1
                 targetOffset = 0
@@ -491,7 +488,11 @@ fun ComposeWebtoonViewer(
                             currentActiveIndex = activeIndex
                             when (item) {
                                 is ReaderUiItem.Page -> {
-                                    onPageSelected(item.page)
+                                    val isCurrentChapter =
+                                        item.page.chapter.chapter.id == activeChapterId
+                                    if (isCurrentChapter || lazyListState.isScrollInProgress) {
+                                        onPageSelected(item.page)
+                                    }
                                     val pages = item.page.chapter.pages
                                     if (
                                         pages != null && item.page.chapter == viewer.currentChapter
@@ -510,7 +511,11 @@ fun ComposeWebtoonViewer(
                                     }
                                 }
                                 is ReaderUiItem.SplitPage -> {
-                                    onPageSelected(item.page)
+                                    val isCurrentChapter =
+                                        item.page.chapter.chapter.id == activeChapterId
+                                    if (isCurrentChapter || lazyListState.isScrollInProgress) {
+                                        onPageSelected(item.page)
+                                    }
                                 }
                                 is ReaderUiItem.Transition -> {
                                     onTransitionSelected(item.transition)

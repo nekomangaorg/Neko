@@ -453,17 +453,22 @@ constructor(
      * Called when the user changed to the given [chapter] when changing pages from the viewer. It's
      * used only to set this chapter as active.
      */
-    private suspend fun loadNewChapter(chapter: ReaderChapter) {
+    private suspend fun loadNewChapter(
+        chapter: ReaderChapter,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
+    ) {
         val loader = loader ?: return
 
-        TimberKt.d { "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name}" }
+        TimberKt.d {
+            "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name} with target $navTarget"
+        }
 
         flushReadTimer()
         restartReadTimer()
 
         withIOContext {
             try {
-                loadChapter(loader, chapter)
+                loadChapter(loader, chapter, navTarget)
             } catch (e: Throwable) {
                 if (e is CancellationException) {
                     throw e
@@ -629,9 +634,20 @@ constructor(
             loadNewChapterJob?.cancel()
             TimberKt.d { "Setting ${chapterToLoad.chapter.url} as active" }
             viewModelScope.launchNonCancellable { saveReadingProgress(currentChapters.currChapter) }
+            val isForward =
+                if (
+                    selectedChapter.chapter.chapter_number !=
+                        currentChapters.currChapter.chapter.chapter_number
+                ) {
+                    selectedChapter.chapter.chapter_number >
+                        currentChapters.currChapter.chapter.chapter_number
+                } else {
+                    selectedChapter == currentChapters.nextChapter
+                }
+            val navTarget = if (isForward) ChapterNavTarget.Start else ChapterNavTarget.End
             loadNewChapterJob = viewModelScope.launch {
                 try {
-                    loadNewChapter(chapterToLoad)
+                    loadNewChapter(chapterToLoad, navTarget)
                 } finally {
                     if (loadingChapterId == chapterToLoad.chapter.id) {
                         loadingChapterId = null
