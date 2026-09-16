@@ -57,6 +57,7 @@ import java.util.Date
 import kotlin.random.Random
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -157,6 +158,15 @@ constructor(
 
     /** The time the chapter was started reading */
     private var chapterReadStartTime: Long? = null
+
+    /**
+     * Tracks the chapter ID currently being asynchronously loaded in onPageSelected to prevent
+     * duplicate concurrent loads.
+     */
+    private var loadingChapterId: Long? = null
+
+    /** Coroutine job for active chapter transition in onPageSelected */
+    private var loadNewChapterJob: Job? = null
 
     /** Relay used when loading prev/next chapter needed to lock the UI (with a dialog). */
     private var finished = false
@@ -443,17 +453,22 @@ constructor(
      * Called when the user changed to the given [chapter] when changing pages from the viewer. It's
      * used only to set this chapter as active.
      */
-    private suspend fun loadNewChapter(chapter: ReaderChapter) {
+    private suspend fun loadNewChapter(
+        chapter: ReaderChapter,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
+    ) {
         val loader = loader ?: return
 
-        TimberKt.d { "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name}" }
+        TimberKt.d {
+            "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name} with target $navTarget"
+        }
 
         flushReadTimer()
         restartReadTimer()
 
         withIOContext {
             try {
-                loadChapter(loader, chapter)
+                loadChapter(loader, chapter, navTarget)
             } catch (e: Throwable) {
                 if (e is CancellationException) {
                     throw e
@@ -610,11 +625,35 @@ constructor(
             updateChapterProgress(selectedChapter, page, hasExtraPage)
         }
 
-        // This logic remains the same, but the timer calls are gone
-        if (selectedChapter != currentChapters.currChapter) {
-            TimberKt.d { "Setting ${selectedChapter.chapter.url} as active" }
+        if (
+            selectedChapter != currentChapters.currChapter &&
+                loadingChapterId != selectedChapter.chapter.id
+        ) {
+            val chapterToLoad = selectedChapter
+            loadingChapterId = chapterToLoad.chapter.id
+            loadNewChapterJob?.cancel()
+            TimberKt.d { "Setting ${chapterToLoad.chapter.url} as active" }
             viewModelScope.launchNonCancellable { saveReadingProgress(currentChapters.currChapter) }
-            viewModelScope.launch { loadNewChapter(selectedChapter) }
+            val isForward =
+                if (
+                    selectedChapter.chapter.chapter_number !=
+                        currentChapters.currChapter.chapter.chapter_number
+                ) {
+                    selectedChapter.chapter.chapter_number >
+                        currentChapters.currChapter.chapter.chapter_number
+                } else {
+                    selectedChapter == currentChapters.nextChapter
+                }
+            val navTarget = if (isForward) ChapterNavTarget.Start else ChapterNavTarget.End
+            loadNewChapterJob = viewModelScope.launch {
+                try {
+                    loadNewChapter(chapterToLoad, navTarget)
+                } finally {
+                    if (loadingChapterId == chapterToLoad.chapter.id) {
+                        loadingChapterId = null
+                    }
+                }
+            }
         }
 
         // This logic is the same, but uses the 0.25 threshold from the new file

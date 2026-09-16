@@ -81,6 +81,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         ReaderPageSplitFetcher.clearCache()
     }
 
+    private var activeChapterId: Long? = null
     private var isInitialLoad = true
 
     /** Tells this viewer to set the given [chapters] as active. */
@@ -88,15 +89,19 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         TimberKt.d { "setChapters" }
         val forceTransition = config.alwaysShowChapterTransition
         val screenHeight = activity.resources.displayMetrics.heightPixels
-        items =
+        val newItems =
             controller.buildItems(
                 chapters,
                 forceTransition,
                 if (config.splitTallPages) screenHeight else 0,
             )
+        val chapterChanged = activeChapterId != chapters.currChapter.chapter.id
+        activeChapterId = chapters.currChapter.chapter.id
+
+        items = newItems
         activity.updateWebtoonViewerItems()
 
-        if (isInitialLoad) {
+        if (chapterChanged || isInitialLoad) {
             isInitialLoad = false
             val pages = chapters.currChapter.pages ?: return
             val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)

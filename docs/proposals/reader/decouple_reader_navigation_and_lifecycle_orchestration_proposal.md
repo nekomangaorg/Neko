@@ -25,6 +25,8 @@
 >   Navigation locks are split between Activity-level state (`isScrollingThroughPagesOrChapters` in [`ReaderActivity.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt#L1165)) and ViewModel-level state (`isLoadingAdjacentChapter` in [`ReaderViewModel.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderViewModel.kt#L530)), creating dual sources of truth and potential deadlocks under rapid hardware key events (`KEYCODE_N`, `KEYCODE_P`, `KEYCODE_R`, `KEYCODE_L`, volume keys) and gesture flings.
 > - **Double Navigation Dispatch on Chapter Load ([`ReaderActivity.kt#L1200`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt#L1200) vs [`PagerViewer.kt#L129`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/PagerViewer.kt#L129))**:
 >   When a chapter finishes loading, `viewModel.loadChapter` updates `state.viewerChapters` which triggers `setChapters(viewerChapters)` -> `PagerViewer.moveToPage(pages[requestedIndex], false)`. Concurrently, `ReaderActivity.loadChapter` resumes from its suspension point and calls `moveToPageIndex(targetPage, false, chapterChange = true)` -> `viewer.moveToPage(...)`. Having two separate, uncoordinated pathways setting page positions creates duplicate state writes, unnecessary recompositions, and timing races.
+> - **Webtoon Continuous Scrolling & Preload Prepend Race Condition ([Issue #3379](https://github.com/nekomangaorg/Neko/issues/3379))**:
+>   In continuous Webtoon vertical mode, background preloading of `prevChapter` finishes and prepends 30–120 newly loaded items directly to the top of `newItems`. Because Compose `LazyColumn` does not automatically shift `firstVisibleItemIndex` when items are prepended asynchronously before layout passes, `lazyListState.firstVisibleItemIndex` lands on the newly prepended chapter. A high-frequency `snapshotFlow` immediately samples this uncompensated index and dispatches `onPageSelected` for the previous chapter, causing `loadNewChapter` to execute and triggering an infinite backward jumping loop across all prior chapters (Repro 3a). Concurrently, continuous forward transitions called `loadChapter` with default `ChapterNavTarget.Resume`, violently jumping forward to stale `last_page_read` values (Repro 3b).
 > - **Legacy Hybrid `PagerViewer` / `BaseViewer` Controller**:
 >   [`PagerViewer`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/PagerViewer.kt) still holds a direct reference to `ReaderActivity` (`val activity: ReaderActivity`) and injects `DownloadManager` via Injekt, functioning as an obsolete bridge from the pre-Compose View system.
 
@@ -155,6 +157,51 @@ sealed interface ReaderNavigationAction {
 }
 ```
 
+### 3.4 Directional Navigation Target Resolver (`ResolveChapterNavTargetUseCase`)
+Extracts directional chapter navigation resolution out of monolithic ViewModel/Activity classes into a pure, testable Kotlin domain interactor:
+
+```kotlin
+package eu.kanade.tachiyomi.ui.reader.domain
+
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
+import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+
+/**
+ * Resolves the appropriate navigation target when moving between chapters in reading order.
+ * Ensures forward continuous transitions land at the start (page 0), backward transitions
+ * land at the end, and initial loads or explicit jumps restore reading progress.
+ */
+class ResolveChapterNavTargetUseCase {
+
+    operator fun invoke(
+        currentChapter: ReaderChapter?,
+        selectedChapter: ReaderChapter,
+        chapterList: List<ReaderChapter>,
+        isContinuousScroll: Boolean = true,
+    ): ChapterNavTarget {
+        if (currentChapter == null || currentChapter.chapter.id == selectedChapter.chapter.id) {
+            return ChapterNavTarget.Resume
+        }
+
+        val currentIndex = chapterList.indexOfFirst { it.chapter.id == currentChapter.chapter.id }
+        val newIndex = chapterList.indexOfFirst { it.chapter.id == selectedChapter.chapter.id }
+
+        val isForward = if (currentIndex != -1 && newIndex != -1) {
+            newIndex > currentIndex
+        } else {
+            true
+        }
+
+        return if (isForward) {
+            ChapterNavTarget.Start
+        } else {
+            ChapterNavTarget.End
+        }
+    }
+}
+```
+This isolates the root cause of [Issue #3379 (Repro 3b)](https://github.com/nekomangaorg/Neko/issues/3379) into a zero-dependency domain contract, guaranteeing that continuous forward scrolling into a previously read chapter lands on page 0 rather than reusing a stale `last_page_read` index.
+
 ---
 
 ## 4. ViewModel-Centric Navigation & Concurrency Engine
@@ -239,6 +286,38 @@ class ReaderViewModel(...) : ViewModel() {
 }
 ```
 
+### 4.2 Continuous Scroll Navigation & Directional Target Assignment
+
+In continuous Webtoon mode, page selection is emitted continuously as the user scrolls across chapter boundaries. In [`ReaderViewModel.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderViewModel.kt), `loadNewChapter` is decoupled from hardcoded `Resume` assumptions and accepts an explicit `navTarget: ChapterNavTarget`:
+
+```kotlin
+fun onPageSelected(page: ReaderPage) {
+    val selectedChapter = page.chapter
+    if (selectedChapter != currentChapter) {
+        // Resolve directional progression relative to the current chapter
+        val isForward = currentChapter?.let { current ->
+            val currentIndex = chapterList.indexOfFirst { it.chapter.id == current.chapter.id }
+            val newIndex = chapterList.indexOfFirst { it.chapter.id == selectedChapter.chapter.id }
+            newIndex > currentIndex
+        } ?: true
+
+        val navTarget = if (isForward) ChapterNavTarget.Start else ChapterNavTarget.End
+        TimberKt.d { "Continuous scroll transitioning to chapter ${selectedChapter.chapter.id} with target $navTarget" }
+        loadNewChapter(selectedChapter, navTarget)
+    }
+    // ...
+}
+
+fun loadNewChapter(readerChapter: ReaderChapter, navTarget: ChapterNavTarget = ChapterNavTarget.Resume) {
+    chapterNavJob?.cancel()
+    chapterNavJob = viewModelScope.launch {
+        loadChapter(readerChapter, navTarget)
+    }
+}
+```
+
+By ensuring that forward continuous transitions explicitly request `ChapterNavTarget.Start` and backward continuous transitions request `ChapterNavTarget.End`, the reader never jumps to stale `last_page_read` locations when crossing chapter seams.
+
 ---
 
 ## 5. UI Layer Refactoring: Stateless `ComposePagerViewer`
@@ -316,6 +395,38 @@ if (isTrigger && !isNavigating) {
 ```
 This guarantees that overscroll locks match the actual network/disk loading lifecycle without arbitrary timeouts.
 
+### 5.3 Webtoon Continuous Scroll Synchronization & Scroll-Gated Transitions (Issue #3379 Fix)
+
+Continuous vertical scrolling in [`ComposeWebtoonViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposeWebtoonViewer.kt) presents unique synchronization challenges when background preloading is active:
+
+1. **Passive Preload Prepend Race Condition ([Issue #3379](https://github.com/nekomangaorg/Neko/issues/3379) Repro 3a):**
+   When `prevChapter` finishes background preloading, its pages are prepended to the `LazyColumn` items list. In Jetpack Compose, prepending items increases the total count and shifts existing item indices forward by $N$ positions. Before `LazyColumn` performs a layout re-anchoring pass, `lazyListState.firstVisibleItemIndex` momentarily remains at index $K$, which now belongs to the newly prepended chapter rather than the active chapter.
+   A high-frequency `snapshotFlow { lazyListState.firstVisibleItemIndex }` immediately samples this uncompensated index and dispatches `onPageSelected` for the previous chapter. `ReaderViewModel` then initiates `loadNewChapter` for that chapter, causing an infinite backward jumping cascade across all preceding chapters.
+
+   **Resolution via Touch-Scroll Gating:**
+   Page selection across adjacent chapter boundaries is strictly gated on active user touch input (`lazyListState.isScrollInProgress`). If the list is idle (no active user gesture/scroll), index changes resulting from background list mutations are rejected:
+   ```kotlin
+   val isAdjacentChapter = currentActiveChapterId != null && item.chapterId != currentActiveChapterId
+   if (isAdjacentChapter && !lazyListState.isScrollInProgress) {
+       TimberKt.d { "Ignoring passive chapter switch to ${item.chapterId} during idle list state (preload prepend defense)" }
+       return@collect
+   }
+   ```
+
+2. **Active Chapter Re-positioning in `WebtoonViewer`:**
+   In [`WebtoonViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/webtoon/WebtoonViewer.kt), page positioning was previously guarded by a one-shot `isInitialLoad: Boolean` flag. Once the first chapter loaded, `isInitialLoad` became false permanently, preventing subsequent chapter transitions from re-evaluating target positions.
+   Replacing this with `activeChapterId: Long?` tracking ensures that every distinct chapter change properly triggers page positioning:
+   ```kotlin
+   val hasChapterChanged = activeChapterId != currentChapter?.chapter?.id
+   activeChapterId = currentChapter?.chapter?.id
+   if (hasChapterChanged || isInitialLoad) {
+       // Reliably position to requested target page (e.g. Page 0 on forward transition)
+   }
+   ```
+
+3. **Destructive Fallback Elimination:**
+   During list recompositions, falling back to `defaultPageIndex` when the list was already positioned caused intermittent jumps to page 0 or page 1. The recomposition check was hardened to only execute when `lazyListState.firstVisibleItemIndex == 0` AND the initial index was greater than 0, preserving stable viewport state during background item updates.
+
 ---
 
 ## 6. Deprecation & Sunset Roadmap for Legacy `PagerViewer` / `BaseViewer`
@@ -358,21 +469,152 @@ gantt
 | File | Proposed Modifications |
 | :--- | :--- |
 | [`ChapterNavTarget.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/model/ChapterNavTarget.kt) | Baseline in place. Add `ReaderNavCommand` and `ReaderChapterTransitionState`. |
-| [`ReaderViewModel.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderViewModel.kt) | Add `navigationMutex`, `navigateAdjacentChapter(forward: Boolean)`, and `_navigationCommands` Channel. Guard against overlapping transitions. |
+| [`ReaderViewModel.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderViewModel.kt) | Add `navigationMutex`, `navigateAdjacentChapter(forward: Boolean)`, and `_navigationCommands` Channel. Pass directional `ChapterNavTarget.Start` / `ChapterNavTarget.End` during continuous scrolling. |
 | [`ReaderActivity.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt) | Delegate key events (`KEYCODE_N`, `KEYCODE_P`, `KEYCODE_R`, `KEYCODE_L`) directly to `viewModel.navigateAdjacentChapter(...)`. Remove `lifecycleScope.launch` navigation blocks. |
 | [`ComposePagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt) | Replace `viewer.activity.loadChapter(...)` and `viewer.activity.requestPreloadChapter(...)` with hoisted lambdas. Consume `ReaderNavCommand` flow for page scrolling. |
+| [`ComposeWebtoonViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposeWebtoonViewer.kt) | Gate `onPageSelected` for adjacent chapters on `lazyListState.isScrollInProgress` to prevent passive preload prepend race conditions ([Issue #3379](https://github.com/nekomangaorg/Neko/issues/3379)). |
+| [`WebtoonViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/webtoon/WebtoonViewer.kt) | Replace one-shot `isInitialLoad` with `activeChapterId` tracking so multi-chapter transitions re-evaluate requested positions. Remove `val activity: ReaderActivity`. |
 | [`PagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/PagerViewer.kt) | Remove `val activity: ReaderActivity`. Mark class as `@Deprecated`. |
+| [`ResolveChapterNavTargetUseCase.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/domain/ResolveChapterNavTargetUseCase.kt) | Pure domain interactor resolving directional navigation targets (`Start`, `End`, `Resume`). |
 
 ---
 
 ## 8. Verification & Test Strategy
 
-1. **Orientation & Foldable Tests:**
-   - Initiate chapter transition on a foldable device and unfold/fold during page load. Verify transition continues uninterrupted in `viewModelScope` and renders on target page.
-2. **Concurrency & Rapid Key Press Tests:**
-   - Simulate rapid alternating presses of `KEYCODE_N`, `KEYCODE_P`, and overscroll gestures. Verify `navigationMutex` suppresses duplicate parallel transitions and prevents race conditions.
-3. **Navigation Target Unit Tests:**
-   - Verify `ReaderNavCommand` accurately emits `SnapToPage(0)` for `ChapterNavTarget.Start`, `SnapToPage(lastIndex)` for `ChapterNavTarget.End`, and correctly restores progress for `ChapterNavTarget.Resume`.
-4. **Tooling Verification:**
-   - Execute `./gradlew testDebugUnitTest` to verify unit test suite.
-   - Execute `./gradlew ktfmtFormat` to enforce coding style standards.
+### 8.1 Current Testing Challenges & Decoupling Prerequisites
+
+Writing isolated unit tests for reader navigation has historically been blocked by deep Android framework and architectural coupling:
+
+1. **Android Framework Coupling (`ReaderActivity` & `DisplayMetrics`):**
+   `WebtoonViewer` and `PagerViewer` require a concrete `ReaderActivity` instance in their constructors, accessing `activity.resources.displayMetrics` and `activity.viewModel`. This prevents instantiating viewers inside pure JVM unit tests (`testDebugUnitTest`) without heavyweight Robolectric or Android instrumentation.
+2. **Global Service Locator (`Injekt`):**
+   `ReaderViewModel` and the viewers call `Injekt.get<PreferencesHelper>()`, `Injekt.get<DownloadManager>()`, etc., directly. In headless JVM tests, these calls throw `InjektException` unless an extensive mock registry is initialized.
+3. **Embedded Domain Logic:**
+   Directional target resolution (`Start` vs `End` vs `Resume`) was originally embedded directly inside `ReaderViewModel.onPageSelected`, entwined with database queries and coroutine launches.
+4. **Compose Runtime State Dependencies:**
+   Scroll gating and index change detection were tied to `snapshotFlow { lazyListState.firstVisibleItemIndex }`, requiring a live Compose composition to verify.
+
+### 8.2 Decoupled Pure JVM Unit Testing Architecture
+
+By extracting pure domain use cases and state policies, reader navigation can be 100% verified using fast JVM unit tests:
+
+#### 1. Directional Target Resolution Tests (`ResolveChapterNavTargetUseCaseTest`)
+Located at `app/src/test/java/eu/kanade/tachiyomi/ui/reader/domain/ResolveChapterNavTargetUseCaseTest.kt`:
+
+```kotlin
+class ResolveChapterNavTargetUseCaseTest {
+
+    private val useCase = ResolveChapterNavTargetUseCase()
+
+    private val ch1 = createReaderChapter(id = 1L, url = "/ch1")
+    private val ch2 = createReaderChapter(id = 2L, url = "/ch2")
+    private val ch3 = createReaderChapter(id = 3L, url = "/ch3")
+    private val chapters = listOf(ch1, ch2, ch3)
+
+    @Test
+    fun `when scrolling forward to next chapter, target is Start (page 0)`() {
+        val target = useCase(currentChapter = ch1, selectedChapter = ch2, chapterList = chapters)
+        assertThat(target).isEqualTo(ChapterNavTarget.Start)
+    }
+
+    @Test
+    fun `when scrolling backward to previous chapter, target is End (last page)`() {
+        val target = useCase(currentChapter = ch2, selectedChapter = ch1, chapterList = chapters)
+        assertThat(target).isEqualTo(ChapterNavTarget.End)
+    }
+
+    @Test
+    fun `when opening chapter initially, target is Resume (saved progress)`() {
+        val target = useCase(currentChapter = null, selectedChapter = ch2, chapterList = chapters)
+        assertThat(target).isEqualTo(ChapterNavTarget.Resume)
+    }
+
+    @Test
+    fun `when re-selecting current chapter, target is Resume`() {
+        val target = useCase(currentChapter = ch2, selectedChapter = ch2, chapterList = chapters)
+        assertThat(target).isEqualTo(ChapterNavTarget.Resume)
+    }
+}
+```
+
+#### 2. Scroll Gating Policy Tests (`WebtoonScrollGatingPolicyTest`)
+Extracts the transition evaluation policy from Compose into a pure Kotlin evaluator:
+
+```kotlin
+class WebtoonScrollGatingPolicyTest {
+
+    @Test
+    fun `when list is idle and candidate is from adjacent chapter, transition is rejected`() {
+        val result = WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
+            activeChapterId = 2L,
+            candidateChapterId = 1L,
+            isScrollInProgress = false,
+        )
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `when list is actively scrolling and candidate is from adjacent chapter, transition is accepted`() {
+        val result = WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
+            activeChapterId = 2L,
+            candidateChapterId = 1L,
+            isScrollInProgress = true,
+        )
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `when candidate is from current chapter, selection is always accepted even if idle`() {
+        val result = WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
+            activeChapterId = 2L,
+            candidateChapterId = 2L,
+            isScrollInProgress = false,
+        )
+        assertThat(result).isTrue()
+    }
+}
+```
+
+### 8.3 Issue #3379 Regression Verification Matrix
+
+| Test Case | Scenario | Expected Outcome | Verified By |
+| :--- | :--- | :--- | :--- |
+| **Repro 3a: Preload Prepend Race** | Active on Ch.46; Ch.45 finishes preloading and prepends 60 items to top while `isScrollInProgress == false`. | Prepend does NOT trigger `onPageSelected(Ch.45)`; viewport re-anchors to Ch.46 without backward jumping loop. | `WebtoonScrollGatingPolicyTest` + UI Integration |
+| **Repro 3b: Forward Transition Stale Resume** | User scrolls from Ch.32 to Ch.33; Ch.33 has stale `last_page_read = 118`. | Transition dispatches with `ChapterNavTarget.Start`; reader lands on page 0 of Ch.33. | `ResolveChapterNavTargetUseCaseTest` |
+| **Backward Continuous Transition** | User scrolls upward from Ch.33 into Ch.32. | Transition dispatches with `ChapterNavTarget.End`; reader lands on the last page of Ch.32. | `ResolveChapterNavTargetUseCaseTest` |
+| **Hardware Key Concurrency** | Rapid presses of `KEYCODE_N` during an active chapter transition. | `navigationMutex` suppresses overlapping requests; exactly one transition completes. | `ReaderViewModelConcurrencyTest` |
+| **Configuration Change Resilience** | Fold/unfold or rotate device during chapter loading. | `viewModelScope` job completes; new composition collects settling state and snaps to target page. | Instrumentation / Manual Test |
+
+### 8.4 Compose UI Headless Testing
+
+Once `ComposeWebtoonViewer` and `ComposePagerViewer` are fully decoupled from `WebtoonViewer` and `Injekt` as described in [`decouple_reader_compose_viewers_proposal.md`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/docs/proposals/reader/decouple_reader_compose_viewers_proposal.md), Compose tests can run in headless Android/Robolectric environments via `runComposeUiTest`:
+
+```kotlin
+@RunWith(AndroidJUnit4::class)
+class ComposeWebtoonViewerTest {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun whenItemsPrependedWhileIdle_doesNotTriggerOnPageSelectedForNewChapter() {
+        var pageSelectedChapterId: Long? = null
+
+        composeTestRule.setContent {
+            ComposeWebtoonViewer(
+                config = WebtoonViewerConfigUiModel(...),
+                items = initialItems,
+                onPageSelected = { page -> pageSelectedChapterId = page.chapter.chapter.id },
+                ...
+            )
+        }
+
+        // Simulate background prepend without scroll gesture
+        // Assert pageSelectedChapterId remains on the original chapter
+    }
+}
+```
+
+### 8.5 Automated Tooling Verification
+- Execute `./gradlew testDebugUnitTest` to verify JVM unit test suite.
+- Execute `./gradlew ktfmtFormat` to enforce coding style standards.
