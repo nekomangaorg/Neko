@@ -116,10 +116,10 @@ abstract class TrackService(val id: Int) {
         val mangaModel =
             manga
                 ?: if (track.manga_id != 0L) mangaRepository.getMangaById(track.manga_id) else null
+        val mangaId =
+            if (track.manga_id != 0L) track.manga_id else mangaModel?.id?.takeIf { it != 0L }
         val mangaChapters =
-            chapters
-                ?: if (track.manga_id != 0L) chapterRepository.getChaptersForManga(track.manga_id)
-                else emptyList()
+            chapters ?: (mangaId?.let { chapterRepository.getChaptersForManga(it) } ?: emptyList())
 
         val hasTotalChaptersMatch =
             track.total_chapters > 0 && track.last_chapter_read >= track.total_chapters.toFloat()
@@ -153,7 +153,7 @@ abstract class TrackService(val id: Int) {
             hasTotalChaptersMatch ||
                 (isMangaCompleted && (allChaptersRead || reachedLastChapter || endChapterRead))
 
-        if (canComplete && isCompleted) {
+        if (canComplete && isCompleted && track.status != completedStatus()) {
             track.status = completedStatus()
             if (track.total_chapters == 0) {
                 val total =
@@ -313,6 +313,7 @@ suspend fun TrackService.getLastChapterRead(
 ): Float {
     if (track.manga_id == 0L) return 0f
     val mangaChapters = chapters ?: chapterRepository.getChaptersForManga(track.manga_id)
-    val lastChapterRead = mangaChapters.filter { it.read }.maxByOrNull { it.smart_order }
-    return lastChapterRead?.takeIf { it.isRecognizedNumber }?.chapter_number ?: 0f
+    val lastChapterRead =
+        mangaChapters.filter { it.read && it.isRecognizedNumber }.maxByOrNull { it.smart_order }
+    return lastChapterRead?.chapter_number ?: 0f
 }

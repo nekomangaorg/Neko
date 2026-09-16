@@ -381,8 +381,14 @@ class TrackServiceTest {
                         every { isRecognizedNumber } returns true
                     },
                     mockk<Chapter>(relaxed = true) {
-                        every { chapter_number } returns 3f
+                        every { chapter_number } returns -1f
                         every { smart_order } returns 2
+                        every { read } returns true
+                        every { isRecognizedNumber } returns false
+                    },
+                    mockk<Chapter>(relaxed = true) {
+                        every { chapter_number } returns 3f
+                        every { smart_order } returns 3
                         every { read } returns false
                         every { isRecognizedNumber } returns true
                     },
