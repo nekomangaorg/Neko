@@ -636,29 +636,31 @@ constructor(
             loadNewChapterJob?.cancel()
             TimberKt.d { "Setting ${chapterToLoad.chapter.url} as active" }
             viewModelScope.launchNonCancellable { saveReadingProgress(currentChapters.currChapter) }
-            val isForward =
-                when {
-                    selectedChapter.chapter.id == currentChapters.nextChapter?.chapter?.id -> true
-                    selectedChapter.chapter.id == currentChapters.prevChapter?.chapter?.id -> false
-                    else -> {
-                        val chapterList = getChapterList()
-                        val currentPos = chapterList.indexOfFirst {
-                            it.chapter.id == currentChapters.currChapter.chapter.id
-                        }
-                        val selectedPos = chapterList.indexOfFirst {
-                            it.chapter.id == selectedChapter.chapter.id
-                        }
-                        if (currentPos != -1 && selectedPos != -1) {
-                            selectedPos > currentPos
-                        } else {
-                            selectedChapter.chapter.chapter_number >
-                                currentChapters.currChapter.chapter.chapter_number
-                        }
-                    }
-                }
-            val navTarget = if (isForward) ChapterNavTarget.Start else ChapterNavTarget.End
             loadNewChapterJob = viewModelScope.launch {
                 try {
+                    val isForward =
+                        when {
+                            selectedChapter.chapter.id ==
+                                currentChapters.nextChapter?.chapter?.id -> true
+                            selectedChapter.chapter.id ==
+                                currentChapters.prevChapter?.chapter?.id -> false
+                            else -> {
+                                val chapterList = chapterListCache ?: getChapterList()
+                                val currentPos = chapterList.indexOfFirst {
+                                    it.chapter.id == currentChapters.currChapter.chapter.id
+                                }
+                                val selectedPos = chapterList.indexOfFirst {
+                                    it.chapter.id == selectedChapter.chapter.id
+                                }
+                                if (currentPos != -1 && selectedPos != -1) {
+                                    selectedPos > currentPos
+                                } else {
+                                    selectedChapter.chapter.chapter_number >
+                                        currentChapters.currChapter.chapter.chapter_number
+                                }
+                            }
+                        }
+                    val navTarget = if (isForward) ChapterNavTarget.Start else ChapterNavTarget.End
                     loadNewChapter(chapterToLoad, navTarget)
                 } finally {
                     if (loadingChapterId == chapterToLoad.chapter.id) {
