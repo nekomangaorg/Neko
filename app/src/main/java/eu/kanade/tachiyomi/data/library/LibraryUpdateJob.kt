@@ -731,7 +731,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         ) {
             val skippedFile =
                 writeErrorFile(skippedUpdates.map { it.key.title to it.value }.toMap(), "skipped")
-                    .getUriCompat(context)
+                    ?.getUriCompat(context)
             notifier.showUpdateSkippedNotification(skippedUpdates.map { it.key.title }, skippedFile)
         }
         if (
@@ -744,7 +744,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val errorFile = writeErrorFile(failedUpdates.map { it.key.title to it.value }.toMap())
             notifier.showUpdateErrorNotification(
                 failedUpdates.map { it.key.title },
-                errorFile.getUriCompat(context),
+                errorFile?.getUriCompat(context),
             )
         }
         failedUpdates.clear()
@@ -759,8 +759,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         downloadManager.downloadChapters(manga, chapters, false)
     }
 
-    /** Writes basic file of update errors to cache dir. */
-    private fun writeErrorFile(errors: Map<String, String?>, fileName: String = "errors"): File {
+    /** Writes basic file of update errors to cache dir, null when it could not be written. */
+    private fun writeErrorFile(errors: Map<String, String?>, fileName: String = "errors"): File? {
         try {
             if (errors.isNotEmpty()) {
                 val file = context.createFileInCacheDir("neko_update_$fileName.txt")
@@ -780,7 +780,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         } catch (e: Exception) {
             TimberKt.e(e) { "Error writing error file" }
         }
-        return File("")
+        return null
     }
 
     private fun addMangaToQueue(manga: List<LibraryManga>) {
