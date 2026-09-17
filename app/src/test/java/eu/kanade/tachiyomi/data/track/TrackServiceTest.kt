@@ -362,7 +362,7 @@ class TrackServiceTest {
         }
 
     @Test
-    fun `given read chapters when getLastChapterRead called then returns chapter with highest smart_order`() =
+    fun `given read chapters when getLastChapterRead called then returns highest read chapter number`() =
         runTest {
             val track = Track.create(1).apply { manga_id = 90L }
 
@@ -370,25 +370,21 @@ class TrackServiceTest {
                 listOf(
                     mockk<Chapter>(relaxed = true) {
                         every { chapter_number } returns 1f
-                        every { smart_order } returns 0
                         every { read } returns true
                         every { isRecognizedNumber } returns true
                     },
                     mockk<Chapter>(relaxed = true) {
                         every { chapter_number } returns 2f
-                        every { smart_order } returns 1
                         every { read } returns true
                         every { isRecognizedNumber } returns true
                     },
                     mockk<Chapter>(relaxed = true) {
                         every { chapter_number } returns -1f
-                        every { smart_order } returns 2
                         every { read } returns true
                         every { isRecognizedNumber } returns false
                     },
                     mockk<Chapter>(relaxed = true) {
                         every { chapter_number } returns 3f
-                        every { smart_order } returns 3
                         every { read } returns false
                         every { isRecognizedNumber } returns true
                     },

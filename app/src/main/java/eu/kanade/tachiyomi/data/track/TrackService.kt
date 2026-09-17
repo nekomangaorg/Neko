@@ -313,7 +313,7 @@ suspend fun TrackService.getLastChapterRead(
 ): Float {
     if (track.manga_id == 0L) return 0f
     val mangaChapters = chapters ?: chapterRepository.getChaptersForManga(track.manga_id)
-    val lastChapterRead =
-        mangaChapters.filter { it.read && it.isRecognizedNumber }.maxByOrNull { it.smart_order }
-    return lastChapterRead?.chapter_number ?: 0f
+    return mangaChapters
+        .filter { it.read && it.isRecognizedNumber }
+        .maxOfOrNull { it.chapter_number } ?: 0f
 }
