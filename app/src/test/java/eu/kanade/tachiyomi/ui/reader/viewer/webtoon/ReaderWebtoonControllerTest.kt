@@ -54,6 +54,8 @@ class ReaderWebtoonControllerTest {
         assertEquals(16, items.size)
         assertTrue(items[0] is ReaderUiItem.Transition)
         assertTrue((items[0] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
+        assertNull(items[0].chapterId)
+        assertNull(items[0].pageIndex)
 
         assertEquals(2L, items[1].chapterId)
         assertEquals(0, items[1].pageIndex)
@@ -211,5 +213,23 @@ class ReaderWebtoonControllerTest {
         assertEquals(ReaderWebtoonController.TallSplitResult.NotTall, result)
         assertTrue(!controller.tallSplitPages.contains(page))
         assertTrue(controller.isNonTall(page))
+    }
+
+    @Test
+    fun `Transition key remains stable when destination chapter is resolved`() {
+        val currChapter = createChapter(46L, pageCount = 5)
+        val prevChapter = createChapter(45L, pageCount = 5)
+
+        val transWithoutTo = ChapterTransition.Prev(currChapter, null)
+        val itemWithoutTo = ReaderUiItem.Transition(transWithoutTo)
+
+        val transWithTo = ChapterTransition.Prev(currChapter, prevChapter)
+        val itemWithTo = ReaderUiItem.Transition(transWithTo)
+
+        assertEquals("webtoon_transition_prev_46", itemWithoutTo.key("webtoon"))
+        assertEquals("webtoon_transition_prev_46", itemWithTo.key("webtoon"))
+        assertEquals(itemWithoutTo.key("webtoon"), itemWithTo.key("webtoon"))
+        assertNull(itemWithoutTo.chapterId)
+        assertNull(itemWithTo.chapterId)
     }
 }

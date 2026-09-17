@@ -538,8 +538,7 @@ fun ComposeWebtoonViewer(
         val hasMargins = viewer.noWebtoonTag && !disableGaps
 
         val density = LocalDensity.current
-        val overscrollThresholdPx =
-            remember(density) { with(density) { Size.extraLarge.toPx() * 2 } }
+        val overscrollThresholdPx = remember(density) { with(density) { (Size.huge * 2).toPx() } }
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 var pullOffset = 0f
@@ -559,7 +558,8 @@ fun ComposeWebtoonViewer(
                     source: NestedScrollSource,
                 ): Offset {
                     if (
-                        available.y > 0 &&
+                        source == NestedScrollSource.UserInput &&
+                            available.y > 0 &&
                             lazyListState.firstVisibleItemIndex == 0 &&
                             lazyListState.firstVisibleItemScrollOffset == 0
                     ) {
