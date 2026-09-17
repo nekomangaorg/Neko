@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,7 +30,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -51,6 +54,7 @@ import kotlin.math.hypot
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withTimeout
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
+import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
@@ -74,6 +78,7 @@ fun PagerPageItem(
     val doublePageGap by readerPreferences.doublePageGap().collectAsState()
     val invertDoublePages by readerPreferences.invertDoublePages().collectAsState()
     val readerThemePref by readerPreferences.readerTheme().collectAsState()
+    val landscapeZoom by readerPreferences.landscapeZoom().collectAsState()
 
     val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
     val touchSlopPx = remember(viewConfiguration) { viewConfiguration.scaledTouchSlop.toDouble() }
@@ -336,7 +341,8 @@ fun PagerPageItem(
         contentAlignment = Alignment.Center,
     ) {
         if (extraPage == null) {
-            val zoomableState = rememberZoomableState()
+            val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
+            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
             val imageState = rememberZoomableImageState(zoomableState)
             val model =
                 remember(page) {
@@ -359,7 +365,8 @@ fun PagerPageItem(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            val zoomableState = rememberZoomableState()
+            val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
+            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
             val (first, second) =
                 viewer.controller.getDoublePageOrder(
                     page = page,
@@ -367,6 +374,14 @@ fun PagerPageItem(
                     isRtl = viewer.isRtl,
                     invertDoublePages = invertDoublePages,
                 )
+
+            LaunchedEffect(isReady, landscapeZoom, imageScaleType) {
+                if (isReady && landscapeZoom && imageScaleType == 1) {
+                    val isRtl = viewer.isRtl.xor(invertDoublePages)
+                    val centroid = if (isRtl) Offset(Float.POSITIVE_INFINITY, 0f) else Offset.Zero
+                    zoomableState.zoomTo(zoomFactor = 2f, centroid = centroid)
+                }
+            }
 
             val firstModel =
                 remember(first) {
@@ -398,23 +413,27 @@ fun PagerPageItem(
                         ),
                 contentAlignment = Alignment.Center,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(Size.tiny * doublePageGap),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    AsyncImage(
-                        model = firstModel,
-                        contentDescription = null,
-                        contentScale = contentScale,
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
-                    )
-                    AsyncImage(
-                        model = secondModel,
-                        contentDescription = null,
-                        contentScale = contentScale,
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
-                    )
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(Size.tiny * doublePageGap),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        AsyncImage(
+                            model = firstModel,
+                            contentDescription = null,
+                            contentScale = contentScale,
+                            alignment = Alignment.CenterEnd,
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                        )
+                        AsyncImage(
+                            model = secondModel,
+                            contentDescription = null,
+                            contentScale = contentScale,
+                            alignment = Alignment.CenterStart,
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                        )
+                    }
                 }
             }
         }
