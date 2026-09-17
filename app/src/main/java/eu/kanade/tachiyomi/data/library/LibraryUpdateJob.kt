@@ -141,17 +141,21 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val emitScope = MainScope()
 
     private val mangaToUpdate = java.util.concurrent.CopyOnWriteArrayList<LibraryManga>()
+
+    // The maps below are written from the concurrent manga updates, so they are synchronized.
     // List containing new updates
-    private val newUpdates = mutableMapOf<LibraryManga, Array<Chapter>>()
+    private val newUpdates =
+        Collections.synchronizedMap(mutableMapOf<LibraryManga, Array<Chapter>>())
 
     // List containing failed updates
-    private val failedUpdates = mutableMapOf<Manga, String?>()
+    private val failedUpdates = Collections.synchronizedMap(mutableMapOf<Manga, String?>())
 
     // List containing skipped updates
-    private val skippedUpdates = mutableMapOf<LibraryManga, String?>()
+    private val skippedUpdates = Collections.synchronizedMap(mutableMapOf<LibraryManga, String?>())
 
     // List containing chapters that became unavailable
-    private val unavailableUpdates = mutableMapOf<LibraryManga, List<Chapter>>()
+    private val unavailableUpdates =
+        Collections.synchronizedMap(mutableMapOf<LibraryManga, List<Chapter>>())
 
     val count = AtomicInteger(0)
 
