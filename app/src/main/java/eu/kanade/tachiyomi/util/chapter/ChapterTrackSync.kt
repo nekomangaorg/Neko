@@ -96,7 +96,7 @@ suspend fun updateTrackChapterRead(
  * True when the manga sits in a category the user excluded from tracker progress updates. A manga
  * with no category counts as the default category (id 0).
  */
-private suspend fun isExcludedFromTrackingUpdates(
+internal suspend fun isExcludedFromTrackingUpdates(
     mangaId: Long,
     preferences: PreferencesHelper,
 ): Boolean {
