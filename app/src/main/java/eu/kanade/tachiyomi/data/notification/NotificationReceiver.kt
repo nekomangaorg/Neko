@@ -319,7 +319,7 @@ class NotificationReceiver : BroadcastReceiver() {
             chapterRepository.updateChaptersProgress(listOf(chapter))
             chapter
         }
-        if (preferences.removeAfterMarkedAsRead().get()) {
+        if (manga.removeAfterMarkedAsRead(preferences)) {
             val chaptersToDelete = dbChapters.filter { it.canDeleteChapter() }
             downloadManager.deleteChapters(manga, chaptersToDelete)
         }
