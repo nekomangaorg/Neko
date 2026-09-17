@@ -1,24 +1,26 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.ui.reader.domain.BuildWebtoonItemsUseCase
+import eu.kanade.tachiyomi.ui.reader.domain.CheckTallPageUseCase
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
-import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 import eu.kanade.tachiyomi.util.system.GLUtil
-import eu.kanade.tachiyomi.util.system.ImageUtil
 import java.util.Collections
-import okio.buffer
-import okio.source
 
 /**
  * Pure domain controller for Webtoon reader item generation, transitions, and tall-page splitting.
  * Decoupled from Android View and RecyclerView hierarchies.
  */
-class ReaderWebtoonController {
+class ReaderWebtoonController(
+    private val checkTallPageUseCase: CheckTallPageUseCase = CheckTallPageUseCase(),
+    private val buildWebtoonItemsUseCase: BuildWebtoonItemsUseCase =
+        BuildWebtoonItemsUseCase(checkTallPageUseCase),
+) {
 
     sealed interface TallSplitResult {
         data class Split(val splits: List<ReaderPageSplit>) : TallSplitResult
@@ -65,81 +67,23 @@ class ReaderWebtoonController {
         if (currentChapter?.chapter?.id != chapters.currChapter.chapter.id) {
             hadTransitionForNext = false
         }
-        val newItems = mutableListOf<ReaderUiItem>()
 
-        val prevHasMissingChapters = hasMissingChapters(chapters.currChapter, chapters.prevChapter)
-        val nextHasMissingChapters = hasMissingChapters(chapters.nextChapter, chapters.currChapter)
+        val result =
+            buildWebtoonItemsUseCase(
+                chapters = chapters,
+                forceTransition = forceTransition,
+                screenHeight = screenHeight,
+                existingItems = existingItems,
+                hadTransitionForNext = hadTransitionForNext,
+            )
 
-        // Add previous chapter padding pages (last 2 pages) to maintain key continuity across
-        // chapter boundaries
-        if (chapters.prevChapter != null) {
-            val prevPages = chapters.prevChapter.pages
-            if (prevPages != null && prevPages.isNotEmpty()) {
-                newItems.addAll(mapPagesToItems(prevPages.takeLast(2), screenHeight, existingItems))
-            }
-        }
-
-        val prevTrans = ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter)
-        prevTransition = prevTrans
-        newItems.add(ReaderUiItem.Transition(prevTrans))
-
-        // Add current chapter pages
-        val currPages = chapters.currChapter.pages
-        if (currPages != null) {
-            newItems.addAll(mapPagesToItems(currPages, screenHeight, existingItems))
-        }
-
+        prevTransition = result.prevTransition
+        nextTransition = result.nextTransition
         currentChapter = chapters.currChapter
+        hadTransitionForNext = result.hadTransitionForNext
+        tallSplitPages.addAll(result.tallSplitPages)
 
-        // Add next chapter transition and pages
-        val nextTrans = ChapterTransition.Next(chapters.currChapter, chapters.nextChapter)
-        nextTransition = nextTrans
-        val shouldAddNextTransition =
-            chapters.nextChapter == null ||
-                nextHasMissingChapters ||
-                forceTransition ||
-                hadTransitionForNext ||
-                chapters.nextChapter.state !is ReaderChapter.State.Loaded
-
-        if (shouldAddNextTransition) {
-            newItems.add(ReaderUiItem.Transition(nextTrans))
-            if (chapters.nextChapter != null) {
-                hadTransitionForNext = true
-            }
-        }
-
-        if (chapters.nextChapter != null) {
-            val nextPages = chapters.nextChapter.pages
-            if (nextPages != null) {
-                newItems.addAll(mapPagesToItems(nextPages, screenHeight, existingItems))
-            }
-        }
-
-        return newItems
-    }
-
-    private fun mapPagesToItems(
-        pages: List<ReaderPage>,
-        screenHeight: Int,
-        existingItems: List<ReaderUiItem> = emptyList(),
-    ): List<ReaderUiItem> {
-        return pages.flatMap { page ->
-            val existingSplits =
-                existingItems.filterIsInstance<ReaderUiItem.SplitPage>().filter {
-                    it.page.isFromSamePage(page)
-                }
-            if (existingSplits.isNotEmpty()) {
-                tallSplitPages.add(page)
-                return@flatMap existingSplits
-            }
-            if (screenHeight > 0 && page.status == Page.State.READY && page.stream != null) {
-                val result = checkAndTrackTallPage(page, screenHeight)
-                if (result is TallSplitResult.Split) {
-                    return@flatMap result.splits.map { ReaderUiItem.SplitPage(it) }
-                }
-            }
-            listOf(ReaderUiItem.Page(page))
-        }
+        return result.items
     }
 
     /**
@@ -182,7 +126,7 @@ class ReaderWebtoonController {
         synchronized(splitCheckLock) {
             if (tallSplitPages.contains(page)) return TallSplitResult.AlreadySplit
             if (nonTallPages.contains(page)) return TallSplitResult.NotTall
-            val splits = Companion.checkTallPage(page, screenHeight, maxTextureSize)
+            val splits = checkTallPageUseCase(page, screenHeight, maxTextureSize)
             return if (splits != null) {
                 tallSplitPages.add(page)
                 TallSplitResult.Split(splits)
@@ -208,6 +152,8 @@ class ReaderWebtoonController {
     }
 
     companion object {
+        private val defaultCheckTallPageUseCase = CheckTallPageUseCase()
+
         /**
          * Inspects [page] image headers and calculates [ReaderPageSplit] slices if the image is
          * taller than [screenHeight] * 2 or exceeds [maxTextureSize].
@@ -216,22 +162,7 @@ class ReaderWebtoonController {
             page: ReaderPage,
             screenHeight: Int,
             maxTextureSize: Int = GLUtil.maxTextureSize,
-        ): List<ReaderPageSplit>? {
-            val streamFn = page.stream ?: return null
-            val options =
-                try {
-                    streamFn().source().buffer().use { ImageUtil.extractImageOptions(it) }
-                } catch (_: Exception) {
-                    return null
-                }
-            return computeSplits(
-                page,
-                options.outWidth,
-                options.outHeight,
-                screenHeight,
-                maxTextureSize,
-            )
-        }
+        ): List<ReaderPageSplit>? = defaultCheckTallPageUseCase(page, screenHeight, maxTextureSize)
 
         /**
          * Pure function that calculates optimal slice splits given dimensions and maximum texture
@@ -243,40 +174,13 @@ class ReaderWebtoonController {
             outHeight: Int,
             screenHeight: Int,
             maxTextureSize: Int = GLUtil.maxTextureSize,
-        ): List<ReaderPageSplit>? {
-            if (outHeight <= 0 || outWidth <= 0) return null
-            val displayMaxHeight =
-                if (screenHeight > 0) {
-                    minOf(maxOf(screenHeight * 2, 4096), maxTextureSize)
-                } else {
-                    maxTextureSize
-                }
-            val isTall =
-                (outHeight.toFloat() / outWidth.toFloat() > 3f) || (outHeight > maxTextureSize)
-            if (!isTall || outHeight <= displayMaxHeight) {
-                return null
-            }
-
-            val maxSliceHeight = minOf(displayMaxHeight, maxTextureSize)
-            val partCount = (outHeight - 1) / maxSliceHeight + 1
-            if (partCount <= 1) return null
-
-            val optimalSplitHeight = outHeight / partCount
-            val splits = mutableListOf<ReaderPageSplit>()
-            for (i in 0 until partCount) {
-                val topOffset = i * optimalSplitHeight
-                val splitH =
-                    if (i == partCount - 1) {
-                        outHeight - topOffset
-                    } else {
-                        optimalSplitHeight
-                    }
-                val split =
-                    ReaderPageSplit(page = page, topOffset = topOffset, splitHeight = splitH)
-                split.aspectRatio = outWidth.toFloat() / splitH.toFloat()
-                splits.add(split)
-            }
-            return splits
-        }
+        ): List<ReaderPageSplit>? =
+            defaultCheckTallPageUseCase.computeSplits(
+                page,
+                outWidth,
+                outHeight,
+                screenHeight,
+                maxTextureSize,
+            )
     }
 }

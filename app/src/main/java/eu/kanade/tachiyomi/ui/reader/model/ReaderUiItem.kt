@@ -76,3 +76,60 @@ sealed interface ReaderUiItem {
         }
     }
 }
+
+/**
+ * Compares two reader UI items for semantic identity equivalence across list updates and preloads.
+ * Enables deterministic list re-anchoring and pure JVM test assertions without Android View models.
+ */
+fun ReaderUiItem.isEquivalentTo(target: ReaderUiItem?): Boolean {
+    if (target == null) return false
+    return when {
+        this is ReaderUiItem.Page && target is ReaderUiItem.Page -> {
+            isSameChapter(this.page.chapter, target.page.chapter) &&
+                this.page.index == target.page.index
+        }
+        this is ReaderUiItem.SplitPage && target is ReaderUiItem.SplitPage -> {
+            isSameChapter(this.page.chapter, target.page.chapter) &&
+                this.page.index == target.page.index &&
+                this.split.topOffset == target.split.topOffset
+        }
+        this is ReaderUiItem.Page && target is ReaderUiItem.SplitPage -> {
+            isSameChapter(this.page.chapter, target.page.chapter) &&
+                this.page.index == target.page.index &&
+                target.split.topOffset == 0
+        }
+        this is ReaderUiItem.SplitPage && target is ReaderUiItem.Page -> {
+            isSameChapter(this.page.chapter, target.page.chapter) &&
+                this.page.index == target.page.index &&
+                this.split.topOffset == 0
+        }
+        this is ReaderUiItem.Transition && target is ReaderUiItem.Transition -> {
+            areTransitionsEquivalent(this.transition, target.transition)
+        }
+        else -> false
+    }
+}
+
+internal fun isSameChapter(a: ReaderChapter, b: ReaderChapter): Boolean {
+    val aId = a.chapter.id
+    val bId = b.chapter.id
+    return if (aId != null && bId != null && aId > 0 && bId > 0) {
+        aId == bId
+    } else {
+        a.chapter.url == b.chapter.url
+    }
+}
+
+internal fun areTransitionsEquivalent(a: ChapterTransition, b: ChapterTransition): Boolean {
+    if (a::class == b::class && isSameChapter(a.from, b.from)) {
+        return true
+    }
+    val aTo = a.to
+    val bTo = b.to
+    if (aTo != null && bTo != null) {
+        if (isSameChapter(a.from, bTo) && isSameChapter(aTo, b.from)) {
+            return true
+        }
+    }
+    return false
+}

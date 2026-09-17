@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import eu.kanade.tachiyomi.data.coil.ReaderPageSplitFetcher
-import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -19,12 +18,17 @@ import kotlin.math.min
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import org.nekomanga.logging.TimberKt
-import uy.kohesive.injekt.injectLazy
 
-/** Headless implementation of [BaseViewer] for Webtoon continuous vertical reading mode. */
+/**
+ * Legacy implementation of [BaseViewer] for Webtoon continuous vertical reading mode.
+ *
+ * @deprecated Superceded by headless [ReaderPreloadEngine], [BuildWebtoonItemsUseCase], and
+ *   stateless [ComposeWebtoonViewer].
+ */
+@Deprecated(
+    "Use ReaderPreloadEngine and stateless ComposeWebtoonViewer with WebtoonViewerConfigUiModel instead"
+)
 class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = false) : BaseViewer {
-
-    val downloadManager: DownloadManager by injectLazy()
 
     val scope = MainScope()
 
@@ -65,6 +69,16 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Configuration used by this viewer. */
     val config = WebtoonConfig(scope)
 
+    /** Headless preload engine for disk prefetching and memory cache warming. */
+    val preloadEngine =
+        ReaderPreloadEngine(
+            context = activity,
+            scope = scope,
+            onPageSplit = { originalPage, insertPages -> splitPage(originalPage, insertPages) },
+            isSplitTallPagesEnabled = { config.splitTallPages },
+            getScreenHeight = { activity.resources.displayMetrics.heightPixels },
+        )
+
     init {
         config.reloadViewerListener = { activity.viewModel.reloadViewer() }
         config.navigationModeChangedListener = {
@@ -77,6 +91,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Destroys this viewer. Called when leaving the reader or swapping viewers. */
     override fun destroy() {
         super.destroy()
+        preloadEngine.clear()
         scope.cancel()
         ReaderPageSplitFetcher.clearCache()
     }
@@ -102,14 +117,25 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         items = newItems
         activity.updateWebtoonViewerItems()
 
+        val pages = chapters.currChapter.pages
+        val requestedIndex = pages?.let { min(chapters.currChapter.requestedPage, it.lastIndex) }
+        val targetPage =
+            if (requestedIndex != null && requestedIndex in pages.indices) pages[requestedIndex]
+            else pages?.firstOrNull()
+        val initialActiveIndex =
+            targetPage?.let { controller.findPageIndex(newItems, it) }?.takeIf { it != -1 } ?: 0
+        preloadEngine.updateActiveIndex(initialActiveIndex, newItems, config.preloadPageAmount)
+
         if (isInitialLoad) {
             isInitialLoad = false
-            val pages = chapters.currChapter.pages ?: return
-            val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
-            if (requestedIndex in pages.indices) {
+            if (requestedIndex != null && requestedIndex in pages.indices) {
                 moveToPage(pages[requestedIndex], false)
             }
         }
+    }
+
+    fun updateActiveIndex(activeIndex: Int) {
+        preloadEngine.updateActiveIndex(activeIndex, items, config.preloadPageAmount)
     }
 
     /** Tells this viewer to move to the given [page]. */

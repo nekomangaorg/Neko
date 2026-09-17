@@ -43,6 +43,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.ReaderPreloadEngine
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
@@ -126,6 +127,14 @@ constructor(
     val state = mutableState.asStateFlow()
 
     private val downloadProvider = DownloadProvider(preferences.context)
+
+    /** Headless preload engine for disk prefetching and memory cache warming. */
+    val preloadEngine =
+        ReaderPreloadEngine(
+            context = preferences.context,
+            scope = viewModelScope,
+            isSplitTallPagesEnabled = { readerPreferences.splitTallImagesReader().get() },
+        )
 
     private val eventChannel = Channel<Event>()
     val eventFlow = eventChannel.receiveAsFlow()
@@ -244,6 +253,7 @@ constructor(
     }
 
     override fun onCleared() {
+        preloadEngine.clear()
         val currentChapters = state.value.viewerChapters
         if (currentChapters != null) {
             // 1. Unreference the viewer chapters
@@ -253,6 +263,12 @@ constructor(
             chapterToDownload?.let { downloadManager.addDownloadsToStartOfQueue(listOf(it)) }
         }
         super.onCleared()
+    }
+
+    fun onWebtoonActiveItemChanged(activeIndex: Int) {
+        val items = state.value.viewerItems
+        val preloadAmount = readerPreferences.preloadPageAmount().get()
+        preloadEngine.updateActiveIndex(activeIndex, items, preloadAmount)
     }
 
     /**
