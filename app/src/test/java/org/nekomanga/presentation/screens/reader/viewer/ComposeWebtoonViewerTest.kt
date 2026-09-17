@@ -86,9 +86,11 @@ class ComposeWebtoonViewerTest {
         assertFalse(areItemsEquivalent(itemPage0, itemPage1))
 
         val splitPage0Top =
-            ReaderUiItem.SplitPage(ReaderPageSplit(page0, topOffset = 0, bottomOffset = 500))
+            ReaderUiItem.SplitPage(ReaderPageSplit(page = page0, topOffset = 0, splitHeight = 500))
         val splitPage0Bottom =
-            ReaderUiItem.SplitPage(ReaderPageSplit(page0, topOffset = 500, bottomOffset = 1000))
+            ReaderUiItem.SplitPage(
+                ReaderPageSplit(page = page0, topOffset = 500, splitHeight = 500)
+            )
 
         assertTrue(areItemsEquivalent(itemPage0, splitPage0Top))
         assertFalse(areItemsEquivalent(itemPage0, splitPage0Bottom))
