@@ -216,20 +216,137 @@ class ReaderWebtoonControllerTest {
     }
 
     @Test
-    fun `Transition key remains stable when destination chapter is resolved`() {
-        val currChapter = createChapter(46L, pageCount = 5)
-        val prevChapter = createChapter(45L, pageCount = 5)
+    fun `Transition key is symmetrical across adjacent chapters when destination is resolved`() {
+        val chapter1 = createChapter(45L, pageCount = 5)
+        val chapter2 = createChapter(46L, pageCount = 5)
 
+        val nextTrans = ChapterTransition.Next(chapter1, chapter2)
+        val prevTrans = ChapterTransition.Prev(chapter2, chapter1)
+
+        val nextItem = ReaderUiItem.Transition(nextTrans)
+        val prevItem = ReaderUiItem.Transition(prevTrans)
+
+        assertEquals("webtoon_transition_45_46", nextItem.key("webtoon"))
+        assertEquals("webtoon_transition_45_46", prevItem.key("webtoon"))
+        assertEquals(nextItem.key("webtoon"), prevItem.key("webtoon"))
+        assertNull(nextItem.chapterId)
+        assertNull(prevItem.chapterId)
+    }
+
+    @Test
+    fun `Transition key falls back to directional type when destination is null`() {
+        val currChapter = createChapter(46L, pageCount = 5)
         val transWithoutTo = ChapterTransition.Prev(currChapter, null)
         val itemWithoutTo = ReaderUiItem.Transition(transWithoutTo)
 
-        val transWithTo = ChapterTransition.Prev(currChapter, prevChapter)
-        val itemWithTo = ReaderUiItem.Transition(transWithTo)
-
         assertEquals("webtoon_transition_prev_46", itemWithoutTo.key("webtoon"))
-        assertEquals("webtoon_transition_prev_46", itemWithTo.key("webtoon"))
-        assertEquals(itemWithoutTo.key("webtoon"), itemWithTo.key("webtoon"))
-        assertNull(itemWithoutTo.chapterId)
-        assertNull(itemWithTo.chapterId)
+    }
+
+    @Test
+    fun `buildItems preserves next transition card when next chapter loads after being displayed`() {
+        val controller = ReaderWebtoonController()
+        val currChapter = createChapter(1L, pageCount = 5)
+        val dbChapter2 =
+            Chapter.create().apply {
+                this.id = 2L
+                this.url = "/chapter/2"
+                this.name = "Chapter 2"
+                this.chapter_number = 2f
+            }
+        val nextChapter = ReaderChapter(dbChapter2)
+        nextChapter.state = ReaderChapter.State.Wait
+
+        val viewerChaptersInitial = ViewerChapters(currChapter, null, nextChapter)
+
+        // Initial build: next chapter is not loaded, so next transition card must be present
+        val initialItems =
+            controller.buildItems(
+                viewerChaptersInitial,
+                forceTransition = false,
+                screenHeight = 1000,
+            )
+
+        // 1 prev transition + 5 curr pages + 1 next transition = 7 items
+        assertEquals(7, initialItems.size)
+        assertTrue(initialItems[6] is ReaderUiItem.Transition)
+        assertTrue(
+            (initialItems[6] as ReaderUiItem.Transition).transition is ChapterTransition.Next
+        )
+
+        // Next chapter finishes loading
+        val pages2 =
+            (0 until 5).map { index ->
+                ReaderPage(index = index, url = "url2_$index", imageUrl = "img2_$index").apply {
+                    this.chapter = nextChapter
+                    this.renderedHeight = 1000
+                }
+            }
+        nextChapter.state = ReaderChapter.State.Loaded(pages2)
+
+        val viewerChaptersLoaded = ViewerChapters(currChapter, null, nextChapter)
+
+        // Re-build with next chapter loaded: transition card must still be preserved
+        val loadedItems =
+            controller.buildItems(
+                viewerChaptersLoaded,
+                forceTransition = false,
+                screenHeight = 1000,
+            )
+
+        // 1 prev transition + 5 curr pages + 1 next transition (preserved!) + 5 next pages = 12
+        // items
+        assertEquals(12, loadedItems.size)
+        assertTrue(loadedItems[6] is ReaderUiItem.Transition)
+        assertTrue((loadedItems[6] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
+
+        // Next chapter pages follow the transition card
+        assertEquals(2L, loadedItems[7].chapterId)
+        assertEquals(0, loadedItems[7].pageIndex)
+    }
+
+    @Test
+    fun `buildItems resets hadTransitionForNext when current chapter changes`() {
+        val controller = ReaderWebtoonController()
+        val chapter1 = createChapter(1L, pageCount = 5)
+        val dbChapter2 =
+            Chapter.create().apply {
+                this.id = 2L
+                this.url = "/chapter/2"
+                this.name = "Chapter 2"
+                this.chapter_number = 2f
+            }
+        val chapter2 = ReaderChapter(dbChapter2)
+        chapter2.state = ReaderChapter.State.Wait
+
+        // Chapter 1 displayed with unloaded Chapter 2 -> sets hadTransitionForNext = true
+        controller.buildItems(ViewerChapters(chapter1, null, chapter2), forceTransition = false)
+
+        // Now user moves to Chapter 2 (currentChapter changes to 2) with loaded Chapter 3
+        val chapter3 = createChapter(3L, pageCount = 5)
+        val pages2 =
+            (0 until 5).map { index ->
+                ReaderPage(index = index, url = "url2_$index", imageUrl = "img2_$index").apply {
+                    this.chapter = chapter2
+                    this.renderedHeight = 1000
+                }
+            }
+        chapter2.state = ReaderChapter.State.Loaded(pages2)
+
+        val chapter2Items =
+            controller.buildItems(
+                ViewerChapters(chapter2, chapter1, chapter3),
+                forceTransition = false,
+            )
+
+        // In Chapter 2: Chapter 3 is loaded and forceTransition is false.
+        // hadTransitionForNext should have been reset, so no next transition is added.
+        // 1 prev transition + 5 curr pages (ch 2) + 5 next pages (ch 3) = 11 items
+        assertEquals(11, chapter2Items.size)
+        assertTrue(chapter2Items[0] is ReaderUiItem.Transition)
+        assertTrue(
+            (chapter2Items[0] as ReaderUiItem.Transition).transition is ChapterTransition.Prev
+        )
+        assertEquals(2L, chapter2Items[1].chapterId)
+        assertEquals(3L, chapter2Items[6].chapterId)
     }
 }

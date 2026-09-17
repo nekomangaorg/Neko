@@ -213,9 +213,28 @@ fun ComposeWebtoonViewer(
                 }
             }
 
+            // Obsolete chapter fallback: If target was in an obsolete chapter that is no longer
+            // present in forward-continuous items, safely anchor to the start of the active chapter
+            // (index 0).
+            if (targetIndex == -1) {
+                val anchor = firstItem ?: activeItem
+                if (anchor != null) {
+                    val anchorChapterId =
+                        anchor.chapterId
+                            ?: (anchor as? ReaderUiItem.Transition)?.transition?.from?.chapter?.id
+                    if (
+                        anchorChapterId != null &&
+                            activeChapterId != null &&
+                            anchorChapterId != activeChapterId
+                    ) {
+                        targetIndex = 0
+                        targetOffset = 0
+                    }
+                }
+            }
+
             if (
-                !lazyListState.isScrollInProgress &&
-                    targetIndex != -1 &&
+                targetIndex != -1 &&
                     (targetIndex != lazyListState.firstVisibleItemIndex ||
                         targetOffset != lazyListState.firstVisibleItemScrollOffset)
             ) {
@@ -1013,7 +1032,7 @@ fun ComposeWebtoonViewer(
     }
 }
 
-private fun isSameChapter(a: ReaderChapter, b: ReaderChapter): Boolean {
+internal fun isSameChapter(a: ReaderChapter, b: ReaderChapter): Boolean {
     val aId = a.chapter.id
     val bId = b.chapter.id
     return if (aId != null && bId != null && aId > 0 && bId > 0) {
@@ -1023,7 +1042,21 @@ private fun isSameChapter(a: ReaderChapter, b: ReaderChapter): Boolean {
     }
 }
 
-private fun areItemsEquivalent(a: ReaderUiItem, b: ReaderUiItem): Boolean {
+internal fun areTransitionsEquivalent(a: ChapterTransition, b: ChapterTransition): Boolean {
+    if (a::class == b::class && isSameChapter(a.from, b.from)) {
+        return true
+    }
+    val aTo = a.to
+    val bTo = b.to
+    if (aTo != null && bTo != null) {
+        if (isSameChapter(a.from, bTo) && isSameChapter(aTo, b.from)) {
+            return true
+        }
+    }
+    return false
+}
+
+internal fun areItemsEquivalent(a: ReaderUiItem, b: ReaderUiItem): Boolean {
     return when {
         a is ReaderUiItem.Page && b is ReaderUiItem.Page -> {
             isSameChapter(a.page.chapter, b.page.chapter) && a.page.index == b.page.index
@@ -1044,8 +1077,7 @@ private fun areItemsEquivalent(a: ReaderUiItem, b: ReaderUiItem): Boolean {
                 a.split.topOffset == 0
         }
         a is ReaderUiItem.Transition && b is ReaderUiItem.Transition -> {
-            a.transition::class == b.transition::class &&
-                isSameChapter(a.transition.from, b.transition.from)
+            areTransitionsEquivalent(a.transition, b.transition)
         }
         else -> false
     }

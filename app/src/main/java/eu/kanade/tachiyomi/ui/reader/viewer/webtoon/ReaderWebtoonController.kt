@@ -47,6 +47,8 @@ class ReaderWebtoonController {
 
     private val splitCheckLock = Any()
 
+    private var hadTransitionForNext = false
+
     /**
      * Builds the list of [ReaderUiItem] for the given [chapters]. Handles previous chapter padding
      * pages, transition pages, and next chapter peek pages.
@@ -58,6 +60,9 @@ class ReaderWebtoonController {
     ): List<ReaderUiItem> {
         tallSplitPages.clear()
         nonTallPages.clear()
+        if (currentChapter?.chapter?.id != chapters.currChapter.chapter.id) {
+            hadTransitionForNext = false
+        }
         val newItems = mutableListOf<ReaderUiItem>()
 
         val prevHasMissingChapters = hasMissingChapters(chapters.currChapter, chapters.prevChapter)
@@ -81,13 +86,18 @@ class ReaderWebtoonController {
         // Add next chapter transition and pages
         val nextTrans = ChapterTransition.Next(chapters.currChapter, chapters.nextChapter)
         nextTransition = nextTrans
-        if (
+        val shouldAddNextTransition =
             chapters.nextChapter == null ||
                 nextHasMissingChapters ||
                 forceTransition ||
+                hadTransitionForNext ||
                 chapters.nextChapter.state !is ReaderChapter.State.Loaded
-        ) {
+
+        if (shouldAddNextTransition) {
             newItems.add(ReaderUiItem.Transition(nextTrans))
+            if (chapters.nextChapter != null) {
+                hadTransitionForNext = true
+            }
         }
 
         if (chapters.nextChapter != null) {
