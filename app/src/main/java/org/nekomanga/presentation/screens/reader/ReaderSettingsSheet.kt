@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import eu.kanade.tachiyomi.ui.reader.settings.DeleteAfterReadType
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderSliderPosition
@@ -176,6 +177,19 @@ private fun GeneralSettingsTab(
             onSelected = { index ->
                 val rotationType = OrientationType.fromSpinner(index)
                 onAction(ReaderSettingsAction.SetOrientation(rotationType))
+            },
+        )
+
+        val deleteAfterReadOptions =
+            DeleteAfterReadType.entries.map { stringResource(it.stringRes) }
+        ReaderChipsSelector(
+            label = stringResource(R.string.remove_after_read),
+            options = deleteAfterReadOptions,
+            selectedIndex = uiState.deleteAfterRead.prefValue,
+            onSelected = { index ->
+                onAction(
+                    ReaderSettingsAction.SetDeleteAfterRead(DeleteAfterReadType.entries[index])
+                )
             },
         )
 

@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
@@ -40,6 +41,7 @@ class FeedRepository(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val chapterUseCases: ChapterUseCases = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get(),
 ) {
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -538,8 +540,10 @@ class FeedRepository(
         historyRepository.deleteAllHistory()
     }
 
-    suspend fun deleteChapter(chapterItem: ChapterItem) {
+    /** Deletes the chapter download when the manga, or the global setting, removes read chapters */
+    suspend fun deleteChapterAfterRead(chapterItem: ChapterItem) {
         val manga = mangaRepository.getMangaById(chapterItem.chapter.mangaId) ?: return
+        if (!manga.removeAfterMarkedAsRead(preferences)) return
         downloadManager.deleteChapters(manga, listOf(chapterItem.chapter.toDbChapter()))
     }
 

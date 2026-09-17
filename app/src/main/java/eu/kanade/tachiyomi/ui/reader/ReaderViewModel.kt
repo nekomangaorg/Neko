@@ -48,6 +48,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ReaderViewerPreferences
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.model.withLivePreloadStates
+import eu.kanade.tachiyomi.ui.reader.settings.DeleteAfterReadType
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
@@ -100,6 +101,7 @@ import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.manga.defaultReaderType
+import org.nekomanga.domain.manga.deleteAfterReadType
 import org.nekomanga.domain.manga.displayTitle
 import org.nekomanga.domain.manga.isLongStrip
 import org.nekomanga.domain.manga.orientationType
@@ -1007,7 +1009,9 @@ constructor(
         // Determine which chapter should be deleted and enqueue
         val chapterList = getChapterList()
         val currentChapterPosition = chapterList.indexOf(currentChapter)
-        val removeAfterReadSlots = preferences.removeAfterReadSlots().get()
+        val removeAfterReadSlots =
+            manga?.toManga()?.removeAfterReadSlots(preferences)
+                ?: preferences.removeAfterReadSlots().get()
         val chapterToDelete = chapterList.getOrNull(currentChapterPosition - removeAfterReadSlots)
 
         if (removeAfterReadSlots != 0 && chapterToDownload != null) {
@@ -1155,6 +1159,16 @@ constructor(
         return when (manga?.orientationType) {
             OrientationType.DEFAULT.flagValue -> default
             else -> manga?.orientationType ?: default
+        }
+    }
+
+    fun setMangaDeleteAfterReadType(type: Int) {
+        val manga = manga ?: return
+
+        viewModelScope.launchIO {
+            val dbManga = manga.toManga().apply { deleteAfterReadType = type }
+            mangaRepository.updateViewerFlags(dbManga)
+            mutableState.update { it.copy(manga = dbManga.toMangaItem()) }
         }
     }
 
@@ -1701,6 +1715,10 @@ constructor(
                     OrientationType.fromPreference(
                         currentManga?.orientationType ?: OrientationType.DEFAULT.flagValue
                     ),
+                deleteAfterRead =
+                    DeleteAfterReadType.fromPreference(
+                        currentManga?.deleteAfterReadType ?: DeleteAfterReadType.DEFAULT.flagValue
+                    ),
                 readerTheme = readerPreferences.readerTheme().get(),
                 sliderPosition = readerPreferences.sliderPosition().get(),
                 showPageNumber = readerPreferences.showPageNumber().get(),
@@ -1768,6 +1786,11 @@ constructor(
                             orientation =
                                 OrientationType.fromPreference(
                                     manga?.orientationType ?: OrientationType.DEFAULT.flagValue
+                                ),
+                            deleteAfterRead =
+                                DeleteAfterReadType.fromPreference(
+                                    manga?.deleteAfterReadType
+                                        ?: DeleteAfterReadType.DEFAULT.flagValue
                                 ),
                         )
                     }
@@ -1915,6 +1938,9 @@ constructor(
             }
             is ReaderSettingsAction.SetOrientation -> {
                 setMangaOrientationType(action.type.flagValue)
+            }
+            is ReaderSettingsAction.SetDeleteAfterRead -> {
+                setMangaDeleteAfterReadType(action.type.flagValue)
             }
             is ReaderSettingsAction.SetTheme -> {
                 readerPreferences.readerTheme().set(action.themeIndex)

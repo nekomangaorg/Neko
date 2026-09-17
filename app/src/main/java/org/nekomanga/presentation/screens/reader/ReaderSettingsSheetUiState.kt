@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.reader
 
 import androidx.compose.runtime.Immutable
+import eu.kanade.tachiyomi.ui.reader.settings.DeleteAfterReadType
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderSliderPosition
@@ -20,6 +21,7 @@ data class ReaderSettingsUiState(
     val hasCutout: Boolean = false,
     val readingMode: ReadingModeType = ReadingModeType.DEFAULT,
     val orientation: OrientationType = OrientationType.DEFAULT,
+    val deleteAfterRead: DeleteAfterReadType = DeleteAfterReadType.DEFAULT,
     val readerTheme: Int = 0,
     val sliderPosition: ReaderSliderPosition = ReaderSliderPosition.RIGHT,
     val showPageNumber: Boolean = true,
@@ -90,6 +92,8 @@ sealed interface ReaderSettingsAction {
     data class SetReadingMode(val type: ReadingModeType) : ReaderSettingsAction
 
     data class SetOrientation(val type: OrientationType) : ReaderSettingsAction
+
+    data class SetDeleteAfterRead(val type: DeleteAfterReadType) : ReaderSettingsAction
 
     data class SetTheme(val themeIndex: Int) : ReaderSettingsAction
 
