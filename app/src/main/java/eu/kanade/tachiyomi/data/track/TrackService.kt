@@ -4,11 +4,14 @@ import androidx.annotation.CallSuper
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -74,7 +77,12 @@ abstract class TrackService(val id: Int) {
 
     abstract suspend fun add(track: Track): Track
 
-    abstract suspend fun update(track: Track, setToRead: Boolean = false): Track
+    abstract suspend fun update(
+        track: Track,
+        setToRead: Boolean = false,
+        manga: Manga? = null,
+        chapters: List<Chapter>? = null,
+    ): Track
 
     abstract suspend fun bind(track: Track): Track
 
@@ -92,20 +100,110 @@ abstract class TrackService(val id: Int) {
 
     open fun isMdList() = false
 
-    open fun updateTrackStatus(
+    open suspend fun updateTrackStatus(
         track: Track,
         setToReadStatus: Boolean,
         mustReadToComplete: Boolean = false,
+        manga: Manga? = null,
+        chapters: List<Chapter>? = null,
     ) {
         if (setToReadStatus && track.status == planningStatus() && track.last_chapter_read != 0f) {
             track.status = readingStatus()
         }
-        if (
-            (!mustReadToComplete || track.status == readingStatus()) &&
-                track.total_chapters != 0 &&
-                track.last_chapter_read.toInt() == track.total_chapters
-        ) {
+
+        val canComplete = !mustReadToComplete || track.status == readingStatus()
+
+        val mangaModel =
+            manga
+                ?: if (track.manga_id != 0L) mangaRepository.getMangaById(track.manga_id) else null
+        val mangaId =
+            if (track.manga_id != 0L) track.manga_id else mangaModel?.id?.takeIf { it != 0L }
+        val mangaChapters =
+            chapters ?: (mangaId?.let { chapterRepository.getChaptersForManga(it) } ?: emptyList())
+
+        val hasTotalChaptersMatch =
+            track.total_chapters > 0 && track.last_chapter_read >= track.total_chapters.toFloat()
+
+        val isMangaCompleted =
+            mangaModel?.isOneShotOrCompleted(chapterRepository, mangaChapters) == true ||
+                mangaChapters.any { it.name.contains("[END]", ignoreCase = true) }
+
+        val allChaptersRead = mangaChapters.isNotEmpty() && mangaChapters.all { it.read }
+
+        val reachedLastChapter = run {
+            val lastChapterNum =
+                listOfNotNull(
+                        mangaModel?.last_chapter_number?.toFloat()?.takeIf { it > 0f },
+                        mangaChapters
+                            .filter { it.isRecognizedNumber }
+                            .maxOfOrNull { it.chapter_number }
+                            ?.takeIf { it > 0f },
+                    )
+                    .maxOrNull()
+            lastChapterNum != null &&
+                lastChapterNum > 0f &&
+                track.last_chapter_read >= lastChapterNum
+        }
+
+        val endChapterRead = mangaChapters.any {
+            it.name.contains("[END]", ignoreCase = true) && it.read
+        }
+
+        val isCompleted =
+            hasTotalChaptersMatch ||
+                (isMangaCompleted && (allChaptersRead || reachedLastChapter || endChapterRead))
+
+        if (canComplete && isCompleted && track.status != completedStatus()) {
             track.status = completedStatus()
+            if (track.total_chapters == 0) {
+                val total =
+                    mangaModel?.last_chapter_number
+                        ?: mangaChapters
+                            .filter { it.isRecognizedNumber }
+                            .maxOfOrNull { it.chapter_number }
+                            ?.roundToInt()
+                        ?: track.last_chapter_read.roundToInt().takeIf { it > 0 }
+                if (total != null && total > 0) {
+                    track.total_chapters = total
+                }
+            }
+        }
+
+        if (supportsReadingDates) {
+            if (track.status == completedStatus()) {
+                val needsFinishDate = track.finished_reading_date <= 0L
+                val needsStartDate = track.started_reading_date <= 0L
+                if (needsFinishDate || needsStartDate) {
+                    val history =
+                        if (track.manga_id != 0L)
+                            historyRepository.getHistoryByMangaId(track.manga_id)
+                        else emptyList()
+                    if (needsFinishDate) {
+                        val completedDate =
+                            getCompletedDate(
+                                track,
+                                allChaptersRead || isCompleted,
+                                history = history,
+                            )
+                        track.finished_reading_date =
+                            if (completedDate > 0L) completedDate else System.currentTimeMillis()
+                    }
+                    if (needsStartDate) {
+                        val startDate =
+                            getStartDate(
+                                track,
+                                hasReadChapters = mangaChapters.any { it.read },
+                                history = history,
+                            )
+                        track.started_reading_date =
+                            if (startDate > 0L) startDate else track.finished_reading_date
+                    }
+                }
+            } else if (track.status == readingStatus() && track.started_reading_date <= 0L) {
+                val startDate = getStartDate(track, hasReadChapters = mangaChapters.any { it.read })
+                track.started_reading_date =
+                    if (startDate > 0L) startDate else System.currentTimeMillis()
+            }
         }
     }
 
@@ -138,44 +236,84 @@ fun TrackService.matchingTrack(track: TrackItem): Boolean {
 }
 
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
-    val manga = mangaRepository.getMangaById(track.manga_id)
+    val manga = if (track.manga_id != 0L) mangaRepository.getMangaById(track.manga_id) else null
+    val chapters =
+        if (track.manga_id != 0L) chapterRepository.getChaptersForManga(track.manga_id)
+        else emptyList()
     val allRead =
-        manga?.isOneShotOrCompleted(chapterRepository) == true &&
-            chapterRepository.getChaptersForManga(track.manga_id).all { it.read }
+        manga?.isOneShotOrCompleted(chapterRepository, chapters) == true &&
+            chapters.isNotEmpty() &&
+            chapters.all { it.read }
     if (supportsReadingDates) {
-        track.started_reading_date = getStartDate(track)
-        track.finished_reading_date = getCompletedDate(track, allRead)
+        val history =
+            if (track.manga_id != 0L) historyRepository.getHistoryByMangaId(track.manga_id)
+            else emptyList()
+        track.started_reading_date =
+            getStartDate(track, hasReadChapters = chapters.any { it.read }, history = history)
+        track.finished_reading_date = getCompletedDate(track, allRead, history = history)
     }
-    track.last_chapter_read = getLastChapterRead(track).takeUnless { it == 0f && allRead } ?: 1f
+    track.last_chapter_read =
+        getLastChapterRead(track, chapters).takeUnless { it == 0f && allRead } ?: 1f
     if (track.last_chapter_read == 0f) {
         track.status = planningStatus
     }
     if (allRead) {
         track.status = completedStatus()
+        if (track.total_chapters == 0) {
+            val total =
+                manga.last_chapter_number
+                    ?: chapters
+                        .filter { it.isRecognizedNumber }
+                        .maxOfOrNull { it.chapter_number }
+                        ?.roundToInt()
+                    ?: track.last_chapter_read.roundToInt().takeIf { it > 0 }
+            if (total != null && total > 0) {
+                track.total_chapters = total
+            }
+        }
     }
 }
 
-suspend fun TrackService.getStartDate(track: Track): Long {
-    if (chapterRepository.getChaptersForManga(track.manga_id).any { it.read }) {
-        val chapters =
-            historyRepository.getHistoryByMangaId(track.manga_id).filter { it.last_read > 0 }
-        val date = chapters.minOfOrNull { it.last_read } ?: return 0L
+suspend fun TrackService.getStartDate(
+    track: Track,
+    hasReadChapters: Boolean? = null,
+    history: List<History>? = null,
+): Long {
+    if (track.manga_id != 0L) {
+        val hasRead =
+            hasReadChapters ?: chapterRepository.getChaptersForManga(track.manga_id).any { it.read }
+        if (hasRead) {
+            val chapters =
+                (history ?: historyRepository.getHistoryByMangaId(track.manga_id)).filter {
+                    it.last_read > 0
+                }
+            val date = chapters.minOfOrNull { it.last_read } ?: return 0L
+            return if (date <= 0L) 0L else date
+        }
+    }
+    return 0L
+}
+
+suspend fun TrackService.getCompletedDate(
+    track: Track,
+    allRead: Boolean,
+    history: List<History>? = null,
+): Long {
+    if (allRead && track.manga_id != 0L) {
+        val chapters = history ?: historyRepository.getHistoryByMangaId(track.manga_id)
+        val date = chapters.filter { it.last_read > 0 }.maxOfOrNull { it.last_read } ?: return 0L
         return if (date <= 0L) 0L else date
     }
     return 0L
 }
 
-suspend fun TrackService.getCompletedDate(track: Track, allRead: Boolean): Long {
-    if (allRead) {
-        val chapters = historyRepository.getHistoryByMangaId(track.manga_id)
-        val date = chapters.maxOfOrNull { it.last_read } ?: return 0L
-        return if (date <= 0L) 0L else date
-    }
-    return 0L
-}
-
-suspend fun TrackService.getLastChapterRead(track: Track): Float {
-    val chapters = chapterRepository.getChaptersForManga(track.manga_id)
-    val lastChapterRead = chapters.filter { it.read }.minByOrNull { it.smart_order }
-    return lastChapterRead?.takeIf { it.isRecognizedNumber }?.chapter_number ?: 0f
+suspend fun TrackService.getLastChapterRead(
+    track: Track,
+    chapters: List<Chapter>? = null,
+): Float {
+    if (track.manga_id == 0L) return 0f
+    val mangaChapters = chapters ?: chapterRepository.getChaptersForManga(track.manga_id)
+    return mangaChapters
+        .filter { it.read && it.isRecognizedNumber }
+        .maxOfOrNull { it.chapter_number } ?: 0f
 }

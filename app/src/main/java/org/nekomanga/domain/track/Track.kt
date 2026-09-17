@@ -34,6 +34,7 @@ data class TrackServiceItem(
     val displayScore: (TrackItem) -> String,
     val scoreList: List<String>,
     val indexToScore: (Int) -> Float,
+    val isCompletedStatus: (Int) -> Boolean = { false },
 )
 
 fun TrackService.toTrackServiceItem(): TrackServiceItem {
@@ -51,6 +52,7 @@ fun TrackService.toTrackServiceItem(): TrackServiceItem {
         displayScore = { track -> this.displayScore(track.toDbTrack()) },
         scoreList = this.getScoreList().toList(),
         indexToScore = { index -> this.indexToScore(index) },
+        isCompletedStatus = { status -> status == this.completedStatus() },
     )
 }
 

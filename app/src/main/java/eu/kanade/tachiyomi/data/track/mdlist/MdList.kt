@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import androidx.core.text.isDigitsOnly
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -61,72 +62,47 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         withContext(Dispatchers.IO) { mdex.updateRating(track) }
     }
 
-    override suspend fun update(track: Track, setToRead: Boolean): Track {
+    override suspend fun update(
+        track: Track,
+        setToRead: Boolean,
+        manga: Manga?,
+        chapters: List<Chapter>?,
+    ): Track {
         return withContext(Dispatchers.IO) {
-            try {
-                val manga =
-                    mangaRepository.getMangaByUrlAndSource(
+            updateTrackStatus(
+                track,
+                setToRead,
+                mustReadToComplete = true,
+                manga = manga,
+                chapters = chapters,
+            )
+            val mangaDb =
+                manga
+                    ?: (if (track.manga_id != 0L) mangaRepository.getMangaById(track.manga_id)
+                    else null)
+                    ?: mangaRepository.getMangaByUrlAndSource(
                         track.tracking_url.substringAfter(".org"),
                         mdex.id,
-                    ) ?: return@withContext track
-                val followStatus = FollowStatus.fromInt(track.status)
+                    )
+                    ?: return@withContext track
+            val followStatus = FollowStatus.fromInt(track.status)
 
-                // allow follow status to update
+            if (followStatus != FollowStatus.UNFOLLOWED) {
                 if (
-                    mdex.updateFollowStatus(MdUtil.getMangaUUID(track.tracking_url), followStatus)
+                    mdex.updateFollowStatus(
+                        MdUtil.getMangaUUID(track.tracking_url),
+                        followStatus,
+                    )
                 ) {
-                    manga.follow_status = followStatus
-                    mangaRepository.updateManga(manga)
+                    mangaDb.follow_status = followStatus
+                    mangaRepository.updateManga(mangaDb)
                 }
-
-                // mangadex wont update chapters if manga is not follows this prevents unneeded
-                // network call
-
-                if (followStatus != FollowStatus.UNFOLLOWED) {
-                    var progressUpdatedByStatusChange = false
-                    if (
-                        track.total_chapters != 0 &&
-                            track.last_chapter_read.toInt() == track.total_chapters
-                    ) {
-                        val newFollowStatus = FollowStatus.COMPLETED
-                        if (
-                            mdex.updateFollowStatus(
-                                MdUtil.getMangaUUID(track.tracking_url),
-                                newFollowStatus,
-                            )
-                        ) {
-                            track.status = newFollowStatus.int
-                            manga.follow_status = newFollowStatus
-                            mangaRepository.updateManga(manga)
-                            mdex.updateReadingProgress(track)
-                            progressUpdatedByStatusChange = true
-                        }
-                    }
-                    if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
-                        val newFollowStatus = FollowStatus.READING
-                        if (
-                            mdex.updateFollowStatus(
-                                MdUtil.getMangaUUID(track.tracking_url),
-                                newFollowStatus,
-                            )
-                        ) {
-                            track.status = newFollowStatus.int
-                            manga.follow_status = newFollowStatus
-                            mangaRepository.updateManga(manga)
-                            mdex.updateReadingProgress(track)
-                            progressUpdatedByStatusChange = true
-                        }
-                    }
-                    if (!progressUpdatedByStatusChange) {
-                        mdex.updateReadingProgress(track)
-                    }
-                } else if (track.last_chapter_read.toInt() != 0) {
-                    // When followStatus has been changed to unfollowed 0 out read chapters since
-                    // dex does
-                    track.last_chapter_read = 0f
-                }
-            } catch (e: Exception) {
-                TimberKt.e(e) { "error updating MDList" }
+                mdex.updateReadingProgress(track)
+            } else if (track.last_chapter_read != 0f) {
+                // When followStatus has been changed to unfollowed 0 out read chapters since
+                // dex does
+                track.last_chapter_read = 0f
+                mdex.updateReadingProgress(track)
             }
             trackRepository.insertTrack(track)
             track

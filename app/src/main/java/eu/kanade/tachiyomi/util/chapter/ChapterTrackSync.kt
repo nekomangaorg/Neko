@@ -11,6 +11,8 @@ import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import kotlinx.coroutines.delay
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import uy.kohesive.injekt.Injekt
@@ -53,24 +55,33 @@ suspend fun updateTrackChapterRead(
         val trackRepository = Injekt.get<TrackRepository>()
         val trackManager = Injekt.get<TrackManager>()
         val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
+        val mangaRepository = Injekt.get<MangaRepository>()
+        val chapterRepository = Injekt.get<ChapterRepository>()
 
         val trackList = trackRepository.getTracksForManga(mangaId)
-        trackList.map { track ->
+        val eligibleTracks = trackList.filter { track ->
             val service = trackManager.getService(track.sync_id)
-            if (service != null && service.isLogged() && newChapterRead > track.last_chapter_read) {
-                if (retryWhenOnline && !preferences.context.isOnline()) {
-                    delayTrackingUpdate(preferences.context, newChapterRead, track)
-                } else if (preferences.context.isOnline()) {
-                    try {
-                        track.last_chapter_read = newChapterRead
-                        val updatedTrack = service.update(track, true)
-                        trackRepository.insertTrack(updatedTrack)
-                        delayedTrackingStore.remove(track.id!!)
-                    } catch (e: Exception) {
-                        onError?.invoke(service, e.localizedMessage)
-                        if (retryWhenOnline) {
-                            delayTrackingUpdate(preferences.context, newChapterRead, track)
-                        }
+            service != null && service.isLogged() && newChapterRead > track.last_chapter_read
+        }
+        if (eligibleTracks.isEmpty()) return@withNonCancellableContext
+
+        val manga = mangaRepository.getMangaById(mangaId)
+        val chapters = chapterRepository.getChaptersForManga(mangaId)
+
+        eligibleTracks.forEach { track ->
+            val service = trackManager.getService(track.sync_id) ?: return@forEach
+            if (retryWhenOnline && !preferences.context.isOnline()) {
+                delayTrackingUpdate(preferences.context, newChapterRead, track)
+            } else if (preferences.context.isOnline()) {
+                try {
+                    track.last_chapter_read = newChapterRead
+                    val updatedTrack = service.update(track, true, manga, chapters)
+                    trackRepository.insertTrack(updatedTrack)
+                    delayedTrackingStore.remove(track.id!!)
+                } catch (e: Exception) {
+                    onError?.invoke(service, e.localizedMessage)
+                    if (retryWhenOnline) {
+                        delayTrackingUpdate(preferences.context, newChapterRead, track)
                     }
                 }
             }

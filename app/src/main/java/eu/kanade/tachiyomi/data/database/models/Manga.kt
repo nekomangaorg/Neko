@@ -173,14 +173,19 @@ interface Manga : SManga {
         }
     }
 
-    suspend fun isOneShotOrCompleted(chapterRepository: ChapterRepository): Boolean {
+    suspend fun isOneShotOrCompleted(
+        chapterRepository: ChapterRepository,
+        chapters: List<Chapter>? = null,
+    ): Boolean {
+        val mangaId = this@Manga.id ?: return false
         val tags = genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
-        val chapters = chapterRepository.getChaptersForManga(this@Manga.id!!)
+        val mangaChapters = chapters ?: chapterRepository.getChaptersForManga(mangaId)
 
-        val firstChapterName by lazy { chapters.firstOrNull()?.name?.lowercase() ?: "" }
+        val firstChapterName by lazy { mangaChapters.firstOrNull()?.name?.lowercase() ?: "" }
         return status == SManga.COMPLETED ||
             tags?.contains("oneshot") == true ||
-            (chapters.size == 1 &&
+            mangaChapters.any { it.name.contains("[END]", ignoreCase = true) } ||
+            (mangaChapters.size == 1 &&
                 (Regex("one.?shot").containsMatchIn(firstChapterName) ||
                     firstChapterName.contains("oneshot")))
     }

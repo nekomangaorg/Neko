@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.track.mangabaka
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -102,22 +103,19 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
         return api.addLibManga(track)
     }
 
-    override suspend fun update(track: Track, setToRead: Boolean): Track {
-        if (track.status != COMPLETED && setToRead) {
-            if (
-                track.total_chapters > 0 &&
-                    track.last_chapter_read.toLong() == track.total_chapters.toLong()
-            ) {
-                track.status = COMPLETED
-                track.finished_reading_date = System.currentTimeMillis()
-            } else if (track.status != REREADING) {
-                track.status = READING
-                if (track.last_chapter_read == 1.0f) {
-                    track.started_reading_date = System.currentTimeMillis()
-                }
-            }
-        }
-
+    override suspend fun update(
+        track: Track,
+        setToRead: Boolean,
+        manga: Manga?,
+        chapters: List<Chapter>?,
+    ): Track {
+        updateTrackStatus(
+            track,
+            setToRead,
+            mustReadToComplete = true,
+            manga = manga,
+            chapters = chapters,
+        )
         return api.updateLibManga(track)
     }
 

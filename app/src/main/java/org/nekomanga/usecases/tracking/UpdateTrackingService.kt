@@ -13,12 +13,16 @@ class UpdateTrackingService(
     private val trackRepository: TrackRepository = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
 ) {
-    suspend fun await(track: TrackItem, service: TrackServiceItem): TrackingUpdate {
+    suspend fun await(
+        track: TrackItem,
+        service: TrackServiceItem,
+        setToRead: Boolean = false,
+    ): TrackingUpdate {
         return runCatching {
             val trackService =
                 trackManager.getService(service.id)
                     ?: throw IllegalStateException("Service not found")
-            val updatedTrack = trackService.update(track.toDbTrack())
+            val updatedTrack = trackService.update(track.toDbTrack(), setToRead = setToRead)
             trackRepository.insertTrack(updatedTrack)
             TrackingUpdate.Success
         }

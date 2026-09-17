@@ -11,6 +11,6 @@ class UpdateTrackChapter(
         trackAndService: TrackingConstants.TrackAndService,
     ): TrackingUpdate {
         val track = trackAndService.track.copy(lastChapterRead = newChapterNumber.toFloat())
-        return updateTrackingService.await(track, trackAndService.service)
+        return updateTrackingService.await(track, trackAndService.service, setToRead = true)
     }
 }
