@@ -138,14 +138,18 @@ class LibraryUpdateNotifier(private val context: Context) {
      * the full log.
      *
      * @param titles List of manga titles with chapters that became unavailable.
-     * @param uri Uri for the log file listing the chapters per manga.
+     * @param uri Uri for the log file listing the chapters per manga, null when the file could not
+     *   be written.
      */
-    fun showUnavailableChaptersNotification(titles: List<String>, uri: Uri) {
+    fun showUnavailableChaptersNotification(titles: List<String>, uri: Uri?) {
         if (titles.isEmpty()) {
             return
         }
 
-        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
+        // Without a log file the notification only opens the app.
+        val pendingIntent =
+            uri?.let { NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, it) }
+                ?: getNotificationIntent()
 
         context.notificationManager.notify(
             Notifications.Id.Library.Unavailable,
@@ -164,11 +168,13 @@ class LibraryUpdateNotifier(private val context: Context) {
                     )
                     setContentIntent(pendingIntent)
                     setSmallIcon(R.drawable.ic_neko_notification)
-                    addAction(
-                        R.drawable.ic_help_24dp,
-                        context.getString(R.string.open_log),
-                        pendingIntent,
-                    )
+                    if (uri != null) {
+                        addAction(
+                            R.drawable.ic_help_24dp,
+                            context.getString(R.string.open_log),
+                            pendingIntent,
+                        )
+                    }
                 }
                 .build(),
         )

@@ -757,7 +757,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     Notifications.Channel.Library.Unavailable,
                 )
         ) {
-            val unavailableFile = writeUnavailableFile(unavailableUpdates).getUriCompat(context)
+            val unavailableFile = writeUnavailableFile(unavailableUpdates)?.getUriCompat(context)
             notifier.showUnavailableChaptersNotification(
                 unavailableUpdates.map { it.key.title },
                 unavailableFile,
@@ -789,8 +789,11 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         downloadManager.downloadChapters(manga, chapters, false)
     }
 
-    /** Writes the chapters that became unavailable, grouped by manga, to cache dir. */
-    private fun writeUnavailableFile(unavailable: Map<LibraryManga, List<Chapter>>): File {
+    /**
+     * Writes the chapters that became unavailable, grouped by manga, to cache dir, null when it
+     * could not be written.
+     */
+    private fun writeUnavailableFile(unavailable: Map<LibraryManga, List<Chapter>>): File? {
         try {
             val file = context.createFileInCacheDir("neko_update_unavailable.txt")
             file.bufferedWriter().use { out ->
@@ -806,7 +809,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         } catch (e: Exception) {
             TimberKt.e(e) { "Error writing unavailable file" }
         }
-        return File("")
+        return null
     }
 
     /** Writes basic file of update errors to cache dir, null when it could not be written. */
