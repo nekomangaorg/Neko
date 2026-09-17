@@ -89,16 +89,6 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         TimberKt.d { "setChapters" }
         val forceTransition = config.alwaysShowChapterTransition
         val screenHeight = activity.resources.displayMetrics.heightPixels
-        val wasAlreadyInItems =
-            chapters.currChapter.pages?.firstOrNull()?.let { firstPage ->
-                controller.findPageIndex(items, firstPage) != -1
-            } ?: false ||
-                items.any {
-                    it is ReaderUiItem.Transition &&
-                        (it.transition.to?.chapter?.id == chapters.currChapter.chapter.id ||
-                            it.transition.from.chapter.id == chapters.currChapter.chapter.id)
-                }
-
         val newItems =
             controller.buildItems(
                 chapters = chapters,
@@ -112,7 +102,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         items = newItems
         activity.updateWebtoonViewerItems()
 
-        if ((chapterChanged && !wasAlreadyInItems) || isInitialLoad) {
+        if (isInitialLoad) {
             isInitialLoad = false
             val pages = chapters.currChapter.pages ?: return
             val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)

@@ -46,22 +46,29 @@ class ReaderWebtoonControllerTest {
         val items =
             controller.buildItems(viewerChapters, forceTransition = false, screenHeight = 1000)
 
-        // Webtoon mode is forward-continuous: previous chapter pages are never prepended.
-        // Index 0: previous chapter transition
-        // Current chapter: all 10 pages (pages 0..9 at indices 1..10)
-        // Next chapter: all 5 pages (pages 0..4 at indices 11..15)
-        // Total = 1 + 10 + 5 = 16 items
-        assertEquals(16, items.size)
-        assertTrue(items[0] is ReaderUiItem.Transition)
-        assertTrue((items[0] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
-        assertNull(items[0].chapterId)
-        assertNull(items[0].pageIndex)
+        // Padded previous chapter pages (last 2) + previous chapter transition + current pages +
+        // next pages
+        // Indices 0..1: previous chapter pages 3 and 4
+        // Index 2: previous chapter transition
+        // Current chapter: all 10 pages (pages 0..9 at indices 3..12)
+        // Next chapter: all 5 pages (pages 0..4 at indices 13..17)
+        // Total = 2 + 1 + 10 + 5 = 18 items
+        assertEquals(18, items.size)
+        assertEquals(1L, items[0].chapterId)
+        assertEquals(3, items[0].pageIndex)
+        assertEquals(1L, items[1].chapterId)
+        assertEquals(4, items[1].pageIndex)
 
-        assertEquals(2L, items[1].chapterId)
-        assertEquals(0, items[1].pageIndex)
+        assertTrue(items[2] is ReaderUiItem.Transition)
+        assertTrue((items[2] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
+        assertNull(items[2].chapterId)
+        assertNull(items[2].pageIndex)
 
-        assertEquals(3L, items[11].chapterId)
-        assertEquals(0, items[11].pageIndex)
+        assertEquals(2L, items[3].chapterId)
+        assertEquals(0, items[3].pageIndex)
+
+        assertEquals(3L, items[13].chapterId)
+        assertEquals(0, items[13].pageIndex)
     }
 
     @Test
@@ -76,13 +83,13 @@ class ReaderWebtoonControllerTest {
         val items = controller.buildItems(viewerChapters, forceTransition = true)
 
         // With forceTransition = true:
-        // prev transition (1) + curr pages (10) + next transition (1) = 12 items
+        // prev pages (2) + prev transition (1) + curr pages (10) + next transition (1) = 14 items
         // (next is Wait so 0 pages)
-        assertEquals(12, items.size)
-        assertTrue(items[0] is ReaderUiItem.Transition)
-        assertTrue((items[0] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
-        assertTrue(items[11] is ReaderUiItem.Transition)
-        assertTrue((items[11] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
+        assertEquals(14, items.size)
+        assertTrue(items[2] is ReaderUiItem.Transition)
+        assertTrue((items[2] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
+        assertTrue(items[13] is ReaderUiItem.Transition)
+        assertTrue((items[13] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
     }
 
     @Test
@@ -340,14 +347,15 @@ class ReaderWebtoonControllerTest {
 
         // In Chapter 2: Chapter 3 is loaded and forceTransition is false.
         // hadTransitionForNext should have been reset, so no next transition is added.
-        // 1 prev transition + 5 curr pages (ch 2) + 5 next pages (ch 3) = 11 items
-        assertEquals(11, chapter2Items.size)
-        assertTrue(chapter2Items[0] is ReaderUiItem.Transition)
+        // 2 prev pages (ch 1) + 1 prev transition + 5 curr pages (ch 2) + 5 next pages (ch 3) = 13
+        // items
+        assertEquals(13, chapter2Items.size)
+        assertTrue(chapter2Items[2] is ReaderUiItem.Transition)
         assertTrue(
-            (chapter2Items[0] as ReaderUiItem.Transition).transition is ChapterTransition.Prev
+            (chapter2Items[2] as ReaderUiItem.Transition).transition is ChapterTransition.Prev
         )
-        assertEquals(2L, chapter2Items[1].chapterId)
-        assertEquals(3L, chapter2Items[6].chapterId)
+        assertEquals(2L, chapter2Items[3].chapterId)
+        assertEquals(3L, chapter2Items[8].chapterId)
     }
 
     @Test
@@ -400,5 +408,46 @@ class ReaderWebtoonControllerTest {
 
         val foundIndex = controller.findPageIndex(items, queryPage)
         assertEquals(2, foundIndex)
+    }
+
+    @Test
+    fun `buildItems preserves boundary item keys between adjacent chapters`() {
+        val controller = ReaderWebtoonController()
+        val chapter1 = createChapter(1L, pageCount = 5)
+        val chapter2 = createChapter(2L, pageCount = 5)
+
+        // While reading Chapter 1 with Chapter 2 loaded and transitions enabled
+        val ch1Items =
+            controller.buildItems(
+                ViewerChapters(chapter1, null, chapter2),
+                forceTransition = true,
+            )
+        // ch1Items: [0]=PrevTrans(1, null), [1..5]=Ch1 pages 0..4, [6]=NextTrans(1, 2), [7..11]=Ch2
+        // pages 0..4
+        assertTrue(ch1Items[5] is ReaderUiItem.Page)
+        assertTrue(ch1Items[6] is ReaderUiItem.Transition)
+        assertTrue(ch1Items[7] is ReaderUiItem.Page)
+        val ch1LastPageKey = ch1Items[5].key("webtoon")
+        val ch1NextTransKey = ch1Items[6].key("webtoon")
+        val ch2FirstPageKey = ch1Items[7].key("webtoon")
+
+        // User crosses into Chapter 2
+        val ch2Items =
+            controller.buildItems(
+                ViewerChapters(chapter2, chapter1, null),
+                forceTransition = true,
+            )
+        // ch2Items: [0..1]=Ch1 pages 3..4, [2]=PrevTrans(2, 1), [3..7]=Ch2 pages 0..4,
+        // [8]=NextTrans(2, null)
+        assertTrue(ch2Items[1] is ReaderUiItem.Page)
+        assertTrue(ch2Items[2] is ReaderUiItem.Transition)
+        assertTrue(ch2Items[3] is ReaderUiItem.Page)
+        val ch2PaddedPageKey = ch2Items[1].key("webtoon")
+        val ch2PrevTransKey = ch2Items[2].key("webtoon")
+        val ch2FirstPageNewKey = ch2Items[3].key("webtoon")
+
+        assertEquals(ch1LastPageKey, ch2PaddedPageKey)
+        assertEquals(ch1NextTransKey, ch2PrevTransKey)
+        assertEquals(ch2FirstPageKey, ch2FirstPageNewKey)
     }
 }

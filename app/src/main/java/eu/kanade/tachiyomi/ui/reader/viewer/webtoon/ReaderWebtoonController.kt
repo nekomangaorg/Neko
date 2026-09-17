@@ -70,9 +70,15 @@ class ReaderWebtoonController {
         val prevHasMissingChapters = hasMissingChapters(chapters.currChapter, chapters.prevChapter)
         val nextHasMissingChapters = hasMissingChapters(chapters.nextChapter, chapters.currChapter)
 
-        // Webtoon mode is forward-continuous: previous chapter pages are never prepended to prevent
-        // LazyColumn index shifts and backward scroll jumps.
-        // The previous chapter transition page is always placed at the top (index 0).
+        // Add previous chapter padding pages (last 2 pages) to maintain key continuity across
+        // chapter boundaries
+        if (chapters.prevChapter != null) {
+            val prevPages = chapters.prevChapter.pages
+            if (prevPages != null && prevPages.isNotEmpty()) {
+                newItems.addAll(mapPagesToItems(prevPages.takeLast(2), screenHeight, existingItems))
+            }
+        }
+
         val prevTrans = ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter)
         prevTransition = prevTrans
         newItems.add(ReaderUiItem.Transition(prevTrans))

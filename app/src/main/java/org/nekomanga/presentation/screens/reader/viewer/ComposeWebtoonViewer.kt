@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -158,6 +159,7 @@ fun ComposeWebtoonViewer(
         val currentOnNavigateToChapter by rememberUpdatedState(onNavigateToChapter)
 
         var lastFirstVisibleItem by remember { mutableStateOf(items.getOrNull(initialItemIndex)) }
+        var lastFirstVisibleOffset by remember { mutableIntStateOf(0) }
         var lastActiveItem by remember { mutableStateOf(items.getOrNull(initialItemIndex)) }
 
         LaunchedEffect(currentChapterId) {
@@ -166,21 +168,17 @@ fun ComposeWebtoonViewer(
 
         LaunchedEffect(items) {
             if (viewer.requestedPagePosition != null) return@LaunchedEffect
-            if (lazyListState.isScrollInProgress) return@LaunchedEffect
 
-            // Check if the current first visible item's key is still present in the updated items
-            // list.
-            // Compose's LazyColumn natively and automatically preserves the scroll position of
-            // items
-            // with known keys. Attempting to manually re-anchor via scrollToItem while the key
-            // still
-            // exists will disrupt smooth scrolling or cause jumps due to asynchronous snapshotFlow
-            // updates.
-            val currentFirstVisibleKey =
-                lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()?.key
+            // If the item currently positioned at firstVisibleItemIndex already matches the
+            // previously visible item, Compose's native key tracking has successfully maintained
+            // our
+            // scroll anchor.
+            val currentFirstVisibleItem = items.getOrNull(lazyListState.firstVisibleItemIndex)
+            val previousFirstItem = lastFirstVisibleItem
             if (
-                currentFirstVisibleKey != null &&
-                    items.any { it.key("webtoon") == currentFirstVisibleKey }
+                currentFirstVisibleItem != null &&
+                    previousFirstItem != null &&
+                    areItemsEquivalent(currentFirstVisibleItem, previousFirstItem)
             ) {
                 return@LaunchedEffect
             }
@@ -193,7 +191,7 @@ fun ComposeWebtoonViewer(
             // Find the slice that covers the exact scroll offset into that page and preserve
             // sub-pixel position.
             if (firstItem is ReaderUiItem.Page) {
-                val pageOffset = lazyListState.firstVisibleItemScrollOffset
+                val pageOffset = lastFirstVisibleOffset
                 val matchingSliceIndex = items.indexOfFirst {
                     it is ReaderUiItem.SplitPage &&
                         isSameChapter(it.page.chapter, firstItem.page.chapter) &&
@@ -205,6 +203,8 @@ fun ComposeWebtoonViewer(
                     val slice = (items[matchingSliceIndex] as ReaderUiItem.SplitPage).split
                     val sliceOffset = (pageOffset - slice.topOffset).coerceAtLeast(0)
                     lazyListState.scrollToItem(matchingSliceIndex, sliceOffset)
+                    lastFirstVisibleItem = items[matchingSliceIndex]
+                    lastFirstVisibleOffset = sliceOffset
                     return@LaunchedEffect
                 }
             }
@@ -217,9 +217,10 @@ fun ComposeWebtoonViewer(
                         it.page.index == firstItem.page.index
                 }
                 if (pageIndex != -1) {
-                    val targetOffset =
-                        firstItem.split.topOffset + lazyListState.firstVisibleItemScrollOffset
+                    val targetOffset = firstItem.split.topOffset + lastFirstVisibleOffset
                     lazyListState.scrollToItem(pageIndex, targetOffset)
+                    lastFirstVisibleItem = items[pageIndex]
+                    lastFirstVisibleOffset = targetOffset
                     return@LaunchedEffect
                 }
             }
@@ -233,7 +234,7 @@ fun ComposeWebtoonViewer(
 
             if (firstItemNewIndex != -1) {
                 targetIndex = firstItemNewIndex
-                targetOffset = lazyListState.firstVisibleItemScrollOffset
+                targetOffset = lastFirstVisibleOffset
             } else if (activeItem != null) {
                 val activeItemNewIndex = items.indexOfFirst { areItemsEquivalent(it, activeItem) }
                 if (activeItemNewIndex != -1) {
@@ -269,8 +270,7 @@ fun ComposeWebtoonViewer(
             }
 
             // Obsolete chapter fallback: If target was in an obsolete chapter that is no longer
-            // present in forward-continuous items, safely anchor to the start of the active chapter
-            // (index 0).
+            // present, safely anchor to the start of the active chapter.
             if (targetIndex == -1) {
                 val anchor = firstItem ?: activeItem
                 if (anchor != null) {
@@ -282,7 +282,8 @@ fun ComposeWebtoonViewer(
                             activeChapterId != null &&
                             anchorChapterId != activeChapterId
                     ) {
-                        targetIndex = 0
+                        val activeStart = items.indexOfFirst { it.chapterId == activeChapterId }
+                        targetIndex = if (activeStart != -1) activeStart else 0
                         targetOffset = 0
                     }
                 }
@@ -294,6 +295,8 @@ fun ComposeWebtoonViewer(
                         targetOffset != lazyListState.firstVisibleItemScrollOffset)
             ) {
                 lazyListState.scrollToItem(targetIndex, targetOffset)
+                lastFirstVisibleItem = items.getOrNull(targetIndex)
+                lastFirstVisibleOffset = targetOffset
             }
         }
 
@@ -550,15 +553,24 @@ fun ComposeWebtoonViewer(
                         firstVisibleScrollOffset = lazyListState.firstVisibleItemScrollOffset,
                     )
                 val firstVisibleItem = currentItems.getOrNull(lazyListState.firstVisibleItemIndex)
-                Triple(activeIndex, currentItems.getOrNull(activeIndex), firstVisibleItem)
+                val firstVisibleOffset = lazyListState.firstVisibleItemScrollOffset
+                Triple(
+                    activeIndex,
+                    currentItems.getOrNull(activeIndex),
+                    firstVisibleItem to firstVisibleOffset,
+                )
             }
                 .filterNotNull()
                 .distinctUntilChanged { old, new ->
-                    old.first == new.first && old.third?.key("webtoon") == new.third?.key("webtoon")
+                    old.first == new.first &&
+                        old.third.first?.key("webtoon") == new.third.first?.key("webtoon") &&
+                        old.third.second == new.third.second
                 }
-                .collect { (activeIndex, item, firstVisibleItem) ->
+                .collect { (activeIndex, item, firstVisiblePair) ->
+                    val (firstVisibleItem, firstVisibleOffset) = firstVisiblePair
                     if (firstVisibleItem != null) {
                         lastFirstVisibleItem = firstVisibleItem
+                        lastFirstVisibleOffset = firstVisibleOffset
                     }
                     if (item != null) {
                         lastActiveItem = item
@@ -668,10 +680,15 @@ fun ComposeWebtoonViewer(
                     pullOffset = 0f
                     if (offset > overscrollThresholdPx) {
                         val prevChapter =
-                            (currentItems.firstOrNull() as? ReaderUiItem.Transition)
+                            (currentItems.firstOrNull { it is ReaderUiItem.Transition }
+                                    as? ReaderUiItem.Transition)
                                 ?.transition
                                 ?.to
                                 ?.chapter
+                                ?: (currentItems.firstOrNull() as? ReaderUiItem.Page)
+                                    ?.page
+                                    ?.chapter
+                                    ?.chapter
                         if (prevChapter != null) {
                             currentOnNavigateToChapter?.invoke(prevChapter, ChapterNavTarget.End)
                             return available
