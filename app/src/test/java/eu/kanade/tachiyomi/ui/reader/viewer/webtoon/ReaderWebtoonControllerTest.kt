@@ -36,7 +36,7 @@ class ReaderWebtoonControllerTest {
     }
 
     @Test
-    fun `buildItems with loaded chapters adds prevPages, currentPages, and nextPages`() {
+    fun `buildItems with loaded chapters adds prevTransition, currentPages, and nextPages`() {
         val controller = ReaderWebtoonController()
         val prevChapter = createChapter(1L, pageCount = 5)
         val currChapter = createChapter(2L, pageCount = 10)
@@ -46,22 +46,20 @@ class ReaderWebtoonControllerTest {
         val items =
             controller.buildItems(viewerChapters, forceTransition = false, screenHeight = 1000)
 
-        // Previous chapter: all 5 pages (pages 0..4)
-        // No prev transition because prevChapter is loaded and no missing chapters
-        // Current chapter: all 10 pages (pages 0..9)
-        // No next transition because nextChapter is loaded and no missing chapters
-        // Next chapter: all 5 pages (pages 0..4)
-        // Total = 5 + 10 + 5 = 20 items
-        assertEquals(20, items.size)
-        assertTrue(items[0] is ReaderUiItem.Page)
-        assertEquals(1L, items[0].chapterId)
-        assertEquals(0, items[0].pageIndex)
+        // Webtoon mode is forward-continuous: previous chapter pages are never prepended.
+        // Index 0: previous chapter transition
+        // Current chapter: all 10 pages (pages 0..9 at indices 1..10)
+        // Next chapter: all 5 pages (pages 0..4 at indices 11..15)
+        // Total = 1 + 10 + 5 = 16 items
+        assertEquals(16, items.size)
+        assertTrue(items[0] is ReaderUiItem.Transition)
+        assertTrue((items[0] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
 
-        assertEquals(2L, items[5].chapterId)
-        assertEquals(0, items[5].pageIndex)
+        assertEquals(2L, items[1].chapterId)
+        assertEquals(0, items[1].pageIndex)
 
-        assertEquals(3L, items[15].chapterId)
-        assertEquals(0, items[15].pageIndex)
+        assertEquals(3L, items[11].chapterId)
+        assertEquals(0, items[11].pageIndex)
     }
 
     @Test
@@ -76,13 +74,13 @@ class ReaderWebtoonControllerTest {
         val items = controller.buildItems(viewerChapters, forceTransition = true)
 
         // With forceTransition = true:
-        // prev pages (5) + prev transition (1) + curr pages (10) + next transition (1) = 17 items
+        // prev transition (1) + curr pages (10) + next transition (1) = 12 items
         // (next is Wait so 0 pages)
-        assertEquals(17, items.size)
-        assertTrue(items[5] is ReaderUiItem.Transition)
-        assertTrue((items[5] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
-        assertTrue(items[16] is ReaderUiItem.Transition)
-        assertTrue((items[16] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
+        assertEquals(12, items.size)
+        assertTrue(items[0] is ReaderUiItem.Transition)
+        assertTrue((items[0] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
+        assertTrue(items[11] is ReaderUiItem.Transition)
+        assertTrue((items[11] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
     }
 
     @Test

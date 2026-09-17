@@ -52,27 +52,17 @@ sealed interface ReaderUiItem {
     /** A transition page between adjacent chapters. */
     data class Transition(val transition: ChapterTransition) : ReaderUiItem {
         override val chapterId: Long?
-            get() = transition.to?.chapter?.id ?: transition.from.chapter.id
+            get() = transition.from.chapter.id
 
         override val pageIndex: Int?
             get() = null
 
         override fun key(prefix: String): String {
-            val to = transition.to
-            return if (to != null) {
-                val fromKey =
-                    transition.from.chapter.id?.takeIf { it > 0 }?.toString()
-                        ?: transition.from.chapter.url
-                val toKey = to.chapter.id?.takeIf { it > 0 }?.toString() ?: to.chapter.url
-                val (first, second) = if (fromKey <= toKey) fromKey to toKey else toKey to fromKey
-                "${prefix}_transition_${first}_${second}"
-            } else {
-                val type = if (transition is ChapterTransition.Prev) "prev" else "next"
-                val fromKey =
-                    transition.from.chapter.id?.takeIf { it > 0 }?.toString()
-                        ?: transition.from.chapter.url
-                "${prefix}_transition_${type}_${fromKey}"
-            }
+            val type = if (transition is ChapterTransition.Prev) "prev" else "next"
+            val fromKey =
+                transition.from.chapter.id?.takeIf { it > 0 }?.toString()
+                    ?: transition.from.chapter.url
+            return "${prefix}_transition_${type}_${fromKey}"
         }
     }
 }
