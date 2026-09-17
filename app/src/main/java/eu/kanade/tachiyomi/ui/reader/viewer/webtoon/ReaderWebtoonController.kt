@@ -51,12 +51,14 @@ class ReaderWebtoonController {
 
     /**
      * Builds the list of [ReaderUiItem] for the given [chapters]. Handles previous chapter padding
-     * pages, transition pages, and next chapter peek pages.
+     * pages, transition pages, and next chapter peek pages. Reuses any already computed splits from
+     * [existingItems] to maintain key and layout continuity.
      */
     fun buildItems(
         chapters: ViewerChapters,
         forceTransition: Boolean,
         screenHeight: Int = 0,
+        existingItems: List<ReaderUiItem> = emptyList(),
     ): List<ReaderUiItem> {
         tallSplitPages.clear()
         nonTallPages.clear()
@@ -78,7 +80,7 @@ class ReaderWebtoonController {
         // Add current chapter pages
         val currPages = chapters.currChapter.pages
         if (currPages != null) {
-            newItems.addAll(mapPagesToItems(currPages, screenHeight))
+            newItems.addAll(mapPagesToItems(currPages, screenHeight, existingItems))
         }
 
         currentChapter = chapters.currChapter
@@ -103,15 +105,27 @@ class ReaderWebtoonController {
         if (chapters.nextChapter != null) {
             val nextPages = chapters.nextChapter.pages
             if (nextPages != null) {
-                newItems.addAll(mapPagesToItems(nextPages, screenHeight))
+                newItems.addAll(mapPagesToItems(nextPages, screenHeight, existingItems))
             }
         }
 
         return newItems
     }
 
-    private fun mapPagesToItems(pages: List<ReaderPage>, screenHeight: Int): List<ReaderUiItem> {
+    private fun mapPagesToItems(
+        pages: List<ReaderPage>,
+        screenHeight: Int,
+        existingItems: List<ReaderUiItem> = emptyList(),
+    ): List<ReaderUiItem> {
         return pages.flatMap { page ->
+            val existingSplits =
+                existingItems.filterIsInstance<ReaderUiItem.SplitPage>().filter {
+                    it.page.isFromSamePage(page)
+                }
+            if (existingSplits.isNotEmpty()) {
+                tallSplitPages.add(page)
+                return@flatMap existingSplits
+            }
             if (screenHeight > 0 && page.status == Page.State.READY && page.stream != null) {
                 val result = checkAndTrackTallPage(page, screenHeight)
                 if (result is TallSplitResult.Split) {
@@ -133,7 +147,7 @@ class ReaderWebtoonController {
         insertPages: List<ReaderPageSplit>,
     ): List<ReaderUiItem> {
         val position = currentItems.indexOfFirst {
-            (it as? ReaderUiItem.Page)?.page == originalPage
+            (it as? ReaderUiItem.Page)?.page?.isFromSamePage(originalPage) == true
         }
         if (position < 0) return currentItems
 
@@ -180,8 +194,8 @@ class ReaderWebtoonController {
     fun findPageIndex(items: List<ReaderUiItem>, page: ReaderPage): Int {
         return items.indexOfFirst {
             when (it) {
-                is ReaderUiItem.Page -> it.page == page
-                is ReaderUiItem.SplitPage -> it.page == page
+                is ReaderUiItem.Page -> it.page.isFromSamePage(page)
+                is ReaderUiItem.SplitPage -> it.page.isFromSamePage(page)
                 is ReaderUiItem.Transition -> false
             }
         }

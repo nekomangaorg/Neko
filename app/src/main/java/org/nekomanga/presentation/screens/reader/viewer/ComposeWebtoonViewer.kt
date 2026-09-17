@@ -166,8 +166,63 @@ fun ComposeWebtoonViewer(
 
         LaunchedEffect(items) {
             if (viewer.requestedPagePosition != null) return@LaunchedEffect
-            val firstItem = lastFirstVisibleItem
+            if (lazyListState.isScrollInProgress) return@LaunchedEffect
+
+            // Check if the current first visible item's key is still present in the updated items
+            // list.
+            // Compose's LazyColumn natively and automatically preserves the scroll position of
+            // items
+            // with known keys. Attempting to manually re-anchor via scrollToItem while the key
+            // still
+            // exists will disrupt smooth scrolling or cause jumps due to asynchronous snapshotFlow
+            // updates.
+            val currentFirstVisibleKey =
+                lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()?.key
+            if (
+                currentFirstVisibleKey != null &&
+                    items.any { it.key("webtoon") == currentFirstVisibleKey }
+            ) {
+                return@LaunchedEffect
+            }
+
+            val firstItem =
+                lastFirstVisibleItem ?: currentItems.getOrNull(lazyListState.firstVisibleItemIndex)
             val activeItem = lastActiveItem
+
+            // Case A: The previously visible monolithic Page was split into slices.
+            // Find the slice that covers the exact scroll offset into that page and preserve
+            // sub-pixel position.
+            if (firstItem is ReaderUiItem.Page) {
+                val pageOffset = lazyListState.firstVisibleItemScrollOffset
+                val matchingSliceIndex = items.indexOfFirst {
+                    it is ReaderUiItem.SplitPage &&
+                        isSameChapter(it.page.chapter, firstItem.page.chapter) &&
+                        it.page.index == firstItem.page.index &&
+                        pageOffset in
+                            it.split.topOffset until (it.split.topOffset + it.split.splitHeight)
+                }
+                if (matchingSliceIndex != -1) {
+                    val slice = (items[matchingSliceIndex] as ReaderUiItem.SplitPage).split
+                    val sliceOffset = (pageOffset - slice.topOffset).coerceAtLeast(0)
+                    lazyListState.scrollToItem(matchingSliceIndex, sliceOffset)
+                    return@LaunchedEffect
+                }
+            }
+
+            // Case B: The previously visible SplitPage slice was replaced by a monolithic Page.
+            if (firstItem is ReaderUiItem.SplitPage) {
+                val pageIndex = items.indexOfFirst {
+                    it is ReaderUiItem.Page &&
+                        isSameChapter(it.page.chapter, firstItem.page.chapter) &&
+                        it.page.index == firstItem.page.index
+                }
+                if (pageIndex != -1) {
+                    val targetOffset =
+                        firstItem.split.topOffset + lazyListState.firstVisibleItemScrollOffset
+                    lazyListState.scrollToItem(pageIndex, targetOffset)
+                    return@LaunchedEffect
+                }
+            }
 
             var targetIndex: Int
             var targetOffset: Int

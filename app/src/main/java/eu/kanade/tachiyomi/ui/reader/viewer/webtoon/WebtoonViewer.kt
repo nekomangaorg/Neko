@@ -92,13 +92,19 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         val wasAlreadyInItems =
             chapters.currChapter.pages?.firstOrNull()?.let { firstPage ->
                 controller.findPageIndex(items, firstPage) != -1
-            } ?: false
+            } ?: false ||
+                items.any {
+                    it is ReaderUiItem.Transition &&
+                        (it.transition.to?.chapter?.id == chapters.currChapter.chapter.id ||
+                            it.transition.from.chapter.id == chapters.currChapter.chapter.id)
+                }
 
         val newItems =
             controller.buildItems(
-                chapters,
-                forceTransition,
-                if (config.splitTallPages) screenHeight else 0,
+                chapters = chapters,
+                forceTransition = forceTransition,
+                screenHeight = if (config.splitTallPages) screenHeight else 0,
+                existingItems = items,
             )
         val chapterChanged = activeChapterId != chapters.currChapter.chapter.id
         activeChapterId = chapters.currChapter.chapter.id

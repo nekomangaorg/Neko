@@ -349,4 +349,56 @@ class ReaderWebtoonControllerTest {
         assertEquals(2L, chapter2Items[1].chapterId)
         assertEquals(3L, chapter2Items[6].chapterId)
     }
+
+    @Test
+    fun `buildItems reuses existing SplitPage slices to maintain key and layout continuity`() {
+        val controller = ReaderWebtoonController()
+        val chapter1 = createChapter(1L, pageCount = 3)
+        val page0 = chapter1.pages!![0]
+        val split0 = ReaderPageSplit(page0, topOffset = 0, splitHeight = 1000)
+        val split1 = ReaderPageSplit(page0, topOffset = 1000, splitHeight = 1000)
+
+        val existingItems =
+            listOf(
+                ReaderUiItem.Transition(ChapterTransition.Prev(chapter1, null)),
+                ReaderUiItem.SplitPage(split0),
+                ReaderUiItem.SplitPage(split1),
+                ReaderUiItem.Page(chapter1.pages!![1]),
+                ReaderUiItem.Page(chapter1.pages!![2]),
+            )
+
+        val newItems =
+            controller.buildItems(
+                ViewerChapters(chapter1, null, null),
+                forceTransition = false,
+                existingItems = existingItems,
+            )
+
+        // 1 prev transition + 2 slices for page 0 + 2 pages + 1 next transition = 6 items
+        assertEquals(6, newItems.size)
+        assertTrue(newItems[1] is ReaderUiItem.SplitPage)
+        assertTrue(newItems[2] is ReaderUiItem.SplitPage)
+        assertEquals(0, (newItems[1] as ReaderUiItem.SplitPage).split.topOffset)
+        assertEquals(1000, (newItems[2] as ReaderUiItem.SplitPage).split.topOffset)
+        assertTrue(controller.tallSplitPages.contains(page0))
+    }
+
+    @Test
+    fun `findPageIndex matches pages across distinct ReaderPage instances for same chapter and index`() {
+        val controller = ReaderWebtoonController()
+        val chapter1 = createChapter(1L, pageCount = 2)
+        val items =
+            listOf(
+                ReaderUiItem.Transition(ChapterTransition.Prev(chapter1, null)),
+                ReaderUiItem.Page(chapter1.pages!![0]),
+                ReaderUiItem.Page(chapter1.pages!![1]),
+            )
+
+        // Distinct ReaderPage instance with the same chapter ID and index
+        val duplicateChapter = createChapter(1L, pageCount = 2)
+        val queryPage = duplicateChapter.pages!![1]
+
+        val foundIndex = controller.findPageIndex(items, queryPage)
+        assertEquals(2, foundIndex)
+    }
 }
