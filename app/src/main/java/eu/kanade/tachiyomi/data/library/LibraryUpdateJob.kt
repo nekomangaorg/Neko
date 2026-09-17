@@ -439,20 +439,24 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     val blockedGroups = mangaDexPreferences.blockedGroups().get()
                     val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
-                    val fetchedChapters = buildList {
-                        add(holder.sChapters)
-                        addAll(mergedList.map { it.map { pair -> pair.first } })
-                    }
-                        .mergeSorted(
-                            compareBy<SChapter> { getChapterNum(it) != null }
-                                .thenBy { getChapterNum(it) }
-                        )
-                        .filter {
-                            val scanlators = ChapterUtil.getScanlators(it.scanlator)
-                            scanlators.none { scanlator -> scanlator in blockedGroups } &&
-                                (Constants.NO_GROUP !in scanlators ||
-                                    it.uploader !in blockedUploaders)
-                        }
+                    val (fetchedChapters, blockedChapters) =
+                        buildList {
+                                add(holder.sChapters)
+                                addAll(mergedList.map { it.map { pair -> pair.first } })
+                            }
+                            .mergeSorted(
+                                compareBy<SChapter> { getChapterNum(it) != null }
+                                    .thenBy { getChapterNum(it) }
+                            )
+                            .partition {
+                                val scanlators = ChapterUtil.getScanlators(it.scanlator)
+                                scanlators.none { scanlator -> scanlator in blockedGroups } &&
+                                    (Constants.NO_GROUP !in scanlators ||
+                                        it.uploader !in blockedUploaders)
+                            }
+                    // Blocked chapters drop out of the db on sync, but the user chose that, so
+                    // they are not reported as unavailable.
+                    val blockedUrls = blockedChapters.mapTo(hashSetOf()) { it.url }
 
                     // delete cover cache image if the thumbnail from network is not empty
                     // note: we preload the covers here so we can view everything offline if
@@ -569,8 +573,10 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                 downloadManager.deleteChapters(manga, removedChapters)
                             }
                         }
-                        if (syncResult.nowUnavailable.isNotEmpty()) {
-                            unavailableUpdates[manga] = syncResult.nowUnavailable
+                        val nowUnavailable =
+                            syncResult.nowUnavailable.filterNot { it.url in blockedUrls }
+                        if (nowUnavailable.isNotEmpty()) {
+                            unavailableUpdates[manga] = nowUnavailable
                         }
                         if (syncResult.added.size + syncResult.removed.size > 0) {
                             sendUpdate(manga.id)
