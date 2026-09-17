@@ -10,5 +10,5 @@
 - **Never hardcode user-facing strings**: Always define user-facing text in `strings.xml` and reference them via `stringResource(R.string.xyz)` or `context.getString(R.string.xyz)`.
 - **Always prefer Material 3 theme colors**: In Compose, prefer `MaterialTheme.colorScheme` tokens (e.g., `surface`, `primary`, `background`, `onSurfaceVariant`) over hardcoded color literals (`Color(0xFF...)` or `android.graphics.Color`).
 - **Always enforce immutable UI state**: UI state models should be immutable `data class`es containing only `val` properties to ensure predictable Compose recomposition and prevent state mutation bugs.
-- **Always format Kotlin code with `ktfmt`**: After making any Kotlin code modifications, format files with `./gradlew ktfmtFormat` to maintain repo code style.
+- **Always format Kotlin code with `ktfmt`**: After making Kotlin code modifications, format files with `./gradlew ktfmtFormat` to maintain repo code style only after all changes are made and before the commit message is generated.
 
