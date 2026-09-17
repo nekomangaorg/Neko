@@ -169,8 +169,8 @@ fun ComposeWebtoonViewer(
             val firstItem = lastFirstVisibleItem
             val activeItem = lastActiveItem
 
-            val targetIndex: Int
-            val targetOffset: Int
+            var targetIndex: Int
+            var targetOffset: Int
 
             val firstItemNewIndex =
                 firstItem?.let { target -> items.indexOfFirst { areItemsEquivalent(it, target) } }
@@ -191,6 +191,26 @@ fun ComposeWebtoonViewer(
             } else {
                 targetIndex = -1
                 targetOffset = 0
+            }
+
+            // Fallback: If target was an adjacent transition that was replaced by newly loaded
+            // pages,
+            // anchor directly to the first page of that newly loaded chapter.
+            val anchorItem = firstItem ?: activeItem
+            if (targetIndex == -1 && anchorItem is ReaderUiItem.Transition) {
+                val trans = anchorItem.transition
+                if (trans is ChapterTransition.Next && trans.to != null) {
+                    val toChapterId = trans.to.chapter.id
+                    val nextChapterFirstPageIndex = items.indexOfFirst {
+                        (it as? ReaderUiItem.Page)?.page?.chapter?.chapter?.id == toChapterId ||
+                            (it as? ReaderUiItem.SplitPage)?.page?.chapter?.chapter?.id ==
+                                toChapterId
+                    }
+                    if (nextChapterFirstPageIndex != -1) {
+                        targetIndex = nextChapterFirstPageIndex
+                        targetOffset = 0
+                    }
+                }
             }
 
             if (

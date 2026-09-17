@@ -114,6 +114,12 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Tells this viewer to move to the given [page]. */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
         TimberKt.d { "moveToPage" }
+        if (activeChapterId != null && page.chapter.chapter.id != activeChapterId) {
+            TimberKt.d {
+                "Ignoring moveToPage for non-active chapter ${page.chapter.chapter.id} (active is $activeChapterId)"
+            }
+            return
+        }
         val position = controller.findPageIndex(items, page)
         if (position != -1) {
             requestedPagePosition = WebtoonPagePosition(position, animated)
