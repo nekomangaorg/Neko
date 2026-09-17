@@ -54,6 +54,7 @@ fun ReaderTransitionPage(
     onRetry: (ReaderChapter) -> Unit,
     modifier: Modifier = Modifier,
     onTap: ((PointF) -> Unit)? = null,
+    onCardClick: (() -> Unit)? = null,
 ) {
     val tapModifier =
         if (onTap != null) {
@@ -132,6 +133,23 @@ fun ReaderTransitionPage(
                         chapter = targetChapter,
                         onRetry = { onRetry(targetChapter) },
                     )
+                }
+
+                if (onCardClick != null && transition.to != null) {
+                    Spacer(modifier = Modifier.height(Size.mediumLarge))
+                    Button(
+                        onClick = onCardClick,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text =
+                                if (transition is ChapterTransition.Prev) {
+                                    stringResource(R.string.previous_chapter)
+                                } else {
+                                    stringResource(R.string.next_chapter)
+                                }
+                        )
+                    }
                 }
             }
         }

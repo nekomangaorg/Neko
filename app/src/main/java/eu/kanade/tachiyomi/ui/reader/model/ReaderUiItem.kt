@@ -52,7 +52,7 @@ sealed interface ReaderUiItem {
     /** A transition page between adjacent chapters. */
     data class Transition(val transition: ChapterTransition) : ReaderUiItem {
         override val chapterId: Long?
-            get() = transition.to?.chapter?.id ?: transition.from.chapter.id
+            get() = null
 
         override val pageIndex: Int?
             get() = null

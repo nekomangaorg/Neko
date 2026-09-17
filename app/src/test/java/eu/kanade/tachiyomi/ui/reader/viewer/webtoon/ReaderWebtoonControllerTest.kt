@@ -36,7 +36,7 @@ class ReaderWebtoonControllerTest {
     }
 
     @Test
-    fun `buildItems with loaded chapters adds prevPages, currentPages, and nextPages`() {
+    fun `buildItems with loaded chapters adds prevTransition, currentPages, and nextPages`() {
         val controller = ReaderWebtoonController()
         val prevChapter = createChapter(1L, pageCount = 5)
         val currChapter = createChapter(2L, pageCount = 10)
@@ -46,22 +46,29 @@ class ReaderWebtoonControllerTest {
         val items =
             controller.buildItems(viewerChapters, forceTransition = false, screenHeight = 1000)
 
-        // Previous chapter: all 5 pages (pages 0..4)
-        // No prev transition because prevChapter is loaded and no missing chapters
-        // Current chapter: all 10 pages (pages 0..9)
-        // No next transition because nextChapter is loaded and no missing chapters
-        // Next chapter: all 5 pages (pages 0..4)
-        // Total = 5 + 10 + 5 = 20 items
-        assertEquals(20, items.size)
-        assertTrue(items[0] is ReaderUiItem.Page)
+        // Padded previous chapter pages (last 2) + previous chapter transition + current pages +
+        // next pages
+        // Indices 0..1: previous chapter pages 3 and 4
+        // Index 2: previous chapter transition
+        // Current chapter: all 10 pages (pages 0..9 at indices 3..12)
+        // Next chapter: all 5 pages (pages 0..4 at indices 13..17)
+        // Total = 2 + 1 + 10 + 5 = 18 items
+        assertEquals(18, items.size)
         assertEquals(1L, items[0].chapterId)
-        assertEquals(0, items[0].pageIndex)
+        assertEquals(3, items[0].pageIndex)
+        assertEquals(1L, items[1].chapterId)
+        assertEquals(4, items[1].pageIndex)
 
-        assertEquals(2L, items[5].chapterId)
-        assertEquals(0, items[5].pageIndex)
+        assertTrue(items[2] is ReaderUiItem.Transition)
+        assertTrue((items[2] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
+        assertNull(items[2].chapterId)
+        assertNull(items[2].pageIndex)
 
-        assertEquals(3L, items[15].chapterId)
-        assertEquals(0, items[15].pageIndex)
+        assertEquals(2L, items[3].chapterId)
+        assertEquals(0, items[3].pageIndex)
+
+        assertEquals(3L, items[13].chapterId)
+        assertEquals(0, items[13].pageIndex)
     }
 
     @Test
@@ -76,13 +83,13 @@ class ReaderWebtoonControllerTest {
         val items = controller.buildItems(viewerChapters, forceTransition = true)
 
         // With forceTransition = true:
-        // prev pages (5) + prev transition (1) + curr pages (10) + next transition (1) = 17 items
+        // prev pages (2) + prev transition (1) + curr pages (10) + next transition (1) = 14 items
         // (next is Wait so 0 pages)
-        assertEquals(17, items.size)
-        assertTrue(items[5] is ReaderUiItem.Transition)
-        assertTrue((items[5] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
-        assertTrue(items[16] is ReaderUiItem.Transition)
-        assertTrue((items[16] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
+        assertEquals(14, items.size)
+        assertTrue(items[2] is ReaderUiItem.Transition)
+        assertTrue((items[2] as ReaderUiItem.Transition).transition is ChapterTransition.Prev)
+        assertTrue(items[13] is ReaderUiItem.Transition)
+        assertTrue((items[13] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
     }
 
     @Test
@@ -213,5 +220,234 @@ class ReaderWebtoonControllerTest {
         assertEquals(ReaderWebtoonController.TallSplitResult.NotTall, result)
         assertTrue(!controller.tallSplitPages.contains(page))
         assertTrue(controller.isNonTall(page))
+    }
+
+    @Test
+    fun `Transition key is symmetrical across adjacent chapters when destination is resolved`() {
+        val chapter1 = createChapter(45L, pageCount = 5)
+        val chapter2 = createChapter(46L, pageCount = 5)
+
+        val nextTrans = ChapterTransition.Next(chapter1, chapter2)
+        val prevTrans = ChapterTransition.Prev(chapter2, chapter1)
+
+        val nextItem = ReaderUiItem.Transition(nextTrans)
+        val prevItem = ReaderUiItem.Transition(prevTrans)
+
+        assertEquals("webtoon_transition_45_46", nextItem.key("webtoon"))
+        assertEquals("webtoon_transition_45_46", prevItem.key("webtoon"))
+        assertEquals(nextItem.key("webtoon"), prevItem.key("webtoon"))
+        assertNull(nextItem.chapterId)
+        assertNull(prevItem.chapterId)
+    }
+
+    @Test
+    fun `Transition key falls back to directional type when destination is null`() {
+        val currChapter = createChapter(46L, pageCount = 5)
+        val transWithoutTo = ChapterTransition.Prev(currChapter, null)
+        val itemWithoutTo = ReaderUiItem.Transition(transWithoutTo)
+
+        assertEquals("webtoon_transition_prev_46", itemWithoutTo.key("webtoon"))
+    }
+
+    @Test
+    fun `buildItems preserves next transition card when next chapter loads after being displayed`() {
+        val controller = ReaderWebtoonController()
+        val currChapter = createChapter(1L, pageCount = 5)
+        val dbChapter2 =
+            Chapter.create().apply {
+                this.id = 2L
+                this.url = "/chapter/2"
+                this.name = "Chapter 2"
+                this.chapter_number = 2f
+            }
+        val nextChapter = ReaderChapter(dbChapter2)
+        nextChapter.state = ReaderChapter.State.Wait
+
+        val viewerChaptersInitial = ViewerChapters(currChapter, null, nextChapter)
+
+        // Initial build: next chapter is not loaded, so next transition card must be present
+        val initialItems =
+            controller.buildItems(
+                viewerChaptersInitial,
+                forceTransition = false,
+                screenHeight = 1000,
+            )
+
+        // 1 prev transition + 5 curr pages + 1 next transition = 7 items
+        assertEquals(7, initialItems.size)
+        assertTrue(initialItems[6] is ReaderUiItem.Transition)
+        assertTrue(
+            (initialItems[6] as ReaderUiItem.Transition).transition is ChapterTransition.Next
+        )
+
+        // Next chapter finishes loading
+        val pages2 =
+            (0 until 5).map { index ->
+                ReaderPage(index = index, url = "url2_$index", imageUrl = "img2_$index").apply {
+                    this.chapter = nextChapter
+                    this.renderedHeight = 1000
+                }
+            }
+        nextChapter.state = ReaderChapter.State.Loaded(pages2)
+
+        val viewerChaptersLoaded = ViewerChapters(currChapter, null, nextChapter)
+
+        // Re-build with next chapter loaded: transition card must still be preserved
+        val loadedItems =
+            controller.buildItems(
+                viewerChaptersLoaded,
+                forceTransition = false,
+                screenHeight = 1000,
+            )
+
+        // 1 prev transition + 5 curr pages + 1 next transition (preserved!) + 5 next pages = 12
+        // items
+        assertEquals(12, loadedItems.size)
+        assertTrue(loadedItems[6] is ReaderUiItem.Transition)
+        assertTrue((loadedItems[6] as ReaderUiItem.Transition).transition is ChapterTransition.Next)
+
+        // Next chapter pages follow the transition card
+        assertEquals(2L, loadedItems[7].chapterId)
+        assertEquals(0, loadedItems[7].pageIndex)
+    }
+
+    @Test
+    fun `buildItems resets hadTransitionForNext when current chapter changes`() {
+        val controller = ReaderWebtoonController()
+        val chapter1 = createChapter(1L, pageCount = 5)
+        val dbChapter2 =
+            Chapter.create().apply {
+                this.id = 2L
+                this.url = "/chapter/2"
+                this.name = "Chapter 2"
+                this.chapter_number = 2f
+            }
+        val chapter2 = ReaderChapter(dbChapter2)
+        chapter2.state = ReaderChapter.State.Wait
+
+        // Chapter 1 displayed with unloaded Chapter 2 -> sets hadTransitionForNext = true
+        controller.buildItems(ViewerChapters(chapter1, null, chapter2), forceTransition = false)
+
+        // Now user moves to Chapter 2 (currentChapter changes to 2) with loaded Chapter 3
+        val chapter3 = createChapter(3L, pageCount = 5)
+        val pages2 =
+            (0 until 5).map { index ->
+                ReaderPage(index = index, url = "url2_$index", imageUrl = "img2_$index").apply {
+                    this.chapter = chapter2
+                    this.renderedHeight = 1000
+                }
+            }
+        chapter2.state = ReaderChapter.State.Loaded(pages2)
+
+        val chapter2Items =
+            controller.buildItems(
+                ViewerChapters(chapter2, chapter1, chapter3),
+                forceTransition = false,
+            )
+
+        // In Chapter 2: Chapter 3 is loaded and forceTransition is false.
+        // hadTransitionForNext should have been reset, so no next transition is added.
+        // 2 prev pages (ch 1) + 1 prev transition + 5 curr pages (ch 2) + 5 next pages (ch 3) = 13
+        // items
+        assertEquals(13, chapter2Items.size)
+        assertTrue(chapter2Items[2] is ReaderUiItem.Transition)
+        assertTrue(
+            (chapter2Items[2] as ReaderUiItem.Transition).transition is ChapterTransition.Prev
+        )
+        assertEquals(2L, chapter2Items[3].chapterId)
+        assertEquals(3L, chapter2Items[8].chapterId)
+    }
+
+    @Test
+    fun `buildItems reuses existing SplitPage slices to maintain key and layout continuity`() {
+        val controller = ReaderWebtoonController()
+        val chapter1 = createChapter(1L, pageCount = 3)
+        val page0 = chapter1.pages!![0]
+        val split0 = ReaderPageSplit(page0, topOffset = 0, splitHeight = 1000)
+        val split1 = ReaderPageSplit(page0, topOffset = 1000, splitHeight = 1000)
+
+        val existingItems =
+            listOf(
+                ReaderUiItem.Transition(ChapterTransition.Prev(chapter1, null)),
+                ReaderUiItem.SplitPage(split0),
+                ReaderUiItem.SplitPage(split1),
+                ReaderUiItem.Page(chapter1.pages!![1]),
+                ReaderUiItem.Page(chapter1.pages!![2]),
+            )
+
+        val newItems =
+            controller.buildItems(
+                ViewerChapters(chapter1, null, null),
+                forceTransition = false,
+                existingItems = existingItems,
+            )
+
+        // 1 prev transition + 2 slices for page 0 + 2 pages + 1 next transition = 6 items
+        assertEquals(6, newItems.size)
+        assertTrue(newItems[1] is ReaderUiItem.SplitPage)
+        assertTrue(newItems[2] is ReaderUiItem.SplitPage)
+        assertEquals(0, (newItems[1] as ReaderUiItem.SplitPage).split.topOffset)
+        assertEquals(1000, (newItems[2] as ReaderUiItem.SplitPage).split.topOffset)
+        assertTrue(controller.tallSplitPages.contains(page0))
+    }
+
+    @Test
+    fun `findPageIndex matches pages across distinct ReaderPage instances for same chapter and index`() {
+        val controller = ReaderWebtoonController()
+        val chapter1 = createChapter(1L, pageCount = 2)
+        val items =
+            listOf(
+                ReaderUiItem.Transition(ChapterTransition.Prev(chapter1, null)),
+                ReaderUiItem.Page(chapter1.pages!![0]),
+                ReaderUiItem.Page(chapter1.pages!![1]),
+            )
+
+        // Distinct ReaderPage instance with the same chapter ID and index
+        val duplicateChapter = createChapter(1L, pageCount = 2)
+        val queryPage = duplicateChapter.pages!![1]
+
+        val foundIndex = controller.findPageIndex(items, queryPage)
+        assertEquals(2, foundIndex)
+    }
+
+    @Test
+    fun `buildItems preserves boundary item keys between adjacent chapters`() {
+        val controller = ReaderWebtoonController()
+        val chapter1 = createChapter(1L, pageCount = 5)
+        val chapter2 = createChapter(2L, pageCount = 5)
+
+        // While reading Chapter 1 with Chapter 2 loaded and transitions enabled
+        val ch1Items =
+            controller.buildItems(
+                ViewerChapters(chapter1, null, chapter2),
+                forceTransition = true,
+            )
+        // ch1Items: [0]=PrevTrans(1, null), [1..5]=Ch1 pages 0..4, [6]=NextTrans(1, 2), [7..11]=Ch2
+        // pages 0..4
+        assertTrue(ch1Items[5] is ReaderUiItem.Page)
+        assertTrue(ch1Items[6] is ReaderUiItem.Transition)
+        assertTrue(ch1Items[7] is ReaderUiItem.Page)
+        val ch1LastPageKey = ch1Items[5].key("webtoon")
+        val ch1NextTransKey = ch1Items[6].key("webtoon")
+        val ch2FirstPageKey = ch1Items[7].key("webtoon")
+
+        // User crosses into Chapter 2
+        val ch2Items =
+            controller.buildItems(
+                ViewerChapters(chapter2, chapter1, null),
+                forceTransition = true,
+            )
+        // ch2Items: [0..1]=Ch1 pages 3..4, [2]=PrevTrans(2, 1), [3..7]=Ch2 pages 0..4,
+        // [8]=NextTrans(2, null)
+        assertTrue(ch2Items[1] is ReaderUiItem.Page)
+        assertTrue(ch2Items[2] is ReaderUiItem.Transition)
+        assertTrue(ch2Items[3] is ReaderUiItem.Page)
+        val ch2PaddedPageKey = ch2Items[1].key("webtoon")
+        val ch2PrevTransKey = ch2Items[2].key("webtoon")
+        val ch2FirstPageNewKey = ch2Items[3].key("webtoon")
+
+        assertEquals(ch1LastPageKey, ch2PaddedPageKey)
+        assertEquals(ch1NextTransKey, ch2PrevTransKey)
+        assertEquals(ch2FirstPageKey, ch2FirstPageNewKey)
     }
 }

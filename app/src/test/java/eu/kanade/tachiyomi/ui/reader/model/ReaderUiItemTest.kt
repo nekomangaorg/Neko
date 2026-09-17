@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.model
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ReaderUiItemTest {
@@ -95,8 +96,8 @@ class ReaderUiItemTest {
         assertEquals(102992L, splitItem.chapterId)
         assertEquals(3, splitItem.pageIndex)
 
-        assertEquals(200L, transitionItem.chapterId)
-        assertEquals(null, transitionItem.pageIndex)
+        assertNull(transitionItem.chapterId)
+        assertNull(transitionItem.pageIndex)
     }
 
     @Test

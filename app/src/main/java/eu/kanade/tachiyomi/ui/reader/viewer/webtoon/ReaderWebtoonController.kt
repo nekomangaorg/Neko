@@ -47,46 +47,46 @@ class ReaderWebtoonController {
 
     private val splitCheckLock = Any()
 
+    private var hadTransitionForNext = false
+
     /**
      * Builds the list of [ReaderUiItem] for the given [chapters]. Handles previous chapter padding
-     * pages, transition pages, and next chapter peek pages.
+     * pages, transition pages, and next chapter peek pages. Reuses any already computed splits from
+     * [existingItems] to maintain key and layout continuity.
      */
     fun buildItems(
         chapters: ViewerChapters,
         forceTransition: Boolean,
         screenHeight: Int = 0,
+        existingItems: List<ReaderUiItem> = emptyList(),
     ): List<ReaderUiItem> {
         tallSplitPages.clear()
         nonTallPages.clear()
+        if (currentChapter?.chapter?.id != chapters.currChapter.chapter.id) {
+            hadTransitionForNext = false
+        }
         val newItems = mutableListOf<ReaderUiItem>()
 
         val prevHasMissingChapters = hasMissingChapters(chapters.currChapter, chapters.prevChapter)
         val nextHasMissingChapters = hasMissingChapters(chapters.nextChapter, chapters.currChapter)
 
-        // Add previous chapter pages
+        // Add previous chapter padding pages (last 2 pages) to maintain key continuity across
+        // chapter boundaries
         if (chapters.prevChapter != null) {
             val prevPages = chapters.prevChapter.pages
-            if (prevPages != null) {
-                newItems.addAll(mapPagesToItems(prevPages, screenHeight))
+            if (prevPages != null && prevPages.isNotEmpty()) {
+                newItems.addAll(mapPagesToItems(prevPages.takeLast(2), screenHeight, existingItems))
             }
         }
 
-        // Add transition page if forced, missing chapters, or previous chapter is not loaded
         val prevTrans = ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter)
         prevTransition = prevTrans
-        if (
-            chapters.prevChapter == null ||
-                prevHasMissingChapters ||
-                forceTransition ||
-                chapters.prevChapter.state !is ReaderChapter.State.Loaded
-        ) {
-            newItems.add(ReaderUiItem.Transition(prevTrans))
-        }
+        newItems.add(ReaderUiItem.Transition(prevTrans))
 
         // Add current chapter pages
         val currPages = chapters.currChapter.pages
         if (currPages != null) {
-            newItems.addAll(mapPagesToItems(currPages, screenHeight))
+            newItems.addAll(mapPagesToItems(currPages, screenHeight, existingItems))
         }
 
         currentChapter = chapters.currChapter
@@ -94,27 +94,44 @@ class ReaderWebtoonController {
         // Add next chapter transition and pages
         val nextTrans = ChapterTransition.Next(chapters.currChapter, chapters.nextChapter)
         nextTransition = nextTrans
-        if (
+        val shouldAddNextTransition =
             chapters.nextChapter == null ||
                 nextHasMissingChapters ||
                 forceTransition ||
+                hadTransitionForNext ||
                 chapters.nextChapter.state !is ReaderChapter.State.Loaded
-        ) {
+
+        if (shouldAddNextTransition) {
             newItems.add(ReaderUiItem.Transition(nextTrans))
+            if (chapters.nextChapter != null) {
+                hadTransitionForNext = true
+            }
         }
 
         if (chapters.nextChapter != null) {
             val nextPages = chapters.nextChapter.pages
             if (nextPages != null) {
-                newItems.addAll(mapPagesToItems(nextPages, screenHeight))
+                newItems.addAll(mapPagesToItems(nextPages, screenHeight, existingItems))
             }
         }
 
         return newItems
     }
 
-    private fun mapPagesToItems(pages: List<ReaderPage>, screenHeight: Int): List<ReaderUiItem> {
+    private fun mapPagesToItems(
+        pages: List<ReaderPage>,
+        screenHeight: Int,
+        existingItems: List<ReaderUiItem> = emptyList(),
+    ): List<ReaderUiItem> {
         return pages.flatMap { page ->
+            val existingSplits =
+                existingItems.filterIsInstance<ReaderUiItem.SplitPage>().filter {
+                    it.page.isFromSamePage(page)
+                }
+            if (existingSplits.isNotEmpty()) {
+                tallSplitPages.add(page)
+                return@flatMap existingSplits
+            }
             if (screenHeight > 0 && page.status == Page.State.READY && page.stream != null) {
                 val result = checkAndTrackTallPage(page, screenHeight)
                 if (result is TallSplitResult.Split) {
@@ -136,7 +153,7 @@ class ReaderWebtoonController {
         insertPages: List<ReaderPageSplit>,
     ): List<ReaderUiItem> {
         val position = currentItems.indexOfFirst {
-            (it as? ReaderUiItem.Page)?.page == originalPage
+            (it as? ReaderUiItem.Page)?.page?.isFromSamePage(originalPage) == true
         }
         if (position < 0) return currentItems
 
@@ -183,8 +200,8 @@ class ReaderWebtoonController {
     fun findPageIndex(items: List<ReaderUiItem>, page: ReaderPage): Int {
         return items.indexOfFirst {
             when (it) {
-                is ReaderUiItem.Page -> it.page == page
-                is ReaderUiItem.SplitPage -> it.page == page
+                is ReaderUiItem.Page -> it.page.isFromSamePage(page)
+                is ReaderUiItem.SplitPage -> it.page.isFromSamePage(page)
                 is ReaderUiItem.Transition -> false
             }
         }
