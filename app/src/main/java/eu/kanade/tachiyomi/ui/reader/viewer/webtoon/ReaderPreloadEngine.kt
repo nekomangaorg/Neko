@@ -167,7 +167,7 @@ class ReaderPreloadEngine(
                 .size(CoilSize.ORIGINAL)
                 .maxBitmapSize(maxTextureBitmapSize)
                 .precision(Precision.EXACT)
-                .crossfade(true)
+                .crossfade(false)
                 .build()
 
         activeDisposables[key]?.dispose()

@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -167,58 +168,38 @@ fun ComposeWebtoonViewer(
                 currentFirstVisibleIndex = lazyListState.firstVisibleItemIndex,
                 previousItems = lastProcessedItems,
             )
-        if (target != null && target.index != lazyListState.firstVisibleItemIndex) {
-            val liveOffset =
-                if (
-                    lastProcessedItems
-                        .getOrNull(lazyListState.firstVisibleItemIndex)
-                        ?.isEquivalentTo(target.item) == true
-                ) {
-                    lazyListState.firstVisibleItemScrollOffset
-                } else {
-                    target.offset
-                }
-            lazyListState.requestScrollToItem(target.index, liveOffset)
-            lastFirstVisibleItem = target.item
-            lastFirstVisibleOffset = liveOffset
-        }
-    }
-
-    LaunchedEffect(items) {
-        val target =
-            WebtoonScrollAnchorResolver.resolveReanchorTarget(
-                items = items,
-                lastFirstVisibleItem = lastFirstVisibleItem,
-                lastFirstVisibleOffset = lastFirstVisibleOffset,
-                lastActiveItem = lastActiveItem,
-                activeChapterId = activeChapterId,
-                currentFirstVisibleIndex = lazyListState.firstVisibleItemIndex,
-                previousItems = lastProcessedItems,
-            )
-        try {
+        if (target != null) {
+            val currentFirstItem = lastProcessedItems.getOrNull(lazyListState.firstVisibleItemIndex)
             val shouldScroll =
-                target != null &&
-                    (target.index != lazyListState.firstVisibleItemIndex ||
-                        (lastProcessedItems.getOrNull(lazyListState.firstVisibleItemIndex)?.let {
-                            it::class != target.item::class
-                        } == true && target.offset != lazyListState.firstVisibleItemScrollOffset))
-            if (shouldScroll && target != null) {
+                target.index != lazyListState.firstVisibleItemIndex ||
+                    (currentFirstItem?.let { it::class != target.item::class } == true &&
+                        target.offset != lazyListState.firstVisibleItemScrollOffset)
+            if (shouldScroll) {
                 val liveOffset =
-                    if (
-                        lastProcessedItems
-                            .getOrNull(lazyListState.firstVisibleItemIndex)
-                            ?.isEquivalentTo(target.item) == true
-                    ) {
+                    if (currentFirstItem?.isEquivalentTo(target.item) == true) {
                         lazyListState.firstVisibleItemScrollOffset
                     } else {
                         target.offset
                     }
-                lazyListState.scrollToItem(target.index, liveOffset)
+                lazyListState.requestScrollToItem(target.index, liveOffset)
                 lastFirstVisibleItem = target.item
                 lastFirstVisibleOffset = liveOffset
             }
-        } finally {
-            lastProcessedItems = items
+        }
+    }
+
+    SideEffect { lastProcessedItems = items }
+
+    LaunchedEffect(items) {
+        // Fallback: Ensure scroll position is locked if layout measurement did not apply
+        // requestScrollToItem
+        val currentFirstItem = items.getOrNull(lazyListState.firstVisibleItemIndex)
+        val expectedItem = lastFirstVisibleItem
+        if (expectedItem != null && currentFirstItem?.isEquivalentTo(expectedItem) != true) {
+            val targetIndex = items.indexOfFirst { it.isEquivalentTo(expectedItem) }
+            if (targetIndex != -1 && targetIndex != lazyListState.firstVisibleItemIndex) {
+                lazyListState.scrollToItem(targetIndex, lastFirstVisibleOffset)
+            }
         }
     }
 
@@ -667,16 +648,7 @@ fun ComposeWebtoonViewer(
         }
 
     val sidePaddingPercent =
-        remember(webtoonSidePadding) {
-            when (webtoonSidePadding) {
-                1 -> 0.05f
-                2 -> 0.10f
-                3 -> 0.15f
-                4 -> 0.20f
-                5 -> 0.25f
-                else -> 0f
-            }
-        }
+        remember(webtoonSidePadding) { (webtoonSidePadding / 100f).coerceIn(0f, 0.25f) }
 
     val hasMargins = viewer.hasMargins && !disableGaps
 

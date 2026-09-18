@@ -112,7 +112,7 @@ fun Modifier.webtoonZoomable(
                         if (newScale > 1f) {
                             val maxOffsetX = (size.width * (newScale - 1f)) / 2f
                             state.offsetX =
-                                (state.offsetX + panChange.x * newScale).coerceIn(
+                                (state.offsetX + panChange.x).coerceIn(
                                     -maxOffsetX,
                                     maxOffsetX,
                                 )
@@ -130,7 +130,7 @@ fun Modifier.webtoonZoomable(
                         velocityTracker.addPosition(change.uptimeMillis, change.position)
 
                         if (state.scale > 1.05f) {
-                            val panX = (change.position.x - change.previousPosition.x) * state.scale
+                            val panX = change.position.x - change.previousPosition.x
                             if (panX != 0f) {
                                 val maxOffsetX = (size.width * (state.scale - 1f)) / 2f
                                 state.offsetX =
