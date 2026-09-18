@@ -30,13 +30,28 @@ object WebtoonScrollAnchorResolver {
         lastActiveItem: ReaderUiItem?,
         activeChapterId: Long?,
         currentFirstVisibleIndex: Int,
+        previousItems: List<ReaderUiItem>? = null,
     ): AnchorTarget? {
         val currentFirstVisibleItem = items.getOrNull(currentFirstVisibleIndex)
         val previousFirstItem = lastFirstVisibleItem
+
+        // Fast-path 1: Native Compose key tracking or caller already positioned at equivalent item.
         if (
             currentFirstVisibleItem != null &&
                 previousFirstItem != null &&
                 currentFirstVisibleItem.isEquivalentTo(previousFirstItem)
+        ) {
+            return null
+        }
+
+        // Fast-path 2: When items are appended/updated without shifting the current viewport item
+        // (e.g. next chapter pages loaded while reading transition or last page).
+        val previousItemAtCurrentIndex = previousItems?.getOrNull(currentFirstVisibleIndex)
+        if (
+            currentFirstVisibleItem != null &&
+                previousItemAtCurrentIndex != null &&
+                currentFirstVisibleItem::class == previousItemAtCurrentIndex::class &&
+                currentFirstVisibleItem.isEquivalentTo(previousItemAtCurrentIndex)
         ) {
             return null
         }
@@ -197,6 +212,13 @@ object WebtoonScrollAnchorResolver {
         if (targetIndex != -1) {
             val targetItem = items.getOrNull(targetIndex)
             if (targetItem != null) {
+                if (
+                    targetIndex == currentFirstVisibleIndex &&
+                        currentFirstVisibleItem != null &&
+                        currentFirstVisibleItem.isEquivalentTo(targetItem)
+                ) {
+                    return null
+                }
                 return AnchorTarget(targetIndex, targetOffset, targetItem)
             }
         }

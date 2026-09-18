@@ -154,6 +154,36 @@ fun ComposeWebtoonViewer(
     }
 
     // 3. Maintain scroll anchor across item mutations, prepends, splits, and chapter transitions
+    // Immediate pre-measure re-anchor during composition to eliminate 1-frame flashes and jarring
+    // jitter
+    if (items !== lastProcessedItems) {
+        val target =
+            WebtoonScrollAnchorResolver.resolveReanchorTarget(
+                items = items,
+                lastFirstVisibleItem = lastFirstVisibleItem,
+                lastFirstVisibleOffset = lastFirstVisibleOffset,
+                lastActiveItem = lastActiveItem,
+                activeChapterId = activeChapterId,
+                currentFirstVisibleIndex = lazyListState.firstVisibleItemIndex,
+                previousItems = lastProcessedItems,
+            )
+        if (target != null && target.index != lazyListState.firstVisibleItemIndex) {
+            val liveOffset =
+                if (
+                    lastProcessedItems
+                        .getOrNull(lazyListState.firstVisibleItemIndex)
+                        ?.isEquivalentTo(target.item) == true
+                ) {
+                    lazyListState.firstVisibleItemScrollOffset
+                } else {
+                    target.offset
+                }
+            lazyListState.requestScrollToItem(target.index, liveOffset)
+            lastFirstVisibleItem = target.item
+            lastFirstVisibleOffset = liveOffset
+        }
+    }
+
     LaunchedEffect(items) {
         val target =
             WebtoonScrollAnchorResolver.resolveReanchorTarget(
@@ -163,16 +193,29 @@ fun ComposeWebtoonViewer(
                 lastActiveItem = lastActiveItem,
                 activeChapterId = activeChapterId,
                 currentFirstVisibleIndex = lazyListState.firstVisibleItemIndex,
+                previousItems = lastProcessedItems,
             )
         try {
-            if (
+            val shouldScroll =
                 target != null &&
                     (target.index != lazyListState.firstVisibleItemIndex ||
-                        target.offset != lazyListState.firstVisibleItemScrollOffset)
-            ) {
-                lazyListState.scrollToItem(target.index, target.offset)
+                        (lastProcessedItems.getOrNull(lazyListState.firstVisibleItemIndex)?.let {
+                            it::class != target.item::class
+                        } == true && target.offset != lazyListState.firstVisibleItemScrollOffset))
+            if (shouldScroll && target != null) {
+                val liveOffset =
+                    if (
+                        lastProcessedItems
+                            .getOrNull(lazyListState.firstVisibleItemIndex)
+                            ?.isEquivalentTo(target.item) == true
+                    ) {
+                        lazyListState.firstVisibleItemScrollOffset
+                    } else {
+                        target.offset
+                    }
+                lazyListState.scrollToItem(target.index, liveOffset)
                 lastFirstVisibleItem = target.item
-                lastFirstVisibleOffset = target.offset
+                lastFirstVisibleOffset = liveOffset
             }
         } finally {
             lastProcessedItems = items

@@ -293,4 +293,233 @@ class WebtoonScrollAnchorResolverTest {
         assertEquals(2L, (target.item as ReaderUiItem.Page).page.chapter.chapter.id)
         assertEquals(0, (target.item as ReaderUiItem.Page).page.index)
     }
+
+    @Test
+    fun `resolveReanchorTarget returns null when next chapter loads after transition preserving position without jitter`() {
+        val ch1 = createChapter(1L, pageCount = 171)
+        val ch2 = createChapter(2L, pageCount = 159)
+
+        val transitionNext = ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2))
+
+        // Previous items: Chapter 1 (171 pages) + Transition.Next (index 171)
+        val previousItems = mutableListOf<ReaderUiItem>()
+        previousItems.addAll(ch1.pages!!.map { ReaderUiItem.Page(it) })
+        previousItems.add(transitionNext)
+
+        // User is at transition at index 171, live scroll offset 250
+        val currentFirstVisibleIndex = 171
+        val liveOffset = 250
+
+        // When Chapter 2 finishes loading, its pages are appended after index 171:
+        // Indices 0..170: Ch 1 Pages
+        // Index 171: Transition.Next
+        // Indices 172..330: Ch 2 Pages
+        val newItems = mutableListOf<ReaderUiItem>()
+        newItems.addAll(previousItems)
+        newItems.addAll(ch2.pages!!.map { ReaderUiItem.Page(it) })
+
+        // Even if lastFirstVisibleItem was lagging (e.g. still Page 170 from prior frames)
+        val target =
+            WebtoonScrollAnchorResolver.resolveReanchorTarget(
+                items = newItems,
+                lastFirstVisibleItem = previousItems[170],
+                lastFirstVisibleOffset = liveOffset,
+                lastActiveItem = transitionNext,
+                activeChapterId = 1L,
+                currentFirstVisibleIndex = currentFirstVisibleIndex,
+                previousItems = previousItems,
+            )
+
+        // Target MUST be null so no scrollToItem is called, eliminating jitter on next chapter
+        // loading
+        assertNull(target)
+    }
+
+    @Test
+    fun `resolveReanchorTarget preserves scroll and prevents page jump when previous chapter loads on backward navigation`() {
+        val ch1 = createChapter(1L, pageCount = 171)
+        val ch2 = createChapter(2L, pageCount = 159)
+
+        val transitionPrev = ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1))
+        val transitionNext = ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2))
+
+        // Previous items: Ch 1 Pages 169..170 (indices 0..1) + Transition.Prev (index 2) + Ch 2
+        // Pages 0..158 (indices 3..161)
+        val previousItems = mutableListOf<ReaderUiItem>()
+        previousItems.addAll(ch1.pages!!.takeLast(2).map { ReaderUiItem.Page(it) })
+        previousItems.add(transitionPrev)
+        previousItems.addAll(ch2.pages!!.map { ReaderUiItem.Page(it) })
+
+        // User scrolled backwards into Chapter 1 Page 170 (index 1 in previousItems)
+        val currentFirstVisibleIndex = 1
+        val liveOffset = 320
+        val targetPageCh1 = ReaderUiItem.Page(ch1.pages!![170])
+
+        // When Chapter 1 becomes active, it expands to all 171 pages:
+        // Indices 0..170: Ch 1 Pages 0..170
+        // Index 171: Transition.Next
+        // Indices 172..330: Ch 2 Pages 0..158
+        val newItems = mutableListOf<ReaderUiItem>()
+        newItems.addAll(ch1.pages!!.map { ReaderUiItem.Page(it) })
+        newItems.add(transitionNext)
+        newItems.addAll(ch2.pages!!.map { ReaderUiItem.Page(it) })
+
+        val target =
+            WebtoonScrollAnchorResolver.resolveReanchorTarget(
+                items = newItems,
+                lastFirstVisibleItem = targetPageCh1,
+                lastFirstVisibleOffset = liveOffset,
+                lastActiveItem = targetPageCh1,
+                activeChapterId = 1L,
+                currentFirstVisibleIndex = currentFirstVisibleIndex,
+                previousItems = previousItems,
+            )
+
+        assertNotNull(target)
+        // Must resolve to Chapter 1 Page 170 at index 170 (NOT stay at index 1 which is Page 1!)
+        assertEquals(170, target!!.index)
+        // Must preserve the exact live scroll offset
+        assertEquals(liveOffset, target.offset)
+        assertEquals(1L, (target.item as ReaderUiItem.Page).page.chapter.chapter.id)
+        assertEquals(170, (target.item as ReaderUiItem.Page).page.index)
+    }
+
+    @Test
+    fun `resolveReanchorTarget preserves scroll on transition seam when backward chapter loads`() {
+        val ch1 = createChapter(1L, pageCount = 171)
+        val ch2 = createChapter(2L, pageCount = 159)
+
+        val transitionPrev = ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1))
+        val transitionNext = ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2))
+
+        // User was at Transition.Prev at index 2 in previousItems
+        val previousItems = mutableListOf<ReaderUiItem>()
+        previousItems.addAll(ch1.pages!!.takeLast(2).map { ReaderUiItem.Page(it) })
+        previousItems.add(transitionPrev)
+        previousItems.addAll(ch2.pages!!.map { ReaderUiItem.Page(it) })
+
+        val currentFirstVisibleIndex = 2
+        val liveOffset = 145
+
+        val newItems = mutableListOf<ReaderUiItem>()
+        newItems.addAll(ch1.pages!!.map { ReaderUiItem.Page(it) })
+        newItems.add(transitionNext)
+        newItems.addAll(ch2.pages!!.map { ReaderUiItem.Page(it) })
+
+        val target =
+            WebtoonScrollAnchorResolver.resolveReanchorTarget(
+                items = newItems,
+                lastFirstVisibleItem = transitionPrev,
+                lastFirstVisibleOffset = liveOffset,
+                lastActiveItem = transitionPrev,
+                activeChapterId = 1L,
+                currentFirstVisibleIndex = currentFirstVisibleIndex,
+                previousItems = previousItems,
+            )
+
+        assertNotNull(target)
+        // Transition is now at index 171 in newItems
+        assertEquals(171, target!!.index)
+        assertEquals(liveOffset, target.offset)
+        assertEquals(transitionNext, target.item)
+    }
+
+    @Test
+    fun `resolveReanchorTarget returns null when target index matches current index and item is equivalent`() {
+        val ch1 = createChapter(1L, pageCount = 20)
+        val items = ch1.pages!!.map { ReaderUiItem.Page(it) }
+
+        val target =
+            WebtoonScrollAnchorResolver.resolveReanchorTarget(
+                items = items,
+                lastFirstVisibleItem = items[7],
+                lastFirstVisibleOffset = 180,
+                lastActiveItem = items[7],
+                activeChapterId = 1L,
+                currentFirstVisibleIndex = 7,
+                previousItems = items,
+            )
+
+        assertNull(target)
+    }
+
+    @Test
+    fun `resolveReanchorTarget correctly anchors to Chapter 2 Page 0 when list is pruned and index is clamped to 158`() {
+        val ch1 = createChapter(1L, pageCount = 171)
+        val ch2 = createChapter(2L, pageCount = 159)
+
+        val transitionNext = ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2))
+        val transitionPrev = ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1))
+
+        // Before transition: Ch 1 (171 pages) + Transition.Next (171) + Ch 2 (172..330)
+        val previousItems = mutableListOf<ReaderUiItem>()
+        previousItems.addAll(ch1.pages!!.map { ReaderUiItem.Page(it) })
+        previousItems.add(transitionNext)
+        previousItems.addAll(ch2.pages!!.map { ReaderUiItem.Page(it) })
+
+        // User was at Chapter 2 Page 0 at index 172 in previousItems
+        val ch2Page0 = ReaderUiItem.Page(ch2.pages!![0])
+        val liveOffset = 75
+
+        // When Chapter 2 becomes active, items shrink to 162 items:
+        // Indices 0..1: Ch 1 Pages 169..170
+        // Index 2: Transition.Prev
+        // Indices 3..161: Ch 2 Pages 0..158
+        val newItems = mutableListOf<ReaderUiItem>()
+        newItems.addAll(ch1.pages!!.takeLast(2).map { ReaderUiItem.Page(it) })
+        newItems.add(transitionPrev)
+        newItems.addAll(ch2.pages!!.map { ReaderUiItem.Page(it) })
+
+        // LazyListState's firstVisibleItemIndex was clamped to 158 (end of pruned list)
+        val target =
+            WebtoonScrollAnchorResolver.resolveReanchorTarget(
+                items = newItems,
+                lastFirstVisibleItem = ch2Page0,
+                lastFirstVisibleOffset = liveOffset,
+                lastActiveItem = ch2Page0,
+                activeChapterId = 2L,
+                currentFirstVisibleIndex = 158,
+                previousItems = previousItems,
+            )
+
+        assertNotNull(target)
+        // Must resolve to Chapter 2 Page 0 at index 3 in newItems, NEVER staying clamped at index
+        // 158!
+        assertEquals(3, target!!.index)
+        assertEquals(liveOffset, target.offset)
+        assertEquals(2L, (target.item as ReaderUiItem.Page).page.chapter.chapter.id)
+        assertEquals(0, (target.item as ReaderUiItem.Page).page.index)
+    }
+
+    @Test
+    fun `resolveReanchorTarget handles out-of-bounds currentFirstVisibleIndex without crashing and anchors cleanly`() {
+        val ch1 = createChapter(1L, pageCount = 171)
+        val ch2 = createChapter(2L, pageCount = 159)
+
+        val transitionPrev = ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1))
+
+        val newItems = mutableListOf<ReaderUiItem>()
+        newItems.addAll(ch1.pages!!.takeLast(2).map { ReaderUiItem.Page(it) })
+        newItems.add(transitionPrev)
+        newItems.addAll(ch2.pages!!.map { ReaderUiItem.Page(it) })
+
+        val ch2Page0 = ReaderUiItem.Page(ch2.pages!![0])
+
+        // currentFirstVisibleIndex is 172 (before Compose clamped it), which is >
+        // newItems.lastIndex (161)
+        val target =
+            WebtoonScrollAnchorResolver.resolveReanchorTarget(
+                items = newItems,
+                lastFirstVisibleItem = ch2Page0,
+                lastFirstVisibleOffset = 110,
+                lastActiveItem = ch2Page0,
+                activeChapterId = 2L,
+                currentFirstVisibleIndex = 172,
+            )
+
+        assertNotNull(target)
+        assertEquals(3, target!!.index)
+        assertEquals(110, target.offset)
+        assertEquals(ch2Page0, target.item)
+    }
 }
