@@ -60,6 +60,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.ZoomableContentLocation
@@ -360,8 +361,9 @@ fun PagerPageItem(
                 mutableStateOf(false)
             }
 
+        val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
+
         if (extraPage == null) {
-            val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
             val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
             val imageState = rememberZoomableImageState(zoomableState)
 
@@ -390,23 +392,29 @@ fun PagerPageItem(
                         viewportHeightPx > 0f
                 ) {
                     @Suppress("DEPRECATION")
-                    val bounds = snapshotFlow {
-                        zoomableState.transformedContentBounds
-                    }.filter { !it.isEmpty }.first()
+                    val bounds =
+                        withTimeoutOrNull(2000L) {
+                            snapshotFlow { zoomableState.transformedContentBounds }
+                                .filter { !it.isEmpty }
+                                .first()
+                        }
 
-                    val isLandscape = bounds.width > bounds.height
-                    if (isLandscape && bounds.height < viewportHeightPx) {
-                        val targetScale = (viewportHeightPx / bounds.height).coerceIn(1f, 3f)
-                        if (targetScale > 1.05f) {
-                            val centroid =
-                                when (singlePageZoomType) {
-                                    PagerConfig.ZoomType.Right ->
-                                        Offset(viewportWidthPx, viewportHeightPx / 2f)
-                                    PagerConfig.ZoomType.Left -> Offset(0f, viewportHeightPx / 2f)
-                                    PagerConfig.ZoomType.Center ->
-                                        Offset(viewportWidthPx / 2f, viewportHeightPx / 2f)
-                                }
-                            zoomableState.zoomTo(zoomFactor = targetScale, centroid = centroid)
+                    if (bounds != null) {
+                        val isLandscape = bounds.width > bounds.height
+                        if (isLandscape && bounds.height < viewportHeightPx) {
+                            val targetScale = (viewportHeightPx / bounds.height).coerceIn(1f, 3f)
+                            if (targetScale > 1.05f) {
+                                val centroid =
+                                    when (singlePageZoomType) {
+                                        PagerConfig.ZoomType.Right ->
+                                            Offset(viewportWidthPx, viewportHeightPx / 2f)
+                                        PagerConfig.ZoomType.Left ->
+                                            Offset(0f, viewportHeightPx / 2f)
+                                        PagerConfig.ZoomType.Center ->
+                                            Offset(viewportWidthPx / 2f, viewportHeightPx / 2f)
+                                    }
+                                zoomableState.zoomTo(zoomFactor = targetScale, centroid = centroid)
+                            }
                         }
                     }
                     autoZoomApplied = true
@@ -434,7 +442,6 @@ fun PagerPageItem(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
             val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
             val (first, second) =
                 viewer.controller.getDoublePageOrder(
