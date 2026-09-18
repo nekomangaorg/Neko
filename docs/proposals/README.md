@@ -133,4 +133,5 @@ Large-scale external API and infrastructure migrations.
 
 | Proposal | Description | Target Milestone |
 | :--- | :--- | :--- |
+| [**Migrating Preference Flow Collections to Lifecycle-Aware `collectAsStateWithLifecycle()`**](migrations/migrate_preference_collect_as_state_with_lifecycle_proposal.md) | Migrates Composable preference observations from unconstrained `collectAsState()` to lifecycle-bounded `collectAsStateWithLifecycle()`. | Neko 3.x Lifecycle Modernization |
 | [**Migrating Primary Metadata & Search to MangaBaka**](migrations/mangabaka_migration_proposal.md) | Architectural migration of Neko's primary metadata, search, and browse provider to MangaBaka. | Neko 4.0 Platform Migration |
