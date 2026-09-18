@@ -25,8 +25,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +59,7 @@ import eu.kanade.tachiyomi.ui.reader.model.isSameChapter as modelIsSameChapter
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonActiveItemResolver
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.hypot
 import kotlinx.coroutines.channels.Channel
@@ -90,6 +95,18 @@ fun ComposeWebtoonViewer(
     val zoomState = rememberWebtoonZoomState()
     val coroutineScope = rememberCoroutineScope()
 
+    val currentItems by rememberUpdatedState(items)
+    val activeChapterId by rememberUpdatedState(config.activeChapterId)
+    val currentConfig by rememberUpdatedState(config)
+    val currentOnPageSelected by rememberUpdatedState(onPageSelected)
+    val currentOnTransitionSelected by rememberUpdatedState(onTransitionSelected)
+    val currentOnActiveItemChanged by rememberUpdatedState(onActiveItemChanged)
+
+    var lastFirstVisibleItem by remember { mutableStateOf(items.getOrNull(config.initialIndex)) }
+    var lastFirstVisibleOffset by remember { mutableIntStateOf(0) }
+    var lastActiveItem by remember { mutableStateOf(items.getOrNull(config.initialIndex)) }
+    var lastProcessedItems by remember { mutableStateOf(items) }
+
     // 1. Consume unidirectional programmatic navigation commands
     LaunchedEffect(navCommands) {
         navCommands.collect { cmd ->
@@ -100,8 +117,18 @@ fun ComposeWebtoonViewer(
                     } else {
                         lazyListState.scrollToItem(cmd.pageIndex)
                     }
+                    currentItems.getOrNull(cmd.pageIndex)?.let {
+                        lastFirstVisibleItem = it
+                        lastFirstVisibleOffset = 0
+                    }
                 }
-                is ReaderNavCommand.SnapToPage -> lazyListState.scrollToItem(cmd.pageIndex)
+                is ReaderNavCommand.SnapToPage -> {
+                    lazyListState.scrollToItem(cmd.pageIndex)
+                    currentItems.getOrNull(cmd.pageIndex)?.let {
+                        lastFirstVisibleItem = it
+                        lastFirstVisibleOffset = 0
+                    }
+                }
                 is ReaderNavCommand.ScrollByDelta -> {
                     val scrollAmount =
                         if (zoomState.scale > 0f) cmd.delta / zoomState.scale else cmd.delta
@@ -126,82 +153,131 @@ fun ComposeWebtoonViewer(
         }
     }
 
-    // 3. Resolve active item & dispatch page selections with stationary scroll guard
-    LaunchedEffect(lazyListState, items, config.activeChapterId) {
+    // 3. Maintain scroll anchor across item mutations, prepends, splits, and chapter transitions
+    LaunchedEffect(items) {
+        val target =
+            WebtoonScrollAnchorResolver.resolveReanchorTarget(
+                items = items,
+                lastFirstVisibleItem = lastFirstVisibleItem,
+                lastFirstVisibleOffset = lastFirstVisibleOffset,
+                lastActiveItem = lastActiveItem,
+                activeChapterId = activeChapterId,
+                currentFirstVisibleIndex = lazyListState.firstVisibleItemIndex,
+            )
+        try {
+            if (
+                target != null &&
+                    (target.index != lazyListState.firstVisibleItemIndex ||
+                        target.offset != lazyListState.firstVisibleItemScrollOffset)
+            ) {
+                lazyListState.scrollToItem(target.index, target.offset)
+                lastFirstVisibleItem = target.item
+                lastFirstVisibleOffset = target.offset
+            }
+        } finally {
+            lastProcessedItems = items
+        }
+    }
+
+    // 4. Resolve active item & dispatch page selections with stationary scroll guard and layout
+    // sync check
+    LaunchedEffect(lazyListState) {
         snapshotFlow {
+            if (currentItems !== lastProcessedItems) return@snapshotFlow null
             val layoutInfo = lazyListState.layoutInfo
-            if (layoutInfo.visibleItemsInfo.isEmpty()) return@snapshotFlow null
-            WebtoonActiveItemResolver.resolveActiveIndex(
-                visibleItems = layoutInfo.visibleItemsInfo,
-                currentItems = items,
-                activeChapterId = config.activeChapterId,
-                viewportStartOffset = layoutInfo.viewportStartOffset,
-                viewportEndOffset = layoutInfo.viewportEndOffset,
-                firstVisibleIndex = lazyListState.firstVisibleItemIndex,
-                firstVisibleScrollOffset = lazyListState.firstVisibleItemScrollOffset,
+            val visibleItems = layoutInfo.visibleItemsInfo
+            if (visibleItems.isEmpty()) return@snapshotFlow null
+            if (layoutInfo.totalItemsCount != currentItems.size) return@snapshotFlow null
+            val isOutOfSync = visibleItems.any { info ->
+                info.index !in currentItems.indices ||
+                    currentItems[info.index].key("webtoon") != info.key
+            }
+            if (isOutOfSync) return@snapshotFlow null
+
+            val activeIndex =
+                WebtoonActiveItemResolver.resolveActiveIndex(
+                    visibleItems = visibleItems,
+                    currentItems = currentItems,
+                    activeChapterId = activeChapterId,
+                    viewportStartOffset = layoutInfo.viewportStartOffset,
+                    viewportEndOffset = layoutInfo.viewportEndOffset,
+                    firstVisibleIndex = lazyListState.firstVisibleItemIndex,
+                    firstVisibleScrollOffset = lazyListState.firstVisibleItemScrollOffset,
+                )
+            val firstVisibleItem = currentItems.getOrNull(lazyListState.firstVisibleItemIndex)
+            val firstVisibleOffset = lazyListState.firstVisibleItemScrollOffset
+            Triple(
+                activeIndex,
+                currentItems.getOrNull(activeIndex),
+                firstVisibleItem to firstVisibleOffset,
             )
         }
             .filterNotNull()
-            .distinctUntilChanged()
-            .collect { activeIndex ->
-                onActiveItemChanged(activeIndex)
-                val activeItem = items.getOrNull(activeIndex) ?: return@collect
-                when (activeItem) {
-                    is ReaderUiItem.Page -> {
-                        if (
-                            activeItem.page.chapter.chapter.id == config.activeChapterId ||
-                                lazyListState.isScrollInProgress
-                        ) {
-                            onPageSelected(activeItem.page)
-                        }
-                        val pages = activeItem.page.chapter.pages
-                        if (
-                            pages != null &&
-                                activeItem.page.chapter.chapter.id == config.activeChapterId
-                        ) {
-                            val threshold = maxOf(5, config.preloadPageAmount)
-                            if (pages.size - activeItem.page.number < threshold) {
-                                val nextTransition =
-                                    items.firstOrNull {
-                                        it is ReaderUiItem.Transition &&
-                                            it.transition is ChapterTransition.Next
-                                    } as? ReaderUiItem.Transition
-                                nextTransition?.transition?.to?.let { nextChapter ->
-                                    config.onRequestPreloadChapter?.invoke(nextChapter)
+            .distinctUntilChanged { old, new ->
+                old.first == new.first &&
+                    old.third.first?.key("webtoon") == new.third.first?.key("webtoon") &&
+                    old.third.second == new.third.second
+            }
+            .collect { (activeIndex, item, firstVisiblePair) ->
+                val (firstVisibleItem, firstVisibleOffset) = firstVisiblePair
+                if (firstVisibleItem != null) {
+                    lastFirstVisibleItem = firstVisibleItem
+                    lastFirstVisibleOffset = firstVisibleOffset
+                }
+                if (item != null) {
+                    lastActiveItem = item
+                    currentOnActiveItemChanged(activeIndex)
+                    when (item) {
+                        is ReaderUiItem.Page -> {
+                            if (
+                                item.page.chapter.chapter.id == activeChapterId ||
+                                    lazyListState.isScrollInProgress
+                            ) {
+                                currentOnPageSelected(item.page)
+                            }
+                            val pages = item.page.chapter.pages
+                            if (pages != null && item.page.chapter.chapter.id == activeChapterId) {
+                                val threshold = maxOf(5, currentConfig.preloadPageAmount)
+                                if (pages.size - item.page.number < threshold) {
+                                    val nextTransition =
+                                        currentItems.firstOrNull {
+                                            it is ReaderUiItem.Transition &&
+                                                it.transition is ChapterTransition.Next
+                                        } as? ReaderUiItem.Transition
+                                    nextTransition?.transition?.to?.let { nextChapter ->
+                                        currentConfig.onRequestPreloadChapter?.invoke(nextChapter)
+                                    }
                                 }
                             }
                         }
-                    }
-                    is ReaderUiItem.SplitPage -> {
-                        if (
-                            activeItem.page.chapter.chapter.id == config.activeChapterId ||
-                                lazyListState.isScrollInProgress
-                        ) {
-                            onPageSelected(activeItem.page)
-                        }
-                        val pages = activeItem.page.chapter.pages
-                        if (
-                            pages != null &&
-                                activeItem.page.chapter.chapter.id == config.activeChapterId
-                        ) {
-                            val threshold = maxOf(5, config.preloadPageAmount)
-                            if (pages.size - activeItem.page.number < threshold) {
-                                val nextTransition =
-                                    items.firstOrNull {
-                                        it is ReaderUiItem.Transition &&
-                                            it.transition is ChapterTransition.Next
-                                    } as? ReaderUiItem.Transition
-                                nextTransition?.transition?.to?.let { nextChapter ->
-                                    config.onRequestPreloadChapter?.invoke(nextChapter)
+                        is ReaderUiItem.SplitPage -> {
+                            if (
+                                item.page.chapter.chapter.id == activeChapterId ||
+                                    lazyListState.isScrollInProgress
+                            ) {
+                                currentOnPageSelected(item.page)
+                            }
+                            val pages = item.page.chapter.pages
+                            if (pages != null && item.page.chapter.chapter.id == activeChapterId) {
+                                val threshold = maxOf(5, currentConfig.preloadPageAmount)
+                                if (pages.size - item.page.number < threshold) {
+                                    val nextTransition =
+                                        currentItems.firstOrNull {
+                                            it is ReaderUiItem.Transition &&
+                                                it.transition is ChapterTransition.Next
+                                        } as? ReaderUiItem.Transition
+                                    nextTransition?.transition?.to?.let { nextChapter ->
+                                        currentConfig.onRequestPreloadChapter?.invoke(nextChapter)
+                                    }
                                 }
                             }
                         }
-                    }
-                    is ReaderUiItem.Transition -> {
-                        onTransitionSelected(activeItem.transition)
-                        val toChapter = activeItem.transition.to
-                        if (toChapter != null) {
-                            config.onRequestPreloadChapter?.invoke(toChapter)
+                        is ReaderUiItem.Transition -> {
+                            currentOnTransitionSelected(item.transition)
+                            val toChapter = item.transition.to
+                            if (toChapter != null) {
+                                currentConfig.onRequestPreloadChapter?.invoke(toChapter)
+                            }
                         }
                     }
                 }
@@ -223,105 +299,68 @@ fun ComposeWebtoonViewer(
 
     val density = LocalDensity.current
     val overscrollThresholdPx = remember(density) { with(density) { (Size.huge * 2).toPx() } }
-    val nestedScrollConnection =
-        remember(items, config.onNavigateToChapter) {
-            object : NestedScrollConnection {
-                var pullDownOffset = 0f
-                var pullUpOffset = 0f
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            var pullOffset = 0f
 
-                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    if (pullDownOffset > 0 && available.y < 0) {
-                        val consumedY = available.y.coerceAtLeast(-pullDownOffset)
-                        pullDownOffset += consumedY
-                        return Offset(0f, consumedY)
-                    }
-                    if (pullUpOffset > 0 && available.y > 0) {
-                        val consumedY = available.y.coerceAtMost(pullUpOffset)
-                        pullUpOffset -= consumedY
-                        return Offset(0f, consumedY)
-                    }
-                    return Offset.Zero
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (pullOffset > 0 && available.y < 0) {
+                    val consumedY = available.y.coerceAtLeast(-pullOffset)
+                    pullOffset += consumedY
+                    return Offset(0f, consumedY)
                 }
+                return Offset.Zero
+            }
 
-                override fun onPostScroll(
-                    consumed: Offset,
-                    available: Offset,
-                    source: NestedScrollSource,
-                ): Offset {
-                    if (source == NestedScrollSource.UserInput) {
-                        // Top overscroll (pulling down at the top)
-                        if (
-                            available.y > 0 &&
-                                lazyListState.firstVisibleItemIndex == 0 &&
-                                lazyListState.firstVisibleItemScrollOffset == 0
-                        ) {
-                            pullDownOffset += available.y
-                            return Offset(0f, available.y)
-                        }
-                        // Bottom overscroll (pulling up at the bottom)
-                        val layoutInfo = lazyListState.layoutInfo
-                        val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                        if (
-                            available.y < 0 &&
-                                lastVisibleItem != null &&
-                                lastVisibleItem.index == items.lastIndex &&
-                                (lastVisibleItem.offset + lastVisibleItem.size) <=
-                                    layoutInfo.viewportEndOffset
-                        ) {
-                            pullUpOffset += -available.y
-                            return Offset(0f, available.y)
-                        }
-                    }
-                    return Offset.Zero
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (
+                    source == NestedScrollSource.UserInput &&
+                        available.y > 0 &&
+                        lazyListState.firstVisibleItemIndex == 0 &&
+                        lazyListState.firstVisibleItemScrollOffset == 0
+                ) {
+                    pullOffset += available.y
+                    return Offset(0f, available.y)
                 }
+                return Offset.Zero
+            }
 
-                override suspend fun onPreFling(available: Velocity): Velocity {
-                    val downOffset = pullDownOffset
-                    pullDownOffset = 0f
-                    if (downOffset > overscrollThresholdPx) {
-                        val prevChapter =
-                            (items.firstOrNull {
-                                    it is ReaderUiItem.Transition &&
-                                        it.transition is ChapterTransition.Prev
-                                } as? ReaderUiItem.Transition)
-                                ?.transition
-                                ?.to
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                val offset = pullOffset
+                pullOffset = 0f
+                if (offset > overscrollThresholdPx) {
+                    val prevChapter =
+                        (currentItems.firstOrNull {
+                                it is ReaderUiItem.Transition &&
+                                    it.transition is ChapterTransition.Prev
+                            } as? ReaderUiItem.Transition)
+                            ?.transition
+                            ?.to
+                            ?.chapter
+                            ?: (currentItems.firstOrNull() as? ReaderUiItem.Page)
+                                ?.page
                                 ?.chapter
-                                ?: (items.firstOrNull() as? ReaderUiItem.Page)
-                                    ?.page
-                                    ?.chapter
-                                    ?.chapter
-                        if (prevChapter != null) {
-                            config.onNavigateToChapter?.invoke(prevChapter, ChapterNavTarget.End)
-                            return available
-                        }
-                    }
-
-                    val upOffset = pullUpOffset
-                    pullUpOffset = 0f
-                    if (upOffset > overscrollThresholdPx) {
-                        val nextChapter =
-                            (items.firstOrNull {
-                                    it is ReaderUiItem.Transition &&
-                                        it.transition is ChapterTransition.Next
-                                } as? ReaderUiItem.Transition)
-                                ?.transition
-                                ?.to
                                 ?.chapter
-                                ?: (items.lastOrNull() as? ReaderUiItem.Page)
-                                    ?.page
-                                    ?.chapter
-                                    ?.chapter
-                        if (nextChapter != null) {
-                            config.onNavigateToChapter?.invoke(nextChapter, ChapterNavTarget.Start)
-                            return available
+                    if (prevChapter != null) {
+                        if (currentConfig.onNavigateToChapter != null) {
+                            currentConfig.onNavigateToChapter?.invoke(
+                                prevChapter,
+                                ChapterNavTarget.End,
+                            )
+                        } else {
+                            onNavigateAdjacent(false)
                         }
+                        return available
                     }
-
-                    return Velocity.Zero
                 }
+                return Velocity.Zero
             }
         }
+    }
 
     // 4. Declarative Render Tree
     BoxWithConstraints(

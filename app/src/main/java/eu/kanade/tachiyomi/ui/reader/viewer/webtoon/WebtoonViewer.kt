@@ -93,11 +93,13 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         super.destroy()
         preloadEngine.clear()
         scope.cancel()
+        pendingPageMove = null
         ReaderPageSplitFetcher.clearCache()
     }
 
     private var activeChapterId: Long? = null
     private var isInitialLoad = true
+    private var pendingPageMove: Pair<ReaderPage, Boolean>? = null
 
     /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
@@ -126,7 +128,13 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
             targetPage?.let { controller.findPageIndex(newItems, it) }?.takeIf { it != -1 } ?: 0
         preloadEngine.updateActiveIndex(initialActiveIndex, newItems, config.preloadPageAmount)
 
-        if (isInitialLoad) {
+        val pending = pendingPageMove
+        pendingPageMove = null
+        if (
+            pending != null && pending.first.chapter.chapter.id == chapters.currChapter.chapter.id
+        ) {
+            moveToPage(pending.first, pending.second)
+        } else if (isInitialLoad) {
             isInitialLoad = false
             if (requestedIndex != null && requestedIndex in pages.indices) {
                 moveToPage(pages[requestedIndex], false)
@@ -140,18 +148,21 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
     /** Tells this viewer to move to the given [page]. */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
-        TimberKt.d { "moveToPage" }
+        TimberKt.d { "moveToPage for page ${page.number} in chapter ${page.chapter.chapter.id}" }
         if (activeChapterId != null && page.chapter.chapter.id != activeChapterId) {
             TimberKt.d {
-                "Ignoring moveToPage for non-active chapter ${page.chapter.chapter.id} (active is $activeChapterId)"
+                "Queuing moveToPage for non-active chapter ${page.chapter.chapter.id} (active is $activeChapterId)"
             }
+            pendingPageMove = page to animated
             return
         }
         val position = controller.findPageIndex(items, page)
         if (position != -1) {
+            pendingPageMove = null
             requestedPagePosition = WebtoonPagePosition(position, animated)
         } else {
-            TimberKt.d { "Page $page not found in items" }
+            TimberKt.d { "Page $page not found in items, queuing" }
+            pendingPageMove = page to animated
         }
     }
 
