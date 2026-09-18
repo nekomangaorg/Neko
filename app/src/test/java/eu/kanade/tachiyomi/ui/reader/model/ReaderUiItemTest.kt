@@ -1,6 +1,10 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
+import coil3.request.Options
+import eu.kanade.tachiyomi.data.coil.ReaderPageKeyer
+import eu.kanade.tachiyomi.data.coil.ReaderPageSplitKeyer
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
@@ -112,5 +116,39 @@ class ReaderUiItemTest {
         assertEquals("webtoon_split_102992_0_0", item1.key("webtoon"))
         assertEquals("webtoon_split_102992_0_1000", item2.key("webtoon"))
         assertNotEquals(item1.key("webtoon"), item2.key("webtoon"))
+    }
+
+    @Test
+    fun `reader page keyer uses composite fallback when chapter id is null`() {
+        val chapter =
+            Chapter.create().apply {
+                id = null
+                url = "/chapter/test-url"
+                name = "Test Chapter"
+            }
+        val readerChapter = ReaderChapter(chapter)
+        val page = ReaderPage(index = 2, url = "url_2").apply { this.chapter = readerChapter }
+        val split = ReaderPageSplit(page = page, topOffset = 500, splitHeight = 1000)
+
+        val options = mockk<Options>(relaxed = true)
+        val pageKey = ReaderPageKeyer().key(page, options)
+        val splitKey = ReaderPageSplitKeyer().key(split, options)
+
+        val expectedHash = "/chapter/test-url".hashCode()
+        assertEquals("reader_page_${expectedHash}_2", pageKey)
+        assertEquals("reader_split_${expectedHash}_2_500", splitKey)
+    }
+
+    @Test
+    fun `reader page keyer uses chapter id when non-null`() {
+        val page = createReaderPage(chapterId = 12345L, index = 1)
+        val split = ReaderPageSplit(page = page, topOffset = 250, splitHeight = 1000)
+
+        val options = mockk<Options>(relaxed = true)
+        val pageKey = ReaderPageKeyer().key(page, options)
+        val splitKey = ReaderPageSplitKeyer().key(split, options)
+
+        assertEquals("reader_page_12345_1", pageKey)
+        assertEquals("reader_split_12345_1_250", splitKey)
     }
 }

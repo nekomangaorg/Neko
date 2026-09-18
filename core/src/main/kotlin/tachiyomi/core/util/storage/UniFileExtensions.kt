@@ -17,18 +17,21 @@ val UniFile.displayablePath: String
     get() = filePath ?: uri.toString()
 
 fun UniFile.toTempFile(context: Context): File {
-    val inputStream = context.contentResolver.openInputStream(uri)!!
-    val tempFile = File.createTempFile(nameWithoutExtension.orEmpty(), null)
+    val rawName = nameWithoutExtension.orEmpty()
+    val prefix = if (rawName.length < 3) rawName.padEnd(3, '_') else rawName
+    val tempFile = File.createTempFile(prefix, null, context.cacheDir)
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        FileUtils.copy(inputStream, tempFile.outputStream())
-    } else {
-        BufferedOutputStream(tempFile.outputStream()).use { tmpOut ->
-            inputStream.use { input ->
-                val buffer = ByteArray(8192)
-                var count: Int
-                while (input.read(buffer).also { count = it } > 0) {
-                    tmpOut.write(buffer, 0, count)
+    context.contentResolver.openInputStream(uri)!!.use { inputStream ->
+        tempFile.outputStream().use { outputStream ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                FileUtils.copy(inputStream, outputStream)
+            } else {
+                BufferedOutputStream(outputStream).use { tmpOut ->
+                    val buffer = ByteArray(8192)
+                    var count: Int
+                    while (inputStream.read(buffer).also { count = it } > 0) {
+                        tmpOut.write(buffer, 0, count)
+                    }
                 }
             }
         }

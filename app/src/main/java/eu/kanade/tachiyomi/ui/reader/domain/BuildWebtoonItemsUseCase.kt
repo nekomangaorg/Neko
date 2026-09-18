@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.reader.domain
 
-import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -46,7 +45,6 @@ class BuildWebtoonItemsUseCase(
                 newItems.addAll(
                     mapPagesToItems(
                         pages = prevPages.takeLast(2),
-                        screenHeight = screenHeight,
                         existingItems = existingItems,
                         tallSplitPages = tallSplitPages,
                     )
@@ -63,7 +61,6 @@ class BuildWebtoonItemsUseCase(
             newItems.addAll(
                 mapPagesToItems(
                     pages = currPages,
-                    screenHeight = screenHeight,
                     existingItems = existingItems,
                     tallSplitPages = tallSplitPages,
                 )
@@ -93,7 +90,6 @@ class BuildWebtoonItemsUseCase(
                 newItems.addAll(
                     mapPagesToItems(
                         pages = nextPages,
-                        screenHeight = screenHeight,
                         existingItems = existingItems,
                         tallSplitPages = tallSplitPages,
                     )
@@ -112,7 +108,6 @@ class BuildWebtoonItemsUseCase(
 
     private fun mapPagesToItems(
         pages: List<ReaderPage>,
-        screenHeight: Int,
         existingItems: List<ReaderUiItem>,
         tallSplitPages: MutableSet<ReaderPage>,
     ): List<ReaderUiItem> {
@@ -129,14 +124,6 @@ class BuildWebtoonItemsUseCase(
             if (precomputed != null && precomputed.isNotEmpty()) {
                 tallSplitPages.add(page)
                 return@flatMap precomputed.map { ReaderUiItem.SplitPage(it) }
-            }
-            if (screenHeight > 0 && page.status == Page.State.READY && page.stream != null) {
-                val splits = checkTallPage(page, screenHeight)
-                if (splits != null) {
-                    page.precomputedSplits = splits
-                    tallSplitPages.add(page)
-                    return@flatMap splits.map { ReaderUiItem.SplitPage(it) }
-                }
             }
             listOf(ReaderUiItem.Page(page))
         }

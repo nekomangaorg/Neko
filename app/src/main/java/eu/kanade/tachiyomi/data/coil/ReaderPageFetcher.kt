@@ -19,8 +19,6 @@ import coil3.request.Options
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
-import eu.kanade.tachiyomi.util.system.GLUtil
-import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -79,9 +77,20 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
     Fetcher {
 
     companion object {
+        private class CachedDecodedImage(
+            val bitmap: Bitmap,
+            val originalWidth: Int,
+            val originalHeight: Int,
+        )
+
         private val maxCacheSizeBytes =
             (Runtime.getRuntime().maxMemory() / 16)
                 .coerceIn(16L * 1024 * 1024, 64L * 1024 * 1024)
+                .toInt()
+
+        private val maxBitmapCacheSizeBytes =
+            (Runtime.getRuntime().maxMemory() / 8)
+                .coerceIn(32L * 1024 * 1024, 128L * 1024 * 1024)
                 .toInt()
 
         private val rawBytesCache =
@@ -89,11 +98,20 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 override fun sizeOf(key: String, value: ByteArray): Int = value.size
             }
 
+        private val fallbackBitmapCache =
+            object : LruCache<String, CachedDecodedImage>(maxBitmapCacheSizeBytes) {
+                override fun sizeOf(key: String, value: CachedDecodedImage): Int =
+                    value.bitmap.byteCount
+            }
+
         private val activeFetches = ConcurrentHashMap<String, Deferred<ByteArray>>()
+        private val activeDecodes = ConcurrentHashMap<String, Deferred<CachedDecodedImage?>>()
 
         fun clearCache() {
             rawBytesCache.evictAll()
+            fallbackBitmapCache.evictAll()
             activeFetches.clear()
+            activeDecodes.clear()
         }
     }
 
@@ -119,7 +137,8 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         val actualStream =
             streamFn ?: error("Page stream not available for page ${split.page.index}")
 
-        val cacheKey = "${split.page.chapter.chapter.id}_${split.page.index}"
+        val chapterKey = split.page.chapter.chapter.id ?: split.page.chapter.chapter.url.hashCode()
+        val cacheKey = "${chapterKey}_${split.page.index}"
         val imageBytes =
             rawBytesCache.get(cacheKey)
                 ?: run {
@@ -141,23 +160,27 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
 
         val bitmap =
             withContext(Dispatchers.IO) {
-                decodeRegion(imageBytes, split.topOffset, split.splitHeight)
+                decodeRegion(imageBytes, split.topOffset, split.splitHeight, cacheKey)
             }
-                ?: error(
-                    "Failed to decode webtoon slice for page ${split.page.index} at offset ${split.topOffset}"
-                )
 
-        ImageFetchResult(
-            image = bitmap.asImage(),
-            isSampled = false,
-            dataSource = DataSource.MEMORY,
-        )
+        if (bitmap != null) {
+            ImageFetchResult(
+                image = bitmap.asImage(),
+                isSampled = false,
+                dataSource = DataSource.MEMORY,
+            )
+        } else {
+            error(
+                "Failed to decode webtoon slice for page ${split.page.index} at offset ${split.topOffset}"
+            )
+        }
     }
 
-    private fun decodeRegion(
+    private suspend fun decodeRegion(
         imageBytes: ByteArray,
         top: Int,
         height: Int,
+        cacheKey: String,
     ): Bitmap? {
         val decoder =
             try {
@@ -167,39 +190,85 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                     @Suppress("DEPRECATION")
                     BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
                 }
-            } catch (e: IOException) {
-                TimberKt.e(e) {
-                    "Failed to create BitmapRegionDecoder for page ${split.page.index}, slice offset $top"
+            } catch (e: Exception) {
+                TimberKt.d(e) {
+                    "BitmapRegionDecoder not supported for page ${split.page.index}, slice offset $top, falling back to full decode"
                 }
-                return fallbackDecodeRegion(imageBytes, top, height)
-            } catch (e: IllegalArgumentException) {
-                TimberKt.e(e) {
-                    "Illegal arguments creating BitmapRegionDecoder for page ${split.page.index}, slice offset $top"
-                }
-                return fallbackDecodeRegion(imageBytes, top, height)
+                null
             }
 
-        return try {
-            val bottom = minOf(decoder.height, top + height)
-            if (top >= decoder.height || bottom <= top) {
-                null
-            } else {
-                val region = Rect(0, top, decoder.width, bottom)
-                decoder.decodeRegion(
-                    region,
-                    BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 },
-                )
+        if (decoder != null) {
+            try {
+                val bottom = minOf(decoder.height, top + height)
+                if (top < decoder.height && bottom > top) {
+                    val region = Rect(0, top, decoder.width, bottom)
+                    val sliceBitmap =
+                        decoder.decodeRegion(
+                            region,
+                            BitmapFactory.Options().apply {
+                                inPreferredConfig = Bitmap.Config.ARGB_8888
+                            },
+                        )
+                    if (sliceBitmap != null) {
+                        return sliceBitmap
+                    }
+                }
+            } catch (e: Exception) {
+                TimberKt.e(e) {
+                    "BitmapRegionDecoder failed during decodeRegion for page ${split.page.index}, slice offset $top"
+                }
+            } finally {
+                decoder.recycle()
             }
-        } finally {
-            decoder.recycle()
         }
+
+        return fallbackDecodeRegion(imageBytes, top, height, cacheKey)
     }
 
-    private fun fallbackDecodeRegion(
+    private suspend fun fallbackDecodeRegion(
         imageBytes: ByteArray,
         top: Int,
         height: Int,
-    ): Bitmap? {
+        cacheKey: String,
+    ): Bitmap? = coroutineScope {
+        val cached = fallbackBitmapCache.get(cacheKey)?.takeUnless { it.bitmap.isRecycled }
+        val decoded =
+            cached
+                ?: run {
+                    val deferred =
+                        activeDecodes.compute(cacheKey) { _, existing ->
+                            existing?.takeIf { it.isActive }
+                                ?: async(Dispatchers.IO) {
+                                    try {
+                                        performFullDecode(imageBytes, cacheKey)
+                                    } finally {
+                                        activeDecodes.remove(cacheKey)
+                                    }
+                                }
+                        }!!
+                    deferred.await()
+                }
+                ?: return@coroutineScope null
+
+        try {
+            val scale = decoded.bitmap.height.toFloat() / decoded.originalHeight.toFloat()
+            val scaledTop = (top * scale).toInt().coerceIn(0, decoded.bitmap.height - 1)
+            val scaledHeight = (height * scale).toInt().coerceAtLeast(1)
+            val cropHeight = minOf(scaledHeight, decoded.bitmap.height - scaledTop)
+            if (cropHeight <= 0) {
+                null
+            } else {
+                Bitmap.createBitmap(decoded.bitmap, 0, scaledTop, decoded.bitmap.width, cropHeight)
+            }
+        } catch (e: Exception) {
+            TimberKt.e(e) {
+                "Error cropping fallback slice for page ${split.page.index}, offset $top"
+            }
+            null
+        }
+    }
+
+    private fun performFullDecode(imageBytes: ByteArray, cacheKey: String): CachedDecodedImage? {
         val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, boundsOptions)
         val imageWidth = boundsOptions.outWidth
@@ -212,38 +281,72 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             return null
         }
 
-        // Avoid allocating massive uncompressed bitmaps in memory to prevent OutOfMemoryError
-        val estimatedMemoryBytes = imageWidth.toLong() * imageHeight.toLong() * 4L
-        val maxSafeMemoryBytes = 30L * 1024L * 1024L // 30 MB
-        if (estimatedMemoryBytes > maxSafeMemoryBytes || imageHeight > GLUtil.maxTextureSize) {
-            TimberKt.w {
-                "Skipping full bitmap fallback decode to avoid OutOfMemoryError: dimensions $imageWidth x $imageHeight ($estimatedMemoryBytes bytes), limit $maxSafeMemoryBytes bytes"
-            }
-            return null
+        val maxSafeMemoryBytes =
+            (Runtime.getRuntime().maxMemory() / 4).coerceIn(
+                64L * 1024 * 1024,
+                256L * 1024 * 1024,
+            )
+
+        var sampleSize = 1
+        var testWidth = imageWidth
+        var testHeight = imageHeight
+        while (testWidth.toLong() * testHeight.toLong() * 4L > maxSafeMemoryBytes) {
+            sampleSize *= 2
+            testWidth /= 2
+            testHeight /= 2
         }
 
+        val decodeOptions =
+            BitmapFactory.Options().apply {
+                inSampleSize = sampleSize
+                inPreferredConfig = Bitmap.Config.ARGB_8888
+            }
+
         return try {
-            val fullBitmap =
-                BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return null
-            val cropHeight = minOf(height, fullBitmap.height - top)
-            if (cropHeight <= 0 || top >= fullBitmap.height) {
-                fullBitmap
-            } else {
-                val cropped = Bitmap.createBitmap(fullBitmap, 0, top, fullBitmap.width, cropHeight)
-                if (cropped != fullBitmap) {
-                    fullBitmap.recycle()
+            val full =
+                BitmapFactory.decodeByteArray(
+                    imageBytes,
+                    0,
+                    imageBytes.size,
+                    decodeOptions,
+                )
+            if (full != null) {
+                CachedDecodedImage(full, imageWidth, imageHeight).also {
+                    fallbackBitmapCache.put(cacheKey, it)
                 }
-                cropped
+            } else {
+                null
             }
         } catch (e: OutOfMemoryError) {
-            TimberKt.e(e) {
-                "OutOfMemoryError during fallback decode for page ${split.page.index}, slice offset $top"
+            TimberKt.e(e) { "OutOfMemoryError during fallback decode for page ${split.page.index}" }
+            try {
+                val fallbackOptions =
+                    BitmapFactory.Options().apply {
+                        inSampleSize = (sampleSize * 2).coerceAtLeast(2)
+                        inPreferredConfig = Bitmap.Config.RGB_565
+                    }
+                val full =
+                    BitmapFactory.decodeByteArray(
+                        imageBytes,
+                        0,
+                        imageBytes.size,
+                        fallbackOptions,
+                    )
+                if (full != null) {
+                    CachedDecodedImage(full, imageWidth, imageHeight).also {
+                        fallbackBitmapCache.put(cacheKey, it)
+                    }
+                } else {
+                    null
+                }
+            } catch (e2: Throwable) {
+                TimberKt.e(e2) {
+                    "Secondary OOM during fallback decode for page ${split.page.index}"
+                }
+                null
             }
-            null
         } catch (e: Exception) {
-            TimberKt.e(e) {
-                "Unexpected error during fallback decode for page ${split.page.index}, slice offset $top"
-            }
+            TimberKt.e(e) { "Unexpected error during fallback decode for page ${split.page.index}" }
             null
         }
     }
@@ -261,12 +364,14 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
 
 class ReaderPageKeyer : Keyer<ReaderPage> {
     override fun key(data: ReaderPage, options: Options): String {
-        return "reader_page_${data.chapter.chapter.id}_${data.index}"
+        val chapterKey = data.chapter.chapter.id ?: data.chapter.chapter.url.hashCode()
+        return "reader_page_${chapterKey}_${data.index}"
     }
 }
 
 class ReaderPageSplitKeyer : Keyer<ReaderPageSplit> {
     override fun key(data: ReaderPageSplit, options: Options): String {
-        return "reader_split_${data.page.chapter.chapter.id}_${data.page.index}_${data.topOffset}"
+        val chapterKey = data.page.chapter.chapter.id ?: data.page.chapter.chapter.url.hashCode()
+        return "reader_split_${chapterKey}_${data.page.index}_${data.topOffset}"
     }
 }

@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import kotlin.math.min
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.nekomanga.logging.TimberKt
 
 /**
@@ -100,6 +101,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     private var activeChapterId: Long? = null
     private var isInitialLoad = true
     private var pendingPageMove: Pair<ReaderPage, Boolean>? = null
+    private var lastActiveIndex = 0
 
     /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
@@ -130,7 +132,12 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
             if (requestedIndex != null && requestedIndex in pages.indices) pages[requestedIndex]
             else pages?.firstOrNull()
         val initialActiveIndex =
-            targetPage?.let { controller.findPageIndex(newItems, it) }?.takeIf { it != -1 } ?: 0
+            if (!chapterChanged && lastActiveIndex in newItems.indices) {
+                lastActiveIndex
+            } else {
+                targetPage?.let { controller.findPageIndex(newItems, it) }?.takeIf { it != -1 } ?: 0
+            }
+        lastActiveIndex = initialActiveIndex
         preloadEngine.updateActiveIndex(initialActiveIndex, newItems, config.preloadPageAmount)
 
         val pending = pendingPageMove
@@ -148,6 +155,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     }
 
     fun updateActiveIndex(activeIndex: Int) {
+        lastActiveIndex = activeIndex
         preloadEngine.updateActiveIndex(activeIndex, items, config.preloadPageAmount)
     }
 
@@ -173,8 +181,12 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
     /** Notifies the viewer that a tall page was split into [insertPages]. */
     fun splitPage(originalPage: ReaderPage, insertPages: List<ReaderPageSplit>) {
-        items = controller.splitPage(items, originalPage, insertPages)
-        activity.updateWebtoonViewerItems()
+        scope.launch {
+            val newItems = controller.splitPage(items, originalPage, insertPages)
+            items = newItems
+            activity.updateWebtoonViewerItems()
+            preloadEngine.updateActiveIndex(lastActiveIndex, newItems, config.preloadPageAmount)
+        }
     }
 
     /** Scrolls up by [scrollDistance]. */

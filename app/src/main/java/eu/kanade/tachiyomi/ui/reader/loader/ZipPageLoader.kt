@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets
 import java.util.zip.ZipFile
 
 /** Loader used to load a chapter from a .zip or .cbz file. */
-class ZipPageLoader(file: File) : PageLoader() {
+class ZipPageLoader(private val file: File) : PageLoader() {
 
     /** The zip file to load pages from. */
     private val zip = ZipFile(file, StandardCharsets.ISO_8859_1)
@@ -17,7 +17,11 @@ class ZipPageLoader(file: File) : PageLoader() {
     /** Recycles this loader and the open zip. */
     override fun recycle() {
         super.recycle()
-        zip.close()
+        try {
+            zip.close()
+        } finally {
+            file.delete()
+        }
     }
 
     /** Returns the pages found on this zip archive ordered with a natural comparator. */

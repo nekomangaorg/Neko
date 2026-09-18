@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -25,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.maxBitmapSize
@@ -36,6 +38,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlin.math.hypot
 import kotlinx.coroutines.withTimeout
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.theme.Size
 
 /** Strongly typed target for webtoon rendering to avoid untyped Any? smuggling. */
@@ -112,13 +115,19 @@ private fun WebtoonPageContent(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val isError = pageStatus == Page.State.ERROR
+    var loadError by remember(target) { mutableStateOf(false) }
+    var retryCount by remember(target) { mutableStateOf(0) }
+    val isError = pageStatus == Page.State.ERROR || loadError
     var intrinsicRatio by remember(target) { mutableFloatStateOf(initialRatio) }
 
-    val onRetry: () -> Unit = { page.chapter.pageLoader?.retryPage(page) }
+    val onRetry: () -> Unit = {
+        loadError = false
+        retryCount++
+        page.chapter.pageLoader?.retryPage(page)
+    }
 
     val model =
-        remember(target) {
+        remember(target, retryCount) {
             val modelData =
                 when (target) {
                     is WebtoonImageTarget.Page -> target.page
@@ -131,6 +140,11 @@ private fun WebtoonPageContent(
                 .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
                 .precision(Precision.EXACT)
                 .crossfade(true)
+                .apply {
+                    if (retryCount > 0) {
+                        memoryCachePolicy(CachePolicy.WRITE_ONLY)
+                    }
+                }
                 .build()
         }
 
@@ -198,12 +212,19 @@ private fun WebtoonPageContent(
                         if (intrinsicRatio > 0f) Modifier.aspectRatio(intrinsicRatio) else Modifier
                     ),
             onSuccess = { state ->
+                loadError = false
                 val img = state.result.image
                 if (img.width > 0 && img.height > 0) {
                     val ratio = img.width.toFloat() / img.height.toFloat()
                     intrinsicRatio = ratio
                     onRatioCalculated(ratio, img.height)
                 }
+            },
+            onError = { state ->
+                TimberKt.e(state.result.throwable) {
+                    "Failed to load webtoon image for page ${page.number}"
+                }
+                loadError = true
             },
         )
 
