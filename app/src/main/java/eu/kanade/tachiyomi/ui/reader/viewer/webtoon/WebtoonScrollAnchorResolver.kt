@@ -49,17 +49,64 @@ object WebtoonScrollAnchorResolver {
         // sub-pixel position.
         if (firstItem is ReaderUiItem.Page) {
             val pageOffset = lastFirstVisibleOffset
-            val matchingSliceIndex = items.indexOfFirst {
-                it is ReaderUiItem.SplitPage &&
-                    isSameChapter(it.page.chapter, firstItem.page.chapter) &&
-                    it.page.index == firstItem.page.index &&
-                    pageOffset in
-                        it.split.topOffset until (it.split.topOffset + it.split.splitHeight)
+            val matchingSliceIndices = items.mapIndexedNotNull { index, item ->
+                if (
+                    item is ReaderUiItem.SplitPage &&
+                        isSameChapter(item.page.chapter, firstItem.page.chapter) &&
+                        item.page.index == firstItem.page.index
+                ) {
+                    index to item
+                } else {
+                    null
+                }
             }
-            if (matchingSliceIndex != -1) {
-                val slice = (items[matchingSliceIndex] as ReaderUiItem.SplitPage).split
-                val sliceOffset = (pageOffset - slice.topOffset).coerceAtLeast(0)
-                return AnchorTarget(matchingSliceIndex, sliceOffset, items[matchingSliceIndex])
+            if (matchingSliceIndices.isNotEmpty()) {
+                val totalDisplayedHeight = matchingSliceIndices.sumOf {
+                    it.second.split.displayedHeight
+                }
+                if (totalDisplayedHeight > 0) {
+                    var currentScreenTop = 0
+                    for ((index, item) in matchingSliceIndices) {
+                        val sliceScreenHeight = item.split.displayedHeight
+                        if (
+                            pageOffset in
+                                currentScreenTop until (currentScreenTop + sliceScreenHeight)
+                        ) {
+                            val sliceOffset = (pageOffset - currentScreenTop).coerceAtLeast(0)
+                            return AnchorTarget(index, sliceOffset, item)
+                        }
+                        currentScreenTop += sliceScreenHeight
+                    }
+                    val (lastIndex, lastItem) = matchingSliceIndices.last()
+                    val lastSliceStart = totalDisplayedHeight - lastItem.split.displayedHeight
+                    return AnchorTarget(
+                        lastIndex,
+                        (pageOffset - lastSliceStart).coerceAtLeast(0),
+                        lastItem,
+                    )
+                } else {
+                    val totalBitmapHeight = matchingSliceIndices.maxOf {
+                        it.second.split.topOffset + it.second.split.splitHeight
+                    }
+                    val totalHeight =
+                        if (firstItem.page.renderedHeight > 0) firstItem.page.renderedHeight
+                        else totalBitmapHeight
+                    if (totalHeight > 0 && totalBitmapHeight > 0) {
+                        val scale = totalBitmapHeight.toDouble() / totalHeight.toDouble()
+                        val bitmapOffset = (pageOffset * scale).toInt()
+                        val matching =
+                            matchingSliceIndices.firstOrNull { (_, item) ->
+                                bitmapOffset in
+                                    item.split.topOffset until
+                                        (item.split.topOffset + item.split.splitHeight)
+                            } ?: matchingSliceIndices.last()
+
+                        val sliceOffsetBitmap =
+                            (bitmapOffset - matching.second.split.topOffset).coerceAtLeast(0)
+                        val sliceOffsetScreen = (sliceOffsetBitmap / scale).toInt()
+                        return AnchorTarget(matching.first, sliceOffsetScreen, matching.second)
+                    }
+                }
             }
         }
 
@@ -71,7 +118,16 @@ object WebtoonScrollAnchorResolver {
                     it.page.index == firstItem.page.index
             }
             if (pageIndex != -1) {
-                val targetOffset = firstItem.split.topOffset + lastFirstVisibleOffset
+                val targetOffset =
+                    if (firstItem.split.displayedHeight > 0 && firstItem.split.splitHeight > 0) {
+                        val scale =
+                            firstItem.split.displayedHeight.toDouble() /
+                                firstItem.split.splitHeight.toDouble()
+                        val sliceScreenTop = (firstItem.split.topOffset * scale).toInt()
+                        sliceScreenTop + lastFirstVisibleOffset
+                    } else {
+                        firstItem.split.topOffset + lastFirstVisibleOffset
+                    }
                 return AnchorTarget(pageIndex, targetOffset, items[pageIndex])
             }
         }

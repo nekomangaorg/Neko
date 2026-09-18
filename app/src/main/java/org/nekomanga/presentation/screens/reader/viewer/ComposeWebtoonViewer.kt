@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -42,6 +41,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
@@ -70,7 +70,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.presentation.extensions.collectAsState
+import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle
 import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -368,7 +368,6 @@ fun ComposeWebtoonViewer(
         modifier = modifier.fillMaxSize().background(config.backgroundColor).clipToBounds(),
     ) {
         val horizontalPadding = maxWidth * config.sidePaddingPercent
-        val columnHeight = if (zoomState.scale < 1f) maxHeight / zoomState.scale else maxHeight
 
         LazyColumn(
             state = lazyListState,
@@ -376,18 +375,28 @@ fun ComposeWebtoonViewer(
             verticalArrangement =
                 Arrangement.spacedBy(if (config.hasGaps) Size.medium else Size.none),
             modifier =
-                (if (zoomState.scale < 1f) {
-                        Modifier.fillMaxWidth().requiredHeight(columnHeight)
-                    } else {
-                        Modifier.fillMaxSize()
-                    })
+                Modifier.fillMaxWidth()
+                    .layout { measurable, constraints ->
+                        val scale = zoomState.scale
+                        val targetHeight =
+                            if (scale in 0.01f..0.999f) {
+                                (constraints.maxHeight / scale).toInt()
+                            } else {
+                                constraints.maxHeight
+                            }
+                        val placeable =
+                            measurable.measure(
+                                constraints.copy(minHeight = targetHeight, maxHeight = targetHeight)
+                            )
+                        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                    }
                     .nestedScroll(nestedScrollConnection)
                     .webtoonZoomable(
                         state = zoomState,
                         enableZoomOut = config.enableZoomOut,
                         coroutineScope = coroutineScope,
                     )
-                    .pointerInput(config.navigator) {
+                    .pointerInput(currentConfig.navigator) {
                         var lastTapTime = 0L
                         var lastTapOffset = Offset.Zero
 
@@ -432,7 +441,7 @@ fun ComposeWebtoonViewer(
                                     if (screenWidth > 0 && screenHeight > 0) {
                                         val pos =
                                             PointF(upPos.x / screenWidth, upPos.y / screenHeight)
-                                        val action = config.navigator.getAction(pos)
+                                        val action = currentConfig.navigator.getAction(pos)
 
                                         val isDoubleTap =
                                             (upTime - lastTapTime < doubleTapTimeoutMs) &&
@@ -440,17 +449,19 @@ fun ComposeWebtoonViewer(
                                                     (upPos.x - lastTapOffset.x).toDouble(),
                                                     (upPos.y - lastTapOffset.y).toDouble(),
                                                 ) < doubleTapSlopPx) &&
-                                                (config.doubleTapAnimDuration > 0)
+                                                (currentConfig.doubleTapAnimDuration > 0)
 
                                         if (isDoubleTap) {
-                                            if (config.menuVisible) config.onToggleMenu()
+                                            if (currentConfig.menuVisible)
+                                                currentConfig.onToggleMenu()
                                             lastTapTime = 0L
                                             lastTapOffset = Offset.Zero
                                             coroutineScope.launch {
                                                 zoomState.toggleDoubleTapZoom(
                                                     tapPos = upPos,
                                                     viewportWidth = size.width.toFloat(),
-                                                    animDuration = config.doubleTapAnimDuration,
+                                                    animDuration =
+                                                        currentConfig.doubleTapAnimDuration,
                                                 )
                                             }
                                         } else {
@@ -458,7 +469,7 @@ fun ComposeWebtoonViewer(
                                             lastTapOffset = upPos
                                             when (action) {
                                                 ViewerNavigation.NavigationRegion.MENU ->
-                                                    config.onToggleMenu()
+                                                    currentConfig.onToggleMenu()
                                                 ViewerNavigation.NavigationRegion.NEXT,
                                                 ViewerNavigation.NavigationRegion.RIGHT ->
                                                     onNavigateAdjacent(true)
@@ -468,7 +479,7 @@ fun ComposeWebtoonViewer(
                                             }
                                         }
                                     } else {
-                                        config.onToggleMenu()
+                                        currentConfig.onToggleMenu()
                                     }
                                 }
                             }
@@ -515,7 +526,7 @@ fun ComposeWebtoonViewer(
                             },
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .defaultMinSize(minHeight = columnHeight / 2)
+                                    .defaultMinSize(minHeight = maxHeight / 2)
                                     .padding(
                                         top =
                                             if (
@@ -599,12 +610,13 @@ fun ComposeWebtoonViewer(
         )
 
     val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-    val readerTheme by readerPreferences.readerTheme().collectAsState()
-    val webtoonSidePadding by readerPreferences.webtoonSidePadding().collectAsState()
-    val animatedTransitions by readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
-    val disableGaps by readerPreferences.webtoonDisableGaps().collectAsState()
-    val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsState()
-    val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsState()
+    val readerTheme by readerPreferences.readerTheme().collectAsStateWithLifecycle()
+    val webtoonSidePadding by readerPreferences.webtoonSidePadding().collectAsStateWithLifecycle()
+    val animatedTransitions by
+        readerPreferences.animatedPageTransitionsWebtoon().collectAsStateWithLifecycle()
+    val disableGaps by readerPreferences.webtoonDisableGaps().collectAsStateWithLifecycle()
+    val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsStateWithLifecycle()
+    val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsStateWithLifecycle()
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
         remember(readerTheme, themeBackground) {

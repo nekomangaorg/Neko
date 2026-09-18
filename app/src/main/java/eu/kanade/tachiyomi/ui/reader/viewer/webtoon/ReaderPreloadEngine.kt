@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.content.Context
+import android.os.Build
+import android.view.WindowManager
 import coil3.imageLoader
 import coil3.request.Disposable
 import coil3.request.ImageRequest
@@ -20,6 +22,7 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -34,7 +37,15 @@ class ReaderPreloadEngine(
     private val checkTallPage: CheckTallPageUseCase = CheckTallPageUseCase(),
     private val onPageSplit: ((ReaderPage, List<ReaderPageSplit>) -> Unit)? = null,
     private val isSplitTallPagesEnabled: () -> Boolean = { false },
-    private val getScreenHeight: () -> Int = { context.resources.displayMetrics.heightPixels },
+    private val getScreenHeight: () -> Int = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
+            windowManager?.currentWindowMetrics?.bounds?.height()
+                ?: context.resources.displayMetrics.heightPixels
+        } else {
+            @Suppress("DEPRECATION") context.resources.displayMetrics.heightPixels
+        }
+    },
 ) {
     private val preloadedDisk = Collections.synchronizedSet(mutableSetOf<String>())
     private val preloadedMemory = Collections.synchronizedSet(mutableSetOf<String>())
@@ -53,20 +64,22 @@ class ReaderPreloadEngine(
                 val windowEnd = (activeIndex + preloadAmount).coerceAtMost(items.lastIndex)
                 val memoryEnd = (activeIndex + 2).coerceAtMost(items.lastIndex)
 
-                for (i in windowStart..windowEnd) {
-                    val item = items.getOrNull(i) ?: continue
-                    preloadItem(item, preloadMemory = i in activeIndex..memoryEnd)
+                coroutineScope {
+                    for (i in windowStart..windowEnd) {
+                        val item = items.getOrNull(i) ?: continue
+                        preloadItem(this, item, preloadMemory = i in activeIndex..memoryEnd)
+                    }
                 }
             }
     }
 
-    private fun preloadItem(item: ReaderUiItem, preloadMemory: Boolean) {
+    private fun preloadItem(itemScope: CoroutineScope, item: ReaderUiItem, preloadMemory: Boolean) {
         val key = item.key("webtoon")
         // 1. Disk Preload
         if (preloadedDisk.add(key)) {
             when (item) {
                 is ReaderUiItem.Page -> {
-                    scope.launch(Dispatchers.IO) {
+                    itemScope.launch(Dispatchers.IO) {
                         try {
                             item.page.chapter.pageLoader?.loadPage(item.page)
                         } catch (e: Exception) {
@@ -76,11 +89,11 @@ class ReaderPreloadEngine(
                         }
                     }
                     if (isSplitTallPagesEnabled()) {
-                        checkAndSplitTallPage(item.page, preloadMemory)
+                        checkAndSplitTallPage(itemScope, item.page, preloadMemory)
                     }
                 }
                 is ReaderUiItem.SplitPage -> {
-                    scope.launch(Dispatchers.IO) {
+                    itemScope.launch(Dispatchers.IO) {
                         try {
                             item.page.chapter.pageLoader?.loadPage(item.page)
                         } catch (e: Exception) {
@@ -110,9 +123,13 @@ class ReaderPreloadEngine(
         }
     }
 
-    private fun checkAndSplitTallPage(page: ReaderPage, preloadMemory: Boolean) {
+    private fun checkAndSplitTallPage(
+        itemScope: CoroutineScope,
+        page: ReaderPage,
+        preloadMemory: Boolean,
+    ) {
         if (!checkedTallPages.add(page)) return
-        scope.launch(Dispatchers.IO) {
+        itemScope.launch(Dispatchers.IO) {
             try {
                 page.statusFlow.first { it == Page.State.READY }
                 val screenHeight = getScreenHeight()
@@ -135,7 +152,11 @@ class ReaderPreloadEngine(
                         warmMemoryCache(key, page)
                     }
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                if (e is CancellationException) {
+                    checkedTallPages.remove(page)
+                }
+            }
         }
     }
 

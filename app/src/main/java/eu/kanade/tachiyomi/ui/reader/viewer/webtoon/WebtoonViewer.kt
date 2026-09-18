@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
+import android.os.Build
 import android.view.KeyEvent
 import android.view.MotionEvent
 import androidx.compose.runtime.getValue
@@ -76,7 +77,6 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
             scope = scope,
             onPageSplit = { originalPage, insertPages -> splitPage(originalPage, insertPages) },
             isSplitTallPagesEnabled = { config.splitTallPages },
-            getScreenHeight = { activity.resources.displayMetrics.heightPixels },
         )
 
     init {
@@ -105,7 +105,12 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     override fun setChapters(chapters: ViewerChapters) {
         TimberKt.d { "setChapters" }
         val forceTransition = config.alwaysShowChapterTransition
-        val screenHeight = activity.resources.displayMetrics.heightPixels
+        val screenHeight =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                activity.windowManager.currentWindowMetrics.bounds.height()
+            } else {
+                @Suppress("DEPRECATION") activity.resources.displayMetrics.heightPixels
+            }
         val newItems =
             controller.buildItems(
                 chapters = chapters,
