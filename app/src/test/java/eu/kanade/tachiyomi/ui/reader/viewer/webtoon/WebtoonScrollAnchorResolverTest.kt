@@ -93,7 +93,7 @@ class WebtoonScrollAnchorResolverTest {
     @Test
     fun `resolveReanchorTarget calculates exact split slice and sub-pixel offset when tall page is split`() {
         val ch1 = createChapter(1L, pageCount = 3)
-        val originalPage = ch1.pages!![1]
+        val originalPage = ch1.pages!![1].apply { this.renderedHeight = 2000 }
         val monolithicItem = ReaderUiItem.Page(originalPage)
 
         // Monolithic page was at scroll offset 1250 inside it

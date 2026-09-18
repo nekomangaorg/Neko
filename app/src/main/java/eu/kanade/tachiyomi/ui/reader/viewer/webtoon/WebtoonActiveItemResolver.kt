@@ -179,9 +179,12 @@ object WebtoonActiveItemResolver {
         val isScrolledToBottom =
             lastVisibleItemIndex == currentItems.lastIndex &&
                 lastVisibleItemBottom <= viewportEndOffset
+        val isViewingPostChapterContent =
+            lastVisibleItemIndex > lastCurrentItemIndex ||
+                currentItems.getOrNull(lastVisibleItemIndex) is ReaderUiItem.Transition
 
-        if (hasCurrentChapterItems && isScrolledToBottom && closestNonPrecedingIndex != -1) {
-            return closestNonPrecedingIndex
+        if (hasCurrentChapterItems && isScrolledToBottom && isViewingPostChapterContent) {
+            return lastVisibleItemIndex
         }
 
         // Scenario 2: Item spanning middle is valid

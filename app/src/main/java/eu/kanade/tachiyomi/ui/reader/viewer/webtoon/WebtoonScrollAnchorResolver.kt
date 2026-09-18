@@ -39,6 +39,7 @@ object WebtoonScrollAnchorResolver {
         if (
             currentFirstVisibleItem != null &&
                 previousFirstItem != null &&
+                currentFirstVisibleItem::class == previousFirstItem::class &&
                 currentFirstVisibleItem.isEquivalentTo(previousFirstItem)
         ) {
             return null
@@ -175,8 +176,9 @@ object WebtoonScrollAnchorResolver {
         val anchorItem = firstItem ?: activeItem
         if (targetIndex == -1 && anchorItem is ReaderUiItem.Transition) {
             val trans = anchorItem.transition
-            if (trans is ChapterTransition.Next && trans.to != null) {
-                val toChapterId = trans.to.chapter.id
+            val toChapter = trans.to
+            if (trans is ChapterTransition.Next && toChapter != null) {
+                val toChapterId = toChapter.chapter.id
                 val nextChapterFirstPageIndex = items.indexOfFirst {
                     (it as? ReaderUiItem.Page)?.page?.chapter?.chapter?.id == toChapterId ||
                         (it as? ReaderUiItem.SplitPage)?.page?.chapter?.chapter?.id == toChapterId
@@ -214,8 +216,9 @@ object WebtoonScrollAnchorResolver {
             if (targetItem != null) {
                 if (
                     targetIndex == currentFirstVisibleIndex &&
-                        currentFirstVisibleItem != null &&
-                        currentFirstVisibleItem.isEquivalentTo(targetItem)
+                        previousFirstItem != null &&
+                        targetItem::class == previousFirstItem::class &&
+                        targetItem.isEquivalentTo(previousFirstItem)
                 ) {
                     return null
                 }
