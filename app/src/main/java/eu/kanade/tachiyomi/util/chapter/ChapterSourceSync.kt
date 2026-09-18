@@ -411,10 +411,14 @@ data class ChapterSyncResult(
 
 /**
  * Removed chapters worth telling the user about: gone from the source, not a local file or a merged
- * chapter, and not a duplicate row of a chapter the source still lists.
+ * chapter, not a duplicate row of a chapter the source still lists, and not already flagged
+ * unavailable (those were reported when the flag was set; they drop out of the feed once the
+ * include unavailable setting is turned off).
  */
 internal fun goneFromSource(removed: List<Chapter>, sourceUrls: Set<String>): List<Chapter> {
-    return removed.filter { !it.isLocalSource() && !it.isMergedChapter() && it.url !in sourceUrls }
+    return removed.filter {
+        !it.isLocalSource() && !it.isMergedChapter() && !it.isUnavailable && it.url !in sourceUrls
+    }
 }
 
 /** True when the chapter is available in the db but the source now reports it unavailable. */

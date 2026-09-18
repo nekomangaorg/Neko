@@ -61,6 +61,17 @@ class ChapterSyncUnavailableTest {
     }
 
     @Test
+    fun `chapter already flagged unavailable is not reported when it drops out of the feed`() {
+        val flagged =
+            Chapter.create().apply {
+                url = "/chapter/flagged"
+                isUnavailable = true
+            }
+
+        assertEquals(emptyList<Chapter>(), goneFromSource(listOf(flagged), emptySet()))
+    }
+
+    @Test
     fun `local and merged chapters are not reported`() {
         val local =
             Chapter.create().apply {
