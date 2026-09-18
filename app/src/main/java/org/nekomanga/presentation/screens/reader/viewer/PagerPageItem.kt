@@ -7,14 +7,19 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -29,7 +34,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -49,8 +57,13 @@ import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import kotlin.math.hypot
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
@@ -74,6 +87,7 @@ fun PagerPageItem(
     val doublePageGap by readerPreferences.doublePageGap().collectAsState()
     val invertDoublePages by readerPreferences.invertDoublePages().collectAsState()
     val readerThemePref by readerPreferences.readerTheme().collectAsState()
+    val landscapeZoom by readerPreferences.landscapeZoom().collectAsState()
 
     val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
     val touchSlopPx = remember(viewConfiguration) { viewConfiguration.scaledTouchSlop.toDouble() }
@@ -186,13 +200,13 @@ fun PagerPageItem(
     val doubleClickToZoomListener =
         remember(viewer.config.doubleTapAnimDuration) {
             if (viewer.config.doubleTapAnimDuration > 0) {
-                DoubleClickToZoomListener.cycle()
+                DoubleClickToZoomListener.cycle(maxZoomFactor = 2.5f)
             } else {
                 DoubleClickToZoomListener { _, _ -> }
             }
         }
 
-    Box(
+    BoxWithConstraints(
         modifier =
             modifier.fillMaxSize().background(backgroundColor).pointerInput(
                 viewer,
@@ -335,9 +349,78 @@ fun PagerPageItem(
             },
         contentAlignment = Alignment.Center,
     ) {
+        val viewportWidthPx = constraints.maxWidth.toFloat()
+        val viewportHeightPx = constraints.maxHeight.toFloat()
+        var autoZoomApplied by
+            rememberSaveable(
+                page.chapter.chapter.id,
+                page.index,
+                constraints.maxWidth,
+                constraints.maxHeight,
+            ) {
+                mutableStateOf(false)
+            }
+
+        val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
+
         if (extraPage == null) {
-            val zoomableState = rememberZoomableState()
+            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
             val imageState = rememberZoomableImageState(zoomableState)
+
+            val singlePageZoomType =
+                remember(zoomStart, viewer) {
+                    when (zoomStart) {
+                        1 ->
+                            when (viewer) {
+                                is L2RPagerViewer -> PagerConfig.ZoomType.Left
+                                is R2LPagerViewer -> PagerConfig.ZoomType.Right
+                                else -> PagerConfig.ZoomType.Center
+                            }
+                        2 -> PagerConfig.ZoomType.Left
+                        3 -> PagerConfig.ZoomType.Right
+                        else -> PagerConfig.ZoomType.Center
+                    }
+                }
+
+            LaunchedEffect(isReady, landscapeZoom, imageScaleType) {
+                if (
+                    !autoZoomApplied &&
+                        isReady &&
+                        landscapeZoom &&
+                        imageScaleType == 1 &&
+                        viewportWidthPx > 0f &&
+                        viewportHeightPx > 0f
+                ) {
+                    @Suppress("DEPRECATION")
+                    val bounds =
+                        withTimeoutOrNull(2000L) {
+                            snapshotFlow { zoomableState.transformedContentBounds }
+                                .filter { !it.isEmpty }
+                                .first()
+                        }
+
+                    if (bounds != null) {
+                        val isLandscape = bounds.width > bounds.height
+                        if (isLandscape && bounds.height < viewportHeightPx) {
+                            val targetScale = (viewportHeightPx / bounds.height).coerceIn(1f, 3f)
+                            if (targetScale > 1.05f) {
+                                val centroid =
+                                    when (singlePageZoomType) {
+                                        PagerConfig.ZoomType.Right ->
+                                            Offset(viewportWidthPx, viewportHeightPx / 2f)
+                                        PagerConfig.ZoomType.Left ->
+                                            Offset(0f, viewportHeightPx / 2f)
+                                        PagerConfig.ZoomType.Center ->
+                                            Offset(viewportWidthPx / 2f, viewportHeightPx / 2f)
+                                    }
+                                zoomableState.zoomTo(zoomFactor = targetScale, centroid = centroid)
+                            }
+                        }
+                    }
+                    autoZoomApplied = true
+                }
+            }
+
             val model =
                 remember(page) {
                     ImageRequest.Builder(context)
@@ -359,7 +442,7 @@ fun PagerPageItem(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            val zoomableState = rememberZoomableState()
+            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
             val (first, second) =
                 viewer.controller.getDoublePageOrder(
                     page = page,
@@ -367,6 +450,100 @@ fun PagerPageItem(
                     isRtl = viewer.isRtl,
                     invertDoublePages = invertDoublePages,
                 )
+
+            var firstSize by remember(first) { mutableStateOf<ComposeSize?>(null) }
+            var secondSize by remember(second) { mutableStateOf<ComposeSize?>(null) }
+            val density = LocalDensity.current
+            val gapPx =
+                remember(doublePageGap, density) {
+                    with(density) { (Size.tiny * doublePageGap).toPx() }
+                }
+
+            LaunchedEffect(firstSize, secondSize) {
+                val fSize = firstSize
+                val sSize = secondSize
+                if (fSize != null && sSize != null) {
+                    val totalWidth = fSize.width + sSize.width
+                    val maxHeight = maxOf(fSize.height, sSize.height)
+                    zoomableState.setContentLocation(
+                        ZoomableContentLocation.scaledInsideAndCenterAligned(
+                            ComposeSize(totalWidth, maxHeight)
+                        )
+                    )
+                }
+            }
+
+            LaunchedEffect(isReady, landscapeZoom, imageScaleType, firstSize, secondSize) {
+                if (
+                    !autoZoomApplied &&
+                        isReady &&
+                        landscapeZoom &&
+                        imageScaleType == 1 &&
+                        viewportWidthPx > 0f &&
+                        viewportHeightPx > 0f
+                ) {
+                    val fSize = firstSize
+                    val sSize = secondSize
+                    if (fSize != null && sSize != null) {
+                        val availableColWidth = (viewportWidthPx - gapPx) / 2f
+                        if (
+                            availableColWidth > 0f &&
+                                fSize.width > 0f &&
+                                sSize.width > 0f &&
+                                fSize.height > 0f &&
+                                sSize.height > 0f
+                        ) {
+                            val scale1 =
+                                minOf(
+                                    availableColWidth / fSize.width,
+                                    viewportHeightPx / fSize.height,
+                                )
+                            val scale2 =
+                                minOf(
+                                    availableColWidth / sSize.width,
+                                    viewportHeightPx / sSize.height,
+                                )
+                            val renderedHeight = maxOf(fSize.height * scale1, sSize.height * scale2)
+                            val isLandscape =
+                                (fSize.width + sSize.width) > maxOf(fSize.height, sSize.height)
+
+                            if (isLandscape && renderedHeight < viewportHeightPx) {
+                                val targetScale =
+                                    (viewportHeightPx / renderedHeight).coerceIn(1f, 3f)
+                                if (targetScale > 1.05f) {
+                                    val isRtl = viewer.isRtl.xor(invertDoublePages)
+                                    val doublePageZoomType =
+                                        when (zoomStart) {
+                                            1 ->
+                                                if (isRtl) PagerConfig.ZoomType.Right
+                                                else PagerConfig.ZoomType.Left
+                                            2 -> PagerConfig.ZoomType.Left
+                                            3 -> PagerConfig.ZoomType.Right
+                                            else -> PagerConfig.ZoomType.Center
+                                        }
+                                    val centroid =
+                                        when (doublePageZoomType) {
+                                            PagerConfig.ZoomType.Right ->
+                                                Offset(viewportWidthPx, viewportHeightPx / 2f)
+                                            PagerConfig.ZoomType.Left ->
+                                                Offset(0f, viewportHeightPx / 2f)
+                                            PagerConfig.ZoomType.Center ->
+                                                Offset(
+                                                    viewportWidthPx / 2f,
+                                                    viewportHeightPx / 2f,
+                                                )
+                                        }
+                                    zoomableState.zoomTo(
+                                        zoomFactor = targetScale,
+                                        centroid = centroid,
+                                    )
+                                }
+                            }
+                            autoZoomApplied = true
+                        }
+                    }
+                }
+            }
 
             val firstModel =
                 remember(first) {
@@ -398,23 +575,41 @@ fun PagerPageItem(
                         ),
                 contentAlignment = Alignment.Center,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(Size.tiny * doublePageGap),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    AsyncImage(
-                        model = firstModel,
-                        contentDescription = null,
-                        contentScale = contentScale,
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
-                    )
-                    AsyncImage(
-                        model = secondModel,
-                        contentDescription = null,
-                        contentScale = contentScale,
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
-                    )
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(Size.tiny * doublePageGap),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        AsyncImage(
+                            model = firstModel,
+                            contentDescription = null,
+                            contentScale = contentScale,
+                            alignment = Alignment.CenterEnd,
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            onSuccess = { state ->
+                                val img = state.result.image
+                                if (img.width > 0 && img.height > 0) {
+                                    firstSize =
+                                        ComposeSize(img.width.toFloat(), img.height.toFloat())
+                                }
+                            },
+                        )
+                        AsyncImage(
+                            model = secondModel,
+                            contentDescription = null,
+                            contentScale = contentScale,
+                            alignment = Alignment.CenterStart,
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            onSuccess = { state ->
+                                val img = state.result.image
+                                if (img.width > 0 && img.height > 0) {
+                                    secondSize =
+                                        ComposeSize(img.width.toFloat(), img.height.toFloat())
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }
