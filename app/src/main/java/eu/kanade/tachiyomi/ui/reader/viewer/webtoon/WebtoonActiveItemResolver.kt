@@ -172,6 +172,18 @@ object WebtoonActiveItemResolver {
             return firstCurrentItemIndex
         }
 
+        // Check if user has scrolled to the end of the list and is viewing post-chapter content
+        // (transition/peek)
+        val lastVisibleItemIndex = getItemIndex(itemCount - 1)
+        val lastVisibleItemBottom = getItemOffset(itemCount - 1) + getItemSize(itemCount - 1)
+        val isScrolledToBottom =
+            lastVisibleItemIndex == currentItems.lastIndex &&
+                lastVisibleItemBottom <= viewportEndOffset
+
+        if (hasCurrentChapterItems && isScrolledToBottom && closestNonPrecedingIndex != -1) {
+            return closestNonPrecedingIndex
+        }
+
         // Scenario 2: Item spanning middle is valid
         if (itemSpanningMiddleIndex != -1) {
             val isPrecedingItemWhileChapterVisible =

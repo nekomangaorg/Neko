@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,10 +32,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Velocity
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
@@ -108,7 +115,18 @@ fun ComposeWebtoonViewer(
         }
     }
 
-    // 2. Resolve active item & dispatch page selections with stationary scroll guard
+    // 2. Eagerly preload next chapter when chapter or items update
+    LaunchedEffect(config.activeChapterId, items) {
+        val nextTransition =
+            items.firstOrNull {
+                it is ReaderUiItem.Transition && it.transition is ChapterTransition.Next
+            } as? ReaderUiItem.Transition
+        nextTransition?.transition?.to?.let { nextChapter ->
+            config.onRequestPreloadChapter?.invoke(nextChapter)
+        }
+    }
+
+    // 3. Resolve active item & dispatch page selections with stationary scroll guard
     LaunchedEffect(lazyListState, items, config.activeChapterId) {
         snapshotFlow {
             val layoutInfo = lazyListState.layoutInfo
@@ -136,6 +154,23 @@ fun ComposeWebtoonViewer(
                         ) {
                             onPageSelected(activeItem.page)
                         }
+                        val pages = activeItem.page.chapter.pages
+                        if (
+                            pages != null &&
+                                activeItem.page.chapter.chapter.id == config.activeChapterId
+                        ) {
+                            val threshold = maxOf(5, config.preloadPageAmount)
+                            if (pages.size - activeItem.page.number < threshold) {
+                                val nextTransition =
+                                    items.firstOrNull {
+                                        it is ReaderUiItem.Transition &&
+                                            it.transition is ChapterTransition.Next
+                                    } as? ReaderUiItem.Transition
+                                nextTransition?.transition?.to?.let { nextChapter ->
+                                    config.onRequestPreloadChapter?.invoke(nextChapter)
+                                }
+                            }
+                        }
                     }
                     is ReaderUiItem.SplitPage -> {
                         if (
@@ -144,8 +179,31 @@ fun ComposeWebtoonViewer(
                         ) {
                             onPageSelected(activeItem.page)
                         }
+                        val pages = activeItem.page.chapter.pages
+                        if (
+                            pages != null &&
+                                activeItem.page.chapter.chapter.id == config.activeChapterId
+                        ) {
+                            val threshold = maxOf(5, config.preloadPageAmount)
+                            if (pages.size - activeItem.page.number < threshold) {
+                                val nextTransition =
+                                    items.firstOrNull {
+                                        it is ReaderUiItem.Transition &&
+                                            it.transition is ChapterTransition.Next
+                                    } as? ReaderUiItem.Transition
+                                nextTransition?.transition?.to?.let { nextChapter ->
+                                    config.onRequestPreloadChapter?.invoke(nextChapter)
+                                }
+                            }
+                        }
                     }
-                    is ReaderUiItem.Transition -> onTransitionSelected(activeItem.transition)
+                    is ReaderUiItem.Transition -> {
+                        onTransitionSelected(activeItem.transition)
+                        val toChapter = activeItem.transition.to
+                        if (toChapter != null) {
+                            config.onRequestPreloadChapter?.invoke(toChapter)
+                        }
+                    }
                 }
             }
     }
@@ -163,7 +221,109 @@ fun ComposeWebtoonViewer(
         remember(viewConfiguration) { viewConfiguration.scaledDoubleTapSlop.toDouble() }
     val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
 
-    // 3. Declarative Render Tree
+    val density = LocalDensity.current
+    val overscrollThresholdPx = remember(density) { with(density) { (Size.huge * 2).toPx() } }
+    val nestedScrollConnection =
+        remember(items, config.onNavigateToChapter) {
+            object : NestedScrollConnection {
+                var pullDownOffset = 0f
+                var pullUpOffset = 0f
+
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    if (pullDownOffset > 0 && available.y < 0) {
+                        val consumedY = available.y.coerceAtLeast(-pullDownOffset)
+                        pullDownOffset += consumedY
+                        return Offset(0f, consumedY)
+                    }
+                    if (pullUpOffset > 0 && available.y > 0) {
+                        val consumedY = available.y.coerceAtMost(pullUpOffset)
+                        pullUpOffset -= consumedY
+                        return Offset(0f, consumedY)
+                    }
+                    return Offset.Zero
+                }
+
+                override fun onPostScroll(
+                    consumed: Offset,
+                    available: Offset,
+                    source: NestedScrollSource,
+                ): Offset {
+                    if (source == NestedScrollSource.UserInput) {
+                        // Top overscroll (pulling down at the top)
+                        if (
+                            available.y > 0 &&
+                                lazyListState.firstVisibleItemIndex == 0 &&
+                                lazyListState.firstVisibleItemScrollOffset == 0
+                        ) {
+                            pullDownOffset += available.y
+                            return Offset(0f, available.y)
+                        }
+                        // Bottom overscroll (pulling up at the bottom)
+                        val layoutInfo = lazyListState.layoutInfo
+                        val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+                        if (
+                            available.y < 0 &&
+                                lastVisibleItem != null &&
+                                lastVisibleItem.index == items.lastIndex &&
+                                (lastVisibleItem.offset + lastVisibleItem.size) <=
+                                    layoutInfo.viewportEndOffset
+                        ) {
+                            pullUpOffset += -available.y
+                            return Offset(0f, available.y)
+                        }
+                    }
+                    return Offset.Zero
+                }
+
+                override suspend fun onPreFling(available: Velocity): Velocity {
+                    val downOffset = pullDownOffset
+                    pullDownOffset = 0f
+                    if (downOffset > overscrollThresholdPx) {
+                        val prevChapter =
+                            (items.firstOrNull {
+                                    it is ReaderUiItem.Transition &&
+                                        it.transition is ChapterTransition.Prev
+                                } as? ReaderUiItem.Transition)
+                                ?.transition
+                                ?.to
+                                ?.chapter
+                                ?: (items.firstOrNull() as? ReaderUiItem.Page)
+                                    ?.page
+                                    ?.chapter
+                                    ?.chapter
+                        if (prevChapter != null) {
+                            config.onNavigateToChapter?.invoke(prevChapter, ChapterNavTarget.End)
+                            return available
+                        }
+                    }
+
+                    val upOffset = pullUpOffset
+                    pullUpOffset = 0f
+                    if (upOffset > overscrollThresholdPx) {
+                        val nextChapter =
+                            (items.firstOrNull {
+                                    it is ReaderUiItem.Transition &&
+                                        it.transition is ChapterTransition.Next
+                                } as? ReaderUiItem.Transition)
+                                ?.transition
+                                ?.to
+                                ?.chapter
+                                ?: (items.lastOrNull() as? ReaderUiItem.Page)
+                                    ?.page
+                                    ?.chapter
+                                    ?.chapter
+                        if (nextChapter != null) {
+                            config.onNavigateToChapter?.invoke(nextChapter, ChapterNavTarget.Start)
+                            return available
+                        }
+                    }
+
+                    return Velocity.Zero
+                }
+            }
+        }
+
+    // 4. Declarative Render Tree
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize().background(config.backgroundColor).clipToBounds(),
@@ -182,6 +342,7 @@ fun ComposeWebtoonViewer(
                     } else {
                         Modifier.fillMaxSize()
                     })
+                    .nestedScroll(nestedScrollConnection)
                     .webtoonZoomable(
                         state = zoomState,
                         enableZoomOut = config.enableZoomOut,
@@ -297,9 +458,37 @@ fun ComposeWebtoonViewer(
                     is ReaderUiItem.Transition -> {
                         ReaderTransitionPage(
                             transition = item.transition,
-                            manga = null,
-                            downloadManager = Injekt.get(),
+                            manga = config.manga,
+                            downloadManager = config.downloadManager ?: Injekt.get(),
                             onRetry = config.onRetryTransition,
+                            onTap = { config.onToggleMenu() },
+                            onCardClick = {
+                                val targetChapter = item.transition.to?.chapter
+                                if (targetChapter != null) {
+                                    val navTarget =
+                                        if (item.transition is ChapterTransition.Prev) {
+                                            ChapterNavTarget.End
+                                        } else {
+                                            ChapterNavTarget.Start
+                                        }
+                                    config.onNavigateToChapter?.invoke(targetChapter, navTarget)
+                                }
+                            },
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .defaultMinSize(minHeight = columnHeight / 2)
+                                    .padding(
+                                        top =
+                                            if (
+                                                item.transition is ChapterTransition.Prev &&
+                                                    item.transition.to == null
+                                            ) {
+                                                Size.appBarHeight + Size.large
+                                            } else {
+                                                Size.small
+                                            },
+                                        bottom = Size.extraLarge,
+                                    ),
                         )
                     }
                 }
@@ -338,6 +527,7 @@ fun ComposeWebtoonViewer(
     onTransitionSelected: (ChapterTransition) -> Unit,
     onRetryTransition: (ReaderChapter) -> Unit,
     onNavigateToChapter: ((Chapter, ChapterNavTarget) -> Unit)? = null,
+    onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val currentChapterId =
@@ -375,6 +565,7 @@ fun ComposeWebtoonViewer(
     val animatedTransitions by readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
     val disableGaps by readerPreferences.webtoonDisableGaps().collectAsState()
     val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsState()
+    val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsState()
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
         remember(readerTheme, themeBackground) {
@@ -395,6 +586,12 @@ fun ComposeWebtoonViewer(
 
     val hasMargins = viewer.hasMargins && !disableGaps
 
+    LaunchedEffect(currentChapterId) {
+        viewer.nextTransition?.to?.let {
+            onRequestPreloadChapter?.invoke(it) ?: viewer.activity.requestPreloadChapter(it)
+        }
+    }
+
     val config =
         WebtoonViewerConfigUiModel(
             initialIndex = initialItemIndex,
@@ -411,6 +608,15 @@ fun ComposeWebtoonViewer(
             navigator = viewer.config.navigator,
             onToggleMenu = { viewer.activity.toggleMenu() },
             onRetryTransition = onRetryTransition,
+            manga = manga,
+            downloadManager = downloadManager,
+            preloadPageAmount = preloadPageAmount,
+            onNavigateToChapter = onNavigateToChapter,
+            onRequestPreloadChapter =
+                onRequestPreloadChapter
+                    ?: { chapter ->
+                        viewer.activity.requestPreloadChapter(chapter)
+                    },
         )
 
     val navChannel = remember { Channel<ReaderNavCommand>(Channel.BUFFERED) }

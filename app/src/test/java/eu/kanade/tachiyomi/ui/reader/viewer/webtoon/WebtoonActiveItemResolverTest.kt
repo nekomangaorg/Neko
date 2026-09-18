@@ -319,4 +319,38 @@ class WebtoonActiveItemResolverTest {
         // Falls back to item spanning middle since no chapter matches null ID
         assertEquals(1, activeIndex)
     }
+
+    @Test
+    fun `resolveActiveIndex resolves to Transition Next at bottom of scroll even if preceding page spans middle`() {
+        val currChapter = createChapter(1L, pageCount = 5)
+        val nextChapter = createChapter(2L, pageCount = 5)
+
+        val currentItems = mutableListOf<ReaderUiItem>()
+        currentItems.addAll(currChapter.pages!!.map { ReaderUiItem.Page(it) }) // indices 0..4
+        val nextTrans = ChapterTransition.Next(currChapter, nextChapter)
+        currentItems.add(ReaderUiItem.Transition(nextTrans)) // index 5 (last item)
+
+        // Viewport 0..2400 (middle 1200).
+        // Page 4 spans middle: offset 0..1800 (size 1800, bottom 1800, middle 900)
+        // Transition Next is at bottom: offset 1800..2400 (size 600, bottom 2400)
+        val visibleBounds =
+            listOf(
+                VisibleItemBounds(index = 4, offset = 0, size = 1800), // Spans 1200
+                VisibleItemBounds(index = 5, offset = 1800, size = 600), // Ends at 2400
+            )
+
+        val activeIndex =
+            WebtoonActiveItemResolver.resolveActiveIndex(
+                visibleItems = visibleBounds,
+                currentItems = currentItems,
+                activeChapterId = 1L,
+                viewportStartOffset = 0,
+                viewportEndOffset = 2400,
+                firstVisibleIndex = 4,
+                firstVisibleScrollOffset = 500,
+            )
+
+        // Must resolve to Transition Next (index 5) because user reached the bottom of the list
+        assertEquals(5, activeIndex)
+    }
 }

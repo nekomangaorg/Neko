@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
 import android.graphics.PointF
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -99,7 +100,15 @@ fun ReaderTransitionPage(
             shape = RoundedCornerShape(Size.mediumLarge),
             elevation =
                 CardDefaults.elevatedCardElevation(defaultElevation = Size.small - Size.extraTiny),
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .then(
+                        if (onCardClick != null && transition.to != null) {
+                            Modifier.clickable(onClick = onCardClick)
+                        } else {
+                            Modifier
+                        }
+                    ),
         ) {
             Column(
                 modifier =

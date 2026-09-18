@@ -4,8 +4,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.presentation.theme.Size
 
 /** Immutable UI configuration state for [ComposeWebtoonViewer]. */
@@ -26,4 +30,9 @@ data class WebtoonViewerConfigUiModel(
     val navigator: ViewerNavigation,
     val onToggleMenu: () -> Unit = {},
     val onRetryTransition: (ReaderChapter) -> Unit = {},
+    val manga: MangaItem? = null,
+    val downloadManager: DownloadManager? = null,
+    val preloadPageAmount: Int = 4,
+    val onNavigateToChapter: ((Chapter, ChapterNavTarget) -> Unit)? = null,
+    val onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
 )
