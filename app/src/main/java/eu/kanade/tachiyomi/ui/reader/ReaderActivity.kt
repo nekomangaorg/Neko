@@ -436,6 +436,7 @@ class ReaderActivity : BaseMainActivity() {
                                 }
                             },
                             onRetryTransition = { chapter -> requestPreloadChapter(chapter) },
+                            onRequestPreloadChapter = { chapter -> requestPreloadChapter(chapter) },
                             modifier = Modifier.fillMaxSize(),
                         )
                     }

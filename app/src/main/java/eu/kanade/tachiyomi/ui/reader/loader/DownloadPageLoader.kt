@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.ui.reader.domain.CheckTallPageUseCase
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import tachiyomi.core.util.storage.toTempFile
@@ -18,6 +19,7 @@ class DownloadPageLoader(
     private val manga: Manga,
     private val downloadManager: DownloadManager,
     private val downloadProvider: DownloadProvider,
+    private val checkTallPage: CheckTallPageUseCase = CheckTallPageUseCase(),
 ) : PageLoader() {
 
     // Needed to open input streams
@@ -56,7 +58,13 @@ class DownloadPageLoader(
                     page.mangaDexChapterId,
                     stream = { context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!! },
                 )
-                .apply { status = Page.State.READY }
+                .apply {
+                    status = Page.State.READY
+                    val splits = checkTallPage(this, screenHeight = 0)
+                    if (splits != null) {
+                        precomputedSplits = splits
+                    }
+                }
         }
     }
 

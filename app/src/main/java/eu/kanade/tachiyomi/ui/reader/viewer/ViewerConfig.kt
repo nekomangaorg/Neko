@@ -27,6 +27,7 @@ abstract class ViewerConfig(
     var volumeKeysEnabled = false
     var volumeKeysInverted = false
     var alwaysShowChapterTransition = true
+    var preloadPageAmount = readerPreferences.preloadPageAmount().get()
 
     var navigationOverlayForNewUser = false
     var navigationMode = 0
@@ -53,6 +54,8 @@ abstract class ViewerConfig(
         readerPreferences
             .alwaysShowChapterTransition()
             .register({ alwaysShowChapterTransition = it })
+
+        readerPreferences.preloadPageAmount().register({ preloadPageAmount = it })
     }
 
     fun <T> Preference<T>.register(valueAssignment: (T) -> Unit, onChanged: (T) -> Unit = {}) {

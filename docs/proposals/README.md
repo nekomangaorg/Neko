@@ -34,6 +34,7 @@ Proposals focused on reader performance, Jetpack Compose viewers, navigation lif
 | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Neko Performance |
 | [**Unified Reader Preloader Engine & Two-Tier Pipeline**](reader/reader_preloader_engine_proposal.md) | Extracts inline preloading logic from Compose viewers into a testable domain engine with two-tier disk/memory pipelining. | Neko Reader Phase 2 |
 | [**Rock-Solid ComposeWebtoonViewer Architecture**](reader/rock_solid_webtoon_compose_viewer_proposal.md) | Solves in-UI tall page splitting shifts, post-composition prepend races, and gesture bloat to reduce ComposeWebtoonViewer to ~220 lines. | Neko Reader Phase 2 |
+| [**Rock-Solid ComposePagerViewer Architecture**](reader/rock_solid_paged_compose_viewer_proposal.md) | Solves destructive subtree key resets, post-composition page flashing, in-UI Coil preloading, and preference flooding to reduce ComposePagerViewer to ~180 lines. | Neko Reader Phase 2 |
 | [**Zen Focus Reading Mode & Touch Shield**](reader/zen_focus_reading_mode_proposal.md) | Adds a distraction-free reading mode with accidental touch prevention. | Neko Feature |
 
 ---
@@ -133,4 +134,5 @@ Large-scale external API and infrastructure migrations.
 
 | Proposal | Description | Target Milestone |
 | :--- | :--- | :--- |
+| [**Migrating Preference Flow Collections to Lifecycle-Aware `collectAsStateWithLifecycle()`**](migrations/migrate_preference_collect_as_state_with_lifecycle_proposal.md) | Migrates Composable preference observations from unconstrained `collectAsState()` to lifecycle-bounded `collectAsStateWithLifecycle()`. | Neko 3.x Lifecycle Modernization |
 | [**Migrating Primary Metadata & Search to MangaBaka**](migrations/mangabaka_migration_proposal.md) | Architectural migration of Neko's primary metadata, search, and browse provider to MangaBaka. | Neko 4.0 Platform Migration |

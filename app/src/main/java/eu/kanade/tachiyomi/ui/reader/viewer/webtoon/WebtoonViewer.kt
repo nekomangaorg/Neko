@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
+import android.os.Build
 import android.view.KeyEvent
 import android.view.MotionEvent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import eu.kanade.tachiyomi.data.coil.ReaderPageSplitFetcher
-import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -19,12 +19,17 @@ import kotlin.math.min
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import org.nekomanga.logging.TimberKt
-import uy.kohesive.injekt.injectLazy
 
-/** Headless implementation of [BaseViewer] for Webtoon continuous vertical reading mode. */
+/**
+ * Legacy implementation of [BaseViewer] for Webtoon continuous vertical reading mode.
+ *
+ * @deprecated Superceded by headless [ReaderPreloadEngine], [BuildWebtoonItemsUseCase], and
+ *   stateless [ComposeWebtoonViewer].
+ */
+@Deprecated(
+    "Use ReaderPreloadEngine and stateless ComposeWebtoonViewer with WebtoonViewerConfigUiModel instead"
+)
 class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = false) : BaseViewer {
-
-    val downloadManager: DownloadManager by injectLazy()
 
     val scope = MainScope()
 
@@ -65,6 +70,15 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Configuration used by this viewer. */
     val config = WebtoonConfig(scope)
 
+    /** Headless preload engine for disk prefetching and memory cache warming. */
+    val preloadEngine =
+        ReaderPreloadEngine(
+            context = activity,
+            scope = scope,
+            onPageSplit = { originalPage, insertPages -> splitPage(originalPage, insertPages) },
+            isSplitTallPagesEnabled = { config.splitTallPages },
+        )
+
     init {
         config.reloadViewerListener = { activity.viewModel.reloadViewer() }
         config.navigationModeChangedListener = {
@@ -77,18 +91,26 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Destroys this viewer. Called when leaving the reader or swapping viewers. */
     override fun destroy() {
         super.destroy()
+        preloadEngine.clear()
         scope.cancel()
+        pendingPageMove = null
         ReaderPageSplitFetcher.clearCache()
     }
 
     private var activeChapterId: Long? = null
     private var isInitialLoad = true
+    private var pendingPageMove: Pair<ReaderPage, Boolean>? = null
 
     /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
         TimberKt.d { "setChapters" }
         val forceTransition = config.alwaysShowChapterTransition
-        val screenHeight = activity.resources.displayMetrics.heightPixels
+        val screenHeight =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                activity.windowManager.currentWindowMetrics.bounds.height()
+            } else {
+                @Suppress("DEPRECATION") activity.resources.displayMetrics.heightPixels
+            }
         val newItems =
             controller.buildItems(
                 chapters = chapters,
@@ -102,30 +124,50 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         items = newItems
         activity.updateWebtoonViewerItems()
 
-        if (isInitialLoad) {
+        val pages = chapters.currChapter.pages
+        val requestedIndex = pages?.let { min(chapters.currChapter.requestedPage, it.lastIndex) }
+        val targetPage =
+            if (requestedIndex != null && requestedIndex in pages.indices) pages[requestedIndex]
+            else pages?.firstOrNull()
+        val initialActiveIndex =
+            targetPage?.let { controller.findPageIndex(newItems, it) }?.takeIf { it != -1 } ?: 0
+        preloadEngine.updateActiveIndex(initialActiveIndex, newItems, config.preloadPageAmount)
+
+        val pending = pendingPageMove
+        pendingPageMove = null
+        if (
+            pending != null && pending.first.chapter.chapter.id == chapters.currChapter.chapter.id
+        ) {
+            moveToPage(pending.first, pending.second)
+        } else if (isInitialLoad) {
             isInitialLoad = false
-            val pages = chapters.currChapter.pages ?: return
-            val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
-            if (requestedIndex in pages.indices) {
+            if (requestedIndex != null && requestedIndex in pages.indices) {
                 moveToPage(pages[requestedIndex], false)
             }
         }
     }
 
+    fun updateActiveIndex(activeIndex: Int) {
+        preloadEngine.updateActiveIndex(activeIndex, items, config.preloadPageAmount)
+    }
+
     /** Tells this viewer to move to the given [page]. */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
-        TimberKt.d { "moveToPage" }
+        TimberKt.d { "moveToPage for page ${page.number} in chapter ${page.chapter.chapter.id}" }
         if (activeChapterId != null && page.chapter.chapter.id != activeChapterId) {
             TimberKt.d {
-                "Ignoring moveToPage for non-active chapter ${page.chapter.chapter.id} (active is $activeChapterId)"
+                "Queuing moveToPage for non-active chapter ${page.chapter.chapter.id} (active is $activeChapterId)"
             }
+            pendingPageMove = page to animated
             return
         }
         val position = controller.findPageIndex(items, page)
         if (position != -1) {
+            pendingPageMove = null
             requestedPagePosition = WebtoonPagePosition(position, animated)
         } else {
-            TimberKt.d { "Page $page not found in items" }
+            TimberKt.d { "Page $page not found in items, queuing" }
+            pendingPageMove = page to animated
         }
     }
 

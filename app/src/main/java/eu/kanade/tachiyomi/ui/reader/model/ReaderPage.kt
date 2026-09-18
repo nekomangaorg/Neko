@@ -20,6 +20,9 @@ open class ReaderPage(
     /** Cached aspect ratio (width / height) to prevent layout shifts. */
     var aspectRatio: Float = 0f
 
+    /** Pre-calculated splits when tall page splitting is performed upstream. */
+    var precomputedSplits: List<ReaderPageSplit>? = null
+
     /** Value to check if this page is used to as if it was too wide */
     var shiftedPage: Boolean = false
 
