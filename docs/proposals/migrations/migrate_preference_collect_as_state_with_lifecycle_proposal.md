@@ -6,7 +6,7 @@
 **Target Milestone:** Neko 3.x UI Lifecycle Modernization & Battery Preservation  
 **Execution Order:** Cross-Cutting Infrastructure / Compose Modernization  
 **Prerequisites:** Addition of [`Preference<T>.collectAsStateWithLifecycle()`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/extensions/PreferenceExtensions.kt) in `ref/rock-solid-webtoon-compose-viewer`  
-**Related Proposals:** [`rock_solid_webtoon_compose_viewer_proposal.md`](../reader/rock_solid_webtoon_compose_viewer_proposal.md), [`decouple_reader_settings_sheet_proposal.md`](../reader/decouple_reader_settings_sheet_proposal.md), [`decouple_settings_screens_jobs_and_io_proposal.md`](../decoupling/decouple_settings_screens_jobs_and_io_proposal.md)  
+**Related Proposals:** [`decouple_reader_compose_viewers_proposal.md`](../reader/decouple_reader_compose_viewers_proposal.md), [`decouple_reader_settings_sheet_proposal.md`](../reader/decouple_reader_settings_sheet_proposal.md), [`decouple_settings_screens_jobs_and_io_proposal.md`](../decoupling/decouple_settings_screens_jobs_and_io_proposal.md)  
 **Implementation State:** 🟡 Partially Implemented (Core extension landed in `PreferenceExtensions.kt`; `ComposeWebtoonViewer.kt` migrated; 14 files / 50+ sites pending migration)  
 
 ---
