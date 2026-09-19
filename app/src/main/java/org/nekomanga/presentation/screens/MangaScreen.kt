@@ -362,7 +362,13 @@ fun MangaScreen(
                 },
                 markPrevious = mangaViewModel::markPreviousChapters,
             ),
-        openWebView = { url, title -> onNavigate(Screens.WebView(title = title, url = url)) },
+        openWebView = { url, title ->
+            if (mangaViewModel.openLinksInBrowser()) {
+                context.openInBrowser(url, forceDefaultBrowser = true)
+            } else {
+                onNavigate(Screens.WebView(title = title, url = url))
+            }
+        },
         onBackPressed = onBackPressed,
     )
 }
