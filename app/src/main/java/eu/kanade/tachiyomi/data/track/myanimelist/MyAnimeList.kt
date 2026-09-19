@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.constants.Constants.TRACKER_SEARCH_ID_PREFIX
@@ -72,6 +73,14 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     override fun displayScore(track: Track): String {
         return track.score.toInt().toString()
     }
+
+    override fun statusFromMdList(status: FollowStatus): Int? =
+        when (status) {
+            FollowStatus.ON_HOLD -> ON_HOLD
+            FollowStatus.DROPPED -> DROPPED
+            FollowStatus.RE_READING -> REREADING
+            else -> super.statusFromMdList(status)
+        }
 
     override suspend fun add(track: Track): Track {
         track.status = READING
