@@ -43,6 +43,7 @@ fun Modifier.webtoonTapNavigation(
     val doubleTapSlopPx =
         remember(viewConfiguration) { viewConfiguration.scaledDoubleTapSlop.toDouble() }
     val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
+    val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
     val currentNavigator by rememberUpdatedState(navigator)
     val currentMenuVisible by rememberUpdatedState(menuVisible)
@@ -61,6 +62,7 @@ fun Modifier.webtoonTapNavigation(
                     pass = PointerEventPass.Initial,
                 )
             val downPos = down.position
+            val downTime = System.currentTimeMillis()
             var pointerUp: PointerInputChange? = null
 
             while (true) {
@@ -93,7 +95,11 @@ fun Modifier.webtoonTapNavigation(
                         (upPos.y - downPos.y).toDouble(),
                     )
 
-                if (distance < touchSlopPx) {
+                if (
+                    distance < touchSlopPx &&
+                        (upTime - downTime < longPressTimeoutMs) &&
+                        !up.isConsumed
+                ) {
                     val screenWidth = size.width.toFloat()
                     val screenHeight = size.height.toFloat()
 

@@ -4,15 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -32,6 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
@@ -309,15 +311,23 @@ fun ComposeWebtoonViewer(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize().background(config.backgroundColor).clipToBounds(),
     ) {
-        val horizontalPadding = maxWidth * config.sidePaddingPercent
+        val layoutDirection = LocalLayoutDirection.current
+        val effectiveContentPadding =
+            calculateEffectiveContentPadding(
+                sidePadding = config.sidePadding,
+                sidePaddingPercent = config.sidePaddingPercent,
+                maxWidth = maxWidth,
+                contentPadding = config.contentPadding,
+                layoutDirection = layoutDirection,
+            )
 
         LazyColumn(
             state = lazyListState,
-            contentPadding = config.contentPadding,
+            contentPadding = effectiveContentPadding,
             verticalArrangement =
                 Arrangement.spacedBy(if (config.hasGaps) Size.medium else Size.none),
             modifier =
-                Modifier.fillMaxWidth()
+                Modifier.fillMaxSize()
                     .layout { measurable, constraints ->
                         val scale = zoomState.scale
                         val targetHeight =
@@ -416,23 +426,6 @@ fun ComposeWebtoonViewer(
                     }
                 }
             }
-        }
-
-        if (horizontalPadding > Size.none) {
-            Box(
-                modifier =
-                    Modifier.align(Alignment.CenterStart)
-                        .fillMaxHeight()
-                        .width(horizontalPadding)
-                        .background(config.backgroundColor)
-            )
-            Box(
-                modifier =
-                    Modifier.align(Alignment.CenterEnd)
-                        .fillMaxHeight()
-                        .width(horizontalPadding)
-                        .background(config.backgroundColor)
-            )
         }
     }
 }
@@ -587,3 +580,24 @@ internal fun areTransitionsEquivalent(a: ChapterTransition, b: ChapterTransition
     modelAreTransitionsEquivalent(a, b)
 
 internal fun areItemsEquivalent(a: ReaderUiItem, b: ReaderUiItem): Boolean = a.isEquivalentTo(b)
+
+internal fun calculateEffectiveContentPadding(
+    sidePadding: Dp,
+    sidePaddingPercent: Float,
+    maxWidth: Dp,
+    contentPadding: PaddingValues,
+    layoutDirection: LayoutDirection,
+): PaddingValues {
+    val horizontalPadding =
+        if (sidePadding > Size.none) {
+            sidePadding
+        } else {
+            maxWidth * sidePaddingPercent
+        }
+    return PaddingValues(
+        start = horizontalPadding + contentPadding.calculateStartPadding(layoutDirection),
+        end = horizontalPadding + contentPadding.calculateEndPadding(layoutDirection),
+        top = contentPadding.calculateTopPadding(),
+        bottom = contentPadding.calculateBottomPadding(),
+    )
+}
