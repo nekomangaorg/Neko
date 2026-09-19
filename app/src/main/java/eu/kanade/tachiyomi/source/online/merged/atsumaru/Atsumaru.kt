@@ -171,14 +171,11 @@ class Atsumaru : ReducedHttpSource() {
         // The API returns page images as "/static/..." paths. The site resolves them against
         // cdn.atsu.moe; the origin host answers 410 Gone for those paths once its cached 301s
         // expire, so going through baseUrl fails on a cold Cloudflare edge.
-        fun pageImageUrl(image: String): String {
-            val imageUrl =
-                when {
-                    image.startsWith("http") -> image
-                    image.startsWith("//") -> "https:$image"
-                    else -> "$cdnUrl/static/${image.removePrefix("/").removePrefix("static/")}"
-                }
-            return imageUrl.replaceFirst(Regex("^https?:?//"), "https://")
-        }
+        fun pageImageUrl(image: String): String =
+            when {
+                image.startsWith("http") -> image.replaceFirst(PROTOCOL_REGEX, "https://")
+                image.startsWith("//") -> "https:$image"
+                else -> "$cdnUrl/static/${image.removePrefix("/").removePrefix("static/")}"
+            }
     }
 }
