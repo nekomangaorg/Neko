@@ -104,5 +104,29 @@ class ResolveChapterTransitionUiModelUseCaseTest {
         assertEquals("Chapter 2", nextModel.toChapter?.name)
         assertTrue(nextModel.toChapter?.isDownloaded ?: false)
         assertEquals(0, nextModel.missingChaptersCount)
+        assertEquals(ChapterTransitionUiModel.PreloadState.Ready, nextModel.toChapter?.preloadState)
+    }
+
+    @Test
+    fun `resolve transition reflects chapter error preload state`() {
+        val currChapter = createChapter(1L, chapterNumber = 1f)
+        val nextChapter =
+            createChapter(2L, chapterNumber = 2f).apply {
+                state = ReaderChapter.State.Error(Exception("Network timeout"))
+            }
+        val transition = ChapterTransition.Next(from = currChapter, to = nextChapter)
+
+        every { downloadManager.isChapterDownloaded(any(), any(), any()) } returns false
+
+        val uiModel = useCase(transition, null)
+
+        val nextModel = uiModel as ChapterTransitionUiModel.Next
+        val target = nextModel.toChapter
+        assertNotNull(target)
+        assertTrue(target?.preloadState is ChapterTransitionUiModel.PreloadState.Error)
+        assertEquals(
+            "Network timeout",
+            (target?.preloadState as ChapterTransitionUiModel.PreloadState.Error).message,
+        )
     }
 }

@@ -37,13 +37,15 @@ sealed interface ChapterTransitionUiModel {
         val name: String,
         val isDownloaded: Boolean = false,
         val preloadState: PreloadState = PreloadState.Ready,
-        val readerChapter: ReaderChapter? = null,
     )
 
-    enum class PreloadState {
-        Ready,
-        Loading,
-        Error,
+    @Immutable
+    sealed interface PreloadState {
+        @Immutable data object Ready : PreloadState
+
+        @Immutable data object Loading : PreloadState
+
+        @Immutable data class Error(val message: String = "") : PreloadState
     }
 
     companion object {
@@ -57,6 +59,13 @@ sealed interface ChapterTransitionUiModel {
                         } else {
                             0
                         }
+                    val preloadState =
+                        when (val state = to?.state) {
+                            is ReaderChapter.State.Loading -> PreloadState.Loading
+                            is ReaderChapter.State.Error ->
+                                PreloadState.Error(state.error.message ?: "")
+                            else -> PreloadState.Ready
+                        }
                     Prev(
                         fromChapterName = transition.from.chapter.name,
                         toChapter =
@@ -64,7 +73,7 @@ sealed interface ChapterTransitionUiModel {
                                 TargetChapterInfo(
                                     chapterId = it.chapter.id ?: -1L,
                                     name = it.chapter.name,
-                                    readerChapter = it,
+                                    preloadState = preloadState,
                                 )
                             },
                         missingChaptersCount = diff,
@@ -78,6 +87,13 @@ sealed interface ChapterTransitionUiModel {
                         } else {
                             0
                         }
+                    val preloadState =
+                        when (val state = to?.state) {
+                            is ReaderChapter.State.Loading -> PreloadState.Loading
+                            is ReaderChapter.State.Error ->
+                                PreloadState.Error(state.error.message ?: "")
+                            else -> PreloadState.Ready
+                        }
                     Next(
                         fromChapterName = transition.from.chapter.name,
                         toChapter =
@@ -85,7 +101,7 @@ sealed interface ChapterTransitionUiModel {
                                 TargetChapterInfo(
                                     chapterId = it.chapter.id ?: -1L,
                                     name = it.chapter.name,
-                                    readerChapter = it,
+                                    preloadState = preloadState,
                                 )
                             },
                         missingChaptersCount = diff,

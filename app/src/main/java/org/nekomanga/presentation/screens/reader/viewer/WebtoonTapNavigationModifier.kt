@@ -4,7 +4,10 @@ import android.graphics.PointF
 import android.view.ViewConfiguration
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
@@ -15,6 +18,8 @@ import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlin.math.hypot
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -27,20 +32,27 @@ fun Modifier.webtoonTapNavigation(
     enableDoubleTapZoom: Boolean = true,
     doubleTapAnimDuration: Int = 300,
     menuVisible: Boolean = false,
-    coroutineScope: CoroutineScope,
+    coroutineScope: CoroutineScope? = null,
     onToggleMenu: () -> Unit,
     onNavigateAdjacent: (forward: Boolean) -> Unit,
 ): Modifier = composed {
     val context = LocalContext.current
+    val scope = coroutineScope ?: rememberCoroutineScope()
     val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
     val touchSlopPx = remember(viewConfiguration) { viewConfiguration.scaledTouchSlop.toDouble() }
     val doubleTapSlopPx =
         remember(viewConfiguration) { viewConfiguration.scaledDoubleTapSlop.toDouble() }
     val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
 
-    pointerInput(navigator, enableDoubleTapZoom, doubleTapAnimDuration, menuVisible) {
+    val currentNavigator by rememberUpdatedState(navigator)
+    val currentMenuVisible by rememberUpdatedState(menuVisible)
+    val currentOnToggleMenu by rememberUpdatedState(onToggleMenu)
+    val currentOnNavigateAdjacent by rememberUpdatedState(onNavigateAdjacent)
+
+    pointerInput(enableDoubleTapZoom, doubleTapAnimDuration) {
         var lastTapTime = 0L
         var lastTapOffset = Offset.Zero
+        var pendingSingleTapJob: Job? = null
 
         awaitEachGesture {
             val down =
@@ -63,7 +75,12 @@ fun Modifier.webtoonTapNavigation(
                         (change.position.x - downPos.x).toDouble(),
                         (change.position.y - downPos.y).toDouble(),
                     ) * zoomState.scale
-                if (moveDistance > touchSlopPx) break
+                if (moveDistance > touchSlopPx) {
+                    // User moved beyond touch slop; cancel any pending single-tap action
+                    pendingSingleTapJob?.cancel()
+                    pendingSingleTapJob = null
+                    break
+                }
             }
 
             if (pointerUp != null) {
@@ -82,7 +99,7 @@ fun Modifier.webtoonTapNavigation(
 
                     if (screenWidth > 0 && screenHeight > 0) {
                         val pos = PointF(upPos.x / screenWidth, upPos.y / screenHeight)
-                        val action = navigator.getAction(pos)
+                        val action = currentNavigator.getAction(pos)
 
                         val isDoubleTap =
                             enableDoubleTapZoom &&
@@ -94,34 +111,64 @@ fun Modifier.webtoonTapNavigation(
                                 (doubleTapAnimDuration > 0)
 
                         if (isDoubleTap) {
-                            if (menuVisible) {
-                                onToggleMenu()
-                            }
+                            // Disambiguation success: cancel pending single tap so it never fires
+                            pendingSingleTapJob?.cancel()
+                            pendingSingleTapJob = null
                             lastTapTime = 0L
                             lastTapOffset = Offset.Zero
-                            coroutineScope.launch {
+
+                            if (currentMenuVisible) {
+                                currentOnToggleMenu()
+                            }
+                            scope.launch {
                                 zoomState.toggleDoubleTapZoom(
                                     tapPos = upPos,
-                                    viewportWidth = size.width.toFloat(),
+                                    viewportWidth = screenWidth,
                                     animDuration = doubleTapAnimDuration,
                                 )
                             }
                         } else {
                             lastTapTime = upTime
                             lastTapOffset = upPos
-                            when (action) {
-                                ViewerNavigation.NavigationRegion.MENU -> onToggleMenu()
-                                ViewerNavigation.NavigationRegion.NEXT,
-                                ViewerNavigation.NavigationRegion.RIGHT -> onNavigateAdjacent(true)
-                                ViewerNavigation.NavigationRegion.PREV,
-                                ViewerNavigation.NavigationRegion.LEFT -> onNavigateAdjacent(false)
+
+                            if (enableDoubleTapZoom && doubleTapAnimDuration > 0) {
+                                // Wait for potential second tap before executing single-tap action
+                                pendingSingleTapJob?.cancel()
+                                pendingSingleTapJob = scope.launch {
+                                    delay(doubleTapTimeoutMs)
+                                    dispatchTapAction(
+                                        action = action,
+                                        onToggleMenu = currentOnToggleMenu,
+                                        onNavigateAdjacent = currentOnNavigateAdjacent,
+                                    )
+                                }
+                            } else {
+                                dispatchTapAction(
+                                    action = action,
+                                    onToggleMenu = currentOnToggleMenu,
+                                    onNavigateAdjacent = currentOnNavigateAdjacent,
+                                )
                             }
                         }
                     } else {
-                        onToggleMenu()
+                        currentOnToggleMenu()
                     }
                 }
             }
         }
+    }
+}
+
+private fun dispatchTapAction(
+    action: ViewerNavigation.NavigationRegion,
+    onToggleMenu: () -> Unit,
+    onNavigateAdjacent: (forward: Boolean) -> Unit,
+) {
+    when (action) {
+        ViewerNavigation.NavigationRegion.MENU -> onToggleMenu()
+        ViewerNavigation.NavigationRegion.NEXT,
+        ViewerNavigation.NavigationRegion.RIGHT -> onNavigateAdjacent(true)
+        ViewerNavigation.NavigationRegion.PREV,
+        ViewerNavigation.NavigationRegion.LEFT -> onNavigateAdjacent(false)
     }
 }

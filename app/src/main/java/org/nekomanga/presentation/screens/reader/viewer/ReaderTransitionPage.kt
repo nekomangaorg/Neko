@@ -142,7 +142,7 @@ fun ReaderTransitionPage(
                 if (toChapter != null) {
                     Spacer(modifier = Modifier.height(Size.mediumLarge))
                     ChapterPreloadStatusSection(
-                        targetChapter = toChapter,
+                        preloadState = toChapter.preloadState,
                         onRetry = onRetry,
                     )
                 }
@@ -172,6 +172,7 @@ fun ReaderTransitionPage(
  * Compatibility overload for legacy callers still passing [ChapterTransition] and
  * [DownloadManager].
  */
+@Deprecated("Use ReaderTransitionPage with ChapterTransitionUiModel directly")
 @Composable
 fun ReaderTransitionPage(
     transition: ChapterTransition,
@@ -184,7 +185,30 @@ fun ReaderTransitionPage(
 ) {
     val resolver =
         remember(downloadManager) { ResolveChapterTransitionUiModelUseCase(downloadManager) }
-    val uiModel = remember(transition, manga, downloadManager) { resolver(transition, manga) }
+    val targetChapter = transition.to
+    val targetState = targetChapter?.stateFlow?.collectAsStateWithLifecycle()?.value
+
+    val uiModel =
+        remember(transition, manga, downloadManager, targetState) {
+            val baseModel = resolver(transition, manga)
+            val preloadState =
+                when (targetState) {
+                    is ReaderChapter.State.Loading -> ChapterTransitionUiModel.PreloadState.Loading
+                    is ReaderChapter.State.Error ->
+                        ChapterTransitionUiModel.PreloadState.Error(targetState.error.message ?: "")
+                    else -> ChapterTransitionUiModel.PreloadState.Ready
+                }
+            when (baseModel) {
+                is ChapterTransitionUiModel.Prev ->
+                    baseModel.copy(
+                        toChapter = baseModel.toChapter?.copy(preloadState = preloadState)
+                    )
+                is ChapterTransitionUiModel.Next ->
+                    baseModel.copy(
+                        toChapter = baseModel.toChapter?.copy(preloadState = preloadState)
+                    )
+            }
+        }
     ReaderTransitionPage(
         uiModel = uiModel,
         onRetry = { transition.to?.let(onRetry) },
@@ -356,44 +380,20 @@ private fun MissingChapterWarningSection(missingChaptersCount: Int) {
 
 @Composable
 private fun ChapterPreloadStatusSection(
-    targetChapter: ChapterTransitionUiModel.TargetChapterInfo,
+    preloadState: ChapterTransitionUiModel.PreloadState,
     onRetry: () -> Unit,
 ) {
-    val readerChapter = targetChapter.readerChapter
-    if (readerChapter != null) {
-        val state by readerChapter.stateFlow.collectAsStateWithLifecycle()
-
-        when (val currentState = state) {
-            is ReaderChapter.State.Wait,
-            is ReaderChapter.State.Loading,
-            is ReaderChapter.State.Loaded -> {}
-            is ReaderChapter.State.Error -> {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth().padding(top = Size.small),
-                ) {
-                    Text(
-                        text =
-                            stringResource(
-                                R.string.failed_to_load_pages_,
-                                currentState.error.message ?: "",
-                            ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center,
-                    )
-                    Spacer(modifier = Modifier.height(Size.small))
-                    Button(onClick = onRetry) { Text(text = stringResource(R.string.retry)) }
-                }
-            }
-        }
-    } else if (targetChapter.preloadState == ChapterTransitionUiModel.PreloadState.Error) {
+    if (preloadState is ChapterTransitionUiModel.PreloadState.Error) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth().padding(top = Size.small),
         ) {
             Text(
-                text = stringResource(R.string.failed_to_load_pages_, ""),
+                text =
+                    stringResource(
+                        R.string.failed_to_load_pages_,
+                        preloadState.message,
+                    ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,

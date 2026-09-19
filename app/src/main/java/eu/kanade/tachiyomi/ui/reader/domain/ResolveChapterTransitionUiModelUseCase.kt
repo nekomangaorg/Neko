@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.domain
 
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
+import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.viewer.calculateChapterDifference
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 import org.nekomanga.domain.manga.MangaItem
@@ -41,6 +42,14 @@ class ResolveChapterTransitionUiModelUseCase(private val downloadManager: Downlo
                     } else {
                         0
                     }
+                val preloadState =
+                    when (val state = to?.state) {
+                        is ReaderChapter.State.Loading ->
+                            ChapterTransitionUiModel.PreloadState.Loading
+                        is ReaderChapter.State.Error ->
+                            ChapterTransitionUiModel.PreloadState.Error(state.error.message ?: "")
+                        else -> ChapterTransitionUiModel.PreloadState.Ready
+                    }
                 ChapterTransitionUiModel.Prev(
                     fromChapterName = transition.from.chapter.name,
                     isFromDownloaded = isFromDownloaded,
@@ -50,7 +59,7 @@ class ResolveChapterTransitionUiModelUseCase(private val downloadManager: Downlo
                                 chapterId = it.chapter.id ?: -1L,
                                 name = it.chapter.name,
                                 isDownloaded = isToDownloaded,
-                                readerChapter = it,
+                                preloadState = preloadState,
                             )
                         },
                     missingChaptersCount = diff,
@@ -70,6 +79,14 @@ class ResolveChapterTransitionUiModelUseCase(private val downloadManager: Downlo
                     } else {
                         0
                     }
+                val preloadState =
+                    when (val state = to?.state) {
+                        is ReaderChapter.State.Loading ->
+                            ChapterTransitionUiModel.PreloadState.Loading
+                        is ReaderChapter.State.Error ->
+                            ChapterTransitionUiModel.PreloadState.Error(state.error.message ?: "")
+                        else -> ChapterTransitionUiModel.PreloadState.Ready
+                    }
                 ChapterTransitionUiModel.Next(
                     fromChapterName = transition.from.chapter.name,
                     isFromDownloaded = isFromDownloaded,
@@ -79,7 +96,7 @@ class ResolveChapterTransitionUiModelUseCase(private val downloadManager: Downlo
                                 chapterId = it.chapter.id ?: -1L,
                                 name = it.chapter.name,
                                 isDownloaded = isToDownloaded,
-                                readerChapter = it,
+                                preloadState = preloadState,
                             )
                         },
                     missingChaptersCount = diff,

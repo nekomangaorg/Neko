@@ -1,7 +1,9 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
@@ -29,8 +31,12 @@ fun Modifier.webtoonOverscrollNavigation(
     val density = LocalDensity.current
     val overscrollThresholdPx = remember(density) { with(density) { (Size.huge * 2).toPx() } }
 
+    val currentItems by rememberUpdatedState(items)
+    val currentOnNavigateToChapter by rememberUpdatedState(onNavigateToChapter)
+    val currentOnNavigateAdjacent by rememberUpdatedState(onNavigateAdjacent)
+
     val connection =
-        remember(lazyListState, items, overscrollThresholdPx) {
+        remember(lazyListState, overscrollThresholdPx) {
             object : NestedScrollConnection {
                 var pullOffset = 0f
 
@@ -64,23 +70,16 @@ fun Modifier.webtoonOverscrollNavigation(
                     val offset = pullOffset
                     pullOffset = 0f
                     if (offset > overscrollThresholdPx) {
+                        val firstItem = currentItems.firstOrNull()
+                        val prevTransition = firstItem as? ReaderUiItem.Transition
                         val prevChapter =
-                            (items.firstOrNull {
-                                    it is ReaderUiItem.Transition &&
-                                        it.transition is ChapterTransition.Prev
-                                } as? ReaderUiItem.Transition)
-                                ?.transition
-                                ?.to
-                                ?.chapter
-                                ?: (items.firstOrNull() as? ReaderUiItem.Page)
-                                    ?.page
-                                    ?.chapter
-                                    ?.chapter
+                            (prevTransition?.transition as? ChapterTransition.Prev)?.to?.chapter
                         if (prevChapter != null) {
-                            if (onNavigateToChapter != null) {
-                                onNavigateToChapter(prevChapter, ChapterNavTarget.End)
+                            val navigateTarget = currentOnNavigateToChapter
+                            if (navigateTarget != null) {
+                                navigateTarget(prevChapter, ChapterNavTarget.End)
                             } else {
-                                onNavigateAdjacent(false)
+                                currentOnNavigateAdjacent(false)
                             }
                             return available
                         }

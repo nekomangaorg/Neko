@@ -35,7 +35,7 @@ class ReaderPreloadEngine(
     private val context: Context,
     private val scope: CoroutineScope,
     private val checkTallPage: CheckTallPageUseCase = CheckTallPageUseCase(),
-    private val onPageSplit: ((ReaderPage, List<ReaderPageSplit>) -> Unit)? = null,
+    var onPageSplit: ((ReaderPage, List<ReaderPageSplit>) -> Unit)? = null,
     private val isSplitTallPagesEnabled: () -> Boolean = { false },
     private val getScreenHeight: () -> Int = {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
