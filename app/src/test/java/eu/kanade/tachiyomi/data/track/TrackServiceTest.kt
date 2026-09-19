@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -14,6 +15,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -393,4 +395,105 @@ class TrackServiceTest {
             val lastRead = testService.getLastChapterRead(track, chapters)
             assertEquals(2f, lastRead)
         }
+
+    private fun mdListTrack(mangaId: Long, followStatus: FollowStatus, rating: Float) =
+        Track.create(TrackManager.MDLIST).apply {
+            manga_id = mangaId
+            status = followStatus.int
+            score = rating
+        }
+
+    @Test
+    fun `given mdlist track when updateNewTrackInfo then status and score come from mdlist`() =
+        runTest {
+            val mangaId = 30L
+            val track = Track.create(1).apply { manga_id = mangaId }
+            coEvery {
+                trackRepository.getTrackByMangaIdAndTrackServiceId(mangaId, TrackManager.MDLIST)
+            } returns mdListTrack(mangaId, FollowStatus.READING, 8f)
+
+            testService.updateNewTrackInfo(track, planningStatus = testService.planningStatus())
+
+            assertEquals(testService.readingStatus(), track.status)
+            assertEquals(8f, track.score)
+        }
+
+    @Test
+    fun `given mdlist track with no rating when updateNewTrackInfo then score is untouched`() =
+        runTest {
+            val mangaId = 31L
+            val track = Track.create(1).apply { manga_id = mangaId }
+            coEvery {
+                trackRepository.getTrackByMangaIdAndTrackServiceId(mangaId, TrackManager.MDLIST)
+            } returns mdListTrack(mangaId, FollowStatus.COMPLETED, 0f)
+
+            testService.updateNewTrackInfo(track, planningStatus = testService.planningStatus())
+
+            assertEquals(testService.completedStatus(), track.status)
+            assertEquals(0f, track.score)
+        }
+
+    @Test
+    fun `given unfollowed mdlist track when updateNewTrackInfo then chapter based status is kept`() =
+        runTest {
+            val mangaId = 32L
+            val track = Track.create(1).apply { manga_id = mangaId }
+            coEvery {
+                trackRepository.getTrackByMangaIdAndTrackServiceId(mangaId, TrackManager.MDLIST)
+            } returns mdListTrack(mangaId, FollowStatus.UNFOLLOWED, 7f)
+
+            testService.updateNewTrackInfo(track, planningStatus = testService.planningStatus())
+
+            assertEquals(testService.planningStatus(), track.status)
+            assertEquals(0f, track.score)
+        }
+
+    @Test
+    fun `given no mdlist track when updateNewTrackInfo then chapter based status is kept`() =
+        runTest {
+            val mangaId = 33L
+            val track = Track.create(1).apply { manga_id = mangaId }
+            coEvery {
+                trackRepository.getTrackByMangaIdAndTrackServiceId(mangaId, TrackManager.MDLIST)
+            } returns null
+
+            testService.updateNewTrackInfo(track, planningStatus = testService.planningStatus())
+
+            assertEquals(testService.planningStatus(), track.status)
+        }
+
+    @Test
+    fun `given mdlist status the tracker cannot map when updateNewTrackInfo then chapter based status is kept`() =
+        runTest {
+            val mangaId = 34L
+            val track = Track.create(1).apply { manga_id = mangaId }
+            coEvery {
+                trackRepository.getTrackByMangaIdAndTrackServiceId(mangaId, TrackManager.MDLIST)
+            } returns mdListTrack(mangaId, FollowStatus.ON_HOLD, 6f)
+
+            testService.updateNewTrackInfo(track, planningStatus = testService.planningStatus())
+
+            assertEquals(testService.planningStatus(), track.status)
+            assertEquals(6f, track.score)
+        }
+
+    @Test
+    fun `given base service when statusFromMdList then only reading planning and completed map`() {
+        assertEquals(
+            testService.readingStatus(),
+            testService.statusFromMdList(FollowStatus.READING),
+        )
+        assertEquals(
+            testService.planningStatus(),
+            testService.statusFromMdList(FollowStatus.PLAN_TO_READ),
+        )
+        assertEquals(
+            testService.completedStatus(),
+            testService.statusFromMdList(FollowStatus.COMPLETED),
+        )
+        assertNull(testService.statusFromMdList(FollowStatus.ON_HOLD))
+        assertNull(testService.statusFromMdList(FollowStatus.DROPPED))
+        assertNull(testService.statusFromMdList(FollowStatus.RE_READING))
+        assertNull(testService.statusFromMdList(FollowStatus.UNFOLLOWED))
+    }
 }
