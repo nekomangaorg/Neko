@@ -52,17 +52,51 @@ class ReaderPreloadEngine(
     private val activeDisposables = ConcurrentHashMap<String, Disposable>()
     private val checkedTallPages = Collections.synchronizedSet(mutableSetOf<ReaderPage>())
     private var activeJob: Job? = null
+    private var lastActiveIndex: Int = -1
+    private var lastItems: List<ReaderUiItem>? = null
+    private var lastPreloadAmount: Int = -1
 
     private val maxTextureBitmapSize = CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize)
 
+    fun isJobActive(): Boolean = activeJob?.isActive == true
+
     fun updateActiveIndex(activeIndex: Int, items: List<ReaderUiItem>, preloadAmount: Int) {
+        if (
+            activeJob?.isActive == true &&
+                lastActiveIndex == activeIndex &&
+                lastItems === items &&
+                lastPreloadAmount == preloadAmount
+        ) {
+            return
+        }
+        lastActiveIndex = activeIndex
+        lastItems = items
+        lastPreloadAmount = preloadAmount
         activeJob?.cancel()
         activeJob =
             scope.launch(Dispatchers.IO) {
                 delay(50L) // Debounce fast scrolling flings
-                val windowStart = (activeIndex - 2).coerceAtLeast(0)
-                val windowEnd = (activeIndex + preloadAmount).coerceAtMost(items.lastIndex)
-                val memoryEnd = (activeIndex + 2).coerceAtMost(items.lastIndex)
+                val windowStart =
+                    calculateWindowStart(
+                        startIndex = activeIndex,
+                        items = items,
+                        pageBudget = 1,
+                        minItems = 3,
+                    )
+                val windowEnd =
+                    calculateWindowEnd(
+                        startIndex = activeIndex,
+                        items = items,
+                        pageBudget = maxOf(1, preloadAmount),
+                        minItems = maxOf(4, preloadAmount * 2),
+                    )
+                val memoryEnd =
+                    calculateWindowEnd(
+                        startIndex = activeIndex,
+                        items = items,
+                        pageBudget = maxOf(2, preloadAmount),
+                        minItems = maxOf(8, preloadAmount * 2),
+                    )
 
                 coroutineScope {
                     for (i in windowStart..windowEnd) {
@@ -71,6 +105,66 @@ class ReaderPreloadEngine(
                     }
                 }
             }
+    }
+
+    private fun calculateWindowStart(
+        startIndex: Int,
+        items: List<ReaderUiItem>,
+        pageBudget: Int = 1,
+        minItems: Int = 3,
+    ): Int {
+        if (items.isEmpty()) return 0
+        var distinctPages = 0
+        var lastPage: ReaderPage? = null
+        var lastIdx = startIndex
+        for (i in startIndex downTo 0) {
+            val item = items[i]
+            val page =
+                when (item) {
+                    is ReaderUiItem.Page -> item.page
+                    is ReaderUiItem.SplitPage -> item.page
+                    is ReaderUiItem.Transition -> null
+                }
+            if (page != null && page != lastPage) {
+                distinctPages++
+                lastPage = page
+            }
+            lastIdx = i
+            if (distinctPages > pageBudget && (startIndex - i) >= minItems) {
+                break
+            }
+        }
+        return lastIdx
+    }
+
+    private fun calculateWindowEnd(
+        startIndex: Int,
+        items: List<ReaderUiItem>,
+        pageBudget: Int,
+        minItems: Int,
+    ): Int {
+        if (items.isEmpty()) return 0
+        var distinctPages = 0
+        var lastPage: ReaderPage? = null
+        var lastIdx = startIndex
+        for (i in startIndex..items.lastIndex) {
+            val item = items[i]
+            val page =
+                when (item) {
+                    is ReaderUiItem.Page -> item.page
+                    is ReaderUiItem.SplitPage -> item.page
+                    is ReaderUiItem.Transition -> null
+                }
+            if (page != null && page != lastPage) {
+                distinctPages++
+                lastPage = page
+            }
+            lastIdx = i
+            if (distinctPages > pageBudget && (i - startIndex) >= minItems) {
+                break
+            }
+        }
+        return lastIdx
     }
 
     private fun preloadItem(itemScope: CoroutineScope, item: ReaderUiItem, preloadMemory: Boolean) {
@@ -108,15 +202,19 @@ class ReaderPreloadEngine(
         }
 
         // 2. Memory Preload
-        if (preloadMemory && preloadedMemory.add(key)) {
+        if (preloadMemory) {
             when (item) {
                 is ReaderUiItem.Page -> {
                     if (!isSplitTallPagesEnabled() || checkedTallPages.contains(item.page)) {
-                        warmMemoryCache(key, item.page)
+                        if (preloadedMemory.add(key)) {
+                            warmMemoryCache(key, item.page)
+                        }
                     }
                 }
                 is ReaderUiItem.SplitPage -> {
-                    warmMemoryCache(key, item.split)
+                    if (preloadedMemory.add(key)) {
+                        warmMemoryCache(key, item.split)
+                    }
                 }
                 is ReaderUiItem.Transition -> Unit
             }
@@ -128,14 +226,26 @@ class ReaderPreloadEngine(
         page: ReaderPage,
         preloadMemory: Boolean,
     ) {
+        val precomputed = page.precomputedSplits
+        if (precomputed != null) {
+            checkedTallPages.add(page)
+            if (precomputed.isEmpty() && preloadMemory) {
+                val key =
+                    page.chapter.chapter.id?.let { cid -> "webtoon_page_${cid}_${page.index}" }
+                if (key != null && preloadedMemory.add(key)) {
+                    warmMemoryCache(key, page)
+                }
+            }
+            return
+        }
         if (!checkedTallPages.add(page)) return
         itemScope.launch(Dispatchers.IO) {
             try {
                 page.statusFlow.first { it == Page.State.READY }
                 val screenHeight = getScreenHeight()
                 val splits = checkTallPage(page, screenHeight)
+                page.precomputedSplits = splits ?: emptyList()
                 if (splits != null && splits.isNotEmpty()) {
-                    onPageSplit?.invoke(page, splits)
                     if (preloadMemory) {
                         splits.forEach { split ->
                             val splitKey =
@@ -145,6 +255,7 @@ class ReaderPreloadEngine(
                             }
                         }
                     }
+                    onPageSplit?.invoke(page, splits)
                 } else if (preloadMemory) {
                     val key =
                         page.chapter.chapter.id?.let { cid -> "webtoon_page_${cid}_${page.index}" }
@@ -176,6 +287,9 @@ class ReaderPreloadEngine(
 
     fun clear() {
         activeJob?.cancel()
+        lastActiveIndex = -1
+        lastItems = null
+        lastPreloadAmount = -1
         activeDisposables.values.forEach { it.dispose() }
         activeDisposables.clear()
         preloadedDisk.clear()

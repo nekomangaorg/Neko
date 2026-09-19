@@ -1,12 +1,16 @@
 package eu.kanade.tachiyomi.ui.reader.domain
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import io.mockk.every
+import io.mockk.mockk
+import java.io.ByteArrayInputStream
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -140,5 +144,73 @@ class BuildWebtoonItemsUseCaseTest {
         assertTrue(items[2] is ReaderUiItem.SplitPage)
         assertEquals(1000, (items[2] as ReaderUiItem.SplitPage).split.topOffset)
         assertTrue(result.tallSplitPages.contains(targetPage))
+    }
+
+    @Test
+    fun `invoke splits ready pages with valid stream upfront when screenHeight is greater than 0`() {
+        val mockCheckTallPage = mockk<CheckTallPageUseCase>()
+        val customUseCase = BuildWebtoonItemsUseCase(mockCheckTallPage)
+        val currChapter = createChapter(1L, pageCount = 1, chapterNumber = 1f)
+        val page =
+            currChapter.pages!![0].apply {
+                status = Page.State.READY
+                stream = { ByteArrayInputStream(ByteArray(0)) }
+            }
+        val splits =
+            listOf(
+                ReaderPageSplit(page, 0, 500),
+                ReaderPageSplit(page, 500, 500),
+            )
+        every { mockCheckTallPage(page, 1000) } returns splits
+
+        val viewerChapters = ViewerChapters(currChapter, null, null)
+        val result = customUseCase(viewerChapters, screenHeight = 1000)
+
+        val items = result.items
+        // 1 prev trans + 2 splits + 1 next trans (null next) = 4 items
+        assertEquals(4, items.size)
+        assertTrue(items[1] is ReaderUiItem.SplitPage)
+        assertTrue(items[2] is ReaderUiItem.SplitPage)
+        assertEquals(splits, page.precomputedSplits)
+        assertTrue(result.tallSplitPages.contains(page))
+    }
+
+    @Test
+    fun `invoke reuses precomputedSplits from ReaderPage`() {
+        val currChapter = createChapter(1L, pageCount = 1, chapterNumber = 1f)
+        val page = currChapter.pages!![0]
+        val splits =
+            listOf(
+                ReaderPageSplit(page, 0, 500),
+                ReaderPageSplit(page, 500, 500),
+            )
+        page.precomputedSplits = splits
+
+        val viewerChapters = ViewerChapters(currChapter, null, null)
+        val result = useCase(viewerChapters)
+
+        val items = result.items
+        // 1 prev trans + 2 splits + 1 next trans = 4 items
+        assertEquals(4, items.size)
+        assertTrue(items[1] is ReaderUiItem.SplitPage)
+        assertTrue(items[2] is ReaderUiItem.SplitPage)
+        assertTrue(result.tallSplitPages.contains(page))
+    }
+
+    @Test
+    fun `invoke preserves non-tall page when precomputedSplits is empty list`() {
+        val currChapter = createChapter(1L, pageCount = 1, chapterNumber = 1f)
+        val page = currChapter.pages!![0]
+        page.precomputedSplits = emptyList()
+
+        val viewerChapters = ViewerChapters(currChapter, null, null)
+        val result = useCase(viewerChapters, screenHeight = 1000)
+
+        val items = result.items
+        // 1 prev trans + 1 monolithic page + 1 next trans = 3 items
+        assertEquals(3, items.size)
+        assertTrue(items[1] is ReaderUiItem.Page)
+        assertEquals(page, (items[1] as ReaderUiItem.Page).page)
+        assertTrue(!result.tallSplitPages.contains(page))
     }
 }

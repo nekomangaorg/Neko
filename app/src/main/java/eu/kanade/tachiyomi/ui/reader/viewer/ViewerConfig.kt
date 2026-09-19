@@ -20,6 +20,7 @@ abstract class ViewerConfig(
 
     var navigationModeChangedListener: (() -> Unit)? = null
     var navigationModeInvertedListener: (() -> Unit)? = null
+    var preloadPageAmountChangedListener: ((Int) -> Unit)? = null
 
     var longTapEnabled = true
     var tappingInverted = ViewerNavigation.TappingInvertMode.NONE
@@ -55,7 +56,12 @@ abstract class ViewerConfig(
             .alwaysShowChapterTransition()
             .register({ alwaysShowChapterTransition = it })
 
-        readerPreferences.preloadPageAmount().register({ preloadPageAmount = it })
+        readerPreferences
+            .preloadPageAmount()
+            .register(
+                valueAssignment = { preloadPageAmount = it },
+                onChanged = { preloadPageAmountChangedListener?.invoke(it) },
+            )
     }
 
     fun <T> Preference<T>.register(valueAssignment: (T) -> Unit, onChanged: (T) -> Unit = {}) {

@@ -105,7 +105,7 @@ fun ComposeWebtoonViewer(
 
     var lastFirstVisibleItem by remember { mutableStateOf(items.getOrNull(config.initialIndex)) }
     var lastFirstVisibleOffset by remember { mutableIntStateOf(0) }
-    var lastActiveItem by remember { mutableStateOf(items.getOrNull(config.initialIndex)) }
+    var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
     var lastProcessedItems by remember { mutableStateOf(items) }
 
     // 1. Consume unidirectional programmatic navigation commands
@@ -249,58 +249,69 @@ fun ComposeWebtoonViewer(
                     lastFirstVisibleOffset = firstVisibleOffset
                 }
                 if (item != null) {
+                    val activeItemChanged = lastActiveItem != item
                     lastActiveItem = item
-                    currentOnActiveItemChanged(activeIndex)
-                    when (item) {
-                        is ReaderUiItem.Page -> {
-                            if (
-                                item.page.chapter.chapter.id == activeChapterId ||
-                                    lazyListState.isScrollInProgress
-                            ) {
-                                currentOnPageSelected(item.page)
-                            }
-                            val pages = item.page.chapter.pages
-                            if (pages != null && item.page.chapter.chapter.id == activeChapterId) {
-                                val threshold = maxOf(5, currentConfig.preloadPageAmount)
-                                if (pages.size - item.page.number < threshold) {
-                                    val nextTransition =
-                                        currentItems.firstOrNull {
-                                            it is ReaderUiItem.Transition &&
-                                                it.transition is ChapterTransition.Next
-                                        } as? ReaderUiItem.Transition
-                                    nextTransition?.transition?.to?.let { nextChapter ->
-                                        currentConfig.onRequestPreloadChapter?.invoke(nextChapter)
+                    if (activeItemChanged) {
+                        currentOnActiveItemChanged(activeIndex)
+                        when (item) {
+                            is ReaderUiItem.Page -> {
+                                if (
+                                    item.page.chapter.chapter.id == activeChapterId ||
+                                        lazyListState.isScrollInProgress
+                                ) {
+                                    currentOnPageSelected(item.page)
+                                }
+                                val pages = item.page.chapter.pages
+                                if (
+                                    pages != null && item.page.chapter.chapter.id == activeChapterId
+                                ) {
+                                    val threshold = maxOf(5, currentConfig.preloadPageAmount)
+                                    if (pages.size - item.page.number < threshold) {
+                                        val nextTransition =
+                                            currentItems.firstOrNull {
+                                                it is ReaderUiItem.Transition &&
+                                                    it.transition is ChapterTransition.Next
+                                            } as? ReaderUiItem.Transition
+                                        nextTransition?.transition?.to?.let { nextChapter ->
+                                            currentConfig.onRequestPreloadChapter?.invoke(
+                                                nextChapter
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
-                        is ReaderUiItem.SplitPage -> {
-                            if (
-                                item.page.chapter.chapter.id == activeChapterId ||
-                                    lazyListState.isScrollInProgress
-                            ) {
-                                currentOnPageSelected(item.page)
-                            }
-                            val pages = item.page.chapter.pages
-                            if (pages != null && item.page.chapter.chapter.id == activeChapterId) {
-                                val threshold = maxOf(5, currentConfig.preloadPageAmount)
-                                if (pages.size - item.page.number < threshold) {
-                                    val nextTransition =
-                                        currentItems.firstOrNull {
-                                            it is ReaderUiItem.Transition &&
-                                                it.transition is ChapterTransition.Next
-                                        } as? ReaderUiItem.Transition
-                                    nextTransition?.transition?.to?.let { nextChapter ->
-                                        currentConfig.onRequestPreloadChapter?.invoke(nextChapter)
+                            is ReaderUiItem.SplitPage -> {
+                                if (
+                                    item.page.chapter.chapter.id == activeChapterId ||
+                                        lazyListState.isScrollInProgress
+                                ) {
+                                    currentOnPageSelected(item.page)
+                                }
+                                val pages = item.page.chapter.pages
+                                if (
+                                    pages != null && item.page.chapter.chapter.id == activeChapterId
+                                ) {
+                                    val threshold = maxOf(5, currentConfig.preloadPageAmount)
+                                    if (pages.size - item.page.number < threshold) {
+                                        val nextTransition =
+                                            currentItems.firstOrNull {
+                                                it is ReaderUiItem.Transition &&
+                                                    it.transition is ChapterTransition.Next
+                                            } as? ReaderUiItem.Transition
+                                        nextTransition?.transition?.to?.let { nextChapter ->
+                                            currentConfig.onRequestPreloadChapter?.invoke(
+                                                nextChapter
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
-                        is ReaderUiItem.Transition -> {
-                            currentOnTransitionSelected(item.transition)
-                            val toChapter = item.transition.to
-                            if (toChapter != null) {
-                                currentConfig.onRequestPreloadChapter?.invoke(toChapter)
+                            is ReaderUiItem.Transition -> {
+                                currentOnTransitionSelected(item.transition)
+                                val toChapter = item.transition.to
+                                if (toChapter != null) {
+                                    currentConfig.onRequestPreloadChapter?.invoke(toChapter)
+                                }
                             }
                         }
                     }

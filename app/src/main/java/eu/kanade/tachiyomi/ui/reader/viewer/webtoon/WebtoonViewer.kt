@@ -87,6 +87,10 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
             activity.setNavigation(config.navigator, showOnStart)
         }
         config.navigationModeInvertedListener = { activity.showNavigationAgain() }
+        config.preloadPageAmountChangedListener = { amount ->
+            lastPreloadAmount = amount
+            preloadEngine.updateActiveIndex(lastActiveIndex, items, amount)
+        }
     }
 
     /** Destroys this viewer. Called when leaving the reader or swapping viewers. */
@@ -102,6 +106,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     private var isInitialLoad = true
     private var pendingPageMove: Pair<ReaderPage, Boolean>? = null
     private var lastActiveIndex = 0
+    private var lastPreloadAmount = 0
 
     /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
@@ -155,7 +160,15 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     }
 
     fun updateActiveIndex(activeIndex: Int) {
+        if (
+            lastActiveIndex == activeIndex &&
+                preloadEngine.isJobActive() &&
+                lastPreloadAmount == config.preloadPageAmount
+        ) {
+            return
+        }
         lastActiveIndex = activeIndex
+        lastPreloadAmount = config.preloadPageAmount
         preloadEngine.updateActiveIndex(activeIndex, items, config.preloadPageAmount)
     }
 

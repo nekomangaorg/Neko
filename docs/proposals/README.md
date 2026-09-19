@@ -29,8 +29,7 @@ Proposals focused on reader performance, Jetpack Compose viewers, navigation lif
 
 ### Reader Feature Proposals
 
-| Proposal | Description | Target Milestone |
-| :--- | :--- | :--- |
+| [**Webtoon Preloading & Slice Cache Architecture**](reader/webtoon_preloading_and_slice_cache_architecture_proposal.md) | Eliminates black screen stutter, implements two-tier bounded preloading, disk-cached slice generation, and seamless scroll continuity for downloaded webtoons. | Neko Reader Phase 2 |
 | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Neko Performance |
 | [**Unified Reader Preloader Engine & Two-Tier Pipeline**](reader/reader_preloader_engine_proposal.md) | Extracts inline preloading logic from Compose viewers into a testable domain engine with two-tier disk/memory pipelining. | Neko Reader Phase 2 |
 | [**Rock-Solid ComposeWebtoonViewer Architecture**](reader/rock_solid_webtoon_compose_viewer_proposal.md) | Solves in-UI tall page splitting shifts, post-composition prepend races, and gesture bloat to reduce ComposeWebtoonViewer to ~220 lines. | Neko Reader Phase 2 |
