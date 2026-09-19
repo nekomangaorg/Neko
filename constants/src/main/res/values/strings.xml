@@ -1528,6 +1528,7 @@
     <string name="cache">Cache</string>
     <string name="parent_cache_folder">Clear parent cache folder</string>
     <string name="chapter_disk_cache">Clear chapter disk cache</string>
+    <string name="auto_clear_chapter_cache">Clear chapter disk cache on app launch</string>
     <string name="cover_cache">Clear cover cache</string>
     <string name="custom_cover_cache">Clear custom cover cache</string>
     <string name="online_cover_cache">Clear online cover cache</string>

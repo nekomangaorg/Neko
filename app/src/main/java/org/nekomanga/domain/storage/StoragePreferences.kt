@@ -17,6 +17,8 @@ class StoragePreferences(
 
     fun backupInterval() = this.preferenceStore.getInt("backup_interval", 12)
 
+    fun autoClearChapterCache() = preferenceStore.getBoolean("auto_clear_chapter_cache", false)
+
     fun lastAutoBackupTimestamp() =
         preferenceStore.getLong(Preference.appStateKey("last_auto_backup_timestamp"), 0L)
 
