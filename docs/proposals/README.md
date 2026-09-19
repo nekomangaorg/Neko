@@ -19,7 +19,7 @@ Proposals focused on reader performance, Jetpack Compose viewers, navigation lif
 
 | Order | Status | Proposal | Description | Prerequisites | Target Milestone |
 | :---: | :---: | :--- | :--- | :--- | :--- |
-| **R1** | 🟡 Partial | [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, and guards key events with a `Mutex`. | None | Phase 1 Landed / Phase 2 Next Release |
+| **R1** | ✅ Done | [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, and guards key events with a `Mutex`. | None | Phase 1 & 2 Complete |
 | **R2** | ✅ Done | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math into `ChapterTransitionUiModel`. | Step R1 | Current Release (Landed) |
 | **R3** | ⏳ Planned | [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, hoisting configurations into immutable UI models. | Steps R1, R2 | Next Release (Step R3) |
 | **R4** | ⏳ Planned | [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped `ReaderBottomControlsUiState` and `ReaderBottomBarAction`. | Step R3 | Next Release (Phase R2) |
@@ -29,6 +29,8 @@ Proposals focused on reader performance, Jetpack Compose viewers, navigation lif
 
 ### Reader Feature Proposals
 
+| Proposal | Description | Target Milestone |
+| :--- | :--- | :--- |
 | [**Webtoon Preloading & Slice Cache Architecture**](reader/webtoon_preloading_and_slice_cache_architecture_proposal.md) | Eliminates black screen stutter, implements two-tier bounded preloading, disk-cached slice generation, and seamless scroll continuity for downloaded webtoons. | Neko Reader Phase 2 |
 | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Neko Performance |
 | [**Unified Reader Preloader Engine & Two-Tier Pipeline**](reader/reader_preloader_engine_proposal.md) | Extracts inline preloading logic from Compose viewers into a testable domain engine with two-tier disk/memory pipelining. | Neko Reader Phase 2 |
@@ -55,6 +57,7 @@ flowchart TD
     subgraph P2["Phase 2: Screen Jobs & Workflow Decoupling"]
         S5["Step 5: Settings Jobs & Disk I/O"]
         S6["Step 6: Library Job Dispatching"]
+        S6b["Step 6b: Library Update Logging & Notifications"]
         S7["Step 7: Feed Jobs & Actions"]
         S8["Step 8: Download Screen & Row"]
         S9["Step 9: Browse & Display Screen"]
@@ -76,6 +79,7 @@ flowchart TD
     S1 --> S9
     S2 --> S6
     S5 --> S6
+    S6 --> S6b
     S8 -.-> S13
     S11 --> S14
     S12 --> S14
@@ -96,6 +100,7 @@ flowchart TD
 | **Phase 1<br>Step 4** | [**Decouple Onboarding Steps**](decoupling/decouple_onboarding_steps_proposal.md) | Decouples onboarding steps from service locators, direct preferences, and Activity recreation into `StorageStepUiState` and `ThemeStepUiState`. | None (Self-Contained) | UI Decoupling |
 | **Phase 2<br>Step 5** | [**Decouple Settings Screens Jobs & I/O**](decoupling/decouple_settings_screens_jobs_and_io_proposal.md) | Decouples settings screens from `CoroutineScope`, background WorkManager workers (`LibraryUpdateJob`), and disk I/O. | None (Establishes Job Pattern) | UI Decoupling |
 | **Phase 2<br>Step 6** | [**Decouple LibraryScreen Job Dispatching**](decoupling/decouple_library_screen_job_dispatching_proposal.md) | Decouples library screen from background jobs (`UpdateLibraryUseCase`), database entity mapping, and share intent logic. | Steps 2, 5 | UI Decoupling |
+| **Phase 2<br>Step 6b** | [**Decouple Library Update Logging, Safe URI Generation & Notification Dispatch**](decoupling/decouple_library_update_logging_and_notifications_proposal.md) | Resolves crash hazards, encapsulates `FileProvider` URI resolution inside a safe try-catch boundary, and deduplicates notification builders into a unified component. | None (PR #3404 / PR #3397) | UI Decoupling |
 | **Phase 2<br>Step 7** | [**Decouple FeedScreen Jobs & Actions**](decoupling/decouple_feed_screen_jobs_and_actions_proposal.md) | Isolates feed screen from background job orchestration, duplicate filtering rules, and `StateFlow` prop-drilling via `ValidateChapterDownloadUseCase`. | Step 1 | UI Decoupling |
 | **Phase 2<br>Step 8** | [**Decouple DownloadScreen and DownloadChapterRow**](decoupling/decouple_download_screen_and_chapter_row_proposal.md) | Decouples download management screens from in-composable scanlator grouping and legacy `Download.State` enums. | None | UI Decoupling |
 | **Phase 2<br>Step 9** | [**Decouple Browse & Display Screens**](decoupling/decouple_browse_and_display_screen_navigation_proposal.md) | Decouples Browse and Display screens from Room database entities (`BrowseFilterImpl`) and in-UI navigation routing. | Step 1 | UI Decoupling |

@@ -140,28 +140,10 @@ fun ReaderTransitionPage(
                 MissingChapterWarningSection(missingChaptersCount = missingCount)
 
                 if (toChapter != null) {
-                    Spacer(modifier = Modifier.height(Size.mediumLarge))
                     ChapterPreloadStatusSection(
                         preloadState = toChapter.preloadState,
                         onRetry = onRetry,
                     )
-                }
-
-                if (onCardClick != null && toChapter != null) {
-                    Spacer(modifier = Modifier.height(Size.mediumLarge))
-                    Button(
-                        onClick = onCardClick,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(
-                            text =
-                                if (uiModel is ChapterTransitionUiModel.Prev) {
-                                    stringResource(R.string.previous_chapter)
-                                } else {
-                                    stringResource(R.string.next_chapter)
-                                }
-                        )
-                    }
                 }
             }
         }
@@ -386,7 +368,7 @@ private fun ChapterPreloadStatusSection(
     if (preloadState is ChapterTransitionUiModel.PreloadState.Error) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().padding(top = Size.small),
+            modifier = Modifier.fillMaxWidth().padding(top = Size.mediumLarge),
         ) {
             Text(
                 text =
