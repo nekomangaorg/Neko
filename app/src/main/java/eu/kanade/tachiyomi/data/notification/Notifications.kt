@@ -26,6 +26,7 @@ object Notifications {
             const val Progress = "library_progress_channel"
             const val Error = "library_errors_channel"
             const val Skipped = "library_skipped_channel"
+            const val Unavailable = "library_unavailable_channel"
         }
 
         const val Authentication = "authentication_channel"
@@ -49,6 +50,7 @@ object Notifications {
             const val Progress = -101
             const val Error = -102
             const val Skipped = -103
+            const val Unavailable = -104
         }
 
         object Status {
@@ -158,6 +160,15 @@ object Notifications {
                 NotificationChannel(
                         Channel.Library.Skipped,
                         context.getString(R.string.channel_skipped),
+                        NotificationManager.IMPORTANCE_LOW,
+                    )
+                    .apply {
+                        group = Group.Library
+                        setShowBadge(false)
+                    },
+                NotificationChannel(
+                        Channel.Library.Unavailable,
+                        context.getString(R.string.channel_unavailable),
                         NotificationManager.IMPORTANCE_LOW,
                     )
                     .apply {
