@@ -6,7 +6,6 @@ import android.view.MotionEvent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.lifecycleScope
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -20,11 +19,11 @@ import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import kotlin.math.min
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 /** Headless implementation of [BaseViewer] for Pager reading modes (L2R, R2L, Vertical). */
+@Deprecated("Use ComposePagerViewer with ReaderViewModel and ReaderNavCommand instead")
 abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     val downloadManager: DownloadManager by injectLazy()
@@ -99,12 +98,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     ) {
         if (isTransitioning) return
         isTransitioning = true
-        activity.lifecycleScope.launch {
-            try {
-                activity.loadChapter(chapter, navTarget)
-            } finally {
-                isTransitioning = false
-            }
+        try {
+            activity.viewModel.navigateToChapter(chapter, navTarget)
+        } finally {
+            isTransitioning = false
         }
     }
 

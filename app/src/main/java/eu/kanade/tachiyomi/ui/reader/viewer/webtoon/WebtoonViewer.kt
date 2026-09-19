@@ -151,7 +151,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
             pending != null && pending.first.chapter.chapter.id == chapters.currChapter.chapter.id
         ) {
             moveToPage(pending.first, pending.second)
-        } else if (isInitialLoad) {
+        } else if (chapterChanged || isInitialLoad) {
             isInitialLoad = false
             if (requestedIndex != null && requestedIndex in pages.indices) {
                 moveToPage(pages[requestedIndex], false)

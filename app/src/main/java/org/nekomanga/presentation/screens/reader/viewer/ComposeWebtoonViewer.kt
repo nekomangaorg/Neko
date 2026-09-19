@@ -61,12 +61,14 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonActiveItemResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollAnchorResolver
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollGatingPolicy
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlin.math.hypot
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
@@ -106,6 +108,7 @@ fun ComposeWebtoonViewer(
     var lastFirstVisibleItem by remember { mutableStateOf(items.getOrNull(config.initialIndex)) }
     var lastFirstVisibleOffset by remember { mutableIntStateOf(0) }
     var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
+    var lastDispatchedPage by remember { mutableStateOf<ReaderPage?>(null) }
     var lastProcessedItems by remember { mutableStateOf(items) }
 
     // 1. Consume unidirectional programmatic navigation commands
@@ -128,6 +131,23 @@ fun ComposeWebtoonViewer(
                     currentItems.getOrNull(cmd.pageIndex)?.let {
                         lastFirstVisibleItem = it
                         lastFirstVisibleOffset = 0
+                    }
+                }
+                is ReaderNavCommand.StepPage -> {
+                    val viewportHeight = lazyListState.layoutInfo.viewportSize.height
+                    val delta =
+                        if (viewportHeight > 0) {
+                            viewportHeight * 0.9f
+                        } else {
+                            500f
+                        }
+                    val scrollAmount = if (cmd.forward) delta else -delta
+                    val effectiveScrollAmount =
+                        if (zoomState.scale > 0f) scrollAmount / zoomState.scale else scrollAmount
+                    if (config.animatedTransitions) {
+                        lazyListState.animateScrollBy(effectiveScrollAmount)
+                    } else {
+                        lazyListState.scrollBy(effectiveScrollAmount)
                     }
                 }
                 is ReaderNavCommand.ScrollByDelta -> {
@@ -253,65 +273,65 @@ fun ComposeWebtoonViewer(
                     lastActiveItem = item
                     if (activeItemChanged) {
                         currentOnActiveItemChanged(activeIndex)
-                        when (item) {
-                            is ReaderUiItem.Page -> {
-                                if (
-                                    item.page.chapter.chapter.id == activeChapterId ||
-                                        lazyListState.isScrollInProgress
-                                ) {
-                                    currentOnPageSelected(item.page)
-                                }
-                                val pages = item.page.chapter.pages
-                                if (
-                                    pages != null && item.page.chapter.chapter.id == activeChapterId
-                                ) {
-                                    val threshold = maxOf(5, currentConfig.preloadPageAmount)
-                                    if (pages.size - item.page.number < threshold) {
-                                        val nextTransition =
-                                            currentItems.firstOrNull {
-                                                it is ReaderUiItem.Transition &&
-                                                    it.transition is ChapterTransition.Next
-                                            } as? ReaderUiItem.Transition
-                                        nextTransition?.transition?.to?.let { nextChapter ->
-                                            currentConfig.onRequestPreloadChapter?.invoke(
-                                                nextChapter
-                                            )
-                                        }
+                    }
+                    when (item) {
+                        is ReaderUiItem.Page -> {
+                            val shouldDispatch =
+                                WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
+                                    activeChapterId = activeChapterId,
+                                    candidateChapterId = item.page.chapter.chapter.id,
+                                    isScrollInProgress = lazyListState.isScrollInProgress,
+                                )
+                            if (
+                                shouldDispatch &&
+                                    (lastDispatchedPage != item.page ||
+                                        activeChapterId != item.page.chapter.chapter.id)
+                            ) {
+                                lastDispatchedPage = item.page
+                                currentOnPageSelected(item.page)
+                            }
+                            val pages = item.page.chapter.pages
+                            if (pages != null && item.page.chapter.chapter.id == activeChapterId) {
+                                val threshold = maxOf(5, currentConfig.preloadPageAmount)
+                                if (pages.size - item.page.number < threshold) {
+                                    val nextTransition =
+                                        currentItems.firstOrNull {
+                                            it is ReaderUiItem.Transition &&
+                                                it.transition is ChapterTransition.Next
+                                        } as? ReaderUiItem.Transition
+                                    nextTransition?.transition?.to?.let { nextChapter ->
+                                        currentConfig.onRequestPreloadChapter?.invoke(nextChapter)
                                     }
                                 }
                             }
-                            is ReaderUiItem.SplitPage -> {
-                                if (
-                                    item.page.chapter.chapter.id == activeChapterId ||
-                                        lazyListState.isScrollInProgress
-                                ) {
-                                    currentOnPageSelected(item.page)
-                                }
-                                val pages = item.page.chapter.pages
-                                if (
-                                    pages != null && item.page.chapter.chapter.id == activeChapterId
-                                ) {
-                                    val threshold = maxOf(5, currentConfig.preloadPageAmount)
-                                    if (pages.size - item.page.number < threshold) {
-                                        val nextTransition =
-                                            currentItems.firstOrNull {
-                                                it is ReaderUiItem.Transition &&
-                                                    it.transition is ChapterTransition.Next
-                                            } as? ReaderUiItem.Transition
-                                        nextTransition?.transition?.to?.let { nextChapter ->
-                                            currentConfig.onRequestPreloadChapter?.invoke(
-                                                nextChapter
-                                            )
-                                        }
+                        }
+                        is ReaderUiItem.SplitPage -> {
+                            if (
+                                item.page.chapter.chapter.id == activeChapterId ||
+                                    lazyListState.isScrollInProgress
+                            ) {
+                                currentOnPageSelected(item.page)
+                            }
+                            val pages = item.page.chapter.pages
+                            if (pages != null && item.page.chapter.chapter.id == activeChapterId) {
+                                val threshold = maxOf(5, currentConfig.preloadPageAmount)
+                                if (pages.size - item.page.number < threshold) {
+                                    val nextTransition =
+                                        currentItems.firstOrNull {
+                                            it is ReaderUiItem.Transition &&
+                                                it.transition is ChapterTransition.Next
+                                        } as? ReaderUiItem.Transition
+                                    nextTransition?.transition?.to?.let { nextChapter ->
+                                        currentConfig.onRequestPreloadChapter?.invoke(nextChapter)
                                     }
                                 }
                             }
-                            is ReaderUiItem.Transition -> {
-                                currentOnTransitionSelected(item.transition)
-                                val toChapter = item.transition.to
-                                if (toChapter != null) {
-                                    currentConfig.onRequestPreloadChapter?.invoke(toChapter)
-                                }
+                        }
+                        is ReaderUiItem.Transition -> {
+                            currentOnTransitionSelected(item.transition)
+                            val toChapter = item.transition.to
+                            if (toChapter != null) {
+                                currentConfig.onRequestPreloadChapter?.invoke(toChapter)
                             }
                         }
                     }
@@ -614,6 +634,7 @@ fun ComposeWebtoonViewer(
     onNavigateToChapter: ((Chapter, ChapterNavTarget) -> Unit)? = null,
     onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
     modifier: Modifier = Modifier,
+    navCommands: Flow<ReaderNavCommand>? = null,
 ) {
     val currentChapterId =
         (viewer.currentChapter
@@ -710,10 +731,19 @@ fun ComposeWebtoonViewer(
         viewer.requestedScrollDelta = null
     }
 
+    val effectiveNavCommands =
+        remember(navCommands) {
+            if (navCommands != null) {
+                merge(navChannel.receiveAsFlow(), navCommands)
+            } else {
+                navChannel.receiveAsFlow()
+            }
+        }
+
     ComposeWebtoonViewer(
         items = items,
         config = config,
-        navCommands = navChannel.receiveAsFlow(),
+        navCommands = effectiveNavCommands,
         onActiveItemChanged = { activeIndex -> viewer.updateActiveIndex(activeIndex) },
         onPageSelected = onPageSelected,
         onTransitionSelected = onTransitionSelected,

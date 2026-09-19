@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader
 import android.app.Application
 import android.graphics.BitmapFactory
 import androidx.annotation.ColorInt
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,11 +33,14 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
+import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterNavTargetUseCase
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.ui.reader.model.ReaderChapterTransitionState
+import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -59,7 +63,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -69,7 +75,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.AppDatabase
@@ -129,6 +137,17 @@ constructor(
 
     private val eventChannel = Channel<Event>()
     val eventFlow = eventChannel.receiveAsFlow()
+
+    private val navigationMutex = Mutex()
+
+    private val _navigationCommands = Channel<ReaderNavCommand>(capacity = Channel.BUFFERED)
+    val navigationCommands: Flow<ReaderNavCommand> = _navigationCommands.receiveAsFlow()
+
+    private val _transitionState =
+        MutableStateFlow<ReaderChapterTransitionState>(ReaderChapterTransitionState.Idle)
+    val transitionState: StateFlow<ReaderChapterTransitionState> = _transitionState.asStateFlow()
+
+    private val resolveChapterNavTargetUseCase = ResolveChapterNavTargetUseCase()
 
     /** The manga loaded in the reader. It can be null when instantiated for a short time. */
     val manga: MangaItem?
@@ -615,6 +634,105 @@ constructor(
     }
 
     /**
+     * Navigates to an adjacent chapter in reading order. Guaranteed to survive configuration
+     * changes via viewModelScope and protected against concurrent invocations.
+     */
+    fun navigateAdjacentChapter(forward: Boolean) {
+        viewModelScope.launch {
+            if (!navigationMutex.tryLock()) {
+                TimberKt.d { "Navigation already in progress; ignoring duplicate adjacent request" }
+                return@launch
+            }
+            try {
+                val adjChapter = adjacentChapter(forward)
+                if (adjChapter != null) {
+                    val target = if (forward) ChapterNavTarget.Start else ChapterNavTarget.End
+                    executeChapterTransition(adjChapter, target)
+                } else {
+                    eventChannel.send(
+                        Event.Notify(
+                            if (forward) {
+                                R.string.theres_no_next_chapter
+                            } else {
+                                R.string.theres_no_previous_chapter
+                            }
+                        )
+                    )
+                }
+            } finally {
+                navigationMutex.unlock()
+            }
+        }
+    }
+
+    /**
+     * Executes chapter loading, saves reading progress for current chapter, and emits navigation
+     * command.
+     */
+    fun navigateToChapter(chapter: Chapter, navTarget: ChapterNavTarget = ChapterNavTarget.Resume) {
+        viewModelScope.launch {
+            if (state.value.viewerChapters?.currChapter?.chapter?.id == chapter.id) {
+                TimberKt.d { "Chapter ${chapter.id} already active; ignoring navigation request" }
+                return@launch
+            }
+            val currentTransition = _transitionState.value
+            if (
+                currentTransition is ReaderChapterTransitionState.Loading &&
+                    currentTransition.targetChapterId == chapter.id
+            ) {
+                TimberKt.d { "Already loading chapter ${chapter.id}; ignoring navigation request" }
+                return@launch
+            }
+            if (!navigationMutex.tryLock()) {
+                TimberKt.d {
+                    "Navigation already in progress; ignoring duplicate navigateToChapter request"
+                }
+                return@launch
+            }
+            try {
+                val readerChapter =
+                    getChapterList().find { it.chapter.id == chapter.id } ?: ReaderChapter(chapter)
+                executeChapterTransition(readerChapter, navTarget)
+            } finally {
+                navigationMutex.unlock()
+            }
+        }
+    }
+
+    private suspend fun executeChapterTransition(
+        chapter: ReaderChapter,
+        navTarget: ChapterNavTarget,
+    ) {
+        _transitionState.value = ReaderChapterTransitionState.Loading(chapter.chapter.id, navTarget)
+        try {
+            val targetPage = loadChapter(chapter, navTarget)
+            if (targetPage != null && targetPage >= 0) {
+                _transitionState.value =
+                    ReaderChapterTransitionState.Settling(chapter.chapter.id, targetPage)
+                _navigationCommands.send(ReaderNavCommand.SnapToPage(targetPage))
+            }
+            getChapters()
+            _transitionState.value = ReaderChapterTransitionState.Idle
+        } catch (e: Throwable) {
+            if (e is CancellationException) throw e
+            TimberKt.e(e) { "Failed to transition to chapter ${chapter.chapter.url}" }
+            _transitionState.value = ReaderChapterTransitionState.Error(chapter.chapter.id, e)
+        }
+    }
+
+    fun requestPreloadChapter(chapter: Chapter) {
+        viewModelScope.launch {
+            val readerChapter =
+                getChapterList().find { it.chapter.id == chapter.id } ?: ReaderChapter(chapter)
+            preload(readerChapter)
+        }
+    }
+
+    fun sendNavigationCommand(command: ReaderNavCommand) {
+        viewModelScope.launch { _navigationCommands.send(command) }
+    }
+
+    /**
      * Called every time a page changes on the reader. Used to mark the flag of chapters being read,
      * update tracking services, enqueue downloaded chapter deletion, and updating the active
      * chapter if this [page]'s chapter is different from the currently active.
@@ -638,29 +756,14 @@ constructor(
             viewModelScope.launchNonCancellable { saveReadingProgress(currentChapters.currChapter) }
             loadNewChapterJob = viewModelScope.launch {
                 try {
-                    val isForward =
-                        when {
-                            selectedChapter.chapter.id ==
-                                currentChapters.nextChapter?.chapter?.id -> true
-                            selectedChapter.chapter.id ==
-                                currentChapters.prevChapter?.chapter?.id -> false
-                            else -> {
-                                val chapterList = chapterListCache ?: getChapterList()
-                                val currentPos = chapterList.indexOfFirst {
-                                    it.chapter.id == currentChapters.currChapter.chapter.id
-                                }
-                                val selectedPos = chapterList.indexOfFirst {
-                                    it.chapter.id == selectedChapter.chapter.id
-                                }
-                                if (currentPos != -1 && selectedPos != -1) {
-                                    selectedPos > currentPos
-                                } else {
-                                    selectedChapter.chapter.chapter_number >
-                                        currentChapters.currChapter.chapter.chapter_number
-                                }
-                            }
-                        }
-                    val navTarget = if (isForward) ChapterNavTarget.Start else ChapterNavTarget.End
+                    val navTarget =
+                        resolveChapterNavTargetUseCase(
+                            currentChapter = currentChapters.currChapter,
+                            selectedChapter = selectedChapter,
+                            chapterList = chapterListCache ?: getChapterList(),
+                            nextChapter = currentChapters.nextChapter,
+                            prevChapter = currentChapters.prevChapter,
+                        )
                     loadNewChapter(chapterToLoad, navTarget)
                 } finally {
                     if (loadingChapterId == chapterToLoad.chapter.id) {
@@ -1390,6 +1493,8 @@ constructor(
     )
 
     sealed class Event {
+        data class Notify(@StringRes val stringRes: Int) : Event()
+
         object ReloadViewerChapters : Event()
 
         object ReloadMangaAndChapters : Event()
