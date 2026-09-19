@@ -88,6 +88,7 @@ fun ReaderPageErrorOverlay(
     visible: Boolean,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    message: String? = null,
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -115,6 +116,14 @@ fun ReaderPageErrorOverlay(
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                 )
+                if (message != null) {
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
                 Button(onClick = onRetry) { Text(text = stringResource(id = R.string.retry)) }
             }
         }

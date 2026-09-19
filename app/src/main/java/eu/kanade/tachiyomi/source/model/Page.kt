@@ -25,8 +25,12 @@ open class Page(
     var status: State
         get() = _statusFlow.value
         set(value) {
+            if (value != State.ERROR) errorMessage = null
             _statusFlow.value = value
         }
+
+    /** Why the page is in [State.ERROR], for the reader's error overlay. Set before [status]. */
+    @Transient var errorMessage: String? = null
 
     @Transient private val _progressFlow = MutableStateFlow(0)
 

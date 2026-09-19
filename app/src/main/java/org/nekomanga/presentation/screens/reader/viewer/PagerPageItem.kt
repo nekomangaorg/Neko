@@ -616,7 +616,11 @@ fun PagerPageItem(
 
         ReaderPageLoadingOverlay(status = combinedStatus, progress = combinedProgress)
 
-        ReaderPageErrorOverlay(visible = isError, onRetry = onRetry)
+        ReaderPageErrorOverlay(
+            visible = isError,
+            onRetry = onRetry,
+            message = page.errorMessage ?: extraPage?.errorMessage,
+        )
     }
 }
 
