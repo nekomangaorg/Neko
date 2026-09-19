@@ -17,15 +17,15 @@ Proposals focused on reader performance, Jetpack Compose viewers, navigation lif
 
 ### Reader Decoupling Execution Track
 
-| Order | Proposal | Description | Prerequisites | Target Milestone |
-| :---: | :--- | :--- | :--- | :--- |
-| **R1** | [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, and guards key events with a `Mutex`. | None (Phase 1 Complete) | Current Release (Landed) |
-| **R2** | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math into `ChapterTransitionUiModel`. | Step R1 | Current Release (Landed) |
-| **R3** | [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, hoisting configurations into immutable UI models. | Steps R1, R2 | Next Release (Step R3) |
-| **R4** | [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped `ReaderBottomControlsUiState` and `ReaderBottomBarAction`. | Step R3 | Next Release (Phase R2) |
-| **R5** | [**Decouple ReaderChaptersSheet**](reader/decouple_reader_chapters_sheet_proposal.md) | Decouples the chapter selection bottom sheet from direct preferences, context color resolvers, and inline repository calls. | Step R3 | Next Release (Phase R2) |
-| **R6** | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags into `ReaderSettingsUiState`. | Step R3 | Next Release (Phase R2) |
-| **R7** | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math into `NavigationRegionUiModel`. | None (Self-Contained) | Current Release (Self-Contained) |
+| Order | Status | Proposal | Description | Prerequisites | Target Milestone |
+| :---: | :---: | :--- | :--- | :--- | :--- |
+| **R1** | 🟡 Partial | [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, and guards key events with a `Mutex`. | None | Phase 1 Landed / Phase 2 Next Release |
+| **R2** | ✅ Done | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math into `ChapterTransitionUiModel`. | Step R1 | Current Release (Landed) |
+| **R3** | ⏳ Planned | [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, hoisting configurations into immutable UI models. | Steps R1, R2 | Next Release (Step R3) |
+| **R4** | ⏳ Planned | [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped `ReaderBottomControlsUiState` and `ReaderBottomBarAction`. | Step R3 | Next Release (Phase R2) |
+| **R5** | ⏳ Planned | [**Decouple ReaderChaptersSheet**](reader/decouple_reader_chapters_sheet_proposal.md) | Decouples the chapter selection bottom sheet from direct preferences, context color resolvers, and inline repository calls. | Step R3 | Next Release (Phase R2) |
+| **R6** | ⏳ Planned | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags into `ReaderSettingsUiState`. | Step R3 | Next Release (Phase R2) |
+| **R7** | ⏳ Planned | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math into `NavigationRegionUiModel`. | None (Self-Contained) | Next Release (Phase R2) |
 
 ### Reader Feature Proposals
 
