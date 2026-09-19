@@ -10,6 +10,7 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
 import org.nekomanga.presentation.screens.library.filter.FilterCompleted
+import org.nekomanga.presentation.screens.library.filter.FilterContentRating
 import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
 import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 import org.nekomanga.presentation.screens.library.filter.FilterMerged
@@ -145,6 +146,7 @@ data class LibraryViewPreferences(
 data class LibraryFilters(
     val filterBookmarked: FilterBookmarked = FilterBookmarked.Inactive,
     val filterCompleted: FilterCompleted = FilterCompleted.Inactive,
+    val filterContentRating: FilterContentRating = FilterContentRating.Inactive,
     val filterDownloaded: FilterDownloaded = FilterDownloaded.Inactive,
     val filterMangaType: FilterMangaType = FilterMangaType.Inactive,
     val filterMerged: FilterMerged = FilterMerged.Inactive,
@@ -156,6 +158,7 @@ data class LibraryFilters(
     fun hasActiveFilter(): Boolean {
         return filterBookmarked !is FilterBookmarked.Inactive ||
             filterCompleted !is FilterCompleted.Inactive ||
+            filterContentRating !is FilterContentRating.Inactive ||
             filterDownloaded !is FilterDownloaded.Inactive ||
             filterMangaType !is FilterMangaType.Inactive ||
             filterMerged !is FilterMerged.Inactive ||

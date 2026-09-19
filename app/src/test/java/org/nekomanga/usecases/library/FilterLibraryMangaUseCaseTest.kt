@@ -10,6 +10,7 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.screens.library.LibraryFilters
 import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
 import org.nekomanga.presentation.screens.library.filter.FilterCompleted
+import org.nekomanga.presentation.screens.library.filter.FilterContentRating
 import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
 import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 import org.nekomanga.presentation.screens.library.filter.FilterMerged
@@ -32,6 +33,7 @@ class FilterLibraryMangaUseCaseTest {
         hasMissingChapters: Boolean = false,
         status: List<String> = emptyList(),
         seriesType: FilterMangaType = FilterMangaType.Manga,
+        contentRating: List<String> = emptyList(),
     ): LibraryMangaItem {
         val displayManga = mockk<DisplayManga>()
         every { displayManga.getTitle() } returns "Manga Title"
@@ -57,7 +59,7 @@ class FilterLibraryMangaUseCaseTest {
             altTitles = emptyList(),
             genre = emptyList(),
             author = emptyList(),
-            contentRating = emptyList(),
+            contentRating = contentRating,
             status = status,
             seriesType = seriesType,
         )
@@ -333,5 +335,45 @@ class FilterLibraryMangaUseCaseTest {
             LibraryFilters(filterMissingChapters = FilterMissingChapters.NoMissingChapters)
 
         assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when safe content rating filter active and item is safe, returns true`() {
+        val manga = mockMangaItem(contentRating = listOf("Safe"))
+        val filters = LibraryFilters(filterContentRating = FilterContentRating.Safe)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when safe content rating filter active and item is suggestive, returns false`() {
+        val manga = mockMangaItem(contentRating = listOf("Suggestive"))
+        val filters = LibraryFilters(filterContentRating = FilterContentRating.Safe)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when pornographic content rating filter active and item is pornographic, returns true`() {
+        val manga = mockMangaItem(contentRating = listOf("Pornographic"))
+        val filters = LibraryFilters(filterContentRating = FilterContentRating.Pornographic)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when content rating filter active and item rating is unknown, returns false`() {
+        val manga = mockMangaItem(contentRating = listOf("Unknown"))
+        val filters = LibraryFilters(filterContentRating = FilterContentRating.Erotica)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when content rating filter active, rating matches ignoring case`() {
+        val manga = mockMangaItem(contentRating = listOf("erotica"))
+        val filters = LibraryFilters(filterContentRating = FilterContentRating.Erotica)
+
+        assertTrue(useCase(manga, filters))
     }
 }
