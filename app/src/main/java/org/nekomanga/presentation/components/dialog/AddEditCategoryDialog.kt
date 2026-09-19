@@ -17,12 +17,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
+import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.theme.Size
 
 /** Simple Dialog to add a new category */
@@ -44,6 +46,17 @@ fun AddEditCategoryDialog(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration,
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
+        val canSave =
+            validCategory &&
+                categoryText.text.isNotBlank() &&
+                (categorySelected.isBlank() || categorySelected != categoryText.text)
+        val saveAction = {
+            if (canSave) {
+                onConfirm(categoryText.text)
+                onDismiss()
+            }
+        }
+
         AlertDialog(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.tiny),
             title = {
@@ -56,6 +69,7 @@ fun AddEditCategoryDialog(
             text = {
                 Column {
                     OutlinedTextField(
+                        modifier = Modifier.runOnEnterKeyPressed(saveAction),
                         value = categoryText,
                         onValueChange = { newCategory ->
                             categoryText = newCategory
@@ -90,14 +104,8 @@ fun AddEditCategoryDialog(
             onDismissRequest = onDismiss,
             confirmButton = {
                 TextButton(
-                    onClick = {
-                        onConfirm(categoryText.text)
-                        onDismiss()
-                    },
-                    enabled =
-                        validCategory &&
-                            categoryText.text.isNotBlank() &&
-                            (categorySelected.isBlank() || categorySelected != categoryText.text),
+                    onClick = saveAction,
+                    enabled = canSave,
                     colors =
                         ButtonDefaults.textButtonColors(
                             contentColor = themeColorState.primaryColor

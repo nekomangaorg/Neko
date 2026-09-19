@@ -30,6 +30,7 @@ import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -69,6 +70,12 @@ fun ColumnScope.SearchFooter(
                 .onFocusEvent {
                     if (it.isFocused || it.hasFocus) {
                         scope.launch { bringIntoViewRequester.bringIntoView() }
+                    }
+                }
+                .runOnEnterKeyPressed {
+                    if (!isError) {
+                        focusManager.clearFocus()
+                        search(title)
                     }
                 }
                 .padding(horizontal = Size.small),

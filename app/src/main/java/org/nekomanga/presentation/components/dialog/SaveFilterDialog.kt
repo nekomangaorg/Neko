@@ -17,12 +17,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.theme.Size
 
 /** Simple Dialog to save a filter */
@@ -55,11 +57,19 @@ fun SaveFilterDialog(
             }
         }
 
+        val saveAction = {
+            if (saveEnabled) {
+                onConfirm(saveFilterText)
+                onDismiss()
+            }
+        }
+
         AlertDialog(
             title = { Text(text = stringResource(id = R.string.save_filter)) },
             text = {
                 Column {
                     OutlinedTextField(
+                        modifier = Modifier.runOnEnterKeyPressed(saveAction),
                         value = saveFilterText,
                         onValueChange = { saveFilterText = it },
                         label = { Text(text = stringResource(id = R.string.name)) },
@@ -85,10 +95,7 @@ fun SaveFilterDialog(
             onDismissRequest = onDismiss,
             confirmButton = {
                 TextButton(
-                    onClick = {
-                        onConfirm(saveFilterText)
-                        onDismiss()
-                    },
+                    onClick = saveAction,
                     enabled = saveEnabled,
                     colors =
                         ButtonDefaults.textButtonColors(

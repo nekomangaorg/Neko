@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import eu.kanade.tachiyomi.ui.setting.MergeLoginEvent
 import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
+import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -70,6 +71,18 @@ fun LoginDialog(
                     showLoading = false
                 }
             }
+        }
+    }
+
+    val canSignIn =
+        !showLoading &&
+            url.text.isNotEmpty() &&
+            (!showCredentialsField() || username.text.isNotBlank() && password.text.isNotBlank())
+    val signInAction = {
+        if (canSignIn) {
+            onConfirm(username.text, password.text, url.text)
+            showLoading = true
+            showLoginError = false
         }
     }
 
@@ -111,7 +124,7 @@ fun LoginDialog(
                             }
                         },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().runOnEnterKeyPressed(signInAction),
                     )
                 }
                 if (showUrlField) {
@@ -120,7 +133,7 @@ fun LoginDialog(
                         value = url,
                         onValueChange = { url = it },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().runOnEnterKeyPressed(signInAction),
                     )
                 }
                 if (showLoginError) {
@@ -137,16 +150,8 @@ fun LoginDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
-                enabled =
-                    !showLoading &&
-                        url.text.isNotEmpty() &&
-                        (!showCredentialsField() ||
-                            username.text.isNotBlank() && password.text.isNotBlank()),
-                onClick = {
-                    onConfirm(username.text, password.text, url.text)
-                    showLoading = true
-                    showLoginError = false
-                },
+                enabled = canSignIn,
+                onClick = signInAction,
             ) {
                 Text(text = stringResource(id = R.string.sign_in))
             }
