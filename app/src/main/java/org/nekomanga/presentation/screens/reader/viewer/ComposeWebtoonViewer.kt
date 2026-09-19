@@ -1,11 +1,7 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
-import android.graphics.PointF
-import android.view.ViewConfiguration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,19 +31,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Velocity
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -58,17 +45,14 @@ import eu.kanade.tachiyomi.ui.reader.model.areTransitionsEquivalent as modelAreT
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
 import eu.kanade.tachiyomi.ui.reader.model.isSameChapter as modelIsSameChapter
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
-import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonActiveItemResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
-import kotlin.math.hypot
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle
@@ -155,8 +139,6 @@ fun ComposeWebtoonViewer(
     }
 
     // 3. Maintain scroll anchor across item mutations, prepends, splits, and chapter transitions
-    // Immediate pre-measure re-anchor during composition to eliminate 1-frame flashes and jarring
-    // jitter
     if (items !== lastProcessedItems) {
         val target =
             WebtoonScrollAnchorResolver.resolveReanchorTarget(
@@ -191,8 +173,6 @@ fun ComposeWebtoonViewer(
     SideEffect { lastProcessedItems = items }
 
     LaunchedEffect(items) {
-        // Fallback: Ensure scroll position is locked if layout measurement did not apply
-        // requestScrollToItem
         val currentFirstItem = items.getOrNull(lazyListState.firstVisibleItemIndex)
         val expectedItem = lastFirstVisibleItem
         if (expectedItem != null && currentFirstItem?.isEquivalentTo(expectedItem) != true) {
@@ -203,8 +183,7 @@ fun ComposeWebtoonViewer(
         }
     }
 
-    // 4. Resolve active item & dispatch page selections with stationary scroll guard and layout
-    // sync check
+    // 4. Resolve active item & dispatch page selections with stationary scroll guard
     LaunchedEffect(lazyListState) {
         snapshotFlow {
             if (currentItems !== lastProcessedItems) return@snapshotFlow null
@@ -325,79 +304,7 @@ fun ComposeWebtoonViewer(
         }
     }
 
-    val context = LocalContext.current
-    val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
-    val touchSlopPx = remember(viewConfiguration) { viewConfiguration.scaledTouchSlop.toDouble() }
-    val doubleTapSlopPx =
-        remember(viewConfiguration) { viewConfiguration.scaledDoubleTapSlop.toDouble() }
-    val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
-
-    val density = LocalDensity.current
-    val overscrollThresholdPx = remember(density) { with(density) { (Size.huge * 2).toPx() } }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            var pullOffset = 0f
-
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (pullOffset > 0 && available.y < 0) {
-                    val consumedY = available.y.coerceAtLeast(-pullOffset)
-                    pullOffset += consumedY
-                    return Offset(0f, consumedY)
-                }
-                return Offset.Zero
-            }
-
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource,
-            ): Offset {
-                if (
-                    source == NestedScrollSource.UserInput &&
-                        available.y > 0 &&
-                        lazyListState.firstVisibleItemIndex == 0 &&
-                        lazyListState.firstVisibleItemScrollOffset == 0
-                ) {
-                    pullOffset += available.y
-                    return Offset(0f, available.y)
-                }
-                return Offset.Zero
-            }
-
-            override suspend fun onPreFling(available: Velocity): Velocity {
-                val offset = pullOffset
-                pullOffset = 0f
-                if (offset > overscrollThresholdPx) {
-                    val prevChapter =
-                        (currentItems.firstOrNull {
-                                it is ReaderUiItem.Transition &&
-                                    it.transition is ChapterTransition.Prev
-                            } as? ReaderUiItem.Transition)
-                            ?.transition
-                            ?.to
-                            ?.chapter
-                            ?: (currentItems.firstOrNull() as? ReaderUiItem.Page)
-                                ?.page
-                                ?.chapter
-                                ?.chapter
-                    if (prevChapter != null) {
-                        if (currentConfig.onNavigateToChapter != null) {
-                            currentConfig.onNavigateToChapter?.invoke(
-                                prevChapter,
-                                ChapterNavTarget.End,
-                            )
-                        } else {
-                            onNavigateAdjacent(false)
-                        }
-                        return available
-                    }
-                }
-                return Velocity.Zero
-            }
-        }
-    }
-
-    // 4. Declarative Render Tree
+    // 5. Declarative Render Tree
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize().background(config.backgroundColor).clipToBounds(),
@@ -425,101 +332,27 @@ fun ComposeWebtoonViewer(
                             )
                         layout(placeable.width, placeable.height) { placeable.place(0, 0) }
                     }
-                    .nestedScroll(nestedScrollConnection)
+                    .webtoonOverscrollNavigation(
+                        lazyListState = lazyListState,
+                        items = currentItems,
+                        onNavigateToChapter = currentConfig.onNavigateToChapter,
+                        onNavigateAdjacent = onNavigateAdjacent,
+                    )
                     .webtoonZoomable(
                         state = zoomState,
                         enableZoomOut = config.enableZoomOut,
                         coroutineScope = coroutineScope,
                     )
-                    .pointerInput(currentConfig.navigator) {
-                        var lastTapTime = 0L
-                        var lastTapOffset = Offset.Zero
-
-                        awaitEachGesture {
-                            val down =
-                                awaitFirstDown(
-                                    requireUnconsumed = false,
-                                    pass = PointerEventPass.Initial,
-                                )
-                            val downPos = down.position
-                            var pointerUp: PointerInputChange? = null
-
-                            while (true) {
-                                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                                val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                if (!change.pressed) {
-                                    pointerUp = change
-                                    break
-                                }
-                                val moveDistance =
-                                    hypot(
-                                        (change.position.x - downPos.x).toDouble(),
-                                        (change.position.y - downPos.y).toDouble(),
-                                    ) * zoomState.scale
-                                if (moveDistance > touchSlopPx) break
-                            }
-
-                            if (pointerUp != null) {
-                                val up = pointerUp!!
-                                val upPos = up.position
-                                val upTime = System.currentTimeMillis()
-                                val distance =
-                                    hypot(
-                                        (upPos.x - downPos.x).toDouble(),
-                                        (upPos.y - downPos.y).toDouble(),
-                                    )
-
-                                if (distance < touchSlopPx) {
-                                    val screenWidth = size.width.toFloat()
-                                    val screenHeight = size.height.toFloat()
-
-                                    if (screenWidth > 0 && screenHeight > 0) {
-                                        val pos =
-                                            PointF(upPos.x / screenWidth, upPos.y / screenHeight)
-                                        val action = currentConfig.navigator.getAction(pos)
-
-                                        val isDoubleTap =
-                                            (upTime - lastTapTime < doubleTapTimeoutMs) &&
-                                                (hypot(
-                                                    (upPos.x - lastTapOffset.x).toDouble(),
-                                                    (upPos.y - lastTapOffset.y).toDouble(),
-                                                ) < doubleTapSlopPx) &&
-                                                (currentConfig.doubleTapAnimDuration > 0)
-
-                                        if (isDoubleTap) {
-                                            if (currentConfig.menuVisible)
-                                                currentConfig.onToggleMenu()
-                                            lastTapTime = 0L
-                                            lastTapOffset = Offset.Zero
-                                            coroutineScope.launch {
-                                                zoomState.toggleDoubleTapZoom(
-                                                    tapPos = upPos,
-                                                    viewportWidth = size.width.toFloat(),
-                                                    animDuration =
-                                                        currentConfig.doubleTapAnimDuration,
-                                                )
-                                            }
-                                        } else {
-                                            lastTapTime = upTime
-                                            lastTapOffset = upPos
-                                            when (action) {
-                                                ViewerNavigation.NavigationRegion.MENU ->
-                                                    currentConfig.onToggleMenu()
-                                                ViewerNavigation.NavigationRegion.NEXT,
-                                                ViewerNavigation.NavigationRegion.RIGHT ->
-                                                    onNavigateAdjacent(true)
-                                                ViewerNavigation.NavigationRegion.PREV,
-                                                ViewerNavigation.NavigationRegion.LEFT ->
-                                                    onNavigateAdjacent(false)
-                                            }
-                                        }
-                                    } else {
-                                        currentConfig.onToggleMenu()
-                                    }
-                                }
-                            }
-                        }
-                    },
+                    .webtoonTapNavigation(
+                        navigator = currentConfig.navigator,
+                        zoomState = zoomState,
+                        enableDoubleTapZoom = currentConfig.doubleTapAnimDuration > 0,
+                        doubleTapAnimDuration = currentConfig.doubleTapAnimDuration,
+                        menuVisible = currentConfig.menuVisible,
+                        coroutineScope = coroutineScope,
+                        onToggleMenu = currentConfig.onToggleMenu,
+                        onNavigateAdjacent = onNavigateAdjacent,
+                    ),
         ) {
             items(
                 items = items,
@@ -541,12 +374,14 @@ fun ComposeWebtoonViewer(
                         )
                     }
                     is ReaderUiItem.Transition -> {
+                        val uiModel =
+                            item.transitionUiModel ?: ChapterTransitionUiModel.from(item.transition)
                         ReaderTransitionPage(
-                            transition = item.transition,
-                            manga = config.manga,
-                            downloadManager = config.downloadManager ?: Injekt.get(),
-                            onRetry = config.onRetryTransition,
-                            onTap = { config.onToggleMenu() },
+                            uiModel = uiModel,
+                            onRetry = {
+                                item.transition.to?.let { currentConfig.onRetryTransition(it) }
+                            },
+                            onTap = { currentConfig.onToggleMenu() },
                             onCardClick = {
                                 val targetChapter = item.transition.to?.chapter
                                 if (targetChapter != null) {
@@ -556,7 +391,10 @@ fun ComposeWebtoonViewer(
                                         } else {
                                             ChapterNavTarget.Start
                                         }
-                                    config.onNavigateToChapter?.invoke(targetChapter, navTarget)
+                                    currentConfig.onNavigateToChapter?.invoke(
+                                        targetChapter,
+                                        navTarget,
+                                    )
                                 }
                             },
                             modifier =
@@ -602,6 +440,7 @@ fun ComposeWebtoonViewer(
 /**
  * Compatibility overload bridging legacy [WebtoonViewer] to the stateless [ComposeWebtoonViewer].
  */
+@Deprecated("Use ComposeWebtoonViewer with WebtoonViewerConfigUiModel directly")
 @Composable
 fun ComposeWebtoonViewer(
     viewer: WebtoonViewer,
@@ -710,8 +549,21 @@ fun ComposeWebtoonViewer(
         viewer.requestedScrollDelta = null
     }
 
+    val transitionResolver =
+        remember(downloadManager) { ResolveChapterTransitionUiModelUseCase(downloadManager) }
+    val enrichedItems =
+        remember(items, manga, transitionResolver) {
+            items.map { item ->
+                if (item is ReaderUiItem.Transition && item.transitionUiModel == null) {
+                    item.copy(transitionUiModel = transitionResolver(item.transition, manga))
+                } else {
+                    item
+                }
+            }
+        }
+
     ComposeWebtoonViewer(
-        items = items,
+        items = enrichedItems,
         config = config,
         navCommands = navChannel.receiveAsFlow(),
         onActiveItemChanged = { activeIndex -> viewer.updateActiveIndex(activeIndex) },

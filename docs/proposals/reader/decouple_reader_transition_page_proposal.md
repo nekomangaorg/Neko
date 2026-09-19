@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling ReaderTransitionPage from DownloadManager, Legacy Entity Conversions & Chapter Gap Math
 
-**Status:** Proposed / Under Review  
+**Status:** Implemented (Step R2 Landed)  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
 **Execution Order:** Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R2 (Priority: High / Viewer Subcomponent)  
 **Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md))  
 **Downstream Dependents:** Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
-**Implementation State:** 🟡 Coupled Baseline (DownloadManager injected into Composable, legacy DB conversions, and gap math in UI)  
+**Implementation State:** 🟢 Landed in `ref/rock-solid-webtoon-compose-viewer` (Decoupled pure ChapterTransitionUiModel, ResolveChapterTransitionUiModelUseCase, and previews)  
 
 ---
 
@@ -154,8 +154,8 @@ No `DownloadManager`, no `queueState.collectAsState()`, and no `toManga()` calls
 >
 > Decoupling `ReaderTransitionPage` into `ChapterTransitionUiModel` removes `DownloadManager` and legacy database model conversions from the viewer page item tree. This is a direct prerequisite for cleanly decoupling `ComposePagerViewer` and `ComposeWebtoonViewer` without leaking download manager dependencies.
 
-- [ ] **Step 1**: Define `ChapterTransitionUiModel`.
-- [ ] **Step 2**: Create transition mapping logic in `ReaderViewModel` combining chapter gap math and download status.
-- [ ] **Step 3**: Refactor `ReaderTransitionPage.kt` to consume `ChapterTransitionUiModel`.
-- [ ] **Step 4**: Add `@Preview` annotations for all transition states.
-- [ ] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [x] **Step 1**: Define `ChapterTransitionUiModel`.
+- [x] **Step 2**: Create transition mapping logic in `ReaderViewModel` combining chapter gap math and download status.
+- [x] **Step 3**: Refactor `ReaderTransitionPage.kt` to consume `ChapterTransitionUiModel`.
+- [x] **Step 4**: Add `@Preview` annotations for all transition states.
+- [x] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.

@@ -43,6 +43,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.ReaderPreloadEngine
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
@@ -129,6 +130,15 @@ constructor(
 
     private val eventChannel = Channel<Event>()
     val eventFlow = eventChannel.receiveAsFlow()
+
+    /** Headless preload engine for disk prefetching and memory cache warming in webtoon mode. */
+    val webtoonPreloadEngine by lazy {
+        ReaderPreloadEngine(
+            context = preferences.context,
+            scope = viewModelScope,
+            isSplitTallPagesEnabled = { readerPreferences.splitTallImagesReader().get() },
+        )
+    }
 
     /** The manga loaded in the reader. It can be null when instantiated for a short time. */
     val manga: MangaItem?
@@ -244,6 +254,7 @@ constructor(
     }
 
     override fun onCleared() {
+        webtoonPreloadEngine.clear()
         val currentChapters = state.value.viewerChapters
         if (currentChapters != null) {
             // 1. Unreference the viewer chapters
@@ -1302,6 +1313,12 @@ constructor(
 
     fun setViewerItems(items: List<ReaderUiItem>) {
         mutableState.update { it.copy(viewerItems = items) }
+    }
+
+    fun updateWebtoonActiveIndex(activeIndex: Int) {
+        val items = state.value.viewerItems
+        val preloadAmount = readerPreferences.preloadPageAmount().get()
+        webtoonPreloadEngine.updateActiveIndex(activeIndex, items, preloadAmount)
     }
 
     fun setChapterTitle(title: String) {

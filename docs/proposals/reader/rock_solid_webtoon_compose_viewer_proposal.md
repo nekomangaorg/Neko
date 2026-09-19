@@ -1,6 +1,6 @@
 # Technical Proposal: High-Performance, Rock-Solid Architecture for ComposeWebtoonViewer
 
-**Status:** Implemented (Phase 1–4 Landed) / Handoff to Steps R2 & R3  
+**Status:** Implemented (Phase 1–4 & Step R2 Landed) / Handoff to Step R3  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling & Performance Hardening  
@@ -468,6 +468,6 @@ fun ComposeWebtoonViewer(
 With the landing of this architecture in `ref/rock-solid-webtoon-compose-viewer`, the core Webtoon Compose viewer has been reduced from 1,157 lines to a modular, stateless pipeline with headless preloading, isolated gesture modifiers, and deterministic scroll re-anchoring.
 
 The remaining cross-module refactoring tasks are formally handed off to the existing reader track milestones:
-1. **Transition Page & `DownloadManager` Decoupling**: Fully removing `DownloadManager` and `Injekt.get()` from `WebtoonViewerConfigUiModel` is tracked under [**Step R2 (`decouple_reader_transition_page_proposal.md`)**](decouple_reader_transition_page_proposal.md).
+1. **Transition Page & `DownloadManager` Decoupling**: Completed under [**Step R2 (`decouple_reader_transition_page_proposal.md`)**](decouple_reader_transition_page_proposal.md) via pure `ChapterTransitionUiModel` and `ResolveChapterTransitionUiModelUseCase`.
 2. **Complete Legacy Viewer Decommission**: Fully eliminating `WebtoonViewer.kt` and transferring all navigation state and key-handling directly into `ReaderViewModel` and `ReaderActivity` is tracked under [**Step R3 (`decouple_reader_compose_viewers_proposal.md`)**](decouple_reader_compose_viewers_proposal.md).
 

@@ -30,7 +30,13 @@ data class WebtoonViewerConfigUiModel(
     val navigator: ViewerNavigation,
     val onToggleMenu: () -> Unit = {},
     val onRetryTransition: (ReaderChapter) -> Unit = {},
+    @Deprecated(
+        "Transition pages are now decoupled from DownloadManager and MangaItem via ChapterTransitionUiModel"
+    )
     val manga: MangaItem? = null,
+    @Deprecated(
+        "Transition pages are now decoupled from DownloadManager and MangaItem via ChapterTransitionUiModel"
+    )
     val downloadManager: DownloadManager? = null,
     val preloadPageAmount: Int = 4,
     val onNavigateToChapter: ((Chapter, ChapterNavTarget) -> Unit)? = null,

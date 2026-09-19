@@ -36,23 +36,25 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
-import eu.kanade.tachiyomi.ui.reader.viewer.calculateChapterDifference
-import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 import org.nekomanga.R
 import org.nekomanga.domain.manga.MangaItem
-import org.nekomanga.domain.manga.toManga
+import org.nekomanga.presentation.theme.NekoTheme
 import org.nekomanga.presentation.theme.Size
 
+/**
+ * Pure, stateless interstitial transition page between adjacent chapters. Consumes an immutable
+ * [ChapterTransitionUiModel] prepared by the domain layer.
+ */
 @Composable
 fun ReaderTransitionPage(
-    transition: ChapterTransition,
-    manga: MangaItem?,
-    downloadManager: DownloadManager,
-    onRetry: (ReaderChapter) -> Unit,
+    uiModel: ChapterTransitionUiModel,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     onTap: ((PointF) -> Unit)? = null,
     onCardClick: (() -> Unit)? = null,
@@ -77,6 +79,8 @@ fun ReaderTransitionPage(
             Modifier
         }
 
+    val isPrevWithoutTo = uiModel is ChapterTransitionUiModel.Prev && uiModel.toChapter == null
+
     Box(
         modifier =
             modifier
@@ -87,7 +91,7 @@ fun ReaderTransitionPage(
                     start = Size.mediumLarge,
                     end = Size.mediumLarge,
                     top =
-                        if (transition is ChapterTransition.Prev && transition.to == null) {
+                        if (isPrevWithoutTo) {
                             Size.appBarHeight + Size.large
                         } else {
                             Size.small
@@ -96,6 +100,12 @@ fun ReaderTransitionPage(
                 ),
         contentAlignment = Alignment.Center,
     ) {
+        val toChapter =
+            when (uiModel) {
+                is ChapterTransitionUiModel.Prev -> uiModel.toChapter
+                is ChapterTransitionUiModel.Next -> uiModel.toChapter
+            }
+
         ElevatedCard(
             shape = RoundedCornerShape(Size.mediumLarge),
             elevation =
@@ -103,7 +113,7 @@ fun ReaderTransitionPage(
             modifier =
                 Modifier.fillMaxWidth()
                     .then(
-                        if (onCardClick != null && transition.to != null) {
+                        if (onCardClick != null && toChapter != null) {
                             Modifier.clickable(onClick = onCardClick)
                         } else {
                             Modifier
@@ -117,34 +127,27 @@ fun ReaderTransitionPage(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                when (transition) {
-                    is ChapterTransition.Prev -> {
-                        PrevChapterTransitionContent(
-                            transition = transition,
-                            manga = manga,
-                            downloadManager = downloadManager,
-                        )
-                    }
-                    is ChapterTransition.Next -> {
-                        NextChapterTransitionContent(
-                            transition = transition,
-                            manga = manga,
-                            downloadManager = downloadManager,
-                        )
-                    }
+                when (uiModel) {
+                    is ChapterTransitionUiModel.Prev -> PrevChapterTransitionContent(uiModel)
+                    is ChapterTransitionUiModel.Next -> NextChapterTransitionContent(uiModel)
                 }
 
-                MissingChapterWarningSection(transition = transition)
+                val missingCount =
+                    when (uiModel) {
+                        is ChapterTransitionUiModel.Prev -> uiModel.missingChaptersCount
+                        is ChapterTransitionUiModel.Next -> uiModel.missingChaptersCount
+                    }
+                MissingChapterWarningSection(missingChaptersCount = missingCount)
 
-                transition.to?.let { targetChapter ->
+                if (toChapter != null) {
                     Spacer(modifier = Modifier.height(Size.mediumLarge))
                     ChapterPreloadStatusSection(
-                        chapter = targetChapter,
-                        onRetry = { onRetry(targetChapter) },
+                        targetChapter = toChapter,
+                        onRetry = onRetry,
                     )
                 }
 
-                if (onCardClick != null && transition.to != null) {
+                if (onCardClick != null && toChapter != null) {
                     Spacer(modifier = Modifier.height(Size.mediumLarge))
                     Button(
                         onClick = onCardClick,
@@ -152,7 +155,7 @@ fun ReaderTransitionPage(
                     ) {
                         Text(
                             text =
-                                if (transition is ChapterTransition.Prev) {
+                                if (uiModel is ChapterTransitionUiModel.Prev) {
                                     stringResource(R.string.previous_chapter)
                                 } else {
                                     stringResource(R.string.next_chapter)
@@ -165,28 +168,36 @@ fun ReaderTransitionPage(
     }
 }
 
+/**
+ * Compatibility overload for legacy callers still passing [ChapterTransition] and
+ * [DownloadManager].
+ */
 @Composable
-private fun PrevChapterTransitionContent(
-    transition: ChapterTransition.Prev,
+fun ReaderTransitionPage(
+    transition: ChapterTransition,
     manga: MangaItem?,
     downloadManager: DownloadManager,
+    onRetry: (ReaderChapter) -> Unit,
+    modifier: Modifier = Modifier,
+    onTap: ((PointF) -> Unit)? = null,
+    onCardClick: (() -> Unit)? = null,
 ) {
-    val prevChapter = transition.to
-    if (prevChapter != null) {
-        val queue by downloadManager.queueState.collectAsStateWithLifecycle()
-        val isPrevDownloaded =
-            remember(prevChapter, manga, queue) {
-                manga?.let {
-                    downloadManager.isChapterDownloaded(prevChapter.chapter, it.toManga())
-                } ?: false
-            }
-        val isCurrentDownloaded =
-            remember(transition.from, manga, queue) {
-                manga?.let {
-                    downloadManager.isChapterDownloaded(transition.from.chapter, it.toManga())
-                } ?: false
-            }
+    val resolver =
+        remember(downloadManager) { ResolveChapterTransitionUiModelUseCase(downloadManager) }
+    val uiModel = remember(transition, manga, downloadManager) { resolver(transition, manga) }
+    ReaderTransitionPage(
+        uiModel = uiModel,
+        onRetry = { transition.to?.let(onRetry) },
+        modifier = modifier,
+        onTap = onTap,
+        onCardClick = onCardClick,
+    )
+}
 
+@Composable
+private fun PrevChapterTransitionContent(uiModel: ChapterTransitionUiModel.Prev) {
+    val prevChapter = uiModel.toChapter
+    if (prevChapter != null) {
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(R.string.previous_title),
@@ -199,15 +210,15 @@ private fun PrevChapterTransitionContent(
                 modifier = Modifier.padding(top = Size.small - Size.extraTiny),
             ) {
                 Text(
-                    text = prevChapter.chapter.name,
+                    text = prevChapter.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                if (isPrevDownloaded != isCurrentDownloaded) {
+                if (prevChapter.isDownloaded != uiModel.isFromDownloaded) {
                     Spacer(modifier = Modifier.width(Size.small))
-                    DownloadStatusIcon(isDownloaded = isPrevDownloaded)
+                    DownloadStatusIcon(isDownloaded = prevChapter.isDownloaded)
                 }
             }
 
@@ -220,7 +231,7 @@ private fun PrevChapterTransitionContent(
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = transition.from.chapter.name,
+                text = uiModel.fromChapterName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -240,27 +251,9 @@ private fun PrevChapterTransitionContent(
 }
 
 @Composable
-private fun NextChapterTransitionContent(
-    transition: ChapterTransition.Next,
-    manga: MangaItem?,
-    downloadManager: DownloadManager,
-) {
-    val nextChapter = transition.to
+private fun NextChapterTransitionContent(uiModel: ChapterTransitionUiModel.Next) {
+    val nextChapter = uiModel.toChapter
     if (nextChapter != null) {
-        val queue by downloadManager.queueState.collectAsStateWithLifecycle()
-        val isCurrentDownloaded =
-            remember(transition.from, manga, queue) {
-                manga?.let {
-                    downloadManager.isChapterDownloaded(transition.from.chapter, it.toManga())
-                } ?: false
-            }
-        val isNextDownloaded =
-            remember(nextChapter, manga, queue) {
-                manga?.let {
-                    downloadManager.isChapterDownloaded(nextChapter.chapter, it.toManga())
-                } ?: false
-            }
-
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(R.string.finished_chapter),
@@ -269,7 +262,7 @@ private fun NextChapterTransitionContent(
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = transition.from.chapter.name,
+                text = uiModel.fromChapterName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -289,15 +282,15 @@ private fun NextChapterTransitionContent(
                 modifier = Modifier.padding(top = Size.small - Size.extraTiny),
             ) {
                 Text(
-                    text = nextChapter.chapter.name,
+                    text = nextChapter.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                if (isNextDownloaded != isCurrentDownloaded) {
+                if (nextChapter.isDownloaded != uiModel.isFromDownloaded) {
                     Spacer(modifier = Modifier.width(Size.small))
-                    DownloadStatusIcon(isDownloaded = isNextDownloaded)
+                    DownloadStatusIcon(isDownloaded = nextChapter.isDownloaded)
                 }
             }
         }
@@ -327,22 +320,8 @@ private fun DownloadStatusIcon(isDownloaded: Boolean) {
 }
 
 @Composable
-private fun MissingChapterWarningSection(transition: ChapterTransition) {
-    if (transition.to == null) return
-
-    val hasMissing =
-        when (transition) {
-            is ChapterTransition.Prev -> hasMissingChapters(transition.from, transition.to)
-            is ChapterTransition.Next -> hasMissingChapters(transition.to, transition.from)
-        }
-
-    if (!hasMissing) return
-
-    val diff =
-        when (transition) {
-            is ChapterTransition.Prev -> calculateChapterDifference(transition.from, transition.to)
-            is ChapterTransition.Next -> calculateChapterDifference(transition.to, transition.from)
-        }
+private fun MissingChapterWarningSection(missingChaptersCount: Int) {
+    if (missingChaptersCount <= 0) return
 
     Spacer(modifier = Modifier.height(Size.medium))
     Surface(
@@ -365,8 +344,8 @@ private fun MissingChapterWarningSection(transition: ChapterTransition) {
                 text =
                     pluralStringResource(
                         R.plurals.missing_chapters_warning,
-                        diff.toInt(),
-                        diff.toInt(),
+                        missingChaptersCount,
+                        missingChaptersCount,
                     ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onErrorContainer,
@@ -377,33 +356,116 @@ private fun MissingChapterWarningSection(transition: ChapterTransition) {
 
 @Composable
 private fun ChapterPreloadStatusSection(
-    chapter: ReaderChapter,
+    targetChapter: ChapterTransitionUiModel.TargetChapterInfo,
     onRetry: () -> Unit,
 ) {
-    val state by chapter.stateFlow.collectAsStateWithLifecycle()
+    val readerChapter = targetChapter.readerChapter
+    if (readerChapter != null) {
+        val state by readerChapter.stateFlow.collectAsStateWithLifecycle()
 
-    when (val currentState = state) {
-        is ReaderChapter.State.Wait,
-        is ReaderChapter.State.Loading,
-        is ReaderChapter.State.Loaded -> {}
-        is ReaderChapter.State.Error -> {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth().padding(top = Size.small),
-            ) {
-                Text(
-                    text =
-                        stringResource(
-                            R.string.failed_to_load_pages_,
-                            currentState.error.message ?: "",
-                        ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center,
-                )
-                Spacer(modifier = Modifier.height(Size.small))
-                Button(onClick = onRetry) { Text(text = stringResource(R.string.retry)) }
+        when (val currentState = state) {
+            is ReaderChapter.State.Wait,
+            is ReaderChapter.State.Loading,
+            is ReaderChapter.State.Loaded -> {}
+            is ReaderChapter.State.Error -> {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth().padding(top = Size.small),
+                ) {
+                    Text(
+                        text =
+                            stringResource(
+                                R.string.failed_to_load_pages_,
+                                currentState.error.message ?: "",
+                            ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(modifier = Modifier.height(Size.small))
+                    Button(onClick = onRetry) { Text(text = stringResource(R.string.retry)) }
+                }
             }
         }
+    } else if (targetChapter.preloadState == ChapterTransitionUiModel.PreloadState.Error) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().padding(top = Size.small),
+        ) {
+            Text(
+                text = stringResource(R.string.failed_to_load_pages_, ""),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(Size.small))
+            Button(onClick = onRetry) { Text(text = stringResource(R.string.retry)) }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PrevTransitionPreview() {
+    NekoTheme {
+        ReaderTransitionPage(
+            uiModel =
+                ChapterTransitionUiModel.Prev(
+                    fromChapterName = "Chapter 2",
+                    isFromDownloaded = true,
+                    toChapter =
+                        ChapterTransitionUiModel.TargetChapterInfo(
+                            chapterId = 1L,
+                            name = "Chapter 1",
+                            isDownloaded = false,
+                        ),
+                    missingChaptersCount = 0,
+                ),
+            onRetry = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun NextTransitionPreview() {
+    NekoTheme {
+        ReaderTransitionPage(
+            uiModel =
+                ChapterTransitionUiModel.Next(
+                    fromChapterName = "Chapter 1",
+                    isFromDownloaded = true,
+                    toChapter =
+                        ChapterTransitionUiModel.TargetChapterInfo(
+                            chapterId = 2L,
+                            name = "Chapter 2",
+                            isDownloaded = true,
+                        ),
+                    missingChaptersCount = 0,
+                ),
+            onRetry = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun MissingChaptersWarningPreview() {
+    NekoTheme {
+        ReaderTransitionPage(
+            uiModel =
+                ChapterTransitionUiModel.Next(
+                    fromChapterName = "Chapter 1",
+                    isFromDownloaded = false,
+                    toChapter =
+                        ChapterTransitionUiModel.TargetChapterInfo(
+                            chapterId = 5L,
+                            name = "Chapter 5",
+                            isDownloaded = false,
+                        ),
+                    missingChaptersCount = 3,
+                ),
+            onRetry = {},
+        )
     }
 }

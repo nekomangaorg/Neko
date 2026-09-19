@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
+import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel
+
 /**
  * Sealed hierarchy representing a renderable item in Compose reader viewers (pager or webtoon).
  * Replaces untyped List<Any> and Pair<*, *> runtime casting with compile-time type safety.
@@ -50,7 +52,10 @@ sealed interface ReaderUiItem {
     }
 
     /** A transition page between adjacent chapters. */
-    data class Transition(val transition: ChapterTransition) : ReaderUiItem {
+    data class Transition(
+        val transition: ChapterTransition,
+        val transitionUiModel: ChapterTransitionUiModel? = null,
+    ) : ReaderUiItem {
         override val chapterId: Long?
             get() = null
 
