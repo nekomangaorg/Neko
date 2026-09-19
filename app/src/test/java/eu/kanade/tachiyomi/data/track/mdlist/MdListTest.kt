@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import java.io.IOException
 import kotlinx.coroutines.test.runTest
@@ -95,5 +96,37 @@ class MdListTest {
                 assertEquals("Network error", e.message)
             }
             assertTrue("Expected IOException to be thrown", caught)
+        }
+
+    @Test
+    fun `given the rating is accepted when updateScore is called then the local track is saved`() =
+        runTest {
+            val track =
+                Track.create(1).apply {
+                    manga_id = 1L
+                    tracking_url = "https://mangadex.org/title/00000000-0000-0000-0000-000000000001"
+                    score = 7f
+                }
+            coEvery { mangaDex.updateRating(track) } returns true
+
+            mdList.updateScore(track)
+
+            coVerify(exactly = 1) { trackRepository.insertTrack(track) }
+        }
+
+    @Test
+    fun `given the rating is rejected when updateScore is called then the local track is not saved`() =
+        runTest {
+            val track =
+                Track.create(1).apply {
+                    manga_id = 1L
+                    tracking_url = "https://mangadex.org/title/00000000-0000-0000-0000-000000000001"
+                    score = 7f
+                }
+            coEvery { mangaDex.updateRating(track) } returns false
+
+            mdList.updateScore(track)
+
+            coVerify(exactly = 0) { trackRepository.insertTrack(any()) }
         }
 }
