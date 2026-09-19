@@ -625,6 +625,8 @@ private fun LazyListScope.chapterList(
             chapterActions = chapterActions,
             onBookmark = onBookmark,
             onRead = onRead,
+            swipeRightAction = screenState.general.chapterSwipeRightAction,
+            swipeLeftAction = screenState.general.chapterSwipeLeftAction,
         )
     }
 }
