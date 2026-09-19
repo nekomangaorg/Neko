@@ -72,15 +72,13 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     val config = WebtoonConfig(scope)
 
     /** Headless preload engine for disk prefetching and memory cache warming. */
-    val preloadEngine =
-        ReaderPreloadEngine(
-            context = activity,
-            scope = scope,
-            onPageSplit = { originalPage, insertPages -> splitPage(originalPage, insertPages) },
-            isSplitTallPagesEnabled = { config.splitTallPages },
-        )
+    val preloadEngine: ReaderPreloadEngine
+        get() = activity.viewModel.webtoonPreloadEngine
 
     init {
+        activity.viewModel.webtoonPreloadEngine.onPageSplit = { originalPage, insertPages ->
+            splitPage(originalPage, insertPages)
+        }
         config.reloadViewerListener = { activity.viewModel.reloadViewer() }
         config.navigationModeChangedListener = {
             val showOnStart = config.navigationOverlayForNewUser
@@ -96,6 +94,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Destroys this viewer. Called when leaving the reader or swapping viewers. */
     override fun destroy() {
         super.destroy()
+        activity.viewModel.webtoonPreloadEngine.onPageSplit = null
         preloadEngine.clear()
         scope.cancel()
         pendingPageMove = null

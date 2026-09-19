@@ -1,14 +1,21 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.nekomanga.presentation.theme.Size
 
 class ComposeWebtoonViewerTest {
 
@@ -96,5 +103,55 @@ class ComposeWebtoonViewerTest {
         assertFalse(areItemsEquivalent(itemPage0, splitPage0Bottom))
         assertTrue(areItemsEquivalent(splitPage0Top, splitPage0Top))
         assertFalse(areItemsEquivalent(splitPage0Top, splitPage0Bottom))
+    }
+
+    @Test
+    fun `calculateEffectiveContentPadding applies sidePaddingPercent to start and end`() {
+        val basePadding = PaddingValues(top = Size.small, bottom = Size.medium)
+        val result =
+            calculateEffectiveContentPadding(
+                sidePadding = Size.none,
+                sidePaddingPercent = 0.1f,
+                maxWidth = 400.dp,
+                contentPadding = basePadding,
+                layoutDirection = LayoutDirection.Ltr,
+            )
+
+        assertEquals(40.dp, result.calculateStartPadding(LayoutDirection.Ltr))
+        assertEquals(40.dp, result.calculateEndPadding(LayoutDirection.Ltr))
+        assertEquals(Size.small, result.calculateTopPadding())
+        assertEquals(Size.medium, result.calculateBottomPadding())
+    }
+
+    @Test
+    fun `calculateEffectiveContentPadding prioritizes sidePadding Dp when greater than none`() {
+        val basePadding = PaddingValues(top = Size.none, bottom = Size.none)
+        val result =
+            calculateEffectiveContentPadding(
+                sidePadding = Size.large,
+                sidePaddingPercent = 0.25f,
+                maxWidth = 400.dp,
+                contentPadding = basePadding,
+                layoutDirection = LayoutDirection.Ltr,
+            )
+
+        assertEquals(Size.large, result.calculateStartPadding(LayoutDirection.Ltr))
+        assertEquals(Size.large, result.calculateEndPadding(LayoutDirection.Ltr))
+    }
+
+    @Test
+    fun `calculateEffectiveContentPadding combines with existing start and end contentPadding`() {
+        val basePadding = PaddingValues(start = Size.small, end = Size.small)
+        val result =
+            calculateEffectiveContentPadding(
+                sidePadding = Size.none,
+                sidePaddingPercent = 0.1f,
+                maxWidth = 200.dp,
+                contentPadding = basePadding,
+                layoutDirection = LayoutDirection.Ltr,
+            )
+
+        assertEquals(20.dp + Size.small, result.calculateStartPadding(LayoutDirection.Ltr))
+        assertEquals(20.dp + Size.small, result.calculateEndPadding(LayoutDirection.Ltr))
     }
 }

@@ -17,22 +17,21 @@ Proposals focused on reader performance, Jetpack Compose viewers, navigation lif
 
 ### Reader Decoupling Execution Track
 
-| Order | Proposal | Description | Prerequisites | Target Milestone |
-| :---: | :--- | :--- | :--- | :--- |
-| **R1** | [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, and guards key events with a `Mutex`. | None (Phase 1 Complete) | Neko 3.x Reader Decoupling |
-| **R2** | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math into `ChapterTransitionUiModel`. | Step R1 | Neko 3.x Reader Decoupling |
-| **R3** | [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, hoisting configurations into immutable UI models. | Steps R1, R2 | Neko 3.x Reader Decoupling |
-| **R4** | [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped `ReaderBottomControlsUiState` and `ReaderBottomBarAction`. | Step R3 | Neko 3.x Reader Decoupling |
-| **R5** | [**Decouple ReaderChaptersSheet**](reader/decouple_reader_chapters_sheet_proposal.md) | Decouples the chapter selection bottom sheet from direct preferences, context color resolvers, and inline repository calls. | Step R3 | Neko 3.x Reader Decoupling |
-| **R6** | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags into `ReaderSettingsUiState`. | Step R3 | Neko 3.x Reader Decoupling |
-| **R7** | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math into `NavigationRegionUiModel`. | None (Self-Contained) | Neko 3.x Reader Decoupling |
+| Order | Status | Proposal | Description | Prerequisites | Target Milestone |
+| :---: | :---: | :--- | :--- | :--- | :--- |
+| **R1** | 🟡 Partial | [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, and guards key events with a `Mutex`. | None | Phase 1 Landed / Phase 2 Next Release |
+| **R2** | ✅ Done | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math into `ChapterTransitionUiModel`. | Step R1 | Current Release (Landed) |
+| **R3** | ⏳ Planned | [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, hoisting configurations into immutable UI models. | Steps R1, R2 | Next Release (Step R3) |
+| **R4** | ⏳ Planned | [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped `ReaderBottomControlsUiState` and `ReaderBottomBarAction`. | Step R3 | Next Release (Phase R2) |
+| **R5** | ⏳ Planned | [**Decouple ReaderChaptersSheet**](reader/decouple_reader_chapters_sheet_proposal.md) | Decouples the chapter selection bottom sheet from direct preferences, context color resolvers, and inline repository calls. | Step R3 | Next Release (Phase R2) |
+| **R6** | ⏳ Planned | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags into `ReaderSettingsUiState`. | Step R3 | Next Release (Phase R2) |
+| **R7** | ⏳ Planned | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math into `NavigationRegionUiModel`. | None (Self-Contained) | Next Release (Phase R2) |
 
 ### Reader Feature Proposals
 
 | [**Webtoon Preloading & Slice Cache Architecture**](reader/webtoon_preloading_and_slice_cache_architecture_proposal.md) | Eliminates black screen stutter, implements two-tier bounded preloading, disk-cached slice generation, and seamless scroll continuity for downloaded webtoons. | Neko Reader Phase 2 |
 | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Neko Performance |
 | [**Unified Reader Preloader Engine & Two-Tier Pipeline**](reader/reader_preloader_engine_proposal.md) | Extracts inline preloading logic from Compose viewers into a testable domain engine with two-tier disk/memory pipelining. | Neko Reader Phase 2 |
-| [**Rock-Solid ComposeWebtoonViewer Architecture**](reader/rock_solid_webtoon_compose_viewer_proposal.md) | Solves in-UI tall page splitting shifts, post-composition prepend races, and gesture bloat to reduce ComposeWebtoonViewer to ~220 lines. | Neko Reader Phase 2 |
 | [**Rock-Solid ComposePagerViewer Architecture**](reader/rock_solid_paged_compose_viewer_proposal.md) | Solves destructive subtree key resets, post-composition page flashing, in-UI Coil preloading, and preference flooding to reduce ComposePagerViewer to ~180 lines. | Neko Reader Phase 2 |
 | [**Zen Focus Reading Mode & Touch Shield**](reader/zen_focus_reading_mode_proposal.md) | Adds a distraction-free reading mode with accidental touch prevention. | Neko Feature |
 

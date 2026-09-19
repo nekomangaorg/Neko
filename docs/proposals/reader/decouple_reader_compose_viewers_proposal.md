@@ -3,15 +3,20 @@
 **Status:** Proposed / Under Review  
 **Author:** Neko Development Team  
 **Date:** September 2026  
-**Target Milestone:** Neko 3.x Reader Decoupling  
+**Target Milestone:** Next Release (Neko 3.8.0 / Step R3: Complete Viewer Decommissioning)  
 **Execution Order:** Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R3 (Priority: Critical / Viewer Decoupling)  
 **Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)), Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md))  
 **Downstream Dependents:** Reader Track Phase R2 Auxiliary Proposals (Steps R4–R7)  
-**Implementation State:** 🟡 Coupled Baseline (Passing legacy View instances, DownloadManager, and Injekt inside Compose Viewers)  
+**Implementation State:** 🟡 Scheduled for Next Release (Current release delivers Step R1, Step R2, and Webtoon Compose stabilization; Step R3 will decommission legacy `WebtoonViewer.kt` and `PagerViewer.kt` and decouple `ComposePagerViewer`)  
 
 ---
 
 ## 📌 Codebase Audit & Baseline Notes
+
+> [!IMPORTANT]
+> **Release Staging & Separation of Scope:**
+> - **Current Release (`ref/rock-solid-webtoon-phase2` / 3.7.x)**: Shipped Step R1 (navigation orchestration), Step R2 (transition page decoupling), and the Rock-Solid Webtoon Compose viewer stabilization (upstream tall page splitting, headless `ReaderPreloadEngine`, isolated gesture modifiers, deterministic scroll re-anchoring).
+> - **Next Release (Step R3 / 3.8.x)**: Scheduled to perform the complete decommissioning of legacy `WebtoonViewer.kt` and `PagerViewer.kt` Android View hierarchies, applying `PagerViewerConfigUiModel` hoisting to `ComposePagerViewer.kt`, and wiring both viewers directly from `ReaderViewModel` and `ReaderActivity` without compatibility bridge overloads.
 
 > [!NOTE]
 > **Current Codebase Baseline:**
