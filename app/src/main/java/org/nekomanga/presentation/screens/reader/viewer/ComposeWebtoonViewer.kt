@@ -8,15 +8,12 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -403,6 +400,14 @@ fun ComposeWebtoonViewer(
         modifier = modifier.fillMaxSize().background(config.backgroundColor).clipToBounds(),
     ) {
         val horizontalPadding = maxWidth * config.sidePaddingPercent
+        // Pad the page items themselves so the image is measured at the narrower width and
+        // scales down into it. Covering the edges after the fact would hide part of the page.
+        val pageModifier =
+            if (horizontalPadding > Size.none) {
+                Modifier.padding(horizontal = horizontalPadding)
+            } else {
+                Modifier
+            }
 
         LazyColumn(
             state = lazyListState,
@@ -531,6 +536,7 @@ fun ComposeWebtoonViewer(
                             page = item.page,
                             backgroundColor = config.backgroundColor,
                             onLongClick = { onPageLongTap(item.page) },
+                            modifier = pageModifier,
                         )
                     }
                     is ReaderUiItem.SplitPage -> {
@@ -538,6 +544,7 @@ fun ComposeWebtoonViewer(
                             split = item.split,
                             backgroundColor = config.backgroundColor,
                             onLongClick = { onPageLongTap(item.page) },
+                            modifier = pageModifier,
                         )
                     }
                     is ReaderUiItem.Transition -> {
@@ -578,23 +585,6 @@ fun ComposeWebtoonViewer(
                     }
                 }
             }
-        }
-
-        if (horizontalPadding > Size.none) {
-            Box(
-                modifier =
-                    Modifier.align(Alignment.CenterStart)
-                        .fillMaxHeight()
-                        .width(horizontalPadding)
-                        .background(config.backgroundColor)
-            )
-            Box(
-                modifier =
-                    Modifier.align(Alignment.CenterEnd)
-                        .fillMaxHeight()
-                        .width(horizontalPadding)
-                        .background(config.backgroundColor)
-            )
         }
     }
 }
