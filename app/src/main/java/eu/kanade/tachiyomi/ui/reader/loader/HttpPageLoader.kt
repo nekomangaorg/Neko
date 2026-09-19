@@ -186,7 +186,9 @@ class HttpPageLoader(
                 val imageResponse = source.getImage(page)
                 if (!imageResponse.isSuccessful) {
                     imageResponse.close()
-                    throw Exception("HTTP error ${imageResponse.code}")
+                    throw Exception(
+                        httpErrorMessage(imageResponse.code, imageResponse.request.url.host)
+                    )
                 }
                 chapterCache.putImageToCache(imageUrl, imageResponse)
             }
@@ -194,6 +196,7 @@ class HttpPageLoader(
             page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
             page.status = Page.State.READY
         } catch (e: Throwable) {
+            page.errorMessage = e.message ?: e.javaClass.simpleName
             page.status = Page.State.ERROR
             if (e is CancellationException) {
                 throw e
@@ -201,5 +204,9 @@ class HttpPageLoader(
                 TimberKt.e(e) { "Error loading page" }
             }
         }
+    }
+
+    companion object {
+        fun httpErrorMessage(code: Int, host: String): String = "HTTP $code from $host"
     }
 }

@@ -444,6 +444,7 @@ class Downloader(
             if (e is CancellationException) throw e
             // Mark this page as error and allow to download the remaining
             page.progress = 0
+            page.errorMessage = e.message ?: ""
             page.status = Page.State.ERROR
             notifier.onError(e.message, download.chapterItem.name, download.mangaItem.title)
         }

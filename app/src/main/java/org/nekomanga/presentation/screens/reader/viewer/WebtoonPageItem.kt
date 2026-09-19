@@ -116,12 +116,14 @@ private fun WebtoonPageContent(
 ) {
     val context = LocalContext.current
     var loadError by remember(target) { mutableStateOf(false) }
+    var loadErrorMessage by remember(target) { mutableStateOf<String?>(null) }
     var retryCount by remember(target) { mutableStateOf(0) }
     val isError = pageStatus == Page.State.ERROR || loadError
     var intrinsicRatio by remember(target) { mutableFloatStateOf(initialRatio) }
 
     val onRetry: () -> Unit = {
         loadError = false
+        loadErrorMessage = null
         retryCount++
         page.chapter.pageLoader?.retryPage(page)
     }
@@ -224,12 +226,18 @@ private fun WebtoonPageContent(
                 TimberKt.e(state.result.throwable) {
                     "Failed to load webtoon image for page ${page.number}"
                 }
+                loadErrorMessage =
+                    state.result.throwable.message ?: state.result.throwable.javaClass.simpleName
                 loadError = true
             },
         )
 
         ReaderPageLoadingOverlay(status = pageStatus, progress = pageProgress)
 
-        ReaderPageErrorOverlay(visible = isError, onRetry = onRetry)
+        ReaderPageErrorOverlay(
+            visible = isError,
+            onRetry = onRetry,
+            message = page.errorMessage ?: loadErrorMessage,
+        )
     }
 }
