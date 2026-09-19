@@ -811,7 +811,9 @@ constructor(
         // Determine which chapter should be deleted and enqueue
         val chapterList = getChapterList()
         val currentChapterPosition = chapterList.indexOf(currentChapter)
-        val removeAfterReadSlots = preferences.removeAfterReadSlots().get()
+        val removeAfterReadSlots =
+            manga?.toManga()?.removeAfterReadSlots(preferences)
+                ?: preferences.removeAfterReadSlots().get()
         val chapterToDelete = chapterList.getOrNull(currentChapterPosition - removeAfterReadSlots)
 
         if (removeAfterReadSlots != 0 && chapterToDownload != null) {
@@ -959,6 +961,16 @@ constructor(
         return when (manga?.orientationType) {
             OrientationType.DEFAULT.flagValue -> default
             else -> manga?.orientationType ?: default
+        }
+    }
+
+    fun setMangaDeleteAfterReadType(type: Int) {
+        val manga = manga ?: return
+
+        viewModelScope.launchIO {
+            val dbManga = manga.toManga().apply { deleteAfterReadType = type }
+            mangaRepository.updateViewerFlags(dbManga)
+            mutableState.update { it.copy(manga = dbManga.toMangaItem()) }
         }
     }
 

@@ -677,6 +677,9 @@ class ReaderActivity : BaseMainActivity() {
                                 onOrientationChange = { orientation ->
                                     viewModel.setMangaOrientationType(orientation.flagValue)
                                 },
+                                onDeleteAfterReadChange = { type ->
+                                    viewModel.setMangaDeleteAfterReadType(type.flagValue)
+                                },
                                 onOpenReaderSettings = {
                                     val intent =
                                         MainActivity.openReaderSettings(this@ReaderActivity)

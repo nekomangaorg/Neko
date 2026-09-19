@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import eu.kanade.tachiyomi.ui.reader.settings.DeleteAfterReadType
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderSliderPosition
@@ -49,6 +50,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.manga.MangaItem
+import org.nekomanga.domain.manga.deleteAfterReadType
 import org.nekomanga.domain.manga.isLongStrip
 import org.nekomanga.domain.manga.orientationType
 import org.nekomanga.domain.manga.readingModeType
@@ -68,6 +70,7 @@ fun ReaderSettingsSheet(
     hasCutout: Boolean,
     onReadingModeChange: (ReadingModeType) -> Unit,
     onOrientationChange: (OrientationType) -> Unit,
+    onDeleteAfterReadChange: (DeleteAfterReadType) -> Unit,
     onOpenReaderSettings: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
@@ -90,6 +93,7 @@ fun ReaderSettingsSheet(
 
     val readingModeType = manga?.readingModeType ?: 0
     val orientationType = manga?.orientationType ?: OrientationType.DEFAULT.flagValue
+    val deleteAfterReadType = manga?.deleteAfterReadType ?: DeleteAfterReadType.DEFAULT.flagValue
 
     val tabs =
         listOf(
@@ -173,8 +177,10 @@ fun ReaderSettingsSheet(
                                 GeneralSettingsTab(
                                     readingModeType = readingModeType,
                                     orientationType = orientationType,
+                                    deleteAfterReadType = deleteAfterReadType,
                                     onReadingModeChange = onReadingModeChange,
                                     onOrientationChange = onOrientationChange,
+                                    onDeleteAfterReadChange = onDeleteAfterReadChange,
                                     readerPreferences = readerPreferences,
                                 )
                             1 ->
@@ -197,8 +203,10 @@ fun ReaderSettingsSheet(
 private fun GeneralSettingsTab(
     readingModeType: Int,
     orientationType: Int,
+    deleteAfterReadType: Int,
     onReadingModeChange: (ReadingModeType) -> Unit,
     onOrientationChange: (OrientationType) -> Unit,
+    onDeleteAfterReadChange: (DeleteAfterReadType) -> Unit,
     readerPreferences: ReaderPreferences,
 ) {
     val readerTheme by readerPreferences.readerTheme().collectAsState()
@@ -212,6 +220,11 @@ private fun GeneralSettingsTab(
 
     val currentRotationIndex =
         remember(orientationType) { OrientationType.fromPreference(orientationType).prefValue }
+
+    val currentDeleteAfterReadIndex =
+        remember(deleteAfterReadType) {
+            DeleteAfterReadType.fromPreference(deleteAfterReadType).prefValue
+        }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         val readingModeOptions = stringArrayResource(id = R.array.viewers_selector).toList()
@@ -234,6 +247,15 @@ private fun GeneralSettingsTab(
                 val rotationType = OrientationType.fromSpinner(index)
                 onOrientationChange(rotationType)
             },
+        )
+
+        val deleteAfterReadOptions =
+            DeleteAfterReadType.entries.map { stringResource(it.stringRes) }
+        ReaderChipsSelector(
+            label = stringResource(R.string.remove_after_read),
+            options = deleteAfterReadOptions,
+            selectedIndex = currentDeleteAfterReadIndex,
+            onSelected = { index -> onDeleteAfterReadChange(DeleteAfterReadType.entries[index]) },
         )
 
         val themeOptions = stringArrayResource(id = R.array.reader_themes).toList()
