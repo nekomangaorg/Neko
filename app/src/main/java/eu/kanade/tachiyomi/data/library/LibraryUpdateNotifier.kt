@@ -94,14 +94,18 @@ class LibraryUpdateNotifier(private val context: Context) {
      * Shows notification containing update entries that failed with action to open full log.
      *
      * @param errors List of entry titles that failed to update.
-     * @param uri Uri for error log file containing all titles that failed.
+     * @param uri Uri for error log file containing all titles that failed, null when the file could
+     *   not be written.
      */
-    fun showUpdateErrorNotification(errors: List<String>, uri: Uri) {
+    fun showUpdateErrorNotification(errors: List<String>, uri: Uri?) {
         if (errors.isEmpty()) {
             return
         }
 
-        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
+        // Without a log file the notification only opens the app.
+        val pendingIntent =
+            uri?.let { NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, it) }
+                ?: getNotificationIntent()
 
         context.notificationManager.notify(
             Notifications.Id.Library.Error,
@@ -117,11 +121,13 @@ class LibraryUpdateNotifier(private val context: Context) {
                     )
                     setContentIntent(pendingIntent)
                     setSmallIcon(R.drawable.ic_neko_notification)
-                    addAction(
-                        R.drawable.ic_help_24dp,
-                        context.getString(R.string.open_log),
-                        pendingIntent,
-                    )
+                    if (uri != null) {
+                        addAction(
+                            R.drawable.ic_help_24dp,
+                            context.getString(R.string.open_log),
+                            pendingIntent,
+                        )
+                    }
                 }
                 .build(),
         )
@@ -132,14 +138,18 @@ class LibraryUpdateNotifier(private val context: Context) {
      * and learn more.
      *
      * @param skips List of entry titles that were skipped.
-     * @param uri Uri for error log file containing all titles that were skipped.
+     * @param uri Uri for error log file containing all titles that were skipped, null when the file
+     *   could not be written.
      */
-    fun showUpdateSkippedNotification(skips: List<String>, uri: Uri) {
+    fun showUpdateSkippedNotification(skips: List<String>, uri: Uri?) {
         if (skips.isEmpty()) {
             return
         }
 
-        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
+        // Without a log file the notification only opens the app.
+        val pendingIntent =
+            uri?.let { NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, it) }
+                ?: getNotificationIntent()
 
         context.notificationManager.notify(
             Notifications.Id.Library.Skipped,
@@ -155,11 +165,13 @@ class LibraryUpdateNotifier(private val context: Context) {
                     )
                     setContentIntent(pendingIntent)
                     setSmallIcon(R.drawable.ic_neko_notification)
-                    addAction(
-                        R.drawable.ic_help_24dp,
-                        context.getString(R.string.open_log),
-                        pendingIntent,
-                    )
+                    if (uri != null) {
+                        addAction(
+                            R.drawable.ic_help_24dp,
+                            context.getString(R.string.open_log),
+                            pendingIntent,
+                        )
+                    }
                 }
                 .build(),
         )
