@@ -65,15 +65,7 @@ class Atsumaru : ReducedHttpSource() {
         val dto = json.decodeFromString<PageObjectDto>(response.body.string())
 
         return dto.readChapter.pages.mapIndexed { index, page ->
-            val imageUrl =
-                when {
-                    page.image.startsWith("http") -> page.image
-                    page.image.startsWith("//") -> "https:${page.image}"
-                    else ->
-                        "$baseUrl/static/${page.image.removePrefix("/").removePrefix("static/")}"
-                }
-
-            Page(index, imageUrl = imageUrl.replaceFirst(Regex("^https?:?//"), "https://"))
+            Page(index, imageUrl = pageImageUrl(page.image))
         }
     }
 
@@ -173,6 +165,17 @@ class Atsumaru : ReducedHttpSource() {
     companion object {
         const val name = "Atsumaru"
         const val baseUrl = "https://atsu.moe"
+        const val cdnUrl = "https://cdn.atsu.moe"
         private val PROTOCOL_REGEX = Regex("^https?://")
+
+        // The API returns page images as "/static/..." paths. The site resolves them against
+        // cdn.atsu.moe; the origin host answers 410 Gone for those paths once its cached 301s
+        // expire, so going through baseUrl fails on a cold Cloudflare edge.
+        fun pageImageUrl(image: String): String =
+            when {
+                image.startsWith("http") -> image.replaceFirst(PROTOCOL_REGEX, "https://")
+                image.startsWith("//") -> "https:$image"
+                else -> "$cdnUrl/static/${image.removePrefix("/").removePrefix("static/")}"
+            }
     }
 }
