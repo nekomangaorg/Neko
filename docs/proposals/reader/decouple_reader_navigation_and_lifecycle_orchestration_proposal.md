@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration
 
-**Status:** Proposed / Under Review  
+**Status:** Complete / Implemented  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
 **Execution Order:** Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R1 (Priority: Critical / Concurrency Backbone)  
 **Prerequisites:** None (Phase 1 Complete, Phase 2 in progress)  
 **Downstream Dependents:** Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)), Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
-**Implementation State:** 🟡 Phase 1 Stabilization Complete (Hoisted `onNavigateToChapter` and `onRequestPreloadChapter`, memoized `defaultPageIndex`, stabilized `nestedScrollConnection`, and aligned concurrency checks; transition execution remains in Activity `lifecycleScope` awaiting Phase 2 ViewModel engine)  
+**Implementation State:** 🟢 Complete (Migrated chapter navigation into `viewModelScope`, introduced `ReaderNavCommand` and `ReaderChapterTransitionState`, guarded transitions with `navigationMutex`, extracted `ResolveChapterNavTargetUseCase` and `WebtoonScrollGatingPolicy`, and eliminated dual dispatch)  
 
 ---
 

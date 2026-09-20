@@ -6,5 +6,7 @@ sealed interface ReaderNavCommand {
 
     data class SnapToPage(val pageIndex: Int) : ReaderNavCommand
 
+    data class StepPage(val forward: Boolean) : ReaderNavCommand
+
     data class ScrollByDelta(val delta: Float) : ReaderNavCommand
 }

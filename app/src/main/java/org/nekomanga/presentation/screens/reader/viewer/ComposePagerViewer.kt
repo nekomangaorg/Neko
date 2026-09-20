@@ -42,6 +42,8 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.ui.reader.model.ReaderChapterTransitionState
+import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
@@ -52,6 +54,7 @@ import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.MangaItem
@@ -75,6 +78,8 @@ fun ComposePagerViewer(
     onRequestPreloadChapter: (ReaderChapter) -> Unit,
     onRetryTransition: (ReaderChapter) -> Unit,
     modifier: Modifier = Modifier,
+    transitionState: ReaderChapterTransitionState = ReaderChapterTransitionState.Idle,
+    navCommands: Flow<ReaderNavCommand>? = null,
 ) {
     val currentChapterId =
         (viewer.currentChapter
@@ -190,6 +195,85 @@ fun ComposePagerViewer(
             remember(readerTheme, themeBackground) {
                 ReaderTheme.fromPreference(readerTheme).color(themeBackground)
             }
+
+        val currentTransitionState by rememberUpdatedState(transitionState)
+        val currentIsNavigating by
+            rememberUpdatedState(
+                transitionState is ReaderChapterTransitionState.Loading ||
+                    transitionState is ReaderChapterTransitionState.Settling
+            )
+
+        // Consume unidirectional programmatic navigation commands
+        LaunchedEffect(navCommands) {
+            navCommands?.collect { command ->
+                when (command) {
+                    is ReaderNavCommand.ScrollToPage -> {
+                        val target =
+                            if (command.pageIndex in items.indices) {
+                                command.pageIndex
+                            } else {
+                                items
+                                    .indexOfFirst {
+                                        it is ReaderUiItem.Page &&
+                                            it.page.chapter.chapter.id == currentChapterId &&
+                                            (it.page.index == command.pageIndex ||
+                                                it.extraPage?.index == command.pageIndex)
+                                    }
+                                    .takeIf { it != -1 } ?: command.pageIndex
+                            }
+                        if (target in items.indices && pagerState.currentPage != target) {
+                            if (command.animated && animatedTransitions) {
+                                pagerState.animateScrollToPage(
+                                    page = target,
+                                    animationSpec =
+                                        tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                                )
+                            } else {
+                                pagerState.scrollToPage(target)
+                            }
+                        }
+                    }
+                    is ReaderNavCommand.SnapToPage -> {
+                        val target =
+                            if (command.pageIndex in items.indices) {
+                                command.pageIndex
+                            } else {
+                                items
+                                    .indexOfFirst {
+                                        it is ReaderUiItem.Page &&
+                                            it.page.chapter.chapter.id == currentChapterId &&
+                                            (it.page.index == command.pageIndex ||
+                                                it.extraPage?.index == command.pageIndex)
+                                    }
+                                    .takeIf { it != -1 } ?: command.pageIndex
+                            }
+                        if (target in items.indices && pagerState.currentPage != target) {
+                            pagerState.scrollToPage(target)
+                        }
+                    }
+                    is ReaderNavCommand.StepPage -> {
+                        val target =
+                            if (command.forward) {
+                                pagerState.currentPage + 1
+                            } else {
+                                pagerState.currentPage - 1
+                            }
+                        if (target in items.indices) {
+                            if (animatedTransitions) {
+                                pagerState.animateScrollToPage(
+                                    page = target,
+                                    animationSpec =
+                                        tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                                )
+                            } else {
+                                pagerState.scrollToPage(target)
+                            }
+                        }
+                    }
+                    is ReaderNavCommand.ScrollByDelta -> {}
+                }
+            }
+        }
 
         // Sync programmatic page changes (slider, TOC, etc.)
         LaunchedEffect(viewer.requestedPagePosition) {
@@ -444,7 +528,7 @@ fun ComposePagerViewer(
                                             accumulatedOverscroll < -thresholdPx
                                         }
                                     }
-                                if (isTrigger && !isTransitioning) {
+                                if (isTrigger && !currentIsNavigating && !isTransitioning) {
                                     accumulatedOverscroll = 0f
                                     isTransitioning = true
                                     coroutineScope.launch {
@@ -459,7 +543,6 @@ fun ComposePagerViewer(
                                                 toChapter.chapter,
                                                 navTarget,
                                             )
-                                            delay(500L)
                                         } finally {
                                             isTransitioning = false
                                         }
