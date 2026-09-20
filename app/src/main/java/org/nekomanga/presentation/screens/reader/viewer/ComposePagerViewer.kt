@@ -147,7 +147,6 @@ fun ComposePagerViewer(
             )
 
         var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
-        var isTransitioning by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
         val currentOnNavigateToChapter by rememberUpdatedState(onNavigateToChapter)
         val currentOnRequestPreloadChapter by rememberUpdatedState(onRequestPreloadChapter)
@@ -528,25 +527,18 @@ fun ComposePagerViewer(
                                             accumulatedOverscroll < -thresholdPx
                                         }
                                     }
-                                if (isTrigger && !currentIsNavigating && !isTransitioning) {
+                                if (isTrigger && !currentIsNavigating) {
                                     accumulatedOverscroll = 0f
-                                    isTransitioning = true
-                                    coroutineScope.launch {
-                                        try {
-                                            val navTarget =
-                                                if (transition is ChapterTransition.Prev) {
-                                                    ChapterNavTarget.End
-                                                } else {
-                                                    ChapterNavTarget.Start
-                                                }
-                                            currentOnNavigateToChapter(
-                                                toChapter.chapter,
-                                                navTarget,
-                                            )
-                                        } finally {
-                                            isTransitioning = false
+                                    val navTarget =
+                                        if (transition is ChapterTransition.Prev) {
+                                            ChapterNavTarget.End
+                                        } else {
+                                            ChapterNavTarget.Start
                                         }
-                                    }
+                                    currentOnNavigateToChapter(
+                                        toChapter.chapter,
+                                        navTarget,
+                                    )
                                 }
                             }
                         }
