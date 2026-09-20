@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko Reader Phase 2  
+**Execution Order:** Reader Track — Phase R1 (Core Navigation, Engine & Viewers), Step R4 (Priority: High / Domain Preload Engine)  
+**Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)), Step R3 ([`webtoon_preloading_and_slice_cache_architecture_proposal.md`](webtoon_preloading_and_slice_cache_architecture_proposal.md))  
+**Downstream Dependents:** Step R5 ([`rock_solid_paged_compose_viewer_proposal.md`](rock_solid_paged_compose_viewer_proposal.md)), Step R6 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
 **Implementation State:** 🟡 Phase 1 Completed (Direction-Aware Indexing, Decoupled Disk Prefetch & Bounded Memory Cache); Phase 2 Proposed (Domain Extraction & State Machine)
 
 ---

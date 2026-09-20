@@ -4,6 +4,9 @@
 **Author:** Neko Architecture Team  
 **Date:** September 2026  
 **Target Milestone:** Neko Reader Phase 2  
+**Execution Order:** Reader Track — Phase R1 (Core Navigation, Engine & Viewers), Step R3 (Priority: High / Webtoon Engine Stabilization)  
+**Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md))  
+**Downstream Dependents:** Step R4 ([`reader_preloader_engine_proposal.md`](reader_preloader_engine_proposal.md))  
 **Related PRs / Commits:** #3407 (`fa10861316`), `6557a70c30`
 
 ---

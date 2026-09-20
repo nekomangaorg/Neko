@@ -4,9 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
-**Execution Order:** Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R1 (Priority: Critical / Concurrency Backbone)  
+**Execution Order:** Reader Track — Phase R1 (Core Navigation, Engine & Viewers), Step R1 (Priority: Critical / Concurrency Backbone)  
 **Prerequisites:** None (Phase 1 Complete, Phase 2 in progress)  
-**Downstream Dependents:** Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)), Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
+**Downstream Dependents:** Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)), Step R3 ([`webtoon_preloading_and_slice_cache_architecture_proposal.md`](webtoon_preloading_and_slice_cache_architecture_proposal.md))  
 **Implementation State:** 🟢 Complete (Migrated chapter navigation into `viewModelScope`, introduced `ReaderNavCommand` and `ReaderChapterTransitionState`, guarded transitions with `navigationMutex`, extracted `ResolveChapterNavTargetUseCase` and `WebtoonScrollGatingPolicy`, and eliminated dual dispatch)  
 
 ---
@@ -452,9 +452,9 @@ gantt
 
 ### Prerequisites & Sequential Placement
 > [!IMPORTANT]
-> **Execution Placement:** **Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R1**  
+> **Execution Placement:** **Reader Track — Phase R1 (Core Navigation, Engine & Viewers), Step R1**  
 > **Prerequisites:** None (Phase 1 Complete; Phase 2 in progress).  
-> **Unlocks:** Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)) and Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md)).  
+> **Unlocks:** Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)), Step R3 ([`webtoon_preloading_and_slice_cache_architecture_proposal.md`](webtoon_preloading_and_slice_cache_architecture_proposal.md)), and downstream viewer refactors.  
 >
 > As the reader's central navigation and concurrency engine, moving chapter transitions into `ReaderViewModel.viewModelScope` guarded by `navigationMutex` and streaming `ReaderNavCommand` events is the foundational backbone of the Reader Decoupling track.
 

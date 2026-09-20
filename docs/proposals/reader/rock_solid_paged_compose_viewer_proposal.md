@@ -4,8 +4,8 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling & Paged Engine Stabilization  
-**Execution Order:** Reader Track — Phase R1 / Step R3 Extension (Priority: High / Paged Engine Hardening)  
-**Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)), Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md))  
+**Execution Order:** Reader Track — Phase R1 (Core Navigation, Engine & Viewers), Step R5 (Priority: High / Paged Engine Hardening)  
+**Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)), Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)), Step R4 ([`reader_preloader_engine_proposal.md`](reader_preloader_engine_proposal.md))  
 **Related Proposals:** [`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md), [`reader_preloader_engine_proposal.md`](reader_preloader_engine_proposal.md)  
 **Implementation Target:** [`ComposePagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt), [`PagerPageItem.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerPageItem.kt), [`PagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/PagerViewer.kt)  
 
@@ -491,7 +491,7 @@ gantt
 ### Phase 4: Verification & Handoff
 1. Verify with unit tests in `app/src/test/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/`.
 2. Format all files with `./gradlew ktfmtFormat`.
-3. Complete handoff to Step R2 ([`decouple_reader_transition_page_proposal.md`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/docs/proposals/reader/decouple_reader_transition_page_proposal.md)) and Step R3 ([`decouple_reader_compose_viewers_proposal.md`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/docs/proposals/reader/decouple_reader_compose_viewers_proposal.md)).
+3. Complete handoff to Step R2 ([`decouple_reader_transition_page_proposal.md`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/docs/proposals/reader/decouple_reader_transition_page_proposal.md)) and Step R6 ([`decouple_reader_compose_viewers_proposal.md`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/docs/proposals/reader/decouple_reader_compose_viewers_proposal.md)).
 
 ---
 
@@ -499,4 +499,4 @@ gantt
 
 Following the completion of this proposal:
 1. **Transition Page Decoupling**: Removing `DownloadManager` and `Injekt.get()` from `PagerViewerConfigUiModel` is tracked under [**Step R2 (`decouple_reader_transition_page_proposal.md`)**](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/docs/proposals/reader/decouple_reader_transition_page_proposal.md).
-2. **Complete Legacy Viewer Decommission**: Decommissioning `PagerViewer.kt`, `R2LPagerViewer.kt`, `L2RPagerViewer.kt`, and `VerticalPagerViewer.kt` to drive state directly from `ReaderViewModel` is tracked under [**Step R3 (`decouple_reader_compose_viewers_proposal.md`)**](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/docs/proposals/reader/decouple_reader_compose_viewers_proposal.md).
+2. **Complete Legacy Viewer Decommission**: Decommissioning `PagerViewer.kt`, `R2LPagerViewer.kt`, `L2RPagerViewer.kt`, and `VerticalPagerViewer.kt` to drive state directly from `ReaderViewModel` is tracked under [**Step R6 (`decouple_reader_compose_viewers_proposal.md`)**](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/docs/proposals/reader/decouple_reader_compose_viewers_proposal.md).

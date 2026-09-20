@@ -15,27 +15,57 @@ Proposals are categorized by subsystem and scope to keep documentation organized
 
 Proposals focused on reader performance, Jetpack Compose viewers, navigation lifecycle orchestration, memory optimization, and UI controls decoupling.
 
-### Reader Decoupling Execution Track
+### Reader Refactor Dependency & Execution Graph
+
+```mermaid
+flowchart TD
+    subgraph PR1["Phase R1: Core Navigation, Engine & Viewers"]
+        R1["Step R1: Chapter Navigation & Lifecycle Orchestration"]
+        R2["Step R2: Decouple TransitionPage"]
+        R3["Step R3: Webtoon Preloading & Slice Cache"]
+        R4["Step R4: Unified Preloader Engine"]
+        R5["Step R5: Rock-Solid ComposePagerViewer"]
+        R6["Step R6: Decouple Compose Viewers & Decommission Legacy Views"]
+    end
+
+    subgraph PR2["Phase R2: Auxiliary UI & Overlays Decoupling"]
+        R7["Step R7: ReaderControls & Bottom Action Bar"]
+        R8["Step R8: ReaderChaptersSheet"]
+        R9["Step R9: ReaderSettingsSheet"]
+        R10["Step R10: GestureNavigationOverlay"]
+    end
+
+    subgraph PR3["Phase R3: Advanced Rendering"]
+        R11["Step R11: Native Compose Subsampling Tile Renderer"]
+    end
+
+    R1 --> R2
+    R1 --> R3
+    R3 --> R4
+    R2 --> R5
+    R4 --> R5
+    R5 --> R6
+    R6 --> R7
+    R6 --> R8
+    R6 --> R9
+    R6 --> R11
+```
+
+### Reader Refactor Track
 
 | Order | Status | Proposal | Description | Prerequisites | Target Milestone |
 | :---: | :---: | :--- | :--- | :--- | :--- |
-| **R1** | ✅ Done | [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, and guards key events with a `Mutex`. | None | Phase 1 & 2 Complete |
+| **R1** | ✅ Done | [**Decouple Reader Chapter Navigation, Concurrency Guards & Lifecycle Orchestration**](reader/decouple_reader_navigation_and_lifecycle_orchestration_proposal.md) | Migrates chapter navigation into `viewModelScope`, introduces `ReaderNavCommand` and `ReaderChapterTransitionState`, and guards key events with a `Mutex`. | None | Phase 1 & 2 Complete (Landed) |
 | **R2** | ✅ Done | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math into `ChapterTransitionUiModel`. | Step R1 | Current Release (Landed) |
-| **R3** | ⏳ Planned | [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, hoisting configurations into immutable UI models. | Steps R1, R2 | Next Release (Step R3) |
-| **R4** | ⏳ Planned | [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped `ReaderBottomControlsUiState` and `ReaderBottomBarAction`. | Step R3 | Next Release (Phase R2) |
-| **R5** | ⏳ Planned | [**Decouple ReaderChaptersSheet**](reader/decouple_reader_chapters_sheet_proposal.md) | Decouples the chapter selection bottom sheet from direct preferences, context color resolvers, and inline repository calls. | Step R3 | Next Release (Phase R2) |
-| **R6** | ⏳ Planned | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags into `ReaderSettingsUiState`. | Step R3 | Next Release (Phase R2) |
-| **R7** | ⏳ Planned | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math into `NavigationRegionUiModel`. | None (Self-Contained) | Next Release (Phase R2) |
-
-### Reader Feature Proposals
-
-| Proposal | Description | Target Milestone |
-| :--- | :--- | :--- |
-| [**Webtoon Preloading & Slice Cache Architecture**](reader/webtoon_preloading_and_slice_cache_architecture_proposal.md) | Eliminates black screen stutter, implements two-tier bounded preloading, disk-cached slice generation, and seamless scroll continuity for downloaded webtoons. | Neko Reader Phase 2 |
-| [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Neko Performance |
-| [**Unified Reader Preloader Engine & Two-Tier Pipeline**](reader/reader_preloader_engine_proposal.md) | Extracts inline preloading logic from Compose viewers into a testable domain engine with two-tier disk/memory pipelining. | Neko Reader Phase 2 |
-| [**Rock-Solid ComposePagerViewer Architecture**](reader/rock_solid_paged_compose_viewer_proposal.md) | Solves destructive subtree key resets, post-composition page flashing, in-UI Coil preloading, and preference flooding to reduce ComposePagerViewer to ~180 lines. | Neko Reader Phase 2 |
-| [**Zen Focus Reading Mode & Touch Shield**](reader/zen_focus_reading_mode_proposal.md) | Adds a distraction-free reading mode with accidental touch prevention. | Neko Feature |
+| **R3** | ⏳ Planned | [**Webtoon Preloading & Slice Cache Architecture**](reader/webtoon_preloading_and_slice_cache_architecture_proposal.md) | Eliminates black screen stutter, implements two-tier bounded preloading, disk-cached slice generation, and seamless scroll continuity for downloaded webtoons. | Step R1 | Neko Reader Phase 2 |
+| **R4** | ⏳ Planned | [**Unified Reader Preloader Engine & Two-Tier Pipeline**](reader/reader_preloader_engine_proposal.md) | Extracts inline preloading logic from Compose viewers into a testable headless domain engine (`ReaderPreloadController`) with two-tier disk/memory pipelining. | Steps R1, R3 | Neko Reader Phase 2 |
+| **R5** | ⏳ Planned | [**Rock-Solid ComposePagerViewer Architecture**](reader/rock_solid_paged_compose_viewer_proposal.md) | Solves destructive subtree key resets, post-composition page flashing, in-UI Coil preloading, and preference flooding to reduce `ComposePagerViewer` to ~180 lines. | Steps R1, R2, R4 | Neko Reader Phase 2 |
+| **R6** | ⏳ Planned | [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, hoisting configurations into immutable UI models and decommissioning legacy View hierarchies. | Steps R1, R2, R4, R5 | Next Release (Step R6) |
+| **R7** | ⏳ Planned | [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped `ReaderBottomControlsUiState` and `ReaderBottomBarAction`. | Step R6 | Next Release (Phase R2) |
+| **R8** | ⏳ Planned | [**Decouple ReaderChaptersSheet**](reader/decouple_reader_chapters_sheet_proposal.md) | Decouples the chapter selection bottom sheet from direct preferences, context color resolvers, and inline repository calls. | Step R6 | Next Release (Phase R2) |
+| **R9** | ⏳ Planned | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags into `ReaderSettingsUiState`. | Step R6 | Next Release (Phase R2) |
+| **R10** | ⏳ Planned | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math into `NavigationRegionUiModel`. | None (Self-Contained) | Next Release (Phase R2) |
+| **R11** | ⏳ Planned | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Step R6 | Neko Performance (Phase 4) |
 
 ---
 
