@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.domain
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -123,5 +124,34 @@ class CheckTallPageUseCaseTest {
         page.stream = null
         val splits = useCase(page, screenHeight = 1000)
         assertNull(splits)
+    }
+
+    @Test
+    fun `invoke returns cached precomputed splits without invoking stream`() {
+        val page = createPage()
+        val dummySplits =
+            listOf(
+                ReaderPageSplit(
+                    page = page,
+                    topOffset = 0,
+                    splitHeight = 2000,
+                )
+            )
+        page.precomputedSplits = dummySplits
+        // Stream throws exception if called
+        page.stream = { throw IllegalStateException("Stream should not be called") }
+
+        val result = useCase(page, screenHeight = 1000)
+        assertEquals(dummySplits, result)
+    }
+
+    @Test
+    fun `invoke returns null without invoking stream when precomputedSplits is emptyList`() {
+        val page = createPage()
+        page.precomputedSplits = emptyList()
+        page.stream = { throw IllegalStateException("Stream should not be called") }
+
+        val result = useCase(page, screenHeight = 1000)
+        assertNull(result)
     }
 }

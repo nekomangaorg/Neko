@@ -1,16 +1,22 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
+import android.os.Build
+import android.view.WindowManager
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.ui.reader.domain.CheckTallPageUseCase
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import org.nekomanga.domain.reader.ReaderPreferences
 import tachiyomi.core.util.storage.toTempFile
-import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 /** Loader used to load a chapter from the downloaded chapters. */
 class DownloadPageLoader(
@@ -18,10 +24,19 @@ class DownloadPageLoader(
     private val manga: Manga,
     private val downloadManager: DownloadManager,
     private val downloadProvider: DownloadProvider,
+    private val checkTallPage: CheckTallPageUseCase = CheckTallPageUseCase(),
+    private val context: Application = Injekt.get(),
+    private val readerPreferences: ReaderPreferences = Injekt.get(),
+    private val getScreenHeight: () -> Int = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val wm = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
+            wm?.currentWindowMetrics?.bounds?.height()
+                ?: context.resources.displayMetrics.heightPixels
+        } else {
+            @Suppress("DEPRECATION") context.resources.displayMetrics.heightPixels
+        }
+    },
 ) : PageLoader() {
-
-    // Needed to open input streams
-    private val context: Application by injectLazy()
 
     private var zipPageLoader: ZipPageLoader? = null
 
@@ -34,11 +49,22 @@ class DownloadPageLoader(
     override suspend fun getPages(): List<ReaderPage> {
         val dbChapter = chapter.chapter
         val chapterPath = downloadProvider.findChapterDir(dbChapter, manga)
-        return if (chapterPath?.isFile == true) {
-            getPagesFromArchive(chapterPath)
-        } else {
-            getPagesFromDirectory()
+        val pages =
+            if (chapterPath?.isFile == true) {
+                getPagesFromArchive(chapterPath)
+            } else {
+                getPagesFromDirectory()
+            }
+        if (readerPreferences.splitTallImagesReader().get()) {
+            val screenHeight = getScreenHeight()
+            pages.forEach { page ->
+                if (page.precomputedSplits == null) {
+                    val splits = checkTallPage(page, screenHeight)
+                    page.precomputedSplits = splits ?: emptyList()
+                }
+            }
         }
+        return pages
     }
 
     private suspend fun getPagesFromArchive(chapterPath: UniFile): List<ReaderPage> {

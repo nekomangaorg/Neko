@@ -18,6 +18,10 @@ class CheckTallPageUseCase {
         screenHeight: Int,
         maxTextureSize: Int = GLUtil.maxTextureSize,
     ): List<ReaderPageSplit>? {
+        val precomputed = page.precomputedSplits
+        if (precomputed != null) {
+            return precomputed.ifEmpty { null }
+        }
         val streamFn = page.stream ?: return null
         val options =
             try {

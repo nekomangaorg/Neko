@@ -47,6 +47,17 @@ class ReaderPreloadEngine(
         }
     },
 ) {
+    companion object {
+        /** Hard cap on memory preloaded pages to prevent Coil LRU cache thrashing. */
+        const val MAX_MEMORY_PRELOAD_PAGES = 4
+
+        /** Hard cap on memory preloaded slices (e.g. ~100MB of bitmap memory). */
+        const val MAX_MEMORY_PRELOAD_SLICES = 12
+
+        /** Minimum slice buffer ahead of viewport. */
+        const val MIN_MEMORY_PRELOAD_SLICES = 6
+    }
+
     private val preloadedDisk = Collections.synchronizedSet(mutableSetOf<String>())
     private val preloadedMemory = Collections.synchronizedSet(mutableSetOf<String>())
     private val activeDisposables = ConcurrentHashMap<String, Disposable>()
@@ -76,48 +87,61 @@ class ReaderPreloadEngine(
         activeJob =
             scope.launch(Dispatchers.IO) {
                 delay(50L) // Debounce fast scrolling flings
+
+                val safeStart = activeIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
+
+                // 1. Backward window (1 page behind)
                 val windowStart =
                     calculateWindowStart(
-                        startIndex = activeIndex,
+                        startIndex = safeStart,
                         items = items,
                         pageBudget = 1,
                         minItems = 3,
                     )
+
+                // 2. Disk prefetch window: respects full user preference
                 val windowEnd =
                     calculateWindowEnd(
-                        startIndex = activeIndex,
+                        startIndex = safeStart,
                         items = items,
                         pageBudget = maxOf(1, preloadAmount),
                         minItems = maxOf(4, preloadAmount * 2),
                     )
+
+                // 3. Memory cache warming window: strictly bounded to immediate reading horizon
                 val memoryEnd =
                     calculateWindowEnd(
-                        startIndex = activeIndex,
+                        startIndex = safeStart,
                         items = items,
-                        pageBudget = maxOf(2, preloadAmount),
-                        minItems = maxOf(8, preloadAmount * 2),
+                        pageBudget = minOf(maxOf(2, preloadAmount), MAX_MEMORY_PRELOAD_PAGES),
+                        minItems =
+                            minOf(
+                                maxOf(MIN_MEMORY_PRELOAD_SLICES, preloadAmount * 2),
+                                MAX_MEMORY_PRELOAD_SLICES,
+                            ),
                     )
 
                 coroutineScope {
                     for (i in windowStart..windowEnd) {
                         val item = items.getOrNull(i) ?: continue
-                        preloadItem(this, item, preloadMemory = i in activeIndex..memoryEnd)
+                        preloadItem(this, item, preloadMemory = i in safeStart..memoryEnd)
                     }
                 }
             }
     }
 
-    private fun calculateWindowStart(
+    internal fun calculateWindowStart(
         startIndex: Int,
         items: List<ReaderUiItem>,
         pageBudget: Int = 1,
         minItems: Int = 3,
     ): Int {
         if (items.isEmpty()) return 0
+        val safeStart = startIndex.coerceIn(0, items.lastIndex)
         var distinctPages = 0
         var lastPage: ReaderPage? = null
-        var lastIdx = startIndex
-        for (i in startIndex downTo 0) {
+        var lastIdx = safeStart
+        for (i in safeStart downTo 0) {
             val item = items[i]
             val page =
                 when (item) {
@@ -130,24 +154,25 @@ class ReaderPreloadEngine(
                 lastPage = page
             }
             lastIdx = i
-            if (distinctPages > pageBudget && (startIndex - i) >= minItems) {
+            if (distinctPages > pageBudget && (safeStart - i) >= minItems) {
                 break
             }
         }
         return lastIdx
     }
 
-    private fun calculateWindowEnd(
+    internal fun calculateWindowEnd(
         startIndex: Int,
         items: List<ReaderUiItem>,
         pageBudget: Int,
         minItems: Int,
     ): Int {
         if (items.isEmpty()) return 0
+        val safeStart = startIndex.coerceIn(0, items.lastIndex)
         var distinctPages = 0
         var lastPage: ReaderPage? = null
-        var lastIdx = startIndex
-        for (i in startIndex..items.lastIndex) {
+        var lastIdx = safeStart
+        for (i in safeStart..items.lastIndex) {
             val item = items[i]
             val page =
                 when (item) {
@@ -160,7 +185,7 @@ class ReaderPreloadEngine(
                 lastPage = page
             }
             lastIdx = i
-            if (distinctPages > pageBudget && (i - startIndex) >= minItems) {
+            if (distinctPages > pageBudget && (i - safeStart) >= minItems) {
                 break
             }
         }
@@ -229,7 +254,18 @@ class ReaderPreloadEngine(
         val precomputed = page.precomputedSplits
         if (precomputed != null) {
             checkedTallPages.add(page)
-            if (precomputed.isEmpty() && preloadMemory) {
+            if (precomputed.isNotEmpty()) {
+                if (preloadMemory) {
+                    precomputed.forEach { split ->
+                        val splitKey =
+                            "webtoon_split_${split.page.chapter.chapter.id}_${split.page.index}_${split.topOffset}"
+                        if (preloadedMemory.add(splitKey)) {
+                            warmMemoryCache(splitKey, split)
+                        }
+                    }
+                }
+                onPageSplit?.invoke(page, precomputed)
+            } else if (preloadMemory) {
                 val key =
                     page.chapter.chapter.id?.let { cid -> "webtoon_page_${cid}_${page.index}" }
                 if (key != null && preloadedMemory.add(key)) {
@@ -272,6 +308,7 @@ class ReaderPreloadEngine(
     }
 
     private fun warmMemoryCache(key: String, data: Any) {
+        var disposable: Disposable? = null
         val request =
             ImageRequest.Builder(context)
                 .data(data)
@@ -279,10 +316,19 @@ class ReaderPreloadEngine(
                 .maxBitmapSize(maxTextureBitmapSize)
                 .precision(Precision.EXACT)
                 .crossfade(false)
+                .listener(
+                    onSuccess = { _, _ -> disposable?.let { activeDisposables.remove(key, it) } },
+                    onError = { _, _ -> disposable?.let { activeDisposables.remove(key, it) } },
+                    onCancel = { _ -> disposable?.let { activeDisposables.remove(key, it) } },
+                )
                 .build()
 
         activeDisposables[key]?.dispose()
-        activeDisposables[key] = context.imageLoader.enqueue(request)
+        val handle = context.imageLoader.enqueue(request)
+        disposable = handle
+        if (!handle.isDisposed) {
+            activeDisposables[key] = handle
+        }
     }
 
     fun clear() {
