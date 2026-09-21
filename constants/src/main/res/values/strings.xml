@@ -901,6 +901,8 @@
     <string name="force_portrait_details_description">On wide devices, force the view to be a single pane instead of double pane.</string>
     <string name="theme_buttons_based_on_cover">Theme buttons based on cover</string>
     <string name="wrap_alt_titles">Wrap the alternative titles, default is horizontal scrollable</string>
+    <string name="chapter_swipe_right_action">Swipe right on a chapter</string>
+    <string name="chapter_swipe_left_action">Swipe left on a chapter</string>
     <string name="expanded_toolbar">Expanded toolbar</string>
     <string name="show_larger_toolbar">Show a larger, expanded toolbar at the top of most pages (does not show on smaller devices regardless of setting)</string>
     <string name="hides_on_scroll">Hides when scrolling</string>

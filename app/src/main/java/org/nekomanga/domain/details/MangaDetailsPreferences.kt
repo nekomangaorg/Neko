@@ -43,4 +43,16 @@ class MangaDetailsPreferences(private val preferenceStore: PreferenceStore) {
 
     fun backdropSize() =
         this.preferenceStore.getEnum("backdrop_size", MangaConstants.BackdropSize.Default)
+
+    fun chapterSwipeRightAction() =
+        this.preferenceStore.getEnum(
+            "chapter_swipe_right_action",
+            MangaConstants.ChapterSwipeAction.ToggleBookmark,
+        )
+
+    fun chapterSwipeLeftAction() =
+        this.preferenceStore.getEnum(
+            "chapter_swipe_left_action",
+            MangaConstants.ChapterSwipeAction.ToggleRead,
+        )
 }
