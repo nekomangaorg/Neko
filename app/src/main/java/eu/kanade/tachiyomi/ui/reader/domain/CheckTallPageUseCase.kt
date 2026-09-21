@@ -29,19 +29,13 @@ class CheckTallPageUseCase {
             } catch (_: Exception) {
                 return null
             }
-        if (options.outWidth > 0 && options.outHeight > 0 && page.aspectRatio == 0f) {
-            page.aspectRatio = options.outWidth.toFloat() / options.outHeight.toFloat()
-        }
-        val splits =
-            computeSplits(
-                page = page,
-                outWidth = options.outWidth,
-                outHeight = options.outHeight,
-                screenHeight = screenHeight,
-                maxTextureSize = maxTextureSize,
-            )
-        page.precomputedSplits = splits ?: emptyList()
-        return splits
+        return computeSplits(
+            page = page,
+            outWidth = options.outWidth,
+            outHeight = options.outHeight,
+            screenHeight = screenHeight,
+            maxTextureSize = maxTextureSize,
+        )
     }
 
     /** Pure calculation of optimal slice splits given dimensions and maximum texture sizes. */

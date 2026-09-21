@@ -11,7 +11,8 @@ import eu.kanade.tachiyomi.ui.reader.domain.CheckTallPageUseCase
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import tachiyomi.core.util.storage.toTempFile
-import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 /** Loader used to load a chapter from the downloaded chapters. */
 class DownloadPageLoader(
@@ -20,12 +21,8 @@ class DownloadPageLoader(
     private val downloadManager: DownloadManager,
     private val downloadProvider: DownloadProvider,
     private val checkTallPage: CheckTallPageUseCase = CheckTallPageUseCase(),
-    context: Application? = null,
+    private val context: Application = Injekt.get(),
 ) : PageLoader() {
-
-    // Needed to open input streams
-    private val injectedContext: Application by injectLazy()
-    private val context: Application = context ?: injectedContext
 
     private var zipPageLoader: ZipPageLoader? = null
 
