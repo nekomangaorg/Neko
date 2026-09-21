@@ -94,7 +94,7 @@ fun ComposeWebtoonViewer(
     var lastFirstVisibleItem by remember { mutableStateOf(items.getOrNull(config.initialIndex)) }
     var lastFirstVisibleOffset by remember { mutableIntStateOf(0) }
     var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
-    var lastDispatchedPage by remember { mutableStateOf<ReaderPage?>(null) }
+    var lastSelectedPage by remember { mutableStateOf<ReaderPage?>(null) }
     var lastProcessedItems by remember { mutableStateOf(items) }
 
     // 1. Consume unidirectional programmatic navigation commands
@@ -205,7 +205,18 @@ fun ComposeWebtoonViewer(
         }
     }
 
-    // 4. Resolve active item & dispatch page selections with stationary scroll guard
+    // 4. Track first visible item and offset for scroll anchor preservation
+    LaunchedEffect(lazyListState) {
+        snapshotFlow {
+            lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset
+        }
+            .collect { (firstIndex, firstOffset) ->
+                currentItems.getOrNull(firstIndex)?.let { lastFirstVisibleItem = it }
+                lastFirstVisibleOffset = firstOffset
+            }
+    }
+
+    // 5. Resolve active item & dispatch page selections with stationary scroll guard
     LaunchedEffect(lazyListState) {
         snapshotFlow {
             if (currentItems !== lastProcessedItems) return@snapshotFlow null
@@ -229,52 +240,42 @@ fun ComposeWebtoonViewer(
                     firstVisibleIndex = lazyListState.firstVisibleItemIndex,
                     firstVisibleScrollOffset = lazyListState.firstVisibleItemScrollOffset,
                 )
-            val firstVisibleItem = currentItems.getOrNull(lazyListState.firstVisibleItemIndex)
-            val firstVisibleOffset = lazyListState.firstVisibleItemScrollOffset
-            Triple(
-                activeIndex,
-                currentItems.getOrNull(activeIndex),
-                firstVisibleItem to firstVisibleOffset,
-            )
+            activeIndex to currentItems.getOrNull(activeIndex)
         }
             .filterNotNull()
-            .distinctUntilChanged { old, new ->
-                old.first == new.first &&
-                    old.third.first?.key("webtoon") == new.third.first?.key("webtoon") &&
-                    old.third.second == new.third.second
-            }
-            .collect { (activeIndex, item, firstVisiblePair) ->
-                val (firstVisibleItem, firstVisibleOffset) = firstVisiblePair
-                if (firstVisibleItem != null) {
-                    lastFirstVisibleItem = firstVisibleItem
-                    lastFirstVisibleOffset = firstVisibleOffset
-                }
+            .distinctUntilChanged { old, new -> old.first == new.first && old.second == new.second }
+            .collect { (activeIndex, item) ->
                 if (item != null) {
                     val activeItemChanged = lastActiveItem != item
                     lastActiveItem = item
                     if (activeItemChanged) {
                         currentOnActiveItemChanged(activeIndex)
-                    }
-                    when (item) {
-                        is ReaderUiItem.Page -> {
+
+                        val currentPage =
+                            when (item) {
+                                is ReaderUiItem.Page -> item.page
+                                is ReaderUiItem.SplitPage -> item.page
+                                is ReaderUiItem.Transition -> null
+                            }
+
+                        if (currentPage != null && currentPage != lastSelectedPage) {
+                            lastSelectedPage = currentPage
                             val shouldDispatch =
                                 WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
                                     activeChapterId = activeChapterId,
-                                    candidateChapterId = item.page.chapter.chapter.id,
+                                    candidateChapterId = currentPage.chapter.chapter.id,
                                     isScrollInProgress = lazyListState.isScrollInProgress,
                                 )
-                            if (
-                                shouldDispatch &&
-                                    (lastDispatchedPage != item.page ||
-                                        activeChapterId != item.page.chapter.chapter.id)
-                            ) {
-                                lastDispatchedPage = item.page
-                                currentOnPageSelected(item.page)
+                            if (shouldDispatch) {
+                                currentOnPageSelected(currentPage)
                             }
-                            val pages = item.page.chapter.pages
-                            if (pages != null && item.page.chapter.chapter.id == activeChapterId) {
+                            // Trigger adjacent chapter preloading near end of chapter
+                            val pages = currentPage.chapter.pages
+                            if (
+                                pages != null && currentPage.chapter.chapter.id == activeChapterId
+                            ) {
                                 val threshold = maxOf(5, currentConfig.preloadPageAmount)
-                                if (pages.size - item.page.number < threshold) {
+                                if (pages.size - currentPage.number < threshold) {
                                     val nextTransition =
                                         currentItems.firstOrNull {
                                             it is ReaderUiItem.Transition &&
@@ -285,30 +286,7 @@ fun ComposeWebtoonViewer(
                                     }
                                 }
                             }
-                        }
-                        is ReaderUiItem.SplitPage -> {
-                            if (
-                                item.page.chapter.chapter.id == activeChapterId ||
-                                    lazyListState.isScrollInProgress
-                            ) {
-                                currentOnPageSelected(item.page)
-                            }
-                            val pages = item.page.chapter.pages
-                            if (pages != null && item.page.chapter.chapter.id == activeChapterId) {
-                                val threshold = maxOf(5, currentConfig.preloadPageAmount)
-                                if (pages.size - item.page.number < threshold) {
-                                    val nextTransition =
-                                        currentItems.firstOrNull {
-                                            it is ReaderUiItem.Transition &&
-                                                it.transition is ChapterTransition.Next
-                                        } as? ReaderUiItem.Transition
-                                    nextTransition?.transition?.to?.let { nextChapter ->
-                                        currentConfig.onRequestPreloadChapter?.invoke(nextChapter)
-                                    }
-                                }
-                            }
-                        }
-                        is ReaderUiItem.Transition -> {
+                        } else if (item is ReaderUiItem.Transition) {
                             currentOnTransitionSelected(item.transition)
                             val toChapter = item.transition.to
                             if (toChapter != null) {

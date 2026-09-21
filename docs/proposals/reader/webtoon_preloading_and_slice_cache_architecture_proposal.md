@@ -1,6 +1,6 @@
 # Architecture Proposal: Rock-Solid Webtoon Preloading Pipeline, Two-Tier Cache Horizon & Asynchronous Tall-Page Slicing
 
-**Status:** Proposed / Under Review  
+**Status:** Implemented / Complete  
 **Author:** Neko Architecture Team  
 **Date:** September 2026  
 **Target Milestone:** Neko Reader Phase 2  

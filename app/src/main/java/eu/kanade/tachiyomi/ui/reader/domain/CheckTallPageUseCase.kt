@@ -18,6 +18,10 @@ class CheckTallPageUseCase {
         screenHeight: Int,
         maxTextureSize: Int = GLUtil.maxTextureSize,
     ): List<ReaderPageSplit>? {
+        val precomputed = page.precomputedSplits
+        if (precomputed != null) {
+            return precomputed.ifEmpty { null }
+        }
         val streamFn = page.stream ?: return null
         val options =
             try {
@@ -25,13 +29,19 @@ class CheckTallPageUseCase {
             } catch (_: Exception) {
                 return null
             }
-        return computeSplits(
-            page = page,
-            outWidth = options.outWidth,
-            outHeight = options.outHeight,
-            screenHeight = screenHeight,
-            maxTextureSize = maxTextureSize,
-        )
+        if (options.outWidth > 0 && options.outHeight > 0 && page.aspectRatio == 0f) {
+            page.aspectRatio = options.outWidth.toFloat() / options.outHeight.toFloat()
+        }
+        val splits =
+            computeSplits(
+                page = page,
+                outWidth = options.outWidth,
+                outHeight = options.outHeight,
+                screenHeight = screenHeight,
+                maxTextureSize = maxTextureSize,
+            )
+        page.precomputedSplits = splits ?: emptyList()
+        return splits
     }
 
     /** Pure calculation of optimal slice splits given dimensions and maximum texture sizes. */
