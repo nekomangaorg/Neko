@@ -4,8 +4,8 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
-**Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R6 (Priority: Medium / UI Sheet Decoupling)  
-**Prerequisites:** Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
+**Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R9 (Priority: Medium / UI Sheet Decoupling)  
+**Prerequisites:** Step R6 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
 **Downstream Dependents:** None  
 **Implementation State:** 🟡 Coupled Baseline (Injekt calls, direct preference mutations, and domain flag parsing in Compose)  
 
@@ -159,8 +159,8 @@ private fun GeneralSettingsTab(
 
 ### Prerequisites & Sequential Placement
 > [!IMPORTANT]
-> **Execution Placement:** **Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R6**  
-> **Prerequisites:** Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md)).  
+> **Execution Placement:** **Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R9**  
+> **Prerequisites:** Step R6 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md)).  
 > **Unlocks:** None (Completes reader settings sheet modernization).  
 >
 > Decoupling `ReaderSettingsSheet` eliminates `Injekt.get()`, in-Composable preference mutations, and domain flag parsing, hoisting preference streams and mutations into `ReaderViewModel`.

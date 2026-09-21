@@ -4,6 +4,9 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko Reader Phase 4  
+**Execution Order:** Reader Track — Phase R3 (Advanced Rendering), Step R11 (Priority: Medium / High-Resolution Subsampling)  
+**Prerequisites:** Step R6 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
+**Downstream Dependents:** None  
 **Implementation State:** 🟡 Partially Present Baseline (Step 1 & Step 2 completed: Original size Coil decoding + BitmapRegionDecoder tall page slicing; Step 3 Compose Tile Subsampling is Proposed)  
 
 ---

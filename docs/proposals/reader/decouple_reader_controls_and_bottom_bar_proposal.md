@@ -4,8 +4,8 @@
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
-**Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R4 (Priority: High / UI State Consolidation)  
-**Prerequisites:** Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
+**Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R7 (Priority: High / UI State Consolidation)  
+**Prerequisites:** Step R6 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
 **Downstream Dependents:** None  
 **Implementation State:** 🟡 Coupled Baseline (41 separate parameters in Composable signature, state sprawl)  
 
@@ -186,8 +186,8 @@ fun ReaderBottomControls(
 
 ### Prerequisites & Sequential Placement
 > [!IMPORTANT]
-> **Execution Placement:** **Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R4**  
-> **Prerequisites:** Step R3 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md)) for stabilized reader state flows.  
+> **Execution Placement:** **Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R7**  
+> **Prerequisites:** Step R6 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md)) for stabilized reader state flows.  
 > **Unlocks:** None (Completes controls refactoring).  
 >
 > Consolidating the 41-parameter `ReaderBottomControls` signature into `ReaderBottomControlsUiState` and `ReaderBottomBarAction` simplifies `ReaderActivity` control binding and enables instant previewability for slider and toolbar variants.

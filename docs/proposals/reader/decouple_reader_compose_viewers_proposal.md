@@ -3,11 +3,11 @@
 **Status:** Proposed / Under Review  
 **Author:** Neko Development Team  
 **Date:** September 2026  
-**Target Milestone:** Next Release (Neko 3.8.0 / Step R3: Complete Viewer Decommissioning)  
-**Execution Order:** Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R3 (Priority: Critical / Viewer Decoupling)  
-**Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)), Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md))  
-**Downstream Dependents:** Reader Track Phase R2 Auxiliary Proposals (Steps R4–R7)  
-**Implementation State:** 🟡 Scheduled for Next Release (Current release delivers Step R1, Step R2, and Webtoon Compose stabilization; Step R3 will decommission legacy `WebtoonViewer.kt` and `PagerViewer.kt` and decouple `ComposePagerViewer`)  
+**Target Milestone:** Next Release (Neko 3.8.0 / Step R6: Complete Viewer Decommissioning)  
+**Execution Order:** Reader Track — Phase R1 (Core Navigation, Engine & Viewers), Step R6 (Priority: Critical / Viewer Decoupling)  
+**Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)), Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)), Step R4 ([`reader_preloader_engine_proposal.md`](reader_preloader_engine_proposal.md)), Step R5 ([`rock_solid_paged_compose_viewer_proposal.md`](rock_solid_paged_compose_viewer_proposal.md))  
+**Downstream Dependents:** Reader Track Phase R2 Auxiliary Proposals (Steps R7–R10), Step R11 ([`native_compose_webtoon_subsampling_renderer_proposal.md`](native_compose_webtoon_subsampling_renderer_proposal.md))  
+**Implementation State:** 🟡 Scheduled for Next Release (Current release delivers Step R1, Step R2; Step R6 will decommission legacy `WebtoonViewer.kt` and `PagerViewer.kt` and decouple `ComposePagerViewer`)  
 
 ---
 
@@ -16,7 +16,7 @@
 > [!IMPORTANT]
 > **Release Staging & Separation of Scope:**
 > - **Current Release (`ref/rock-solid-webtoon-phase2` / 3.7.x)**: Shipped Step R1 (navigation orchestration), Step R2 (transition page decoupling), and the Rock-Solid Webtoon Compose viewer stabilization (upstream tall page splitting, headless `ReaderPreloadEngine`, isolated gesture modifiers, deterministic scroll re-anchoring).
-> - **Next Release (Step R3 / 3.8.x)**: Scheduled to perform the complete decommissioning of legacy `WebtoonViewer.kt` and `PagerViewer.kt` Android View hierarchies, applying `PagerViewerConfigUiModel` hoisting to `ComposePagerViewer.kt`, and wiring both viewers directly from `ReaderViewModel` and `ReaderActivity` without compatibility bridge overloads.
+> - **Next Release (Step R6 / 3.8.x)**: Scheduled to perform the complete decommissioning of legacy `WebtoonViewer.kt` and `PagerViewer.kt` Android View hierarchies, applying `PagerViewerConfigUiModel` hoisting to `ComposePagerViewer.kt`, and wiring both viewers directly from `ReaderViewModel` and `ReaderActivity` without compatibility bridge overloads.
 
 > [!NOTE]
 > **Current Codebase Baseline:**
@@ -346,9 +346,9 @@ class ComposeWebtoonViewerTest {
 
 ### Prerequisites & Sequential Placement
 > [!IMPORTANT]
-> **Execution Placement:** **Reader Track — Phase R1 (Core Navigation & Viewer Architecture), Step R3**  
-> **Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)) for hoisted nav callbacks and Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)) for transition page UI models.  
-> **Unlocks:** Reader Track Phase R2 (Auxiliary Sheets & Overlays, Steps R4–R7).  
+> **Execution Placement:** **Reader Track — Phase R1 (Core Navigation, Engine & Viewers), Step R6**  
+> **Prerequisites:** Steps R1, R2, R4, and R5.  
+> **Unlocks:** Reader Track Phase R2 (Auxiliary Sheets & Overlays, Steps R7–R10) and Step R11 ([`native_compose_webtoon_subsampling_renderer_proposal.md`](native_compose_webtoon_subsampling_renderer_proposal.md)).  
 >
 > Decoupling `ComposePagerViewer` and `ComposeWebtoonViewer` from legacy View classes (`PagerViewer`, `WebtoonViewer`), `DownloadManager`, and `Injekt` isolates viewer rendering into pure Jetpack Compose components driven by `PagerViewerConfigUiModel` / `WebtoonViewerConfigUiModel`, completing core viewer decoupling.
 
