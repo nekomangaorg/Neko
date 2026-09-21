@@ -308,6 +308,7 @@ class ReaderPreloadEngine(
     }
 
     private fun warmMemoryCache(key: String, data: Any) {
+        var disposable: Disposable? = null
         val request =
             ImageRequest.Builder(context)
                 .data(data)
@@ -316,14 +317,15 @@ class ReaderPreloadEngine(
                 .precision(Precision.EXACT)
                 .crossfade(false)
                 .listener(
-                    onSuccess = { _, _ -> activeDisposables.remove(key) },
-                    onError = { _, _ -> activeDisposables.remove(key) },
-                    onCancel = { activeDisposables.remove(key) },
+                    onSuccess = { _, _ -> disposable?.let { activeDisposables.remove(key, it) } },
+                    onError = { _, _ -> disposable?.let { activeDisposables.remove(key, it) } },
+                    onCancel = { _ -> disposable?.let { activeDisposables.remove(key, it) } },
                 )
                 .build()
 
         activeDisposables[key]?.dispose()
-        activeDisposables[key] = context.imageLoader.enqueue(request)
+        disposable = context.imageLoader.enqueue(request)
+        activeDisposables[key] = disposable
     }
 
     fun clear() {
