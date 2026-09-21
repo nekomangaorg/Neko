@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -64,6 +63,11 @@ import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+private class ScrollAnchorState(
+    var item: ReaderUiItem? = null,
+    var offset: Int = 0,
+)
+
 /**
  * Pure stateless Jetpack Compose viewer for continuous Webtoon vertical reading. Decoupled from
  * legacy View models, DownloadManager, and Service Locators.
@@ -91,10 +95,9 @@ fun ComposeWebtoonViewer(
     val currentOnTransitionSelected by rememberUpdatedState(onTransitionSelected)
     val currentOnActiveItemChanged by rememberUpdatedState(onActiveItemChanged)
 
-    var lastFirstVisibleItem by remember { mutableStateOf(items.getOrNull(config.initialIndex)) }
-    var lastFirstVisibleOffset by remember { mutableIntStateOf(0) }
+    val scrollAnchorState = remember { ScrollAnchorState(items.getOrNull(config.initialIndex), 0) }
     var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
-    var lastSelectedPage by remember { mutableStateOf<ReaderPage?>(null) }
+    var lastDispatchedPage by remember { mutableStateOf<ReaderPage?>(null) }
     var lastProcessedItems by remember { mutableStateOf(items) }
 
     // 1. Consume unidirectional programmatic navigation commands
@@ -108,15 +111,15 @@ fun ComposeWebtoonViewer(
                         lazyListState.scrollToItem(cmd.pageIndex)
                     }
                     currentItems.getOrNull(cmd.pageIndex)?.let {
-                        lastFirstVisibleItem = it
-                        lastFirstVisibleOffset = 0
+                        scrollAnchorState.item = it
+                        scrollAnchorState.offset = 0
                     }
                 }
                 is ReaderNavCommand.SnapToPage -> {
                     lazyListState.scrollToItem(cmd.pageIndex)
                     currentItems.getOrNull(cmd.pageIndex)?.let {
-                        lastFirstVisibleItem = it
-                        lastFirstVisibleOffset = 0
+                        scrollAnchorState.item = it
+                        scrollAnchorState.offset = 0
                     }
                 }
                 is ReaderNavCommand.StepPage -> {
@@ -165,8 +168,8 @@ fun ComposeWebtoonViewer(
         val target =
             WebtoonScrollAnchorResolver.resolveReanchorTarget(
                 items = items,
-                lastFirstVisibleItem = lastFirstVisibleItem,
-                lastFirstVisibleOffset = lastFirstVisibleOffset,
+                lastFirstVisibleItem = scrollAnchorState.item,
+                lastFirstVisibleOffset = scrollAnchorState.offset,
                 lastActiveItem = lastActiveItem,
                 activeChapterId = activeChapterId,
                 currentFirstVisibleIndex = lazyListState.firstVisibleItemIndex,
@@ -186,8 +189,8 @@ fun ComposeWebtoonViewer(
                         target.offset
                     }
                 lazyListState.requestScrollToItem(target.index, liveOffset)
-                lastFirstVisibleItem = target.item
-                lastFirstVisibleOffset = liveOffset
+                scrollAnchorState.item = target.item
+                scrollAnchorState.offset = liveOffset
             }
         }
     }
@@ -196,11 +199,11 @@ fun ComposeWebtoonViewer(
 
     LaunchedEffect(items) {
         val currentFirstItem = items.getOrNull(lazyListState.firstVisibleItemIndex)
-        val expectedItem = lastFirstVisibleItem
+        val expectedItem = scrollAnchorState.item
         if (expectedItem != null && currentFirstItem?.isEquivalentTo(expectedItem) != true) {
             val targetIndex = items.indexOfFirst { it.isEquivalentTo(expectedItem) }
             if (targetIndex != -1 && targetIndex != lazyListState.firstVisibleItemIndex) {
-                lazyListState.scrollToItem(targetIndex, lastFirstVisibleOffset)
+                lazyListState.scrollToItem(targetIndex, scrollAnchorState.offset)
             }
         }
     }
@@ -211,8 +214,8 @@ fun ComposeWebtoonViewer(
             lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset
         }
             .collect { (firstIndex, firstOffset) ->
-                currentItems.getOrNull(firstIndex)?.let { lastFirstVisibleItem = it }
-                lastFirstVisibleOffset = firstOffset
+                currentItems.getOrNull(firstIndex)?.let { scrollAnchorState.item = it }
+                scrollAnchorState.offset = firstOffset
             }
     }
 
@@ -258,15 +261,15 @@ fun ComposeWebtoonViewer(
                                 is ReaderUiItem.Transition -> null
                             }
 
-                        if (currentPage != null && currentPage != lastSelectedPage) {
-                            lastSelectedPage = currentPage
+                        if (currentPage != null) {
                             val shouldDispatch =
                                 WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
                                     activeChapterId = activeChapterId,
                                     candidateChapterId = currentPage.chapter.chapter.id,
                                     isScrollInProgress = lazyListState.isScrollInProgress,
                                 )
-                            if (shouldDispatch) {
+                            if (shouldDispatch && currentPage != lastDispatchedPage) {
+                                lastDispatchedPage = currentPage
                                 currentOnPageSelected(currentPage)
                             }
                             // Trigger adjacent chapter preloading near end of chapter

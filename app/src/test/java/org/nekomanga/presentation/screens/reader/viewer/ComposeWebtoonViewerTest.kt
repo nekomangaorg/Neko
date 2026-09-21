@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollGatingPolicy
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -153,5 +154,51 @@ class ComposeWebtoonViewerTest {
 
         assertEquals(20.dp + Size.small, result.calculateStartPadding(LayoutDirection.Ltr))
         assertEquals(20.dp + Size.small, result.calculateEndPadding(LayoutDirection.Ltr))
+    }
+
+    @Test
+    fun `page dispatch gating does not prematurely consume adjacent chapter page when initially stationary`() {
+        var lastDispatchedPage: ReaderPage? = null
+        var dispatchCount = 0
+
+        val ch1 = createChapter(1L)
+        val ch2 = createChapter(2L)
+
+        val page1 = ReaderPage(10, "url_10", "img_10").apply { chapter = ch1 }
+        val page2 = ReaderPage(0, "url_0", "img_0").apply { chapter = ch2 }
+
+        // Initial state: page 1 of ch 1 was dispatched
+        lastDispatchedPage = page1
+
+        var activeChapterId = 1L
+        var isScrollInProgress = false
+
+        fun evaluateDispatch(candidate: ReaderPage) {
+            val shouldDispatch =
+                WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
+                    activeChapterId = activeChapterId,
+                    candidateChapterId = candidate.chapter.chapter.id,
+                    isScrollInProgress = isScrollInProgress,
+                )
+            if (shouldDispatch && candidate != lastDispatchedPage) {
+                lastDispatchedPage = candidate
+                dispatchCount++
+            }
+        }
+
+        // 1. Candidate is adjacent chapter (page2 of ch2), but scrolling stopped (settling / idle)
+        evaluateDispatch(page2)
+        assertEquals(0, dispatchCount)
+        assertEquals(page1, lastDispatchedPage) // Not prematurely consumed!
+
+        // 2. User starts scrolling into adjacent chapter
+        isScrollInProgress = true
+        evaluateDispatch(page2)
+        assertEquals(1, dispatchCount)
+        assertEquals(page2, lastDispatchedPage) // Dispatched!
+
+        // 3. Next split slice of same page2 while scrolling
+        evaluateDispatch(page2)
+        assertEquals(1, dispatchCount) // Not redundantly dispatched for same page!
     }
 }

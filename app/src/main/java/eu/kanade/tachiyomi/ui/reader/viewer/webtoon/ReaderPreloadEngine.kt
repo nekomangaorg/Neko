@@ -324,8 +324,11 @@ class ReaderPreloadEngine(
                 .build()
 
         activeDisposables[key]?.dispose()
-        disposable = context.imageLoader.enqueue(request)
-        activeDisposables[key] = disposable
+        val handle = context.imageLoader.enqueue(request)
+        disposable = handle
+        if (!handle.isDisposed) {
+            activeDisposables[key] = handle
+        }
     }
 
     fun clear() {
