@@ -37,6 +37,8 @@ open class MemoryCacheWarmManager(
         onSuccess: (() -> Unit)? = null,
         onError: ((Throwable) -> Unit)? = null,
     ) {
+        if (isWarming(key)) return
+
         val loader =
             getImageLoader()
                 ?: run {

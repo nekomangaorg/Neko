@@ -14,6 +14,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -181,7 +183,15 @@ class ReaderPreloadControllerTest {
     @Test
     fun `onPositionChanged executes disk prefetch and warms memory cache`() = testScope.runTest {
         val chapter = createChapter(1L, 10)
+        chapter.pages!!.forEach { it.status = Page.State.QUEUE }
         val items = chapter.pages!!.map { ReaderUiItem.Page(it) }
+
+        val loader = chapter.pageLoader!!
+        coEvery { loader.loadPage(any()) } answers
+            {
+                val page = firstArg<ReaderPage>()
+                page.status = Page.State.READY
+            }
 
         controller.onPositionChanged(
             currentIndex = 0,
@@ -195,7 +205,6 @@ class ReaderPreloadControllerTest {
         runCurrent()
 
         // Verify disk loader was called for items
-        val loader = chapter.pageLoader!!
         coVerify(atLeast = 1) { loader.loadPage(any()) }
 
         // Verify memory cache was warmed for pages within memory window
@@ -486,4 +495,132 @@ class ReaderPreloadControllerTest {
             status is PreloadPageStatus.Error,
         )
     }
+
+    @Test
+    fun `suspending pageLoader does not deadlock and warms memory cache when status becomes READY`() =
+        testScope.runTest {
+            val chapter = createChapter(1L, 5)
+            val page = chapter.pages!![0]
+            page.status = Page.State.QUEUE
+
+            val loader = chapter.pageLoader!!
+            coEvery { loader.loadPage(page) } coAnswers { suspendCancellableCoroutine<Nothing> {} }
+
+            val item = ReaderUiItem.Page(page)
+            controller.onPositionChanged(
+                currentIndex = 0,
+                items = listOf(item),
+                preloadAmount = 1,
+                isRtl = false,
+                isWebtoon = false,
+            )
+            runCurrent()
+
+            // Page is downloading
+            val key = controller.itemDomainKey(item)
+            val downloadingStatus = controller.state.value.pageStatuses[key]
+            assertTrue(
+                "Expected DiskDownloading but got $downloadingStatus",
+                downloadingStatus is PreloadPageStatus.DiskDownloading ||
+                    downloadingStatus is PreloadPageStatus.DiskQueued,
+            )
+
+            // Simulate download finishing in background
+            page.status = Page.State.READY
+            runCurrent()
+
+            // Verify status transitioned to DiskReady or MemoryReady and memory cache was warmed
+            val finalStatus = controller.state.value.pageStatuses[key]
+            assertTrue(
+                "Expected DiskReady or MemoryReady but got $finalStatus",
+                finalStatus is PreloadPageStatus.DiskReady ||
+                    finalStatus is PreloadPageStatus.MemoryReady ||
+                    finalStatus is PreloadPageStatus.MemoryDecoding,
+            )
+            io.mockk.verify(atLeast = 1) {
+                memoryWarmManager.warmMemoryCache(
+                    key = key,
+                    data = page,
+                    crossfade = true,
+                    onSuccess = any(),
+                    onError = any(),
+                )
+            }
+        }
+
+    @Test
+    fun `initial onPositionChanged warms memory immediately without debounce delay`() =
+        testScope.runTest {
+            val chapter = createChapter(1L, 5)
+            val items = chapter.pages!!.map { ReaderUiItem.Page(it) }
+
+            // Brand new controller call without advanceTimeBy(DEBOUNCE_DELAY_MS)
+            controller.onPositionChanged(
+                currentIndex = 0,
+                items = items,
+                preloadAmount = 2,
+                isRtl = false,
+                isWebtoon = false,
+            )
+            runCurrent()
+
+            val key0 = controller.itemDomainKey(items[0])
+            // Should be invoked immediately because isInitial == true bypasses debounce
+            io.mockk.verify(atLeast = 1) {
+                memoryWarmManager.warmMemoryCache(
+                    key = key0,
+                    data = items[0].page,
+                    crossfade = any(),
+                    onSuccess = any(),
+                    onError = any(),
+                )
+            }
+        }
+
+    @Test
+    fun `extra page memory cache key is retained and not cancelled by sliding window`() =
+        testScope.runTest {
+            val chapter = createChapter(1L, 5)
+            val page = chapter.pages!![0]
+            val extraPage = chapter.pages!![1]
+            val doublePageItem = ReaderUiItem.Page(page = page, extraPage = extraPage)
+            val items = listOf(doublePageItem)
+
+            controller.onPositionChanged(
+                currentIndex = 0,
+                items = items,
+                preloadAmount = 2,
+                isRtl = false,
+                isWebtoon = false,
+            )
+            runCurrent()
+
+            val baseKey = controller.itemDomainKey(doublePageItem)
+            val extraKey = "${baseKey}_extra"
+
+            // Verify both base page and extraPage were sent to memory warming
+            io.mockk.verify(atLeast = 1) {
+                memoryWarmManager.warmMemoryCache(
+                    key = baseKey,
+                    data = page,
+                    crossfade = any(),
+                    onSuccess = any(),
+                    onError = any(),
+                )
+            }
+            io.mockk.verify(atLeast = 1) {
+                memoryWarmManager.warmMemoryCache(
+                    key = extraKey,
+                    data = extraPage,
+                    crossfade = any(),
+                    onSuccess = any(),
+                    onError = any(),
+                )
+            }
+
+            // Verify cancelAllExcept was called with a set that includes extraKey
+            io.mockk.verify {
+                memoryWarmManager.cancelAllExcept(match { extraKey in it && baseKey in it })
+            }
+        }
 }
