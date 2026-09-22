@@ -47,7 +47,7 @@ fun MangaChapterListItem(
             onClick = chapterActions.open,
             onBookmark = onBookmark,
             onRead = onRead,
-            onWebView = chapterActions.openInBrowser,
+            onWebView = chapterActions.openInWebView,
             onComment = chapterActions.openComment,
             onDownload = chapterActions.download,
             markPrevious = chapterActions.markPrevious,

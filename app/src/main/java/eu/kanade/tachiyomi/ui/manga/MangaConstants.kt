@@ -344,7 +344,7 @@ object MangaConstants {
         val blockScanlator: (BlockType, String) -> Unit,
         val openNext: () -> Unit,
         val openComment: (String) -> Unit,
-        val openInBrowser: (ChapterItem) -> Unit,
+        val openInWebView: (ChapterItem) -> Unit,
         val markPrevious: (ChapterItem, Boolean) -> Unit,
     )
 
