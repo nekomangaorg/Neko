@@ -47,7 +47,6 @@ open class MemoryCacheWarmManager(
         val maxSize = maxTextureSizeProvider()
         val maxTextureBitmapSize = CoilSize(maxSize, maxSize)
 
-        var disposable: Disposable? = null
         val request =
             ImageRequest.Builder(context)
                 .data(data)
@@ -57,20 +56,19 @@ open class MemoryCacheWarmManager(
                 .crossfade(crossfade)
                 .listener(
                     onSuccess = { _, _ ->
-                        disposable?.let { activeDisposables.remove(key, it) }
+                        activeDisposables.remove(key)
                         onSuccess?.invoke()
                     },
                     onError = { _, result ->
-                        disposable?.let { activeDisposables.remove(key, it) }
+                        activeDisposables.remove(key)
                         onError?.invoke(result.throwable)
                     },
-                    onCancel = { _ -> disposable?.let { activeDisposables.remove(key, it) } },
+                    onCancel = { _ -> activeDisposables.remove(key) },
                 )
                 .build()
 
-        activeDisposables[key]?.dispose()
+        activeDisposables.remove(key)?.dispose()
         val handle = loader.enqueue(request)
-        disposable = handle
         if (!handle.isDisposed) {
             activeDisposables[key] = handle
         }

@@ -260,7 +260,7 @@ class ReaderPreloadControllerTest {
         advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
         runCurrent()
 
-        val errorKey = item.key("pager")
+        val errorKey = controller.itemDomainKey(item)
         val status = controller.state.value.pageStatuses[errorKey]
         assertTrue("Expected Error status but got $status", status is PreloadPageStatus.Error)
 
@@ -341,5 +341,149 @@ class ReaderPreloadControllerTest {
         assertTrue(state.isIdle)
         assertTrue(state.pageStatuses.isEmpty())
         io.mockk.verify(atLeast = 1) { memoryWarmManager.release() }
+    }
+
+    @Test
+    fun `itemDomainKey generates consistent key for Page items across modes`() {
+        val chapter = createChapter(10L, 2)
+        val page = chapter.pages!![0]
+        val item = ReaderUiItem.Page(page)
+
+        val domainKey = controller.itemDomainKey(item)
+        assertEquals("domain_page_10_0", domainKey)
+    }
+
+    @Test
+    fun `in-flight downloads for pages remaining in window survive onPositionChanged cancellation`() =
+        testScope.runTest {
+            val chapter = createChapter(1L, 10)
+            val items = chapter.pages!!.map { ReaderUiItem.Page(it) }
+
+            val page1 = chapter.pages!![1]
+            page1.status = Page.State.LOAD_PAGE
+            val loader = chapter.pageLoader!!
+            coEvery { loader.loadPage(page1) } coAnswers
+                {
+                    kotlinx.coroutines.delay(500L)
+                    page1.status = Page.State.READY
+                }
+
+            controller.onPositionChanged(
+                currentIndex = 0,
+                items = items,
+                preloadAmount = 3,
+                isRtl = false,
+                isWebtoon = false,
+            )
+            advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
+            runCurrent()
+
+            val key1 = controller.itemDomainKey(items[1])
+            val statusBefore = controller.state.value.pageStatuses[key1]
+            assertTrue(
+                "Expected DiskDownloading or DiskQueued but got $statusBefore",
+                statusBefore is PreloadPageStatus.DiskDownloading ||
+                    statusBefore is PreloadPageStatus.DiskQueued,
+            )
+
+            controller.onPositionChanged(
+                currentIndex = 1,
+                items = items,
+                preloadAmount = 3,
+                isRtl = false,
+                isWebtoon = false,
+            )
+            advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
+            runCurrent()
+
+            advanceTimeBy(500L)
+            runCurrent()
+
+            val statusAfter = controller.state.value.pageStatuses[key1]
+            assertTrue(
+                "Expected DiskReady or MemoryReady after surviving re-scroll but got $statusAfter",
+                statusAfter is PreloadPageStatus.DiskReady ||
+                    statusAfter is PreloadPageStatus.MemoryReady ||
+                    statusAfter is PreloadPageStatus.MemoryDecoding,
+            )
+        }
+
+    @Test
+    fun `scrolling forward and then backward re-warms memory cache for revisited pages`() =
+        testScope.runTest {
+            val chapter = createChapter(1L, 20)
+            val items = chapter.pages!!.map { ReaderUiItem.Page(it) }
+
+            controller.onPositionChanged(
+                currentIndex = 0,
+                items = items,
+                preloadAmount = 2,
+                isRtl = false,
+                isWebtoon = false,
+            )
+            advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
+            runCurrent()
+
+            val key0 = controller.itemDomainKey(items[0])
+            io.mockk.verify(atLeast = 1) {
+                memoryWarmManager.warmMemoryCache(key = key0, any(), any(), any(), any())
+            }
+
+            controller.onPositionChanged(
+                currentIndex = 10,
+                items = items,
+                preloadAmount = 2,
+                isRtl = false,
+                isWebtoon = false,
+            )
+            advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
+            runCurrent()
+
+            io.mockk.clearMocks(memoryWarmManager, answers = false)
+
+            controller.onPositionChanged(
+                currentIndex = 0,
+                items = items,
+                preloadAmount = 2,
+                isRtl = false,
+                isWebtoon = false,
+            )
+            advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
+            runCurrent()
+
+            io.mockk.verify(atLeast = 1) {
+                memoryWarmManager.warmMemoryCache(key = key0, any(), any(), any(), any())
+            }
+        }
+
+    @Test
+    fun `download timeout sets status to Error without deadlocking`() = testScope.runTest {
+        val chapter = createChapter(1L, 5)
+        val hangingPage = chapter.pages!![0]
+        hangingPage.status = Page.State.LOAD_PAGE
+
+        val loader = chapter.pageLoader!!
+        coEvery { loader.loadPage(hangingPage) } answers {}
+
+        val item = ReaderUiItem.Page(hangingPage)
+        controller.onPositionChanged(
+            currentIndex = 0,
+            items = listOf(item),
+            preloadAmount = 1,
+            isRtl = false,
+            isWebtoon = false,
+        )
+        advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
+        runCurrent()
+
+        advanceTimeBy(ReaderPreloadControllerImpl.DOWNLOAD_TIMEOUT_MS + 1000L)
+        runCurrent()
+
+        val key = controller.itemDomainKey(item)
+        val status = controller.state.value.pageStatuses[key]
+        assertTrue(
+            "Expected Error on timeout but got $status",
+            status is PreloadPageStatus.Error,
+        )
     }
 }

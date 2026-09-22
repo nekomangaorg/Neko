@@ -285,11 +285,7 @@ fun ComposePagerViewer(
             }
         }
 
-        val effectivePreloadController =
-            preloadController
-                ?: remember(viewer) {
-                    runCatching { viewer.activity.viewModel.preloadController }.getOrNull()
-                }
+        val effectivePreloadController = preloadController
 
         // Preload initial batch of pages when items are loaded or updated
         LaunchedEffect(items, preloadPageAmount, isRtl, effectivePreloadController) {

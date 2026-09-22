@@ -568,11 +568,7 @@ fun ComposeWebtoonViewer(
             }
         }
 
-    val effectivePreloadController =
-        preloadController
-            ?: remember(viewer) {
-                runCatching { viewer.activity.viewModel.preloadController }.getOrNull()
-            }
+    val effectivePreloadController = preloadController
 
     LaunchedEffect(enrichedItems, preloadPageAmount, effectivePreloadController) {
         effectivePreloadController?.onPositionChanged(
@@ -589,14 +585,17 @@ fun ComposeWebtoonViewer(
         config = config,
         navCommands = effectiveNavCommands,
         onActiveItemChanged = { activeIndex ->
-            viewer.updateActiveIndex(activeIndex)
-            effectivePreloadController?.onPositionChanged(
-                currentIndex = activeIndex,
-                items = enrichedItems,
-                preloadAmount = preloadPageAmount,
-                isRtl = false,
-                isWebtoon = true,
-            )
+            if (effectivePreloadController != null) {
+                effectivePreloadController.onPositionChanged(
+                    currentIndex = activeIndex,
+                    items = enrichedItems,
+                    preloadAmount = preloadPageAmount,
+                    isRtl = false,
+                    isWebtoon = true,
+                )
+            } else {
+                viewer.updateActiveIndex(activeIndex)
+            }
         },
         onPageSelected = onPageSelected,
         onTransitionSelected = onTransitionSelected,

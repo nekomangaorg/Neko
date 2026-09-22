@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
 import android.content.Context
-import android.os.Build
-import android.view.WindowManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.domain.CheckTallPageUseCase
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -12,6 +10,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.ReaderPagerController
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeoutException
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +25,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Headless implementation of [ReaderPreloadController] managing a two-tier execution pipeline: Tier
@@ -40,13 +40,10 @@ class ReaderPreloadControllerImpl(
     override var onPageSplit: ((ReaderPage, List<ReaderPageSplit>) -> Unit)? = null,
     private val isSplitTallPagesEnabled: () -> Boolean = { false },
     private val getScreenHeight: () -> Int = {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
-            windowManager?.currentWindowMetrics?.bounds?.height()
-                ?: context.resources.displayMetrics.heightPixels
-        } else {
-            @Suppress("DEPRECATION") context.resources.displayMetrics.heightPixels
-        }
+        val config = context.resources.configuration
+        val density = context.resources.displayMetrics.density
+        val windowHeightPx = (config.screenHeightDp * density).toInt()
+        if (windowHeightPx > 0) windowHeightPx else context.resources.displayMetrics.heightPixels
     },
     private val onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
     private val maxConcurrentDownloads: Int = MAX_CONCURRENT_DOWNLOADS,
@@ -59,6 +56,8 @@ class ReaderPreloadControllerImpl(
         const val MAX_MEMORY_PRELOAD_SLICES = 12
         const val MIN_MEMORY_PRELOAD_SLICES = 6
         const val DEBOUNCE_DELAY_MS = 50L
+        const val DOWNLOAD_TIMEOUT_MS = 60_000L
+        const val DOMAIN_KEY_PREFIX = "domain"
     }
 
     private val _state = MutableStateFlow(ReaderPreloadState())
@@ -81,6 +80,8 @@ class ReaderPreloadControllerImpl(
 
     fun isJobActive(): Boolean =
         activeOrchestratorJob?.isActive == true || activeDownloads.values.any { it.isActive }
+
+    internal fun itemDomainKey(item: ReaderUiItem): String = item.key(DOMAIN_KEY_PREFIX)
 
     override fun onPositionChanged(
         currentIndex: Int,
@@ -144,35 +145,42 @@ class ReaderPreloadControllerImpl(
                 }
 
                 // 3. Priority Re-ordering & Demotion of superseded requests
-                val prefix = if (isWebtoon) "webtoon" else "pager"
                 val activeDiskKeys =
                     windowIndices.orderedIndices
-                        .mapNotNull { items.getOrNull(it)?.key(prefix) }
+                        .mapNotNull { items.getOrNull(it)?.let(::itemDomainKey) }
                         .toSet()
                 val activeMemoryKeys =
                     windowIndices.memoryIndices
-                        .mapNotNull { items.getOrNull(it)?.key(prefix) }
+                        .mapNotNull { items.getOrNull(it)?.let(::itemDomainKey) }
                         .toSet()
 
                 // Cancel downloads for items that fall outside the new window
                 val downloadIterator = activeDownloads.entries.iterator()
+                val keysToPrune = mutableSetOf<String>()
                 while (downloadIterator.hasNext()) {
                     val entry = downloadIterator.next()
                     if (entry.key !in activeDiskKeys) {
                         entry.value.cancel()
                         downloadIterator.remove()
-                        updatePageStatus(entry.key, PreloadPageStatus.Idle)
+                        keysToPrune.add(entry.key)
+                    }
+                }
+                if (keysToPrune.isNotEmpty()) {
+                    _state.update { current ->
+                        val updated = current.pageStatuses.toMutableMap()
+                        keysToPrune.forEach { updated.remove(it) }
+                        current.copy(pageStatuses = updated)
                     }
                 }
 
-                // Cancel memory decodes outside sliding memory window
+                // Prune memory tracking and cancel memory decodes outside sliding memory window
+                preloadedMemoryKeys.retainAll(activeMemoryKeys)
                 memoryCacheWarmManager.cancelAllExcept(activeMemoryKeys)
 
                 // 4. Bounded Priority Execution: Network -> Disk -> Memory
-                val downloadJobs = mutableListOf<Job>()
                 for (index in windowIndices.orderedIndices) {
                     val item = items.getOrNull(index) ?: continue
-                    val key = item.key(prefix)
+                    val key = itemDomainKey(item)
                     val shouldWarmMemory = index in windowIndices.memoryIndices
 
                     // If already on disk, check if it needs memory warm
@@ -190,45 +198,57 @@ class ReaderPreloadControllerImpl(
 
                     updatePageStatus(key, PreloadPageStatus.DiskQueued)
 
-                    val job = launch {
-                        try {
-                            downloadSemaphore.withPermit {
-                                updatePageStatus(key, PreloadPageStatus.DiskDownloading)
-                                val success = loadItemToDisk(item, key)
-                                if (success) {
-                                    preloadedDiskKeys.add(key)
-                                    updatePageStatus(key, PreloadPageStatus.DiskReady)
+                    val job =
+                        scope.launch(ioDispatcher) {
+                            try {
+                                downloadSemaphore.withPermit {
+                                    updatePageStatus(key, PreloadPageStatus.DiskDownloading)
+                                    val success = loadItemToDisk(item, key)
+                                    if (success) {
+                                        preloadedDiskKeys.add(key)
+                                        updatePageStatus(key, PreloadPageStatus.DiskReady)
 
-                                    // Tall page check if in Webtoon mode
-                                    if (
-                                        isWebtoon &&
-                                            isSplitTallPagesEnabled() &&
-                                            item is ReaderUiItem.Page
-                                    ) {
-                                        checkAndSplitTallPage(
-                                            this,
-                                            item.page,
-                                            preloadMemory = shouldWarmMemory,
-                                        )
-                                    } else if (shouldWarmMemory) {
-                                        warmItemMemory(item, key, isWebtoon)
+                                        // Tall page check if in Webtoon mode
+                                        if (
+                                            isWebtoon &&
+                                                isSplitTallPagesEnabled() &&
+                                                item is ReaderUiItem.Page
+                                        ) {
+                                            checkAndSplitTallPage(
+                                                this,
+                                                item.page,
+                                                preloadMemory = shouldWarmMemory,
+                                            )
+                                        } else if (shouldWarmMemory) {
+                                            warmItemMemory(item, key, isWebtoon)
+                                        }
+                                    } else {
+                                        preloadedDiskKeys.remove(key)
                                     }
-                                } else {
-                                    preloadedDiskKeys.remove(key)
+                                }
+                            } finally {
+                                activeDownloads.remove(key)
+                                _state.update { current ->
+                                    if (
+                                        activeDownloads.isEmpty() &&
+                                            memoryCacheWarmManager.activeCount() == 0
+                                    ) {
+                                        current.copy(isIdle = true)
+                                    } else {
+                                        current
+                                    }
                                 }
                             }
-                        } finally {
-                            activeDownloads.remove(key)
                         }
-                    }
                     activeDownloads[key] = job
-                    downloadJobs.add(job)
                 }
 
-                downloadJobs.forEach { it.join() }
-
                 _state.update { current ->
-                    if (activeDownloads.isEmpty()) current.copy(isIdle = true) else current
+                    if (activeDownloads.isEmpty() && memoryCacheWarmManager.activeCount() == 0) {
+                        current.copy(isIdle = true)
+                    } else {
+                        current
+                    }
                 }
             }
     }
@@ -241,8 +261,22 @@ class ReaderPreloadControllerImpl(
                     page.chapter.pageLoader?.let { loader ->
                         loader.loadPage(page)
                         if (page.status != Page.State.READY) {
-                            page.statusFlow.first {
-                                it == Page.State.READY || it == Page.State.ERROR
+                            val finalStatus =
+                                withTimeoutOrNull(DOWNLOAD_TIMEOUT_MS) {
+                                    page.statusFlow.first {
+                                        it == Page.State.READY || it == Page.State.ERROR
+                                    }
+                                }
+                            if (finalStatus == null) {
+                                val count = retryCounts.getOrDefault(key, 0)
+                                updatePageStatus(
+                                    key,
+                                    PreloadPageStatus.Error(
+                                        TimeoutException("Timeout downloading page ${page.index}"),
+                                        count,
+                                    ),
+                                )
+                                return false
                             }
                         }
                         if (page.status == Page.State.ERROR) {
@@ -261,8 +295,24 @@ class ReaderPreloadControllerImpl(
                         extra.chapter.pageLoader?.let { extraLoader ->
                             extraLoader.loadPage(extra)
                             if (extra.status != Page.State.READY) {
-                                extra.statusFlow.first {
-                                    it == Page.State.READY || it == Page.State.ERROR
+                                val extraFinalStatus =
+                                    withTimeoutOrNull(DOWNLOAD_TIMEOUT_MS) {
+                                        extra.statusFlow.first {
+                                            it == Page.State.READY || it == Page.State.ERROR
+                                        }
+                                    }
+                                if (extraFinalStatus == null) {
+                                    val count = retryCounts.getOrDefault(key, 0)
+                                    updatePageStatus(
+                                        key,
+                                        PreloadPageStatus.Error(
+                                            TimeoutException(
+                                                "Timeout downloading extra page ${extra.index}"
+                                            ),
+                                            count,
+                                        ),
+                                    )
+                                    return false
                                 }
                             }
                             if (extra.status == Page.State.ERROR) {
@@ -285,8 +335,24 @@ class ReaderPreloadControllerImpl(
                     page.chapter.pageLoader?.let { loader ->
                         loader.loadPage(page)
                         if (page.status != Page.State.READY) {
-                            page.statusFlow.first {
-                                it == Page.State.READY || it == Page.State.ERROR
+                            val finalStatus =
+                                withTimeoutOrNull(DOWNLOAD_TIMEOUT_MS) {
+                                    page.statusFlow.first {
+                                        it == Page.State.READY || it == Page.State.ERROR
+                                    }
+                                }
+                            if (finalStatus == null) {
+                                val count = retryCounts.getOrDefault(key, 0)
+                                updatePageStatus(
+                                    key,
+                                    PreloadPageStatus.Error(
+                                        TimeoutException(
+                                            "Timeout downloading parent page for split"
+                                        ),
+                                        count,
+                                    ),
+                                )
+                                return false
                             }
                         }
                         if (page.status == Page.State.ERROR) {
@@ -374,7 +440,7 @@ class ReaderPreloadControllerImpl(
                 if (preloadMemory) {
                     precomputed.forEach { split ->
                         val splitKey =
-                            "webtoon_split_${split.page.chapter.chapter.id}_${split.page.index}_${split.topOffset}"
+                            "${DOMAIN_KEY_PREFIX}_split_${split.page.chapter.chapter.id ?: 0}_${split.page.index}_${split.topOffset}"
                         if (preloadedMemoryKeys.add(splitKey)) {
                             updatePageStatus(splitKey, PreloadPageStatus.MemoryDecoding)
                             memoryCacheWarmManager.warmMemoryCache(
@@ -398,9 +464,8 @@ class ReaderPreloadControllerImpl(
                 }
                 onPageSplit?.invoke(page, precomputed)
             } else if (preloadMemory) {
-                val key =
-                    page.chapter.chapter.id?.let { cid -> "webtoon_page_${cid}_${page.index}" }
-                if (key != null && preloadedMemoryKeys.add(key)) {
+                val key = "${DOMAIN_KEY_PREFIX}_page_${page.chapter.chapter.id ?: 0}_${page.index}"
+                if (preloadedMemoryKeys.add(key)) {
                     updatePageStatus(key, PreloadPageStatus.MemoryDecoding)
                     memoryCacheWarmManager.warmMemoryCache(
                         key = key,
@@ -430,7 +495,7 @@ class ReaderPreloadControllerImpl(
                     if (preloadMemory) {
                         splits.forEach { split ->
                             val splitKey =
-                                "webtoon_split_${split.page.chapter.chapter.id}_${split.page.index}_${split.topOffset}"
+                                "${DOMAIN_KEY_PREFIX}_split_${split.page.chapter.chapter.id ?: 0}_${split.page.index}_${split.topOffset}"
                             if (preloadedMemoryKeys.add(splitKey)) {
                                 updatePageStatus(splitKey, PreloadPageStatus.MemoryDecoding)
                                 memoryCacheWarmManager.warmMemoryCache(
@@ -455,8 +520,8 @@ class ReaderPreloadControllerImpl(
                     onPageSplit?.invoke(page, splits)
                 } else if (preloadMemory) {
                     val key =
-                        page.chapter.chapter.id?.let { cid -> "webtoon_page_${cid}_${page.index}" }
-                    if (key != null && preloadedMemoryKeys.add(key)) {
+                        "${DOMAIN_KEY_PREFIX}_page_${page.chapter.chapter.id ?: 0}_${page.index}"
+                    if (preloadedMemoryKeys.add(key)) {
                         updatePageStatus(key, PreloadPageStatus.MemoryDecoding)
                         memoryCacheWarmManager.warmMemoryCache(
                             key = key,
@@ -481,6 +546,7 @@ class ReaderPreloadControllerImpl(
 
     private fun updatePageStatus(key: String, status: PreloadPageStatus) {
         _state.update { current ->
+            if (current.pageStatuses[key] == status) return@update current
             val updatedStatuses = current.pageStatuses.toMutableMap()
             if (status is PreloadPageStatus.Idle) {
                 updatedStatuses.remove(key)
@@ -496,7 +562,7 @@ class ReaderPreloadControllerImpl(
     }
 
     override fun retryPage(item: ReaderUiItem) {
-        val key = item.key(if (lastIsWebtoon) "webtoon" else "pager")
+        val key = itemDomainKey(item)
         val count = (retryCounts[key] ?: 0) + 1
         retryCounts[key] = count
         preloadedDiskKeys.remove(key)
@@ -511,6 +577,7 @@ class ReaderPreloadControllerImpl(
             }
             is ReaderUiItem.Transition -> Unit
         }
+        val isWebtoon = item is ReaderUiItem.SplitPage || lastIsWebtoon
         scope.launch(ioDispatcher) {
             updatePageStatus(key, PreloadPageStatus.DiskQueued)
             downloadSemaphore.withPermit {
@@ -519,7 +586,7 @@ class ReaderPreloadControllerImpl(
                 if (success) {
                     preloadedDiskKeys.add(key)
                     updatePageStatus(key, PreloadPageStatus.DiskReady)
-                    warmItemMemory(item, key, lastIsWebtoon)
+                    warmItemMemory(item, key, isWebtoon)
                 }
             }
         }
