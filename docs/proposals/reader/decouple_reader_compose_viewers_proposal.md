@@ -133,7 +133,9 @@ fun ReaderUiItem.isEquivalentTo(target: ReaderUiItem?): Boolean {
             // while respecting split half boundaries
             thisPages.any { tp ->
                 targetPages.any { op ->
-                    tp.index == op.index && tp.firstHalf == op.firstHalf
+                    tp.index == op.index &&
+                        tp.firstHalf == op.firstHalf &&
+                        tp.chapter.chapter.id == op.chapter.chapter.id
                 }
             }
         }
@@ -324,6 +326,7 @@ class BuildPagerItemsUseCase {
     ): List<ReaderUiItem> {
         val result = mutableListOf<ReaderUiItem>()
         val pageBuffer = mutableListOf<ReaderPage?>()
+        var hasShifted = false
 
         for (item in items) {
             if (item is ReaderPage) {
@@ -332,8 +335,10 @@ class BuildPagerItemsUseCase {
                     result.add(ReaderUiItem.Page(item, null))
                 } else {
                     pageBuffer.add(item)
-                    if (pageBuffer.size == (if (shiftDoublePage && result.isEmpty()) 1 else 2)) {
+                    val targetSize = if (shiftDoublePage && !hasShifted) 1 else 2
+                    if (pageBuffer.size == targetSize) {
                         flushBuffer(pageBuffer, result)
+                        hasShifted = true
                     }
                 }
             } else if (item is ChapterTransition) {

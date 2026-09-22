@@ -209,7 +209,9 @@ flowchart TD
                // while respecting split half boundaries
                thisPages.any { tp ->
                    targetPages.any { op ->
-                       tp.index == op.index && tp.firstHalf == op.firstHalf
+                       tp.index == op.index &&
+                           tp.firstHalf == op.firstHalf &&
+                           tp.chapter.chapter.id == op.chapter.chapter.id
                    }
                }
            }
