@@ -116,6 +116,11 @@ enum class ReaderBottomActionId {
 }
 ```
 
+> [!NOTE]
+> **Dynamic Dual-Page Toolbar State:**
+> - `ReaderBottomActionId.DoublePage`: Toggles `PageLayout.DOUBLE_PAGES` vs `PageLayout.SINGLE_PAGE`. Its `isToggled` reflects active dual-page state, and its icon resolves to `ic_book_open_variant_24dp` (dual) or `ic_book_open_24dp` (single).
+> - `ReaderBottomActionId.ShiftPage`: Visibility (`isVisible`) is strictly conditional on `DoublePage` being active. Its icon flips dynamically between `ic_page_next_outline_24dp` and `ic_page_previous_outline_24dp` depending on `(!shiftDoublePage).xor(isRtl)`.
+
 ### 3.2 Sealed Bottom Bar Actions
 
 ```kotlin

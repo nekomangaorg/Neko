@@ -83,6 +83,13 @@ data class ReaderSettingsUiState(
     val orientationIndex: Int = 0,
     val themeIndex: Int = 0,
     val sliderPositionIndex: Int = 0,
+    val pageLayout: PageLayout = PageLayout.SINGLE_PAGE,
+    val doublePageGap: Int = 0,
+    val invertDoublePages: Boolean = false,
+    val webtoonInvertDoublePages: Boolean = false,
+    val zoomDoublePageSpreads: Boolean = false,
+    val doublePageRotate: Boolean = false,
+    val doublePageRotateReverse: Boolean = false,
     val showPageNumber: Boolean = true,
     val keepScreenOn: Boolean = true,
     val cropBorders: Boolean = false,
@@ -101,6 +108,13 @@ sealed interface ReaderSettingsAction {
     data class SetOrientation(val type: OrientationType) : ReaderSettingsAction
     data class SetTheme(val themeIndex: Int) : ReaderSettingsAction
     data class SetSliderPosition(val positionIndex: Int) : ReaderSettingsAction
+    data class SetPageLayout(val layout: PageLayout) : ReaderSettingsAction
+    data class SetDoublePageGap(val gap: Int) : ReaderSettingsAction
+    data class ToggleInvertDoublePages(val invert: Boolean) : ReaderSettingsAction
+    data class ToggleWebtoonInvertDoublePages(val invert: Boolean) : ReaderSettingsAction
+    data class ToggleZoomDoublePageSpreads(val zoom: Boolean) : ReaderSettingsAction
+    data class ToggleDoublePageRotate(val rotate: Boolean) : ReaderSettingsAction
+    data class ToggleDoublePageRotateReverse(val reverse: Boolean) : ReaderSettingsAction
     data class ToggleShowPageNumber(val show: Boolean) : ReaderSettingsAction
     data class ToggleKeepScreenOn(val keep: Boolean) : ReaderSettingsAction
     data class ToggleCropBorders(val crop: Boolean) : ReaderSettingsAction

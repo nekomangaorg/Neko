@@ -100,15 +100,25 @@ While [`decouple_reader_compose_viewers_proposal.md`](file:///run/media/nonproto
 * **The Mechanism:** Both composables directly accept `viewer: PagerViewer` and `downloadManager: DownloadManager`, mutating mutable properties (`viewer.currentPagePosition = pageIndex`, `viewer.requestedPagePosition = null`, `viewer.moveToNext()`).
 * **The Impact:** Completely prevents previewing composables in Android Studio `@Preview` and tightly binds Compose rendering to deprecated View classes scheduled for deletion in Phase 3.
 
+### 1.7 Hazard 7: Dead-Code Spread Detection & Dual-Page Pairing Desynchronization
+* **Code Reference:** [`ReaderPagerController.kt#L131, L219`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/ReaderPagerController.kt#L131), [`PagerPageItem.kt#L445-L615`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerPageItem.kt#L445-L615)
+* **The Mechanism:** In the legacy View reader, `PagerPageHolder` checked image aspect ratios upon decoding and flagged wide images with `page.fullPage = true`, allowing `ReaderPagerController.joinItems` to isolate two-page spreads. In Compose, `PagerPageHolder` was deleted and `page.fullPage` / `page.longPage` are **never populated dynamically**.
+* **The Impact:**
+  - **In Dual-Page Mode**: 2-page spreads (landscape images where `width > height`) are blindly chunked alongside single pages into a single viewport. Both images are squished down to half width, and all subsequent two-page spreads across the chapter become permanently desynchronized.
+  - **In Single-Page Mode with `splitPages = true`**: Because `page.longPage` is never set, [`ReaderPagerController.kt#L131`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/ReaderPagerController.kt#L131) never runs, leaving split double pages completely broken.
+  - **In Scroll Re-anchoring**: Naive identity checks comparing only `this.page.page == target.page.page` break during `shiftDoublePage` or dynamic spread isolation because `extraPage` is ignored.
+
 ---
 
-## 2. The 4 Pillars of the Rock-Solid Paged Architecture
+## 2. The 5 Pillars of the Rock-Solid Paged Architecture
 
 ```mermaid
 flowchart TD
     subgraph Data & Domain Pipeline
-        Chapters["ViewerChapters (curr, prev, next)"] --> Controller["ReaderPagerController\n(buildItems, joinItems)"]
-        Controller --> Resolver["PagerScrollAnchorResolver\n(Pure Domain Positioning)"]
+        Chapters["ViewerChapters (curr, prev, next)"] --> Controller["BuildPagerItemsUseCase\n(Stateless Pairing & Transitions)"]
+        Decoded["Image Stream / Dimensions"] --> WideDetector["CheckWidePageUseCase\n(Spread & Aspect Ratio Isolation)"]
+        WideDetector --> Controller
+        Controller --> Resolver["PagerScrollAnchorResolver\n(Spread-Aware Re-anchoring)"]
         Controller --> Preloader["ReaderPreloadEngine\n(Headless Disk/Memory Warmer)"]
     end
 
@@ -123,6 +133,7 @@ flowchart TD
         CPV --> Overscroll["Modifier.pagerOverscrollNavigation(...)"]
         CPV --> Pager["HorizontalPager / VerticalPager\n(Persistent PagerState, Stable Keys)"]
         Pager --> PPI["Stateless PagerPageItem\n(Zero Injekt, Pre-resolved Config)"]
+        PPI --> DPL["Stateless DoublePageLayout\n(Dual Aspect Scaling, Gap, RTL Order)"]
         
         CPV -->|onPageSelected(page)| RVM["ReaderViewModel"]
         CPV -->|onTransitionSelected(transition)| RVM
@@ -181,7 +192,41 @@ flowchart TD
        }
    }
    ```
-3. **Pre-Measure Composition Re-anchoring:**
+3. **Spread-Aware Identity Equivalence Contract (`isEquivalentTo`):**
+   When `shiftDoublePage` or dynamic spread isolation re-chunks items (e.g. from `[p4, p5]` to `[p5, p6]`), comparing only `page.index` fails because the user is viewing `extraPage`. The identity contract must compare all constituent pages and split halves:
+   ```kotlin
+   fun ReaderUiItem.isEquivalentTo(target: ReaderUiItem?): Boolean {
+       if (target == null) return false
+       return when {
+           this is ReaderUiItem.Page && target is ReaderUiItem.Page -> {
+               val sameChapter = this.page.chapter.chapter.id == target.page.chapter.chapter.id
+               if (!sameChapter) return false
+
+               val thisPages = listOfNotNull(this.page, this.extraPage)
+               val targetPages = listOfNotNull(target.page, target.extraPage)
+
+               // Matches if any constituent page matches across single/dual items,
+               // while respecting split half boundaries
+               thisPages.any { tp ->
+                   targetPages.any { op ->
+                       tp.index == op.index && tp.firstHalf == op.firstHalf
+                   }
+               }
+           }
+           this is ReaderUiItem.SplitPage && target is ReaderUiItem.SplitPage -> {
+               this.page.index == target.page.index &&
+                   this.page.chapter.chapter.id == target.page.chapter.chapter.id &&
+                   this.split.topOffset == target.split.topOffset
+           }
+           this is ReaderUiItem.Transition && target is ReaderUiItem.Transition -> {
+               this.transition.chapter.chapter.id == target.transition.chapter.chapter.id &&
+                   this.transition::class == target.transition::class
+           }
+           else -> false
+       }
+   }
+   ```
+4. **Pre-Measure Composition Re-anchoring:**
    Call `pagerState.requestScrollToPage(target.index)` synchronously during composition when `items !== lastProcessedItems`. This instructs Compose to measure at the correct page index on the very first layout pass, eliminating the 1-frame flash of the wrong page.
 
 ---
@@ -236,8 +281,14 @@ flowchart TD
        val isVertical: Boolean = false,
        val animatedTransitions: Boolean = true,
        val imageScaleType: Int = 0,
-       val doublePageGap: Boolean = false,
+       val pageLayout: PageLayout = PageLayout.SINGLE_PAGE,
+       val doublePages: Boolean = false,
+       val shiftDoublePage: Boolean = false,
        val invertDoublePages: Boolean = false,
+       val doublePageGap: Int = 0,
+       val zoomDoublePageSpreads: Boolean = false,
+       val doublePageRotate: Boolean = false,
+       val doublePageRotateReverse: Boolean = false,
        val zoomStart: Int = 0,
        val navigator: ViewerNavigation = ViewerNavigation(),
        val preloadPageAmount: Int = 4,
@@ -273,8 +324,64 @@ flowchart TD
        onNavigateToChapter: (Chapter, ChapterNavTarget) -> Unit,
    ): Modifier
    ```
-2. **Isolated Double-Page Splitter & Layout:**
-   Extract paired double-page image measurement and layout into a dedicated composable ([`DoublePageLayout.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/DoublePageLayout.kt)), separating spread alignment math from single-page rendering.
+
+---
+
+### Pillar 5: Dual-Page Spread Architecture & Wide-Page Splitting Engine
+
+**Rule:** *Two-page spreads, pair shifting, and wide-page splits must be governed by pure domain interactors, not inline view hacks.*
+
+1. **Dynamic Wide-Spread Detection (`CheckWidePageUseCase`):**
+   Mirroring `CheckTallPageUseCase` from Webtoon, extract pure domain detection to flag two-page spreads when image dimensions become known:
+   ```kotlin
+   package eu.kanade.tachiyomi.ui.reader.domain
+
+   import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+
+   class CheckWidePageUseCase {
+       fun isWidePage(width: Int, height: Int): Boolean {
+           if (width <= 0 || height <= 0) return false
+           return width > height
+       }
+
+       operator fun invoke(page: ReaderPage, width: Int, height: Int): Boolean {
+           val isWide = isWidePage(width, height)
+           if (isWide) {
+               page.fullPage = true
+               page.longPage = true
+           }
+           return isWide
+       }
+   }
+   ```
+   When `MemoryCacheWarmManager` or Coil decodes an image, `CheckWidePageUseCase` evaluates dimensions and marks `page.fullPage = true`. If this modifies chapter layout topology, `BuildPagerItemsUseCase` is triggered to re-chunk the items.
+
+2. **Pure Domain Item Assembly (`BuildPagerItemsUseCase`):**
+   Extract `ReaderPagerController.buildItems` and `joinItems` into a pure Kotlin interactor:
+   - Takes `ViewerChapters`, `pageLayout: PageLayout`, `shiftDoublePage: Boolean`, `isRtl: Boolean`, `forceTransition: Boolean`.
+   - **Dual-Page Pairing**: In `DOUBLE_PAGES` mode (or landscape `AUTOMATIC`), isolates any `page.fullPage == true` into single-spread items (`ReaderUiItem.Page(page, null)`), preventing squishing and preserving spread pairing for subsequent pages.
+   - **Spread Shifting**: When `shiftDoublePage == true`, offsets pairing so that cover pages are displayed alone.
+   - **Split Double Pages**: In `SPLIT_PAGES` mode, slices wide pages (`page.longPage == true`) into two consecutive `InsertPage` instances (`firstHalf = true` and `firstHalf = false`).
+
+3. **Stateless `DoublePageLayout.kt`:**
+   Extract lines 445–615 of `PagerPageItem.kt` into a standalone composable:
+   ```kotlin
+   @Composable
+   fun DoublePageLayout(
+       page: ReaderPage,
+       extraPage: ReaderPage,
+       config: PagerViewerConfigUiModel,
+       zoomableState: ZoomableState,
+       modifier: Modifier = Modifier,
+   )
+   ```
+   - Determines left-to-right display ordering via `(!config.isRtl).xor(config.invertDoublePages)`.
+   - Applies inter-page spacing via `Arrangement.spacedBy(Size.tiny * config.doublePageGap)`.
+   - Computes merged bounding box (`totalWidth = fSize.width + sSize.width`, `maxHeight = maxOf(fSize.height, sSize.height)`) and registers with `zoomableState.setContentLocation(...)`.
+   - Coordinates zoom anchor centroid for `zoomDoublePageSpreads` based on reading direction.
+
+4. **Split-Page Rendering (`SplitPageLayout.kt`):**
+   For single-page mode with `firstHalf != null`, crops the bitmap to render the designated 50% half without redundant network calls or duplicate memory decoding.
 
 ---
 
@@ -450,6 +557,9 @@ fun ComposePagerViewer(
 | **Prepend Flash / Jitter** | Previous chapter loads while user is on Page 0, expanding list by 40 pages. | High (1-frame flash to wrong page) | `requestScrollToPage(target.index)` executes during composition before layout, preventing Compose from measuring at old index 0. |
 | **Unshifted Appending** | Next chapter finishes loading while user is reading stationary on current chapter. | High (Stutter / Momentum Kill) | Fast-path 2 in `PagerScrollAnchorResolver` returns `null` when item at current index did not shift, preventing redundant scroll calls. |
 | **Double-Page Spread Inversion** | User toggles "Invert Double Pages" or "Double Page Gap" in settings sheet. | Medium (Layout Misalignment) | Settings hoisted to `PagerViewerConfigUiModel`. Changing config triggers clean recomposition of spreads without resetting pager position. |
+| **Wide Double-Page Spreads (`fullPage`)** | Image width > height in dual-page mode. | High (Squished layout & pair desync) | `CheckWidePageUseCase` flags spread dynamically upon decode; `BuildPagerItemsUseCase` isolates spread into single-page item `ReaderUiItem.Page(page, null)` so subsequent spreads stay in sync. |
+| **Dual-Page Shift (`shiftDoublePage`) Re-anchoring** | Shifting double pages re-chunks `[p4, p5]` to `[p5, p6]` while reading. | High (Jump to wrong page / flash) | `ReaderUiItem.isEquivalentTo` matches any constituent page across pairs (`page` or `extraPage`), preserving active viewport item across re-chunking. |
+| **Split Double Pages (`SPLIT_PAGES`)** | User reads wide spread manga in portrait with split double pages enabled. | Medium (Dead code / no crop) | `BuildPagerItemsUseCase` splits wide spreads into `InsertPage` halves; `SplitPageLayout` crops bitmap at 50% boundary according to reading direction. |
 | **Rapid Swiping / Fling** | User flings through 10 pages in rapid succession. | Medium (Coil Request Flooding) | Headless `ReaderPreloadEngine` bounds memory preloading strictly to immediate 2-page window with cancellation of superseded indices. |
 | **RTL Edge Drag** | User reaches start/end edge in Japanese (R2L) reading mode. | Medium (Overscroll Inversion Failure) | `Modifier.pagerOverscrollNavigation` encapsulates direction inversion math, isolating it from page rendering. |
 
@@ -463,30 +573,36 @@ gantt
     dateFormat  YYYY-MM-DD
     section Phase 1: Pure Domain Foundations
     Extract PagerScrollAnchorResolver       :p1_1, 2026-10-01, 2d
-    Expand ReaderPreloadEngine for Pager    :p1_2, after p1_1, 2d
+    Extract CheckWidePageUseCase            :p1_2, after p1_1, 1d
+    Extract BuildPagerItemsUseCase          :p1_3, after p1_2, 2d
+    Expand ReaderPreloadEngine for Pager    :p1_4, after p1_3, 2d
     section Phase 2: Configuration & Modifier Decoupling
-    Define PagerViewerConfigUiModel         :p2_1, after p1_2, 1d
+    Define PagerViewerConfigUiModel         :p2_1, after p1_4, 1d
     Extract Modifier.pagerOverscrollNav     :p2_2, after p2_1, 2d
     section Phase 3: Composable Modernization
-    Refactor PagerPageItem to Stateless     :p3_1, after p2_2, 2d
-    Refactor ComposePagerViewer (~180 lines):p3_2, after p3_1, 2d
+    Extract Stateless DoublePageLayout      :p3_1, after p2_2, 2d
+    Refactor PagerPageItem to Stateless     :p3_2, after p3_1, 2d
+    Refactor ComposePagerViewer (~180 lines):p3_3, after p3_2, 2d
     section Phase 4: Verification & Handoff
-    Add JVM Unit Tests for Anchor Resolver  :p4_1, after p3_2, 2d
-    Validate ktfmt & Handoff to R2/R3       :p4_2, after p4_1, 1d
+    Add JVM Unit Tests for Resolver & Spread:p4_1, after p3_3, 2d
+    Validate ktfmt & Handoff to R2/R6       :p4_2, after p4_1, 1d
 ```
 
 ### Phase 1: Pure Domain Foundations
 1. Implement [`PagerScrollAnchorResolver.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/PagerScrollAnchorResolver.kt) in `eu.kanade.tachiyomi.ui.reader.viewer.pager`.
-2. Write pure JVM unit tests in [`PagerScrollAnchorResolverTest.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/test/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/PagerScrollAnchorResolverTest.kt) covering forward seam transitions, backward expansions, unshifted appends, and clamped index resilience.
-3. Generalize [`ReaderPreloadEngine.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/webtoon/ReaderPreloadEngine.kt) to support pager index calculations (`ReaderPagerController.getPreloadIndices`).
+2. Implement `CheckWidePageUseCase` to restore dynamic two-page spread detection upon image decode.
+3. Extract `BuildPagerItemsUseCase` from `ReaderPagerController` to make dual-page pairing, spread isolation, and split double pages pure, deterministic, and testable.
+4. Write pure JVM unit tests in [`PagerScrollAnchorResolverTest.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/test/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/PagerScrollAnchorResolverTest.kt) covering forward seam transitions, backward expansions, unshifted appends, dual-page shift re-anchoring, and clamped index resilience.
+5. Generalize [`ReaderPreloadEngine.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/webtoon/ReaderPreloadEngine.kt) to support pager index calculations (`ReaderPagerController.getPreloadIndices`).
 
 ### Phase 2: Configuration & Modifier Decoupling
-1. Create [`PagerViewerConfigUiModel.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerViewerConfigUiModel.kt).
+1. Create [`PagerViewerConfigUiModel.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerViewerConfigUiModel.kt) containing complete dual-page preferences.
 2. Extract overscroll physics into `PagerOverscrollNavigation.kt`.
 
 ### Phase 3: Composable Modernization
-1. Refactor [`PagerPageItem.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerPageItem.kt) into a stateless composable with zero `Injekt.get()` and zero preference collectors.
-2. Refactor [`ComposePagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt) to the ~180-line stateless structure, removing `key(viewer, currentChapterId, ...)`.
+1. Extract `DoublePageLayout.kt` into a stateless composable handling dual-page aspect ratio scaling, gap spacing, and RTL display ordering.
+2. Refactor [`PagerPageItem.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerPageItem.kt) into a stateless composable with zero `Injekt.get()` and zero preference collectors.
+3. Refactor [`ComposePagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt) to the ~180-line stateless structure, removing `key(viewer, currentChapterId, ...)`.
 
 ### Phase 4: Verification & Handoff
 1. Verify with unit tests in `app/src/test/java/eu/kanade/tachiyomi/ui/reader/viewer/pager/`.
