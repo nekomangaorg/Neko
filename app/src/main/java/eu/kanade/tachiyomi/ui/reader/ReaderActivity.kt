@@ -402,6 +402,7 @@ class ReaderActivity : BaseMainActivity() {
                             modifier = Modifier.fillMaxSize(),
                             transitionState = transitionState,
                             navCommands = viewModel.navigationCommands,
+                            preloadController = viewModel.preloadController,
                         )
                     } else if (currentViewer is WebtoonViewer && items.isNotEmpty()) {
                         ComposeWebtoonViewer(
@@ -424,6 +425,7 @@ class ReaderActivity : BaseMainActivity() {
                             },
                             modifier = Modifier.fillMaxSize(),
                             navCommands = viewModel.navigationCommands,
+                            preloadController = viewModel.preloadController,
                         )
                     }
 

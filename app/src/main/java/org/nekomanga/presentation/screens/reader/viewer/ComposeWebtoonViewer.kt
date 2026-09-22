@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
+import eu.kanade.tachiyomi.ui.reader.loader.ReaderPreloadController
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -448,6 +449,7 @@ fun ComposeWebtoonViewer(
     onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
     modifier: Modifier = Modifier,
     navCommands: Flow<ReaderNavCommand>? = null,
+    preloadController: ReaderPreloadController? = null,
 ) {
     val currentChapterId =
         (viewer.currentChapter
@@ -566,11 +568,36 @@ fun ComposeWebtoonViewer(
             }
         }
 
+    val effectivePreloadController =
+        preloadController
+            ?: remember(viewer) {
+                runCatching { viewer.activity.viewModel.preloadController }.getOrNull()
+            }
+
+    LaunchedEffect(enrichedItems, preloadPageAmount, effectivePreloadController) {
+        effectivePreloadController?.onPositionChanged(
+            currentIndex = initialItemIndex,
+            items = enrichedItems,
+            preloadAmount = preloadPageAmount,
+            isRtl = false,
+            isWebtoon = true,
+        )
+    }
+
     ComposeWebtoonViewer(
         items = enrichedItems,
         config = config,
         navCommands = effectiveNavCommands,
-        onActiveItemChanged = { activeIndex -> viewer.updateActiveIndex(activeIndex) },
+        onActiveItemChanged = { activeIndex ->
+            viewer.updateActiveIndex(activeIndex)
+            effectivePreloadController?.onPositionChanged(
+                currentIndex = activeIndex,
+                items = enrichedItems,
+                preloadAmount = preloadPageAmount,
+                isRtl = false,
+                isWebtoon = true,
+            )
+        },
         onPageSelected = onPageSelected,
         onTransitionSelected = onTransitionSelected,
         onPageLongTap = { page ->
