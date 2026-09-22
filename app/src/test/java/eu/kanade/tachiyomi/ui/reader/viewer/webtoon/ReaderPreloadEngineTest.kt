@@ -208,6 +208,15 @@ class ReaderPreloadEngineTest {
 
     @Test
     fun `updateActiveIndex handles rapid list shrinking without crashing`() = testScope.runTest {
+        // Preloading launches jobs on Dispatchers.IO that outlive the test body, so give the
+        // engine the background scope runTest cancels instead of the scope it waits on.
+        val engine =
+            ReaderPreloadEngine(
+                context = context,
+                scope = backgroundScope,
+                checkTallPage = checkTallPage,
+                getScreenHeight = { 2000 },
+            )
         val chapter = createChapter(1L, 20)
         val largeList = chapter.pages!!.map { ReaderUiItem.Page(it) }
         val smallList = largeList.take(3)
