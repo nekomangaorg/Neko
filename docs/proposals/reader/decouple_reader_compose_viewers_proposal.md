@@ -85,6 +85,14 @@ data class PagerViewerConfigUiModel(
     val cropBorders: Boolean,
     val navigateToPan: Boolean,
     val landscapeZoom: Boolean,
+    val pageLayout: PageLayout,
+    val doublePages: Boolean,
+    val shiftDoublePage: Boolean,
+    val invertDoublePages: Boolean,
+    val doublePageGap: Int,
+    val zoomDoublePageSpreads: Boolean,
+    val doublePageRotate: Boolean,
+    val doublePageRotateReverse: Boolean,
     val requestedPageIndex: Int?,
 )
 
@@ -101,24 +109,44 @@ data class WebtoonViewerConfigUiModel(
 
 ### 3.2 Domain Item Equivalence & Re-anchoring Contract
 
-When background chapter preloading prepends or appends items to `LazyColumn`, the list shifts items. To reliably re-anchor the viewport to the currently visible item without relying on volatile numeric indices, we define an identity equivalence contract:
+When background chapter preloading prepends or appends items, or when dual-page spread isolation and shifting (`shiftDoublePage`) re-chunks items across list updates, the list shifts item indices. To reliably re-anchor the viewport to the currently visible item without relying on volatile numeric indices, we define an identity equivalence contract that supports single pages, paired dual-page spreads, and split halves:
 
 ```kotlin
 package eu.kanade.tachiyomi.ui.reader.model
 
 /**
- * Compares two reader UI items for semantic identity equivalence across list updates and preloads.
+ * Compares two reader UI items for semantic identity equivalence across list updates,
+ * preloads, dual-page pair shifting, and spread isolation.
  * Enables deterministic list re-anchoring and pure JVM test assertions without Android View models.
  */
 fun ReaderUiItem.isEquivalentTo(target: ReaderUiItem?): Boolean {
     if (target == null) return false
     return when {
         this is ReaderUiItem.Page && target is ReaderUiItem.Page -> {
-            this.page.page == target.page.page &&
-                this.page.chapter.chapter.id == target.page.chapter.chapter.id
+            val sameChapter = this.page.chapter.chapter.id == target.page.chapter.chapter.id
+            if (!sameChapter) return false
+
+            val thisPages = listOfNotNull(this.page, this.extraPage)
+            val targetPages = listOfNotNull(target.page, target.extraPage)
+
+            // Matches if any constituent page matches across single/dual items,
+            // while respecting split half boundaries
+            thisPages.any { tp ->
+                targetPages.any { op ->
+                    tp.index == op.index &&
+                        tp.firstHalf == op.firstHalf &&
+                        tp.chapter.chapter.id == op.chapter.chapter.id
+                }
+            }
+        }
+        this is ReaderUiItem.SplitPage && target is ReaderUiItem.SplitPage -> {
+            this.page.index == target.page.index &&
+                this.page.chapter.chapter.id == target.page.chapter.chapter.id &&
+                this.split.topOffset == target.split.topOffset
         }
         this is ReaderUiItem.Transition && target is ReaderUiItem.Transition -> {
-            this.transition.chapter.chapter.id == target.transition.chapter.chapter.id
+            this.transition.chapter.chapter.id == target.transition.chapter.chapter.id &&
+                this.transition::class == target.transition::class
         }
         else -> false
     }
@@ -209,6 +237,130 @@ class BuildWebtoonItemsUseCase {
 ```
 This enables unit testing item assembly and index calculation without spinning up Android framework components.
 
+### 4.4 Decoupled Pager Item Generation (`BuildPagerItemsUseCase`)
+
+Currently, `ReaderPagerController.buildItems` and `joinItems` retain mutable fields (`prevTransition`, `nextTransition`, `currentChapter`, `pageToShift`) and mutate `page.shiftedPage` and `page.isolatedPage` inline.
+
+We extract this into a stateless domain interactor:
+
+```kotlin
+package eu.kanade.tachiyomi.ui.reader.domain
+
+import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
+import eu.kanade.tachiyomi.ui.reader.model.InsertPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
+
+/**
+ * Pure Kotlin interactor mapping ViewerChapters into a sequential list of ReaderUiItem instances
+ * for horizontal and vertical paginated viewers.
+ * Handles dual-page spread pairing, wide-spread isolation, pair shifting, and single-page splits.
+ */
+class BuildPagerItemsUseCase {
+
+    operator fun invoke(
+        chapters: ViewerChapters,
+        pageLayout: PageLayout,
+        shiftDoublePage: Boolean,
+        isRtl: Boolean,
+        forceTransition: Boolean = false,
+    ): List<ReaderUiItem> {
+        val isDoublePages = pageLayout == PageLayout.DOUBLE_PAGES
+        val isSplitPages = pageLayout == PageLayout.SPLIT_PAGES
+        val subItems = mutableListOf<Any>()
+
+        // 1. Previous chapter boundary items
+        chapters.prevChapter?.let { prev ->
+            val prevPages = prev.pages.orEmpty()
+            val fullCount = prevPages.count { it.fullPage == true || it.isolatedPage }
+            subItems.addAll(prevPages.takeLast(if ((prevPages.size + fullCount) % 2 == 0) 2 else 3))
+            subItems.add(ChapterTransition.Prev(chapters.currChapter, prev))
+        }
+
+        // 2. Current chapter pages
+        chapters.currChapter.pages?.let { subItems.addAll(it) }
+
+        // 3. Next chapter boundary items
+        chapters.nextChapter?.let { next ->
+            subItems.add(ChapterTransition.Next(chapters.currChapter, next))
+            subItems.addAll(next.pages.orEmpty().take(2))
+        }
+
+        // 4. Assemble ReaderUiItems
+        val result = mutableListOf<ReaderUiItem>()
+        if (!isDoublePages) {
+            val processed = if (isSplitPages) splitWidePages(subItems) else subItems
+            for (item in processed) {
+                when (item) {
+                    is ReaderPage -> result.add(ReaderUiItem.Page(item))
+                    is ChapterTransition -> result.add(ReaderUiItem.Transition(item))
+                }
+            }
+            if (isRtl) result.reverse()
+        } else {
+            result.addAll(chunkDualPages(subItems, shiftDoublePage, isRtl))
+        }
+
+        return result
+    }
+
+    private fun splitWidePages(items: List<Any>): List<Any> {
+        val output = mutableListOf<Any>()
+        for (item in items) {
+            if (item is ReaderPage && item.longPage == true) {
+                output.add(InsertPage(item).apply { firstHalf = true })
+                output.add(InsertPage(item).apply { firstHalf = false })
+            } else {
+                output.add(item)
+            }
+        }
+        return output
+    }
+
+    private fun chunkDualPages(
+        items: List<Any>,
+        shiftDoublePage: Boolean,
+        isRtl: Boolean,
+    ): List<ReaderUiItem> {
+        val result = mutableListOf<ReaderUiItem>()
+        val pageBuffer = mutableListOf<ReaderPage?>()
+        var hasShifted = false
+
+        for (item in items) {
+            if (item is ReaderPage) {
+                if (item.fullPage == true) {
+                    flushBuffer(pageBuffer, result)
+                    result.add(ReaderUiItem.Page(item, null))
+                } else {
+                    pageBuffer.add(item)
+                    val targetSize = if (shiftDoublePage && !hasShifted) 1 else 2
+                    if (pageBuffer.size == targetSize) {
+                        flushBuffer(pageBuffer, result)
+                        hasShifted = true
+                    }
+                }
+            } else if (item is ChapterTransition) {
+                flushBuffer(pageBuffer, result)
+                result.add(ReaderUiItem.Transition(item))
+            }
+        }
+        flushBuffer(pageBuffer, result)
+        if (isRtl) result.reverse()
+        return result
+    }
+
+    private fun flushBuffer(buffer: MutableList<ReaderPage?>, result: MutableList<ReaderUiItem>) {
+        if (buffer.isEmpty()) return
+        val first = buffer[0] ?: return
+        val second = buffer.getOrNull(1)
+        result.add(ReaderUiItem.Page(first, second))
+        buffer.clear()
+    }
+}
+```
+
 ---
 
 ## 5. Technical Footprint & Integration
@@ -216,8 +368,10 @@ This enables unit testing item assembly and index calculation without spinning u
 1. **[`ComposePagerViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposePagerViewer.kt)**: Replace `viewer` and `downloadManager` parameters with `config: PagerViewerConfigUiModel`; remove `Injekt.get()`.
 2. **[`ComposeWebtoonViewer.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/ComposeWebtoonViewer.kt)**: Replace `viewer` and `downloadManager` parameters with `config: WebtoonViewerConfigUiModel`; remove `Injekt.get()`.
 3. **[`ReaderActivity.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt)**: Pass assembled viewer configurations into Compose content.
-4. **[`BuildWebtoonItemsUseCase.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/domain/BuildWebtoonItemsUseCase.kt)**: Extract item composition into a testable pure Kotlin interactor.
-5. **[`ReaderUiItem.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/model/ReaderUiItem.kt)**: Add `isEquivalentTo(target)` identity contract.
+4. **[`BuildWebtoonItemsUseCase.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/domain/BuildWebtoonItemsUseCase.kt)**: Extract webtoon item composition into a testable pure Kotlin interactor.
+5. **[`BuildPagerItemsUseCase.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/domain/BuildPagerItemsUseCase.kt)**: Extract pager item composition and dual-page pairing into a testable pure Kotlin interactor.
+6. **[`ReaderUiItem.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/ui/reader/model/ReaderUiItem.kt)**: Add spread-aware `isEquivalentTo(target)` identity contract.
+7. **[`DoublePageLayout.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/DoublePageLayout.kt)**: Stateless dual-page spread layout composable.
 
 ---
 
@@ -318,6 +472,26 @@ class ReaderUiItemEquivalenceTest {
         val reanchoredIndex = updatedItems.indexOfFirst { it.isEquivalentTo(anchorItem) }
         assertThat(reanchoredIndex).isEqualTo(51)
     }
+
+    @Test
+    fun `re-anchoring preserves position when dual page pairs are shifted`() {
+        val p4 = createPage(index = 4, chapterId = 1L)
+        val p5 = createPage(index = 5, chapterId = 1L)
+        val p6 = createPage(index = 6, chapterId = 1L)
+
+        // Before shift: [p4, p5]
+        val activeItem = ReaderUiItem.Page(p4, p5)
+
+        // After shift: [p3, p4], [p5, p6]
+        val shiftedItems = listOf(
+            ReaderUiItem.Page(createPage(index = 3, chapterId = 1L), p4),
+            ReaderUiItem.Page(p5, p6),
+        )
+
+        // User was looking at the spread containing p5; equivalence finds the pair containing p5
+        val reanchoredIndex = shiftedItems.indexOfFirst { it.isEquivalentTo(activeItem) }
+        assertThat(reanchoredIndex).isEqualTo(0) // p4 matches first pair
+    }
 }
 ```
 
@@ -352,9 +526,10 @@ class ComposeWebtoonViewerTest {
 >
 > Decoupling `ComposePagerViewer` and `ComposeWebtoonViewer` from legacy View classes (`PagerViewer`, `WebtoonViewer`), `DownloadManager`, and `Injekt` isolates viewer rendering into pure Jetpack Compose components driven by `PagerViewerConfigUiModel` / `WebtoonViewerConfigUiModel`, completing core viewer decoupling.
 
-- [ ] **Step 1**: Define `PagerViewerConfigUiModel` and `WebtoonViewerConfigUiModel`.
-- [ ] **Step 2**: Implement `ReaderUiItem.isEquivalentTo` domain identity contract and pure JVM tests.
-- [ ] **Step 3**: Extract `BuildWebtoonItemsUseCase` domain interactor and add `BuildWebtoonItemsUseCaseTest`.
+- [ ] **Step 1**: Define `PagerViewerConfigUiModel` and `WebtoonViewerConfigUiModel` with complete dual-page preferences.
+- [ ] **Step 2**: Implement `ReaderUiItem.isEquivalentTo` domain identity contract supporting dual pages and pure JVM tests.
+- [ ] **Step 3a**: Extract `BuildWebtoonItemsUseCase` domain interactor and add `BuildWebtoonItemsUseCaseTest`.
+- [ ] **Step 3b**: Extract `BuildPagerItemsUseCase` domain interactor with dual-page chunking and add `BuildPagerItemsUseCaseTest`.
 - [ ] **Step 4**: Hoist preference observation from viewers to `ReaderViewModel`.
 - [ ] **Step 5**: Refactor `ComposePagerViewer.kt` to eliminate legacy view and service dependencies.
 - [ ] **Step 6**: Refactor `ComposeWebtoonViewer.kt` to eliminate legacy view and service dependencies.

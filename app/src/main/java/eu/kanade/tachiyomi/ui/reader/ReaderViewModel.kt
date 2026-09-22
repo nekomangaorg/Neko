@@ -37,6 +37,8 @@ import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterNavTargetUseCase
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
+import eu.kanade.tachiyomi.ui.reader.loader.ReaderPreloadController
+import eu.kanade.tachiyomi.ui.reader.loader.ReaderPreloadControllerImpl
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapterTransitionState
@@ -139,12 +141,24 @@ constructor(
     private val eventChannel = Channel<Event>()
     val eventFlow = eventChannel.receiveAsFlow()
 
+    /** Headless unified preload controller for disk prefetching and memory cache warming. */
+    val preloadController: ReaderPreloadController by lazy {
+        ReaderPreloadControllerImpl(
+            context = preferences.context,
+            scope = viewModelScope,
+            isSplitTallPagesEnabled = { readerPreferences.splitTallImagesReader().get() },
+            onRequestPreloadChapter = { chapter -> viewModelScope.launch { preload(chapter) } },
+        )
+    }
+
     /** Headless preload engine for disk prefetching and memory cache warming in webtoon mode. */
+    @Deprecated("Use preloadController instead")
     val webtoonPreloadEngine by lazy {
         ReaderPreloadEngine(
             context = preferences.context,
             scope = viewModelScope,
             isSplitTallPagesEnabled = { readerPreferences.splitTallImagesReader().get() },
+            controller = preloadController as? ReaderPreloadControllerImpl,
         )
     }
 
@@ -273,7 +287,7 @@ constructor(
     }
 
     override fun onCleared() {
-        webtoonPreloadEngine.clear()
+        preloadController.release()
         val currentChapters = state.value.viewerChapters
         if (currentChapters != null) {
             // 1. Unreference the viewer chapters
@@ -1421,7 +1435,25 @@ constructor(
     fun updateWebtoonActiveIndex(activeIndex: Int) {
         val items = state.value.viewerItems
         val preloadAmount = readerPreferences.preloadPageAmount().get()
-        webtoonPreloadEngine.updateActiveIndex(activeIndex, items, preloadAmount)
+        preloadController.onPositionChanged(
+            currentIndex = activeIndex,
+            items = items,
+            preloadAmount = preloadAmount,
+            isRtl = false,
+            isWebtoon = true,
+        )
+    }
+
+    fun updatePagerActiveIndex(activeIndex: Int, isRtl: Boolean) {
+        val items = state.value.viewerItems
+        val preloadAmount = readerPreferences.preloadPageAmount().get()
+        preloadController.onPositionChanged(
+            currentIndex = activeIndex,
+            items = items,
+            preloadAmount = preloadAmount,
+            isRtl = isRtl,
+            isWebtoon = false,
+        )
     }
 
     fun setChapterTitle(title: String) {
