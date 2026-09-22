@@ -8,12 +8,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import com.hippo.unifile.UniFile
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
 import org.nekomanga.R
+import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.extensions.collectAsState
 import tachiyomi.core.preference.Preference
@@ -24,6 +28,7 @@ fun storageLocationPicker(
     storageDirPref: Preference<String>
 ): ManagedActivityResultLauncher<Uri?, Uri?> {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     return rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()
@@ -47,8 +52,37 @@ fun storageLocationPicker(
                 context.toast(R.string.file_picker_uri_permission_unsupported)
             }
 
-            UniFile.fromUri(context, uri)?.let { storageDirPref.set(it.uri.toString()) }
+            UniFile.fromUri(context, uri)?.let { directory ->
+                scope.launchIO {
+                    if (directory.canHostAppDirectories()) {
+                        storageDirPref.set(directory.uri.toString())
+                    } else {
+                        withUIContext {
+                            context.toast(
+                                context.getString(
+                                    R.string.invalid_location,
+                                    directory.displayablePath,
+                                )
+                            )
+                        }
+                    }
+                }
+            }
         }
+    }
+}
+
+/**
+ * Some document providers hand out a tree the app cannot create folders in, the Downloads shortcut
+ * of a few file managers among them. Saving such a location leaves every download failing with an
+ * invalid location error, so probe it with the folder the app needs first.
+ */
+internal fun UniFile.canHostAppDirectories(): Boolean {
+    return try {
+        createDirectory(StoragePreferences.DOWNLOADS_DIR) != null
+    } catch (e: Exception) {
+        TimberKt.e(e) { "Error creating a folder in $uri" }
+        false
     }
 }
 
