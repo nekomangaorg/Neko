@@ -66,10 +66,10 @@ class BackupCreator(val context: Context) {
     /**
      * Create backup Json file from database
      *
-     * @param uri path of Uri
+     * @param uri file to write a manual backup to, not used for automatic backups
      * @param isAutoBackup backup called from scheduled backup job
      */
-    suspend fun createBackup(uri: Uri, flags: Int, isAutoBackup: Boolean): String {
+    suspend fun createBackup(uri: Uri?, flags: Int, isAutoBackup: Boolean): String {
         // Create root object
         var backup: Backup? = null
 
@@ -94,7 +94,11 @@ class BackupCreator(val context: Context) {
             file =
                 (if (isAutoBackup) {
                     // Get dir of file and create
-                    val dir = storageManager.getAutomaticBackupsDirectory()!!
+                    val dir =
+                        storageManager.getAutomaticBackupsDirectory()
+                            ?: throw IllegalStateException(
+                                "Couldn't create automatic backup folder"
+                            )
 
                     // Delete older backups
                     dir.listFiles { _, filename -> Backup.filenameRegex.matches(filename) }
@@ -106,7 +110,7 @@ class BackupCreator(val context: Context) {
                     // Create new file to place backup
                     dir.createFile(Backup.getBackupFilename())
                 } else {
-                    UniFile.fromUri(context, uri)
+                    uri?.let { UniFile.fromUri(context, it) }
                 }) ?: throw Exception("Couldn't create backup file")
 
             if (!file.isFile) {
