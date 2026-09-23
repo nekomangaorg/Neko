@@ -77,6 +77,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                 putJsonObject("attributes") {
                     put("status", track.toKitsuStatus())
                     put("progress", track.last_chapter_read.toInt())
+                    track.toKitsuScore()?.let { put("ratingTwenty", it) }
                 }
                 putJsonObject("relationships") {
                     putJsonObject("user") {
