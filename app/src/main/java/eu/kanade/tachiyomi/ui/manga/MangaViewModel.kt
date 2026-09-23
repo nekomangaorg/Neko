@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.database.models.uuid
+import eu.kanade.tachiyomi.data.external.DexCreateThread
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -162,6 +163,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val appSnackbarManager: AppSnackbarManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
     val sourceManager: SourceManager = Injekt.get()
+    val isLoggedInToMangaDex: Boolean get() = loginHelper.isLoggedIn()
     private val loginHelper: MangaDexLoginHelper = Injekt.get()
     private val statusHandler: StatusHandler = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
@@ -615,7 +617,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                         allInfo.mangaItem.userTitle.ifEmpty {
                                             allInfo.mangaItem.title
                                         },
-                                    externalLinks = allInfo.mangaItem.externalLinks,
+                                    externalLinks = allInfo.mangaItem.externalLinks.mapNotNull { link ->
+                                        if (link is DexCreateThread) {
+                                            if (!isLoggedInToMangaDex) return@mapNotNull null
+                                            link.createAction = createMangaThreadAction()
+                                        }
+                                        link
+                                    },
                                     genres = allInfo.mangaItem.genre,
                                     initialized = allInfo.mangaItem.initialized,
                                     inLibrary = allInfo.mangaItem.favorite,
@@ -1969,6 +1977,33 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             context.openInWebView(url, title = "Comments")
                         }
                     }
+                }
+            }
+        }
+    }
+
+    fun createMangaThreadAction(): (DexCreateThread) -> Unit = { createThread ->
+        runBlocking(Dispatchers.IO) {
+            if (!isOnline()) return@runBlocking
+            _mangaDetailScreenState.update {
+                it.copy(general = it.general.copy(isRefreshing = true))
+            }
+            val manga = mangaRepository.getMangaById(mangaId) ?: return@runBlocking
+            val mangaUUID = MdUtil.getMangaUUID(manga.url)
+            val threadId =
+                sourceManager.mangaDex
+                    .getMangaCommentId(mangaUUID)
+                    .onErr { TimberKt.e { it.message() } }
+                    .getOrElse { null }
+            _mangaDetailScreenState.update {
+                it.copy(general = it.general.copy(isRefreshing = false))
+            }
+            if (threadId != null) {
+                createThread.id = threadId
+                manga.thread_id = threadId
+                mangaRepository.updateManga(manga)
+                _mangaDetailScreenState.update {
+                    it.copy(manga = it.manga.copy(externalLinks = manga.getExternalLinks()))
                 }
             }
         }
