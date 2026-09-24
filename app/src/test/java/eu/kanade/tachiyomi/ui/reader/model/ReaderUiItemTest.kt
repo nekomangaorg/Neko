@@ -6,8 +6,10 @@ import eu.kanade.tachiyomi.data.coil.ReaderPageSplitKeyer
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReaderUiItemTest {
@@ -150,5 +152,77 @@ class ReaderUiItemTest {
 
         assertEquals("reader_page_12345_1", pageKey)
         assertEquals("reader_split_12345_1_250", splitKey)
+    }
+
+    @Test
+    fun `slice continues into the next slice of the same page`() {
+        val page = createReaderPage(chapterId = 102992L, index = 0)
+        val top = ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 0, splitHeight = 1000))
+        val bottom =
+            ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 1000, splitHeight = 1000))
+
+        assertTrue(top.continuesInto(bottom))
+    }
+
+    @Test
+    fun `last slice does not continue into the next page`() {
+        val page = createReaderPage(chapterId = 102992L, index = 0)
+        val lastSlice =
+            ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 1000, splitHeight = 1000))
+        val nextPage = ReaderUiItem.Page(createReaderPage(chapterId = 102992L, index = 1))
+
+        assertFalse(lastSlice.continuesInto(nextPage))
+    }
+
+    @Test
+    fun `last slice does not continue into the first slice of the next tall page`() {
+        val page = createReaderPage(chapterId = 102992L, index = 0)
+        val nextPage = createReaderPage(chapterId = 102992L, index = 1)
+        val lastSlice =
+            ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 1000, splitHeight = 1000))
+        val nextFirstSlice =
+            ReaderUiItem.SplitPage(ReaderPageSplit(nextPage, topOffset = 0, splitHeight = 1000))
+
+        assertFalse(lastSlice.continuesInto(nextFirstSlice))
+    }
+
+    @Test
+    fun `slice does not continue into a slice with the same page index in another chapter`() {
+        val lastSlice =
+            ReaderUiItem.SplitPage(
+                ReaderPageSplit(
+                    createReaderPage(chapterId = 100L, index = 0),
+                    topOffset = 1000,
+                    splitHeight = 1000,
+                )
+            )
+        val otherChapterSlice =
+            ReaderUiItem.SplitPage(
+                ReaderPageSplit(
+                    createReaderPage(chapterId = 200L, index = 0),
+                    topOffset = 0,
+                    splitHeight = 1000,
+                )
+            )
+
+        assertFalse(lastSlice.continuesInto(otherChapterSlice))
+    }
+
+    @Test
+    fun `pages, transitions and the end of the list never continue`() {
+        val page = createReaderPage(chapterId = 100L, index = 0)
+        val slice = ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 0, splitHeight = 1000))
+        val transition =
+            ReaderUiItem.Transition(
+                ChapterTransition.Next(
+                    from = createReaderChapter(100L),
+                    to = createReaderChapter(200L),
+                )
+            )
+
+        assertFalse(ReaderUiItem.Page(page).continuesInto(ReaderUiItem.Page(page)))
+        assertFalse(slice.continuesInto(transition))
+        assertFalse(transition.continuesInto(slice))
+        assertFalse(slice.continuesInto(null))
     }
 }

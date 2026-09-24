@@ -115,6 +115,16 @@ fun ReaderUiItem.isEquivalentTo(target: ReaderUiItem?): Boolean {
     }
 }
 
+/**
+ * True when this item and [next] are slices of the same tall page. The webtoon viewer puts no page
+ * gap between them, so the page reads as one image.
+ */
+fun ReaderUiItem.continuesInto(next: ReaderUiItem?): Boolean =
+    this is ReaderUiItem.SplitPage &&
+        next is ReaderUiItem.SplitPage &&
+        isSameChapter(this.page.chapter, next.page.chapter) &&
+        this.page.index == next.page.index
+
 internal fun isSameChapter(a: ReaderChapter, b: ReaderChapter): Boolean {
     val aId = a.chapter.id
     val bId = b.chapter.id

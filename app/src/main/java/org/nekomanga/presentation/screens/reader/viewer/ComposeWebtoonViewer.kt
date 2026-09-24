@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens.reader.viewer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -13,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -44,6 +43,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.areTransitionsEquivalent as modelAreTransitionsEquivalent
+import eu.kanade.tachiyomi.ui.reader.model.continuesInto
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
 import eu.kanade.tachiyomi.ui.reader.model.isSameChapter as modelIsSameChapter
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
@@ -326,8 +326,6 @@ fun ComposeWebtoonViewer(
         LazyColumn(
             state = lazyListState,
             contentPadding = effectiveContentPadding,
-            verticalArrangement =
-                Arrangement.spacedBy(if (config.hasGaps) Size.medium else Size.none),
             modifier =
                 Modifier.fillMaxSize()
                     .layout { measurable, constraints ->
@@ -366,16 +364,24 @@ fun ComposeWebtoonViewer(
                         onNavigateAdjacent = onNavigateAdjacent,
                     ),
         ) {
-            items(
+            itemsIndexed(
                 items = items,
-                key = { it.key("webtoon") },
-            ) { item ->
+                key = { _, item -> item.key("webtoon") },
+            ) { index, item ->
+                // Slices of one tall page get no gap between them, so the page reads as one image.
+                val hasGapBelow =
+                    config.hasGaps &&
+                        index < items.lastIndex &&
+                        !item.continuesInto(items[index + 1])
+                val gapModifier =
+                    if (hasGapBelow) Modifier.padding(bottom = Size.medium) else Modifier
                 when (item) {
                     is ReaderUiItem.Page -> {
                         WebtoonPageItem(
                             page = item.page,
                             backgroundColor = config.backgroundColor,
                             onLongClick = { onPageLongTap(item.page) },
+                            modifier = gapModifier,
                         )
                     }
                     is ReaderUiItem.SplitPage -> {
@@ -383,6 +389,7 @@ fun ComposeWebtoonViewer(
                             split = item.split,
                             backgroundColor = config.backgroundColor,
                             onLongClick = { onPageLongTap(item.page) },
+                            modifier = gapModifier,
                         )
                     }
                     is ReaderUiItem.Transition -> {
@@ -410,7 +417,8 @@ fun ComposeWebtoonViewer(
                                 }
                             },
                             modifier =
-                                Modifier.fillMaxWidth()
+                                gapModifier
+                                    .fillMaxWidth()
                                     .defaultMinSize(minHeight = maxHeight / 2)
                                     .padding(
                                         top =
