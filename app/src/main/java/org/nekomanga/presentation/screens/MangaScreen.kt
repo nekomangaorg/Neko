@@ -110,6 +110,14 @@ fun MangaScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    val openWebView: (String, String) -> Unit = { url, title ->
+        if (mangaViewModel.openLinksInBrowser()) {
+            context.openInBrowser(url, forceDefaultBrowser = true)
+        } else {
+            onNavigate(Screens.WebView(title = title, url = url))
+        }
+    }
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Re-implementation of ObserveAsEvents from MainActivity
@@ -352,23 +360,17 @@ fun MangaScreen(
                 blockScanlator = mangaViewModel::blockScanlator,
                 openComment = { chapterId -> mangaViewModel.openComment(context, chapterId) },
                 createMangaFolder = mangaViewModel::createMangaFolder,
-                openInBrowser = { chapterItem ->
+                openInWebView = { chapterItem ->
                     if (chapterItem.chapter.isUnavailable) {
                         context.toast("Chapter is not available")
                     } else {
                         val url = mangaViewModel.getChapterUrl(chapterItem.chapter)
-                        context.openInBrowser(url)
+                        openWebView(url, chapterItem.chapter.name)
                     }
                 },
                 markPrevious = mangaViewModel::markPreviousChapters,
             ),
-        openWebView = { url, title ->
-            if (mangaViewModel.openLinksInBrowser()) {
-                context.openInBrowser(url, forceDefaultBrowser = true)
-            } else {
-                onNavigate(Screens.WebView(title = title, url = url))
-            }
-        },
+        openWebView = openWebView,
         onBackPressed = onBackPressed,
     )
 }

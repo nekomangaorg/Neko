@@ -1763,7 +1763,12 @@ class ReaderActivity : BaseMainActivity() {
                 }
             }
         } else {
-            this@ReaderActivity.openInBrowser(viewModel.getChapterUrl()!!)
+            val url = viewModel.getChapterUrl() ?: return
+            if (preferences.openLinksInBrowser().get()) {
+                openInBrowser(url, forceDefaultBrowser = true)
+            } else {
+                openInWebView(url, title = currentChapter.chapter.name)
+            }
         }
     }
 
