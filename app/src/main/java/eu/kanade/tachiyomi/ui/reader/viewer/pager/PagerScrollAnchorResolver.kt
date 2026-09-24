@@ -57,17 +57,22 @@ object PagerScrollAnchorResolver {
         }
 
         // Fallback: If target was an adjacent transition that was replaced by newly loaded pages,
-        // anchor directly to the first page of that newly loaded chapter.
+        // anchor directly to the appropriate boundary page of that newly loaded chapter.
         if (newIndex == -1 && targetItem is ReaderUiItem.Transition) {
             val trans = targetItem.transition
             val toChapter = trans.to
-            if (trans is ChapterTransition.Next && toChapter != null) {
+            if (toChapter != null) {
                 val toChapterId = toChapter.chapter.id
-                val nextChapterFirstPageIndex = items.indexOfFirst {
-                    (it as? ReaderUiItem.Page)?.page?.chapter?.chapter?.id == toChapterId
-                }
-                if (nextChapterFirstPageIndex != -1) {
-                    return AnchorTarget(nextChapterFirstPageIndex, items[nextChapterFirstPageIndex])
+                if (trans is ChapterTransition.Next) {
+                    val firstIndex = items.indexOfFirst { it.chapterId == toChapterId }
+                    if (firstIndex != -1) {
+                        return AnchorTarget(firstIndex, items[firstIndex])
+                    }
+                } else if (trans is ChapterTransition.Prev) {
+                    val lastIndex = items.indexOfLast { it.chapterId == toChapterId }
+                    if (lastIndex != -1) {
+                        return AnchorTarget(lastIndex, items[lastIndex])
+                    }
                 }
             }
         }

@@ -212,7 +212,11 @@ fun DoublePageLayout(
                         val img = state.result.image
                         if (img.width > 0 && img.height > 0) {
                             firstSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
-                            checkWidePage(first, img.width, img.height)
+                            val wasWide = first.fullPage == true
+                            val isWide = checkWidePage(first, img.width, img.height)
+                            if (isWide && !wasWide) {
+                                config.onWidePageDetected?.invoke(first)
+                            }
                         }
                     },
                 )
@@ -226,7 +230,11 @@ fun DoublePageLayout(
                         val img = state.result.image
                         if (img.width > 0 && img.height > 0) {
                             secondSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
-                            checkWidePage(second, img.width, img.height)
+                            val wasWide = second.fullPage == true
+                            val isWide = checkWidePage(second, img.width, img.height)
+                            if (isWide && !wasWide) {
+                                config.onWidePageDetected?.invoke(second)
+                            }
                         }
                     },
                 )

@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapterTransitionState
 import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerScrollAnchorResolver
@@ -86,6 +87,7 @@ fun ComposePagerViewer(
                 currentVisibleIndex = pagerState.currentPage,
                 previousItems = lastProcessedItems,
             )
+        lastProcessedItems = items
         if (target != null && target.index != pagerState.currentPage) {
             pagerState.requestScrollToPage(target.index)
             lastActiveItem = target.item
@@ -94,20 +96,20 @@ fun ComposePagerViewer(
 
     // 2. Fallback post-composition anchor sync
     LaunchedEffect(items) {
-        val target =
-            PagerScrollAnchorResolver.resolveReanchorTarget(
-                items = items,
-                lastActiveItem = lastActiveItem,
-                currentVisibleIndex = pagerState.currentPage,
-                previousItems = lastProcessedItems,
-            )
-        try {
+        val currentItem = items.getOrNull(pagerState.currentPage)
+        val activeItem = lastActiveItem
+        if (currentItem != null && activeItem != null && !currentItem.isEquivalentTo(activeItem)) {
+            val target =
+                PagerScrollAnchorResolver.resolveReanchorTarget(
+                    items = items,
+                    lastActiveItem = lastActiveItem,
+                    currentVisibleIndex = pagerState.currentPage,
+                    previousItems = lastProcessedItems,
+                )
             if (target != null && target.index != pagerState.currentPage) {
                 pagerState.scrollToPage(target.index)
                 lastActiveItem = target.item
             }
-        } finally {
-            lastProcessedItems = items
         }
     }
 
@@ -160,12 +162,13 @@ fun ComposePagerViewer(
                     }
                 }
                 is ReaderNavCommand.StepPage -> {
-                    val target =
-                        if (command.forward) {
-                            pagerState.currentPage + 1
+                    val step =
+                        if (config.isRtl && !config.isVertical) {
+                            if (command.forward) -1 else 1
                         } else {
-                            pagerState.currentPage - 1
+                            if (command.forward) 1 else -1
                         }
+                    val target = pagerState.currentPage + step
                     if (target in items.indices) {
                         if (config.animatedTransitions) {
                             pagerState.animateScrollToPage(
@@ -523,14 +526,16 @@ fun ComposePagerViewer(
             menuVisible = viewer.activity.menuVisible,
             navigator = viewer.config.navigator,
             preloadPageAmount = preloadPageAmount,
-            onToggleMenu = { viewer.activity.toggleMenu() },
-            onNavigateAdjacent = { forward ->
-                if (forward) viewer.moveToNext() else viewer.moveToPrevious()
-            },
+            onToggleMenu = remember(viewer) { { viewer.activity.toggleMenu() } },
+            onNavigateAdjacent =
+                remember(viewer) {
+                    { forward -> if (forward) viewer.moveToNext() else viewer.moveToPrevious() }
+                },
             onRetryTransition = onRetryTransition,
             onNavigateToChapter = onNavigateToChapter,
             onRequestPreloadChapter = onRequestPreloadChapter,
-            onPageLongTap = { p, ep -> viewer.activity.onPageLongTap(p, ep) },
+            onPageLongTap = remember(viewer) { { p, ep -> viewer.activity.onPageLongTap(p, ep) } },
+            onWidePageDetected = remember(viewer) { { page -> viewer.splitDoublePages(page) } },
             manga = manga,
             downloadManager = downloadManager,
         )

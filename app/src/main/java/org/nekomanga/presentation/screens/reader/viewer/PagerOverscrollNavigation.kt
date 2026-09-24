@@ -1,11 +1,11 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
  * Modifier extracting edge overscroll physics and direction inversion for paginated chapter
  * navigation.
  */
+@Composable
 fun Modifier.pagerOverscrollNavigation(
     pagerState: PagerState,
     isRtl: Boolean,
@@ -28,7 +29,7 @@ fun Modifier.pagerOverscrollNavigation(
     thresholdPx: Float,
     isNavigating: Boolean = false,
     onNavigateToChapter: (Chapter, ChapterNavTarget) -> Unit,
-): Modifier = composed {
+): Modifier {
     val currentItems by rememberUpdatedState(items)
     val currentIsNavigating by rememberUpdatedState(isNavigating)
     val currentOnNavigateToChapter by rememberUpdatedState(onNavigateToChapter)
@@ -39,6 +40,12 @@ fun Modifier.pagerOverscrollNavigation(
                 var accumulatedOverscroll = 0f
 
                 private fun checkAndTrigger(delta: Float) {
+                    if (
+                        (accumulatedOverscroll > 0f && delta < 0f) ||
+                            (accumulatedOverscroll < 0f && delta > 0f)
+                    ) {
+                        accumulatedOverscroll = 0f
+                    }
                     val currentIndex = pagerState.currentPage
                     val currentItem = currentItems.getOrNull(currentIndex)
 
@@ -75,6 +82,8 @@ fun Modifier.pagerOverscrollNavigation(
                                 )
                             }
                         }
+                    } else {
+                        accumulatedOverscroll = 0f
                     }
                 }
 
@@ -86,6 +95,8 @@ fun Modifier.pagerOverscrollNavigation(
                             pagerState.currentPage == pagerState.pageCount - 1 && delta < 0
                         if (isAtStartEdge || isAtEndEdge) {
                             checkAndTrigger(delta)
+                        } else {
+                            accumulatedOverscroll = 0f
                         }
                     }
                     return Offset.Zero
@@ -109,8 +120,16 @@ fun Modifier.pagerOverscrollNavigation(
                     accumulatedOverscroll = 0f
                     return Velocity.Zero
                 }
+
+                override suspend fun onPostFling(
+                    consumed: Velocity,
+                    available: Velocity,
+                ): Velocity {
+                    accumulatedOverscroll = 0f
+                    return Velocity.Zero
+                }
             }
         }
 
-    nestedScroll(nestedScrollConnection)
+    return this.nestedScroll(nestedScrollConnection)
 }

@@ -50,7 +50,25 @@ class ReaderPagerController(
         )
     }
 
-    /** Joins and splits pages into [ReaderUiItem]s based on double/split page settings. */
+    fun joinItems(
+        items: List<ReaderUiItem>,
+        doublePages: Boolean,
+        splitPages: Boolean,
+        shiftDoublePage: Boolean,
+        isRtl: Boolean,
+    ): List<ReaderUiItem> {
+        return buildPagerItemsUseCase.joinItems(
+            items = items,
+            doublePages = doublePages,
+            splitPages = splitPages,
+            shiftDoublePage = shiftDoublePage,
+            isRtl = isRtl,
+            pageToShift = pageToShift,
+        )
+    }
+
+    /** Legacy compatibility overload taking raw subItems. */
+    @JvmName("joinItemsUntyped")
     fun joinItems(
         subItems: List<Any>,
         doublePages: Boolean,

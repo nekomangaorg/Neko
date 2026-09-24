@@ -26,7 +26,7 @@ class BuildPagerItemsUseCase {
         forceTransition: Boolean = false,
         pageToShift: ReaderPage? = null,
     ): List<ReaderUiItem> {
-        val subItems = mutableListOf<Any>()
+        val subItems = mutableListOf<ReaderUiItem>()
 
         val prevHasMissingChapters = hasMissingChapters(chapters.currChapter, chapters.prevChapter)
         val nextHasMissingChapters = hasMissingChapters(chapters.nextChapter, chapters.currChapter)
@@ -37,9 +37,9 @@ class BuildPagerItemsUseCase {
             val numberOfFullPages =
                 chapters.prevChapter.pages?.count { it.fullPage == true || it.isolatedPage } ?: 0
             if (prevPages != null) {
-                subItems.addAll(
+                val pagesToTake =
                     prevPages.takeLast(if ((prevPages.size + numberOfFullPages) % 2 == 0) 2 else 3)
-                )
+                subItems.addAll(pagesToTake.map { ReaderUiItem.Page(it) })
             }
         }
 
@@ -50,13 +50,13 @@ class BuildPagerItemsUseCase {
                 forceTransition ||
                 chapters.prevChapter.state !is ReaderChapter.State.Loaded
         ) {
-            subItems.add(prevTrans)
+            subItems.add(ReaderUiItem.Transition(prevTrans))
         }
 
         // Add current chapter pages
         val currPages = chapters.currChapter.pages
         if (currPages != null) {
-            subItems.addAll(currPages)
+            subItems.addAll(currPages.map { ReaderUiItem.Page(it) })
         }
 
         // Add next chapter transition and pages
@@ -67,18 +67,18 @@ class BuildPagerItemsUseCase {
                 forceTransition ||
                 chapters.nextChapter.state !is ReaderChapter.State.Loaded
         ) {
-            subItems.add(nextTrans)
+            subItems.add(ReaderUiItem.Transition(nextTrans))
         }
 
         if (chapters.nextChapter != null) {
             val nextPages = chapters.nextChapter.pages
             if (nextPages != null) {
-                subItems.addAll(nextPages.take(2))
+                subItems.addAll(nextPages.take(2).map { ReaderUiItem.Page(it) })
             }
         }
 
         return joinItems(
-            subItems = subItems,
+            items = subItems,
             doublePages = doublePages,
             splitPages = splitPages,
             shiftDoublePage = shiftDoublePage,
@@ -110,7 +110,7 @@ class BuildPagerItemsUseCase {
 
     /** Joins and splits pages into [ReaderUiItem]s based on double/split page settings. */
     fun joinItems(
-        subItems: List<Any>,
+        items: List<ReaderUiItem>,
         doublePages: Boolean,
         splitPages: Boolean,
         shiftDoublePage: Boolean,
@@ -120,46 +120,39 @@ class BuildPagerItemsUseCase {
         val result = mutableListOf<ReaderUiItem>()
 
         if (!doublePages) {
-            subItems.forEach {
-                (it as? ReaderPage)?.apply {
-                    shiftedPage = false
-                    firstHalf = null
-                    endPageConfidence = null
-                    startPageConfidence = null
+            items.forEach { item ->
+                if (item is ReaderUiItem.Page) {
+                    item.page.shiftedPage = false
+                    item.page.firstHalf = null
+                    item.page.endPageConfidence = null
+                    item.page.startPageConfidence = null
                 }
             }
 
             if (splitPages) {
                 var itemIndex = 0
-                val pagedItems = subItems.toMutableList()
+                val pagedItems = items.toMutableList()
                 while (itemIndex < pagedItems.size) {
-                    val page = pagedItems[itemIndex] as? ReaderPage
-                    if (page == null) {
+                    val item = pagedItems[itemIndex]
+                    if (item !is ReaderUiItem.Page) {
                         itemIndex++
                         continue
                     }
+                    val page = item.page
                     if (page.longPage == true) {
                         page.firstHalf = true
-                        pagedItems[itemIndex] = InsertPage(page).apply { firstHalf = true }
-                        val secondHalf = InsertPage(page).apply { firstHalf = false }
+                        pagedItems[itemIndex] =
+                            ReaderUiItem.Page(InsertPage(page).apply { firstHalf = true })
+                        val secondHalf =
+                            ReaderUiItem.Page(InsertPage(page).apply { firstHalf = false })
                         pagedItems.add(itemIndex + 1, secondHalf)
                         itemIndex++
                     }
                     itemIndex++
                 }
-                for (item in pagedItems) {
-                    when (item) {
-                        is ReaderPage -> result.add(ReaderUiItem.Page(item))
-                        is ChapterTransition -> result.add(ReaderUiItem.Transition(item))
-                    }
-                }
+                result.addAll(pagedItems)
             } else {
-                for (item in subItems) {
-                    when (item) {
-                        is ReaderPage -> result.add(ReaderUiItem.Page(item))
-                        is ChapterTransition -> result.add(ReaderUiItem.Transition(item))
-                    }
-                }
+                result.addAll(items)
             }
 
             if (isRtl) {
@@ -167,22 +160,30 @@ class BuildPagerItemsUseCase {
             }
         } else {
             val pagedItems = mutableListOf<MutableList<ReaderPage?>>()
-            val otherItems = mutableListOf<Any>()
+            val transitions = mutableListOf<ChapterTransition>()
             pagedItems.add(mutableListOf())
 
             // Step 1: segment pages and transition pages
-            subItems.forEach {
-                if (it is ReaderPage) {
-                    if (
-                        pagedItems.last().lastOrNull() != null &&
-                            pagedItems.last().last()?.chapter?.chapter?.id != it.chapter.chapter.id
-                    ) {
+            items.forEach { item ->
+                when (item) {
+                    is ReaderUiItem.Page -> {
+                        val page = item.page
+                        if (
+                            pagedItems.last().lastOrNull() != null &&
+                                pagedItems.last().last()?.chapter?.chapter?.id !=
+                                    page.chapter.chapter.id
+                        ) {
+                            pagedItems.add(mutableListOf())
+                        }
+                        pagedItems.last().add(page)
+                    }
+                    is ReaderUiItem.Transition -> {
+                        transitions.add(item.transition)
                         pagedItems.add(mutableListOf())
                     }
-                    pagedItems.last().add(it)
-                } else {
-                    otherItems.add(it)
-                    pagedItems.add(mutableListOf())
+                    is ReaderUiItem.SplitPage -> {
+                        pagedItems.last().add(item.page)
+                    }
                 }
             }
 
@@ -190,8 +191,8 @@ class BuildPagerItemsUseCase {
             val joinedList = mutableListOf<ReaderUiItem>()
 
             // Step 2: process each set of pages
-            pagedItems.forEach { items ->
-                items.forEach {
+            pagedItems.forEach { pages ->
+                pages.forEach {
                     it?.shiftedPage = false
                     it?.firstHalf = null
                 }
@@ -199,7 +200,7 @@ class BuildPagerItemsUseCase {
                 // Step 3: Shift pages if configured
                 if (shiftDoublePage) {
                     run loop@{
-                        var index = items.indexOf(pageToShift)
+                        var index = pages.indexOf(pageToShift)
                         if (pageToShift?.fullPage == true) {
                             index = max(0, index - 1)
                         }
@@ -207,14 +208,14 @@ class BuildPagerItemsUseCase {
                             max(
                                 0,
                                 if (index > -1) {
-                                    items.take(index).indexOfLast { it?.fullPage == true }
+                                    pages.take(index).indexOfLast { it?.fullPage == true }
                                 } else {
                                     -1
                                 },
                             )
-                        (fullPageBeforeIndex until items.size).forEach {
-                            if (items[it]?.fullPage != true) {
-                                items[it]?.shiftedPage = true
+                        (fullPageBeforeIndex until pages.size).forEach {
+                            if (pages[it]?.fullPage != true) {
+                                pages[it]?.shiftedPage = true
                                 return@loop
                             }
                         }
@@ -223,20 +224,20 @@ class BuildPagerItemsUseCase {
 
                 // Step 4: Add blanks for chunking
                 var itemIndex = 0
-                while (itemIndex < items.size) {
-                    items[itemIndex]?.isolatedPage = false
+                while (itemIndex < pages.size) {
+                    pages[itemIndex]?.isolatedPage = false
                     if (
-                        items[itemIndex]?.fullPage == true || items[itemIndex]?.shiftedPage == true
+                        pages[itemIndex]?.fullPage == true || pages[itemIndex]?.shiftedPage == true
                     ) {
-                        items.add(itemIndex + 1, null)
+                        pages.add(itemIndex + 1, null)
                         if (
-                            items[itemIndex]?.fullPage == true &&
+                            pages[itemIndex]?.fullPage == true &&
                                 itemIndex > 0 &&
-                                items[itemIndex - 1] != null &&
+                                pages[itemIndex - 1] != null &&
                                 (itemIndex - 1) % 2 == 0
                         ) {
-                            items[itemIndex - 1]?.isolatedPage = true
-                            items.add(itemIndex, null)
+                            pages[itemIndex - 1]?.isolatedPage = true
+                            pages.add(itemIndex, null)
                             itemIndex++
                         }
                         itemIndex++
@@ -245,9 +246,9 @@ class BuildPagerItemsUseCase {
                 }
 
                 // Step 5: Chunk into pairs
-                if (items.isNotEmpty()) {
+                if (pages.isNotEmpty()) {
                     joinedList.addAll(
-                        items.chunked(2).map { chunk ->
+                        pages.chunked(2).map { chunk ->
                             val first = chunk.first()!!
                             val second = chunk.getOrNull(1)
                             ReaderUiItem.Page(first, second)
@@ -255,19 +256,17 @@ class BuildPagerItemsUseCase {
                     )
                 }
 
-                otherItems.getOrNull(pagedIndex)?.let {
+                transitions.getOrNull(pagedIndex)?.let { trans ->
                     val lastPage = (joinedList.lastOrNull() as? ReaderUiItem.Page)?.page
                     if (
                         lastPage == null ||
-                            (if (it is ChapterTransition.Next) {
-                                it.from.chapter.id == lastPage.chapter.chapter.id
+                            (if (trans is ChapterTransition.Next) {
+                                trans.from.chapter.id == lastPage.chapter.chapter.id
                             } else {
                                 true
                             })
                     ) {
-                        if (it is ChapterTransition) {
-                            joinedList.add(ReaderUiItem.Transition(it))
-                        }
+                        joinedList.add(ReaderUiItem.Transition(trans))
                         pagedIndex++
                     }
                 }
@@ -281,5 +280,33 @@ class BuildPagerItemsUseCase {
         }
 
         return result
+    }
+
+    /** Untyped compatibility overload for legacy callers. */
+    @JvmName("joinItemsUntyped")
+    fun joinItems(
+        subItems: List<Any>,
+        doublePages: Boolean,
+        splitPages: Boolean,
+        shiftDoublePage: Boolean,
+        isRtl: Boolean,
+        pageToShift: ReaderPage? = null,
+    ): List<ReaderUiItem> {
+        val typedItems = subItems.mapNotNull { item ->
+            when (item) {
+                is ReaderUiItem -> item
+                is ReaderPage -> ReaderUiItem.Page(item)
+                is ChapterTransition -> ReaderUiItem.Transition(item)
+                else -> null
+            }
+        }
+        return joinItems(
+            items = typedItems,
+            doublePages = doublePages,
+            splitPages = splitPages,
+            shiftDoublePage = shiftDoublePage,
+            isRtl = isRtl,
+            pageToShift = pageToShift,
+        )
     }
 }

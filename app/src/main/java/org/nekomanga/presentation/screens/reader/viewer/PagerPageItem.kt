@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -78,10 +79,16 @@ fun PagerPageItem(
     val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
     val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
+    val currentConfig by rememberUpdatedState(config)
+
     // Trigger page loading
-    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
+    LaunchedEffect(page) {
+        if (page.status == Page.State.QUEUE) {
+            page.chapter.pageLoader?.loadPage(page)
+        }
+    }
     LaunchedEffect(extraPage) {
-        if (extraPage != null) {
+        if (extraPage != null && extraPage.status == Page.State.QUEUE) {
             extraPage.chapter.pageLoader?.loadPage(extraPage)
         }
     }
@@ -174,9 +181,10 @@ fun PagerPageItem(
     BoxWithConstraints(
         modifier =
             modifier.fillMaxSize().background(config.backgroundColor).pointerInput(
-                config,
-                page,
-                extraPage,
+                page.chapter.chapter.id,
+                page.index,
+                extraPage?.chapter?.chapter?.id,
+                extraPage?.index,
             ) {
                 var lastTapTime = 0L
                 var lastTapOffset = Offset.Zero
@@ -214,8 +222,11 @@ fun PagerPageItem(
                             }
                         }
                     } catch (_: PointerEventTimeoutCancellationException) {
-                        if (!isMovementPastSlop && (config.menuVisible || config.longTapEnabled)) {
-                            config.onPageLongTap?.invoke(page, extraPage)
+                        if (
+                            !isMovementPastSlop &&
+                                (currentConfig.menuVisible || currentConfig.longTapEnabled)
+                        ) {
+                            currentConfig.onPageLongTap?.invoke(page, extraPage)
                             isLongPressTriggered = true
                         }
                         while (currentEvent.changes.any { it.pressed }) {
@@ -249,7 +260,7 @@ fun PagerPageItem(
                                         upPos.x / screenWidth,
                                         upPos.y / screenHeight,
                                     )
-                                val navigator = config.navigator
+                                val navigator = currentConfig.navigator
                                 val action = navigator.getAction(pos)
 
                                 val isDoubleTap =
@@ -258,11 +269,11 @@ fun PagerPageItem(
                                             (upPos.x - lastTapOffset.x).toDouble(),
                                             (upPos.y - lastTapOffset.y).toDouble(),
                                         ) < doubleTapSlopPx) &&
-                                        (config.doubleTapAnimDuration > 0)
+                                        (currentConfig.doubleTapAnimDuration > 0)
 
                                 if (isDoubleTap) {
-                                    if (config.menuVisible) {
-                                        config.onToggleMenu()
+                                    if (currentConfig.menuVisible) {
+                                        currentConfig.onToggleMenu()
                                     }
                                     lastTapTime = 0L
                                     lastTapOffset = Offset.Zero
@@ -273,42 +284,42 @@ fun PagerPageItem(
                                     when (action) {
                                         ViewerNavigation.NavigationRegion.NEXT -> {
                                             up.consume()
-                                            if (config.menuVisible) {
-                                                config.onToggleMenu()
+                                            if (currentConfig.menuVisible) {
+                                                currentConfig.onToggleMenu()
                                             }
-                                            config.onNavigateAdjacent(true)
+                                            currentConfig.onNavigateAdjacent(true)
                                         }
                                         ViewerNavigation.NavigationRegion.PREV -> {
                                             up.consume()
-                                            if (config.menuVisible) {
-                                                config.onToggleMenu()
+                                            if (currentConfig.menuVisible) {
+                                                currentConfig.onToggleMenu()
                                             }
-                                            config.onNavigateAdjacent(false)
+                                            currentConfig.onNavigateAdjacent(false)
                                         }
                                         ViewerNavigation.NavigationRegion.RIGHT -> {
                                             up.consume()
-                                            if (config.menuVisible) {
-                                                config.onToggleMenu()
+                                            if (currentConfig.menuVisible) {
+                                                currentConfig.onToggleMenu()
                                             }
-                                            if (config.isRtl) {
-                                                config.onNavigateAdjacent(false)
+                                            if (currentConfig.isRtl) {
+                                                currentConfig.onNavigateAdjacent(false)
                                             } else {
-                                                config.onNavigateAdjacent(true)
+                                                currentConfig.onNavigateAdjacent(true)
                                             }
                                         }
                                         ViewerNavigation.NavigationRegion.LEFT -> {
                                             up.consume()
-                                            if (config.menuVisible) {
-                                                config.onToggleMenu()
+                                            if (currentConfig.menuVisible) {
+                                                currentConfig.onToggleMenu()
                                             }
-                                            if (config.isRtl) {
-                                                config.onNavigateAdjacent(true)
+                                            if (currentConfig.isRtl) {
+                                                currentConfig.onNavigateAdjacent(true)
                                             } else {
-                                                config.onNavigateAdjacent(false)
+                                                currentConfig.onNavigateAdjacent(false)
                                             }
                                         }
                                         ViewerNavigation.NavigationRegion.MENU -> {
-                                            config.onToggleMenu()
+                                            currentConfig.onToggleMenu()
                                         }
                                     }
                                 }
@@ -353,6 +364,7 @@ fun PagerPageItem(
                 config = config,
                 zoomableState = zoomableState,
                 doubleClickToZoomListener = doubleClickToZoomListener,
+                contentScale = contentScale,
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
@@ -478,11 +490,13 @@ fun PagerPageItem(
             longTapEnabled = viewer.config.longTapEnabled,
             menuVisible = viewer.activity.menuVisible,
             navigator = viewer.config.navigator,
-            onToggleMenu = { viewer.activity.toggleMenu() },
-            onNavigateAdjacent = { forward ->
-                if (forward) viewer.moveToNext() else viewer.moveToPrevious()
-            },
-            onPageLongTap = { p, ep -> viewer.activity.onPageLongTap(p, ep) },
+            onToggleMenu = remember(viewer) { { viewer.activity.toggleMenu() } },
+            onNavigateAdjacent =
+                remember(viewer) {
+                    { forward -> if (forward) viewer.moveToNext() else viewer.moveToPrevious() }
+                },
+            onPageLongTap = remember(viewer) { { p, ep -> viewer.activity.onPageLongTap(p, ep) } },
+            onWidePageDetected = remember(viewer) { { p -> viewer.splitDoublePages(p) } },
         )
 
     PagerPageItem(

@@ -43,6 +43,7 @@ data class PagerViewerConfigUiModel(
     val onNavigateToChapter: ((Chapter, ChapterNavTarget) -> Unit)? = null,
     val onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
     val onPageLongTap: ((ReaderPage, ReaderPage?) -> Unit)? = null,
+    val onWidePageDetected: ((ReaderPage) -> Unit)? = null,
     @Deprecated(
         "Transition pages are now decoupled from DownloadManager and MangaItem via ChapterTransitionUiModel"
     )
