@@ -19,10 +19,7 @@ import coil3.request.Options
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
-import java.util.concurrent.ConcurrentHashMap
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -139,8 +136,8 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                     value.bitmap.byteCount
             }
 
-        private val activeFetches = ConcurrentHashMap<String, Deferred<ByteArray>>()
-        private val activeDecodes = ConcurrentHashMap<String, Deferred<CachedDecodedImage?>>()
+        private val activeFetches = SharedWork<ByteArray>()
+        private val activeDecodes = SharedWork<CachedDecodedImage?>()
 
         fun clearCache() {
             rawBytesCache.evictAll()
@@ -194,27 +191,16 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
 
         val imageBytes =
             rawBytesCache.get(cacheKey)
-                ?: run {
-                    val deferred =
-                        activeFetches.compute(cacheKey) { _, existing ->
-                            existing?.takeIf { it.isActive }
-                                ?: async(Dispatchers.IO) {
-                                    try {
-                                        actualStream()
-                                            .use { it.readBytes() }
-                                            .also {
-                                                // LruCache.put would evict a file bigger than the
-                                                // cache right away, with every other entry.
-                                                if (it.size <= rawBytesCache.maxSize()) {
-                                                    rawBytesCache.put(cacheKey, it)
-                                                }
-                                            }
-                                    } finally {
-                                        activeFetches.remove(cacheKey)
-                                    }
-                                }
-                        }!!
-                    deferred.await()
+                ?: activeFetches.await(cacheKey) {
+                    actualStream()
+                        .use { it.readBytes() }
+                        .also {
+                            // LruCache.put would evict a file bigger than the cache right away,
+                            // with every other entry.
+                            if (it.size <= rawBytesCache.maxSize()) {
+                                rawBytesCache.put(cacheKey, it)
+                            }
+                        }
                 }
 
         val bitmap =
@@ -289,27 +275,14 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         top: Int,
         height: Int,
         cacheKey: String,
-    ): Bitmap? = coroutineScope {
+    ): Bitmap? {
         val cached = fallbackBitmapCache.get(cacheKey)?.takeUnless { it.bitmap.isRecycled }
         val decoded =
             cached
-                ?: run {
-                    val deferred =
-                        activeDecodes.compute(cacheKey) { _, existing ->
-                            existing?.takeIf { it.isActive }
-                                ?: async(Dispatchers.IO) {
-                                    try {
-                                        performFullDecode(imageBytes, cacheKey)
-                                    } finally {
-                                        activeDecodes.remove(cacheKey)
-                                    }
-                                }
-                        }!!
-                    deferred.await()
-                }
-                ?: return@coroutineScope null
+                ?: activeDecodes.await(cacheKey) { performFullDecode(imageBytes, cacheKey) }
+                ?: return null
 
-        cropFallbackSlice(decoded, top, height)
+        return cropFallbackSlice(decoded, top, height)
     }
 
     private fun cropFallbackSlice(decoded: CachedDecodedImage, top: Int, height: Int): Bitmap? =
