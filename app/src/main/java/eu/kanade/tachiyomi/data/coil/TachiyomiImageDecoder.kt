@@ -56,12 +56,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
 
         private fun isApplicable(source: BufferedSource): Boolean {
             val type = source.peek().inputStream().use { ImageUtil.findImageType(it) }
-            return when (type) {
-                ImageUtil.ImageType.HEIF,
-                ImageUtil.ImageType.AVIF,
-                ImageUtil.ImageType.JXL -> true
-                else -> false
-            }
+            return type?.needsNativeDecoder == true
         }
 
         override fun equals(other: Any?) = other is Factory
