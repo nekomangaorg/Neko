@@ -74,6 +74,14 @@ class ImageUtilTest {
         }
     }
 
+    @Test
+    fun testNeedsNativeDecoder() {
+        assertEquals(
+            listOf(ImageUtil.ImageType.AVIF, ImageUtil.ImageType.HEIF, ImageUtil.ImageType.JXL),
+            ImageUtil.ImageType.entries.filter { it.needsNativeDecoder },
+        )
+    }
+
     data class TestCase(
         val format: Format,
         val isAnimated: Boolean,

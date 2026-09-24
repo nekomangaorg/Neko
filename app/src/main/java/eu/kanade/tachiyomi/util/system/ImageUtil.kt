@@ -131,12 +131,20 @@ object ImageUtil {
         }
     }
 
-    enum class ImageType(val mime: String, val extension: String) {
-        AVIF("image/avif", "avif"),
+    enum class ImageType(
+        val mime: String,
+        val extension: String,
+        /**
+         * The platform decoders can't be relied on for this format, so decode it with the bundled
+         * [ImageDecoder].
+         */
+        val needsNativeDecoder: Boolean = false,
+    ) {
+        AVIF("image/avif", "avif", needsNativeDecoder = true),
         GIF("image/gif", "gif"),
-        HEIF("image/heif", "heif"),
+        HEIF("image/heif", "heif", needsNativeDecoder = true),
         JPEG("image/jpeg", "jpg"),
-        JXL("image/jxl", "jxl"),
+        JXL("image/jxl", "jxl", needsNativeDecoder = true),
         PNG("image/png", "png"),
         WEBP("image/webp", "webp"),
     }

@@ -19,6 +19,7 @@ import coil3.request.Options
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
+import eu.kanade.tachiyomi.util.system.ImageUtil
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,7 @@ import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.source
 import org.nekomanga.logging.TimberKt
+import tachiyomi.decoder.ImageDecoder
 
 class ReaderPageFetcher(private val page: ReaderPage, private val options: Options) : Fetcher {
 
@@ -269,6 +271,49 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
     }
 
     private fun performFullDecode(imageBytes: ByteArray, cacheKey: String): CachedDecodedImage? {
+        // BitmapFactory decodes AVIF with the platform AV1 codec, and the AOSP software one
+        // (c2.android.av1-dav1d) rejects frames wider or taller than 4096 px, so a tall AVIF page
+        // decodes to null. Formats with needsNativeDecoder set use the bundled decoder instead,
+        // as they do in TachiyomiImageDecoder.
+        val decoded =
+            if (ImageUtil.findImageType(imageBytes.inputStream())?.needsNativeDecoder == true) {
+                nativeFullDecode(imageBytes)
+            } else {
+                platformFullDecode(imageBytes)
+            }
+        return decoded?.also { fallbackBitmapCache.put(cacheKey, it) }
+    }
+
+    private fun nativeFullDecode(imageBytes: ByteArray): CachedDecodedImage? {
+        val decoder = ImageDecoder.newInstance(imageBytes.inputStream())
+        if (decoder == null || decoder.width <= 0 || decoder.height <= 0) {
+            decoder?.recycle()
+            TimberKt.e {
+                "Cannot fallback decode region: native decoder could not open page ${split.page.index}"
+            }
+            return null
+        }
+
+        val imageWidth = decoder.width
+        val imageHeight = decoder.height
+        val sampleSize = fullDecodeSampleSize(imageWidth, imageHeight)
+        // decode() catches its own out-of-memory errors and returns null
+        val full =
+            try {
+                decoder.decode(sampleSize = sampleSize)
+            } finally {
+                decoder.recycle()
+            }
+        if (full == null) {
+            TimberKt.e {
+                "Native fallback decode returned no bitmap for page ${split.page.index} ($imageWidth x $imageHeight, sample size $sampleSize)"
+            }
+            return null
+        }
+        return CachedDecodedImage(full, imageWidth, imageHeight)
+    }
+
+    private fun platformFullDecode(imageBytes: ByteArray): CachedDecodedImage? {
         val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, boundsOptions)
         val imageWidth = boundsOptions.outWidth
@@ -281,20 +326,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             return null
         }
 
-        val maxSafeMemoryBytes =
-            (Runtime.getRuntime().maxMemory() / 4).coerceIn(
-                64L * 1024 * 1024,
-                256L * 1024 * 1024,
-            )
-
-        var sampleSize = 1
-        var testWidth = imageWidth
-        var testHeight = imageHeight
-        while (testWidth.toLong() * testHeight.toLong() * 4L > maxSafeMemoryBytes) {
-            sampleSize *= 2
-            testWidth /= 2
-            testHeight /= 2
-        }
+        val sampleSize = fullDecodeSampleSize(imageWidth, imageHeight)
 
         val decodeOptions =
             BitmapFactory.Options().apply {
@@ -311,10 +343,11 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                     decodeOptions,
                 )
             if (full != null) {
-                CachedDecodedImage(full, imageWidth, imageHeight).also {
-                    fallbackBitmapCache.put(cacheKey, it)
-                }
+                CachedDecodedImage(full, imageWidth, imageHeight)
             } else {
+                TimberKt.e {
+                    "BitmapFactory returned no bitmap for page ${split.page.index} ($imageWidth x $imageHeight)"
+                }
                 null
             }
         } catch (e: OutOfMemoryError) {
@@ -333,9 +366,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                         fallbackOptions,
                     )
                 if (full != null) {
-                    CachedDecodedImage(full, imageWidth, imageHeight).also {
-                        fallbackBitmapCache.put(cacheKey, it)
-                    }
+                    CachedDecodedImage(full, imageWidth, imageHeight)
                 } else {
                     null
                 }
@@ -349,6 +380,24 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             TimberKt.e(e) { "Unexpected error during fallback decode for page ${split.page.index}" }
             null
         }
+    }
+
+    private fun fullDecodeSampleSize(imageWidth: Int, imageHeight: Int): Int {
+        val maxSafeMemoryBytes =
+            (Runtime.getRuntime().maxMemory() / 4).coerceIn(
+                64L * 1024 * 1024,
+                256L * 1024 * 1024,
+            )
+
+        var sampleSize = 1
+        var testWidth = imageWidth
+        var testHeight = imageHeight
+        while (testWidth.toLong() * testHeight.toLong() * 4L > maxSafeMemoryBytes) {
+            sampleSize *= 2
+            testWidth /= 2
+            testHeight /= 2
+        }
+        return sampleSize
     }
 
     class Factory : Fetcher.Factory<ReaderPageSplit> {
