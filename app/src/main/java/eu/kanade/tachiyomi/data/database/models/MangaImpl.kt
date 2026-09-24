@@ -98,7 +98,7 @@ open class MangaImpl : Manga {
                 val downloadManager: DownloadManager by injectLazy()
                 val storageManager: StorageManager by injectLazy()
                 val provider = DownloadProvider(downloadManager.context)
-                provider.renameMangaFolder(oldTitle, title)
+                provider.renameMangaFolder(this, oldTitle)
                 storageManager.renamePagesAndCoverDirectory(oldTitle, title)
                 downloadManager.updateDownloadCacheForManga(this)
             }
