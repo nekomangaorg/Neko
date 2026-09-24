@@ -108,8 +108,7 @@ object DiskUtil {
     fun createNoMediaFile(dir: UniFile?, context: Context?) {
         if (dir != null && dir.exists()) {
             val nomedia = dir.findFile(NOMEDIA_FILE)
-            if (nomedia == null) {
-                dir.createFile(NOMEDIA_FILE)!!
+            if (nomedia == null && dir.createFile(NOMEDIA_FILE) != null) {
                 context?.let { scanMedia(it, dir.uri) }
             }
         }
