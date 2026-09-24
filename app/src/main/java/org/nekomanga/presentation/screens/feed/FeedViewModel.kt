@@ -300,13 +300,8 @@ class FeedViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val updatedChapterItem = feedRepository.toggleChapterRead(chapterItem)
             updateReadOnFeed(updatedChapterItem)
-            if (updatedChapterItem.chapter.read) {
-                if (
-                    preferences.removeAfterMarkedAsRead().get() &&
-                        updatedChapterItem.chapter.canDeleteChapter()
-                ) {
-                    feedRepository.deleteChapter(updatedChapterItem)
-                }
+            if (updatedChapterItem.chapter.read && updatedChapterItem.chapter.canDeleteChapter()) {
+                feedRepository.deleteChapterAfterRead(updatedChapterItem)
             }
         }
     }

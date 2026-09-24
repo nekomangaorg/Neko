@@ -16,8 +16,10 @@ import eu.kanade.tachiyomi.data.external.Mal
 import eu.kanade.tachiyomi.data.external.MangaBakaLink
 import eu.kanade.tachiyomi.data.external.MangaUpdatesLink
 import eu.kanade.tachiyomi.data.external.Raw
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.reader.settings.DeleteAfterReadType
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.manga.MangaMappings
@@ -277,6 +279,30 @@ interface Manga : SManga {
     var orientationType: Int
         get() = viewer_flags and OrientationType.MASK
         set(rotationType) = setViewerFlags(rotationType, OrientationType.MASK)
+
+    var deleteAfterReadType: Int
+        get() = viewer_flags and DeleteAfterReadType.MASK
+        set(type) = setViewerFlags(type, DeleteAfterReadType.MASK)
+
+    /**
+     * Chapters to keep behind the one just read, -1 to keep them all, honoring the manga override
+     */
+    fun removeAfterReadSlots(preferences: PreferencesHelper): Int {
+        val slots = preferences.removeAfterReadSlots().get()
+        return when (DeleteAfterReadType.fromPreference(deleteAfterReadType)) {
+            DeleteAfterReadType.DEFAULT -> slots
+            DeleteAfterReadType.NEVER -> -1
+            DeleteAfterReadType.ALWAYS -> if (slots == -1) 0 else slots
+        }
+    }
+
+    /** Whether marking a chapter read deletes its download, honoring the manga override */
+    fun removeAfterMarkedAsRead(preferences: PreferencesHelper): Boolean =
+        when (DeleteAfterReadType.fromPreference(deleteAfterReadType)) {
+            DeleteAfterReadType.DEFAULT -> preferences.removeAfterMarkedAsRead().get()
+            DeleteAfterReadType.NEVER -> false
+            DeleteAfterReadType.ALWAYS -> true
+        }
 
     companion object {
 
