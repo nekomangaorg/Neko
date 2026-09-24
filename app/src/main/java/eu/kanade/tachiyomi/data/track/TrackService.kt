@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -72,6 +73,21 @@ abstract class TrackService(val id: Int) {
     open fun get10PointScore(score: Float): Float {
         return score
     }
+
+    // Inverse of get10PointScore, used to seed a new entry from the MangaDex rating.
+    open fun fromTenPointScore(score: Float): Float {
+        return score
+    }
+
+    // The status a new entry starts with for a MangaDex follow status, null when this
+    // tracker has nothing equivalent.
+    open fun statusFromMdList(status: FollowStatus): Int? =
+        when (status) {
+            FollowStatus.READING -> readingStatus()
+            FollowStatus.PLAN_TO_READ -> planningStatus()
+            FollowStatus.COMPLETED -> completedStatus()
+            else -> null
+        }
 
     abstract fun displayScore(track: Track): String
 
@@ -271,6 +287,22 @@ suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
                 track.total_chapters = total
             }
         }
+    }
+    seedFromMdList(track)
+}
+
+// A MangaDex follow status and rating are the user's own choice, so a new entry starts from
+// them instead of the read-chapter guess above. Unfollowed or missing MdList rows change nothing.
+private suspend fun TrackService.seedFromMdList(track: Track) {
+    if (track.manga_id == 0L) return
+    val mdListTrack =
+        trackRepository.getTrackByMangaIdAndTrackServiceId(track.manga_id, TrackManager.MDLIST)
+            ?: return
+    val followStatus = FollowStatus.fromInt(mdListTrack.status)
+    if (followStatus == FollowStatus.UNFOLLOWED) return
+    statusFromMdList(followStatus)?.let { track.status = it }
+    if (mdListTrack.score > 0f) {
+        track.score = fromTenPointScore(mdListTrack.score)
     }
 }
 

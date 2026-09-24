@@ -50,6 +50,9 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     put("mangaId", track.media_id)
                     put("progress", track.last_chapter_read.toInt())
                     put("status", track.toAnilistStatus())
+                    if (track.score > 0) {
+                        put("score", track.score.toInt())
+                    }
                     createDate(track.started_reading_date)?.let { date ->
                         put("startedAt", Json.encodeToJsonElement(date))
                     }
@@ -340,8 +343,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
         fun addToLibraryQuery() =
             """
-            |mutation AddManga(${'$'}mangaId: Int, ${'$'}progress: Int, ${'$'}status: MediaListStatus, ${'$'}startedAt: FuzzyDateInput, ${'$'}completedAt: FuzzyDateInput) {
-            |SaveMediaListEntry (mediaId: ${'$'}mangaId, progress: ${'$'}progress, status: ${'$'}status, startedAt: ${'$'}startedAt, completedAt: ${'$'}completedAt) {
+            |mutation AddManga(${'$'}mangaId: Int, ${'$'}progress: Int, ${'$'}status: MediaListStatus, ${'$'}score: Int, ${'$'}startedAt: FuzzyDateInput, ${'$'}completedAt: FuzzyDateInput) {
+            |SaveMediaListEntry (mediaId: ${'$'}mangaId, progress: ${'$'}progress, status: ${'$'}status, scoreRaw: ${'$'}score, startedAt: ${'$'}startedAt, completedAt: ${'$'}completedAt) {
             |   id
             |   status
             |}
