@@ -89,13 +89,17 @@ class ReaderPagerController(
     /** Finds the index of [page] in [items]. */
     fun findPageIndex(items: List<ReaderUiItem>, page: ReaderPage): Int {
         return items.indexOfFirst {
-            if (it is ReaderUiItem.Page) {
-                it.page == page ||
-                    it.extraPage == page ||
-                    it.page.isFromSamePage(page) ||
-                    it.extraPage?.isFromSamePage(page) == true
-            } else {
-                false
+            when (it) {
+                is ReaderUiItem.Page -> {
+                    it.page == page ||
+                        it.extraPage == page ||
+                        it.page.isFromSamePage(page) ||
+                        it.extraPage?.isFromSamePage(page) == true
+                }
+                is ReaderUiItem.SplitPage -> {
+                    it.page == page || it.page.isFromSamePage(page)
+                }
+                else -> false
             }
         }
     }

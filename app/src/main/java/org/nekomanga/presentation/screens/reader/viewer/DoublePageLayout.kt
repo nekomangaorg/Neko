@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -81,16 +83,35 @@ fun DoublePageLayout(
             mutableStateOf(false)
         }
 
-    LaunchedEffect(firstSize, secondSize) {
+    val doublePageAlignment =
+        remember(config.zoomStart, config.isRtl, config.invertDoublePages) {
+            val isRtl = config.isRtl.xor(config.invertDoublePages)
+            val zoomType =
+                when (config.zoomStart) {
+                    1 -> if (isRtl) PagerConfig.ZoomType.Right else PagerConfig.ZoomType.Left
+                    2 -> PagerConfig.ZoomType.Left
+                    3 -> PagerConfig.ZoomType.Right
+                    else -> PagerConfig.ZoomType.Center
+                }
+            when (zoomType) {
+                PagerConfig.ZoomType.Left -> Alignment.CenterStart
+                PagerConfig.ZoomType.Right -> Alignment.CenterEnd
+                PagerConfig.ZoomType.Center -> Alignment.Center
+            }
+        }
+
+    LaunchedEffect(firstSize, secondSize, contentScale, doublePageAlignment) {
         val fSize = firstSize
         val sSize = secondSize
         if (fSize != null && sSize != null) {
-            val totalWidth = fSize.width + sSize.width
-            val maxHeight = maxOf(fSize.height, sSize.height)
+            val h = maxOf(fSize.height, sSize.height)
+            val w1 = if (fSize.height > 0f) fSize.width * (h / fSize.height) else fSize.width
+            val w2 = if (sSize.height > 0f) sSize.width * (h / sSize.height) else sSize.width
+            val totalWidth = w1 + w2 + gapPx
+            zoomableState.contentScale = contentScale
+            zoomableState.contentAlignment = doublePageAlignment
             zoomableState.setContentLocation(
-                ZoomableContentLocation.scaledInsideAndCenterAligned(
-                    ComposeSize(totalWidth, maxHeight)
-                )
+                ZoomableContentLocation.scaledInsideAndCenterAligned(ComposeSize(totalWidth, h))
             )
         }
     }
@@ -107,60 +128,51 @@ fun DoublePageLayout(
             val fSize = firstSize
             val sSize = secondSize
             if (fSize != null && sSize != null) {
-                val availableColWidth = (viewportWidthPx - gapPx) / 2f
-                if (
-                    availableColWidth > 0f &&
-                        fSize.width > 0f &&
-                        sSize.width > 0f &&
-                        fSize.height > 0f &&
-                        sSize.height > 0f
-                ) {
-                    val scale1 =
-                        minOf(
-                            availableColWidth / fSize.width,
-                            viewportHeightPx / fSize.height,
-                        )
-                    val scale2 =
-                        minOf(
-                            availableColWidth / sSize.width,
-                            viewportHeightPx / sSize.height,
-                        )
-                    val renderedHeight = maxOf(fSize.height * scale1, sSize.height * scale2)
-                    val isLandscape =
-                        (fSize.width + sSize.width) > maxOf(fSize.height, sSize.height)
+                val h = maxOf(fSize.height, sSize.height)
+                val w1 = if (fSize.height > 0f) fSize.width * (h / fSize.height) else fSize.width
+                val w2 = if (sSize.height > 0f) sSize.width * (h / sSize.height) else sSize.width
+                val totalWidth = w1 + w2 + gapPx
 
-                    if (isLandscape && renderedHeight < viewportHeightPx) {
-                        val targetScale = (viewportHeightPx / renderedHeight).coerceIn(1f, 3f)
-                        if (targetScale > 1.05f) {
-                            val isRtl = config.isRtl.xor(config.invertDoublePages)
-                            val doublePageZoomType =
-                                when (config.zoomStart) {
-                                    1 ->
-                                        if (isRtl) PagerConfig.ZoomType.Right
-                                        else PagerConfig.ZoomType.Left
-                                    2 -> PagerConfig.ZoomType.Left
-                                    3 -> PagerConfig.ZoomType.Right
-                                    else -> PagerConfig.ZoomType.Center
-                                }
-                            val centroid =
-                                when (doublePageZoomType) {
-                                    PagerConfig.ZoomType.Right ->
-                                        Offset(viewportWidthPx, viewportHeightPx / 2f)
-                                    PagerConfig.ZoomType.Left -> Offset(0f, viewportHeightPx / 2f)
-                                    PagerConfig.ZoomType.Center ->
-                                        Offset(
-                                            viewportWidthPx / 2f,
-                                            viewportHeightPx / 2f,
-                                        )
-                                }
-                            zoomableState.zoomTo(
-                                zoomFactor = targetScale,
-                                centroid = centroid,
-                            )
-                        }
+                val insideScale =
+                    if (totalWidth > 0f && h > 0f) {
+                        minOf(1f, viewportWidthPx / totalWidth, viewportHeightPx / h)
+                    } else {
+                        1f
                     }
-                    autoZoomApplied = true
+                val renderedHeight = h * insideScale
+                val isLandscape = totalWidth > h
+
+                if (isLandscape && renderedHeight < viewportHeightPx) {
+                    val targetScale = (viewportHeightPx / renderedHeight).coerceIn(1f, 3f)
+                    if (targetScale > 1.05f) {
+                        val isRtl = config.isRtl.xor(config.invertDoublePages)
+                        val doublePageZoomType =
+                            when (config.zoomStart) {
+                                1 ->
+                                    if (isRtl) PagerConfig.ZoomType.Right
+                                    else PagerConfig.ZoomType.Left
+                                2 -> PagerConfig.ZoomType.Left
+                                3 -> PagerConfig.ZoomType.Right
+                                else -> PagerConfig.ZoomType.Center
+                            }
+                        val centroid =
+                            when (doublePageZoomType) {
+                                PagerConfig.ZoomType.Right ->
+                                    Offset(viewportWidthPx, viewportHeightPx / 2f)
+                                PagerConfig.ZoomType.Left -> Offset(0f, viewportHeightPx / 2f)
+                                PagerConfig.ZoomType.Center ->
+                                    Offset(
+                                        viewportWidthPx / 2f,
+                                        viewportHeightPx / 2f,
+                                    )
+                            }
+                        zoomableState.zoomTo(
+                            zoomFactor = targetScale,
+                            centroid = centroid,
+                        )
+                    }
                 }
+                autoZoomApplied = true
             }
         }
     }
@@ -197,47 +209,111 @@ fun DoublePageLayout(
         contentAlignment = Alignment.Center,
     ) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(Size.tiny * config.doublePageGap),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                AsyncImage(
-                    model = firstModel,
-                    contentDescription = null,
-                    contentScale = contentScale,
-                    alignment = Alignment.CenterEnd,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onSuccess = { state ->
-                        val img = state.result.image
-                        if (img.width > 0 && img.height > 0) {
-                            firstSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
-                            val wasWide = first.fullPage == true
-                            val isWide = checkWidePage(first, img.width, img.height)
-                            if (isWide && !wasWide) {
-                                config.onWidePageDetected?.invoke(first)
+            val fSize = firstSize
+            val sSize = secondSize
+            if (fSize != null && sSize != null) {
+                val h = maxOf(fSize.height, sSize.height)
+                val w1 = if (fSize.height > 0f) fSize.width * (h / fSize.height) else fSize.width
+                val w2 = if (sSize.height > 0f) sSize.width * (h / sSize.height) else sSize.width
+                val totalWidth = w1 + w2 + gapPx
+                val insideScale =
+                    if (
+                        totalWidth > 0f && h > 0f && viewportWidthPx > 0f && viewportHeightPx > 0f
+                    ) {
+                        minOf(1f, viewportWidthPx / totalWidth, viewportHeightPx / h)
+                    } else {
+                        1f
+                    }
+                val w1Dp = with(density) { (w1 * insideScale).toDp() }
+                val w2Dp = with(density) { (w2 * insideScale).toDp() }
+                val hDp = with(density) { (h * insideScale).toDp() }
+                val gapDp = with(density) { (gapPx * insideScale).toDp() }
+
+                Row(
+                    modifier = Modifier.wrapContentSize(align = Alignment.Center, unbounded = true),
+                    horizontalArrangement = Arrangement.spacedBy(gapDp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AsyncImage(
+                        model = firstModel,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        alignment = Alignment.CenterEnd,
+                        modifier = Modifier.size(width = w1Dp, height = hDp),
+                        onSuccess = { state ->
+                            val img = state.result.image
+                            if (img.width > 0 && img.height > 0) {
+                                firstSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
+                                val wasWide = first.fullPage == true
+                                val isWide = checkWidePage(first, img.width, img.height)
+                                if (isWide && !wasWide) {
+                                    config.onWidePageDetected?.invoke(first)
+                                }
                             }
-                        }
-                    },
-                )
-                AsyncImage(
-                    model = secondModel,
-                    contentDescription = null,
-                    contentScale = contentScale,
-                    alignment = Alignment.CenterStart,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onSuccess = { state ->
-                        val img = state.result.image
-                        if (img.width > 0 && img.height > 0) {
-                            secondSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
-                            val wasWide = second.fullPage == true
-                            val isWide = checkWidePage(second, img.width, img.height)
-                            if (isWide && !wasWide) {
-                                config.onWidePageDetected?.invoke(second)
+                        },
+                    )
+                    AsyncImage(
+                        model = secondModel,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        alignment = Alignment.CenterStart,
+                        modifier = Modifier.size(width = w2Dp, height = hDp),
+                        onSuccess = { state ->
+                            val img = state.result.image
+                            if (img.width > 0 && img.height > 0) {
+                                secondSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
+                                val wasWide = second.fullPage == true
+                                val isWide = checkWidePage(second, img.width, img.height)
+                                if (isWide && !wasWide) {
+                                    config.onWidePageDetected?.invoke(second)
+                                }
                             }
-                        }
-                    },
-                )
+                        },
+                    )
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(Size.tiny * config.doublePageGap),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AsyncImage(
+                        model = firstModel,
+                        contentDescription = null,
+                        contentScale = contentScale,
+                        alignment = Alignment.CenterEnd,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        onSuccess = { state ->
+                            val img = state.result.image
+                            if (img.width > 0 && img.height > 0) {
+                                firstSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
+                                val wasWide = first.fullPage == true
+                                val isWide = checkWidePage(first, img.width, img.height)
+                                if (isWide && !wasWide) {
+                                    config.onWidePageDetected?.invoke(first)
+                                }
+                            }
+                        },
+                    )
+                    AsyncImage(
+                        model = secondModel,
+                        contentDescription = null,
+                        contentScale = contentScale,
+                        alignment = Alignment.CenterStart,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        onSuccess = { state ->
+                            val img = state.result.image
+                            if (img.width > 0 && img.height > 0) {
+                                secondSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
+                                val wasWide = second.fullPage == true
+                                val isWide = checkWidePage(second, img.width, img.height)
+                                if (isWide && !wasWide) {
+                                    config.onWidePageDetected?.invoke(second)
+                                }
+                            }
+                        },
+                    )
+                }
             }
         }
     }

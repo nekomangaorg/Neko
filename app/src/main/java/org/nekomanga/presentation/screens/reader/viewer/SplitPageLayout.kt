@@ -87,6 +87,7 @@ fun SplitPageLayout(
                     val img = state.result.image
                     if (img.width > 0 && img.height > 0) {
                         imageSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
+                        zoomableState.contentScale = contentScale
                         zoomableState.setContentLocation(
                             ZoomableContentLocation.scaledInsideAndCenterAligned(
                                 ComposeSize(img.width / 2f, img.height.toFloat())
