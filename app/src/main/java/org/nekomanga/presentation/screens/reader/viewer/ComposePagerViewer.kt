@@ -39,6 +39,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.merge
@@ -113,6 +114,18 @@ fun ComposePagerViewer(
                     }
                     return true
                 } else {
+                    val transitionIndex = resolveTransitionIndexForChapter(items, targetChapterId)
+                    if (transitionIndex != null && pagerState.currentPage != transitionIndex) {
+                        if (command.animated && config.animatedTransitions) {
+                            pagerState.animateScrollToPage(
+                                page = transitionIndex,
+                                animationSpec =
+                                    tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                            )
+                        } else {
+                            pagerState.scrollToPage(transitionIndex)
+                        }
+                    }
                     return false
                 }
             }
@@ -125,6 +138,10 @@ fun ComposePagerViewer(
                     }
                     return true
                 } else {
+                    val transitionIndex = resolveTransitionIndexForChapter(items, targetChapterId)
+                    if (transitionIndex != null && pagerState.currentPage != transitionIndex) {
+                        pagerState.scrollToPage(transitionIndex)
+                    }
                     return false
                 }
             }
@@ -228,6 +245,23 @@ fun ComposePagerViewer(
         navCommands?.collect { command ->
             if (!executeNavCommand(command)) {
                 pendingNavCommand = command
+            } else {
+                pendingNavCommand = null
+            }
+        }
+    }
+
+    // 4. Clear pending navigation command if navigation finishes or times out
+    LaunchedEffect(pendingNavCommand, currentIsNavigating) {
+        if (pendingNavCommand != null) {
+            if (!currentIsNavigating) {
+                delay(1000L)
+                if (!currentIsNavigating && pendingNavCommand != null) {
+                    pendingNavCommand = null
+                }
+            } else {
+                delay(5000L)
+                pendingNavCommand = null
             }
         }
     }
@@ -715,4 +749,15 @@ internal fun resolveItemIndexForPage(
 
     // 3. Fallback: clamp within bounds
     return pageIndex.coerceIn(0, items.lastIndex)
+}
+
+internal fun resolveTransitionIndexForChapter(
+    items: List<ReaderUiItem>,
+    targetChapterId: Long?,
+): Int? {
+    if (targetChapterId == null || targetChapterId <= 0L || items.isEmpty()) return null
+    val index = items.indexOfFirst { item ->
+        item is ReaderUiItem.Transition && item.transition.to?.chapter?.id == targetChapterId
+    }
+    return if (index != -1) index else null
 }

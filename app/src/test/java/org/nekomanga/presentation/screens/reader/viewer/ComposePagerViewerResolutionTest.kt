@@ -113,4 +113,65 @@ class ComposePagerViewerResolutionTest {
             resolveItemIndexForPage(items = emptyList(), targetChapterId = 2L, pageIndex = 0)
         assertNull(resolved)
     }
+
+    @Test
+    fun `resolveTransitionIndexForChapter finds transition item leading to targetChapterId`() {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[0]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Page(ch1Pages[2]),
+                ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2)),
+            )
+
+        val transitionIndex = resolveTransitionIndexForChapter(items = items, targetChapterId = 2L)
+        assertEquals(3, transitionIndex)
+    }
+
+    @Test
+    fun `resolveTransitionIndexForChapter returns null when transition does not lead to targetChapterId`() {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[0]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Page(ch1Pages[2]),
+                ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2)),
+            )
+
+        // Target chapter 1 is 'from', not 'to'
+        assertNull(resolveTransitionIndexForChapter(items = items, targetChapterId = 1L))
+        // Target chapter 3 has no transition
+        assertNull(resolveTransitionIndexForChapter(items = items, targetChapterId = 3L))
+    }
+
+    @Test
+    fun `resolveTransitionIndexForChapter returns null when transition destination is null`() {
+        val ch1 = createChapter(1L, pageCount = 2)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[0]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Transition(ChapterTransition.Next(ch1, null)),
+            )
+
+        assertNull(resolveTransitionIndexForChapter(items = items, targetChapterId = 2L))
+    }
+
+    @Test
+    fun `resolveTransitionIndexForChapter returns null for empty items or non-positive target ids`() {
+        assertNull(resolveTransitionIndexForChapter(items = emptyList(), targetChapterId = 2L))
+        assertNull(resolveTransitionIndexForChapter(items = emptyList(), targetChapterId = null))
+        assertNull(resolveTransitionIndexForChapter(items = emptyList(), targetChapterId = 0L))
+        assertNull(resolveTransitionIndexForChapter(items = emptyList(), targetChapterId = -1L))
+    }
 }
