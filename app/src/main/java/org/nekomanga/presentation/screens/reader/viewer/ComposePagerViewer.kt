@@ -252,18 +252,13 @@ fun ComposePagerViewer(
         }
     }
 
-    // 4. Clear pending navigation command if navigation finishes or times out
-    LaunchedEffect(pendingNavCommand, currentIsNavigating) {
+    // 4. Safety watchdog: clear stale pending navigation command after generous timeout
+    LaunchedEffect(pendingNavCommand) {
         if (pendingNavCommand != null) {
-            if (!currentIsNavigating) {
-                delay(1000L)
-                if (!currentIsNavigating && pendingNavCommand != null) {
-                    pendingNavCommand = null
-                }
-            } else {
-                delay(5000L)
-                pendingNavCommand = null
-            }
+            // Generous 15-second safety watchdog so slow network or disk chapter loading
+            // does not prematurely drop valid user navigation commands.
+            delay(15000L)
+            pendingNavCommand = null
         }
     }
 
@@ -729,15 +724,12 @@ internal fun resolveItemIndexForPage(
         }
         if (chapterMatch != -1) return chapterMatch
 
-        // If targetChapterId is specified, check if the chapter exists at all in items
-        val chapterExists = items.any { it.chapterId == targetChapterId }
-        if (!chapterExists) {
-            // Chapter has not yet been loaded into items, defer until items update
-            return null
-        }
+        // When a targetChapterId is specified, never fall through to match other chapters
+        // or clamp across all items. Doing so would navigate to a completely wrong chapter.
+        return null
     }
 
-    // 2. Fallback: match by page index across items
+    // 2. Fallback (only when no specific chapter was targeted): match by page index across items
     val pageMatch = items.indexOfFirst { item ->
         when (item) {
             is ReaderUiItem.Page ->

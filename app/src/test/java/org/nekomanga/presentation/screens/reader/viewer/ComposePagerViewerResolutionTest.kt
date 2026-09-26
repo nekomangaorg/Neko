@@ -174,4 +174,45 @@ class ComposePagerViewerResolutionTest {
         assertNull(resolveTransitionIndexForChapter(items = emptyList(), targetChapterId = 0L))
         assertNull(resolveTransitionIndexForChapter(items = emptyList(), targetChapterId = -1L))
     }
+
+    @Test
+    fun `resolveItemIndexForPage returns null when target chapter exists but page index is not in chapter`() {
+        val ch1 = createChapter(1L, pageCount = 15)
+        val ch2 = createChapter(2L, pageCount = 3)
+
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[10]), // Ch1 has page 10
+                ReaderUiItem.Page(ch2Pages[0]), // Ch2 has page 0
+                ReaderUiItem.Page(ch2Pages[1]), // Ch2 has page 1
+                ReaderUiItem.Page(ch2Pages[2]), // Ch2 has page 2
+            )
+
+        // Target Chapter 2 Page 10 does not exist in Chapter 2, even though Chapter 1 has page 10.
+        // It MUST return null, NOT navigate to Chapter 1 Page 10!
+        val resolved = resolveItemIndexForPage(items = items, targetChapterId = 2L, pageIndex = 10)
+        assertNull(resolved)
+    }
+
+    @Test
+    fun `resolveItemIndexForPage falls back to page index match and clamping when targetChapterId is null`() {
+        val ch1 = createChapter(1L, pageCount = 5)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+
+        val items = ch1Pages.map { ReaderUiItem.Page(it) }
+
+        // Matches page index across items when targetChapterId is null
+        assertEquals(
+            3,
+            resolveItemIndexForPage(items = items, targetChapterId = null, pageIndex = 3),
+        )
+        // Clamps within bounds when out of range and targetChapterId is null
+        assertEquals(
+            4,
+            resolveItemIndexForPage(items = items, targetChapterId = null, pageIndex = 99),
+        )
+    }
 }
