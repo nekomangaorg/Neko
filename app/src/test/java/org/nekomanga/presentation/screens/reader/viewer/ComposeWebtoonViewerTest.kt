@@ -201,4 +201,53 @@ class ComposeWebtoonViewerTest {
         evaluateDispatch(page2)
         assertEquals(1, dispatchCount) // Not redundantly dispatched for same page!
     }
+
+    @Test
+    fun `webtoon list entries put a gap below every item except the last`() {
+        val ch1 = createChapter(1L)
+        val page0 = ReaderPage(index = 0, url = "url_0", imageUrl = "img_0").apply { chapter = ch1 }
+        val page1 = ReaderPage(index = 1, url = "url_1", imageUrl = "img_1").apply { chapter = ch1 }
+        val items =
+            listOf(
+                ReaderUiItem.Page(page0),
+                ReaderUiItem.Page(page1),
+                ReaderUiItem.Transition(ChapterTransition.Next(ch1, null)),
+            )
+
+        val entries = items.toWebtoonListEntries()
+
+        assertEquals(items, entries.map { it.item })
+        assertEquals(listOf(true, true, false), entries.map { it.hasGapBelow })
+    }
+
+    @Test
+    fun `webtoon list entries put no gap between slices of one tall page`() {
+        val ch1 = createChapter(1L)
+        val tallPage =
+            ReaderPage(index = 0, url = "url_0", imageUrl = "img_0").apply { chapter = ch1 }
+        val nextPage =
+            ReaderPage(index = 1, url = "url_1", imageUrl = "img_1").apply { chapter = ch1 }
+        val items =
+            listOf(
+                ReaderUiItem.SplitPage(
+                    ReaderPageSplit(tallPage, topOffset = 0, splitHeight = 1000)
+                ),
+                ReaderUiItem.SplitPage(
+                    ReaderPageSplit(tallPage, topOffset = 1000, splitHeight = 1000)
+                ),
+                ReaderUiItem.SplitPage(
+                    ReaderPageSplit(tallPage, topOffset = 2000, splitHeight = 500)
+                ),
+                ReaderUiItem.Page(nextPage),
+            )
+
+        val entries = items.toWebtoonListEntries()
+
+        assertEquals(listOf(false, false, true, false), entries.map { it.hasGapBelow })
+    }
+
+    @Test
+    fun `webtoon list entries of an empty list are empty`() {
+        assertTrue(emptyList<ReaderUiItem>().toWebtoonListEntries().isEmpty())
+    }
 }
