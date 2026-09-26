@@ -90,8 +90,19 @@ fun ReaderUiItem.isEquivalentTo(target: ReaderUiItem?): Boolean {
     if (target == null) return false
     return when {
         this is ReaderUiItem.Page && target is ReaderUiItem.Page -> {
-            isSameChapter(this.page.chapter, target.page.chapter) &&
-                this.page.index == target.page.index
+            val sameChapter = isSameChapter(this.page.chapter, target.page.chapter)
+            if (!sameChapter) return false
+
+            val thisPages = listOfNotNull(this.page, this.extraPage)
+            val targetPages = listOfNotNull(target.page, target.extraPage)
+
+            thisPages.any { tp ->
+                targetPages.any { op ->
+                    tp.index == op.index &&
+                        tp.firstHalf == op.firstHalf &&
+                        isSameChapter(tp.chapter, op.chapter)
+                }
+            }
         }
         this is ReaderUiItem.SplitPage && target is ReaderUiItem.SplitPage -> {
             isSameChapter(this.page.chapter, target.page.chapter) &&

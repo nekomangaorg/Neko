@@ -61,12 +61,28 @@ class ReaderNavigationStateTest {
 
         val cmdNonAnimated = ReaderNavCommand.ScrollToPage(pageIndex = 5, animated = false)
         assertFalse(cmdNonAnimated.animated)
+
+        val cmdWithChapter =
+            ReaderNavCommand.ScrollToPage(pageIndex = 5, animated = true, chapterId = 100L)
+        assertEquals(100L, cmdWithChapter.chapterId)
     }
 
     @Test
-    fun `ReaderNavCommand SnapToPage holds target page index`() {
+    fun `ReaderNavCommand SnapToPage holds target page index and chapter id`() {
         val cmd = ReaderNavCommand.SnapToPage(pageIndex = 12)
         assertEquals(12, cmd.pageIndex)
+        assertEquals(null, cmd.chapterId)
+
+        val cmdWithChapter = ReaderNavCommand.SnapToPage(pageIndex = 0, chapterId = 200L)
+        assertEquals(0, cmdWithChapter.pageIndex)
+        assertEquals(200L, cmdWithChapter.chapterId)
+    }
+
+    @Test
+    fun `ReaderNavCommand ScrollToItem holds item index and animation flag`() {
+        val cmd = ReaderNavCommand.ScrollToItem(itemIndex = 7, animated = false)
+        assertEquals(7, cmd.itemIndex)
+        assertFalse(cmd.animated)
     }
 
     @Test

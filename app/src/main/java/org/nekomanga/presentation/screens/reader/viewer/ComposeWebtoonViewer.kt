@@ -105,20 +105,40 @@ fun ComposeWebtoonViewer(
     LaunchedEffect(navCommands) {
         navCommands.collect { cmd ->
             when (cmd) {
-                is ReaderNavCommand.ScrollToPage -> {
+                is ReaderNavCommand.ScrollToItem -> {
+                    val target = cmd.itemIndex.coerceIn(0, currentItems.lastIndex)
                     if (cmd.animated && config.animatedTransitions) {
-                        lazyListState.animateScrollToItem(cmd.pageIndex)
+                        lazyListState.animateScrollToItem(target)
                     } else {
-                        lazyListState.scrollToItem(cmd.pageIndex)
+                        lazyListState.scrollToItem(target)
                     }
-                    currentItems.getOrNull(cmd.pageIndex)?.let {
+                    currentItems.getOrNull(target)?.let {
+                        scrollAnchorState.item = it
+                        scrollAnchorState.offset = 0
+                    }
+                }
+                is ReaderNavCommand.ScrollToPage -> {
+                    val targetChapterId = cmd.chapterId ?: config.activeChapterId
+                    val target =
+                        resolveItemIndexForPage(currentItems, targetChapterId, cmd.pageIndex)
+                            ?: cmd.pageIndex.coerceIn(0, currentItems.lastIndex)
+                    if (cmd.animated && config.animatedTransitions) {
+                        lazyListState.animateScrollToItem(target)
+                    } else {
+                        lazyListState.scrollToItem(target)
+                    }
+                    currentItems.getOrNull(target)?.let {
                         scrollAnchorState.item = it
                         scrollAnchorState.offset = 0
                     }
                 }
                 is ReaderNavCommand.SnapToPage -> {
-                    lazyListState.scrollToItem(cmd.pageIndex)
-                    currentItems.getOrNull(cmd.pageIndex)?.let {
+                    val targetChapterId = cmd.chapterId ?: config.activeChapterId
+                    val target =
+                        resolveItemIndexForPage(currentItems, targetChapterId, cmd.pageIndex)
+                            ?: cmd.pageIndex.coerceIn(0, currentItems.lastIndex)
+                    lazyListState.scrollToItem(target)
+                    currentItems.getOrNull(target)?.let {
                         scrollAnchorState.item = it
                         scrollAnchorState.offset = 0
                     }
@@ -536,7 +556,7 @@ fun ComposeWebtoonViewer(
 
     LaunchedEffect(viewer.requestedPagePosition) {
         val req = viewer.requestedPagePosition ?: return@LaunchedEffect
-        navChannel.send(ReaderNavCommand.ScrollToPage(req.targetPage, req.animated))
+        navChannel.send(ReaderNavCommand.ScrollToItem(req.targetPage, req.animated))
         viewer.requestedPagePosition = null
     }
 

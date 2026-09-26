@@ -35,8 +35,19 @@ flowchart TD
         R10["Step R10: GestureNavigationOverlay"]
     end
 
-    subgraph PR3["Phase R3: Advanced Rendering"]
+    subgraph PR3["Phase R3: Advanced Rendering & Image Processing"]
         R11["Step R11: Native Compose Subsampling Tile Renderer"]
+        R12["Step R12: Native Compose Crop Borders Pipeline"]
+    end
+
+    subgraph PR4["Phase R4: Gesture Engine & Touch Pointer Stabilization"]
+        R13["Step R13: Multi-Touch Pinch-Zoom Long-Press Guard"]
+        R14["Step R14: Tap vs Double-Tap Navigation Disambiguation"]
+    end
+
+    subgraph PR5["Phase R5: Dual-Page Engine & Layout Scaling"]
+        R15["Step R15: Double-Page Tablet Auto-Zoom Disambiguation"]
+        R16["Step R16: Double-Page Fit Height Overflow & Scaling Engine"]
     end
 
     R1 --> R2
@@ -45,10 +56,15 @@ flowchart TD
     R2 --> R5
     R4 --> R5
     R5 --> R6
+    R5 --> R13
+    R5 --> R14
+    R5 --> R15
+    R15 --> R16
     R6 --> R7
     R6 --> R8
     R6 --> R9
     R6 --> R11
+    R6 --> R12
 ```
 
 ### Reader Refactor Track
@@ -59,13 +75,18 @@ flowchart TD
 | **R2** | ✅ Done | [**Decouple ReaderTransitionPage**](reader/decouple_reader_transition_page_proposal.md) | Decouples chapter transition pages from `DownloadManager`, legacy entity conversions, and chapter gap math into `ChapterTransitionUiModel`. | Step R1 | Current Release (Landed) |
 | **R3** | ✅ Done | [**Webtoon Preloading & Slice Cache Architecture**](reader/webtoon_preloading_and_slice_cache_architecture_proposal.md) | Eliminates black screen stutter, implements two-tier bounded preloading, disk-cached slice generation, and seamless scroll continuity for downloaded webtoons. | Step R1 | Current Release (Landed) |
 | **R4** | ✅ Done | [**Unified Reader Preloader Engine & Two-Tier Pipeline**](reader/reader_preloader_engine_proposal.md) | Extracts inline preloading logic from Compose viewers into a testable headless domain engine (`ReaderPreloadController`) with two-tier disk/memory pipelining. | Steps R1, R3 | Current Release (Landed) |
-| **R5** | ⏳ Planned | [**Rock-Solid ComposePagerViewer Architecture**](reader/rock_solid_paged_compose_viewer_proposal.md) | Solves destructive subtree key resets, post-composition page flashing, in-UI Coil preloading, and dual-page spread layout/re-chunking (`DoublePageLayout`, `CheckWidePageUseCase`, `PagerScrollAnchorResolver`). | Steps R1, R2, R4 | Neko Reader Phase 2 |
+| **R5** | ✅ Done | [**Rock-Solid ComposePagerViewer Architecture**](reader/rock_solid_paged_compose_viewer_proposal.md) | Solves destructive subtree key resets, post-composition page flashing, in-UI Coil preloading, and dual-page spread layout/re-chunking (`DoublePageLayout`, `CheckWidePageUseCase`, `PagerScrollAnchorResolver`). | Steps R1, R2, R4 | Current Release (Landed) |
 | **R6** | ⏳ Planned | [**Decouple ComposePagerViewer & ComposeWebtoonViewer**](reader/decouple_reader_compose_viewers_proposal.md) | Removes legacy View references, `DownloadManager`, and `Injekt.get()` from Compose viewers, extracts domain item builders (`BuildWebtoonItemsUseCase`, `BuildPagerItemsUseCase`), hoists dual-page configurations, and decommissions legacy View hierarchies. | Steps R1, R2, R4, R5 | Next Release (Step R6) |
 | **R7** | ⏳ Planned | [**Decouple ReaderControls and Bottom Action Bar**](reader/decouple_reader_controls_and_bottom_bar_proposal.md) | Refactors parameter-heavy reader control bars into grouped `ReaderBottomControlsUiState` and `ReaderBottomBarAction`. | Step R6 | Next Release (Phase R2) |
 | **R8** | ⏳ Planned | [**Decouple ReaderChaptersSheet**](reader/decouple_reader_chapters_sheet_proposal.md) | Decouples the chapter selection bottom sheet from direct preferences, context color resolvers, and inline repository calls. | Step R6 | Next Release (Phase R2) |
 | **R9** | ⏳ Planned | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags into `ReaderSettingsUiState`. | Step R6 | Next Release (Phase R2) |
 | **R10** | ⏳ Planned | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math into `NavigationRegionUiModel`. | None (Self-Contained) | Next Release (Phase R2) |
 | **R11** | ⏳ Planned | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Step R6 | Neko Performance (Phase 4) |
+| **R12** | ⏳ Planned | [**Native Compose Crop Borders Pipeline & Auto-Crop Transformation**](reader/compose_crop_borders_pipeline_proposal.md) | Restores border cropping in Compose Pager and Webtoon viewers via a Coil 3 transformation and luminance edge scanner (resolves [#3435](https://github.com/nekomangaorg/Neko/issues/3435)). | Step R5, Step R6 | Next Release (Phase R3) |
+| **R13** | ⏳ Planned | [**Multi-Touch Gesture Disambiguation & Pinch-Zoom Long-Press Guard**](reader/multi_touch_pinch_zoom_long_press_guard_proposal.md) | Prevents slow multi-touch pinch-to-zoom gestures from accidentally triggering the page actions modal sheet (resolves [#3434](https://github.com/nekomangaorg/Neko/issues/3434)). | Step R5 | Next Release (Phase R4) |
+| **R14** | ⏳ Planned | [**Tap vs Double-Tap Navigation Disambiguation in Compose Pager**](reader/tap_double_tap_navigation_disambiguation_proposal.md) | Eliminates navigation jitter and race conditions by debouncing single-tap page turns during double-tap zoom windows (resolves [#3433](https://github.com/nekomangaorg/Neko/issues/3433)). | Step R5 | Next Release (Phase R4) |
+| **R15** | ⏳ Planned | [**Double-Page Spread Auto-Zoom Disambiguation & Tablet Landscape Stabilization**](reader/double_page_tablet_auto_zoom_proposal.md) | Disambiguates single-page landscape zoom from dual-page layouts, preventing unintended zoom-ins on tablets in landscape (resolves [#3421](https://github.com/nekomangaorg/Neko/issues/3421)). | Step R5 | Next Release (Phase R5) |
+| **R16** | ⏳ Planned | [**Double-Page Fit Height Overflow & Aspect Ratio Scaling Engine**](reader/double_page_fit_height_overflow_proposal.md) | Respects "Fit height" scale type in double-page mode, enabling full-height presentation with horizontal overflow panning (resolves [#3364](https://github.com/nekomangaorg/Neko/issues/3364)). | Step R5, Step R15 | Next Release (Phase R5) |
 
 ---
 
