@@ -45,6 +45,11 @@ flowchart TD
         R14["Step R14: Tap vs Double-Tap Navigation Disambiguation"]
     end
 
+    subgraph PR5["Phase R5: Dual-Page Engine & Layout Scaling"]
+        R15["Step R15: Double-Page Tablet Auto-Zoom Disambiguation"]
+        R16["Step R16: Double-Page Fit Height Overflow & Scaling Engine"]
+    end
+
     R1 --> R2
     R1 --> R3
     R3 --> R4
@@ -53,6 +58,8 @@ flowchart TD
     R5 --> R6
     R5 --> R13
     R5 --> R14
+    R5 --> R15
+    R15 --> R16
     R6 --> R7
     R6 --> R8
     R6 --> R9
@@ -78,6 +85,8 @@ flowchart TD
 | **R12** | ⏳ Planned | [**Native Compose Crop Borders Pipeline & Auto-Crop Transformation**](reader/compose_crop_borders_pipeline_proposal.md) | Restores border cropping in Compose Pager and Webtoon viewers via a Coil 3 transformation and luminance edge scanner (resolves [#3435](https://github.com/nekomangaorg/Neko/issues/3435)). | Step R5, Step R6 | Next Release (Phase R3) |
 | **R13** | ⏳ Planned | [**Multi-Touch Gesture Disambiguation & Pinch-Zoom Long-Press Guard**](reader/multi_touch_pinch_zoom_long_press_guard_proposal.md) | Prevents slow multi-touch pinch-to-zoom gestures from accidentally triggering the page actions modal sheet (resolves [#3434](https://github.com/nekomangaorg/Neko/issues/3434)). | Step R5 | Next Release (Phase R4) |
 | **R14** | ⏳ Planned | [**Tap vs Double-Tap Navigation Disambiguation in Compose Pager**](reader/tap_double_tap_navigation_disambiguation_proposal.md) | Eliminates navigation jitter and race conditions by debouncing single-tap page turns during double-tap zoom windows (resolves [#3433](https://github.com/nekomangaorg/Neko/issues/3433)). | Step R5 | Next Release (Phase R4) |
+| **R15** | ⏳ Planned | [**Double-Page Spread Auto-Zoom Disambiguation & Tablet Landscape Stabilization**](reader/double_page_tablet_auto_zoom_proposal.md) | Disambiguates single-page landscape zoom from dual-page layouts, preventing unintended zoom-ins on tablets in landscape (resolves [#3421](https://github.com/nekomangaorg/Neko/issues/3421)). | Step R5 | Next Release (Phase R5) |
+| **R16** | ⏳ Planned | [**Double-Page Fit Height Overflow & Aspect Ratio Scaling Engine**](reader/double_page_fit_height_overflow_proposal.md) | Respects "Fit height" scale type in double-page mode, enabling full-height presentation with horizontal overflow panning (resolves [#3364](https://github.com/nekomangaorg/Neko/issues/3364)). | Step R5, Step R15 | Next Release (Phase R5) |
 
 ---
 
