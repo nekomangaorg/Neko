@@ -54,7 +54,7 @@ kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", versi
 kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlinResultVersion" }
 
 sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqliteVersion" }
-tachi-image-decoder = "com.github.ivaniskandar:image-decoder:d7e0d3dfaa"
+tachi-image-decoder = "com.github.mods-hd:image-decoder:de090ce483"
 tachi-source-api = "org.tachiyomi:source-api:1.1"
 tachi-directional-view-pager = "com.github.tachiyomiorg:DirectionalViewPager:1.0.0"
 tachi-unifile = "com.github.tachiyomiorg:unifile:a9de196cc7"
