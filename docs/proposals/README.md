@@ -35,8 +35,14 @@ flowchart TD
         R10["Step R10: GestureNavigationOverlay"]
     end
 
-    subgraph PR3["Phase R3: Advanced Rendering"]
+    subgraph PR3["Phase R3: Advanced Rendering & Image Processing"]
         R11["Step R11: Native Compose Subsampling Tile Renderer"]
+        R12["Step R12: Native Compose Crop Borders Pipeline"]
+    end
+
+    subgraph PR4["Phase R4: Gesture Engine & Touch Pointer Stabilization"]
+        R13["Step R13: Multi-Touch Pinch-Zoom Long-Press Guard"]
+        R14["Step R14: Tap vs Double-Tap Navigation Disambiguation"]
     end
 
     R1 --> R2
@@ -45,10 +51,13 @@ flowchart TD
     R2 --> R5
     R4 --> R5
     R5 --> R6
+    R5 --> R13
+    R5 --> R14
     R6 --> R7
     R6 --> R8
     R6 --> R9
     R6 --> R11
+    R6 --> R12
 ```
 
 ### Reader Refactor Track
@@ -66,6 +75,9 @@ flowchart TD
 | **R9** | ⏳ Planned | [**Decouple ReaderSettingsSheet**](reader/decouple_reader_settings_sheet_proposal.md) | Decouples reader settings sheet from service locators, preference mutations, and domain flags into `ReaderSettingsUiState`. | Step R6 | Next Release (Phase R2) |
 | **R10** | ⏳ Planned | [**Decouple GestureNavigationOverlay**](reader/decouple_gesture_navigation_overlay_proposal.md) | Decouples gesture navigation overlays from viewer navigation geometry inversion math into `NavigationRegionUiModel`. | None (Self-Contained) | Next Release (Phase R2) |
 | **R11** | ⏳ Planned | [**Native Compose Subsampling Tile Renderer**](reader/native_compose_webtoon_subsampling_renderer_proposal.md) | Introduces high-performance tiled subsampling for long webtoon image strips in Compose. | Step R6 | Neko Performance (Phase 4) |
+| **R12** | ⏳ Planned | [**Native Compose Crop Borders Pipeline & Auto-Crop Transformation**](reader/compose_crop_borders_pipeline_proposal.md) | Restores border cropping in Compose Pager and Webtoon viewers via a Coil 3 transformation and luminance edge scanner (resolves [#3435](https://github.com/nekomangaorg/Neko/issues/3435)). | Step R5, Step R6 | Next Release (Phase R3) |
+| **R13** | ⏳ Planned | [**Multi-Touch Gesture Disambiguation & Pinch-Zoom Long-Press Guard**](reader/multi_touch_pinch_zoom_long_press_guard_proposal.md) | Prevents slow multi-touch pinch-to-zoom gestures from accidentally triggering the page actions modal sheet (resolves [#3434](https://github.com/nekomangaorg/Neko/issues/3434)). | Step R5 | Next Release (Phase R4) |
+| **R14** | ⏳ Planned | [**Tap vs Double-Tap Navigation Disambiguation in Compose Pager**](reader/tap_double_tap_navigation_disambiguation_proposal.md) | Eliminates navigation jitter and race conditions by debouncing single-tap page turns during double-tap zoom windows (resolves [#3433](https://github.com/nekomangaorg/Neko/issues/3433)). | Step R5 | Next Release (Phase R4) |
 
 ---
 
