@@ -66,13 +66,14 @@ fun ComposePagerViewer(
     navCommands: Flow<ReaderNavCommand>? = null,
     isNavigating: Boolean = false,
 ) {
+    val initialPage = config.initialIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
     val pagerState =
         rememberPagerState(
-            initialPage = config.initialIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0)),
+            initialPage = initialPage,
             pageCount = { items.size },
         )
 
-    var lastActiveItem by remember { mutableStateOf(items.getOrNull(config.initialIndex)) }
+    var lastActiveItem by remember { mutableStateOf(items.getOrNull(initialPage)) }
     var lastProcessedItems by remember { mutableStateOf(items) }
     var pendingNavCommand by remember { mutableStateOf<ReaderNavCommand?>(null) }
 

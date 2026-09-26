@@ -49,38 +49,86 @@ fun Modifier.pagerOverscrollNavigation(
                     val currentIndex = pagerState.currentPage
                     val currentItem = currentItems.getOrNull(currentIndex)
 
+                    val chapterToNavigate: Chapter?
+                    val navTarget: ChapterNavTarget?
+                    val isPrevTransition: Boolean
+
                     if (currentItem is ReaderUiItem.Transition) {
                         val transition = currentItem.transition
-                        val toChapter = transition.to
-                        if (toChapter != null) {
-                            accumulatedOverscroll += delta
-                            val isTrigger =
-                                if (isRtl) {
-                                    if (transition is ChapterTransition.Prev) {
-                                        accumulatedOverscroll < -thresholdPx
-                                    } else {
-                                        accumulatedOverscroll > thresholdPx
-                                    }
-                                } else {
-                                    if (transition is ChapterTransition.Prev) {
-                                        accumulatedOverscroll > thresholdPx
-                                    } else {
-                                        accumulatedOverscroll < -thresholdPx
-                                    }
-                                }
-                            if (isTrigger && !currentIsNavigating) {
-                                accumulatedOverscroll = 0f
-                                val navTarget =
-                                    if (transition is ChapterTransition.Prev) {
-                                        ChapterNavTarget.End
-                                    } else {
-                                        ChapterNavTarget.Start
-                                    }
-                                currentOnNavigateToChapter(
-                                    toChapter.chapter,
-                                    navTarget,
-                                )
+                        chapterToNavigate = transition.to?.chapter
+                        isPrevTransition = transition is ChapterTransition.Prev
+                        navTarget =
+                            if (isPrevTransition) ChapterNavTarget.End else ChapterNavTarget.Start
+                    } else if (
+                        currentItem is ReaderUiItem.Page || currentItem is ReaderUiItem.SplitPage
+                    ) {
+                        val isAtStartOfContent = currentIndex == 0
+                        val isAtEndOfContent = currentIndex == currentItems.lastIndex
+
+                        val wantsPrevious =
+                            if (isRtl) {
+                                isAtEndOfContent && delta < 0
+                            } else {
+                                isAtStartOfContent && delta > 0
                             }
+                        val wantsNext =
+                            if (isRtl) {
+                                isAtStartOfContent && delta > 0
+                            } else {
+                                isAtEndOfContent && delta < 0
+                            }
+
+                        if (wantsPrevious) {
+                            val prevTransition =
+                                currentItems.firstOrNull {
+                                    it is ReaderUiItem.Transition &&
+                                        it.transition is ChapterTransition.Prev
+                                } as? ReaderUiItem.Transition
+                            chapterToNavigate = prevTransition?.transition?.to?.chapter
+                            isPrevTransition = true
+                            navTarget = ChapterNavTarget.End
+                        } else if (wantsNext) {
+                            val nextTransition =
+                                currentItems.lastOrNull {
+                                    it is ReaderUiItem.Transition &&
+                                        it.transition is ChapterTransition.Next
+                                } as? ReaderUiItem.Transition
+                            chapterToNavigate = nextTransition?.transition?.to?.chapter
+                            isPrevTransition = false
+                            navTarget = ChapterNavTarget.Start
+                        } else {
+                            chapterToNavigate = null
+                            navTarget = null
+                            isPrevTransition = false
+                        }
+                    } else {
+                        chapterToNavigate = null
+                        navTarget = null
+                        isPrevTransition = false
+                    }
+
+                    if (chapterToNavigate != null && navTarget != null) {
+                        accumulatedOverscroll += delta
+                        val isTrigger =
+                            if (isRtl) {
+                                if (isPrevTransition) {
+                                    accumulatedOverscroll < -thresholdPx
+                                } else {
+                                    accumulatedOverscroll > thresholdPx
+                                }
+                            } else {
+                                if (isPrevTransition) {
+                                    accumulatedOverscroll > thresholdPx
+                                } else {
+                                    accumulatedOverscroll < -thresholdPx
+                                }
+                            }
+                        if (isTrigger && !currentIsNavigating) {
+                            accumulatedOverscroll = 0f
+                            currentOnNavigateToChapter(
+                                chapterToNavigate,
+                                navTarget,
+                            )
                         }
                     } else {
                         accumulatedOverscroll = 0f
