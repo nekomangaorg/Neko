@@ -175,15 +175,15 @@ class ReaderUiItemTest {
     }
 
     @Test
-    fun `last slice does not continue into the first slice of the next tall page`() {
+    fun `slice does not continue into a slice of another page that starts where it ends`() {
         val page = createReaderPage(chapterId = 102992L, index = 0)
         val nextPage = createReaderPage(chapterId = 102992L, index = 1)
         val lastSlice =
             ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 1000, splitHeight = 1000))
-        val nextFirstSlice =
-            ReaderUiItem.SplitPage(ReaderPageSplit(nextPage, topOffset = 0, splitHeight = 1000))
+        val nextPageSlice =
+            ReaderUiItem.SplitPage(ReaderPageSplit(nextPage, topOffset = 2000, splitHeight = 1000))
 
-        assertFalse(lastSlice.continuesInto(nextFirstSlice))
+        assertFalse(lastSlice.continuesInto(nextPageSlice))
     }
 
     @Test
@@ -200,7 +200,7 @@ class ReaderUiItemTest {
             ReaderUiItem.SplitPage(
                 ReaderPageSplit(
                     createReaderPage(chapterId = 200L, index = 0),
-                    topOffset = 0,
+                    topOffset = 2000,
                     splitHeight = 1000,
                 )
             )
@@ -224,5 +224,35 @@ class ReaderUiItemTest {
         assertFalse(slice.continuesInto(transition))
         assertFalse(transition.continuesInto(slice))
         assertFalse(slice.continuesInto(null))
+    }
+
+    @Test
+    fun `slice does not continue into a duplicate slice`() {
+        val page = createReaderPage(chapterId = 100L, index = 0)
+        val slice = ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 0, splitHeight = 1000))
+        val duplicate =
+            ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 0, splitHeight = 1000))
+
+        assertFalse(slice.continuesInto(duplicate))
+    }
+
+    @Test
+    fun `slice does not continue into an out-of-order slice`() {
+        val page = createReaderPage(chapterId = 100L, index = 0)
+        val lower =
+            ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 1000, splitHeight = 1000))
+        val upper = ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 0, splitHeight = 1000))
+
+        assertFalse(lower.continuesInto(upper))
+    }
+
+    @Test
+    fun `slice does not continue into a non-contiguous slice`() {
+        val page = createReaderPage(chapterId = 100L, index = 0)
+        val top = ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 0, splitHeight = 1000))
+        val afterMissingSlice =
+            ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 2000, splitHeight = 1000))
+
+        assertFalse(top.continuesInto(afterMissingSlice))
     }
 }
