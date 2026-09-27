@@ -73,6 +73,44 @@ class ReaderPageFetcher(private val page: ReaderPage, private val options: Optio
     }
 }
 
+/**
+ * Size limit of [ReaderPageSplitFetcher]'s cache of full page decodes, and the budget for one
+ * decode. LruCache.put evicts a value bigger than the limit right after adding it, so a bigger
+ * decode would be repeated for every later slice of the page.
+ */
+internal fun fallbackBitmapCacheMaxBytes(maxMemory: Long = Runtime.getRuntime().maxMemory()): Int =
+    (maxMemory / 4).coerceAtMost(256L * 1024 * 1024).toInt()
+
+/**
+ * Power-of-two sample size that keeps an ARGB_8888 decode of the whole page within
+ * [fallbackBitmapCacheMaxBytes].
+ */
+internal fun fallbackDecodeSampleSize(
+    imageWidth: Int,
+    imageHeight: Int,
+    maxMemory: Long = Runtime.getRuntime().maxMemory(),
+): Int {
+    val maxPixels = fallbackBitmapCacheMaxBytes(maxMemory) / 4
+
+    var sampleSize = 1
+    while (
+        sampledDimension(imageWidth, sampleSize) * sampledDimension(imageHeight, sampleSize) >
+            maxPixels
+    ) {
+        sampleSize *= 2
+    }
+    return sampleSize
+}
+
+/** Upper bound on the byte count of an ARGB_8888 decode of the whole page at [sampleSize]. */
+internal fun fallbackDecodeBytes(imageWidth: Int, imageHeight: Int, sampleSize: Int): Long =
+    sampledDimension(imageWidth, sampleSize) * sampledDimension(imageHeight, sampleSize) * 4
+
+// Round up. BitmapFactory rounds a sampled GIF to the nearest pixel, so a 2305x65535 GIF
+// decodes to 1153x32768 at sample size 2.
+private fun sampledDimension(size: Int, sampleSize: Int): Long =
+    (size.toLong() + sampleSize - 1) / sampleSize
+
 class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val options: Options) :
     Fetcher {
 
@@ -88,10 +126,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 .coerceIn(16L * 1024 * 1024, 64L * 1024 * 1024)
                 .toInt()
 
-        private val maxBitmapCacheSizeBytes =
-            (Runtime.getRuntime().maxMemory() / 8)
-                .coerceIn(32L * 1024 * 1024, 128L * 1024 * 1024)
-                .toInt()
+        private val maxBitmapCacheSizeBytes = fallbackBitmapCacheMaxBytes()
 
         private val rawBytesCache =
             object : LruCache<String, ByteArray>(maxCacheSizeBytes) {
@@ -116,6 +151,26 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
     }
 
     override suspend fun fetch(): FetchResult = coroutineScope {
+        val chapterKey = split.page.chapter.chapter.id ?: split.page.chapter.chapter.url.hashCode()
+        val cacheKey = "${chapterKey}_${split.page.index}"
+
+        // A page with a cached full decode serves its slices from that decode, without reading
+        // the file again.
+        val cached = fallbackBitmapCache.get(cacheKey)?.takeUnless { it.bitmap.isRecycled }
+        if (cached != null) {
+            val slice =
+                withContext(Dispatchers.IO) {
+                    cropFallbackSlice(cached, split.topOffset, split.splitHeight)
+                }
+            if (slice != null) {
+                return@coroutineScope ImageFetchResult(
+                    image = slice.asImage(),
+                    isSampled = false,
+                    dataSource = DataSource.MEMORY,
+                )
+            }
+        }
+
         var streamFn = split.page.stream
         if (streamFn == null) {
             val loader = split.page.chapter.pageLoader
@@ -137,8 +192,6 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         val actualStream =
             streamFn ?: error("Page stream not available for page ${split.page.index}")
 
-        val chapterKey = split.page.chapter.chapter.id ?: split.page.chapter.chapter.url.hashCode()
-        val cacheKey = "${chapterKey}_${split.page.index}"
         val imageBytes =
             rawBytesCache.get(cacheKey)
                 ?: run {
@@ -149,7 +202,13 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                                     try {
                                         actualStream()
                                             .use { it.readBytes() }
-                                            .also { rawBytesCache.put(cacheKey, it) }
+                                            .also {
+                                                // LruCache.put would evict a file bigger than the
+                                                // cache right away, with every other entry.
+                                                if (it.size <= rawBytesCache.maxSize()) {
+                                                    rawBytesCache.put(cacheKey, it)
+                                                }
+                                            }
                                     } finally {
                                         activeFetches.remove(cacheKey)
                                     }
@@ -250,6 +309,10 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 }
                 ?: return@coroutineScope null
 
+        cropFallbackSlice(decoded, top, height)
+    }
+
+    private fun cropFallbackSlice(decoded: CachedDecodedImage, top: Int, height: Int): Bitmap? =
         try {
             val scale = decoded.bitmap.height.toFloat() / decoded.originalHeight.toFloat()
             val scaledTop = (top * scale).toInt().coerceIn(0, decoded.bitmap.height - 1)
@@ -266,7 +329,6 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             }
             null
         }
-    }
 
     private fun performFullDecode(imageBytes: ByteArray, cacheKey: String): CachedDecodedImage? {
         val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
@@ -281,20 +343,14 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             return null
         }
 
-        val maxSafeMemoryBytes =
-            (Runtime.getRuntime().maxMemory() / 4).coerceIn(
-                64L * 1024 * 1024,
-                256L * 1024 * 1024,
-            )
+        val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
 
-        var sampleSize = 1
-        var testWidth = imageWidth
-        var testHeight = imageHeight
-        while (testWidth.toLong() * testHeight.toLong() * 4L > maxSafeMemoryBytes) {
-            sampleSize *= 2
-            testWidth /= 2
-            testHeight /= 2
-        }
+        // LruCache evicts on put, after the new bitmap is allocated. Evicting first keeps cached
+        // pages plus the new bitmap within the budget when pages decode one at a time.
+        val expectedBytes = fallbackDecodeBytes(imageWidth, imageHeight, sampleSize)
+        fallbackBitmapCache.trimToSize(
+            (fallbackBitmapCache.maxSize() - expectedBytes).coerceAtLeast(0).toInt()
+        )
 
         val decodeOptions =
             BitmapFactory.Options().apply {
@@ -319,6 +375,8 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             }
         } catch (e: OutOfMemoryError) {
             TimberKt.e(e) { "OutOfMemoryError during fallback decode for page ${split.page.index}" }
+            fallbackBitmapCache.evictAll()
+            rawBytesCache.evictAll()
             try {
                 val fallbackOptions =
                     BitmapFactory.Options().apply {
