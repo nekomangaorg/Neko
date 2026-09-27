@@ -1,10 +1,6 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
-import android.graphics.PointF
-import android.view.ViewConfiguration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -13,8 +9,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -23,10 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size as ComposeSize
 import androidx.compose.ui.geometry.isSpecified
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.platform.LocalContext
@@ -40,18 +30,12 @@ import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
-import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.util.system.GLUtil
-import kotlin.math.hypot
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
@@ -75,16 +59,6 @@ fun PagerPageItem(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
-    val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
-    val touchSlopPx = remember(viewConfiguration) { viewConfiguration.scaledTouchSlop.toDouble() }
-    val doubleTapSlopPx =
-        remember(viewConfiguration) { viewConfiguration.scaledDoubleTapSlop.toDouble() }
-    val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
-    val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
-
-    val currentConfig by rememberUpdatedState(config)
 
     // Trigger page loading
     LaunchedEffect(page) {
@@ -185,221 +159,14 @@ fun PagerPageItem(
 
     BoxWithConstraints(
         modifier =
-            modifier.fillMaxSize().background(config.backgroundColor).pointerInput(
-                page.chapter.chapter.id,
-                page.index,
-                extraPage?.chapter?.chapter?.id,
-                extraPage?.index,
-            ) {
-                var lastTapTime = 0L
-                var lastTapOffset = Offset.Zero
-                var pendingNavJob: Job? = null
-                var pendingNavAction: (() -> Unit)? = null
-
-                try {
-                    awaitEachGesture {
-                        val down =
-                            awaitFirstDown(
-                                requireUnconsumed = false,
-                                pass = PointerEventPass.Initial,
-                            )
-                        val downPos = down.position
-                        var isLongPressTriggered = false
-                        var isMovementPastSlop = false
-                        var isMultiTouch = currentEvent.changes.count { it.pressed } > 1
-                        var pointerUp: PointerInputChange? = null
-
-                        if (!isMultiTouch) {
-                            try {
-                                withTimeout(longPressTimeoutMs) {
-                                    while (true) {
-                                        val event =
-                                            awaitPointerEvent(pass = PointerEventPass.Initial)
-
-                                        // Cancel long-press evaluation immediately if multiple
-                                        // pointers active
-                                        if (event.changes.count { it.pressed } > 1) {
-                                            isMultiTouch = true
-                                            break
-                                        }
-
-                                        val change = event.changes.firstOrNull { it.id == down.id }
-                                        if (change == null) break
-                                        val moveDistance =
-                                            hypot(
-                                                (change.position.x - downPos.x).toDouble(),
-                                                (change.position.y - downPos.y).toDouble(),
-                                            )
-                                        if (moveDistance > touchSlopPx) {
-                                            isMovementPastSlop = true
-                                            break
-                                        }
-                                        if (!change.pressed) {
-                                            pointerUp = change
-                                            break
-                                        }
-                                    }
-                                }
-                            } catch (_: PointerEventTimeoutCancellationException) {
-                                if (
-                                    !isMovementPastSlop &&
-                                        !isMultiTouch &&
-                                        (currentConfig.menuVisible || currentConfig.longTapEnabled)
-                                ) {
-                                    currentConfig.onPageLongTap?.invoke(page, extraPage)
-                                    isLongPressTriggered = true
-                                }
-                                while (currentEvent.changes.any { it.pressed }) {
-                                    awaitPointerEvent(pass = PointerEventPass.Initial)
-                                }
-                            }
-                        }
-
-                        if ((pointerUp == null || isMultiTouch) && !isLongPressTriggered) {
-                            while (currentEvent.changes.any { it.pressed }) {
-                                awaitPointerEvent(pass = PointerEventPass.Initial)
-                            }
-                        }
-
-                        if (isMovementPastSlop || isMultiTouch || isLongPressTriggered) {
-                            pendingNavJob?.cancel()
-                            pendingNavJob = null
-                            pendingNavAction = null
-                            lastTapTime = 0L
-                            lastTapOffset = Offset.Zero
-                        }
-
-                        if (
-                            !isLongPressTriggered &&
-                                !isMovementPastSlop &&
-                                !isMultiTouch &&
-                                pointerUp != null
-                        ) {
-                            val up = pointerUp!!
-                            val upPos = up.position
-                            val upTime = System.currentTimeMillis()
-                            val distance =
-                                hypot(
-                                    (upPos.x - downPos.x).toDouble(),
-                                    (upPos.y - downPos.y).toDouble(),
-                                )
-
-                            if (distance < touchSlopPx * 1.5) {
-                                val screenWidth = size.width.toFloat()
-                                val screenHeight = size.height.toFloat()
-
-                                if (screenWidth > 0 && screenHeight > 0) {
-                                    val pos =
-                                        PointF(
-                                            upPos.x / screenWidth,
-                                            upPos.y / screenHeight,
-                                        )
-                                    val navigator = currentConfig.navigator
-                                    val action = navigator.getAction(pos)
-
-                                    val isDoubleTap =
-                                        (upTime - lastTapTime < doubleTapTimeoutMs) &&
-                                            (hypot(
-                                                (upPos.x - lastTapOffset.x).toDouble(),
-                                                (upPos.y - lastTapOffset.y).toDouble(),
-                                            ) < doubleTapSlopPx) &&
-                                            (currentConfig.doubleTapAnimDuration > 0)
-
-                                    if (isDoubleTap) {
-                                        // Cancel pending single tap navigation immediately so pager
-                                        // stays stationary
-                                        pendingNavJob?.cancel()
-                                        pendingNavJob = null
-                                        pendingNavAction = null
-
-                                        if (currentConfig.menuVisible) {
-                                            currentConfig.onToggleMenu()
-                                        }
-                                        lastTapTime = 0L
-                                        lastTapOffset = Offset.Zero
-                                    } else {
-                                        // If a previous single-tap job is still waiting and this is
-                                        // a distinct rapid tap,
-                                        // flush previous tap so it's not dropped.
-                                        if (pendingNavJob?.isActive == true) {
-                                            pendingNavJob?.cancel()
-                                            pendingNavJob = null
-                                            pendingNavAction?.invoke()
-                                            pendingNavAction = null
-                                        }
-
-                                        lastTapTime = upTime
-                                        lastTapOffset = upPos
-
-                                        val executeNav: () -> Unit = {
-                                            when (action) {
-                                                ViewerNavigation.NavigationRegion.NEXT -> {
-                                                    if (currentConfig.menuVisible) {
-                                                        currentConfig.onToggleMenu()
-                                                    }
-                                                    currentConfig.onNavigateAdjacent(true)
-                                                }
-                                                ViewerNavigation.NavigationRegion.PREV -> {
-                                                    if (currentConfig.menuVisible) {
-                                                        currentConfig.onToggleMenu()
-                                                    }
-                                                    currentConfig.onNavigateAdjacent(false)
-                                                }
-                                                ViewerNavigation.NavigationRegion.RIGHT -> {
-                                                    if (currentConfig.menuVisible) {
-                                                        currentConfig.onToggleMenu()
-                                                    }
-                                                    if (currentConfig.isRtl) {
-                                                        currentConfig.onNavigateAdjacent(false)
-                                                    } else {
-                                                        currentConfig.onNavigateAdjacent(true)
-                                                    }
-                                                }
-                                                ViewerNavigation.NavigationRegion.LEFT -> {
-                                                    if (currentConfig.menuVisible) {
-                                                        currentConfig.onToggleMenu()
-                                                    }
-                                                    if (currentConfig.isRtl) {
-                                                        currentConfig.onNavigateAdjacent(true)
-                                                    } else {
-                                                        currentConfig.onNavigateAdjacent(false)
-                                                    }
-                                                }
-                                                ViewerNavigation.NavigationRegion.MENU -> {
-                                                    currentConfig.onToggleMenu()
-                                                }
-                                            }
-                                        }
-
-                                        if (
-                                            currentConfig.doubleTapAnimDuration > 0 &&
-                                                action != ViewerNavigation.NavigationRegion.MENU
-                                        ) {
-                                            // Defer single tap until double-tap timeout expires
-                                            pendingNavAction = executeNav
-                                            pendingNavJob = coroutineScope.launch {
-                                                delay(doubleTapTimeoutMs)
-                                                executeNav()
-                                                pendingNavJob = null
-                                                pendingNavAction = null
-                                            }
-                                        } else {
-                                            if (action != ViewerNavigation.NavigationRegion.MENU) {
-                                                up.consume()
-                                            }
-                                            executeNav()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } finally {
-                    pendingNavJob?.cancel()
-                    pendingNavJob = null
-                    pendingNavAction = null
-                }
-            },
+            modifier
+                .fillMaxSize()
+                .background(config.backgroundColor)
+                .pagerTapNavigation(
+                    config = config,
+                    page = page,
+                    extraPage = extraPage,
+                ),
         contentAlignment = Alignment.Center,
     ) {
         val viewportWidthPx = constraints.maxWidth.toFloat()
