@@ -273,6 +273,6 @@ class MangaBall : ReducedHttpSource() {
 
     companion object {
         const val name = "Manga Ball"
-        const val baseUrl = "https://mangaball.net"
+        const val baseUrl = "https://mangaball.com"
     }
 }
