@@ -5,18 +5,15 @@ import android.view.ViewConfiguration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -24,9 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size as ComposeSize
-import androidx.compose.ui.geometry.isEmpty
 import androidx.compose.ui.geometry.isSpecified
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.PointerInputChange
@@ -34,12 +29,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.maxBitmapSize
@@ -49,12 +40,9 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.util.system.GLUtil
-import eu.kanade.tachiyomi.util.system.ThemeUtil
 import kotlin.math.hypot
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
@@ -63,31 +51,26 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
-import me.saket.telephoto.zoomable.zoomable
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsState
-import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+/**
+ * Pure stateless Composable rendering an individual paginated reader item (single page, paired
+ * spread, or split double page). Completely decoupled from Service Locators and View hierarchies.
+ */
 @Composable
 fun PagerPageItem(
-    viewer: PagerViewer,
     page: ReaderPage,
+    config: PagerViewerConfigUiModel,
     extraPage: ReaderPage? = null,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-    val imageScaleType by readerPreferences.imageScaleType().collectAsState()
-    val doublePageGap by readerPreferences.doublePageGap().collectAsState()
-    val invertDoublePages by readerPreferences.invertDoublePages().collectAsState()
-    val readerThemePref by readerPreferences.readerTheme().collectAsState()
-    val landscapeZoom by readerPreferences.landscapeZoom().collectAsState()
 
     val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
     val touchSlopPx = remember(viewConfiguration) { viewConfiguration.scaledTouchSlop.toDouble() }
@@ -96,10 +79,16 @@ fun PagerPageItem(
     val doubleTapTimeoutMs = remember { ViewConfiguration.getDoubleTapTimeout().toLong() }
     val longPressTimeoutMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
 
+    val currentConfig by rememberUpdatedState(config)
+
     // Trigger page loading
-    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
+    LaunchedEffect(page) {
+        if (page.status == Page.State.QUEUE) {
+            page.chapter.pageLoader?.loadPage(page)
+        }
+    }
     LaunchedEffect(extraPage) {
-        if (extraPage != null) {
+        if (extraPage != null && extraPage.status == Page.State.QUEUE) {
             extraPage.chapter.pageLoader?.loadPage(extraPage)
         }
     }
@@ -129,19 +118,11 @@ fun PagerPageItem(
     val combinedProgress =
         if (extraPage == null) pageProgress else (pageProgress + extraPageProgress) / 2
 
-    val zoomStart by readerPreferences.zoomStart().collectAsState()
-
     val imageAlignment =
-        remember(zoomStart, viewer) {
+        remember(config.zoomStart, config.isRtl) {
             val zoomType =
-                when (zoomStart) {
-                    // Auto
-                    1 ->
-                        when (viewer) {
-                            is L2RPagerViewer -> PagerConfig.ZoomType.Left
-                            is R2LPagerViewer -> PagerConfig.ZoomType.Right
-                            else -> PagerConfig.ZoomType.Center
-                        }
+                when (config.zoomStart) {
+                    1 -> if (config.isRtl) PagerConfig.ZoomType.Right else PagerConfig.ZoomType.Left
                     2 -> PagerConfig.ZoomType.Left
                     3 -> PagerConfig.ZoomType.Right
                     else -> PagerConfig.ZoomType.Center
@@ -171,24 +152,15 @@ fun PagerPageItem(
         }
 
     val contentScale =
-        remember(imageScaleType) {
-            when (imageScaleType) {
-                1 -> ContentScale.Fit // Fit screen
-                2 -> ContentScale.FillBounds // Stretch
-                3 -> ContentScale.FillWidth // Fit width
-                4 -> ContentScale.FillHeight // Fit height
-                5 -> ContentScale.None // Original size (1:1)
-                6 -> SmartFitContentScale // Smart fit
+        remember(config.imageScaleType) {
+            when (config.imageScaleType) {
+                1 -> ContentScale.Fit
+                2 -> ContentScale.FillBounds
+                3 -> ContentScale.FillWidth
+                4 -> ContentScale.FillHeight
+                5 -> ContentScale.None
+                6 -> SmartFitContentScale
                 else -> ContentScale.Fit
-            }
-        }
-
-    val backgroundColor =
-        remember(readerThemePref) {
-            val theme = ReaderTheme.fromPreference(readerThemePref)
-            when (theme) {
-                ReaderTheme.SMART_BY_THEME -> Color.Transparent
-                else -> Color(ThemeUtil.readerBackgroundColor(readerThemePref, context))
             }
         }
 
@@ -198,8 +170,8 @@ fun PagerPageItem(
     }
 
     val doubleClickToZoomListener =
-        remember(viewer.config.doubleTapAnimDuration) {
-            if (viewer.config.doubleTapAnimDuration > 0) {
+        remember(config.doubleTapAnimDuration) {
+            if (config.doubleTapAnimDuration > 0) {
                 DoubleClickToZoomListener.cycle(maxZoomFactor = 2.5f)
             } else {
                 DoubleClickToZoomListener { _, _ -> }
@@ -208,10 +180,11 @@ fun PagerPageItem(
 
     BoxWithConstraints(
         modifier =
-            modifier.fillMaxSize().background(backgroundColor).pointerInput(
-                viewer,
-                page,
-                extraPage,
+            modifier.fillMaxSize().background(config.backgroundColor).pointerInput(
+                page.chapter.chapter.id,
+                page.index,
+                extraPage?.chapter?.chapter?.id,
+                extraPage?.index,
             ) {
                 var lastTapTime = 0L
                 var lastTapOffset = Offset.Zero
@@ -251,9 +224,9 @@ fun PagerPageItem(
                     } catch (_: PointerEventTimeoutCancellationException) {
                         if (
                             !isMovementPastSlop &&
-                                (viewer.activity.menuVisible || viewer.config.longTapEnabled)
+                                (currentConfig.menuVisible || currentConfig.longTapEnabled)
                         ) {
-                            viewer.activity.onPageLongTap(page, extraPage)
+                            currentConfig.onPageLongTap?.invoke(page, extraPage)
                             isLongPressTriggered = true
                         }
                         while (currentEvent.changes.any { it.pressed }) {
@@ -287,7 +260,7 @@ fun PagerPageItem(
                                         upPos.x / screenWidth,
                                         upPos.y / screenHeight,
                                     )
-                                val navigator = viewer.config.navigator
+                                val navigator = currentConfig.navigator
                                 val action = navigator.getAction(pos)
 
                                 val isDoubleTap =
@@ -296,11 +269,11 @@ fun PagerPageItem(
                                             (upPos.x - lastTapOffset.x).toDouble(),
                                             (upPos.y - lastTapOffset.y).toDouble(),
                                         ) < doubleTapSlopPx) &&
-                                        (viewer.config.doubleTapAnimDuration > 0)
+                                        (currentConfig.doubleTapAnimDuration > 0)
 
                                 if (isDoubleTap) {
-                                    if (viewer.activity.menuVisible) {
-                                        viewer.activity.hideMenu()
+                                    if (currentConfig.menuVisible) {
+                                        currentConfig.onToggleMenu()
                                     }
                                     lastTapTime = 0L
                                     lastTapOffset = Offset.Zero
@@ -311,34 +284,42 @@ fun PagerPageItem(
                                     when (action) {
                                         ViewerNavigation.NavigationRegion.NEXT -> {
                                             up.consume()
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
+                                            if (currentConfig.menuVisible) {
+                                                currentConfig.onToggleMenu()
                                             }
-                                            viewer.moveToNext()
+                                            currentConfig.onNavigateAdjacent(true)
                                         }
                                         ViewerNavigation.NavigationRegion.PREV -> {
                                             up.consume()
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
+                                            if (currentConfig.menuVisible) {
+                                                currentConfig.onToggleMenu()
                                             }
-                                            viewer.moveToPrevious()
+                                            currentConfig.onNavigateAdjacent(false)
                                         }
                                         ViewerNavigation.NavigationRegion.RIGHT -> {
                                             up.consume()
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
+                                            if (currentConfig.menuVisible) {
+                                                currentConfig.onToggleMenu()
                                             }
-                                            viewer.moveRight()
+                                            if (currentConfig.isRtl) {
+                                                currentConfig.onNavigateAdjacent(false)
+                                            } else {
+                                                currentConfig.onNavigateAdjacent(true)
+                                            }
                                         }
                                         ViewerNavigation.NavigationRegion.LEFT -> {
                                             up.consume()
-                                            if (viewer.activity.menuVisible) {
-                                                viewer.activity.hideMenu()
+                                            if (currentConfig.menuVisible) {
+                                                currentConfig.onToggleMenu()
                                             }
-                                            viewer.moveLeft()
+                                            if (currentConfig.isRtl) {
+                                                currentConfig.onNavigateAdjacent(true)
+                                            } else {
+                                                currentConfig.onNavigateAdjacent(false)
+                                            }
                                         }
                                         ViewerNavigation.NavigationRegion.MENU -> {
-                                            viewer.activity.toggleMenu()
+                                            currentConfig.onToggleMenu()
                                         }
                                     }
                                 }
@@ -363,31 +344,51 @@ fun PagerPageItem(
 
         val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
 
-        if (extraPage == null) {
+        if (extraPage != null) {
+            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
+            DoublePageLayout(
+                page = page,
+                extraPage = extraPage,
+                config = config,
+                zoomableState = zoomableState,
+                contentScale = contentScale,
+                doubleClickToZoomListener = doubleClickToZoomListener,
+                constraints = constraints,
+                isReady = isReady,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else if (page.firstHalf != null) {
+            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
+            SplitPageLayout(
+                page = page,
+                config = config,
+                zoomableState = zoomableState,
+                doubleClickToZoomListener = doubleClickToZoomListener,
+                contentScale = contentScale,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
             val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
             val imageState = rememberZoomableImageState(zoomableState)
 
             val singlePageZoomType =
-                remember(zoomStart, viewer) {
-                    when (zoomStart) {
+                remember(config.zoomStart, config.isRtl) {
+                    when (config.zoomStart) {
                         1 ->
-                            when (viewer) {
-                                is L2RPagerViewer -> PagerConfig.ZoomType.Left
-                                is R2LPagerViewer -> PagerConfig.ZoomType.Right
-                                else -> PagerConfig.ZoomType.Center
-                            }
+                            if (config.isRtl) PagerConfig.ZoomType.Right
+                            else PagerConfig.ZoomType.Left
                         2 -> PagerConfig.ZoomType.Left
                         3 -> PagerConfig.ZoomType.Right
                         else -> PagerConfig.ZoomType.Center
                     }
                 }
 
-            LaunchedEffect(isReady, landscapeZoom, imageScaleType) {
+            LaunchedEffect(isReady, config.landscapeZoom, config.imageScaleType) {
                 if (
                     !autoZoomApplied &&
                         isReady &&
-                        landscapeZoom &&
-                        imageScaleType == 1 &&
+                        config.landscapeZoom &&
+                        config.imageScaleType == 1 &&
                         viewportWidthPx > 0f &&
                         viewportHeightPx > 0f
                 ) {
@@ -441,177 +442,6 @@ fun PagerPageItem(
                 onDoubleClick = doubleClickToZoomListener,
                 modifier = Modifier.fillMaxSize(),
             )
-        } else {
-            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
-            val (first, second) =
-                viewer.controller.getDoublePageOrder(
-                    page = page,
-                    extraPage = extraPage,
-                    isRtl = viewer.isRtl,
-                    invertDoublePages = invertDoublePages,
-                )
-
-            var firstSize by remember(first) { mutableStateOf<ComposeSize?>(null) }
-            var secondSize by remember(second) { mutableStateOf<ComposeSize?>(null) }
-            val density = LocalDensity.current
-            val gapPx =
-                remember(doublePageGap, density) {
-                    with(density) { (Size.tiny * doublePageGap).toPx() }
-                }
-
-            LaunchedEffect(firstSize, secondSize) {
-                val fSize = firstSize
-                val sSize = secondSize
-                if (fSize != null && sSize != null) {
-                    val totalWidth = fSize.width + sSize.width
-                    val maxHeight = maxOf(fSize.height, sSize.height)
-                    zoomableState.setContentLocation(
-                        ZoomableContentLocation.scaledInsideAndCenterAligned(
-                            ComposeSize(totalWidth, maxHeight)
-                        )
-                    )
-                }
-            }
-
-            LaunchedEffect(isReady, landscapeZoom, imageScaleType, firstSize, secondSize) {
-                if (
-                    !autoZoomApplied &&
-                        isReady &&
-                        landscapeZoom &&
-                        imageScaleType == 1 &&
-                        viewportWidthPx > 0f &&
-                        viewportHeightPx > 0f
-                ) {
-                    val fSize = firstSize
-                    val sSize = secondSize
-                    if (fSize != null && sSize != null) {
-                        val availableColWidth = (viewportWidthPx - gapPx) / 2f
-                        if (
-                            availableColWidth > 0f &&
-                                fSize.width > 0f &&
-                                sSize.width > 0f &&
-                                fSize.height > 0f &&
-                                sSize.height > 0f
-                        ) {
-                            val scale1 =
-                                minOf(
-                                    availableColWidth / fSize.width,
-                                    viewportHeightPx / fSize.height,
-                                )
-                            val scale2 =
-                                minOf(
-                                    availableColWidth / sSize.width,
-                                    viewportHeightPx / sSize.height,
-                                )
-                            val renderedHeight = maxOf(fSize.height * scale1, sSize.height * scale2)
-                            val isLandscape =
-                                (fSize.width + sSize.width) > maxOf(fSize.height, sSize.height)
-
-                            if (isLandscape && renderedHeight < viewportHeightPx) {
-                                val targetScale =
-                                    (viewportHeightPx / renderedHeight).coerceIn(1f, 3f)
-                                if (targetScale > 1.05f) {
-                                    val isRtl = viewer.isRtl.xor(invertDoublePages)
-                                    val doublePageZoomType =
-                                        when (zoomStart) {
-                                            1 ->
-                                                if (isRtl) PagerConfig.ZoomType.Right
-                                                else PagerConfig.ZoomType.Left
-                                            2 -> PagerConfig.ZoomType.Left
-                                            3 -> PagerConfig.ZoomType.Right
-                                            else -> PagerConfig.ZoomType.Center
-                                        }
-                                    val centroid =
-                                        when (doublePageZoomType) {
-                                            PagerConfig.ZoomType.Right ->
-                                                Offset(viewportWidthPx, viewportHeightPx / 2f)
-                                            PagerConfig.ZoomType.Left ->
-                                                Offset(0f, viewportHeightPx / 2f)
-                                            PagerConfig.ZoomType.Center ->
-                                                Offset(
-                                                    viewportWidthPx / 2f,
-                                                    viewportHeightPx / 2f,
-                                                )
-                                        }
-                                    zoomableState.zoomTo(
-                                        zoomFactor = targetScale,
-                                        centroid = centroid,
-                                    )
-                                }
-                            }
-                            autoZoomApplied = true
-                        }
-                    }
-                }
-            }
-
-            val firstModel =
-                remember(first) {
-                    ImageRequest.Builder(context)
-                        .data(first)
-                        .size(CoilSize.ORIGINAL)
-                        .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
-                        .precision(Precision.EXACT)
-                        .crossfade(true)
-                        .build()
-                }
-            val secondModel =
-                remember(second) {
-                    ImageRequest.Builder(context)
-                        .data(second)
-                        .size(CoilSize.ORIGINAL)
-                        .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
-                        .precision(Precision.EXACT)
-                        .crossfade(true)
-                        .build()
-                }
-
-            Box(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .zoomable(
-                            state = zoomableState,
-                            onDoubleClick = doubleClickToZoomListener,
-                        ),
-                contentAlignment = Alignment.Center,
-            ) {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.spacedBy(Size.tiny * doublePageGap),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        AsyncImage(
-                            model = firstModel,
-                            contentDescription = null,
-                            contentScale = contentScale,
-                            alignment = Alignment.CenterEnd,
-                            modifier = Modifier.weight(1f).fillMaxHeight(),
-                            onSuccess = { state ->
-                                val img = state.result.image
-                                if (img.width > 0 && img.height > 0) {
-                                    firstSize =
-                                        ComposeSize(img.width.toFloat(), img.height.toFloat())
-                                }
-                            },
-                        )
-                        AsyncImage(
-                            model = secondModel,
-                            contentDescription = null,
-                            contentScale = contentScale,
-                            alignment = Alignment.CenterStart,
-                            modifier = Modifier.weight(1f).fillMaxHeight(),
-                            onSuccess = { state ->
-                                val img = state.result.image
-                                if (img.width > 0 && img.height > 0) {
-                                    secondSize =
-                                        ComposeSize(img.width.toFloat(), img.height.toFloat())
-                                }
-                            },
-                        )
-                    }
-                }
-            }
         }
 
         ReaderPageLoadingOverlay(status = combinedStatus, progress = combinedProgress)
@@ -622,6 +452,59 @@ fun PagerPageItem(
             message = page.errorMessage ?: extraPage?.errorMessage,
         )
     }
+}
+
+/** Legacy compatibility overload for [PagerPageItem] passing [PagerViewer]. */
+@Deprecated("Use stateless PagerPageItem with PagerViewerConfigUiModel")
+@Composable
+fun PagerPageItem(
+    viewer: PagerViewer,
+    page: ReaderPage,
+    extraPage: ReaderPage? = null,
+    modifier: Modifier = Modifier,
+) {
+    val readerPreferences: ReaderPreferences = remember { Injekt.get() }
+    val imageScaleType by readerPreferences.imageScaleType().collectAsState()
+    val doublePageGap by readerPreferences.doublePageGap().collectAsState()
+    val invertDoublePages by readerPreferences.invertDoublePages().collectAsState()
+    val readerThemePref by readerPreferences.readerTheme().collectAsState()
+    val landscapeZoom by readerPreferences.landscapeZoom().collectAsState()
+    val zoomStart by readerPreferences.zoomStart().collectAsState()
+
+    val themeBackground = MaterialTheme.colorScheme.background
+    val backgroundColor =
+        remember(readerThemePref, themeBackground) {
+            ReaderTheme.fromPreference(readerThemePref).color(themeBackground)
+        }
+
+    val config =
+        PagerViewerConfigUiModel(
+            backgroundColor = backgroundColor,
+            isRtl = viewer.isRtl,
+            imageScaleType = imageScaleType,
+            doublePageGap = doublePageGap,
+            invertDoublePages = invertDoublePages,
+            landscapeZoom = landscapeZoom,
+            zoomStart = zoomStart,
+            doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
+            longTapEnabled = viewer.config.longTapEnabled,
+            menuVisible = viewer.activity.menuVisible,
+            navigator = viewer.config.navigator,
+            onToggleMenu = remember(viewer) { { viewer.activity.toggleMenu() } },
+            onNavigateAdjacent =
+                remember(viewer) {
+                    { forward -> if (forward) viewer.moveToNext() else viewer.moveToPrevious() }
+                },
+            onPageLongTap = remember(viewer) { { p, ep -> viewer.activity.onPageLongTap(p, ep) } },
+            onWidePageDetected = remember(viewer) { { p -> viewer.splitDoublePages(p) } },
+        )
+
+    PagerPageItem(
+        page = page,
+        config = config,
+        extraPage = extraPage,
+        modifier = modifier,
+    )
 }
 
 private object SmartFitContentScale : ContentScale {

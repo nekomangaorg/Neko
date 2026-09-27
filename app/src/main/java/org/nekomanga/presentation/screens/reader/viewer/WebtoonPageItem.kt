@@ -55,7 +55,11 @@ fun WebtoonPageItem(
     onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
+    LaunchedEffect(page) {
+        if (page.status == Page.State.QUEUE) {
+            page.chapter.pageLoader?.loadPage(page)
+        }
+    }
 
     val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
     val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)
@@ -81,7 +85,11 @@ fun WebtoonPageItem(
     modifier: Modifier = Modifier,
 ) {
     val page = split.page
-    LaunchedEffect(page) { page.chapter.pageLoader?.loadPage(page) }
+    LaunchedEffect(page) {
+        if (page.status == Page.State.QUEUE) {
+            page.chapter.pageLoader?.loadPage(page)
+        }
+    }
 
     val pageStatus by page.statusFlow.collectAsStateWithLifecycle(Page.State.QUEUE)
     val pageProgress by page.progressFlow.collectAsStateWithLifecycle(0)

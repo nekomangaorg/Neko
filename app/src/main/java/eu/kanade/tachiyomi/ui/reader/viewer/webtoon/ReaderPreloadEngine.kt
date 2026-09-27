@@ -72,6 +72,22 @@ class ReaderPreloadEngine(
         )
     }
 
+    fun updateActivePagerIndex(
+        activeIndex: Int,
+        items: List<ReaderUiItem>,
+        preloadAmount: Int,
+        isRtl: Boolean,
+    ) {
+        internalController.onPageSplit = onPageSplit
+        internalController.onPositionChanged(
+            currentIndex = activeIndex,
+            items = items,
+            preloadAmount = preloadAmount,
+            isRtl = isRtl,
+            isWebtoon = false,
+        )
+    }
+
     fun calculateWindowStart(
         startIndex: Int,
         items: List<ReaderUiItem>,

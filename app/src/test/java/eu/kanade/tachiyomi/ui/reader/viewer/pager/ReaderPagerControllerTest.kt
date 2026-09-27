@@ -302,4 +302,33 @@ class ReaderPagerControllerTest {
         assertTrue(ReaderPagerController.getPreloadIndices(-1, 4, 10, false).isEmpty())
         assertTrue(ReaderPagerController.getPreloadIndices(10, 4, 10, false).isEmpty())
     }
+
+    @Test
+    fun `findPageIndex finds target page in Page and SplitPage items`() {
+        val controller = ReaderPagerController()
+        val currChapter = createChapter(1L, pageCount = 4)
+        val pages = (currChapter.state as ReaderChapter.State.Loaded).pages
+
+        val split =
+            eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit(
+                page = pages[2],
+                topOffset = 0,
+                splitHeight = 500,
+            )
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(pages[0], pages[1]),
+                ReaderUiItem.SplitPage(split),
+                ReaderUiItem.Page(pages[3]),
+            )
+
+        assertEquals(0, controller.findPageIndex(items, pages[0]))
+        assertEquals(0, controller.findPageIndex(items, pages[1]))
+        assertEquals(1, controller.findPageIndex(items, pages[2]))
+        assertEquals(2, controller.findPageIndex(items, pages[3]))
+
+        val missingPage = ReaderPage(99, "missing", "missing")
+        assertEquals(-1, controller.findPageIndex(items, missingPage))
+    }
 }

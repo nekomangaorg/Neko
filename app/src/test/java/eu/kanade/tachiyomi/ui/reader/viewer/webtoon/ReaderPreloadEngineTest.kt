@@ -39,7 +39,7 @@ class ReaderPreloadEngineTest {
         engine =
             ReaderPreloadEngine(
                 context = context,
-                scope = testScope,
+                scope = testScope.backgroundScope,
                 checkTallPage = checkTallPage,
                 getScreenHeight = { 2000 },
             )
@@ -47,6 +47,7 @@ class ReaderPreloadEngineTest {
 
     @After
     fun tearDown() {
+        engine.clear()
         Dispatchers.resetMain()
     }
 
@@ -229,5 +230,21 @@ class ReaderPreloadEngineTest {
 
         advanceTimeBy(100L)
         // Completes without throwing IndexOutOfBoundsException
+        engine.clear()
+    }
+
+    @Test
+    fun `updateActivePagerIndex delegates cleanly without throwing`() = testScope.runTest {
+        val chapter = createChapter(1L, 10)
+        val items = chapter.pages!!.map { ReaderUiItem.Page(it) }
+
+        engine.updateActivePagerIndex(
+            activeIndex = 2,
+            items = items,
+            preloadAmount = 4,
+            isRtl = false,
+        )
+        advanceTimeBy(100L)
+        engine.clear()
     }
 }
