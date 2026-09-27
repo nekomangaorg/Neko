@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens.reader.viewer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -44,6 +43,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.areTransitionsEquivalent as modelAreTransitionsEquivalent
+import eu.kanade.tachiyomi.ui.reader.model.continuesInto
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
 import eu.kanade.tachiyomi.ui.reader.model.isSameChapter as modelIsSameChapter
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
@@ -322,12 +322,12 @@ fun ComposeWebtoonViewer(
                 contentPadding = config.contentPadding,
                 layoutDirection = layoutDirection,
             )
+        val entries = remember(items) { items.toWebtoonListEntries() }
+        val pageGapModifier = remember { Modifier.padding(bottom = Size.medium) }
 
         LazyColumn(
             state = lazyListState,
             contentPadding = effectiveContentPadding,
-            verticalArrangement =
-                Arrangement.spacedBy(if (config.hasGaps) Size.medium else Size.none),
             modifier =
                 Modifier.fillMaxSize()
                     .layout { measurable, constraints ->
@@ -367,15 +367,19 @@ fun ComposeWebtoonViewer(
                     ),
         ) {
             items(
-                items = items,
-                key = { it.key("webtoon") },
-            ) { item ->
+                items = entries,
+                key = { it.item.key("webtoon") },
+            ) { entry ->
+                val item = entry.item
+                val gapModifier =
+                    if (config.hasGaps && entry.hasGapBelow) pageGapModifier else Modifier
                 when (item) {
                     is ReaderUiItem.Page -> {
                         WebtoonPageItem(
                             page = item.page,
                             backgroundColor = config.backgroundColor,
                             onLongClick = { onPageLongTap(item.page) },
+                            modifier = gapModifier,
                         )
                     }
                     is ReaderUiItem.SplitPage -> {
@@ -383,6 +387,7 @@ fun ComposeWebtoonViewer(
                             split = item.split,
                             backgroundColor = config.backgroundColor,
                             onLongClick = { onPageLongTap(item.page) },
+                            modifier = gapModifier,
                         )
                     }
                     is ReaderUiItem.Transition -> {
@@ -410,7 +415,8 @@ fun ComposeWebtoonViewer(
                                 }
                             },
                             modifier =
-                                Modifier.fillMaxWidth()
+                                gapModifier
+                                    .fillMaxWidth()
                                     .defaultMinSize(minHeight = maxHeight / 2)
                                     .padding(
                                         top =
@@ -617,6 +623,19 @@ internal fun areTransitionsEquivalent(a: ChapterTransition, b: ChapterTransition
     modelAreTransitionsEquivalent(a, b)
 
 internal fun areItemsEquivalent(a: ReaderUiItem, b: ReaderUiItem): Boolean = a.isEquivalentTo(b)
+
+/** A webtoon list item and whether it gets a page gap below it when page gaps are on. */
+internal data class WebtoonListEntry(val item: ReaderUiItem, val hasGapBelow: Boolean)
+
+/**
+ * Every item gets a page gap below it except the last one and a slice that continues into the next
+ * slice of the same tall page, so a split page reads as one image.
+ */
+internal fun List<ReaderUiItem>.toWebtoonListEntries(): List<WebtoonListEntry> =
+    mapIndexed { index, item ->
+        val next = getOrNull(index + 1)
+        WebtoonListEntry(item, hasGapBelow = next != null && !item.continuesInto(next))
+    }
 
 internal fun calculateEffectiveContentPadding(
     sidePadding: Dp,
