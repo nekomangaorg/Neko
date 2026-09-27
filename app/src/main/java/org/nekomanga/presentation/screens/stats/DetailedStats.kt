@@ -788,7 +788,7 @@ private fun Line(
                 data = { lineData },
                 color = ChartyColor.Solid(color),
                 modifier = Modifier.fillMaxWidth().height(height.dp).padding(Size.medium),
-                config = LineChartConfig(smoothCurve = false, showPoints = true),
+                lineChartConfig = LineChartConfig(smoothCurve = false, showPoints = true),
             )
         } else {
             Text(
