@@ -35,6 +35,18 @@ class ReaderPageSplitFetcherTest {
     }
 
     @Test
+    fun `decode budget is a quarter of a small heap`() {
+        assertEquals(32 * MIB, fallbackBitmapCacheMaxBytes(128L * MIB).toLong())
+        assertEquals(48 * MIB, fallbackBitmapCacheMaxBytes(192L * MIB).toLong())
+    }
+
+    @Test
+    fun `decode byte count rounds sampled dimensions up`() {
+        // 2305x65535 at sample size 4 is at most 577x16384.
+        assertEquals(577L * 16_384 * 4, fallbackDecodeBytes(2305, 65_535, 4))
+    }
+
+    @Test
     fun `sample size allows for sampled dimensions rounding up`() {
         // BitmapFactory decoded a 2305x65535 GIF at sample size 2 to 1153x32768, 151126016 bytes,
         // over the 150994944 byte budget of a 576 MiB heap. Rounded down it would fit.
