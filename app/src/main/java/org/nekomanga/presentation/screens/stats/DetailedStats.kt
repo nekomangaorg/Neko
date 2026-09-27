@@ -47,14 +47,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.himanshoe.charty.common.axis.AxisConfig
-import com.himanshoe.charty.common.dimens.ChartDimens
+import com.himanshoe.charty.color.ChartyColor
 import com.himanshoe.charty.line.LineChart
-import com.himanshoe.charty.line.config.LineConfig
-import com.himanshoe.charty.line.model.LineData
+import com.himanshoe.charty.line.config.LineChartConfig
+import com.himanshoe.charty.line.data.LineData
 import com.himanshoe.charty.pie.PieChart
-import com.himanshoe.charty.pie.config.PieConfig
-import com.himanshoe.charty.pie.config.PieData
+import com.himanshoe.charty.pie.config.PieChartConfig
+import com.himanshoe.charty.pie.config.PieChartStyle
+import com.himanshoe.charty.pie.data.PieData
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import jp.wasabeef.gap.Gap
@@ -349,7 +349,7 @@ private fun StartYearView(
     val lineData = remember {
         sortedSeries.mapNotNull {
             if (it.key != notStartedString) {
-                LineData(xValue = it.key, yValue = it.value.size.toFloat())
+                LineData(label = it.key, value = it.value.size.toFloat())
             } else {
                 null
             }
@@ -754,8 +754,8 @@ private fun Pie(pieData: List<PieData>, chartWidth: Float, modifier: Modifier = 
         if (pieData.isNotEmpty()) {
             PieChart(
                 modifier = Modifier.fillMaxWidth(chartWidth),
-                pieData = pieData,
-                config = PieConfig(isDonut = true, expandDonutOnClick = false),
+                data = { pieData },
+                config = PieChartConfig(style = PieChartStyle.DONUT),
             )
         } else {
             Text(
@@ -785,20 +785,10 @@ private fun Line(
             val height = LocalConfiguration.current.screenHeightDp / 3
 
             LineChart(
-                lineData = lineData,
-                color = color,
+                data = { lineData },
+                color = ChartyColor.Solid(color),
                 modifier = Modifier.fillMaxWidth().height(height.dp).padding(Size.medium),
-                chartDimens = ChartDimens(Size.small),
-                axisConfig =
-                    AxisConfig(
-                        showAxis = true,
-                        isAxisDashed = false,
-                        showUnitLabels = true,
-                        showXLabels = true,
-                        xAxisColor = MaterialTheme.colorScheme.onSurface,
-                        yAxisColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                lineConfig = LineConfig(hasSmoothCurve = false, hasDotMarker = true),
+                config = LineChartConfig(smoothCurve = false, showPoints = true),
             )
         } else {
             Text(
@@ -915,7 +905,11 @@ private fun <T> pieData(
                 Sort.Duration -> entry.value.sumOf { it.readDuration }
             }
         if (data.toFloat() > 0) {
-            PieData(data.toFloat(), colorMap[entry.key]!!)
+            PieData(
+                label = entry.key.toString(),
+                value = data.toFloat(),
+                color = ChartyColor.Solid(colorMap[entry.key]!!),
+            )
         } else {
             null
         }
