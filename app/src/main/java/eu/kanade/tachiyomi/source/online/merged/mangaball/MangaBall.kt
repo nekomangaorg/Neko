@@ -8,27 +8,25 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
-import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.lang.toDisplayMessage
-import eu.kanade.tachiyomi.util.system.tryParse
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.json.Json
-import okhttp3.FormBody
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import okhttp3.Headers
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.Response
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.closeQuietly
-import org.jsoup.nodes.Document
-import org.nekomanga.constants.Constants
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import tachiyomi.core.network.HttpException
 import tachiyomi.core.network.await
 import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.injectLazy
@@ -54,94 +52,17 @@ class MangaBall : ReducedHttpSource() {
 
     override val headers: Headers = Headers.Builder().apply { add("Referer", "$baseUrl/") }.build()
 
-    override val client =
-        network.cloudFlareClient
-            .newBuilder()
-            .addInterceptor { chain ->
-                try {
-                    var request = chain.request()
-                    if (request.url.pathSegments.getOrNull(0) == "api") {
-                        request =
-                            request
-                                .newBuilder()
-                                .header("X-Requested-With", "XMLHttpRequest")
-                                .header("X-CSRF-TOKEN", getCSRF())
-                                .build()
-
-                        val response = chain.proceed(request)
-                        if (!response.isSuccessful && response.code == 403) {
-                            response.close()
-                            request =
-                                request
-                                    .newBuilder()
-                                    .header("X-CSRF-TOKEN", getCSRF(forceReset = true))
-                                    .build()
-
-                            chain.proceed(request)
-                        } else {
-                            response
-                        }
-                    } else {
-                        chain.proceed(request)
-                    }
-                } catch (e: Exception) {
-                    if (e is IOException) throw e
-                    throw IOException(e.message, e)
-                }
-            }
-            .build()
-
-    private var _csrf: String? = null
-
-    @Synchronized
-    private fun getCSRF(document: Document? = null, forceReset: Boolean = false): String {
-        if (_csrf == null || document != null || forceReset) {
-            val doc =
-                document
-                    ?: try {
-                        client.newCall(GET(baseUrl, headers)).execute().asJsoup()
-                    } catch (e: Exception) {
-                        if (e is IOException) throw e
-                        throw IOException("Failed to fetch CSRF page", e)
-                    }
-
-            doc.selectFirst("meta[name=csrf-token]")
-                ?.attr("content")
-                ?.takeIf { it.isNotBlank() }
-                ?.also { _csrf = it }
-        }
-
-        return _csrf ?: throw IOException("CSRF token not found")
-    }
+    override val client = network.cloudFlareClient
 
     override suspend fun searchManga(query: String): List<SManga> {
-        val body =
-            FormBody.Builder()
-                .apply {
-                    add("search_input", query.trim())
-                    siteLangs().forEach { add("filters[translatedLanguage][]", it) }
-                }
-                .build()
-
-        /* val response =
-        client.newCall(POST("$baseUrl/api/v1/title/search-advanced/", headers, body)).await()*/
         val response =
-            client.newCall(POST("$baseUrl/api/v1/smart-search/search", headers, body)).await()
-        return parseSearchManga(response)
-    }
-
-    private fun parseSearchManga(response: Response): List<SManga> {
+            client.newCall(GET(searchUrl(query, siteLangs()).toString(), headers)).await()
+        if (!response.isSuccessful) {
+            response.closeQuietly()
+            throw HttpException(response.code)
+        }
         val search = with(json) { response.parseAs<SearchResponse>() }
-
-        val mangaList =
-            search.data.manga.map {
-                SManga.create().apply {
-                    url = (baseUrl + it.url).toHttpUrl().pathSegments[1]
-                    title = it.title
-                    thumbnail_url = it.img
-                }
-            }
-        return mangaList
+        return search.data.map { it.toSManga() }
     }
 
     override suspend fun fetchChapters(
@@ -149,16 +70,24 @@ class MangaBall : ReducedHttpSource() {
     ): Result<List<SChapterStatusPair>, ResultError> {
         return try {
             val id = mangaUrl.substringAfterLast("-")
-            val body = FormBody.Builder().add("title_id", id).build()
-
             val response =
                 client
                     .newCall(
-                        POST("$baseUrl/api/v1/chapter/chapter-listing-by-title-id/", headers, body)
+                        POST(
+                            "$baseUrl/api/v1/chapter/chapter-listing-by-title-id",
+                            headers,
+                            titleIdBody(id),
+                        )
                     )
                     .await()
+            if (!response.isSuccessful) {
+                response.closeQuietly()
+                return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
+            }
 
-            parseChapters(response)
+            val chapterList = with(json) { response.parseAs<ChapterListResponse>() }
+            val enabledSiteLangs = siteLangs()
+            Ok(chapterList.data.mapNotNull { it.toSChapter(enabledSiteLangs) }.map { it to false })
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -167,136 +96,47 @@ class MangaBall : ReducedHttpSource() {
         }
     }
 
-    private fun parseChapters(response: Response): Result<List<SChapterStatusPair>, ResultError> {
-
-        val data = with(json) { response.parseAs<ChapterListResponse>() }
-        val enabledSiteLangs = siteLangs()
-
-        val chapters =
-            data.chapters.flatMap { chapter ->
-                chapter.translations.mapNotNull { translation ->
-                    val language = MangaBallLang.fromMangaBallLang(translation.language)
-                    if (translation.language in enabledSiteLangs && language != null) {
-                        SChapter.create().apply {
-                            url = translation.id
-                            val chapterName = mutableListOf<String>()
-                            if (translation.volume > 0) {
-                                val volume =
-                                    "Vol.${translation.volume.toString().removeSuffix(".0")}"
-                                vol = volume
-                                chapterName.add(volume)
-                            }
-
-                            val number = chapter.number.toString().removeSuffix(".0")
-
-                            val chapterNum = "Ch.$number"
-                            chapter_txt = chapterNum
-
-                            chapterName.add(chapterNum)
-
-                            val title = normalizeChapterName(translation.name, chapter.number)
-                            if (title.isNotBlank()) {
-                                chapterName.add("-")
-                                chapterName.add(title)
-                            }
-
-                            name = chapterName.joinToString(" ")
-
-                            chapter_number = chapter.number
-                            date_upload = dateFormat.tryParse(translation.date)
-                            val scanlatorList = mutableListOf(MangaBall.name)
-                            scanlatorList.add(translation.group.name)
-                            if (groupIdRegex.matchEntire(translation.group.id) == null) {
-                                scanlatorList.add("(${translation.group.id})")
-                            }
-
-                            scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
-                            this.language = language
-                        }
-                    } else {
-                        null
-                    }
-                }
-            }
-
-        return Ok(chapters.map { it to false })
-    }
-
-    fun normalizeChapterName(name: String, number: Float): String {
-        val trimmedName = name.trim()
-
-        // Regex to find "Chapter XXX:", "Ch. 12:", "Chapter 12.1 - ", etc.
-        // This matches the prefix AND a separator (like ':', '-', '—')
-        // and returns *only* the text after it.
-        val prefixRegex = Regex("""^(?i)(Chapter|Ch\.?)\s+\d+(\.\d+)?\s*[:\-–—]\s*(.*)$""")
-        val prefixMatch = prefixRegex.find(trimmedName)
-        if (prefixMatch != null) {
-            // Found a prefix and a title. Return just the title part.
-            // groupValues[3] is the (.*) part
-            return prefixMatch.groupValues[3].trim()
-        }
-
-        // Regex to find if the *entire string* is just a chapter identifier
-        // (e.f., "Chapter 1506", "Ch. 12", "Chapter 04")
-        val fullMatchRegex = Regex("""^(?i)(Chapter|Ch\.?)\s+\d+(\.\d+)?\s*$""")
-        if (fullMatchRegex.matches(trimmedName)) {
-            // The name is just "Chapter XXX", no title.
-            return ""
-        }
-
-        // Check if the name is *just* the number (e.g., "77.1")
-        val numAsStr =
-            if (number == number.toInt().toFloat()) {
-                number.toInt().toString() // "77"
-            } else {
-                number.toString() // "77.1"
-            }
-
-        if (trimmedName == numAsStr) {
-            return ""
-        }
-
-        // If no patterns matched, the name is already a valid title.
-        // (e.g., "Official Translation", "The Island of Destiny")
-        return trimmedName
-    }
-
-    private val groupIdRegex = Regex("""[a-z0-9]{24}""")
-
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT)
-
     override fun getMangaUrl(url: String): String {
-        return "$baseUrl/title-detail/$url/"
+        return "$baseUrl/title-detail/$url"
     }
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
-        return getChapterUrl(simpleChapter.url)
-    }
-
-    private fun getChapterUrl(url: String): String {
-        return "$baseUrl/chapter-detail/$url/"
+        return "$baseUrl/chapter-detail/${simpleChapter.url}"
     }
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
-        val response = client.newCall(GET(getChapterUrl(chapter.url), headers)).await()
-        val document = response.asJsoup()
-        response.closeQuietly()
-        getCSRF(document)
-
-        val script =
-            document.select("script:containsData(chapterImages)").joinToString(";") { it.data() }
-        val images =
-            with(json) {
-                imagesRegex.find(script)?.groupValues?.get(1)?.parseAs<List<String>>().orEmpty()
-            }
-
-        return images.mapIndexed { idx, img -> Page(idx, imageUrl = img) }
+        val url =
+            "$baseUrl/api/v1/chapter-detail"
+                .toHttpUrl()
+                .newBuilder()
+                .addQueryParameter("chapter_id", chapter.url)
+                .build()
+        val response = client.newCall(GET(url.toString(), headers)).await()
+        if (!response.isSuccessful) {
+            response.closeQuietly()
+            throw HttpException(response.code)
+        }
+        return with(json) { response.parseAs<ChapterDetailResponse>() }.toPageList()
     }
-
-    private val imagesRegex = Regex("""const\s+chapterImages\s*=\s*JSON\.parse\(`([^`]+)`\)""")
 
     companion object {
         const val name = "Manga Ball"
-        const val baseUrl = "https://mangaball.net"
+        const val baseUrl = "https://mangaball.com"
+
+        fun searchUrl(query: String, siteLangs: List<String>): HttpUrl =
+            "$baseUrl/api/v1/title/search-advanced"
+                .toHttpUrl()
+                .newBuilder()
+                .addQueryParameter("page", "1")
+                .addQueryParameter("limit", "24")
+                .addQueryParameter("keyword", query.trim())
+                .addQueryParameter("translated_language", siteLangs.joinToString(","))
+                .build()
+
+        /** The API answers 400 to a charset in Content-Type, which String.toRequestBody adds. */
+        fun titleIdBody(titleId: String): RequestBody {
+            val body = buildJsonObject { put("title_id", titleId) }.toString()
+            return body.toByteArray().toRequestBody("application/json".toMediaType())
+        }
     }
 }
