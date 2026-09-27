@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.manga.shouldDownloadNewChapters
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -226,6 +227,7 @@ class MangaUpdateCoordinator {
                     val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
                     runCatching { source.fetchChapters(mergeManga.url) }
                         .getOrElse { e ->
+                            if (e is CancellationException) throw e
                             TimberKt.e(e) {
                                 "Failed to fetch chapters for merged source: ${source.name}"
                             }

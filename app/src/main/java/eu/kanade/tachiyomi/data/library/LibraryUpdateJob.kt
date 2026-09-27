@@ -404,6 +404,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                             MergeType.getSource(mergeManga.mergeType, sourceManager)
                                         runCatching { source.fetchChapters(mergeManga.url) }
                                             .getOrElse { e ->
+                                                if (e is CancellationException) throw e
                                                 TimberKt.e(e) {
                                                     "Error fetching merged chapters for ${mergeManga.mergeType}"
                                                 }

@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.util.system.tryParse
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.json.Json
 import okhttp3.FormBody
 import okhttp3.Headers
@@ -158,6 +159,8 @@ class MangaBall : ReducedHttpSource() {
                     .await()
 
             parseChapters(response)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             TimberKt.e(e) { "Error fetching chapters for MangaBall" }
             Err(ResultError.Generic(e.toDisplayMessage()))
