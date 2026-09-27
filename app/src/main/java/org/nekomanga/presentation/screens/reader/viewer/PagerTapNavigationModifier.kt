@@ -237,7 +237,6 @@ internal fun dispatchNavigation(
             NavigationRegion.PREV -> false
             NavigationRegion.RIGHT -> !isRtl
             NavigationRegion.LEFT -> isRtl
-            NavigationRegion.MENU -> return
         }
     onNavigateAdjacent(forward)
 }
