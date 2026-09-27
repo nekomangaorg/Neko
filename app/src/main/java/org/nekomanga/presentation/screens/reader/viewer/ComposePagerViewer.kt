@@ -252,13 +252,20 @@ fun ComposePagerViewer(
         }
     }
 
-    // 4. Safety watchdog: clear stale pending navigation command after generous timeout
-    LaunchedEffect(pendingNavCommand) {
+    // 4. Safety watchdog: clear stale pending navigation command after timeout
+    LaunchedEffect(pendingNavCommand, currentIsNavigating) {
         if (pendingNavCommand != null) {
-            // Generous 15-second safety watchdog so slow network or disk chapter loading
-            // does not prematurely drop valid user navigation commands.
-            delay(15000L)
-            pendingNavCommand = null
+            if (currentIsNavigating) {
+                // Generous 60-second safety backstop while a chapter is actively loading/settling
+                // so slow network or disk loading does not prematurely drop valid user navigation
+                // commands.
+                delay(60000L)
+                pendingNavCommand = null
+            } else {
+                // If viewer is idle and navigation was not consumed within 10s, clear stale command
+                delay(10000L)
+                pendingNavCommand = null
+            }
         }
     }
 
@@ -269,7 +276,7 @@ fun ComposePagerViewer(
         }
     }
 
-    // 4. Track active page changes and dispatch selections
+    // 6. Track active page changes, dispatch selections, and trigger threshold preloads
     LaunchedEffect(pagerState, items) {
         snapshotFlow { pagerState.currentPage }
             .distinctUntilChanged()
@@ -309,27 +316,12 @@ fun ComposePagerViewer(
                         }
                     }
                     is ReaderUiItem.SplitPage -> onPageSelected(item.page, false)
-                    is ReaderUiItem.Transition -> onTransitionSelected(item.transition)
+                    is ReaderUiItem.Transition -> {
+                        onTransitionSelected(item.transition)
+                        item.transition.to?.let { config.onRequestPreloadChapter?.invoke(it) }
+                    }
                 }
             }
-    }
-
-    // 5. Eagerly preload adjacent chapters when items update
-    LaunchedEffect(config.activeChapterId, items) {
-        val nextTransition =
-            items.firstOrNull {
-                it is ReaderUiItem.Transition && it.transition is ChapterTransition.Next
-            } as? ReaderUiItem.Transition
-        nextTransition?.transition?.to?.let { nextChapter ->
-            config.onRequestPreloadChapter?.invoke(nextChapter)
-        }
-        val prevTransition =
-            items.firstOrNull {
-                it is ReaderUiItem.Transition && it.transition is ChapterTransition.Prev
-            } as? ReaderUiItem.Transition
-        prevTransition?.transition?.to?.let { prevChapter ->
-            config.onRequestPreloadChapter?.invoke(prevChapter)
-        }
     }
 
     val density = LocalDensity.current
