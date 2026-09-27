@@ -20,6 +20,7 @@ import androidx.work.WorkerParameters
 import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onErr
@@ -96,6 +97,7 @@ import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
 import org.nekomanga.domain.library.ScanlatorFilterOption
+import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
@@ -398,8 +400,15 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                 withIOContext {
                                     mergeMangaList.map { mergeManga ->
                                         // in the future check the merge type
-                                        MergeType.getSource(mergeManga.mergeType, sourceManager)
-                                            .fetchChapters(mergeManga.url)
+                                        val source =
+                                            MergeType.getSource(mergeManga.mergeType, sourceManager)
+                                        runCatching { source.fetchChapters(mergeManga.url) }
+                                            .getOrElse { e ->
+                                                TimberKt.e(e) {
+                                                    "Error fetching merged chapters for ${mergeManga.mergeType}"
+                                                }
+                                                Err(ResultError.Generic(e.toDisplayMessage()))
+                                            }
                                             .onErr {
                                                 errorFromMerged = true
                                                 failedUpdates[manga] =

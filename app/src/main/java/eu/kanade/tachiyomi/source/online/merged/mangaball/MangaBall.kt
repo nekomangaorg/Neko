@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.merged.mangaball
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import eu.kanade.tachiyomi.source.model.Page
@@ -8,7 +9,9 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.asJsoup
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import eu.kanade.tachiyomi.util.system.tryParse
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.serialization.json.Json
@@ -24,6 +27,7 @@ import org.nekomanga.core.network.POST
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.injectLazy
@@ -53,30 +57,35 @@ class MangaBall : ReducedHttpSource() {
         network.cloudFlareClient
             .newBuilder()
             .addInterceptor { chain ->
-                var request = chain.request()
-                if (request.url.pathSegments[0] == "api") {
-                    request =
-                        request
-                            .newBuilder()
-                            .header("X-Requested-With", "XMLHttpRequest")
-                            .header("X-CSRF-TOKEN", getCSRF())
-                            .build()
-
-                    val response = chain.proceed(request)
-                    if (!response.isSuccessful && response.code == 403) {
-                        response.close()
+                try {
+                    var request = chain.request()
+                    if (request.url.pathSegments.getOrNull(0) == "api") {
                         request =
                             request
                                 .newBuilder()
-                                .header("X-CSRF-TOKEN", getCSRF(forceReset = true))
+                                .header("X-Requested-With", "XMLHttpRequest")
+                                .header("X-CSRF-TOKEN", getCSRF())
                                 .build()
 
-                        chain.proceed(request)
+                        val response = chain.proceed(request)
+                        if (!response.isSuccessful && response.code == 403) {
+                            response.close()
+                            request =
+                                request
+                                    .newBuilder()
+                                    .header("X-CSRF-TOKEN", getCSRF(forceReset = true))
+                                    .build()
+
+                            chain.proceed(request)
+                        } else {
+                            response
+                        }
                     } else {
-                        response
+                        chain.proceed(request)
                     }
-                } else {
-                    chain.proceed(request)
+                } catch (e: Exception) {
+                    if (e is IOException) throw e
+                    throw IOException(e.message, e)
                 }
             }
             .build()
@@ -86,7 +95,14 @@ class MangaBall : ReducedHttpSource() {
     @Synchronized
     private fun getCSRF(document: Document? = null, forceReset: Boolean = false): String {
         if (_csrf == null || document != null || forceReset) {
-            val doc = document ?: client.newCall(GET(baseUrl, headers)).execute().asJsoup()
+            val doc =
+                document
+                    ?: try {
+                        client.newCall(GET(baseUrl, headers)).execute().asJsoup()
+                    } catch (e: Exception) {
+                        if (e is IOException) throw e
+                        throw IOException("Failed to fetch CSRF page", e)
+                    }
 
             doc.selectFirst("meta[name=csrf-token]")
                 ?.attr("content")
@@ -94,7 +110,7 @@ class MangaBall : ReducedHttpSource() {
                 ?.also { _csrf = it }
         }
 
-        return _csrf ?: throw Exception("CSRF token not found")
+        return _csrf ?: throw IOException("CSRF token not found")
     }
 
     override suspend fun searchManga(query: String): List<SManga> {
@@ -130,17 +146,22 @@ class MangaBall : ReducedHttpSource() {
     override suspend fun fetchChapters(
         mangaUrl: String
     ): Result<List<SChapterStatusPair>, ResultError> {
-        val id = mangaUrl.substringAfterLast("-")
-        val body = FormBody.Builder().add("title_id", id).build()
+        return try {
+            val id = mangaUrl.substringAfterLast("-")
+            val body = FormBody.Builder().add("title_id", id).build()
 
-        val response =
-            client
-                .newCall(
-                    POST("$baseUrl/api/v1/chapter/chapter-listing-by-title-id/", headers, body)
-                )
-                .await()
+            val response =
+                client
+                    .newCall(
+                        POST("$baseUrl/api/v1/chapter/chapter-listing-by-title-id/", headers, body)
+                    )
+                    .await()
 
-        return parseChapters(response)
+            parseChapters(response)
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Error fetching chapters for MangaBall" }
+            Err(ResultError.Generic(e.toDisplayMessage()))
+        }
     }
 
     private fun parseChapters(response: Response): Result<List<SChapterStatusPair>, ResultError> {
