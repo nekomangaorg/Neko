@@ -19,10 +19,7 @@ import coil3.request.Options
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
-import java.util.concurrent.ConcurrentHashMap
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -139,14 +136,90 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                     value.bitmap.byteCount
             }
 
-        private val activeFetches = ConcurrentHashMap<String, Deferred<ByteArray>>()
-        private val activeDecodes = ConcurrentHashMap<String, Deferred<CachedDecodedImage?>>()
+        private val activeFetches = SharedWork<ByteArray>()
+        private val activeDecodes = SharedWork<CachedDecodedImage?>()
 
         fun clearCache() {
-            rawBytesCache.evictAll()
-            fallbackBitmapCache.evictAll()
+            // clear() leaves running work alone because the next reader can already be waiting on
+            // it when the old reader's destroy calls this. Clearing the shared work before the
+            // evictions makes that work skip its put, so it cannot refill the caches.
             activeFetches.clear()
             activeDecodes.clear()
+            rawBytesCache.evictAll()
+            fallbackBitmapCache.evictAll()
+        }
+
+        private fun performFullDecode(imageBytes: ByteArray, pageIndex: Int): CachedDecodedImage? {
+            val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, boundsOptions)
+            val imageWidth = boundsOptions.outWidth
+            val imageHeight = boundsOptions.outHeight
+
+            if (imageWidth <= 0 || imageHeight <= 0) {
+                TimberKt.e {
+                    "Cannot fallback decode region: invalid image dimensions ($imageWidth x $imageHeight)"
+                }
+                return null
+            }
+
+            val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
+
+            // LruCache evicts on put, after the new bitmap is allocated. Evicting first keeps
+            // cached pages plus the new bitmap within the budget when pages decode one at a time.
+            val expectedBytes = fallbackDecodeBytes(imageWidth, imageHeight, sampleSize)
+            fallbackBitmapCache.trimToSize(
+                (fallbackBitmapCache.maxSize() - expectedBytes).coerceAtLeast(0).toInt()
+            )
+
+            val decodeOptions =
+                BitmapFactory.Options().apply {
+                    inSampleSize = sampleSize
+                    inPreferredConfig = Bitmap.Config.ARGB_8888
+                }
+
+            return try {
+                val full =
+                    BitmapFactory.decodeByteArray(
+                        imageBytes,
+                        0,
+                        imageBytes.size,
+                        decodeOptions,
+                    )
+                if (full != null) {
+                    CachedDecodedImage(full, imageWidth, imageHeight)
+                } else {
+                    null
+                }
+            } catch (e: OutOfMemoryError) {
+                TimberKt.e(e) { "OutOfMemoryError during fallback decode for page $pageIndex" }
+                fallbackBitmapCache.evictAll()
+                rawBytesCache.evictAll()
+                try {
+                    val fallbackOptions =
+                        BitmapFactory.Options().apply {
+                            inSampleSize = (sampleSize * 2).coerceAtLeast(2)
+                            inPreferredConfig = Bitmap.Config.RGB_565
+                        }
+                    val full =
+                        BitmapFactory.decodeByteArray(
+                            imageBytes,
+                            0,
+                            imageBytes.size,
+                            fallbackOptions,
+                        )
+                    if (full != null) {
+                        CachedDecodedImage(full, imageWidth, imageHeight)
+                    } else {
+                        null
+                    }
+                } catch (e2: Throwable) {
+                    TimberKt.e(e2) { "Secondary OOM during fallback decode for page $pageIndex" }
+                    null
+                }
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Unexpected error during fallback decode for page $pageIndex" }
+                null
+            }
         }
     }
 
@@ -194,27 +267,16 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
 
         val imageBytes =
             rawBytesCache.get(cacheKey)
-                ?: run {
-                    val deferred =
-                        activeFetches.compute(cacheKey) { _, existing ->
-                            existing?.takeIf { it.isActive }
-                                ?: async(Dispatchers.IO) {
-                                    try {
-                                        actualStream()
-                                            .use { it.readBytes() }
-                                            .also {
-                                                // LruCache.put would evict a file bigger than the
-                                                // cache right away, with every other entry.
-                                                if (it.size <= rawBytesCache.maxSize()) {
-                                                    rawBytesCache.put(cacheKey, it)
-                                                }
-                                            }
-                                    } finally {
-                                        activeFetches.remove(cacheKey)
-                                    }
-                                }
-                        }!!
-                    deferred.await()
+                ?: activeFetches.await(cacheKey) {
+                    actualStream()
+                        .use { it.readBytes() }
+                        .also {
+                            // LruCache.put would evict a file bigger than the cache right away,
+                            // with every other entry.
+                            if (it.size <= rawBytesCache.maxSize()) {
+                                unlessCleared { rawBytesCache.put(cacheKey, it) }
+                            }
+                        }
                 }
 
         val bitmap =
@@ -289,27 +351,21 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         top: Int,
         height: Int,
         cacheKey: String,
-    ): Bitmap? = coroutineScope {
+    ): Bitmap? {
         val cached = fallbackBitmapCache.get(cacheKey)?.takeUnless { it.bitmap.isRecycled }
+        // The decode can outlive this fetcher, so it reads no fetcher fields. A reference to the
+        // fetcher would keep its Options and their context alive until the decode ends.
+        val pageIndex = split.page.index
         val decoded =
             cached
-                ?: run {
-                    val deferred =
-                        activeDecodes.compute(cacheKey) { _, existing ->
-                            existing?.takeIf { it.isActive }
-                                ?: async(Dispatchers.IO) {
-                                    try {
-                                        performFullDecode(imageBytes, cacheKey)
-                                    } finally {
-                                        activeDecodes.remove(cacheKey)
-                                    }
-                                }
-                        }!!
-                    deferred.await()
+                ?: activeDecodes.await(cacheKey) {
+                    performFullDecode(imageBytes, pageIndex)?.also {
+                        unlessCleared { fallbackBitmapCache.put(cacheKey, it) }
+                    }
                 }
-                ?: return@coroutineScope null
+                ?: return null
 
-        cropFallbackSlice(decoded, top, height)
+        return cropFallbackSlice(decoded, top, height)
     }
 
     private fun cropFallbackSlice(decoded: CachedDecodedImage, top: Int, height: Int): Bitmap? =
@@ -329,85 +385,6 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             }
             null
         }
-
-    private fun performFullDecode(imageBytes: ByteArray, cacheKey: String): CachedDecodedImage? {
-        val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, boundsOptions)
-        val imageWidth = boundsOptions.outWidth
-        val imageHeight = boundsOptions.outHeight
-
-        if (imageWidth <= 0 || imageHeight <= 0) {
-            TimberKt.e {
-                "Cannot fallback decode region: invalid image dimensions ($imageWidth x $imageHeight)"
-            }
-            return null
-        }
-
-        val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
-
-        // LruCache evicts on put, after the new bitmap is allocated. Evicting first keeps cached
-        // pages plus the new bitmap within the budget when pages decode one at a time.
-        val expectedBytes = fallbackDecodeBytes(imageWidth, imageHeight, sampleSize)
-        fallbackBitmapCache.trimToSize(
-            (fallbackBitmapCache.maxSize() - expectedBytes).coerceAtLeast(0).toInt()
-        )
-
-        val decodeOptions =
-            BitmapFactory.Options().apply {
-                inSampleSize = sampleSize
-                inPreferredConfig = Bitmap.Config.ARGB_8888
-            }
-
-        return try {
-            val full =
-                BitmapFactory.decodeByteArray(
-                    imageBytes,
-                    0,
-                    imageBytes.size,
-                    decodeOptions,
-                )
-            if (full != null) {
-                CachedDecodedImage(full, imageWidth, imageHeight).also {
-                    fallbackBitmapCache.put(cacheKey, it)
-                }
-            } else {
-                null
-            }
-        } catch (e: OutOfMemoryError) {
-            TimberKt.e(e) { "OutOfMemoryError during fallback decode for page ${split.page.index}" }
-            fallbackBitmapCache.evictAll()
-            rawBytesCache.evictAll()
-            try {
-                val fallbackOptions =
-                    BitmapFactory.Options().apply {
-                        inSampleSize = (sampleSize * 2).coerceAtLeast(2)
-                        inPreferredConfig = Bitmap.Config.RGB_565
-                    }
-                val full =
-                    BitmapFactory.decodeByteArray(
-                        imageBytes,
-                        0,
-                        imageBytes.size,
-                        fallbackOptions,
-                    )
-                if (full != null) {
-                    CachedDecodedImage(full, imageWidth, imageHeight).also {
-                        fallbackBitmapCache.put(cacheKey, it)
-                    }
-                } else {
-                    null
-                }
-            } catch (e2: Throwable) {
-                TimberKt.e(e2) {
-                    "Secondary OOM during fallback decode for page ${split.page.index}"
-                }
-                null
-            }
-        } catch (e: Exception) {
-            TimberKt.e(e) { "Unexpected error during fallback decode for page ${split.page.index}" }
-            null
-        }
-    }
 
     class Factory : Fetcher.Factory<ReaderPageSplit> {
         override fun create(
