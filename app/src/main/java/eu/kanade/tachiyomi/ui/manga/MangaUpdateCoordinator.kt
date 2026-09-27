@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import androidx.room.withTransaction
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
@@ -14,8 +15,10 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.chapter.getChapterNum
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.manga.shouldDownloadNewChapters
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -40,6 +43,7 @@ import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.manga.toManga
 import org.nekomanga.domain.manga.toMangaItem
 import org.nekomanga.domain.manga.uuid
+import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
@@ -221,8 +225,14 @@ class MangaUpdateCoordinator {
             mergeMangaRepository.getMergeMangaList(manga.id!!).map { mergeManga ->
                 async {
                     val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
-                    source
-                        .fetchChapters(mergeManga.url)
+                    runCatching { source.fetchChapters(mergeManga.url) }
+                        .getOrElse { e ->
+                            if (e is CancellationException) throw e
+                            TimberKt.e(e) {
+                                "Failed to fetch chapters for merged source: ${source.name}"
+                            }
+                            Err(ResultError.Generic(e.toDisplayMessage()))
+                        }
                         .onErr {
                             val msg = "Failed to fetch from ${source.name}: ${it.message()}"
                             send(MangaResult.Error(text = msg))
