@@ -1,6 +1,6 @@
 # Technical Proposal: Tap vs Double-Tap Navigation Disambiguation in Compose Pager
 
-**Status:** Proposed / Under Review  
+**Status:** Implemented / Complete  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling & Gesture Stabilization  
