@@ -262,6 +262,13 @@ fun ComposePagerViewer(
         }
     }
 
+    // 5. Invalidate deferred navigation if user manually intervenes by swiping
+    LaunchedEffect(pagerState.isScrollInProgress) {
+        if (pagerState.isScrollInProgress && !currentIsNavigating && pendingNavCommand != null) {
+            pendingNavCommand = null
+        }
+    }
+
     // 4. Track active page changes and dispatch selections
     LaunchedEffect(pagerState, items) {
         snapshotFlow { pagerState.currentPage }
