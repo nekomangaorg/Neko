@@ -7,11 +7,13 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -19,6 +21,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SharedWorkTest {
 
     private val sharedWork = SharedWork<String>()
@@ -95,6 +98,59 @@ class SharedWorkTest {
             work.finish()
             assertEquals("decoded", withTimeout(5_000) { waiter.await() })
         }
+
+    @Test
+    fun `work that is running during clear gives callers its result but skips its put`() =
+        runBlocking {
+            val work = BlockingWork("decoded")
+            val puts = LinkedBlockingQueue<String>()
+            val caller =
+                callers.async(start = CoroutineStart.UNDISPATCHED) {
+                    sharedWork.await(key) { work.run().also { unlessCleared { puts.put(it) } } }
+                }
+            assertEquals("decoded", started.poll(5, TimeUnit.SECONDS))
+
+            sharedWork.clear()
+            work.finish()
+
+            assertEquals("decoded", withTimeout(5_000) { caller.await() })
+            assertTrue("put ran after clear: $puts", puts.isEmpty())
+        }
+
+    @Test
+    fun `work that waits for a thread during clear skips its put`() = runBlocking {
+        val dispatcher = StandardTestDispatcher()
+        val queuedWork = SharedWork<String>(dispatcher)
+        val puts = LinkedBlockingQueue<String>()
+        val caller =
+            callers.async(start = CoroutineStart.UNDISPATCHED) {
+                queuedWork.await(key) { "decoded".also { unlessCleared { puts.put(it) } } }
+            }
+
+        queuedWork.clear()
+        dispatcher.scheduler.runCurrent()
+
+        assertEquals("decoded", withTimeout(5_000) { caller.await() })
+        assertTrue("put ran after clear: $puts", puts.isEmpty())
+    }
+
+    @Test
+    fun `work that is not cleared runs its put`() = runBlocking {
+        val puts = LinkedBlockingQueue<String>()
+        val result = sharedWork.await(key) { "decoded".also { unlessCleared { puts.put(it) } } }
+
+        assertEquals("decoded", result)
+        assertEquals(listOf("decoded"), puts.toList())
+    }
+
+    @Test
+    fun `work that starts after clear runs its put`() = runBlocking {
+        sharedWork.clear()
+        val puts = LinkedBlockingQueue<String>()
+        sharedWork.await(key) { "decoded".also { unlessCleared { puts.put(it) } } }
+
+        assertEquals(listOf("decoded"), puts.toList())
+    }
 
     @Test
     fun `work that ends after clear does not remove the entry of newer work`() = runBlocking {

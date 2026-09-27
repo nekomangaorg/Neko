@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.coil
 
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -12,15 +13,19 @@ import kotlinx.coroutines.async
  * it runs. The work runs in this class's own scope, so cancelling a caller ends only that caller's
  * wait.
  */
-internal class SharedWork<T> {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+internal class SharedWork<T>(ioDispatcher: CoroutineDispatcher = Dispatchers.IO) {
+    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private val active = ConcurrentHashMap<String, Deferred<T>>()
+    @Volatile private var clears = 0L
 
-    suspend fun await(key: String, work: suspend () -> T): T {
+    suspend fun await(key: String, work: suspend Run.() -> T): T {
         var created: Deferred<T>? = null
         val deferred =
             active.compute(key) { _, existing ->
-                existing?.takeIf { it.isActive } ?: scope.async { work() }.also { created = it }
+                // Take the clear count before dispatching the work, so a clear() that comes
+                // while the work waits for a thread still makes it skip its put.
+                existing?.takeIf { it.isActive }
+                    ?: Run(clears).let { run -> scope.async { run.work() } }.also { created = it }
             }!!
         // A newer call can put its own work under the key after clear(), or once this work is
         // done, so remove the entry only while it still holds this work.
@@ -28,7 +33,28 @@ internal class SharedWork<T> {
         return deferred.await()
     }
 
+    /** One run of the work given to [await]. */
+    inner class Run(private val clearsAtStart: Long) {
+        /**
+         * Runs [block] unless [clear] was called after [await] created this work. The check and
+         * [block] run under the lock that [clear] takes, so after [clear] returns, work created
+         * before the call never runs its block.
+         */
+        fun unlessCleared(block: () -> Unit) {
+            synchronized(this@SharedWork) {
+                if (clears == clearsAtStart) {
+                    block()
+                }
+            }
+        }
+    }
+
+    /**
+     * Forgets all work, so the next call for a key starts new work. Work that is still running
+     * keeps going and its callers get its result, but its [Run.unlessCleared] block is skipped.
+     */
     fun clear() {
+        synchronized(this) { clears++ }
         active.clear()
     }
 }
