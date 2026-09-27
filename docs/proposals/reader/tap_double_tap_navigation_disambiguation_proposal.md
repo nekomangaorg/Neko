@@ -1,6 +1,6 @@
 # Technical Proposal: Tap vs Double-Tap Navigation Disambiguation in Compose Pager
 
-**Status:** Proposed / Under Review  
+**Status:** Implemented / Complete  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling & Gesture Stabilization  
@@ -102,21 +102,26 @@ sequenceDiagram
 
 ## 3. Technical Specifications
 
-### 3.1 Debounced Navigation State Machine
+### 3.1 Decoupled PagerTapNavigationModifier
 
-1. **Retain a Cancellable Coroutine Job**:
-   Inside [`PagerPageItem.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerPageItem.kt), track a pending navigation job:
+1. **Dedicated Reusable Modifier Extension**:
+   Extracted into [`PagerTapNavigationModifier.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerTapNavigationModifier.kt) to decouple gesture detection from image layout and rendering:
    ```kotlin
-   val coroutineScope = rememberCoroutineScope()
-   var pendingNavJob by remember { mutableStateOf<Job?>(null) }
+   fun Modifier.pagerTapNavigation(
+       config: PagerViewerConfigUiModel,
+       page: ReaderPage,
+       extraPage: ReaderPage? = null,
+       coroutineScope: CoroutineScope? = null,
+   ): Modifier
    ```
 
-2. **Pointer Event Processing**:
+2. **Pointer Event Processing & Uniform Disambiguation**:
    ```kotlin
    if (isDoubleTap) {
-       // Cancel any pending single-tap navigation immediately
+       // Cancel any pending single-tap navigation immediately so pager stays stationary
        pendingNavJob?.cancel()
        pendingNavJob = null
+       pendingNavAction = null
 
        if (currentConfig.menuVisible) {
            currentConfig.onToggleMenu()
@@ -124,50 +129,48 @@ sequenceDiagram
        lastTapTime = 0L
        lastTapOffset = Offset.Zero
    } else {
+       // Flush previous pending tap if a distinct rapid tap arrives
+       if (pendingNavJob?.isActive == true) {
+           pendingNavJob?.cancel()
+           pendingNavJob = null
+           pendingNavAction?.invoke()
+           pendingNavAction = null
+       }
+
        lastTapTime = upTime
        lastTapOffset = upPos
 
-       val executeNav = {
-           when (action) {
-               ViewerNavigation.NavigationRegion.NEXT -> {
-                   if (currentConfig.menuVisible) currentConfig.onToggleMenu()
-                   currentConfig.onNavigateAdjacent(true)
-               }
-               ViewerNavigation.NavigationRegion.PREV -> {
-                   if (currentConfig.menuVisible) currentConfig.onToggleMenu()
-                   currentConfig.onNavigateAdjacent(false)
-               }
-               ViewerNavigation.NavigationRegion.RIGHT -> {
-                   if (currentConfig.menuVisible) currentConfig.onToggleMenu()
-                   currentConfig.onNavigateAdjacent(!currentConfig.isRtl)
-               }
-               ViewerNavigation.NavigationRegion.LEFT -> {
-                   if (currentConfig.menuVisible) currentConfig.onToggleMenu()
-                   currentConfig.onNavigateAdjacent(currentConfig.isRtl)
-               }
-               ViewerNavigation.NavigationRegion.MENU -> {
-                   currentConfig.onToggleMenu()
-               }
-           }
+       val executeNav: () -> Unit = {
+           dispatchNavigation(
+               action = action,
+               isRtl = currentConfig.isRtl,
+               menuVisible = currentConfig.menuVisible,
+               onToggleMenu = currentConfig.onToggleMenu,
+               onNavigateAdjacent = currentConfig.onNavigateAdjacent,
+           )
+           lastTapTime = 0L
+           lastTapOffset = Offset.Zero
        }
 
-       if (currentConfig.doubleTapAnimDuration > 0 && action != ViewerNavigation.NavigationRegion.MENU) {
-           // Defer single tap until double-tap timeout expires
-           pendingNavJob?.cancel()
-           pendingNavJob = coroutineScope.launch {
+       if (currentConfig.doubleTapAnimDuration > 0) {
+           // Defer tap until double-tap timeout expires so double-tap zoom is not interrupted
+           // Debounce applies uniformly to all regions (including MENU) to prevent chrome flicker
+           pendingNavAction = executeNav
+           pendingNavJob = scope.launch {
                delay(doubleTapTimeoutMs)
                executeNav()
                pendingNavJob = null
+               pendingNavAction = null
            }
        } else {
-           // Immediate execution for MENU or when double-tap zoom is disabled
            executeNav()
        }
    }
    ```
 
-3. **Event Consumption Decoupling**:
-   Do not consume `up` on Tap 1 if `currentConfig.doubleTapAnimDuration > 0`. This ensures downstream pointer handlers (including Telephoto's `onDoubleClick`) receive both taps unencumbered.
+3. **Compose LocalViewConfiguration & Zero-Allocation Math**:
+   - Uses `LocalViewConfiguration.current` (`touchSlop`, `doubleTapTouchSlop`, `doubleTapTimeoutMillis`, `longPressTimeoutMillis`) to properly respect Compose test rules, system accessibility touch delays, and density scaling.
+   - Computes distances using squared distance primitives `(pos1 - pos2).getDistanceSquared()` without allocating heap objects or performing floating-point conversions.
 
 ---
 
