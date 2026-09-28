@@ -1,6 +1,6 @@
 # Technical Proposal: Native Compose Crop Borders Pipeline & Auto-Crop Image Transformation
 
-**Status:** Proposed / Under Review  
+**Status:** Implemented / Completed (Branch: `ref/reader-crop-borders-r12`)  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling & Rendering Pipeline  
@@ -8,7 +8,7 @@
 **Resolves Issue:** [GitHub Issue #3435](https://github.com/nekomangaorg/Neko/issues/3435) ("Regression: 'Crop borders' doesn't work in Paged mode")  
 **Prerequisites:** Step R5 ([`rock_solid_paged_compose_viewer_proposal.md`](rock_solid_paged_compose_viewer_proposal.md))  
 **Downstream Dependents:** Step R11 ([`native_compose_webtoon_subsampling_renderer_proposal.md`](native_compose_webtoon_subsampling_renderer_proposal.md))  
-**Implementation Targets:** [`PagerViewerConfigUiModel.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerViewerConfigUiModel.kt), [`PagerPageItem.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerPageItem.kt), [`DoublePageLayout.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/DoublePageLayout.kt), [`CropBordersTransformation.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/domain/reader/image/CropBordersTransformation.kt)  
+**Implementation Targets:** [`PagerViewerConfigUiModel.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerViewerConfigUiModel.kt), [`PagerPageItem.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/PagerPageItem.kt), [`DoublePageLayout.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/org/nekomanga/presentation/screens/reader/viewer/DoublePageLayout.kt), [`CropBordersTransformation.kt`](file:///run/media/nonproto/WD4T/programming/workspace-android/Neko/app/src/main/java/eu/kanade/tachiyomi/data/coil/CropBordersTransformation.kt)  
 
 ---
 

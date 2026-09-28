@@ -30,8 +30,10 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.maxBitmapSize
+import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
+import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
@@ -52,6 +54,7 @@ sealed interface WebtoonImageTarget {
 fun WebtoonPageItem(
     page: ReaderPage,
     backgroundColor: Color,
+    cropBorders: Boolean = false,
     onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -72,6 +75,7 @@ fun WebtoonPageItem(
         pageStatus = pageStatus,
         pageProgress = pageProgress,
         backgroundColor = backgroundColor,
+        cropBorders = cropBorders,
         onLongClick = onLongClick,
         modifier = modifier,
     )
@@ -81,6 +85,7 @@ fun WebtoonPageItem(
 fun WebtoonPageItem(
     split: ReaderPageSplit,
     backgroundColor: Color,
+    cropBorders: Boolean = false,
     onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -105,6 +110,10 @@ fun WebtoonPageItem(
         pageStatus = pageStatus,
         pageProgress = pageProgress,
         backgroundColor = backgroundColor,
+        // Sliced vertical tiles must NOT be independently cropped horizontally,
+        // otherwise differing crop amounts across slices would cause horizontal step/seam
+        // discontinuities when scaled to fillMaxWidth.
+        cropBorders = false,
         onLongClick = onLongClick,
         modifier = modifier,
     )
@@ -119,6 +128,7 @@ private fun WebtoonPageContent(
     pageStatus: Page.State,
     pageProgress: Int,
     backgroundColor: Color,
+    cropBorders: Boolean,
     onLongClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -127,7 +137,7 @@ private fun WebtoonPageContent(
     var loadErrorMessage by remember(target) { mutableStateOf<String?>(null) }
     var retryCount by remember(target) { mutableStateOf(0) }
     val isError = pageStatus == Page.State.ERROR || loadError
-    var intrinsicRatio by remember(target) { mutableFloatStateOf(initialRatio) }
+    var intrinsicRatio by remember(target, cropBorders) { mutableFloatStateOf(initialRatio) }
 
     val onRetry: () -> Unit = {
         loadError = false
@@ -137,7 +147,7 @@ private fun WebtoonPageContent(
     }
 
     val model =
-        remember(target, retryCount) {
+        remember(target, retryCount, cropBorders) {
             val modelData =
                 when (target) {
                     is WebtoonImageTarget.Page -> target.page
@@ -153,6 +163,9 @@ private fun WebtoonPageContent(
                 .apply {
                     if (retryCount > 0) {
                         memoryCachePolicy(CachePolicy.WRITE_ONLY)
+                    }
+                    if (cropBorders) {
+                        transformations(CropBordersTransformation(cropTopBottom = false))
                     }
                 }
                 .build()

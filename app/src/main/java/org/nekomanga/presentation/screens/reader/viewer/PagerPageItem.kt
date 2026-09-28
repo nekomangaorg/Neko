@@ -25,8 +25,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.maxBitmapSize
+import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
+import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
@@ -262,13 +264,18 @@ fun PagerPageItem(
             }
 
             val model =
-                remember(page) {
+                remember(page, config.cropBorders) {
                     ImageRequest.Builder(context)
                         .data(page)
                         .size(CoilSize.ORIGINAL)
                         .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
                         .precision(Precision.EXACT)
                         .crossfade(true)
+                        .apply {
+                            if (config.cropBorders) {
+                                transformations(CropBordersTransformation(cropTopBottom = true))
+                            }
+                        }
                         .build()
                 }
 
@@ -309,6 +316,7 @@ fun PagerPageItem(
     val readerThemePref by readerPreferences.readerTheme().collectAsState()
     val landscapeZoom by readerPreferences.landscapeZoom().collectAsState()
     val zoomStart by readerPreferences.zoomStart().collectAsState()
+    val cropBorders by readerPreferences.cropBorders().collectAsState()
 
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
@@ -328,6 +336,7 @@ fun PagerPageItem(
             doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
             longTapEnabled = viewer.config.longTapEnabled,
             menuVisible = viewer.activity.menuVisible,
+            cropBorders = cropBorders,
             navigator = viewer.config.navigator,
             onToggleMenu = remember(viewer) { { viewer.activity.toggleMenu() } },
             onNavigateAdjacent =

@@ -53,6 +53,10 @@ fun SplitPageLayout(
 
     var imageSize by remember(page) { mutableStateOf<ComposeSize?>(null) }
 
+    // Outer border cropping is deliberately omitted for split double pages because asymmetrical
+    // margin trimming shifts the geometric center (img.width / 2f), displacing the central fold
+    // line
+    // and cutting through artwork or speech bubbles.
     val model =
         remember(page) {
             ImageRequest.Builder(context)

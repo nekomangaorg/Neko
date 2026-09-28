@@ -590,6 +590,7 @@ fun ComposePagerViewer(
     val landscapeZoom by readerPreferences.landscapeZoom().collectAsStateWithLifecycle()
     val zoomStart by readerPreferences.zoomStart().collectAsStateWithLifecycle()
     val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsStateWithLifecycle()
+    val cropBorders by readerPreferences.cropBorders().collectAsStateWithLifecycle()
 
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
@@ -618,6 +619,7 @@ fun ComposePagerViewer(
             doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
             longTapEnabled = viewer.config.longTapEnabled,
             menuVisible = viewer.activity.menuVisible,
+            cropBorders = cropBorders,
             navigator = viewer.config.navigator,
             preloadPageAmount = preloadPageAmount,
             onToggleMenu = remember(viewer) { { viewer.activity.toggleMenu() } },
