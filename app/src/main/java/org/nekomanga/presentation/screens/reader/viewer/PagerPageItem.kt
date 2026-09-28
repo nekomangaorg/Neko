@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -173,20 +174,21 @@ fun PagerPageItem(
     ) {
         val viewportWidthPx = constraints.maxWidth.toFloat()
         val viewportHeightPx = constraints.maxHeight.toFloat()
+        // rememberSaveable does not check its inputs against a restored value. Without key(), a
+        // rotation restores this flag and the zoomable states below as saved for the old viewport
+        // size, and telephoto keeps the old zoom level for a page that was dragged or zoomed.
         var autoZoomApplied by
-            rememberSaveable(
-                page.chapter.chapter.id,
-                page.index,
-                constraints.maxWidth,
-                constraints.maxHeight,
-            ) {
-                mutableStateOf(false)
+            key(constraints.maxWidth, constraints.maxHeight) {
+                rememberSaveable(page.chapter.chapter.id, page.index) { mutableStateOf(false) }
             }
 
         val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
 
         if (extraPage != null) {
-            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
+            val zoomableState =
+                key(constraints.maxWidth, constraints.maxHeight) {
+                    rememberZoomableState(zoomSpec = zoomSpec)
+                }
             DoublePageLayout(
                 page = page,
                 extraPage = extraPage,
@@ -199,7 +201,10 @@ fun PagerPageItem(
                 modifier = Modifier.fillMaxSize(),
             )
         } else if (page.firstHalf != null) {
-            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
+            val zoomableState =
+                key(constraints.maxWidth, constraints.maxHeight) {
+                    rememberZoomableState(zoomSpec = zoomSpec)
+                }
             SplitPageLayout(
                 page = page,
                 config = config,
@@ -209,7 +214,10 @@ fun PagerPageItem(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            val zoomableState = rememberZoomableState(zoomSpec = zoomSpec)
+            val zoomableState =
+                key(constraints.maxWidth, constraints.maxHeight) {
+                    rememberZoomableState(zoomSpec = zoomSpec)
+                }
             val imageState = rememberZoomableImageState(zoomableState)
 
             val singlePageZoomType =

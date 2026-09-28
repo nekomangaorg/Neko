@@ -12,6 +12,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -103,14 +104,10 @@ fun DoublePageLayout(
 
     val viewportWidthPx = constraints.maxWidth.toFloat()
     val viewportHeightPx = constraints.maxHeight.toFloat()
+    // Keyed on the viewport size like the zoomable state it goes with, see PagerPageItem.
     var autoZoomApplied by
-        rememberSaveable(
-            page.chapter.chapter.id,
-            page.index,
-            constraints.maxWidth,
-            constraints.maxHeight,
-        ) {
-            mutableStateOf(false)
+        key(constraints.maxWidth, constraints.maxHeight) {
+            rememberSaveable(page.chapter.chapter.id, page.index) { mutableStateOf(false) }
         }
 
     val scaleType =
