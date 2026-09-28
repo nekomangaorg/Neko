@@ -35,6 +35,7 @@ data class PagerViewerConfigUiModel(
     val doubleTapAnimDuration: Int = 300,
     val longTapEnabled: Boolean = true,
     val menuVisible: Boolean = false,
+    val cropBorders: Boolean = false,
     val navigator: ViewerNavigation = DisabledNavigation(),
     val preloadPageAmount: Int = 4,
     val onToggleMenu: () -> Unit = {},

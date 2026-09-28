@@ -27,6 +27,7 @@ data class WebtoonViewerConfigUiModel(
     val doubleTapAnimDuration: Int = 300,
     val longTapEnabled: Boolean = true,
     val menuVisible: Boolean = false,
+    val cropBorders: Boolean = false,
     val navigator: ViewerNavigation,
     val onToggleMenu: () -> Unit = {},
     val onRetryTransition: (ReaderChapter) -> Unit = {},

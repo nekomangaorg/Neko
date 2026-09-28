@@ -398,6 +398,7 @@ fun ComposeWebtoonViewer(
                         WebtoonPageItem(
                             page = item.page,
                             backgroundColor = config.backgroundColor,
+                            cropBorders = config.cropBorders,
                             onLongClick = { onPageLongTap(item.page) },
                             modifier = gapModifier,
                         )
@@ -406,6 +407,7 @@ fun ComposeWebtoonViewer(
                         WebtoonPageItem(
                             split = item.split,
                             backgroundColor = config.backgroundColor,
+                            cropBorders = config.cropBorders,
                             onLongClick = { onPageLongTap(item.page) },
                             modifier = gapModifier,
                         )
@@ -514,6 +516,7 @@ fun ComposeWebtoonViewer(
     val disableGaps by readerPreferences.webtoonDisableGaps().collectAsStateWithLifecycle()
     val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsStateWithLifecycle()
     val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsStateWithLifecycle()
+    val cropBorders by readerPreferences.cropBordersWebtoon().collectAsStateWithLifecycle()
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
         remember(readerTheme, themeBackground) {
@@ -544,6 +547,7 @@ fun ComposeWebtoonViewer(
             doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
             longTapEnabled = viewer.config.longTapEnabled,
             menuVisible = viewer.activity.menuVisible,
+            cropBorders = cropBorders,
             navigator = viewer.config.navigator,
             onToggleMenu = { viewer.activity.toggleMenu() },
             onRetryTransition = onRetryTransition,

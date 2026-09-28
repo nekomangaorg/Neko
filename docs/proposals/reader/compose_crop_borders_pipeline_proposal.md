@@ -1,6 +1,6 @@
 # Technical Proposal: Native Compose Crop Borders Pipeline & Auto-Crop Image Transformation
 
-**Status:** Proposed / Under Review  
+**Status:** Implemented / Completed (Branch: `ref/reader-crop-borders-r12`)  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling & Rendering Pipeline  
