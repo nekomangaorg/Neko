@@ -27,14 +27,19 @@ import uy.kohesive.injekt.api.get
  * are created with the md5 of the thumbnail URL.
  *
  * @param context the application context.
+ * @param maxOnlineCacheSize the size in bytes that [deleteCachedCovers] trims online covers to.
  * @constructor creates an instance of the cover cache.
  */
-class CoverCache(val context: Context) {
+class CoverCache(
+    val context: Context,
+    private val maxOnlineCacheSize: Long = MAX_ONLINE_CACHE_SIZE,
+) {
 
     companion object {
         private const val COVERS_DIR = "covers"
         private const val CUSTOM_COVERS_DIR = "covers/custom"
         private const val ONLINE_COVERS_DIR = "online_covers"
+        private const val MAX_ONLINE_CACHE_SIZE = 1024L * 1024L * 1024L // 1 GB
     }
 
     /** Cache directory used for cache management. */
@@ -45,8 +50,6 @@ class CoverCache(val context: Context) {
 
     /** Cache directory used for covers not in library management. */
     val onlineCoverDirectory = File(context.cacheDir, ONLINE_COVERS_DIR).also { it.mkdirs() }
-
-    private val maxOnlineCacheSize = 50L * 1024L * 1024L // 50 MB
 
     private var lastClean = 0L
 

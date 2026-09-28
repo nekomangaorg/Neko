@@ -4,7 +4,6 @@ import android.content.Context
 import io.mockk.every
 import io.mockk.mockk
 import java.io.File
-import java.io.RandomAccessFile
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -81,11 +80,11 @@ class StartupCacheCleanerTest {
                 every { getFilesDir() } returns filesDir
                 every { getExternalFilesDir(any()) } returns null
             }
-        val coverCache = CoverCache(context)
+        val coverCache = CoverCache(context, maxOnlineCacheSize = 100L)
         val covers =
             (0 until 4).map { index ->
                 File(coverCache.onlineCoverDirectory, "cover$index").apply {
-                    RandomAccessFile(this, "rw").use { it.setLength(20L * 1024L * 1024L) }
+                    writeBytes(ByteArray(40))
                     withTimestamp(startedAt - 60_000 + index * 1_000L)
                 }
             }
