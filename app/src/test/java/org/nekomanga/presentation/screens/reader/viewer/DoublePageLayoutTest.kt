@@ -82,8 +82,11 @@ class DoublePageLayoutTest {
     }
 
     @Test
-    fun `calculateDoublePageScale with Smart Fit picks Fit Height for landscape spreads`() {
-        // totalWidth 2000 > maxHeight 1000 -> picks Fit Height
+    fun `calculateDoublePageScale with Smart Fit fits width when content aspect ratio exceeds viewport aspect ratio`() {
+        // Phone portrait viewport: 1080x1920 (aspect ratio 0.5625)
+        // Spread dimensions: 2000x1000 (aspect ratio 2.0)
+        // contentRatio (2.0) > screenRatio (0.5625) -> fits width to prevent massive horizontal
+        // blowout
         val scale =
             calculateDoublePageScale(
                 imageScaleType = 6, // Smart fit
@@ -93,7 +96,36 @@ class DoublePageLayoutTest {
                 viewportHeight = 1920f,
             )
 
-        assertEquals(1.92f, scale, 0.001f)
+        // Expected scale: 1080 / 2000 = 0.54
+        assertEquals(0.54f, scale, 0.001f)
+        val renderedWidth = 2000f * scale
+        val renderedHeight = 1000f * scale
+        assertEquals(1080f, renderedWidth, 0.001f)
+        assertEquals(540f, renderedHeight, 0.001f)
+    }
+
+    @Test
+    fun `calculateDoublePageScale with Smart Fit fits height when viewport aspect ratio exceeds content aspect ratio`() {
+        // Tablet landscape viewport: 2560x1600 (aspect ratio 1.6)
+        // Spread dimensions: 2000x1500 (aspect ratio 1.333)
+        // contentRatio (1.333) <= screenRatio (1.6) -> fits height to optimize vertical screen
+        // usage
+        val scale =
+            calculateDoublePageScale(
+                imageScaleType = 6, // Smart fit
+                totalWidth = 2000f,
+                maxHeight = 1500f,
+                viewportWidth = 2560f,
+                viewportHeight = 1600f,
+            )
+
+        // Expected scale: 1600 / 1500 = 1.0667
+        assertEquals(1600f / 1500f, scale, 0.001f)
+        val renderedWidth = 2000f * scale
+        val renderedHeight = 1500f * scale
+        assertEquals(2133.333f, renderedWidth, 0.01f)
+        assertEquals(1600f, renderedHeight, 0.001f)
+        assertTrue(renderedWidth <= 2560f)
     }
 
     @Test
@@ -324,8 +356,9 @@ class DoublePageLayoutTest {
     }
 
     @Test
-    fun `calculateDimensions handles null sizes safely`() {
-        val dims =
+    fun `calculateDimensions handles partial or null sizes safely`() {
+        // Only second page loaded
+        val dimsOnlySecond =
             DoublePageLayoutPolicy.calculateDimensions(
                 fWidth = null,
                 fHeight = null,
@@ -334,10 +367,40 @@ class DoublePageLayoutTest {
                 gapPx = 16f,
             )
 
-        assertEquals(0f, dims.maxHeight, 0.001f)
-        assertEquals(0f, dims.w1, 0.001f)
-        assertEquals(600f, dims.w2, 0.001f)
-        assertEquals(0f, dims.totalWidth, 0.001f)
+        assertEquals(1200f, dimsOnlySecond.maxHeight, 0.001f)
+        assertEquals(0f, dimsOnlySecond.w1, 0.001f)
+        assertEquals(600f, dimsOnlySecond.w2, 0.001f)
+        assertEquals(600f, dimsOnlySecond.totalWidth, 0.001f)
+
+        // Only first page loaded
+        val dimsOnlyFirst =
+            DoublePageLayoutPolicy.calculateDimensions(
+                fWidth = 500f,
+                fHeight = 1000f,
+                sWidth = null,
+                sHeight = null,
+                gapPx = 16f,
+            )
+
+        assertEquals(1000f, dimsOnlyFirst.maxHeight, 0.001f)
+        assertEquals(500f, dimsOnlyFirst.w1, 0.001f)
+        assertEquals(0f, dimsOnlyFirst.w2, 0.001f)
+        assertEquals(500f, dimsOnlyFirst.totalWidth, 0.001f)
+
+        // Neither loaded
+        val dimsNeither =
+            DoublePageLayoutPolicy.calculateDimensions(
+                fWidth = null,
+                fHeight = null,
+                sWidth = null,
+                sHeight = null,
+                gapPx = 16f,
+            )
+
+        assertEquals(0f, dimsNeither.maxHeight, 0.001f)
+        assertEquals(0f, dimsNeither.w1, 0.001f)
+        assertEquals(0f, dimsNeither.w2, 0.001f)
+        assertEquals(0f, dimsNeither.totalWidth, 0.001f)
     }
 
     @Test

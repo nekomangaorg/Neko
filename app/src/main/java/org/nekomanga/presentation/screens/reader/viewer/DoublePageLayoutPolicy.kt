@@ -54,24 +54,37 @@ object DoublePageLayoutPolicy {
         sHeight: Float?,
         gapPx: Float,
     ): DoublePageDimensions {
-        if (fWidth != null && fHeight != null && sWidth != null && sHeight != null) {
-            val maxHeight = maxOf(fHeight, sHeight)
-            val w1 = if (fHeight > 0f) fWidth * (maxHeight / fHeight) else fWidth
-            val w2 = if (sHeight > 0f) sWidth * (maxHeight / sHeight) else sWidth
-            val totalWidth = w1 + w2 + gapPx
-            return DoublePageDimensions(
-                maxHeight = maxHeight,
-                w1 = w1,
-                w2 = w2,
-                totalWidth = totalWidth,
-            )
+        val hasFirst = fWidth != null && fHeight != null && fWidth > 0f && fHeight > 0f
+        val hasSecond = sWidth != null && sHeight != null && sWidth > 0f && sHeight > 0f
+
+        return when {
+            hasFirst && hasSecond -> {
+                val maxHeight = maxOf(fHeight, sHeight)
+                val w1 = fWidth * (maxHeight / fHeight)
+                val w2 = sWidth * (maxHeight / sHeight)
+                DoublePageDimensions(
+                    maxHeight = maxHeight,
+                    w1 = w1,
+                    w2 = w2,
+                    totalWidth = w1 + w2 + gapPx,
+                )
+            }
+            hasFirst ->
+                DoublePageDimensions(
+                    maxHeight = fHeight,
+                    w1 = fWidth,
+                    w2 = 0f,
+                    totalWidth = fWidth,
+                )
+            hasSecond ->
+                DoublePageDimensions(
+                    maxHeight = sHeight,
+                    w1 = 0f,
+                    w2 = sWidth,
+                    totalWidth = sWidth,
+                )
+            else -> DoublePageDimensions(0f, 0f, 0f, 0f)
         }
-        return DoublePageDimensions(
-            maxHeight = 0f,
-            w1 = fWidth ?: 0f,
-            w2 = sWidth ?: 0f,
-            totalWidth = 0f,
-        )
     }
 
     /** Calculates the effective scale factor based on scale type and viewport constraints. */
@@ -89,9 +102,15 @@ object DoublePageLayoutPolicy {
             ReaderScaleType.FitHeight -> viewportHeight / maxHeight
             ReaderScaleType.FitWidth -> viewportWidth / totalWidth
             ReaderScaleType.OriginalSize -> 1f
-            ReaderScaleType.SmartFit ->
-                if (maxHeight > totalWidth) viewportWidth / totalWidth
-                else viewportHeight / maxHeight
+            ReaderScaleType.SmartFit -> {
+                val contentRatio = totalWidth / maxHeight
+                val screenRatio = viewportWidth / viewportHeight
+                if (contentRatio > screenRatio) {
+                    viewportWidth / totalWidth
+                } else {
+                    viewportHeight / maxHeight
+                }
+            }
             ReaderScaleType.FitScreen,
             ReaderScaleType.Stretch ->
                 minOf(1f, viewportWidth / totalWidth, viewportHeight / maxHeight)
