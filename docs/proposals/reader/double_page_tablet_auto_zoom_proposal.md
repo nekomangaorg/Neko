@@ -1,6 +1,6 @@
 # Technical Proposal: Double-Page Spread Auto-Zoom Disambiguation & Tablet Landscape Stabilization
 
-**Status:** Proposed / Under Review  
+**Status:** Implemented / Complete  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling & Dual-Page Engine  
