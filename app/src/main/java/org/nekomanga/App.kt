@@ -28,6 +28,8 @@ import eu.kanade.tachiyomi.AppModule
 import eu.kanade.tachiyomi.PreferenceModule
 import eu.kanade.tachiyomi.crash.CrashActivity
 import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
+import eu.kanade.tachiyomi.data.cache.CoverCache
+import eu.kanade.tachiyomi.data.cache.StartupCacheCleaner
 import eu.kanade.tachiyomi.data.coil.coilImageLoader
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -36,6 +38,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notification
 import java.security.Security
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +67,7 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
     val networkPreferences: NetworkPreferences by injectLazy()
     val securityPreferences: SecurityPreferences by injectLazy()
     val mangaDexPreferences: MangaDexPreferences by injectLazy()
+    private val coverCache: CoverCache by injectLazy()
 
     private val disableIncognitoReceiver = DisableIncognitoReceiver()
 
@@ -113,6 +117,11 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
         ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.Default) {
             setupNotificationChannels()
             MangaCoverMetadata.load()
+        }
+
+        val startedAt = System.currentTimeMillis()
+        ProcessLifecycleOwner.get().lifecycleScope.launchIO {
+            StartupCacheCleaner(cacheDir, coverCache).clean(startedAt)
         }
 
         preferences
