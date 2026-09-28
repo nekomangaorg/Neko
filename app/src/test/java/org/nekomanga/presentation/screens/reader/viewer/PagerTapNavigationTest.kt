@@ -125,4 +125,75 @@ class PagerTapNavigationTest {
         assertTrue("Menu should be dismissed when navigating with visible menu", menuToggled)
         assertEquals(true, navigated)
     }
+
+    @Test
+    fun `dispatchNavigation with PREV action and menuVisible dismisses menu before navigating backward`() {
+        var menuToggled = false
+        var navigated: Boolean? = null
+
+        dispatchNavigation(
+            action = NavigationRegion.PREV,
+            isRtl = false,
+            menuVisible = true,
+            onToggleMenu = { menuToggled = true },
+            onNavigateAdjacent = { forward -> navigated = forward },
+        )
+
+        assertTrue(
+            "Menu should be dismissed when navigating backward with visible menu",
+            menuToggled,
+        )
+        assertEquals(false, navigated)
+    }
+
+    @Test
+    fun `dispatchNavigation with MENU action and menuVisible toggles menu without navigating`() {
+        var menuToggled = false
+        var navigated: Boolean? = null
+
+        dispatchNavigation(
+            action = NavigationRegion.MENU,
+            isRtl = false,
+            menuVisible = true,
+            onToggleMenu = { menuToggled = true },
+            onNavigateAdjacent = { forward -> navigated = forward },
+        )
+
+        assertTrue(menuToggled)
+        assertEquals(null, navigated)
+    }
+
+    @Test
+    fun `dispatchNavigation with RIGHT in RTL and menuVisible dismisses menu and navigates backward`() {
+        var menuToggled = false
+        var navigated: Boolean? = null
+
+        dispatchNavigation(
+            action = NavigationRegion.RIGHT,
+            isRtl = true,
+            menuVisible = true,
+            onToggleMenu = { menuToggled = true },
+            onNavigateAdjacent = { forward -> navigated = forward },
+        )
+
+        assertTrue(menuToggled)
+        assertEquals(false, navigated)
+    }
+
+    @Test
+    fun `dispatchNavigation with LEFT in RTL and menuVisible dismisses menu and navigates forward`() {
+        var menuToggled = false
+        var navigated: Boolean? = null
+
+        dispatchNavigation(
+            action = NavigationRegion.LEFT,
+            isRtl = true,
+            menuVisible = true,
+            onToggleMenu = { menuToggled = true },
+            onNavigateAdjacent = { forward -> navigated = forward },
+        )
+
+        assertTrue(menuToggled)
+        assertEquals(true, navigated)
+    }
 }

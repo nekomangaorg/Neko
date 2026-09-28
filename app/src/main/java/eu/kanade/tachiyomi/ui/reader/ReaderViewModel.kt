@@ -770,6 +770,7 @@ constructor(
     fun onPageSelected(page: ReaderPage, hasExtraPage: Boolean) {
         val currentChapters = state.value.viewerChapters ?: return
         val selectedChapter = page.chapter
+        selectedChapter.requestedPage = page.index
 
         viewModelScope.launchNonCancellable {
             updateChapterProgress(selectedChapter, page, hasExtraPage)
@@ -826,6 +827,7 @@ constructor(
 
         // Save the page index for process restoration
         chapterPageIndex = pageIndex
+        readerChapter.requestedPage = pageIndex
 
         // ---- This logic is from your original onPageSelected ----
         if (!securityPreferences.incognitoMode().get()) {

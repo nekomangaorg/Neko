@@ -65,6 +65,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     private var isTransitioning: Boolean = false
 
+    private var isInitialLoad = true
+
+    private var activeChapterId: Long? = null
+
+    private var pendingPageMove: Pair<ReaderPage, Boolean>? = null
+
     init {
         config.imagePropertyChangedListener = {
             activity.isScrollingThroughPagesOrChapters = true
@@ -108,6 +114,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
         TimberKt.d { "setChapters" }
+        val chapterChanged = activeChapterId != chapters.currChapter.chapter.id
+        activeChapterId = chapters.currChapter.chapter.id
         val forceTransition = config.alwaysShowChapterTransition
         items =
             controller.buildItems(
@@ -122,8 +130,17 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
         val pages = chapters.currChapter.pages ?: return
         val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
-        if (requestedIndex in pages.indices) {
-            moveToPage(pages[requestedIndex], false)
+        val pending = pendingPageMove
+        pendingPageMove = null
+        if (
+            pending != null && pending.first.chapter.chapter.id == chapters.currChapter.chapter.id
+        ) {
+            moveToPage(pending.first, pending.second)
+        } else if (isInitialLoad || chapterChanged) {
+            isInitialLoad = false
+            if (requestedIndex in pages.indices) {
+                moveToPage(pages[requestedIndex], false)
+            }
         }
     }
 
@@ -149,7 +166,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             currentPagePosition = position
             requestedPagePosition = position to animated
         } else {
-            TimberKt.d { "Page $page not found in items" }
+            TimberKt.d { "Page $page not found in items; queuing pending move" }
+            pendingPageMove = page to animated
         }
     }
 
@@ -182,6 +200,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             val target = current + 1
             currentPagePosition = target
             requestedPagePosition = target to config.usePageTransitions
+        } else if (item !is ReaderUiItem.Transition) {
+            activity.viewModel.navigateAdjacentChapter(forward = true)
         }
     }
 
@@ -206,6 +226,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             val target = current - 1
             currentPagePosition = target
             requestedPagePosition = target to config.usePageTransitions
+        } else if (item !is ReaderUiItem.Transition) {
+            activity.viewModel.navigateAdjacentChapter(forward = false)
         }
     }
 

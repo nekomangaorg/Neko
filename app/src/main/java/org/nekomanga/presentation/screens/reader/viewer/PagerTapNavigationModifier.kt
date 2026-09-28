@@ -39,7 +39,8 @@ fun Modifier.pagerTapNavigation(
     val scope = coroutineScope ?: rememberCoroutineScope()
     val viewConfiguration = LocalViewConfiguration.current
     val touchSlop = viewConfiguration.touchSlop
-    val touchSlopSquared = touchSlop * touchSlop
+    val tapSlop = touchSlop * 1.5f
+    val tapSlopSquared = tapSlop * tapSlop
     val doubleTapSlop =
         remember(context) { AndroidViewConfiguration.get(context).scaledDoubleTapSlop.toFloat() }
     val doubleTapSlopSquared = doubleTapSlop * doubleTapSlop
@@ -88,14 +89,20 @@ fun Modifier.pagerTapNavigation(
                                 }
 
                                 val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                val moveDistanceSquared =
-                                    (change.position - downPos).getDistanceSquared()
-                                if (moveDistanceSquared > touchSlopSquared) {
-                                    isMovementPastSlop = true
+                                if (!change.pressed) {
+                                    val moveDistanceSquared =
+                                        (change.position - downPos).getDistanceSquared()
+                                    if (moveDistanceSquared <= tapSlopSquared) {
+                                        pointerUp = change
+                                    } else {
+                                        isMovementPastSlop = true
+                                    }
                                     break
                                 }
-                                if (!change.pressed) {
-                                    pointerUp = change
+                                val moveDistanceSquared =
+                                    (change.position - downPos).getDistanceSquared()
+                                if (moveDistanceSquared > tapSlopSquared) {
+                                    isMovementPastSlop = true
                                     break
                                 }
                             }
@@ -140,7 +147,7 @@ fun Modifier.pagerTapNavigation(
                     val upTime = System.currentTimeMillis()
                     val distanceSquared = (upPos - downPos).getDistanceSquared()
 
-                    if (distanceSquared < touchSlopSquared) {
+                    if (distanceSquared <= tapSlopSquared) {
                         val screenWidth = size.width.toFloat()
                         val screenHeight = size.height.toFloat()
 
@@ -148,59 +155,85 @@ fun Modifier.pagerTapNavigation(
                             val pos = PointF(upPos.x / screenWidth, upPos.y / screenHeight)
                             val action = currentConfig.navigator.getAction(pos)
 
-                            val tapDistanceSquared = (upPos - lastTapOffset).getDistanceSquared()
-                            val isDoubleTap =
-                                (upTime - lastTapTime < doubleTapTimeoutMs) &&
-                                    (tapDistanceSquared < doubleTapSlopSquared) &&
-                                    (currentConfig.doubleTapAnimDuration > 0)
-
-                            if (isDoubleTap) {
-                                // Double-tap detected: cancel pending single-tap navigation
-                                // immediately
-                                pendingNavJob?.cancel()
-                                pendingNavJob = null
-                                pendingNavAction = null
-
+                            if (action == NavigationRegion.MENU) {
                                 if (currentConfig.menuVisible) {
+                                    pendingNavJob?.cancel()
+                                    pendingNavJob = null
+                                    pendingNavAction = null
                                     currentConfig.onToggleMenu()
+                                    lastTapTime = 0L
+                                    lastTapOffset = Offset.Zero
+                                } else {
+                                    val tapDistanceSquared =
+                                        (upPos - lastTapOffset).getDistanceSquared()
+                                    val isDoubleTap =
+                                        (upTime - lastTapTime < doubleTapTimeoutMs) &&
+                                            (tapDistanceSquared < doubleTapSlopSquared) &&
+                                            (currentConfig.doubleTapAnimDuration > 0)
+
+                                    if (isDoubleTap) {
+                                        // Double-tap in MENU region: cancel pending menu toggle so
+                                        // menu
+                                        // doesn't flicker, allowing double-tap zoom to take effect
+                                        pendingNavJob?.cancel()
+                                        pendingNavJob = null
+                                        pendingNavAction = null
+                                        lastTapTime = 0L
+                                        lastTapOffset = Offset.Zero
+                                    } else {
+                                        if (pendingNavJob?.isActive == true) {
+                                            pendingNavJob?.cancel()
+                                            pendingNavJob = null
+                                            pendingNavAction?.invoke()
+                                            pendingNavAction = null
+                                        }
+
+                                        lastTapTime = upTime
+                                        lastTapOffset = upPos
+
+                                        val executeMenu: () -> Unit = {
+                                            currentConfig.onToggleMenu()
+                                            lastTapTime = 0L
+                                            lastTapOffset = Offset.Zero
+                                        }
+
+                                        if (currentConfig.doubleTapAnimDuration > 0) {
+                                            pendingNavAction = executeMenu
+                                            pendingNavJob = scope.launch {
+                                                delay(doubleTapTimeoutMs)
+                                                executeMenu()
+                                                pendingNavJob = null
+                                                pendingNavAction = null
+                                            }
+                                        } else {
+                                            executeMenu()
+                                        }
+                                    }
                                 }
-                                lastTapTime = 0L
-                                lastTapOffset = Offset.Zero
                             } else {
-                                // Flush previous pending tap if a new distinct tap arrives
+                                // Navigation action (NEXT, PREV, LEFT, RIGHT):
+                                // Execute immediately with zero latency and never cancel page
+                                // turns.
+                                // Consume UP event so child zoomable composable does not trigger
+                                // double-tap zoom.
+                                up.consume()
+
                                 if (pendingNavJob?.isActive == true) {
                                     pendingNavJob?.cancel()
                                     pendingNavJob = null
                                     pendingNavAction?.invoke()
                                     pendingNavAction = null
                                 }
+                                lastTapTime = 0L
+                                lastTapOffset = Offset.Zero
 
-                                lastTapTime = upTime
-                                lastTapOffset = upPos
-
-                                val executeNav: () -> Unit = {
-                                    dispatchNavigation(
-                                        action = action,
-                                        isRtl = currentConfig.isRtl,
-                                        menuVisible = currentConfig.menuVisible,
-                                        onToggleMenu = currentConfig.onToggleMenu,
-                                        onNavigateAdjacent = currentConfig.onNavigateAdjacent,
-                                    )
-                                    lastTapTime = 0L
-                                    lastTapOffset = Offset.Zero
-                                }
-
-                                if (currentConfig.doubleTapAnimDuration > 0) {
-                                    pendingNavAction = executeNav
-                                    pendingNavJob = scope.launch {
-                                        delay(doubleTapTimeoutMs)
-                                        executeNav()
-                                        pendingNavJob = null
-                                        pendingNavAction = null
-                                    }
-                                } else {
-                                    executeNav()
-                                }
+                                dispatchNavigation(
+                                    action = action,
+                                    isRtl = currentConfig.isRtl,
+                                    menuVisible = currentConfig.menuVisible,
+                                    onToggleMenu = currentConfig.onToggleMenu,
+                                    onNavigateAdjacent = currentConfig.onNavigateAdjacent,
+                                )
                             }
                         }
                     }
