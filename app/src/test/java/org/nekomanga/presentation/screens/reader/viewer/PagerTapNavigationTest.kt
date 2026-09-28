@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
+import androidx.compose.ui.geometry.Offset
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -195,5 +196,228 @@ class PagerTapNavigationTest {
 
         assertTrue(menuToggled)
         assertEquals(true, navigated)
+    }
+
+    @Test
+    fun `evaluatePointerMovement returns VALID_TAP_UP when finger is lifted within touch slop`() {
+        val down = Offset(100f, 100f)
+        val upWithinSlop = Offset(104f, 103f) // distance = 5px, distanceSquared = 25px
+        val touchSlopSquared = 64f // slop = 8px
+
+        val result =
+            evaluatePointerMovement(
+                downPos = down,
+                currentPos = upWithinSlop,
+                isPressed = false,
+                touchSlopSquared = touchSlopSquared,
+            )
+
+        assertEquals(PointerSlopResult.VALID_TAP_UP, result)
+    }
+
+    @Test
+    fun `evaluatePointerMovement returns VALID_TAP_UP on zero movement finger lift`() {
+        val down = Offset(100f, 100f)
+        val touchSlopSquared = 64f
+
+        val result =
+            evaluatePointerMovement(
+                downPos = down,
+                currentPos = down,
+                isPressed = false,
+                touchSlopSquared = touchSlopSquared,
+            )
+
+        assertEquals(PointerSlopResult.VALID_TAP_UP, result)
+    }
+
+    @Test
+    fun `evaluatePointerMovement returns MOVEMENT_PAST_SLOP when finger lift exceeds touch slop`() {
+        val down = Offset(100f, 100f)
+        val upPastSlop = Offset(110f, 100f) // distance = 10px, distanceSquared = 100px
+        val touchSlopSquared = 64f // slop = 8px
+
+        val result =
+            evaluatePointerMovement(
+                downPos = down,
+                currentPos = upPastSlop,
+                isPressed = false,
+                touchSlopSquared = touchSlopSquared,
+            )
+
+        assertEquals(PointerSlopResult.MOVEMENT_PAST_SLOP, result)
+    }
+
+    @Test
+    fun `evaluatePointerMovement returns WITHIN_SLOP_PRESSED when finger is held down and within touch slop`() {
+        val down = Offset(100f, 100f)
+        val moveWithinSlop = Offset(103f, 100f) // distance = 3px, distanceSquared = 9px
+        val touchSlopSquared = 64f
+
+        val result =
+            evaluatePointerMovement(
+                downPos = down,
+                currentPos = moveWithinSlop,
+                isPressed = true,
+                touchSlopSquared = touchSlopSquared,
+            )
+
+        assertEquals(PointerSlopResult.WITHIN_SLOP_PRESSED, result)
+    }
+
+    @Test
+    fun `evaluatePointerMovement returns MOVEMENT_PAST_SLOP when finger is held down and exceeds touch slop`() {
+        val down = Offset(100f, 100f)
+        val movePastSlop = Offset(115f, 100f) // distance = 15px, distanceSquared = 225px
+        val touchSlopSquared = 64f
+
+        val result =
+            evaluatePointerMovement(
+                downPos = down,
+                currentPos = movePastSlop,
+                isPressed = true,
+                touchSlopSquared = touchSlopSquared,
+            )
+
+        assertEquals(PointerSlopResult.MOVEMENT_PAST_SLOP, result)
+    }
+
+    @Test
+    fun `isDoubleTap returns true when second tap is within timeout and slop distance`() {
+        val result =
+            isDoubleTap(
+                upTime = 500L,
+                lastTapTime = 300L, // 200ms < 300ms timeout
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(102f, 100f),
+                lastTapOffset = Offset(100f, 100f), // distance = 2px, distanceSquared = 4px
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `isDoubleTap returns false when second tap exceeds timeout`() {
+        val result =
+            isDoubleTap(
+                upTime = 700L,
+                lastTapTime = 300L, // 400ms > 300ms timeout
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(100f, 100f),
+                lastTapOffset = Offset(100f, 100f),
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `isDoubleTap returns false when second tap exceeds slop distance`() {
+        val result =
+            isDoubleTap(
+                upTime = 400L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(150f, 100f), // distance = 50px, distanceSquared = 2500px
+                lastTapOffset = Offset(100f, 100f),
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `isDoubleTap returns false when double tap animation is disabled`() {
+        val result =
+            isDoubleTap(
+                upTime = 400L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(100f, 100f),
+                lastTapOffset = Offset(100f, 100f),
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = false,
+            )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `resolveTapAction always resolves navigation regions to NAVIGATE_IMMEDIATELY even during double tap`() {
+        // Tapping backward / forward must never be swallowed or delayed by double-tap detection
+        val actions =
+            listOf(
+                NavigationRegion.NEXT,
+                NavigationRegion.PREV,
+                NavigationRegion.LEFT,
+                NavigationRegion.RIGHT,
+            )
+
+        for (action in actions) {
+            val result =
+                resolveTapAction(
+                    action = action,
+                    menuVisible = false,
+                    isDoubleTap = true,
+                    hasDoubleTapAnimation = true,
+                )
+            assertEquals(TapActionResolution.NAVIGATE_IMMEDIATELY, result)
+        }
+    }
+
+    @Test
+    fun `resolveTapAction resolves MENU to TOGGLE_MENU_IMMEDIATE when menu is currently visible`() {
+        val result =
+            resolveTapAction(
+                action = NavigationRegion.MENU,
+                menuVisible = true,
+                isDoubleTap = false,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertEquals(TapActionResolution.TOGGLE_MENU_IMMEDIATE, result)
+    }
+
+    @Test
+    fun `resolveTapAction resolves MENU to CANCEL_MENU_FOR_ZOOM when menu is hidden and isDoubleTap is true`() {
+        val result =
+            resolveTapAction(
+                action = NavigationRegion.MENU,
+                menuVisible = false,
+                isDoubleTap = true,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertEquals(TapActionResolution.CANCEL_MENU_FOR_ZOOM, result)
+    }
+
+    @Test
+    fun `resolveTapAction resolves MENU to SCHEDULE_MENU_DELAYED when menu is hidden, single tap, and animation enabled`() {
+        val result =
+            resolveTapAction(
+                action = NavigationRegion.MENU,
+                menuVisible = false,
+                isDoubleTap = false,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertEquals(TapActionResolution.SCHEDULE_MENU_DELAYED, result)
+    }
+
+    @Test
+    fun `resolveTapAction resolves MENU to TOGGLE_MENU_IMMEDIATE when menu is hidden, single tap, and animation disabled`() {
+        val result =
+            resolveTapAction(
+                action = NavigationRegion.MENU,
+                menuVisible = false,
+                isDoubleTap = false,
+                hasDoubleTapAnimation = false,
+            )
+
+        assertEquals(TapActionResolution.TOGGLE_MENU_IMMEDIATE, result)
     }
 }
