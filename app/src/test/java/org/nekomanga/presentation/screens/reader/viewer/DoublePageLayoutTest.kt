@@ -259,4 +259,92 @@ class DoublePageLayoutTest {
 
         assertEquals(Alignment.Center, alignment)
     }
+
+    @Test
+    fun `calculateRowAlignment returns TopCenter when content overflows only vertically`() {
+        val alignment =
+            DoublePageLayoutPolicy.calculateRowAlignment(
+                doublePageAlignment = Alignment.CenterStart,
+                renderedWidthPx = 1000f,
+                renderedHeightPx = 2400f,
+                viewportWidthPx = 1080f,
+                viewportHeightPx = 1920f,
+            )
+
+        assertEquals(Alignment.TopCenter, alignment)
+    }
+
+    @Test
+    fun `calculateRowAlignment returns TopStart when content overflows both horizontally and vertically in LTR`() {
+        val alignment =
+            DoublePageLayoutPolicy.calculateRowAlignment(
+                doublePageAlignment = Alignment.CenterStart,
+                renderedWidthPx = 2000f,
+                renderedHeightPx = 2400f,
+                viewportWidthPx = 1080f,
+                viewportHeightPx = 1920f,
+            )
+
+        assertEquals(Alignment.TopStart, alignment)
+    }
+
+    @Test
+    fun `calculateRowAlignment returns TopEnd when content overflows both horizontally and vertically in RTL`() {
+        val alignment =
+            DoublePageLayoutPolicy.calculateRowAlignment(
+                doublePageAlignment = Alignment.CenterEnd,
+                renderedWidthPx = 2000f,
+                renderedHeightPx = 2400f,
+                viewportWidthPx = 1080f,
+                viewportHeightPx = 1920f,
+            )
+
+        assertEquals(Alignment.TopEnd, alignment)
+    }
+
+    @Test
+    fun `calculateDimensions normalizes heights and computes total width with gap`() {
+        val dims =
+            DoublePageLayoutPolicy.calculateDimensions(
+                fWidth = 500f,
+                fHeight = 1000f,
+                sWidth = 600f,
+                sHeight = 1200f,
+                gapPx = 16f,
+            )
+
+        // maxHeight = 1200
+        // w1 = 500 * (1200 / 1000) = 600
+        // w2 = 600 * (1200 / 1200) = 600
+        // totalWidth = 600 + 600 + 16 = 1216
+        assertEquals(1200f, dims.maxHeight, 0.001f)
+        assertEquals(600f, dims.w1, 0.001f)
+        assertEquals(600f, dims.w2, 0.001f)
+        assertEquals(1216f, dims.totalWidth, 0.001f)
+    }
+
+    @Test
+    fun `calculateDimensions handles null sizes safely`() {
+        val dims =
+            DoublePageLayoutPolicy.calculateDimensions(
+                fWidth = null,
+                fHeight = null,
+                sWidth = 600f,
+                sHeight = 1200f,
+                gapPx = 16f,
+            )
+
+        assertEquals(0f, dims.maxHeight, 0.001f)
+        assertEquals(0f, dims.w1, 0.001f)
+        assertEquals(600f, dims.w2, 0.001f)
+        assertEquals(0f, dims.totalWidth, 0.001f)
+    }
+
+    @Test
+    fun `ReaderScaleType and ZoomStartPosition enums fall back to defaults on unknown values`() {
+        assertEquals(ReaderScaleType.FitScreen, ReaderScaleType.fromPreference(999))
+        assertEquals(ReaderScaleType.FitHeight, ReaderScaleType.fromPreference(4))
+        assertEquals(ZoomStartPosition.Auto, ZoomStartPosition.fromPreference(999))
+        assertEquals(ZoomStartPosition.Right, ZoomStartPosition.fromPreference(3))
+    }
 }
