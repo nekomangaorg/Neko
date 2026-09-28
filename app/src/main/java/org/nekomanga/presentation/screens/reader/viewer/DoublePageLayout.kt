@@ -435,21 +435,8 @@ internal fun calculateRowAlignment(
     doublePageAlignment: Alignment,
     renderedWidthPx: Float,
     viewportWidthPx: Float,
-): Alignment =
-    DoublePageLayoutPolicy.calculateRowAlignment(
-        doublePageAlignment = doublePageAlignment,
-        renderedWidthPx = renderedWidthPx,
-        renderedHeightPx = 0f,
-        viewportWidthPx = viewportWidthPx,
-        viewportHeightPx = 0f,
-    )
-
-internal fun calculateRowAlignment(
-    doublePageAlignment: Alignment,
-    renderedWidthPx: Float,
-    renderedHeightPx: Float,
-    viewportWidthPx: Float,
-    viewportHeightPx: Float,
+    renderedHeightPx: Float = 1f,
+    viewportHeightPx: Float = 1f,
 ): Alignment =
     DoublePageLayoutPolicy.calculateRowAlignment(
         doublePageAlignment = doublePageAlignment,
