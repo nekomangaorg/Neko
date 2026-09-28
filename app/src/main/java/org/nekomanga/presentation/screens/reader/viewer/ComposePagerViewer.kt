@@ -613,6 +613,7 @@ fun ComposePagerViewer(
             doublePageRotate = viewer.config.doublePageRotate,
             doublePageRotateReverse = viewer.config.doublePageRotateReverse,
             zoomStart = zoomStart,
+            zoomDoublePageSpreads = landscapeZoom,
             landscapeZoom = landscapeZoom,
             doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
             longTapEnabled = viewer.config.longTapEnabled,

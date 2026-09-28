@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +20,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size as ComposeSize
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -27,6 +29,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.roundToIntSize
+import androidx.compose.ui.unit.toOffset
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -45,6 +49,25 @@ import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import org.nekomanga.presentation.theme.Size
+
+@Immutable
+private data class DoublePageContentLocation(
+    private val contentSize: ComposeSize,
+    private val alignment: Alignment,
+) : ZoomableContentLocation {
+    override fun location(layoutSize: ComposeSize, direction: LayoutDirection): Rect {
+        val alignedOffset =
+            alignment.align(
+                size = contentSize.roundToIntSize(),
+                space = layoutSize.roundToIntSize(),
+                layoutDirection = direction,
+            )
+        return Rect(
+            offset = alignedOffset.toOffset(),
+            size = contentSize,
+        )
+    }
+}
 
 /**
  * Pure stateless Composable rendering a paired dual-page spread in paginated reader viewers.
@@ -88,55 +111,127 @@ fun DoublePageLayout(
             mutableStateOf(false)
         }
 
+    val scaleType =
+        remember(config.imageScaleType) { ReaderScaleType.fromPreference(config.imageScaleType) }
+    val zoomStartPos =
+        remember(config.zoomStart) { ZoomStartPosition.fromPreference(config.zoomStart) }
+
     val doublePageAlignment =
-        remember(config.zoomStart, config.isRtl, config.invertDoublePages) {
-            val isRtl = config.isRtl.xor(config.invertDoublePages)
-            val zoomType =
-                when (config.zoomStart) {
-                    1 -> if (isRtl) PagerConfig.ZoomType.Right else PagerConfig.ZoomType.Left
-                    2 -> PagerConfig.ZoomType.Left
-                    3 -> PagerConfig.ZoomType.Right
-                    else -> PagerConfig.ZoomType.Center
-                }
-            when (zoomType) {
-                PagerConfig.ZoomType.Left -> Alignment.CenterStart
-                PagerConfig.ZoomType.Right -> Alignment.CenterEnd
-                PagerConfig.ZoomType.Center -> Alignment.Center
-            }
+        remember(zoomStartPos, config.isRtl, config.invertDoublePages) {
+            DoublePageLayoutPolicy.resolveAlignment(
+                zoomStart = zoomStartPos,
+                isRtl = config.isRtl.xor(config.invertDoublePages),
+            )
+        }
+
+    val fSize = firstSize
+    val sSize = secondSize
+    val hasBothSizes = fSize != null && sSize != null
+
+    val dimensions =
+        remember(fSize, sSize, gapPx) {
+            DoublePageLayoutPolicy.calculateDimensions(
+                fWidth = fSize?.width,
+                fHeight = fSize?.height,
+                sWidth = sSize?.width,
+                sHeight = sSize?.height,
+                gapPx = gapPx,
+            )
+        }
+
+    val effectiveScale =
+        remember(scaleType, dimensions, viewportWidthPx, viewportHeightPx) {
+            DoublePageLayoutPolicy.calculateScale(
+                scaleType = scaleType,
+                totalWidth = dimensions.totalWidth,
+                maxHeight = dimensions.maxHeight,
+                viewportWidth = viewportWidthPx,
+                viewportHeight = viewportHeightPx,
+            )
+        }
+
+    val renderedWidthPx = dimensions.totalWidth * effectiveScale
+    val renderedHeightPx = dimensions.maxHeight * effectiveScale
+
+    val rowAlignment =
+        remember(
+            doublePageAlignment,
+            renderedWidthPx,
+            renderedHeightPx,
+            viewportWidthPx,
+            viewportHeightPx,
+        ) {
+            DoublePageLayoutPolicy.calculateRowAlignment(
+                doublePageAlignment = doublePageAlignment,
+                renderedWidthPx = renderedWidthPx,
+                renderedHeightPx = renderedHeightPx,
+                viewportWidthPx = viewportWidthPx,
+                viewportHeightPx = viewportHeightPx,
+            )
+        }
+
+    val isTrueSpread =
+        first.fullPage == true ||
+            second.fullPage == true ||
+            (fSize?.let { it.width > it.height } == true) ||
+            (sSize?.let { it.width > it.height } == true)
+    val shouldAutoZoom =
+        remember(
+            config.zoomDoublePageSpreads,
+            config.landscapeZoom,
+            scaleType,
+            isTrueSpread,
+            viewportWidthPx,
+            viewportHeightPx,
+        ) {
+            DoublePageLayoutPolicy.shouldAutoZoom(
+                zoomEnabled = config.zoomDoublePageSpreads || config.landscapeZoom,
+                scaleType = scaleType,
+                isTrueSpread = isTrueSpread,
+                viewportWidth = viewportWidthPx,
+                viewportHeight = viewportHeightPx,
+            )
         }
 
     LaunchedEffect(
-        firstSize,
-        secondSize,
-        contentScale,
-        doublePageAlignment,
-        config.landscapeZoom,
-        config.imageScaleType,
+        hasBothSizes,
+        renderedWidthPx,
+        renderedHeightPx,
+        rowAlignment,
+        shouldAutoZoom,
         isReady,
         viewportWidthPx,
         viewportHeightPx,
     ) {
-        val fSize = firstSize ?: return@LaunchedEffect
-        val sSize = secondSize ?: return@LaunchedEffect
+        if (!hasBothSizes) return@LaunchedEffect
 
-        val h = maxOf(fSize.height, sSize.height)
-        val w1 = if (fSize.height > 0f) fSize.width * (h / fSize.height) else fSize.width
-        val w2 = if (sSize.height > 0f) sSize.width * (h / sSize.height) else sSize.width
-        val totalWidth = w1 + w2 + gapPx
-        zoomableState.contentScale = contentScale
-        zoomableState.contentAlignment = doublePageAlignment
+        zoomableState.contentScale = ContentScale.None
+        zoomableState.contentAlignment = rowAlignment
         zoomableState.setContentLocation(
-            ZoomableContentLocation.scaledInsideAndCenterAligned(ComposeSize(totalWidth, h))
+            DoublePageContentLocation(
+                contentSize = ComposeSize(renderedWidthPx, renderedHeightPx),
+                alignment = rowAlignment,
+            )
         )
 
         if (
             !autoZoomApplied &&
                 isReady &&
-                config.landscapeZoom &&
-                config.imageScaleType == 1 &&
+                shouldAutoZoom &&
                 viewportWidthPx > 0f &&
                 viewportHeightPx > 0f
         ) {
+            // Mark applied immediately to prevent retry loops or hijacking on delayed decodes
+            autoZoomApplied = true
+
+            // Abort if user is already interacting with or animating the content
+            val userAlreadyInteracting =
+                zoomableState.isAnimationRunning ||
+                    (zoomableState.zoomFraction != null && zoomableState.zoomFraction!! > 0.05f)
+            if (userAlreadyInteracting) {
+                return@LaunchedEffect
+            }
+
             @Suppress("DEPRECATION")
             val bounds =
                 withTimeoutOrNull(2000L) {
@@ -146,8 +241,13 @@ fun DoublePageLayout(
                 }
 
             if (bounds != null) {
+                // Re-check interaction state before applying zoom
+                val stillIdle =
+                    !zoomableState.isAnimationRunning &&
+                        (zoomableState.zoomFraction == null ||
+                            zoomableState.zoomFraction!! <= 0.05f)
                 val isLandscape = bounds.width > bounds.height
-                if (isLandscape && bounds.height < viewportHeightPx) {
+                if (stillIdle && isLandscape && bounds.height < viewportHeightPx) {
                     val targetScale = (viewportHeightPx / bounds.height).coerceIn(1f, 3f)
                     if (targetScale > 1.05f) {
                         val isRtl = config.isRtl.xor(config.invertDoublePages)
@@ -177,7 +277,6 @@ fun DoublePageLayout(
                         )
                     }
                 }
-                autoZoomApplied = true
             }
         }
     }
@@ -214,32 +313,16 @@ fun DoublePageLayout(
         contentAlignment = Alignment.Center,
     ) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            val fSize = firstSize
-            val sSize = secondSize
-
-            val hasBothSizes = fSize != null && sSize != null
             val w1Dp: Dp
             val w2Dp: Dp
             val hDp: Dp
             val effectiveGapDp: Dp
 
             if (hasBothSizes) {
-                val h = maxOf(fSize.height, sSize.height)
-                val w1 = if (fSize.height > 0f) fSize.width * (h / fSize.height) else fSize.width
-                val w2 = if (sSize.height > 0f) sSize.width * (h / sSize.height) else sSize.width
-                val totalWidth = w1 + w2 + gapPx
-                val insideScale =
-                    if (
-                        totalWidth > 0f && h > 0f && viewportWidthPx > 0f && viewportHeightPx > 0f
-                    ) {
-                        minOf(1f, viewportWidthPx / totalWidth, viewportHeightPx / h)
-                    } else {
-                        1f
-                    }
-                w1Dp = with(density) { (w1 * insideScale).toDp() }
-                w2Dp = with(density) { (w2 * insideScale).toDp() }
-                hDp = with(density) { (h * insideScale).toDp() }
-                effectiveGapDp = with(density) { (gapPx * insideScale).toDp() }
+                w1Dp = with(density) { (dimensions.w1 * effectiveScale).toDp() }
+                w2Dp = with(density) { (dimensions.w2 * effectiveScale).toDp() }
+                hDp = with(density) { renderedHeightPx.toDp() }
+                effectiveGapDp = with(density) { (gapPx * effectiveScale).toDp() }
             } else {
                 w1Dp = Dp.Unspecified
                 w2Dp = Dp.Unspecified
@@ -250,7 +333,7 @@ fun DoublePageLayout(
             Row(
                 modifier =
                     if (hasBothSizes) {
-                        Modifier.wrapContentSize(align = Alignment.Center, unbounded = true)
+                        Modifier.wrapContentSize(align = rowAlignment, unbounded = true)
                     } else {
                         Modifier.fillMaxSize()
                     },
@@ -308,3 +391,57 @@ fun DoublePageLayout(
         }
     }
 }
+
+internal fun calculateDoublePageScale(
+    imageScaleType: Int,
+    totalWidth: Float,
+    maxHeight: Float,
+    viewportWidth: Float,
+    viewportHeight: Float,
+): Float =
+    DoublePageLayoutPolicy.calculateScale(
+        scaleType = ReaderScaleType.fromPreference(imageScaleType),
+        totalWidth = totalWidth,
+        maxHeight = maxHeight,
+        viewportWidth = viewportWidth,
+        viewportHeight = viewportHeight,
+    )
+
+internal fun shouldAutoZoomSpread(
+    zoomEnabled: Boolean,
+    imageScaleType: Int,
+    isTrueSpread: Boolean,
+    viewportWidth: Float,
+    viewportHeight: Float,
+): Boolean =
+    DoublePageLayoutPolicy.shouldAutoZoom(
+        zoomEnabled = zoomEnabled,
+        scaleType = ReaderScaleType.fromPreference(imageScaleType),
+        isTrueSpread = isTrueSpread,
+        viewportWidth = viewportWidth,
+        viewportHeight = viewportHeight,
+    )
+
+internal fun resolveDoublePageAlignment(
+    zoomStart: Int,
+    isRtl: Boolean,
+): Alignment =
+    DoublePageLayoutPolicy.resolveAlignment(
+        zoomStart = ZoomStartPosition.fromPreference(zoomStart),
+        isRtl = isRtl,
+    )
+
+internal fun calculateRowAlignment(
+    doublePageAlignment: Alignment,
+    renderedWidthPx: Float,
+    viewportWidthPx: Float,
+    renderedHeightPx: Float = 1f,
+    viewportHeightPx: Float = 1f,
+): Alignment =
+    DoublePageLayoutPolicy.calculateRowAlignment(
+        doublePageAlignment = doublePageAlignment,
+        renderedWidthPx = renderedWidthPx,
+        renderedHeightPx = renderedHeightPx,
+        viewportWidthPx = viewportWidthPx,
+        viewportHeightPx = viewportHeightPx,
+    )

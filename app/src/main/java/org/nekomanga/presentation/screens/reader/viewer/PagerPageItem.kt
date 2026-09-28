@@ -351,8 +351,12 @@ private object SmartFitContentScale : ContentScale {
         srcSize: ComposeSize,
         dstSize: ComposeSize,
     ): ScaleFactor {
-        return if (srcSize.isSpecified && !srcSize.isEmpty()) {
-            if (srcSize.height > srcSize.width) {
+        return if (
+            srcSize.isSpecified && !srcSize.isEmpty() && dstSize.isSpecified && !dstSize.isEmpty()
+        ) {
+            val contentRatio = srcSize.width / srcSize.height
+            val screenRatio = dstSize.width / dstSize.height
+            if (contentRatio > screenRatio) {
                 ContentScale.FillWidth.computeScaleFactor(srcSize, dstSize)
             } else {
                 ContentScale.FillHeight.computeScaleFactor(srcSize, dstSize)
