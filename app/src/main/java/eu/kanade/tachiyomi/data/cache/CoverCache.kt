@@ -139,11 +139,17 @@ class CoverCache(val context: Context) {
                         return@withIOContext
                     }
                     var deletedSize = 0L
+                    // Read each timestamp once. Sorting on lastModified() reads it again for every
+                    // comparison, and MangaCoverFetcher updates the timestamp of a cover it loads,
+                    // so a cover loaded during the sort can make the sort throw.
                     val files =
-                        directory.listFiles()?.sortedBy { it.lastModified() }?.iterator()
-                            ?: return@withIOContext
+                        directory
+                            .listFiles()
+                            ?.map { it to it.lastModified() }
+                            ?.sortedBy { it.second }
+                            ?.iterator() ?: return@withIOContext
                     while (files.hasNext()) {
-                        val file = files.next()
+                        val (file, _) = files.next()
                         deletedSize += file.length()
                         file.delete()
                         if (size - deletedSize <= maxOnlineCacheSize) {
