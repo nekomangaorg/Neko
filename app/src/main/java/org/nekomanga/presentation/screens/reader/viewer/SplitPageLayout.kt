@@ -19,7 +19,6 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.maxBitmapSize
-import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -29,7 +28,6 @@ import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.zoomable
-import org.nekomanga.domain.reader.image.CropBordersTransformation
 
 /**
  * Pure stateless Composable rendering a split double-page half (firstHalf = true or false). In
@@ -55,21 +53,18 @@ fun SplitPageLayout(
 
     var imageSize by remember(page) { mutableStateOf<ComposeSize?>(null) }
 
+    // Outer border cropping is deliberately omitted for split double pages because asymmetrical
+    // margin trimming shifts the geometric center (img.width / 2f), displacing the central fold
+    // line
+    // and cutting through artwork or speech bubbles.
     val model =
-        remember(page, config.cropBorders) {
+        remember(page) {
             ImageRequest.Builder(context)
                 .data(page)
                 .size(CoilSize.ORIGINAL)
                 .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
                 .precision(Precision.EXACT)
                 .crossfade(true)
-                .apply {
-                    if (config.cropBorders) {
-                        transformations(
-                            CropBordersTransformation(enabled = true, cropTopBottom = true)
-                        )
-                    }
-                }
                 .build()
         }
 

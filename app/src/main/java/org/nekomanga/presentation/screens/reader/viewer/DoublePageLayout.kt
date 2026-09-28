@@ -38,6 +38,7 @@ import coil3.request.maxBitmapSize
 import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
+import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
 import eu.kanade.tachiyomi.ui.reader.domain.CheckWidePageUseCase
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
@@ -49,7 +50,6 @@ import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.zoomable
-import org.nekomanga.domain.reader.image.CropBordersTransformation
 import org.nekomanga.presentation.theme.Size
 
 @Immutable
@@ -293,9 +293,7 @@ fun DoublePageLayout(
                 .crossfade(true)
                 .apply {
                     if (config.cropBorders) {
-                        transformations(
-                            CropBordersTransformation(enabled = true, cropTopBottom = true)
-                        )
+                        transformations(CropBordersTransformation(cropTopBottom = true))
                     }
                 }
                 .build()
@@ -310,9 +308,7 @@ fun DoublePageLayout(
                 .crossfade(true)
                 .apply {
                     if (config.cropBorders) {
-                        transformations(
-                            CropBordersTransformation(enabled = true, cropTopBottom = true)
-                        )
+                        transformations(CropBordersTransformation(cropTopBottom = true))
                     }
                 }
                 .build()

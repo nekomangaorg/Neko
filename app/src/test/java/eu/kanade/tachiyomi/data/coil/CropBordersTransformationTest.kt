@@ -1,4 +1,4 @@
-package org.nekomanga.domain.reader.image
+package eu.kanade.tachiyomi.data.coil
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -29,12 +29,13 @@ class CropBordersTransformationTest {
     }
 
     @Test
-    fun `calculateCropBounds with 4 white borders trims all sides in paginated mode`() {
+    fun `calculateCropBounds trims monotone white margins on all sides`() {
         val width = 100
         val height = 100
         val white = 0xFFFFFFFF.toInt()
         val art = 0xFF555555.toInt()
 
+        // 10px left/right margin, 15px top/bottom margin
         val reader =
             createPixelReader(width, height) { x, y ->
                 if (x < 10 || x >= 90 || y < 15 || y >= 85) white else art
@@ -112,6 +113,89 @@ class CropBordersTransformationTest {
         assertEquals(12, bounds.top)
         assertEquals(92, bounds.right)
         assertEquals(88, bounds.bottom)
+    }
+
+    @Test
+    fun `calculateCropBounds with vintage aged cream paper crops margins`() {
+        val width = 100
+        val height = 100
+        // Cream / aged paper color (~0.84 luminance)
+        val agedPaper = 0xFFD8D8D0.toInt()
+        val art = 0xFF222222.toInt()
+
+        val reader =
+            createPixelReader(width, height) { x, y ->
+                if (x < 10 || x >= 90 || y < 10 || y >= 90) agedPaper else art
+            }
+
+        val bounds =
+            CropBordersTransformation.calculateCropBounds(
+                width = width,
+                height = height,
+                reader = reader,
+                cropTopBottom = true,
+                tolerance = 15,
+            )
+
+        assertNotNull(bounds)
+        assertEquals(10, bounds!!.left)
+        assertEquals(10, bounds.top)
+        assertEquals(90, bounds.right)
+        assertEquals(90, bounds.bottom)
+    }
+
+    @Test
+    fun `calculateCropBounds with midtone borders does not crop`() {
+        val width = 100
+        val height = 100
+        // 50% gray midtone
+        val gray = 0xFF808080.toInt()
+        val art = 0xFF222222.toInt()
+
+        val reader =
+            createPixelReader(width, height) { x, y ->
+                if (x < 10 || x >= 90 || y < 10 || y >= 90) gray else art
+            }
+
+        val bounds =
+            CropBordersTransformation.calculateCropBounds(
+                width = width,
+                height = height,
+                reader = reader,
+                cropTopBottom = true,
+                tolerance = 15,
+            )
+
+        assertNotNull(bounds)
+        assertEquals(0, bounds!!.left)
+        assertEquals(0, bounds.top)
+        assertEquals(100, bounds.right)
+        assertEquals(100, bounds.bottom)
+    }
+
+    @Test
+    fun `calculateCropBounds with alternating horizontal bands halts at row 1 and preserves artwork`() {
+        val width = 100
+        val height = 100
+        val black = 0xFF000000.toInt()
+        val white = 0xFFFFFFFF.toInt()
+
+        // Page has alternating black and white bands (e.g. speed lines or striped art cover)
+        val reader = createPixelReader(width, height) { _, y -> if (y % 2 == 0) black else white }
+
+        val bounds =
+            CropBordersTransformation.calculateCropBounds(
+                width = width,
+                height = height,
+                reader = reader,
+                cropTopBottom = true,
+                tolerance = 15,
+            )
+
+        assertNotNull(bounds)
+        // Row 0 is black, but Row 1 is white. The scan must halt at row 1, NOT consume 25% of the
+        // page!
+        assertEquals(1, bounds!!.top)
     }
 
     @Test
@@ -240,21 +324,20 @@ class CropBordersTransformationTest {
 
     @Test
     fun `CropBordersTransformation cacheKey incorporates all distinct configuration options`() {
-        val t1 = CropBordersTransformation(enabled = true, cropTopBottom = true, tolerance = 15)
-        val t2 = CropBordersTransformation(enabled = false, cropTopBottom = true, tolerance = 15)
-        val t3 = CropBordersTransformation(enabled = true, cropTopBottom = false, tolerance = 15)
-        val t4 = CropBordersTransformation(enabled = true, cropTopBottom = true, tolerance = 25)
+        val t1 = CropBordersTransformation(cropTopBottom = true, tolerance = 15)
+        val t2 = CropBordersTransformation(cropTopBottom = false, tolerance = 15)
+        val t3 = CropBordersTransformation(cropTopBottom = true, tolerance = 25)
 
         assertNotEquals(t1.cacheKey, t2.cacheKey)
         assertNotEquals(t1.cacheKey, t3.cacheKey)
-        assertNotEquals(t1.cacheKey, t4.cacheKey)
+        assertNotEquals(t2.cacheKey, t3.cacheKey)
     }
 
     @Test
     fun `CropBordersTransformation equals and hashCode contract is satisfied`() {
-        val t1 = CropBordersTransformation(enabled = true, cropTopBottom = true, tolerance = 15)
-        val t2 = CropBordersTransformation(enabled = true, cropTopBottom = true, tolerance = 15)
-        val t3 = CropBordersTransformation(enabled = true, cropTopBottom = false, tolerance = 15)
+        val t1 = CropBordersTransformation(cropTopBottom = true, tolerance = 15)
+        val t2 = CropBordersTransformation(cropTopBottom = true, tolerance = 15)
+        val t3 = CropBordersTransformation(cropTopBottom = false, tolerance = 15)
 
         assertEquals(t1, t2)
         assertEquals(t1.hashCode(), t2.hashCode())

@@ -28,6 +28,7 @@ import coil3.request.maxBitmapSize
 import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
+import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
@@ -44,7 +45,6 @@ import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.domain.reader.image.CropBordersTransformation
 import org.nekomanga.presentation.extensions.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -273,9 +273,7 @@ fun PagerPageItem(
                         .crossfade(true)
                         .apply {
                             if (config.cropBorders) {
-                                transformations(
-                                    CropBordersTransformation(enabled = true, cropTopBottom = true)
-                                )
+                                transformations(CropBordersTransformation(cropTopBottom = true))
                             }
                         }
                         .build()

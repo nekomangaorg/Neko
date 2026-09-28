@@ -33,13 +33,13 @@ import coil3.request.maxBitmapSize
 import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
+import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlin.math.hypot
 import kotlinx.coroutines.withTimeout
-import org.nekomanga.domain.reader.image.CropBordersTransformation
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.theme.Size
 
@@ -110,7 +110,10 @@ fun WebtoonPageItem(
         pageStatus = pageStatus,
         pageProgress = pageProgress,
         backgroundColor = backgroundColor,
-        cropBorders = cropBorders,
+        // Sliced vertical tiles must NOT be independently cropped horizontally,
+        // otherwise differing crop amounts across slices would cause horizontal step/seam
+        // discontinuities when scaled to fillMaxWidth.
+        cropBorders = false,
         onLongClick = onLongClick,
         modifier = modifier,
     )
@@ -134,7 +137,7 @@ private fun WebtoonPageContent(
     var loadErrorMessage by remember(target) { mutableStateOf<String?>(null) }
     var retryCount by remember(target) { mutableStateOf(0) }
     val isError = pageStatus == Page.State.ERROR || loadError
-    var intrinsicRatio by remember(target) { mutableFloatStateOf(initialRatio) }
+    var intrinsicRatio by remember(target, cropBorders) { mutableFloatStateOf(initialRatio) }
 
     val onRetry: () -> Unit = {
         loadError = false
@@ -162,9 +165,7 @@ private fun WebtoonPageContent(
                         memoryCachePolicy(CachePolicy.WRITE_ONLY)
                     }
                     if (cropBorders) {
-                        transformations(
-                            CropBordersTransformation(enabled = true, cropTopBottom = false)
-                        )
+                        transformations(CropBordersTransformation(cropTopBottom = false))
                     }
                 }
                 .build()
