@@ -49,7 +49,7 @@ fun SplitPageLayout(
     // firstHalf = true is the right half (start of reading), firstHalf = false is the left half.
     // In LTR: firstHalf = true is the left half, firstHalf = false is the right half.
     val isFirstHalf = page.firstHalf == true
-    val showLeftHalf = if (config.isRtl) !isFirstHalf else isFirstHalf
+    val showLeftHalf = shouldShowLeftHalf(firstHalf = isFirstHalf, isRtl = config.isRtl)
 
     var imageSize by remember(page) { mutableStateOf<ComposeSize?>(null) }
 
@@ -145,3 +145,6 @@ private fun SplitPageHalfLayout(
         }
     }
 }
+
+internal fun shouldShowLeftHalf(firstHalf: Boolean, isRtl: Boolean): Boolean =
+    if (isRtl) !firstHalf else firstHalf

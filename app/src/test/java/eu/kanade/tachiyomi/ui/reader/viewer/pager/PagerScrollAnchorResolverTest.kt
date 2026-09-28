@@ -189,4 +189,28 @@ class PagerScrollAnchorResolverTest {
         assertEquals(2L, (target.item as ReaderUiItem.Page).page.chapter.chapter.id)
         assertEquals(0, (target.item as ReaderUiItem.Page).page.index)
     }
+
+    @Test
+    fun `resolveReanchorTarget falls back to last page of prev chapter when transition is replaced`() {
+        val ch1 = createChapter(1L, pageCount = 5)
+        val ch2 = createChapter(2L, pageCount = 5)
+
+        val prevTransition = ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1))
+
+        // New items no longer have Transition.Prev, but have Ch1 pages loaded followed by Ch2 pages
+        val newItems = (ch1.pages!! + ch2.pages!!).map { ReaderUiItem.Page(it) }
+
+        val target =
+            PagerScrollAnchorResolver.resolveReanchorTarget(
+                items = newItems,
+                lastActiveItem = prevTransition,
+                currentVisibleIndex = 0,
+            )
+
+        assertNotNull(target)
+        // Last page of Ch1 is at index 4
+        assertEquals(4, target!!.index)
+        assertEquals(1L, (target.item as ReaderUiItem.Page).page.chapter.chapter.id)
+        assertEquals(4, (target.item as ReaderUiItem.Page).page.index)
+    }
 }

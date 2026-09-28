@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.domain
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -242,5 +243,80 @@ class BuildPagerItemsUseCaseTest {
         assertEquals(false, p1Half2.page.firstHalf)
 
         assertEquals(2, p2.page.index)
+    }
+
+    @Test
+    fun `forceTransition true inserts transitions between loaded contiguous chapters`() {
+        val prev = createChapter(1L, pageCount = 4)
+        val curr = createChapter(2L, pageCount = 4)
+        val next = createChapter(3L, pageCount = 4)
+        val chapters = ViewerChapters(currChapter = curr, prevChapter = prev, nextChapter = next)
+
+        val items =
+            useCase(
+                chapters = chapters,
+                doublePages = false,
+                splitPages = false,
+                shiftDoublePage = false,
+                isRtl = false,
+                forceTransition = true,
+            )
+
+        // Transitions should exist before and after currChapter
+        val transitions = items.filterIsInstance<ReaderUiItem.Transition>()
+        assertEquals(2, transitions.size)
+        assertTrue(transitions.first().transition is ChapterTransition.Prev)
+        assertTrue(transitions.last().transition is ChapterTransition.Next)
+    }
+
+    @Test
+    fun `forceTransition false omits transitions between loaded contiguous chapters`() {
+        val prev = createChapter(1L, pageCount = 4)
+        val curr = createChapter(2L, pageCount = 4)
+        val next = createChapter(3L, pageCount = 4)
+        val chapters = ViewerChapters(currChapter = curr, prevChapter = prev, nextChapter = next)
+
+        val items =
+            useCase(
+                chapters = chapters,
+                doublePages = false,
+                splitPages = false,
+                shiftDoublePage = false,
+                isRtl = false,
+                forceTransition = false,
+            )
+
+        // Zero transitions should be generated when contiguous chapters are loaded and
+        // forceTransition is false
+        val transitions = items.filterIsInstance<ReaderUiItem.Transition>()
+        assertEquals(0, transitions.size)
+        assertTrue(items.all { it is ReaderUiItem.Page })
+    }
+
+    @Test
+    fun `shiftDoublePage true shifts pairing in double page mode`() {
+        val curr = createChapter(1L, pageCount = 4)
+        val chapters = ViewerChapters(currChapter = curr, prevChapter = null, nextChapter = null)
+
+        val items =
+            useCase(
+                chapters = chapters,
+                doublePages = true,
+                splitPages = false,
+                shiftDoublePage = true,
+                isRtl = false,
+            )
+
+        val pageItems = items.filterIsInstance<ReaderUiItem.Page>()
+        // Shifted: [p0, null], [p1, p2], [p3, null]
+        assertEquals(3, pageItems.size)
+        assertEquals(0, pageItems[0].page.index)
+        assertNull(pageItems[0].extraPage)
+
+        assertEquals(1, pageItems[1].page.index)
+        assertEquals(2, pageItems[1].extraPage?.index)
+
+        assertEquals(3, pageItems[2].page.index)
+        assertNull(pageItems[2].extraPage)
     }
 }

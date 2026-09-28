@@ -76,4 +76,83 @@ class ReaderUiItemEquivalenceTest {
         val reanchoredIndex = shiftedItems.indexOfFirst { it.isEquivalentTo(activeItem) }
         assertEquals(0, reanchoredIndex) // p4 matches first pair
     }
+
+    @Test
+    fun `Page and SplitPage are equivalent when topOffset is 0`() {
+        val page = createPage(index = 2, chapterId = 10L)
+        val pageItem = ReaderUiItem.Page(page)
+        val splitItem =
+            ReaderUiItem.SplitPage(ReaderPageSplit(page = page, topOffset = 0, splitHeight = 1000))
+
+        assertTrue(pageItem.isEquivalentTo(splitItem))
+        assertTrue(splitItem.isEquivalentTo(pageItem))
+    }
+
+    @Test
+    fun `Page and SplitPage are not equivalent when topOffset is greater than 0`() {
+        val page = createPage(index = 2, chapterId = 10L)
+        val pageItem = ReaderUiItem.Page(page)
+        val splitItem =
+            ReaderUiItem.SplitPage(
+                ReaderPageSplit(page = page, topOffset = 1000, splitHeight = 1000)
+            )
+
+        assertFalse(pageItem.isEquivalentTo(splitItem))
+        assertFalse(splitItem.isEquivalentTo(pageItem))
+    }
+
+    @Test
+    fun `SplitPage items are equivalent only when chapter, page, and topOffset match`() {
+        val page = createPage(index = 2, chapterId = 10L)
+        val splitA =
+            ReaderUiItem.SplitPage(
+                ReaderPageSplit(page = page, topOffset = 500, splitHeight = 1000)
+            )
+        val splitB =
+            ReaderUiItem.SplitPage(
+                ReaderPageSplit(page = page, topOffset = 500, splitHeight = 1000)
+            )
+        val splitDifferentOffset =
+            ReaderUiItem.SplitPage(
+                ReaderPageSplit(page = page, topOffset = 1500, splitHeight = 1000)
+            )
+
+        assertTrue(splitA.isEquivalentTo(splitB))
+        assertFalse(splitA.isEquivalentTo(splitDifferentOffset))
+    }
+
+    @Test
+    fun `Transitions connecting same chapters in opposite directions are equivalent`() {
+        val ch1 = createPage(0, 1L).chapter
+        val ch2 = createPage(0, 2L).chapter
+
+        val nextTransition = ReaderUiItem.Transition(ChapterTransition.Next(from = ch1, to = ch2))
+        val prevTransition = ReaderUiItem.Transition(ChapterTransition.Prev(from = ch2, to = ch1))
+
+        assertTrue(nextTransition.isEquivalentTo(prevTransition))
+        assertTrue(prevTransition.isEquivalentTo(nextTransition))
+    }
+
+    @Test
+    fun `Transitions connecting different chapters are not equivalent`() {
+        val ch1 = createPage(0, 1L).chapter
+        val ch2 = createPage(0, 2L).chapter
+        val ch3 = createPage(0, 3L).chapter
+
+        val trans12 = ReaderUiItem.Transition(ChapterTransition.Next(from = ch1, to = ch2))
+        val trans23 = ReaderUiItem.Transition(ChapterTransition.Next(from = ch2, to = ch3))
+
+        assertFalse(trans12.isEquivalentTo(trans23))
+    }
+
+    @Test
+    fun `split wide page halves are not equivalent when firstHalf differs`() {
+        val p1 = createPage(index = 2, chapterId = 10L).apply { firstHalf = true }
+        val p2 = createPage(index = 2, chapterId = 10L).apply { firstHalf = false }
+
+        val half1 = ReaderUiItem.Page(p1)
+        val half2 = ReaderUiItem.Page(p2)
+
+        assertFalse(half1.isEquivalentTo(half2))
+    }
 }
