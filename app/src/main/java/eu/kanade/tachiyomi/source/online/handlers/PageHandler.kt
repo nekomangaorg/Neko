@@ -61,7 +61,7 @@ class PageHandler {
                 val chapterDate = MdUtil.parseDate(chapterAttributesDto.readableAt)
                 val chapterDateNewer = chapterDate - currentDate > 0
 
-                if (externalUrl != null && chapterAttributesDto.pages == 0) {
+                if (externalUrl != null && chapterAttributesDto.pages <= 1) {
                     when {
                         "azuki manga".equals(chapter.scanlator, true) -> {
                             return@withContext azukiHandler.fetchPageList(externalUrl)
