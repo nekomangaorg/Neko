@@ -66,4 +66,20 @@ class CheckWidePageUseCaseTest {
         assertFalse(page.fullPage == true)
         assertFalse(page.longPage == true)
     }
+
+    @Test
+    fun `invoke with null stream returns false`() {
+        val page = createPage()
+        page.stream = null
+
+        assertFalse(useCase(page))
+    }
+
+    @Test
+    fun `invoke when stream throws exception returns false`() {
+        val page = createPage()
+        page.stream = { throw RuntimeException("Stream decode failed") }
+
+        assertFalse(useCase(page))
+    }
 }

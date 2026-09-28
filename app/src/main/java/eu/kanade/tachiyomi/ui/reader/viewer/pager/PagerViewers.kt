@@ -41,6 +41,8 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
             val target = current + 1
             currentPagePosition = target
             requestedPagePosition = target to config.usePageTransitions
+        } else if (item !is ReaderUiItem.Transition) {
+            activity.viewModel.navigateAdjacentChapter(forward = false)
         }
     }
 
@@ -64,6 +66,8 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
             val target = current - 1
             currentPagePosition = target
             requestedPagePosition = target to config.usePageTransitions
+        } else if (item !is ReaderUiItem.Transition) {
+            activity.viewModel.navigateAdjacentChapter(forward = true)
         }
     }
 }
