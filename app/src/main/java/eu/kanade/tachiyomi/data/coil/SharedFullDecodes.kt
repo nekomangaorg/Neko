@@ -5,50 +5,46 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.nekomanga.logging.TimberKt
 
-/** Result of one full page decode. */
-internal sealed interface FullDecode<out T> {
-    class Decoded<T>(val image: T) : FullDecode<T>
-
-    /**
-     * [permanent] is true when decoding the same bytes again gives the same failure, and false when
-     * a later attempt can succeed, as after running out of memory.
-     */
-    class Failed(val permanent: Boolean) : FullDecode<Nothing>
-}
-
 /**
- * Full page decodes, shared through [SharedWork] by callers that ask for the same page while it
- * decodes. A page whose decode failed for good is not decoded again until a retry or [clear], so
- * its other slices and later scroll passes do not repeat the decode.
+ * Full page decodes, shared through [SharedWork] by callers that ask for the same page at the same
+ * retry generation while it decodes. A page whose decode failed is not decoded again until it is
+ * asked for at a higher retry generation or [clear] runs, so its other slices and later scroll
+ * passes do not repeat the decode.
  */
 internal class SharedFullDecodes<T : Any>(ioDispatcher: CoroutineDispatcher = Dispatchers.IO) {
-    private val work = SharedWork<FullDecode<T>>(ioDispatcher)
-    private val failedKeys = ConcurrentHashMap.newKeySet<String>()
+    private val work = SharedWork<T?>(ioDispatcher)
+
+    /** The highest retry generation at which each failed page failed. */
+    private val failedAt = ConcurrentHashMap<String, Int>()
 
     /**
-     * Returns the decoded page, or null when the decode failed now or failed for good before.
-     * [retry] forgets an earlier failure and decodes the page again.
+     * Returns the decoded page, or null when the decode failed now or failed before at
+     * [retryGeneration] or higher. A request at a higher generation never joins a decode that an
+     * older generation started.
      */
     suspend fun await(
         key: String,
-        retry: Boolean,
-        decode: SharedWork<FullDecode<T>>.Run.() -> FullDecode<T>,
+        retryGeneration: Int,
+        decode: SharedWork<T?>.Run.() -> T?,
     ): T? {
-        if (retry) {
-            failedKeys.remove(key)
-        } else if (key in failedKeys) {
+        val failedGeneration = failedAt[key]
+        if (failedGeneration != null && failedGeneration >= retryGeneration) {
             TimberKt.d { "Not decoding page $key again, its full decode failed" }
             return null
         }
-        val result =
-            work.await(key) {
-                decode().also {
-                    if (it is FullDecode.Failed && it.permanent) {
-                        unlessCleared { failedKeys.add(key) }
+        return work.await("$key@$retryGeneration") {
+            decode().also { image ->
+                unlessCleared {
+                    if (image == null) {
+                        failedAt.merge(key, retryGeneration) { old, new -> maxOf(old, new) }
+                    } else {
+                        failedAt.computeIfPresent(key) { _, failed ->
+                            failed.takeIf { it > retryGeneration }
+                        }
                     }
                 }
             }
-        return (result as? FullDecode.Decoded)?.image
+        }
     }
 
     /**
@@ -57,6 +53,6 @@ internal class SharedFullDecodes<T : Any>(ioDispatcher: CoroutineDispatcher = Di
      */
     fun clear() {
         work.clear()
-        failedKeys.clear()
+        failedAt.clear()
     }
 }

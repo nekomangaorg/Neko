@@ -106,18 +106,18 @@ internal fun fallbackDecodeBytes(imageWidth: Int, imageHeight: Int, sampleSize: 
     sampledDimension(imageWidth, sampleSize) * sampledDimension(imageHeight, sampleSize) * 4
 
 /**
- * Runs [decode] at [sampleSize]. When it returns null, runs [freeMemory] and tries once more at
+ * Runs [decode] at [sampleSize]. When it returns null, runs [beforeRetry] and tries once more at
  * double the sample size, and returns that result.
  */
 internal fun <T : Any> decodeOrRetrySmaller(
     sampleSize: Int,
-    freeMemory: () -> Unit,
+    beforeRetry: () -> Unit,
     decode: (sampleSize: Int) -> T?,
 ): T? {
     decode(sampleSize)?.let {
         return it
     }
-    freeMemory()
+    beforeRetry()
     return decode(sampleSize * 2)
 }
 
@@ -136,6 +136,8 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             val originalHeight: Int,
         )
 
+        private class CachedBytes(val bytes: ByteArray, val retryGeneration: Int)
+
         private val maxCacheSizeBytes =
             (Runtime.getRuntime().maxMemory() / 16)
                 .coerceIn(16L * 1024 * 1024, 64L * 1024 * 1024)
@@ -144,8 +146,8 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         private val maxBitmapCacheSizeBytes = fallbackBitmapCacheMaxBytes()
 
         private val rawBytesCache =
-            object : LruCache<String, ByteArray>(maxCacheSizeBytes) {
-                override fun sizeOf(key: String, value: ByteArray): Int = value.size
+            object : LruCache<String, CachedBytes>(maxCacheSizeBytes) {
+                override fun sizeOf(key: String, value: CachedBytes): Int = value.bytes.size
             }
 
         private val fallbackBitmapCache =
@@ -167,10 +169,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             fallbackBitmapCache.evictAll()
         }
 
-        private fun performFullDecode(
-            imageBytes: ByteArray,
-            pageIndex: Int,
-        ): FullDecode<CachedDecodedImage> {
+        private fun performFullDecode(imageBytes: ByteArray, pageIndex: Int): CachedDecodedImage? {
             // BitmapFactory decodes AVIF with the platform AV1 codec, and the AOSP software one
             // (c2.android.av1-dav1d) rejects frames wider or taller than 4096 px, so a tall AVIF
             // page decodes to null. Formats with needsNativeDecoder set use the bundled decoder
@@ -184,37 +183,32 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             }
         }
 
-        private fun nativeFullDecode(
-            imageBytes: ByteArray,
-            pageIndex: Int,
-        ): FullDecode<CachedDecodedImage> {
+        private fun nativeFullDecode(imageBytes: ByteArray, pageIndex: Int): CachedDecodedImage? {
             val decoder = ImageDecoder.newInstance(imageBytes.inputStream())
             if (decoder == null || decoder.width <= 0 || decoder.height <= 0) {
                 decoder?.recycle()
                 TimberKt.e {
                     "Cannot fallback decode region: native decoder could not open page $pageIndex"
                 }
-                return FullDecode.Failed(permanent = true)
+                return null
             }
 
             val imageWidth = decoder.width
             val imageHeight = decoder.height
             val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
             trimCacheForFullDecode(imageWidth, imageHeight, sampleSize)
-            // decode() returns null both for bad data and when it runs out of memory. Freeing the
-            // cached pages and trying once more at double the sample size lets a page that only
-            // ran out of memory load. A second null counts as permanent, so a corrupt page is
-            // decoded twice and then left alone until Retry.
+            // decode() returns null both for bad data and when it runs out of memory. A second try
+            // at double the sample size needs a quarter of the memory, so a page that only ran out
+            // of memory loads and the cached pages stay. A corrupt page is decoded twice and then
+            // left alone until Retry.
             val full =
                 try {
                     decodeOrRetrySmaller(
                         sampleSize = sampleSize,
-                        freeMemory = {
+                        beforeRetry = {
                             TimberKt.w {
                                 "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size $sampleSize), trying sample size ${sampleSize * 2}"
                             }
-                            fallbackBitmapCache.evictAll()
-                            rawBytesCache.evictAll()
                         },
                         decode = { decoder.decode(sampleSize = it) },
                     )
@@ -225,15 +219,12 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 TimberKt.e {
                     "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size ${sampleSize * 2})"
                 }
-                return FullDecode.Failed(permanent = true)
+                return null
             }
-            return FullDecode.Decoded(CachedDecodedImage(full, imageWidth, imageHeight))
+            return CachedDecodedImage(full, imageWidth, imageHeight)
         }
 
-        private fun platformFullDecode(
-            imageBytes: ByteArray,
-            pageIndex: Int,
-        ): FullDecode<CachedDecodedImage> {
+        private fun platformFullDecode(imageBytes: ByteArray, pageIndex: Int): CachedDecodedImage? {
             val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, boundsOptions)
             val imageWidth = boundsOptions.outWidth
@@ -243,7 +234,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 TimberKt.e {
                     "Cannot fallback decode region: invalid image dimensions ($imageWidth x $imageHeight)"
                 }
-                return FullDecode.Failed(permanent = true)
+                return null
             }
 
             val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
@@ -264,12 +255,12 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                         decodeOptions,
                     )
                 if (full != null) {
-                    FullDecode.Decoded(CachedDecodedImage(full, imageWidth, imageHeight))
+                    CachedDecodedImage(full, imageWidth, imageHeight)
                 } else {
                     TimberKt.e {
                         "BitmapFactory returned no bitmap for page $pageIndex ($imageWidth x $imageHeight)"
                     }
-                    FullDecode.Failed(permanent = true)
+                    null
                 }
             } catch (e: OutOfMemoryError) {
                 TimberKt.e(e) { "OutOfMemoryError during fallback decode for page $pageIndex" }
@@ -289,17 +280,17 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                             fallbackOptions,
                         )
                     if (full != null) {
-                        FullDecode.Decoded(CachedDecodedImage(full, imageWidth, imageHeight))
+                        CachedDecodedImage(full, imageWidth, imageHeight)
                     } else {
-                        FullDecode.Failed(permanent = true)
+                        null
                     }
                 } catch (e2: Throwable) {
                     TimberKt.e(e2) { "Secondary OOM during fallback decode for page $pageIndex" }
-                    FullDecode.Failed(permanent = false)
+                    null
                 }
             } catch (e: Exception) {
                 TimberKt.e(e) { "Unexpected error during fallback decode for page $pageIndex" }
-                FullDecode.Failed(permanent = true)
+                null
             }
         }
 
@@ -316,6 +307,9 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
     override suspend fun fetch(): FetchResult = coroutineScope {
         val chapterKey = split.page.chapter.chapter.id ?: split.page.chapter.chapter.url.hashCode()
         val cacheKey = "${chapterKey}_${split.page.index}"
+        // Bytes read and decodes that failed before the last Retry are not used, so a retry after
+        // the page was downloaded again decodes the new file.
+        val retryGeneration = split.page.retryGeneration
 
         // A page with a cached full decode serves its slices from that decode, without reading
         // the file again.
@@ -355,28 +349,31 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         val actualStream =
             streamFn ?: error("Page stream not available for page ${split.page.index}")
 
-        if (isRetry()) {
-            // Read the file again, so a retry after the page was downloaded again decodes the
-            // new file.
-            rawBytesCache.remove(cacheKey)
-        }
         val imageBytes =
-            rawBytesCache.get(cacheKey)
-                ?: activeFetches.await(cacheKey) {
+            rawBytesCache.get(cacheKey)?.takeIf { it.retryGeneration >= retryGeneration }?.bytes
+                ?: activeFetches.await("$cacheKey@$retryGeneration") {
                     actualStream()
                         .use { it.readBytes() }
                         .also {
                             // LruCache.put would evict a file bigger than the cache right away,
                             // with every other entry.
                             if (it.size <= rawBytesCache.maxSize()) {
-                                unlessCleared { rawBytesCache.put(cacheKey, it) }
+                                unlessCleared {
+                                    rawBytesCache.put(cacheKey, CachedBytes(it, retryGeneration))
+                                }
                             }
                         }
                 }
 
         val bitmap =
             withContext(Dispatchers.IO) {
-                decodeRegion(imageBytes, split.topOffset, split.splitHeight, cacheKey)
+                decodeRegion(
+                    imageBytes,
+                    split.topOffset,
+                    split.splitHeight,
+                    cacheKey,
+                    retryGeneration,
+                )
             }
 
         if (bitmap != null) {
@@ -397,6 +394,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         top: Int,
         height: Int,
         cacheKey: String,
+        retryGeneration: Int,
     ): Bitmap? {
         val decoder =
             try {
@@ -438,7 +436,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             }
         }
 
-        return fallbackDecodeRegion(imageBytes, top, height, cacheKey)
+        return fallbackDecodeRegion(imageBytes, top, height, cacheKey, retryGeneration)
     }
 
     private suspend fun fallbackDecodeRegion(
@@ -446,6 +444,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         top: Int,
         height: Int,
         cacheKey: String,
+        retryGeneration: Int,
     ): Bitmap? {
         val cached = fallbackBitmapCache.get(cacheKey)?.takeUnless { it.bitmap.isRecycled }
         // The decode can outlive this fetcher, so it reads no fetcher fields. A reference to the
@@ -453,20 +452,15 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         val pageIndex = split.page.index
         val decoded =
             cached
-                ?: activeDecodes.await(cacheKey, retry = isRetry()) {
-                    performFullDecode(imageBytes, pageIndex).also {
-                        if (it is FullDecode.Decoded) {
-                            unlessCleared { fallbackBitmapCache.put(cacheKey, it.image) }
-                        }
+                ?: activeDecodes.await(cacheKey, retryGeneration) {
+                    performFullDecode(imageBytes, pageIndex)?.also {
+                        unlessCleared { fallbackBitmapCache.put(cacheKey, it) }
                     }
                 }
                 ?: return null
 
         return cropFallbackSlice(decoded, top, height)
     }
-
-    // The reader's Retry button loads the page with memory cache reads turned off.
-    private fun isRetry(): Boolean = !options.memoryCachePolicy.readEnabled
 
     private fun cropFallbackSlice(decoded: CachedDecodedImage, top: Int, height: Int): Bitmap? =
         try {

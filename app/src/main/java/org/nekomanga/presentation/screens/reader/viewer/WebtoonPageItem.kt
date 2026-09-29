@@ -28,7 +28,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.maxBitmapSize
@@ -140,21 +139,20 @@ private fun WebtoonPageContent(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    var loadError by remember(target) { mutableStateOf(false) }
-    var loadErrorMessage by remember(target) { mutableStateOf<String?>(null) }
-    var retryCount by remember(target) { mutableStateOf(0) }
+    val retryGeneration by page.retryGenerationFlow.collectAsStateWithLifecycle()
+    var loadError by remember(target, retryGeneration) { mutableStateOf(false) }
+    var loadErrorMessage by remember(target, retryGeneration) { mutableStateOf<String?>(null) }
     val isError = pageStatus == Page.State.ERROR || loadError
     var intrinsicRatio by remember(target, cropBorders) { mutableFloatStateOf(initialRatio) }
 
+    // Every slice of the page collects its retry generation, so all of them load again.
     val onRetry: () -> Unit = {
-        loadError = false
-        loadErrorMessage = null
-        retryCount++
+        page.retry()
         page.chapter.pageLoader?.retryPage(page)
     }
 
     val model =
-        remember(target, retryCount, cropBorders) {
+        remember(target, cropBorders) {
             val modelData =
                 when (target) {
                     is WebtoonImageTarget.Page -> target.page
@@ -168,9 +166,6 @@ private fun WebtoonPageContent(
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .apply {
-                    if (retryCount > 0) {
-                        memoryCachePolicy(CachePolicy.WRITE_ONLY)
-                    }
                     if (cropBorders) {
                         transformations(CropBordersTransformation(cropTopBottom = false))
                     }
@@ -231,9 +226,9 @@ private fun WebtoonPageContent(
                 .then(gestureModifier),
         contentAlignment = Alignment.Center,
     ) {
-        // AsyncImage compares requests by data, cache keys and size, not by cache policy, so the
-        // retry request alone would not load again. Each retry gets a new AsyncImage.
-        key(retryCount) {
+        // A retry does not change the request, and AsyncImage loads again only for a changed
+        // request, so each retry gets a new AsyncImage.
+        key(retryGeneration) {
             AsyncImage(
                 model = model,
                 contentDescription = null,

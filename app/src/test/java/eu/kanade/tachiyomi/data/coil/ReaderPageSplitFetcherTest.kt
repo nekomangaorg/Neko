@@ -67,7 +67,7 @@ class ReaderPageSplitFetcherTest {
         val result =
             decodeOrRetrySmaller(
                 sampleSize = 2,
-                freeMemory = { events += "free" },
+                beforeRetry = { events += "retry" },
                 decode = { sampleSize ->
                     "bitmap at $sampleSize".also { events += "decode $sampleSize" }
                 },
@@ -78,13 +78,13 @@ class ReaderPageSplitFetcherTest {
     }
 
     @Test
-    fun `native decode that returns null frees memory and retries at double sample size`() {
+    fun `native decode that returns null is retried at double sample size`() {
         val events = mutableListOf<String>()
 
         val result =
             decodeOrRetrySmaller(
                 sampleSize = 2,
-                freeMemory = { events += "free" },
+                beforeRetry = { events += "retry" },
                 decode = { sampleSize ->
                     events += "decode $sampleSize"
                     if (sampleSize == 4) "bitmap at 4" else null
@@ -92,7 +92,7 @@ class ReaderPageSplitFetcherTest {
             )
 
         assertEquals("bitmap at 4", result)
-        assertEquals(listOf("decode 2", "free", "decode 4"), events)
+        assertEquals(listOf("decode 2", "retry", "decode 4"), events)
     }
 
     @Test
@@ -102,7 +102,7 @@ class ReaderPageSplitFetcherTest {
         val result =
             decodeOrRetrySmaller<String>(
                 sampleSize = 1,
-                freeMemory = { events += "free" },
+                beforeRetry = { events += "retry" },
                 decode = { sampleSize ->
                     events += "decode $sampleSize"
                     null
@@ -110,7 +110,7 @@ class ReaderPageSplitFetcherTest {
             )
 
         assertNull(result)
-        assertEquals(listOf("decode 1", "free", "decode 2"), events)
+        assertEquals(listOf("decode 1", "retry", "decode 2"), events)
     }
 
     private fun roundedUp(size: Int, sampleSize: Int): Long =

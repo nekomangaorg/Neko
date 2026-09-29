@@ -3,6 +3,9 @@ package eu.kanade.tachiyomi.ui.reader.model
 import android.graphics.drawable.Drawable
 import eu.kanade.tachiyomi.source.model.Page
 import java.io.InputStream
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 open class ReaderPage(
     index: Int,
@@ -55,6 +58,24 @@ open class ReaderPage(
 
     fun isFromSamePage(page: ReaderPage): Boolean =
         index == page.index && chapter.chapter.id == page.chapter.chapter.id
+
+    private val _retryGenerationFlow = MutableStateFlow(0)
+
+    /**
+     * Changes each time Retry is tapped on this page. All pages share one counter, so a page object
+     * created again starts below every earlier retry and still sees the failures from before.
+     */
+    val retryGenerationFlow = _retryGenerationFlow.asStateFlow()
+    val retryGeneration: Int
+        get() = _retryGenerationFlow.value
+
+    fun retry() {
+        _retryGenerationFlow.value = retryGenerations.incrementAndGet()
+    }
+
+    private companion object {
+        val retryGenerations = AtomicInteger()
+    }
 }
 
 data class ReaderPageSplit(
