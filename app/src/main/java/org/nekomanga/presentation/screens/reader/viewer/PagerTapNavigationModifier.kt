@@ -69,6 +69,35 @@ fun Modifier.pagerTapNavigation(
                         pass = PointerEventPass.Initial,
                     )
                 val downPos = down.position
+                val downTime = System.currentTimeMillis()
+
+                when (
+                    evaluateDownPointer(
+                        hasActivePendingJob = pendingNavJob?.isActive == true,
+                        downPos = downPos,
+                        lastTapOffset = lastTapOffset,
+                        downTime = downTime,
+                        lastTapTime = lastTapTime,
+                        doubleTapTimeoutMs = doubleTapTimeoutMs,
+                        doubleTapSlopSquared = doubleTapSlopSquared,
+                    )
+                ) {
+                    DownPointerAction.CANCEL_PENDING_FOR_DOUBLE_TAP -> {
+                        pendingNavJob?.cancel()
+                        pendingNavJob = null
+                        pendingNavAction = null
+                    }
+                    DownPointerAction.FLUSH_PENDING_AND_START_NEW -> {
+                        pendingNavJob?.cancel()
+                        pendingNavJob = null
+                        pendingNavAction?.invoke()
+                        pendingNavAction = null
+                        lastTapTime = 0L
+                        lastTapOffset = Offset.Zero
+                    }
+                    DownPointerAction.NO_OP -> {}
+                }
+
                 var isLongPressTriggered = false
                 var isMovementPastSlop = false
                 var isMultiTouch = currentEvent.changes.count { it.pressed } > 1
@@ -217,6 +246,44 @@ fun Modifier.pagerTapNavigation(
                                         pendingNavAction = null
                                     }
                                 }
+                                TapActionResolution.CANCEL_NAV_FOR_ZOOM -> {
+                                    pendingNavJob?.cancel()
+                                    pendingNavJob = null
+                                    pendingNavAction = null
+                                    lastTapTime = 0L
+                                    lastTapOffset = Offset.Zero
+                                }
+                                TapActionResolution.SCHEDULE_NAV_DELAYED -> {
+                                    if (pendingNavJob?.isActive == true) {
+                                        pendingNavJob?.cancel()
+                                        pendingNavJob = null
+                                        pendingNavAction?.invoke()
+                                        pendingNavAction = null
+                                    }
+
+                                    lastTapTime = upTime
+                                    lastTapOffset = upPos
+
+                                    val executeNav: () -> Unit = {
+                                        dispatchNavigation(
+                                            action = action,
+                                            isRtl = currentConfig.isRtl,
+                                            menuVisible = currentConfig.menuVisible,
+                                            onToggleMenu = currentConfig.onToggleMenu,
+                                            onNavigateAdjacent = currentConfig.onNavigateAdjacent,
+                                        )
+                                        lastTapTime = 0L
+                                        lastTapOffset = Offset.Zero
+                                    }
+
+                                    pendingNavAction = executeNav
+                                    pendingNavJob = scope.launch {
+                                        delay(doubleTapTimeoutMs)
+                                        executeNav()
+                                        pendingNavJob = null
+                                        pendingNavAction = null
+                                    }
+                                }
                                 TapActionResolution.NAVIGATE_IMMEDIATELY -> {
                                     up.consume()
 
@@ -305,11 +372,40 @@ internal fun evaluatePointerMovement(
     }
 }
 
+internal enum class DownPointerAction {
+    CANCEL_PENDING_FOR_DOUBLE_TAP,
+    FLUSH_PENDING_AND_START_NEW,
+    NO_OP,
+}
+
+internal fun evaluateDownPointer(
+    hasActivePendingJob: Boolean,
+    downPos: Offset,
+    lastTapOffset: Offset,
+    downTime: Long,
+    lastTapTime: Long,
+    doubleTapTimeoutMs: Long,
+    doubleTapSlopSquared: Float,
+): DownPointerAction {
+    if (!hasActivePendingJob) return DownPointerAction.NO_OP
+    val timeSinceLastTap = downTime - lastTapTime
+    val distToLastTapSq = (downPos - lastTapOffset).getDistanceSquared()
+    return if (
+        timeSinceLastTap in 0 until doubleTapTimeoutMs && distToLastTapSq < doubleTapSlopSquared
+    ) {
+        DownPointerAction.CANCEL_PENDING_FOR_DOUBLE_TAP
+    } else {
+        DownPointerAction.FLUSH_PENDING_AND_START_NEW
+    }
+}
+
 internal enum class TapActionResolution {
     TOGGLE_MENU_IMMEDIATE,
     SCHEDULE_MENU_DELAYED,
     CANCEL_MENU_FOR_ZOOM,
     NAVIGATE_IMMEDIATELY,
+    SCHEDULE_NAV_DELAYED,
+    CANCEL_NAV_FOR_ZOOM,
 }
 
 internal fun resolveTapAction(
@@ -329,7 +425,15 @@ internal fun resolveTapAction(
             TapActionResolution.TOGGLE_MENU_IMMEDIATE
         }
     } else {
-        TapActionResolution.NAVIGATE_IMMEDIATELY
+        if (menuVisible) {
+            TapActionResolution.NAVIGATE_IMMEDIATELY
+        } else if (isDoubleTap) {
+            TapActionResolution.CANCEL_NAV_FOR_ZOOM
+        } else if (hasDoubleTapAnimation) {
+            TapActionResolution.SCHEDULE_NAV_DELAYED
+        } else {
+            TapActionResolution.NAVIGATE_IMMEDIATELY
+        }
     }
 }
 

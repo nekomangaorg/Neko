@@ -347,8 +347,7 @@ class PagerTapNavigationTest {
     }
 
     @Test
-    fun `resolveTapAction always resolves navigation regions to NAVIGATE_IMMEDIATELY even during double tap`() {
-        // Tapping backward / forward must never be swallowed or delayed by double-tap detection
+    fun `resolveTapAction resolves navigation regions to CANCEL_NAV_FOR_ZOOM during double tap with animation enabled`() {
         val actions =
             listOf(
                 NavigationRegion.NEXT,
@@ -365,8 +364,138 @@ class PagerTapNavigationTest {
                     isDoubleTap = true,
                     hasDoubleTapAnimation = true,
                 )
+            assertEquals(TapActionResolution.CANCEL_NAV_FOR_ZOOM, result)
+        }
+    }
+
+    @Test
+    fun `resolveTapAction resolves navigation regions to SCHEDULE_NAV_DELAYED for single tap with animation enabled`() {
+        val actions =
+            listOf(
+                NavigationRegion.NEXT,
+                NavigationRegion.PREV,
+                NavigationRegion.LEFT,
+                NavigationRegion.RIGHT,
+            )
+
+        for (action in actions) {
+            val result =
+                resolveTapAction(
+                    action = action,
+                    menuVisible = false,
+                    isDoubleTap = false,
+                    hasDoubleTapAnimation = true,
+                )
+            assertEquals(TapActionResolution.SCHEDULE_NAV_DELAYED, result)
+        }
+    }
+
+    @Test
+    fun `resolveTapAction resolves navigation regions to NAVIGATE_IMMEDIATELY when animation is disabled`() {
+        val actions =
+            listOf(
+                NavigationRegion.NEXT,
+                NavigationRegion.PREV,
+                NavigationRegion.LEFT,
+                NavigationRegion.RIGHT,
+            )
+
+        for (action in actions) {
+            val result =
+                resolveTapAction(
+                    action = action,
+                    menuVisible = false,
+                    isDoubleTap = false,
+                    hasDoubleTapAnimation = false,
+                )
             assertEquals(TapActionResolution.NAVIGATE_IMMEDIATELY, result)
         }
+    }
+
+    @Test
+    fun `resolveTapAction resolves navigation regions to NAVIGATE_IMMEDIATELY when menu is currently visible`() {
+        val actions =
+            listOf(
+                NavigationRegion.NEXT,
+                NavigationRegion.PREV,
+                NavigationRegion.LEFT,
+                NavigationRegion.RIGHT,
+            )
+
+        for (action in actions) {
+            val result =
+                resolveTapAction(
+                    action = action,
+                    menuVisible = true,
+                    isDoubleTap = false,
+                    hasDoubleTapAnimation = true,
+                )
+            assertEquals(TapActionResolution.NAVIGATE_IMMEDIATELY, result)
+        }
+    }
+
+    @Test
+    fun `evaluateDownPointer returns CANCEL_PENDING_FOR_DOUBLE_TAP when second tap arrives within timeout and slop`() {
+        val result =
+            evaluateDownPointer(
+                hasActivePendingJob = true,
+                downPos = Offset(102f, 100f),
+                lastTapOffset = Offset(100f, 100f), // distance = 2px, distanceSquared = 4px
+                downTime = 450L,
+                lastTapTime = 300L, // 150ms < 300ms timeout
+                doubleTapTimeoutMs = 300L,
+                doubleTapSlopSquared = 100f,
+            )
+
+        assertEquals(DownPointerAction.CANCEL_PENDING_FOR_DOUBLE_TAP, result)
+    }
+
+    @Test
+    fun `evaluateDownPointer returns FLUSH_PENDING_AND_START_NEW when second tap exceeds slop`() {
+        val result =
+            evaluateDownPointer(
+                hasActivePendingJob = true,
+                downPos = Offset(150f, 100f), // distance = 50px, distanceSquared = 2500px
+                lastTapOffset = Offset(100f, 100f),
+                downTime = 450L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                doubleTapSlopSquared = 100f,
+            )
+
+        assertEquals(DownPointerAction.FLUSH_PENDING_AND_START_NEW, result)
+    }
+
+    @Test
+    fun `evaluateDownPointer returns FLUSH_PENDING_AND_START_NEW when second tap exceeds timeout`() {
+        val result =
+            evaluateDownPointer(
+                hasActivePendingJob = true,
+                downPos = Offset(102f, 100f),
+                lastTapOffset = Offset(100f, 100f),
+                downTime = 700L, // 400ms > 300ms timeout
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                doubleTapSlopSquared = 100f,
+            )
+
+        assertEquals(DownPointerAction.FLUSH_PENDING_AND_START_NEW, result)
+    }
+
+    @Test
+    fun `evaluateDownPointer returns NO_OP when no active pending job`() {
+        val result =
+            evaluateDownPointer(
+                hasActivePendingJob = false,
+                downPos = Offset(100f, 100f),
+                lastTapOffset = Offset(100f, 100f),
+                downTime = 350L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                doubleTapSlopSquared = 100f,
+            )
+
+        assertEquals(DownPointerAction.NO_OP, result)
     }
 
     @Test

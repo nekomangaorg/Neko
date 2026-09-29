@@ -1,13 +1,23 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.ui.graphics.Color
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ComposePagerViewerResolutionTest {
@@ -214,5 +224,92 @@ class ComposePagerViewerResolutionTest {
             4,
             resolveItemIndexForPage(items = items, targetChapterId = null, pageIndex = 99),
         )
+    }
+
+    private fun createConfig(
+        activeChapterId: Long = 1L,
+        animatedTransitions: Boolean = true,
+        isRtl: Boolean = false,
+    ): PagerViewerConfigUiModel {
+        return PagerViewerConfigUiModel(
+            activeChapterId = activeChapterId,
+            animatedTransitions = animatedTransitions,
+            isRtl = isRtl,
+            backgroundColor = Color.Black,
+        )
+    }
+
+    @Test
+    fun `executeNavCommand catches CancellationException when animateScrollToPage is interrupted and returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config = createConfig(activeChapterId = 1L, animatedTransitions = true)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+            coEvery { mockPagerState.animateScrollToPage(any(), any()) } throws
+                CancellationException("Interrupted by subsequent tap")
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.ScrollToItem(itemIndex = 2, animated = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue("Interrupted scroll animation must return true and not throw", result)
+        }
+
+    @Test
+    fun `executeNavCommand returns false when target chapter is not yet loaded in items`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config = createConfig(activeChapterId = 1L)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command =
+                        ReaderNavCommand.ScrollToPage(
+                            pageIndex = 0,
+                            chapterId = 2L,
+                            animated = true,
+                        ),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertFalse(
+                "Unresolved chapter target must return false to allow pending queueing",
+                result,
+            )
+        }
+
+    @Test
+    fun `executeNavCommand navigates to target item successfully when chapter exists`() = runTest {
+        val ch1 = createChapter(1L, pageCount = 5)
+        val items = (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+        val config = createConfig(activeChapterId = 1L, animatedTransitions = false)
+
+        val mockPagerState = mockk<PagerState>(relaxed = true)
+        every { mockPagerState.currentPage } returns 0
+
+        val result =
+            executeNavCommand(
+                command = ReaderNavCommand.ScrollToItem(itemIndex = 3, animated = false),
+                pagerState = mockPagerState,
+                items = items,
+                config = config,
+            )
+
+        assertTrue(result)
     }
 }
