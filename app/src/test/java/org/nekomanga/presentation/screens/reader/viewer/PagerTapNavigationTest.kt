@@ -549,4 +549,219 @@ class PagerTapNavigationTest {
 
         assertEquals(TapActionResolution.TOGGLE_MENU_IMMEDIATE, result)
     }
+
+    @Test
+    fun `isDoubleTap returns false when second tap is at doubleTapTimeoutMs boundary`() {
+        val result =
+            isDoubleTap(
+                upTime = 600L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(100f, 100f),
+                lastTapOffset = Offset(100f, 100f),
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `isDoubleTap returns true when second tap is 1ms before doubleTapTimeoutMs boundary`() {
+        val result =
+            isDoubleTap(
+                upTime = 599L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(100f, 100f),
+                lastTapOffset = Offset(100f, 100f),
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `isDoubleTap returns true when timeDiff is 0`() {
+        val result =
+            isDoubleTap(
+                upTime = 300L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(100f, 100f),
+                lastTapOffset = Offset(100f, 100f),
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `isDoubleTap returns false when distanceSquared equals doubleTapSlopSquared`() {
+        val result =
+            isDoubleTap(
+                upTime = 400L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(106f, 108f), // 6^2 + 8^2 = 100
+                lastTapOffset = Offset(100f, 100f),
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `isDoubleTap returns true when distanceSquared is strictly less than doubleTapSlopSquared`() {
+        val result =
+            isDoubleTap(
+                upTime = 400L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(105f, 105f), // 5^2 + 5^2 = 50 < 100
+                lastTapOffset = Offset(100f, 100f),
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `isDoubleTap returns false when distanceSquared exceeds doubleTapSlopSquared`() {
+        val result =
+            isDoubleTap(
+                upTime = 400L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                upPos = Offset(106.1f, 108f),
+                lastTapOffset = Offset(100f, 100f),
+                doubleTapSlopSquared = 100f,
+                hasDoubleTapAnimation = true,
+            )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `evaluateDownPointer returns CANCEL_PENDING_FOR_DOUBLE_TAP when second tap is 1ms before doubleTapTimeoutMs and strictly within slop`() {
+        val result =
+            evaluateDownPointer(
+                hasActivePendingJob = true,
+                downPos = Offset(105f, 105f),
+                lastTapOffset = Offset(100f, 100f),
+                downTime = 599L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                doubleTapSlopSquared = 100f,
+            )
+
+        assertEquals(DownPointerAction.CANCEL_PENDING_FOR_DOUBLE_TAP, result)
+    }
+
+    @Test
+    fun `evaluateDownPointer returns FLUSH_PENDING_AND_START_NEW when second tap is at doubleTapTimeoutMs boundary`() {
+        val result =
+            evaluateDownPointer(
+                hasActivePendingJob = true,
+                downPos = Offset(105f, 105f),
+                lastTapOffset = Offset(100f, 100f),
+                downTime = 600L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                doubleTapSlopSquared = 100f,
+            )
+
+        assertEquals(DownPointerAction.FLUSH_PENDING_AND_START_NEW, result)
+    }
+
+    @Test
+    fun `evaluateDownPointer returns FLUSH_PENDING_AND_START_NEW when distanceSquared equals doubleTapSlopSquared`() {
+        val result =
+            evaluateDownPointer(
+                hasActivePendingJob = true,
+                downPos = Offset(106f, 108f), // 6^2 + 8^2 = 100
+                lastTapOffset = Offset(100f, 100f),
+                downTime = 400L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                doubleTapSlopSquared = 100f,
+            )
+
+        assertEquals(DownPointerAction.FLUSH_PENDING_AND_START_NEW, result)
+    }
+
+    @Test
+    fun `evaluateDownPointer returns CANCEL_PENDING_FOR_DOUBLE_TAP when second tap has timeDiff 0`() {
+        val result =
+            evaluateDownPointer(
+                hasActivePendingJob = true,
+                downPos = Offset(100f, 100f),
+                lastTapOffset = Offset(100f, 100f),
+                downTime = 300L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                doubleTapSlopSquared = 100f,
+            )
+
+        assertEquals(DownPointerAction.CANCEL_PENDING_FOR_DOUBLE_TAP, result)
+    }
+
+    @Test
+    fun `evaluateDownPointer returns FLUSH_PENDING_AND_START_NEW when distanceSquared exceeds slop`() {
+        val result =
+            evaluateDownPointer(
+                hasActivePendingJob = true,
+                downPos = Offset(106.1f, 108f),
+                lastTapOffset = Offset(100f, 100f),
+                downTime = 400L,
+                lastTapTime = 300L,
+                doubleTapTimeoutMs = 300L,
+                doubleTapSlopSquared = 100f,
+            )
+
+        assertEquals(DownPointerAction.FLUSH_PENDING_AND_START_NEW, result)
+    }
+
+    @Test
+    fun `evaluatePointerMovement returns VALID_TAP_UP when finger lift distanceSquared exactly equals touchSlopSquared`() {
+        val result =
+            evaluatePointerMovement(
+                downPos = Offset(100f, 100f),
+                currentPos = Offset(106f, 108f),
+                isPressed = false,
+                touchSlopSquared = 100f,
+            )
+
+        assertEquals(PointerSlopResult.VALID_TAP_UP, result)
+    }
+
+    @Test
+    fun `evaluatePointerMovement returns WITHIN_SLOP_PRESSED when finger is held down and distanceSquared exactly equals touchSlopSquared`() {
+        val result =
+            evaluatePointerMovement(
+                downPos = Offset(100f, 100f),
+                currentPos = Offset(106f, 108f),
+                isPressed = true,
+                touchSlopSquared = 100f,
+            )
+
+        assertEquals(PointerSlopResult.WITHIN_SLOP_PRESSED, result)
+    }
+
+    @Test
+    fun `evaluatePointerMovement returns MOVEMENT_PAST_SLOP when finger lift distanceSquared exceeds touchSlopSquared`() {
+        val result =
+            evaluatePointerMovement(
+                downPos = Offset(100f, 100f),
+                currentPos = Offset(106.1f, 108f),
+                isPressed = false,
+                touchSlopSquared = 100f,
+            )
+
+        assertEquals(PointerSlopResult.MOVEMENT_PAST_SLOP, result)
+    }
 }

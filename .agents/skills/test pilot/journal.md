@@ -21,3 +21,7 @@
 ## 2026-06-22 - Injekt DI Resetting via Delegation
 **Learning:** `Injekt` uses Kotlin interface delegation (`object Injekt : InjektRegistry by KotlinInjektRegistrar()`). Direct reflection over `Injekt::class.java` fields will miss the delegated fields (which are located inside `KotlinInjektRegistrar`), causing `DoubleRegistrationException` in subsequent tests.
 **Action:** When resetting `Injekt` registry via reflection in `tearDown`, search not only for the `registrars` field directly but also check fields containing the `"delegate"` substring to locate the delegate and clear its `registrars` map.
+
+## 2026-09-29 - Testing Compose PagerState and LazyListState Navigation
+**Learning:** `PagerState.scrollToPage` and `LazyListState.scrollToItem` are suspending functions, requiring `coVerify` rather than MockK's `verify` inside `runTest`. Furthermore, Compose extension functions such as `animateScrollBy` and `scrollBy` on `ScrollableState` cannot be intercepted by MockK on standard relaxed mocks without `mockkStatic`.
+**Action:** Extract pure calculation helpers (such as `calculateWebtoonStepDelta` and `calculateEffectiveScrollAmount`) for scroll math to test edge cases deterministically without relying on extension function mocking, and always use `coVerify` for Compose state scroll/animation member functions.

@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CancellationException
@@ -305,6 +306,407 @@ class ComposePagerViewerResolutionTest {
         val result =
             executeNavCommand(
                 command = ReaderNavCommand.ScrollToItem(itemIndex = 3, animated = false),
+                pagerState = mockPagerState,
+                items = items,
+                config = config,
+            )
+
+        assertTrue(result)
+        coVerify { mockPagerState.scrollToPage(3) }
+    }
+
+    @Test
+    fun `executeNavCommand with StepPage forward in LTR animates scroll to currentPage + 1`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config =
+                createConfig(activeChapterId = 1L, animatedTransitions = true, isRtl = false)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 1
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPagerState.animateScrollToPage(page = 2, animationSpec = any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage forward in RTL animates scroll to currentPage - 1`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config =
+                createConfig(activeChapterId = 1L, animatedTransitions = true, isRtl = true)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 3
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPagerState.animateScrollToPage(page = 2, animationSpec = any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage backward in LTR animates scroll to currentPage - 1`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config =
+                createConfig(activeChapterId = 1L, animatedTransitions = true, isRtl = false)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 3
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPagerState.animateScrollToPage(page = 2, animationSpec = any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage backward in RTL animates scroll to currentPage + 1`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config =
+                createConfig(activeChapterId = 1L, animatedTransitions = true, isRtl = true)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 2
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPagerState.animateScrollToPage(page = 3, animationSpec = any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage backward at start boundary does not scroll and returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config =
+                createConfig(activeChapterId = 1L, animatedTransitions = true, isRtl = false)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage forward at end boundary does not scroll and returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config =
+                createConfig(activeChapterId = 1L, animatedTransitions = true, isRtl = false)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 4 // lastIndex
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage with animatedTransitions disabled calls scrollToPage`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config =
+                createConfig(activeChapterId = 1L, animatedTransitions = false, isRtl = false)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 1
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPagerState.scrollToPage(2) }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage catches CancellationException when rapid tapping interrupts animation`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config =
+                createConfig(activeChapterId = 1L, animatedTransitions = true, isRtl = false)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 1
+            coEvery { mockPagerState.animateScrollToPage(any(), any()) } throws
+                CancellationException("Interrupted by rapid user tap")
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue("StepPage interruption must not escape or return false", result)
+        }
+
+    @Test
+    fun `executeNavCommand with SnapToPage calls scrollToPage when target page is found and returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config = createConfig(activeChapterId = 1L)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.SnapToPage(pageIndex = 3, chapterId = 1L),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPagerState.scrollToPage(3) }
+        }
+
+    @Test
+    fun `executeNavCommand with SnapToPage scrolls to transition when chapter is not loaded and returns false`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 2)
+            val ch2 = createChapter(2L, pageCount = 2)
+            val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+            val items =
+                listOf(
+                    ReaderUiItem.Page(ch1Pages[0]),
+                    ReaderUiItem.Page(ch1Pages[1]),
+                    ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2)),
+                )
+            val config = createConfig(activeChapterId = 1L)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.SnapToPage(pageIndex = 0, chapterId = 2L),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertFalse(
+                "Must return false so pending command is preserved until chapter loads",
+                result,
+            )
+            coVerify { mockPagerState.scrollToPage(2) }
+        }
+
+    @Test
+    fun `executeNavCommand with SnapToPage returns false when neither target page nor transition exists`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config = createConfig(activeChapterId = 1L)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.SnapToPage(pageIndex = 0, chapterId = 99L),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertFalse(result)
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with ScrollToPage animates to transition when chapter is not loaded and returns false`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 2)
+            val ch2 = createChapter(2L, pageCount = 2)
+            val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+            val items =
+                listOf(
+                    ReaderUiItem.Page(ch1Pages[0]),
+                    ReaderUiItem.Page(ch1Pages[1]),
+                    ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2)),
+                )
+            val config = createConfig(activeChapterId = 1L, animatedTransitions = true)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command =
+                        ReaderNavCommand.ScrollToPage(
+                            pageIndex = 0,
+                            chapterId = 2L,
+                            animated = true,
+                        ),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertFalse(result)
+            coVerify { mockPagerState.animateScrollToPage(page = 2, animationSpec = any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with ScrollToPage calls scrollToPage when animatedTransitions is false and returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config = createConfig(activeChapterId = 1L, animatedTransitions = false)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command =
+                        ReaderNavCommand.ScrollToPage(
+                            pageIndex = 3,
+                            chapterId = 1L,
+                            animated = true,
+                        ),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPagerState.scrollToPage(3) }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with ScrollToItem clamps target index when out of bounds`() = runTest {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val items = (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+        val config = createConfig(activeChapterId = 1L, animatedTransitions = false)
+
+        val mockPagerState = mockk<PagerState>(relaxed = true)
+        every { mockPagerState.currentPage } returns 0
+
+        val result =
+            executeNavCommand(
+                command = ReaderNavCommand.ScrollToItem(itemIndex = 10, animated = false),
+                pagerState = mockPagerState,
+                items = items,
+                config = config,
+            )
+
+        assertTrue(result)
+        coVerify { mockPagerState.scrollToPage(2) } // clamped to lastIndex 2
+    }
+
+    @Test
+    fun `executeNavCommand with ScrollToItem does not scroll when already on target page`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config = createConfig(activeChapterId = 1L, animatedTransitions = false)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 2
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.ScrollToItem(itemIndex = 2, animated = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with ScrollByDelta returns true`() = runTest {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val items = (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+        val config = createConfig(activeChapterId = 1L)
+        val mockPagerState = mockk<PagerState>(relaxed = true)
+
+        val result =
+            executeNavCommand(
+                command = ReaderNavCommand.ScrollByDelta(delta = 100f),
                 pagerState = mockPagerState,
                 items = items,
                 config = config,

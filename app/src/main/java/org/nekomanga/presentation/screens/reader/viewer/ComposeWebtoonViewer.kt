@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
@@ -65,7 +66,7 @@ import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-private class ScrollAnchorState(
+internal class ScrollAnchorState(
     var item: ReaderUiItem? = null,
     var offset: Int = 0,
 )
@@ -105,77 +106,14 @@ fun ComposeWebtoonViewer(
     // 1. Consume unidirectional programmatic navigation commands
     LaunchedEffect(navCommands) {
         navCommands.collect { cmd ->
-            try {
-                when (cmd) {
-                    is ReaderNavCommand.ScrollToItem -> {
-                        val target = cmd.itemIndex.coerceIn(0, currentItems.lastIndex)
-                        if (cmd.animated && config.animatedTransitions) {
-                            lazyListState.animateScrollToItem(target)
-                        } else {
-                            lazyListState.scrollToItem(target)
-                        }
-                        currentItems.getOrNull(target)?.let {
-                            scrollAnchorState.item = it
-                            scrollAnchorState.offset = 0
-                        }
-                    }
-                    is ReaderNavCommand.ScrollToPage -> {
-                        val targetChapterId = cmd.chapterId ?: config.activeChapterId
-                        val target =
-                            resolveItemIndexForPage(currentItems, targetChapterId, cmd.pageIndex)
-                                ?: cmd.pageIndex.coerceIn(0, currentItems.lastIndex)
-                        if (cmd.animated && config.animatedTransitions) {
-                            lazyListState.animateScrollToItem(target)
-                        } else {
-                            lazyListState.scrollToItem(target)
-                        }
-                        currentItems.getOrNull(target)?.let {
-                            scrollAnchorState.item = it
-                            scrollAnchorState.offset = 0
-                        }
-                    }
-                    is ReaderNavCommand.SnapToPage -> {
-                        val targetChapterId = cmd.chapterId ?: config.activeChapterId
-                        val target =
-                            resolveItemIndexForPage(currentItems, targetChapterId, cmd.pageIndex)
-                                ?: cmd.pageIndex.coerceIn(0, currentItems.lastIndex)
-                        lazyListState.scrollToItem(target)
-                        currentItems.getOrNull(target)?.let {
-                            scrollAnchorState.item = it
-                            scrollAnchorState.offset = 0
-                        }
-                    }
-                    is ReaderNavCommand.StepPage -> {
-                        val viewportHeight = lazyListState.layoutInfo.viewportSize.height
-                        val delta =
-                            if (viewportHeight > 0) {
-                                viewportHeight * 0.9f
-                            } else {
-                                500f
-                            }
-                        val scrollAmount = if (cmd.forward) delta else -delta
-                        val effectiveScrollAmount =
-                            if (zoomState.scale > 0f) scrollAmount / zoomState.scale
-                            else scrollAmount
-                        if (config.animatedTransitions) {
-                            lazyListState.animateScrollBy(effectiveScrollAmount)
-                        } else {
-                            lazyListState.scrollBy(effectiveScrollAmount)
-                        }
-                    }
-                    is ReaderNavCommand.ScrollByDelta -> {
-                        val scrollAmount =
-                            if (zoomState.scale > 0f) cmd.delta / zoomState.scale else cmd.delta
-                        if (config.animatedTransitions) {
-                            lazyListState.animateScrollBy(scrollAmount)
-                        } else {
-                            lazyListState.scrollBy(scrollAmount)
-                        }
-                    }
-                }
-            } catch (_: CancellationException) {
-                // Scroll command interrupted by user gesture or next navigation
-            }
+            executeWebtoonNavCommand(
+                command = cmd,
+                lazyListState = lazyListState,
+                items = currentItems,
+                config = config,
+                scrollAnchorState = scrollAnchorState,
+                zoomScale = zoomState.scale,
+            )
         }
     }
 
@@ -687,3 +625,81 @@ internal fun calculateEffectiveContentPadding(
         bottom = contentPadding.calculateBottomPadding(),
     )
 }
+
+internal suspend fun executeWebtoonNavCommand(
+    command: ReaderNavCommand,
+    lazyListState: LazyListState,
+    items: List<ReaderUiItem>,
+    config: WebtoonViewerConfigUiModel,
+    scrollAnchorState: ScrollAnchorState,
+    zoomScale: Float = 1f,
+) {
+    try {
+        when (command) {
+            is ReaderNavCommand.ScrollToItem -> {
+                val target = command.itemIndex.coerceIn(0, items.lastIndex)
+                if (command.animated && config.animatedTransitions) {
+                    lazyListState.animateScrollToItem(target)
+                } else {
+                    lazyListState.scrollToItem(target)
+                }
+                items.getOrNull(target)?.let {
+                    scrollAnchorState.item = it
+                    scrollAnchorState.offset = 0
+                }
+            }
+            is ReaderNavCommand.ScrollToPage -> {
+                val targetChapterId = command.chapterId ?: config.activeChapterId
+                val target =
+                    resolveItemIndexForPage(items, targetChapterId, command.pageIndex)
+                        ?: command.pageIndex.coerceIn(0, items.lastIndex)
+                if (command.animated && config.animatedTransitions) {
+                    lazyListState.animateScrollToItem(target)
+                } else {
+                    lazyListState.scrollToItem(target)
+                }
+                items.getOrNull(target)?.let {
+                    scrollAnchorState.item = it
+                    scrollAnchorState.offset = 0
+                }
+            }
+            is ReaderNavCommand.SnapToPage -> {
+                val targetChapterId = command.chapterId ?: config.activeChapterId
+                val target =
+                    resolveItemIndexForPage(items, targetChapterId, command.pageIndex)
+                        ?: command.pageIndex.coerceIn(0, items.lastIndex)
+                lazyListState.scrollToItem(target)
+                items.getOrNull(target)?.let {
+                    scrollAnchorState.item = it
+                    scrollAnchorState.offset = 0
+                }
+            }
+            is ReaderNavCommand.StepPage -> {
+                val delta = calculateWebtoonStepDelta(lazyListState.layoutInfo.viewportSize.height)
+                val scrollAmount = if (command.forward) delta else -delta
+                val effectiveScrollAmount = calculateEffectiveScrollAmount(scrollAmount, zoomScale)
+                if (config.animatedTransitions) {
+                    lazyListState.animateScrollBy(effectiveScrollAmount)
+                } else {
+                    lazyListState.scrollBy(effectiveScrollAmount)
+                }
+            }
+            is ReaderNavCommand.ScrollByDelta -> {
+                val scrollAmount = calculateEffectiveScrollAmount(command.delta, zoomScale)
+                if (config.animatedTransitions) {
+                    lazyListState.animateScrollBy(scrollAmount)
+                } else {
+                    lazyListState.scrollBy(scrollAmount)
+                }
+            }
+        }
+    } catch (_: CancellationException) {
+        // Scroll command interrupted by user gesture or next navigation
+    }
+}
+
+internal fun calculateWebtoonStepDelta(viewportHeight: Int): Float =
+    if (viewportHeight > 0) viewportHeight * 0.9f else 500f
+
+internal fun calculateEffectiveScrollAmount(scrollAmount: Float, zoomScale: Float): Float =
+    if (zoomScale > 0f) scrollAmount / zoomScale else scrollAmount
