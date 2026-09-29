@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +28,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.maxBitmapSize
@@ -139,21 +139,20 @@ private fun WebtoonPageContent(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    var loadError by remember(target) { mutableStateOf(false) }
-    var loadErrorMessage by remember(target) { mutableStateOf<String?>(null) }
-    var retryCount by remember(target) { mutableStateOf(0) }
+    val retryGeneration by page.retryGenerationFlow.collectAsStateWithLifecycle()
+    var loadError by remember(target, retryGeneration) { mutableStateOf(false) }
+    var loadErrorMessage by remember(target, retryGeneration) { mutableStateOf<String?>(null) }
     val isError = pageStatus == Page.State.ERROR || loadError
     var intrinsicRatio by remember(target, cropBorders) { mutableFloatStateOf(initialRatio) }
 
+    // Every slice of the page collects its retry generation, so all of them load again.
     val onRetry: () -> Unit = {
-        loadError = false
-        loadErrorMessage = null
-        retryCount++
+        page.retry()
         page.chapter.pageLoader?.retryPage(page)
     }
 
     val model =
-        remember(target, retryCount, cropBorders) {
+        remember(target, cropBorders) {
             val modelData =
                 when (target) {
                     is WebtoonImageTarget.Page -> target.page
@@ -167,9 +166,6 @@ private fun WebtoonPageContent(
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .apply {
-                    if (retryCount > 0) {
-                        memoryCachePolicy(CachePolicy.WRITE_ONLY)
-                    }
                     if (cropBorders) {
                         transformations(CropBordersTransformation(cropTopBottom = false))
                     }
@@ -230,35 +226,41 @@ private fun WebtoonPageContent(
                 .then(gestureModifier),
         contentAlignment = Alignment.Center,
     ) {
-        AsyncImage(
-            model = model,
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            filterQuality = FilterQuality.High,
-            colorFilter = colorFilter,
-            modifier =
-                Modifier.fillMaxWidth()
-                    .then(
-                        if (intrinsicRatio > 0f) Modifier.aspectRatio(intrinsicRatio) else Modifier
-                    ),
-            onSuccess = { state ->
-                loadError = false
-                val img = state.result.image
-                if (img.width > 0 && img.height > 0) {
-                    val ratio = img.width.toFloat() / img.height.toFloat()
-                    intrinsicRatio = ratio
-                    onRatioCalculated(ratio, img.height)
-                }
-            },
-            onError = { state ->
-                TimberKt.e(state.result.throwable) {
-                    "Failed to load webtoon image for page ${page.number}"
-                }
-                loadErrorMessage =
-                    state.result.throwable.message ?: state.result.throwable.javaClass.simpleName
-                loadError = true
-            },
-        )
+        // A retry does not change the request, and AsyncImage loads again only for a changed
+        // request, so each retry gets a new AsyncImage.
+        key(retryGeneration) {
+            AsyncImage(
+                model = model,
+                contentDescription = null,
+                contentScale = ContentScale.FillWidth,
+                filterQuality = FilterQuality.High,
+                colorFilter = colorFilter,
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .then(
+                            if (intrinsicRatio > 0f) Modifier.aspectRatio(intrinsicRatio)
+                            else Modifier
+                        ),
+                onSuccess = { state ->
+                    loadError = false
+                    val img = state.result.image
+                    if (img.width > 0 && img.height > 0) {
+                        val ratio = img.width.toFloat() / img.height.toFloat()
+                        intrinsicRatio = ratio
+                        onRatioCalculated(ratio, img.height)
+                    }
+                },
+                onError = { state ->
+                    TimberKt.e(state.result.throwable) {
+                        "Failed to load webtoon image for page ${page.number}"
+                    }
+                    loadErrorMessage =
+                        state.result.throwable.message
+                            ?: state.result.throwable.javaClass.simpleName
+                    loadError = true
+                },
+            )
+        }
 
         ReaderPageLoadingOverlay(status = pageStatus, progress = pageProgress)
 
