@@ -106,6 +106,19 @@ class CrashReportTest {
     }
 
     @Test
+    fun `saveTraceOnly keeps a report saved after the crash screen opened`() {
+        val crashReport = crashReport()
+        val newer = crashReport.saveCrash("newer\n")!!
+        now += 60_000
+
+        val trace = crashReport.saveTraceOnly("trace\n")
+
+        assertEquals("trace\n", trace!!.readText())
+        assertTrue(newer.exists())
+        assertEquals(newer, crashReport.pendingReport())
+    }
+
+    @Test
     fun `a saved crash is pending until marked seen`() {
         val crashReport = crashReport()
         val report = crashReport.saveCrash("head\n")

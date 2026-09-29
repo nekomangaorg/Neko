@@ -10,8 +10,9 @@ import java.util.Locale
 
 /**
  * The crash report folder. It keeps one report, plus a `pending` marker that stays until the user
- * has seen that report. Nothing here needs Injekt or coroutines, so the crash handler can call it
- * in the process that is dying. The write methods catch every error and return null instead.
+ * has seen that report, and the last trace the crash screen saved. Nothing here needs Injekt or
+ * coroutines, so the crash handler can call it in the process that is dying. The write methods
+ * catch every error and return null instead.
  *
  * @param logcat writes the logcat of this process to the given file, or throws.
  */
@@ -23,19 +24,18 @@ class CrashReport(
 
     /** Writes [head] and the logcat of this process to a new report, then marks it pending. */
     fun saveCrash(head: String): File? {
-        val report = write(head) ?: return null
+        val report = write(fileName(clock()), head) ?: return null
         appendLogcat(report)
         deleteOtherReports(report)
         markPending()
         return report
     }
 
-    /** Writes a report with only [head]. It runs no logcat and marks nothing pending. */
-    fun saveTraceOnly(head: String): File? {
-        val report = write(head) ?: return null
-        deleteOtherReports(report)
-        return report
-    }
+    /**
+     * Writes [head] to [TRACE_ONLY], replacing the previous trace. It runs no logcat. The trace is
+     * not a report, so a report saved after the crash screen opened stays pending.
+     */
+    fun saveTraceOnly(head: String): File? = write(TRACE_ONLY, head)
 
     /** The latest report if the user has not seen it yet, else null. */
     fun pendingReport(): File? = if (File(dir, PENDING).exists()) latestReport() else null
@@ -49,9 +49,9 @@ class CrashReport(
         runCatching { File(dir, PENDING).delete() }
     }
 
-    private fun write(head: String): File? = runCatching {
+    private fun write(name: String, head: String): File? = runCatching {
         dir.mkdirs()
-        File(dir, fileName(clock())).apply { writeText(head) }
+        File(dir, name).apply { writeText(head) }
     }
         .getOrNull()
 
@@ -95,6 +95,7 @@ class CrashReport(
         const val PENDING = "pending"
         const val PREFIX = "neko_crash_log-"
         const val SUFFIX = ".txt"
+        const val TRACE_ONLY = "neko_crash_trace.txt"
         private const val LOGCAT_TEMP = "logcat.tmp"
 
         fun fileName(millis: Long): String =
