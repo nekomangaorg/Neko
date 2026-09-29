@@ -7,9 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
-import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -49,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.buildSpannedString
@@ -87,6 +85,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderKeyNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
@@ -133,7 +132,6 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
@@ -356,74 +354,88 @@ class ReaderActivity : BaseMainActivity() {
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 val readerPreferences: ReaderPreferences = remember { Injekt.get() }
                 val readerTheme by readerPreferences.readerTheme().preferenceCollectAsState()
+                val grayscale by readerPreferences.grayscale().preferenceCollectAsState()
+                val invertedColors by readerPreferences.invertedColors().preferenceCollectAsState()
                 val themeBackground = MaterialTheme.colorScheme.background
                 val backgroundColor =
                     remember(readerTheme, themeBackground) {
                         ReaderTheme.fromPreference(readerTheme).color(themeBackground)
                     }
+                val viewerColorFilter =
+                    remember(grayscale, invertedColors) {
+                        ReaderColorFilter.getColorFilter(grayscale, invertedColors)
+                    }
                 Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
                     // Native Compose Viewers
-                    val currentViewer = viewer
-                    val items =
-                        state.viewerItems.ifEmpty {
-                            when (currentViewer) {
-                                is PagerViewer -> currentViewer.items
-                                is WebtoonViewer -> currentViewer.items
-                                else -> emptyList()
+                    Box(
+                        modifier =
+                            Modifier.fillMaxSize().graphicsLayer {
+                                this.colorFilter = viewerColorFilter
                             }
+                    ) {
+                        val currentViewer = viewer
+                        val items =
+                            state.viewerItems.ifEmpty {
+                                when (currentViewer) {
+                                    is PagerViewer -> currentViewer.items
+                                    is WebtoonViewer -> currentViewer.items
+                                    else -> emptyList()
+                                }
+                            }
+                        val transitionState by
+                            viewModel.transitionState.collectAsStateWithLifecycle()
+                        if (currentViewer is PagerViewer && items.isNotEmpty()) {
+                            ComposePagerViewer(
+                                viewer = currentViewer,
+                                items = items,
+                                isRtl = currentViewer is R2LPagerViewer,
+                                isVertical = currentViewer is VerticalPagerViewer,
+                                manga = viewModel.manga,
+                                downloadManager = Injekt.get<DownloadManager>(),
+                                onPageSelected = { page, hasExtraPage ->
+                                    onPageSelected(page, hasExtraPage)
+                                },
+                                onTransitionSelected = { transition ->
+                                    onTransitionSelected(transition)
+                                },
+                                onNavigateToChapter = { chapter, navTarget ->
+                                    viewModel.navigateToChapter(chapter, navTarget)
+                                },
+                                onRequestPreloadChapter = { chapter ->
+                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                },
+                                onRetryTransition = { chapter ->
+                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                },
+                                modifier = Modifier.fillMaxSize(),
+                                transitionState = transitionState,
+                                navCommands = viewModel.navigationCommands,
+                                preloadController = viewModel.preloadController,
+                            )
+                        } else if (currentViewer is WebtoonViewer && items.isNotEmpty()) {
+                            ComposeWebtoonViewer(
+                                viewer = currentViewer,
+                                items = items,
+                                manga = viewModel.manga,
+                                downloadManager = Injekt.get<DownloadManager>(),
+                                onPageSelected = { page -> onPageSelected(page, false) },
+                                onTransitionSelected = { transition ->
+                                    onTransitionSelected(transition)
+                                },
+                                onNavigateToChapter = { chapter, navTarget ->
+                                    viewModel.navigateToChapter(chapter, navTarget)
+                                },
+                                onRetryTransition = { chapter ->
+                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                },
+                                onRequestPreloadChapter = { chapter ->
+                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                },
+                                modifier = Modifier.fillMaxSize(),
+                                navCommands = viewModel.navigationCommands,
+                                preloadController = viewModel.preloadController,
+                            )
                         }
-                    val transitionState by viewModel.transitionState.collectAsStateWithLifecycle()
-                    if (currentViewer is PagerViewer && items.isNotEmpty()) {
-                        ComposePagerViewer(
-                            viewer = currentViewer,
-                            items = items,
-                            isRtl = currentViewer is R2LPagerViewer,
-                            isVertical = currentViewer is VerticalPagerViewer,
-                            manga = viewModel.manga,
-                            downloadManager = Injekt.get<DownloadManager>(),
-                            onPageSelected = { page, hasExtraPage ->
-                                onPageSelected(page, hasExtraPage)
-                            },
-                            onTransitionSelected = { transition ->
-                                onTransitionSelected(transition)
-                            },
-                            onNavigateToChapter = { chapter, navTarget ->
-                                viewModel.navigateToChapter(chapter, navTarget)
-                            },
-                            onRequestPreloadChapter = { chapter ->
-                                viewModel.requestPreloadChapter(chapter.chapter)
-                            },
-                            onRetryTransition = { chapter ->
-                                viewModel.requestPreloadChapter(chapter.chapter)
-                            },
-                            modifier = Modifier.fillMaxSize(),
-                            transitionState = transitionState,
-                            navCommands = viewModel.navigationCommands,
-                            preloadController = viewModel.preloadController,
-                        )
-                    } else if (currentViewer is WebtoonViewer && items.isNotEmpty()) {
-                        ComposeWebtoonViewer(
-                            viewer = currentViewer,
-                            items = items,
-                            manga = viewModel.manga,
-                            downloadManager = Injekt.get<DownloadManager>(),
-                            onPageSelected = { page -> onPageSelected(page, false) },
-                            onTransitionSelected = { transition ->
-                                onTransitionSelected(transition)
-                            },
-                            onNavigateToChapter = { chapter, navTarget ->
-                                viewModel.navigateToChapter(chapter, navTarget)
-                            },
-                            onRetryTransition = { chapter ->
-                                viewModel.requestPreloadChapter(chapter.chapter)
-                            },
-                            onRequestPreloadChapter = { chapter ->
-                                viewModel.requestPreloadChapter(chapter.chapter)
-                            },
-                            modifier = Modifier.fillMaxSize(),
-                            navCommands = viewModel.navigationCommands,
-                            preloadController = viewModel.preloadController,
-                        )
                     }
 
                     // Color Filter Overlay
@@ -516,7 +528,6 @@ class ReaderActivity : BaseMainActivity() {
                             readerPreferences.cropBordersWebtoon()
                         }
                     val cropBorders by cropBordersPref.preferenceCollectAsState()
-                    val grayscale by readerPreferences.grayscale().preferenceCollectAsState()
 
                     val viewerMode =
                         ReadingModeType.fromPreference(state.manga?.readingModeType ?: 0)
@@ -1972,18 +1983,6 @@ class ReaderActivity : BaseMainActivity() {
                 .onEach { setColorFilter(readerPreferences.colorFilter().get()) }
                 .launchIn(scope)
 
-            merge(
-                    readerPreferences.grayscale().changes(),
-                    readerPreferences.invertedColors().changes(),
-                )
-                .onEach {
-                    setLayerPaint(
-                        readerPreferences.grayscale().get(),
-                        readerPreferences.invertedColors().get(),
-                    )
-                }
-                .launchIn(lifecycleScope)
-
             readerPreferences
                 .alwaysShowChapterTransition()
                 .changes()
@@ -2061,47 +2060,6 @@ class ReaderActivity : BaseMainActivity() {
             }
         }
 
-        private fun getCombinedPaint(grayscale: Boolean, invertedColors: Boolean): Paint {
-            return Paint().apply {
-                colorFilter =
-                    ColorMatrixColorFilter(
-                        ColorMatrix().apply {
-                            if (grayscale) {
-                                setSaturation(0f)
-                            }
-                            if (invertedColors) {
-                                postConcat(
-                                    ColorMatrix(
-                                        floatArrayOf(
-                                            -1f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            255f,
-                                            0f,
-                                            -1f,
-                                            0f,
-                                            0f,
-                                            255f,
-                                            0f,
-                                            0f,
-                                            -1f,
-                                            0f,
-                                            255f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            1f,
-                                            0f,
-                                        )
-                                    )
-                                )
-                            }
-                        }
-                    )
-            }
-        }
-
         private fun setCustomBrightnessValue(value: Int) {
             // Calculate and set reader brightness.
             val readerBrightness =
@@ -2130,10 +2088,6 @@ class ReaderActivity : BaseMainActivity() {
         private fun setColorFilterValue(value: Int) {
             colorFilterOverlayColor = value
             colorFilterOverlayMode = readerPreferences.colorFilterMode().get()
-        }
-
-        private fun setLayerPaint(grayscale: Boolean, invertedColors: Boolean) {
-            // Layer paint is handled natively in Compose
         }
     }
 }
