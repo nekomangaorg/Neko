@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Test
@@ -148,5 +149,111 @@ class ReaderColorFilterTest {
         val both1 = ReaderColorFilter.getColorFilter(grayscale = true, invertedColors = true)
         val both2 = ReaderColorFilter.getColorFilter(grayscale = true, invertedColors = true)
         assertSame(both1, both2)
+    }
+
+    @Test
+    fun `getColorFilter returns distinct singletons for distinct active modes`() {
+        val grayscale = ReaderColorFilter.getColorFilter(grayscale = true, invertedColors = false)
+        val inverted = ReaderColorFilter.getColorFilter(grayscale = false, invertedColors = true)
+        val both = ReaderColorFilter.getColorFilter(grayscale = true, invertedColors = true)
+
+        assertNotNull(grayscale)
+        assertNotNull(inverted)
+        assertNotNull(both)
+
+        assertNotSame(grayscale, inverted)
+        assertNotSame(grayscale, both)
+        assertNotSame(inverted, both)
+    }
+
+    @Test
+    fun `static matrix arrays have exactly 20 elements`() {
+        assertEquals(20, ReaderColorFilter.INVERTED_MATRIX.size)
+        assertEquals(20, ReaderColorFilter.GRAYSCALE_MATRIX.size)
+        assertEquals(20, ReaderColorFilter.INVERTED_GRAYSCALE_MATRIX.size)
+    }
+
+    private fun transformColor(
+        matrix: FloatArray,
+        r: Float,
+        g: Float,
+        b: Float,
+        a: Float,
+    ): FloatArray {
+        val outR = matrix[0] * r + matrix[1] * g + matrix[2] * b + matrix[3] * a + matrix[4]
+        val outG = matrix[5] * r + matrix[6] * g + matrix[7] * b + matrix[8] * a + matrix[9]
+        val outB = matrix[10] * r + matrix[11] * g + matrix[12] * b + matrix[13] * a + matrix[14]
+        val outA = matrix[15] * r + matrix[16] * g + matrix[17] * b + matrix[18] * a + matrix[19]
+        return floatArrayOf(outR, outG, outB, outA)
+    }
+
+    @Test
+    fun `inverted matrix accurately inverts black and white while preserving alpha`() {
+        val black = transformColor(ReaderColorFilter.INVERTED_MATRIX, 0f, 0f, 0f, 1f)
+        assertEquals(255f, black[0], 0.001f)
+        assertEquals(255f, black[1], 0.001f)
+        assertEquals(255f, black[2], 0.001f)
+        assertEquals(1f, black[3], 0.001f)
+
+        val white = transformColor(ReaderColorFilter.INVERTED_MATRIX, 255f, 255f, 255f, 1f)
+        assertEquals(0f, white[0], 0.001f)
+        assertEquals(0f, white[1], 0.001f)
+        assertEquals(0f, white[2], 0.001f)
+        assertEquals(1f, white[3], 0.001f)
+    }
+
+    @Test
+    fun `grayscale matrix accurately converts RGB primaries to luminance`() {
+        val white = transformColor(ReaderColorFilter.GRAYSCALE_MATRIX, 255f, 255f, 255f, 1f)
+        assertEquals(255f, white[0], 0.001f)
+        assertEquals(255f, white[1], 0.001f)
+        assertEquals(255f, white[2], 0.001f)
+        assertEquals(1f, white[3], 0.001f)
+
+        val black = transformColor(ReaderColorFilter.GRAYSCALE_MATRIX, 0f, 0f, 0f, 1f)
+        assertEquals(0f, black[0], 0.001f)
+        assertEquals(0f, black[1], 0.001f)
+        assertEquals(0f, black[2], 0.001f)
+        assertEquals(1f, black[3], 0.001f)
+
+        // Pure Red: 0.213 * 255 = 54.315
+        val red = transformColor(ReaderColorFilter.GRAYSCALE_MATRIX, 255f, 0f, 0f, 1f)
+        assertEquals(54.315f, red[0], 0.001f)
+        assertEquals(54.315f, red[1], 0.001f)
+        assertEquals(54.315f, red[2], 0.001f)
+
+        // Pure Green: 0.715 * 255 = 182.325
+        val green = transformColor(ReaderColorFilter.GRAYSCALE_MATRIX, 0f, 255f, 0f, 1f)
+        assertEquals(182.325f, green[0], 0.001f)
+        assertEquals(182.325f, green[1], 0.001f)
+        assertEquals(182.325f, green[2], 0.001f)
+
+        // Pure Blue: 0.072 * 255 = 18.36
+        val blue = transformColor(ReaderColorFilter.GRAYSCALE_MATRIX, 0f, 0f, 255f, 1f)
+        assertEquals(18.36f, blue[0], 0.001f)
+        assertEquals(18.36f, blue[1], 0.001f)
+        assertEquals(18.36f, blue[2], 0.001f)
+    }
+
+    @Test
+    fun `inverted grayscale matrix accurately computes inverted luminance`() {
+        // Pure White -> Inverted Grayscale -> 255 - 255 = 0
+        val white =
+            transformColor(ReaderColorFilter.INVERTED_GRAYSCALE_MATRIX, 255f, 255f, 255f, 1f)
+        assertEquals(0f, white[0], 0.001f)
+        assertEquals(0f, white[1], 0.001f)
+        assertEquals(0f, white[2], 0.001f)
+
+        // Pure Black -> Inverted Grayscale -> 255 - 0 = 255
+        val black = transformColor(ReaderColorFilter.INVERTED_GRAYSCALE_MATRIX, 0f, 0f, 0f, 1f)
+        assertEquals(255f, black[0], 0.001f)
+        assertEquals(255f, black[1], 0.001f)
+        assertEquals(255f, black[2], 0.001f)
+
+        // Pure Red -> 255 - 54.315 = 200.685
+        val red = transformColor(ReaderColorFilter.INVERTED_GRAYSCALE_MATRIX, 255f, 0f, 0f, 1f)
+        assertEquals(200.685f, red[0], 0.001f)
+        assertEquals(200.685f, red[1], 0.001f)
+        assertEquals(200.685f, red[2], 0.001f)
     }
 }
