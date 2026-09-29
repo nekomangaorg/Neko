@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.coil
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -57,6 +58,59 @@ class ReaderPageSplitFetcherTest {
     fun `sample size math does not overflow at Int max dimensions`() {
         assertEquals(64, fallbackDecodeSampleSize(Int.MAX_VALUE, 1, 576L * MIB))
         assertEquals(524_288, fallbackDecodeSampleSize(Int.MAX_VALUE, Int.MAX_VALUE, 576L * MIB))
+    }
+
+    @Test
+    fun `native decode that succeeds is not retried`() {
+        val events = mutableListOf<String>()
+
+        val result =
+            decodeOrRetrySmaller(
+                sampleSize = 2,
+                freeMemory = { events += "free" },
+                decode = { sampleSize ->
+                    "bitmap at $sampleSize".also { events += "decode $sampleSize" }
+                },
+            )
+
+        assertEquals("bitmap at 2", result)
+        assertEquals(listOf("decode 2"), events)
+    }
+
+    @Test
+    fun `native decode that returns null frees memory and retries at double sample size`() {
+        val events = mutableListOf<String>()
+
+        val result =
+            decodeOrRetrySmaller(
+                sampleSize = 2,
+                freeMemory = { events += "free" },
+                decode = { sampleSize ->
+                    events += "decode $sampleSize"
+                    if (sampleSize == 4) "bitmap at 4" else null
+                },
+            )
+
+        assertEquals("bitmap at 4", result)
+        assertEquals(listOf("decode 2", "free", "decode 4"), events)
+    }
+
+    @Test
+    fun `native decode that returns null twice gives null`() {
+        val events = mutableListOf<String>()
+
+        val result =
+            decodeOrRetrySmaller<String>(
+                sampleSize = 1,
+                freeMemory = { events += "free" },
+                decode = { sampleSize ->
+                    events += "decode $sampleSize"
+                    null
+                },
+            )
+
+        assertNull(result)
+        assertEquals(listOf("decode 1", "free", "decode 2"), events)
     }
 
     private fun roundedUp(size: Int, sampleSize: Int): Long =

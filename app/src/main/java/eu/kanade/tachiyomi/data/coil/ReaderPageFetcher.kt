@@ -105,6 +105,22 @@ internal fun fallbackDecodeSampleSize(
 internal fun fallbackDecodeBytes(imageWidth: Int, imageHeight: Int, sampleSize: Int): Long =
     sampledDimension(imageWidth, sampleSize) * sampledDimension(imageHeight, sampleSize) * 4
 
+/**
+ * Runs [decode] at [sampleSize]. When it returns null, runs [freeMemory] and tries once more at
+ * double the sample size, and returns that result.
+ */
+internal fun <T : Any> decodeOrRetrySmaller(
+    sampleSize: Int,
+    freeMemory: () -> Unit,
+    decode: (sampleSize: Int) -> T?,
+): T? {
+    decode(sampleSize)?.let {
+        return it
+    }
+    freeMemory()
+    return decode(sampleSize * 2)
+}
+
 // Round up. BitmapFactory rounds a sampled GIF to the nearest pixel, so a 2305x65535 GIF
 // decodes to 1153x32768 at sample size 2.
 private fun sampledDimension(size: Int, sampleSize: Int): Long =
@@ -185,20 +201,30 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             val imageHeight = decoder.height
             val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
             trimCacheForFullDecode(imageWidth, imageHeight, sampleSize)
-            // decode() catches its own out-of-memory errors and returns null
+            // decode() returns null both for bad data and when it runs out of memory. Freeing the
+            // cached pages and trying once more at double the sample size lets a page that only
+            // ran out of memory load. A second null counts as permanent, so a corrupt page is
+            // decoded twice and then left alone until Retry.
             val full =
                 try {
-                    decoder.decode(sampleSize = sampleSize)
+                    decodeOrRetrySmaller(
+                        sampleSize = sampleSize,
+                        freeMemory = {
+                            TimberKt.w {
+                                "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size $sampleSize), trying sample size ${sampleSize * 2}"
+                            }
+                            fallbackBitmapCache.evictAll()
+                            rawBytesCache.evictAll()
+                        },
+                        decode = { decoder.decode(sampleSize = it) },
+                    )
                 } finally {
                     decoder.recycle()
                 }
             if (full == null) {
                 TimberKt.e {
-                    "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size $sampleSize)"
+                    "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size ${sampleSize * 2})"
                 }
-                // The decoder returns null both for bad data and when it runs out of memory, so
-                // this can be a failure that would go away. Counting it as permanent stops a
-                // corrupt page from being decoded again on every pass; Retry clears it.
                 return FullDecode.Failed(permanent = true)
             }
             return FullDecode.Decoded(CachedDecodedImage(full, imageWidth, imageHeight))
