@@ -84,8 +84,7 @@ private constructor(
             Intent(applicationContext, activity).apply {
                 putExtra(INTENT_EXTRA, Json.encodeToString(ThrowableSerializer, exception))
                 putExtra(REPORT_EXTRA, report?.name)
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             }
         applicationContext.startActivity(intent)
     }
