@@ -3,15 +3,23 @@ package org.nekomanga.presentation.screens.reader.viewer
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollGatingPolicy
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -20,7 +28,7 @@ import org.nekomanga.presentation.theme.Size
 
 class ComposeWebtoonViewerTest {
 
-    private fun createChapter(id: Long): ReaderChapter {
+    private fun createChapter(id: Long, pageCount: Int = 0): ReaderChapter {
         val dbChapter =
             Chapter.create().apply {
                 this.id = id
@@ -28,7 +36,28 @@ class ComposeWebtoonViewerTest {
                 this.name = "Chapter $id"
                 this.chapter_number = id.toFloat()
             }
-        return ReaderChapter(dbChapter)
+        val readerChapter = ReaderChapter(dbChapter)
+        if (pageCount > 0) {
+            val pages =
+                (0 until pageCount).map { index ->
+                    ReaderPage(index = index, url = "url_$index", imageUrl = "img_$index").apply {
+                        this.chapter = readerChapter
+                    }
+                }
+            readerChapter.state = ReaderChapter.State.Loaded(pages)
+        }
+        return readerChapter
+    }
+
+    private fun createConfig(
+        activeChapterId: Long = 1L,
+        animatedTransitions: Boolean = true,
+    ): WebtoonViewerConfigUiModel {
+        return WebtoonViewerConfigUiModel(
+            activeChapterId = activeChapterId,
+            animatedTransitions = animatedTransitions,
+            navigator = mockk<ViewerNavigation>(relaxed = true),
+        )
     }
 
     @Test
@@ -249,5 +278,174 @@ class ComposeWebtoonViewerTest {
     @Test
     fun `webtoon list entries of an empty list are empty`() {
         assertTrue(emptyList<ReaderUiItem>().toWebtoonListEntries().isEmpty())
+    }
+
+    @Test
+    fun `executeWebtoonNavCommand with ScrollToItem animates to clamped index and updates scroll anchor state`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 5)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config = createConfig(activeChapterId = 1L, animatedTransitions = true)
+            val mockLazyListState = mockk<LazyListState>(relaxed = true)
+            val scrollAnchorState = ScrollAnchorState()
+
+            executeWebtoonNavCommand(
+                command = ReaderNavCommand.ScrollToItem(itemIndex = 2, animated = true),
+                lazyListState = mockLazyListState,
+                items = items,
+                config = config,
+                scrollAnchorState = scrollAnchorState,
+            )
+
+            coVerify { mockLazyListState.animateScrollToItem(2) }
+            assertEquals(items[2], scrollAnchorState.item)
+            assertEquals(0, scrollAnchorState.offset)
+        }
+
+    @Test
+    fun `executeWebtoonNavCommand with ScrollToItem non-animated calls scrollToItem`() = runTest {
+        val ch1 = createChapter(1L, pageCount = 5)
+        val items = (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+        val config = createConfig(activeChapterId = 1L, animatedTransitions = true)
+        val mockLazyListState = mockk<LazyListState>(relaxed = true)
+        val scrollAnchorState = ScrollAnchorState()
+
+        executeWebtoonNavCommand(
+            command = ReaderNavCommand.ScrollToItem(itemIndex = 3, animated = false),
+            lazyListState = mockLazyListState,
+            items = items,
+            config = config,
+            scrollAnchorState = scrollAnchorState,
+        )
+
+        coVerify { mockLazyListState.scrollToItem(3) }
+        coVerify(exactly = 0) { mockLazyListState.animateScrollToItem(any()) }
+        assertEquals(items[3], scrollAnchorState.item)
+    }
+
+    @Test
+    fun `executeWebtoonNavCommand with ScrollToItem clamps target index when out of bounds`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 4)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config = createConfig(activeChapterId = 1L, animatedTransitions = false)
+            val mockLazyListState = mockk<LazyListState>(relaxed = true)
+            val scrollAnchorState = ScrollAnchorState()
+
+            executeWebtoonNavCommand(
+                command = ReaderNavCommand.ScrollToItem(itemIndex = 99, animated = false),
+                lazyListState = mockLazyListState,
+                items = items,
+                config = config,
+                scrollAnchorState = scrollAnchorState,
+            )
+
+            coVerify { mockLazyListState.scrollToItem(3) } // lastIndex
+            assertEquals(items[3], scrollAnchorState.item)
+        }
+
+    @Test
+    fun `executeWebtoonNavCommand with ScrollToPage resolves target item index and animates`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val ch2 = createChapter(2L, pageCount = 3)
+            val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+            val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+            val items =
+                listOf(
+                    ReaderUiItem.Page(ch1Pages[0]),
+                    ReaderUiItem.Page(ch1Pages[1]),
+                    ReaderUiItem.Page(ch1Pages[2]),
+                    ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2)),
+                    ReaderUiItem.Page(ch2Pages[0]),
+                    ReaderUiItem.Page(ch2Pages[1]),
+                    ReaderUiItem.Page(ch2Pages[2]),
+                )
+            val config = createConfig(activeChapterId = 1L, animatedTransitions = true)
+            val mockLazyListState = mockk<LazyListState>(relaxed = true)
+            val scrollAnchorState = ScrollAnchorState()
+
+            executeWebtoonNavCommand(
+                command =
+                    ReaderNavCommand.ScrollToPage(
+                        pageIndex = 1,
+                        chapterId = 2L,
+                        animated = true,
+                    ),
+                lazyListState = mockLazyListState,
+                items = items,
+                config = config,
+                scrollAnchorState = scrollAnchorState,
+            )
+
+            coVerify { mockLazyListState.animateScrollToItem(5) }
+            assertEquals(items[5], scrollAnchorState.item)
+        }
+
+    @Test
+    fun `executeWebtoonNavCommand with SnapToPage calls scrollToItem directly`() = runTest {
+        val ch1 = createChapter(1L, pageCount = 5)
+        val items = (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+        val config = createConfig(activeChapterId = 1L)
+        val mockLazyListState = mockk<LazyListState>(relaxed = true)
+        val scrollAnchorState = ScrollAnchorState()
+
+        executeWebtoonNavCommand(
+            command = ReaderNavCommand.SnapToPage(pageIndex = 2, chapterId = 1L),
+            lazyListState = mockLazyListState,
+            items = items,
+            config = config,
+            scrollAnchorState = scrollAnchorState,
+        )
+
+        coVerify { mockLazyListState.scrollToItem(2) }
+        assertEquals(items[2], scrollAnchorState.item)
+    }
+
+    @Test
+    fun `calculateWebtoonStepDelta returns 90 percent of viewport height when positive`() {
+        assertEquals(900f, calculateWebtoonStepDelta(1000), 0.001f)
+        assertEquals(1800f, calculateWebtoonStepDelta(2000), 0.001f)
+    }
+
+    @Test
+    fun `calculateWebtoonStepDelta falls back to 500 when viewport height is zero or negative`() {
+        assertEquals(500f, calculateWebtoonStepDelta(0), 0.001f)
+        assertEquals(500f, calculateWebtoonStepDelta(-100), 0.001f)
+    }
+
+    @Test
+    fun `calculateEffectiveScrollAmount divides scroll amount by zoom scale when zoomed`() {
+        assertEquals(450f, calculateEffectiveScrollAmount(900f, 2f), 0.001f)
+        assertEquals(200f, calculateEffectiveScrollAmount(300f, 1.5f), 0.001f)
+        assertEquals(-450f, calculateEffectiveScrollAmount(-900f, 2f), 0.001f)
+    }
+
+    @Test
+    fun `calculateEffectiveScrollAmount returns unscaled amount when zoom scale is zero or negative`() {
+        assertEquals(900f, calculateEffectiveScrollAmount(900f, 0f), 0.001f)
+        assertEquals(900f, calculateEffectiveScrollAmount(900f, -1f), 0.001f)
+    }
+
+    @Test
+    fun `executeWebtoonNavCommand catches CancellationException and does not throw`() = runTest {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val items = (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+        val config = createConfig(activeChapterId = 1L, animatedTransitions = true)
+        val mockLazyListState = mockk<LazyListState>(relaxed = true)
+        val scrollAnchorState = ScrollAnchorState()
+        coEvery { mockLazyListState.animateScrollToItem(any()) } throws
+            CancellationException("Interrupted by touch")
+
+        executeWebtoonNavCommand(
+            command = ReaderNavCommand.ScrollToItem(itemIndex = 1, animated = true),
+            lazyListState = mockLazyListState,
+            items = items,
+            config = config,
+            scrollAnchorState = scrollAnchorState,
+        )
+        // Passes if no exception is thrown
     }
 }

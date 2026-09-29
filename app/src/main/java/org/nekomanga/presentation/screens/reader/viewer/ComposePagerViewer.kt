@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +40,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -83,93 +85,7 @@ fun ComposePagerViewer(
     val currentIsNavigating by rememberUpdatedState(isNavigating)
 
     suspend fun executeNavCommand(command: ReaderNavCommand): Boolean {
-        when (command) {
-            is ReaderNavCommand.ScrollToItem -> {
-                val target = command.itemIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
-                if (target in items.indices && pagerState.currentPage != target) {
-                    if (command.animated && config.animatedTransitions) {
-                        pagerState.animateScrollToPage(
-                            page = target,
-                            animationSpec =
-                                tween(durationMillis = 250, easing = FastOutSlowInEasing),
-                        )
-                    } else {
-                        pagerState.scrollToPage(target)
-                    }
-                }
-                return true
-            }
-            is ReaderNavCommand.ScrollToPage -> {
-                val targetChapterId = command.chapterId ?: config.activeChapterId
-                val target = resolveItemIndexForPage(items, targetChapterId, command.pageIndex)
-                if (target != null) {
-                    if (target in items.indices && pagerState.currentPage != target) {
-                        if (command.animated && config.animatedTransitions) {
-                            pagerState.animateScrollToPage(
-                                page = target,
-                                animationSpec =
-                                    tween(durationMillis = 250, easing = FastOutSlowInEasing),
-                            )
-                        } else {
-                            pagerState.scrollToPage(target)
-                        }
-                    }
-                    return true
-                } else {
-                    val transitionIndex = resolveTransitionIndexForChapter(items, targetChapterId)
-                    if (transitionIndex != null && pagerState.currentPage != transitionIndex) {
-                        if (command.animated && config.animatedTransitions) {
-                            pagerState.animateScrollToPage(
-                                page = transitionIndex,
-                                animationSpec =
-                                    tween(durationMillis = 250, easing = FastOutSlowInEasing),
-                            )
-                        } else {
-                            pagerState.scrollToPage(transitionIndex)
-                        }
-                    }
-                    return false
-                }
-            }
-            is ReaderNavCommand.SnapToPage -> {
-                val targetChapterId = command.chapterId ?: config.activeChapterId
-                val target = resolveItemIndexForPage(items, targetChapterId, command.pageIndex)
-                if (target != null) {
-                    if (target in items.indices && pagerState.currentPage != target) {
-                        pagerState.scrollToPage(target)
-                    }
-                    return true
-                } else {
-                    val transitionIndex = resolveTransitionIndexForChapter(items, targetChapterId)
-                    if (transitionIndex != null && pagerState.currentPage != transitionIndex) {
-                        pagerState.scrollToPage(transitionIndex)
-                    }
-                    return false
-                }
-            }
-            is ReaderNavCommand.StepPage -> {
-                val step =
-                    if (config.isRtl && !config.isVertical) {
-                        if (command.forward) -1 else 1
-                    } else {
-                        if (command.forward) 1 else -1
-                    }
-                val target = pagerState.currentPage + step
-                if (target in items.indices) {
-                    if (config.animatedTransitions) {
-                        pagerState.animateScrollToPage(
-                            page = target,
-                            animationSpec =
-                                tween(durationMillis = 250, easing = FastOutSlowInEasing),
-                        )
-                    } else {
-                        pagerState.scrollToPage(target)
-                    }
-                }
-                return true
-            }
-            is ReaderNavCommand.ScrollByDelta -> return true
-        }
+        return executeNavCommand(command, pagerState, items, config)
     }
 
     // 1. Immediate pre-measure re-anchor during composition to eliminate 1-frame flashes
@@ -235,8 +151,12 @@ fun ComposePagerViewer(
                         previousItems = lastProcessedItems,
                     )
                 if (target != null && target.index != pagerState.currentPage) {
-                    pagerState.scrollToPage(target.index)
-                    lastActiveItem = target.item
+                    try {
+                        pagerState.scrollToPage(target.index)
+                        lastActiveItem = target.item
+                    } catch (_: CancellationException) {
+                        // Re-anchor interrupted by user gesture
+                    }
                 }
             }
         }
@@ -245,10 +165,14 @@ fun ComposePagerViewer(
     // 3. Consume unidirectional programmatic navigation commands
     LaunchedEffect(navCommands) {
         navCommands?.collect { command ->
-            if (!executeNavCommand(command)) {
-                pendingNavCommand = command
-            } else {
-                pendingNavCommand = null
+            try {
+                if (!executeNavCommand(command)) {
+                    pendingNavCommand = command
+                } else {
+                    pendingNavCommand = null
+                }
+            } catch (_: CancellationException) {
+                // Interruption must never terminate the navCommands collector
             }
         }
     }
@@ -763,4 +687,104 @@ internal fun resolveTransitionIndexForChapter(
         item is ReaderUiItem.Transition && item.transition.to?.chapter?.id == targetChapterId
     }
     return if (index != -1) index else null
+}
+
+internal suspend fun executeNavCommand(
+    command: ReaderNavCommand,
+    pagerState: PagerState,
+    items: List<ReaderUiItem>,
+    config: PagerViewerConfigUiModel,
+): Boolean {
+    try {
+        when (command) {
+            is ReaderNavCommand.ScrollToItem -> {
+                val target = command.itemIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
+                if (target in items.indices && pagerState.currentPage != target) {
+                    if (command.animated && config.animatedTransitions) {
+                        pagerState.animateScrollToPage(
+                            page = target,
+                            animationSpec =
+                                tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                        )
+                    } else {
+                        pagerState.scrollToPage(target)
+                    }
+                }
+                return true
+            }
+            is ReaderNavCommand.ScrollToPage -> {
+                val targetChapterId = command.chapterId ?: config.activeChapterId
+                val target = resolveItemIndexForPage(items, targetChapterId, command.pageIndex)
+                if (target != null) {
+                    if (target in items.indices && pagerState.currentPage != target) {
+                        if (command.animated && config.animatedTransitions) {
+                            pagerState.animateScrollToPage(
+                                page = target,
+                                animationSpec =
+                                    tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                            )
+                        } else {
+                            pagerState.scrollToPage(target)
+                        }
+                    }
+                    return true
+                } else {
+                    val transitionIndex = resolveTransitionIndexForChapter(items, targetChapterId)
+                    if (transitionIndex != null && pagerState.currentPage != transitionIndex) {
+                        if (command.animated && config.animatedTransitions) {
+                            pagerState.animateScrollToPage(
+                                page = transitionIndex,
+                                animationSpec =
+                                    tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                            )
+                        } else {
+                            pagerState.scrollToPage(transitionIndex)
+                        }
+                    }
+                    return false
+                }
+            }
+            is ReaderNavCommand.SnapToPage -> {
+                val targetChapterId = command.chapterId ?: config.activeChapterId
+                val target = resolveItemIndexForPage(items, targetChapterId, command.pageIndex)
+                if (target != null) {
+                    if (target in items.indices && pagerState.currentPage != target) {
+                        pagerState.scrollToPage(target)
+                    }
+                    return true
+                } else {
+                    val transitionIndex = resolveTransitionIndexForChapter(items, targetChapterId)
+                    if (transitionIndex != null && pagerState.currentPage != transitionIndex) {
+                        pagerState.scrollToPage(transitionIndex)
+                    }
+                    return false
+                }
+            }
+            is ReaderNavCommand.StepPage -> {
+                val step =
+                    if (config.isRtl && !config.isVertical) {
+                        if (command.forward) -1 else 1
+                    } else {
+                        if (command.forward) 1 else -1
+                    }
+                val target = pagerState.currentPage + step
+                if (target in items.indices) {
+                    if (config.animatedTransitions) {
+                        pagerState.animateScrollToPage(
+                            page = target,
+                            animationSpec =
+                                tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                        )
+                    } else {
+                        pagerState.scrollToPage(target)
+                    }
+                }
+                return true
+            }
+            is ReaderNavCommand.ScrollByDelta -> return true
+        }
+    } catch (_: CancellationException) {
+        // Scroll command was interrupted or superseded by another user gesture or navigation
+        return true
+    }
 }
