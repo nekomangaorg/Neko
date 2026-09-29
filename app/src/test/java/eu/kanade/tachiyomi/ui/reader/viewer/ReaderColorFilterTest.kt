@@ -167,6 +167,45 @@ class ReaderColorFilterTest {
     }
 
     @Test
+    fun `getColorMatrix returns cached instance for repeated calls`() {
+        val matrix1 = ReaderColorFilter.getColorMatrix(grayscale = true, invertedColors = false)
+        val matrix2 = ReaderColorFilter.getColorMatrix(grayscale = true, invertedColors = false)
+        assertNotNull(matrix1)
+        assertNotNull(matrix2)
+        assertSame(matrix1?.values, matrix2?.values)
+        assertSame(ReaderColorFilter.GRAYSCALE_MATRIX, matrix1?.values)
+
+        val invert1 = ReaderColorFilter.getColorMatrix(grayscale = false, invertedColors = true)
+        val invert2 = ReaderColorFilter.getColorMatrix(grayscale = false, invertedColors = true)
+        assertNotNull(invert1)
+        assertNotNull(invert2)
+        assertSame(invert1?.values, invert2?.values)
+        assertSame(ReaderColorFilter.INVERTED_MATRIX, invert1?.values)
+
+        val both1 = ReaderColorFilter.getColorMatrix(grayscale = true, invertedColors = true)
+        val both2 = ReaderColorFilter.getColorMatrix(grayscale = true, invertedColors = true)
+        assertNotNull(both1)
+        assertNotNull(both2)
+        assertSame(both1?.values, both2?.values)
+        assertSame(ReaderColorFilter.INVERTED_GRAYSCALE_MATRIX, both1?.values)
+    }
+
+    @Test
+    fun `getColorMatrix returns distinct singletons for distinct active modes`() {
+        val grayscale = ReaderColorFilter.getColorMatrix(grayscale = true, invertedColors = false)
+        val inverted = ReaderColorFilter.getColorMatrix(grayscale = false, invertedColors = true)
+        val both = ReaderColorFilter.getColorMatrix(grayscale = true, invertedColors = true)
+
+        assertNotNull(grayscale)
+        assertNotNull(inverted)
+        assertNotNull(both)
+
+        assertNotSame(grayscale?.values, inverted?.values)
+        assertNotSame(grayscale?.values, both?.values)
+        assertNotSame(inverted?.values, both?.values)
+    }
+
+    @Test
     fun `static matrix arrays have exactly 20 elements`() {
         assertEquals(20, ReaderColorFilter.INVERTED_MATRIX.size)
         assertEquals(20, ReaderColorFilter.GRAYSCALE_MATRIX.size)

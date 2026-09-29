@@ -80,11 +80,13 @@ object ReaderColorFilter {
             0f,
         )
 
-    private val grayscaleFilter by lazy { ColorFilter.colorMatrix(ColorMatrix(GRAYSCALE_MATRIX)) }
-    private val invertedFilter by lazy { ColorFilter.colorMatrix(ColorMatrix(INVERTED_MATRIX)) }
-    private val invertedGrayscaleFilter by lazy {
-        ColorFilter.colorMatrix(ColorMatrix(INVERTED_GRAYSCALE_MATRIX))
-    }
+    private val grayscaleMatrix by lazy { ColorMatrix(GRAYSCALE_MATRIX) }
+    private val invertedMatrix by lazy { ColorMatrix(INVERTED_MATRIX) }
+    private val invertedGrayscaleMatrix by lazy { ColorMatrix(INVERTED_GRAYSCALE_MATRIX) }
+
+    private val grayscaleFilter by lazy { ColorFilter.colorMatrix(grayscaleMatrix) }
+    private val invertedFilter by lazy { ColorFilter.colorMatrix(invertedMatrix) }
+    private val invertedGrayscaleFilter by lazy { ColorFilter.colorMatrix(invertedGrayscaleMatrix) }
 
     /**
      * Returns a cached [ColorFilter] combining [grayscale] and [invertedColors] if either is
@@ -100,14 +102,14 @@ object ReaderColorFilter {
     }
 
     /**
-     * Returns a [ColorMatrix] combining [grayscale] and [invertedColors] if either is active, or
-     * `null` if both are disabled.
+     * Returns a cached [ColorMatrix] combining [grayscale] and [invertedColors] if either is
+     * active, or `null` if both are disabled.
      */
     fun getColorMatrix(grayscale: Boolean, invertedColors: Boolean): ColorMatrix? {
         return when {
-            grayscale && invertedColors -> ColorMatrix(INVERTED_GRAYSCALE_MATRIX)
-            grayscale -> ColorMatrix(GRAYSCALE_MATRIX)
-            invertedColors -> ColorMatrix(INVERTED_MATRIX)
+            grayscale && invertedColors -> invertedGrayscaleMatrix
+            grayscale -> grayscaleMatrix
+            invertedColors -> invertedMatrix
             else -> null
         }
     }
