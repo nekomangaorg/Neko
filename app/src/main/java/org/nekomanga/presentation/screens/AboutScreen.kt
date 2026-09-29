@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
+import eu.kanade.tachiyomi.crash.CrashReportText
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.LATEST_COMMIT_URL
@@ -47,7 +48,6 @@ import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.data.updater.REPO_URL
 import eu.kanade.tachiyomi.data.updater.Release
 import eu.kanade.tachiyomi.ui.main.ObserveAsEvents
-import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.isOnline
 import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
@@ -106,7 +106,7 @@ fun AboutScreen(
         onVersionClicked = { aboutViewModel.onVersionClicked() },
         onVersionLongClicked = { context ->
             aboutViewModel.onVersionLongClicked()
-            val deviceInfo = CrashLogUtil(context).getDebugInfo()
+            val deviceInfo = CrashReportText.debugInfo()
             val clipboard = context.getSystemService<ClipboardManager>()!!
             val appInfo = context.getString(R.string.app_info)
             clipboard.setPrimaryClip(ClipData.newPlainText(appInfo, deviceInfo))

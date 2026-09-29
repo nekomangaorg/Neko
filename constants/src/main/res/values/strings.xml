@@ -1488,8 +1488,15 @@
 
     <!-- Crash screen -->
     <string name="crash_screen_title">An Unexpected Error Occurred</string>
-    <string name="crash_screen_description">%s ran into an unexpected error. We suggest you screenshot this message, dump the crash logs, and then open a GitHub issue.</string>
+    <string name="crash_screen_description">%s ran into an unexpected error. We suggest you screenshot this message, share the crash log, and then open a GitHub issue.</string>
     <string name="crash_screen_restart_application">Restart the application</string>
+    <string name="share_crash_log">Share crash log</string>
+    <string name="crash_log_share_failed">Could not share the crash log</string>
+    <string name="crash_log_folder_failed">Could not create the crash logs folder</string>
+    <string name="crash_log_save_failed">Could not save the crash log</string>
+    <string name="crash_report_dialog_title">%s crashed last time</string>
+    <string name="crash_report_dialog_body">A log of the crash was saved on this device. Share it when you report the problem.</string>
+    <string name="dismiss">Dismiss</string>
 
 
     <!-- MangaDex authentication notification -->
@@ -1621,7 +1628,6 @@
     <string name="spen_open_comments">Open chapter comments</string>
 
 
-    <string name="pref_dump_crash_logs">Dump crash logs</string>
     <string name="pref_dump_crash_logs_summary">Saves error logs to a file for sharing with the developers</string>
     <string name="channel_crash_logs">Crash logs</string>
 </resources>

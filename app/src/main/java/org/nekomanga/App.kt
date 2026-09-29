@@ -28,6 +28,8 @@ import eu.kanade.tachiyomi.AppModule
 import eu.kanade.tachiyomi.PreferenceModule
 import eu.kanade.tachiyomi.crash.CrashActivity
 import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
+import eu.kanade.tachiyomi.crash.VisibleActivityTracker
+import eu.kanade.tachiyomi.crash.currentProcessName
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.cache.StartupCacheCleaner
 import eu.kanade.tachiyomi.data.coil.coilImageLoader
@@ -75,7 +77,14 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
     override fun onCreate() {
         super<Application>.onCreate()
 
-        GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
+        val activityTracker = VisibleActivityTracker()
+        registerActivityLifecycleCallbacks(activityTracker)
+        GlobalExceptionHandler.initialize(
+            applicationContext,
+            CrashActivity::class.java,
+            currentProcessName(),
+            activityTracker,
+        )
 
         kotlin
             .runCatching { CookieManager.getInstance() }
