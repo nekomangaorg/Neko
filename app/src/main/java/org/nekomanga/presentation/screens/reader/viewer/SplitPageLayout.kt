@@ -87,6 +87,7 @@ fun SplitPageLayout(
                 model = model,
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
+                colorFilter = config.colorFilter,
                 onSuccess = { state ->
                     val img = state.result.image
                     if (img.width > 0 && img.height > 0) {

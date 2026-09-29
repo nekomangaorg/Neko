@@ -2,6 +2,7 @@ package org.nekomanga.presentation.screens.reader.viewer
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
@@ -18,6 +19,7 @@ data class PagerViewerConfigUiModel(
     val initialIndex: Int = 0,
     val activeChapterId: Long? = null,
     val backgroundColor: Color = Color.Black,
+    val colorFilter: ColorFilter? = null,
     val isRtl: Boolean = false,
     val isVertical: Boolean = false,
     val animatedTransitions: Boolean = true,

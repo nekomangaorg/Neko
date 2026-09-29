@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.util.system.GLUtil
@@ -46,7 +47,7 @@ import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.presentation.extensions.collectAsState
+import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle as preferenceCollectAsStateWithLifecycle
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -293,6 +294,7 @@ fun PagerPageItem(
                 contentScale = contentScale,
                 alignment = imageAlignment,
                 state = imageState,
+                colorFilter = config.colorFilter,
                 onDoubleClick = doubleClickToZoomListener,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -318,23 +320,31 @@ fun PagerPageItem(
     modifier: Modifier = Modifier,
 ) {
     val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-    val imageScaleType by readerPreferences.imageScaleType().collectAsState()
-    val doublePageGap by readerPreferences.doublePageGap().collectAsState()
-    val invertDoublePages by readerPreferences.invertDoublePages().collectAsState()
-    val readerThemePref by readerPreferences.readerTheme().collectAsState()
-    val landscapeZoom by readerPreferences.landscapeZoom().collectAsState()
-    val zoomStart by readerPreferences.zoomStart().collectAsState()
-    val cropBorders by readerPreferences.cropBorders().collectAsState()
+    val imageScaleType by readerPreferences.imageScaleType().preferenceCollectAsStateWithLifecycle()
+    val doublePageGap by readerPreferences.doublePageGap().preferenceCollectAsStateWithLifecycle()
+    val invertDoublePages by
+        readerPreferences.invertDoublePages().preferenceCollectAsStateWithLifecycle()
+    val readerThemePref by readerPreferences.readerTheme().preferenceCollectAsStateWithLifecycle()
+    val landscapeZoom by readerPreferences.landscapeZoom().preferenceCollectAsStateWithLifecycle()
+    val zoomStart by readerPreferences.zoomStart().preferenceCollectAsStateWithLifecycle()
+    val cropBorders by readerPreferences.cropBorders().preferenceCollectAsStateWithLifecycle()
+    val grayscale by readerPreferences.grayscale().preferenceCollectAsStateWithLifecycle()
+    val invertedColors by readerPreferences.invertedColors().preferenceCollectAsStateWithLifecycle()
 
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
         remember(readerThemePref, themeBackground) {
             ReaderTheme.fromPreference(readerThemePref).color(themeBackground)
         }
+    val colorFilter =
+        remember(grayscale, invertedColors) {
+            ReaderColorFilter.getColorFilter(grayscale, invertedColors)
+        }
 
     val config =
         PagerViewerConfigUiModel(
             backgroundColor = backgroundColor,
+            colorFilter = colorFilter,
             isRtl = viewer.isRtl,
             imageScaleType = imageScaleType,
             doublePageGap = doublePageGap,

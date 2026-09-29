@@ -7,9 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
-import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -133,7 +130,6 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
@@ -154,7 +150,7 @@ import org.nekomanga.domain.manga.orientationType
 import org.nekomanga.domain.manga.readingModeType
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
-import org.nekomanga.presentation.extensions.collectAsState as preferenceCollectAsState
+import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle as preferenceCollectAsStateWithLifecycle
 import org.nekomanga.presentation.screens.reader.GestureNavigationOverlay
 import org.nekomanga.presentation.screens.reader.PageNumberIndicator
 import org.nekomanga.presentation.screens.reader.ReaderAppBar
@@ -355,7 +351,10 @@ class ReaderActivity : BaseMainActivity() {
             NekoTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-                val readerTheme by readerPreferences.readerTheme().preferenceCollectAsState()
+                val readerTheme by
+                    readerPreferences.readerTheme().preferenceCollectAsStateWithLifecycle()
+                val grayscale by
+                    readerPreferences.grayscale().preferenceCollectAsStateWithLifecycle()
                 val themeBackground = MaterialTheme.colorScheme.background
                 val backgroundColor =
                     remember(readerTheme, themeBackground) {
@@ -485,7 +484,9 @@ class ReaderActivity : BaseMainActivity() {
                         onMangaClick = { openMangaScreen() },
                     )
                     val enabledButtons by
-                        readerPreferences.readerBottomButtons().preferenceCollectAsState()
+                        readerPreferences
+                            .readerBottomButtons()
+                            .preferenceCollectAsStateWithLifecycle()
                     val isCommentsVisible = ReaderBottomButton.Comment.isIn(enabledButtons)
                     val isWebViewVisible = ReaderBottomButton.WebView.isIn(enabledButtons)
                     val isChaptersVisible = ReaderBottomButton.ViewChapters.isIn(enabledButtons)
@@ -515,24 +516,26 @@ class ReaderActivity : BaseMainActivity() {
                         } else {
                             readerPreferences.cropBordersWebtoon()
                         }
-                    val cropBorders by cropBordersPref.preferenceCollectAsState()
-                    val grayscale by readerPreferences.grayscale().preferenceCollectAsState()
+                    val cropBorders by cropBordersPref.preferenceCollectAsStateWithLifecycle()
 
                     val viewerMode =
                         ReadingModeType.fromPreference(state.manga?.readingModeType ?: 0)
                     val readingModeIconRes = viewerMode.iconRes
 
                     val defaultOrientation by
-                        readerPreferences.defaultOrientationType().preferenceCollectAsState()
+                        readerPreferences
+                            .defaultOrientationType()
+                            .preferenceCollectAsStateWithLifecycle()
                     val orientation =
                         OrientationType.fromPreference(
                             state.manga?.orientationType ?: defaultOrientation
                         )
                     val rotationIconRes = orientation.iconRes
 
-                    val pageLayout by readerPreferences.pageLayout().preferenceCollectAsState()
+                    val pageLayout by
+                        readerPreferences.pageLayout().preferenceCollectAsStateWithLifecycle()
                     val sliderPosition by
-                        readerPreferences.sliderPosition().preferenceCollectAsState()
+                        readerPreferences.sliderPosition().preferenceCollectAsStateWithLifecycle()
                     val isDoublePage =
                         pageLayout == PageLayout.DOUBLE_PAGES.value ||
                             (pageLayout == PageLayout.AUTOMATIC.value &&
@@ -1972,18 +1975,6 @@ class ReaderActivity : BaseMainActivity() {
                 .onEach { setColorFilter(readerPreferences.colorFilter().get()) }
                 .launchIn(scope)
 
-            merge(
-                    readerPreferences.grayscale().changes(),
-                    readerPreferences.invertedColors().changes(),
-                )
-                .onEach {
-                    setLayerPaint(
-                        readerPreferences.grayscale().get(),
-                        readerPreferences.invertedColors().get(),
-                    )
-                }
-                .launchIn(lifecycleScope)
-
             readerPreferences
                 .alwaysShowChapterTransition()
                 .changes()
@@ -2061,47 +2052,6 @@ class ReaderActivity : BaseMainActivity() {
             }
         }
 
-        private fun getCombinedPaint(grayscale: Boolean, invertedColors: Boolean): Paint {
-            return Paint().apply {
-                colorFilter =
-                    ColorMatrixColorFilter(
-                        ColorMatrix().apply {
-                            if (grayscale) {
-                                setSaturation(0f)
-                            }
-                            if (invertedColors) {
-                                postConcat(
-                                    ColorMatrix(
-                                        floatArrayOf(
-                                            -1f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            255f,
-                                            0f,
-                                            -1f,
-                                            0f,
-                                            0f,
-                                            255f,
-                                            0f,
-                                            0f,
-                                            -1f,
-                                            0f,
-                                            255f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            1f,
-                                            0f,
-                                        )
-                                    )
-                                )
-                            }
-                        }
-                    )
-            }
-        }
-
         private fun setCustomBrightnessValue(value: Int) {
             // Calculate and set reader brightness.
             val readerBrightness =
@@ -2130,10 +2080,6 @@ class ReaderActivity : BaseMainActivity() {
         private fun setColorFilterValue(value: Int) {
             colorFilterOverlayColor = value
             colorFilterOverlayMode = readerPreferences.colorFilterMode().get()
-        }
-
-        private fun setLayerPaint(grayscale: Boolean, invertedColors: Boolean) {
-            // Layer paint is handled natively in Compose
         }
     }
 }

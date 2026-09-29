@@ -355,6 +355,7 @@ fun DoublePageLayout(
                     contentDescription = null,
                     contentScale = imageScale,
                     alignment = Alignment.CenterEnd,
+                    colorFilter = config.colorFilter,
                     modifier =
                         if (hasBothSizes) {
                             Modifier.size(width = w1Dp, height = hDp)
@@ -378,6 +379,7 @@ fun DoublePageLayout(
                     contentDescription = null,
                     contentScale = imageScale,
                     alignment = Alignment.CenterStart,
+                    colorFilter = config.colorFilter,
                     modifier =
                         if (hasBothSizes) {
                             Modifier.size(width = w2Dp, height = hDp)
