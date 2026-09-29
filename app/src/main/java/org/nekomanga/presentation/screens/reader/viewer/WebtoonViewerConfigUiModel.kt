@@ -3,6 +3,7 @@ package org.nekomanga.presentation.screens.reader.viewer
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.Dp
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -18,6 +19,7 @@ data class WebtoonViewerConfigUiModel(
     val initialIndex: Int = 0,
     val activeChapterId: Long? = null,
     val backgroundColor: Color = Color.Transparent,
+    val colorFilter: ColorFilter? = null,
     val contentPadding: PaddingValues = PaddingValues(bottom = Size.none),
     val sidePadding: Dp = Size.none,
     val sidePaddingPercent: Float = 0f,

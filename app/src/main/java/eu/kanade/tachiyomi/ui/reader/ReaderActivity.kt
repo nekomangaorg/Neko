@@ -46,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.buildSpannedString
@@ -85,7 +84,6 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
-import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderKeyNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
@@ -152,7 +150,7 @@ import org.nekomanga.domain.manga.orientationType
 import org.nekomanga.domain.manga.readingModeType
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
-import org.nekomanga.presentation.extensions.collectAsState as preferenceCollectAsState
+import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle as preferenceCollectAsStateWithLifecycle
 import org.nekomanga.presentation.screens.reader.GestureNavigationOverlay
 import org.nekomanga.presentation.screens.reader.PageNumberIndicator
 import org.nekomanga.presentation.screens.reader.ReaderAppBar
@@ -353,89 +351,78 @@ class ReaderActivity : BaseMainActivity() {
             NekoTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-                val readerTheme by readerPreferences.readerTheme().preferenceCollectAsState()
-                val grayscale by readerPreferences.grayscale().preferenceCollectAsState()
-                val invertedColors by readerPreferences.invertedColors().preferenceCollectAsState()
+                val readerTheme by
+                    readerPreferences.readerTheme().preferenceCollectAsStateWithLifecycle()
+                val grayscale by
+                    readerPreferences.grayscale().preferenceCollectAsStateWithLifecycle()
                 val themeBackground = MaterialTheme.colorScheme.background
                 val backgroundColor =
                     remember(readerTheme, themeBackground) {
                         ReaderTheme.fromPreference(readerTheme).color(themeBackground)
                     }
-                val viewerColorFilter =
-                    remember(grayscale, invertedColors) {
-                        ReaderColorFilter.getColorFilter(grayscale, invertedColors)
-                    }
                 Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
                     // Native Compose Viewers
-                    Box(
-                        modifier =
-                            Modifier.fillMaxSize().graphicsLayer {
-                                this.colorFilter = viewerColorFilter
+                    val currentViewer = viewer
+                    val items =
+                        state.viewerItems.ifEmpty {
+                            when (currentViewer) {
+                                is PagerViewer -> currentViewer.items
+                                is WebtoonViewer -> currentViewer.items
+                                else -> emptyList()
                             }
-                    ) {
-                        val currentViewer = viewer
-                        val items =
-                            state.viewerItems.ifEmpty {
-                                when (currentViewer) {
-                                    is PagerViewer -> currentViewer.items
-                                    is WebtoonViewer -> currentViewer.items
-                                    else -> emptyList()
-                                }
-                            }
-                        val transitionState by
-                            viewModel.transitionState.collectAsStateWithLifecycle()
-                        if (currentViewer is PagerViewer && items.isNotEmpty()) {
-                            ComposePagerViewer(
-                                viewer = currentViewer,
-                                items = items,
-                                isRtl = currentViewer is R2LPagerViewer,
-                                isVertical = currentViewer is VerticalPagerViewer,
-                                manga = viewModel.manga,
-                                downloadManager = Injekt.get<DownloadManager>(),
-                                onPageSelected = { page, hasExtraPage ->
-                                    onPageSelected(page, hasExtraPage)
-                                },
-                                onTransitionSelected = { transition ->
-                                    onTransitionSelected(transition)
-                                },
-                                onNavigateToChapter = { chapter, navTarget ->
-                                    viewModel.navigateToChapter(chapter, navTarget)
-                                },
-                                onRequestPreloadChapter = { chapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
-                                },
-                                onRetryTransition = { chapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
-                                },
-                                modifier = Modifier.fillMaxSize(),
-                                transitionState = transitionState,
-                                navCommands = viewModel.navigationCommands,
-                                preloadController = viewModel.preloadController,
-                            )
-                        } else if (currentViewer is WebtoonViewer && items.isNotEmpty()) {
-                            ComposeWebtoonViewer(
-                                viewer = currentViewer,
-                                items = items,
-                                manga = viewModel.manga,
-                                downloadManager = Injekt.get<DownloadManager>(),
-                                onPageSelected = { page -> onPageSelected(page, false) },
-                                onTransitionSelected = { transition ->
-                                    onTransitionSelected(transition)
-                                },
-                                onNavigateToChapter = { chapter, navTarget ->
-                                    viewModel.navigateToChapter(chapter, navTarget)
-                                },
-                                onRetryTransition = { chapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
-                                },
-                                onRequestPreloadChapter = { chapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
-                                },
-                                modifier = Modifier.fillMaxSize(),
-                                navCommands = viewModel.navigationCommands,
-                                preloadController = viewModel.preloadController,
-                            )
                         }
+                    val transitionState by viewModel.transitionState.collectAsStateWithLifecycle()
+                    if (currentViewer is PagerViewer && items.isNotEmpty()) {
+                        ComposePagerViewer(
+                            viewer = currentViewer,
+                            items = items,
+                            isRtl = currentViewer is R2LPagerViewer,
+                            isVertical = currentViewer is VerticalPagerViewer,
+                            manga = viewModel.manga,
+                            downloadManager = Injekt.get<DownloadManager>(),
+                            onPageSelected = { page, hasExtraPage ->
+                                onPageSelected(page, hasExtraPage)
+                            },
+                            onTransitionSelected = { transition ->
+                                onTransitionSelected(transition)
+                            },
+                            onNavigateToChapter = { chapter, navTarget ->
+                                viewModel.navigateToChapter(chapter, navTarget)
+                            },
+                            onRequestPreloadChapter = { chapter ->
+                                viewModel.requestPreloadChapter(chapter.chapter)
+                            },
+                            onRetryTransition = { chapter ->
+                                viewModel.requestPreloadChapter(chapter.chapter)
+                            },
+                            modifier = Modifier.fillMaxSize(),
+                            transitionState = transitionState,
+                            navCommands = viewModel.navigationCommands,
+                            preloadController = viewModel.preloadController,
+                        )
+                    } else if (currentViewer is WebtoonViewer && items.isNotEmpty()) {
+                        ComposeWebtoonViewer(
+                            viewer = currentViewer,
+                            items = items,
+                            manga = viewModel.manga,
+                            downloadManager = Injekt.get<DownloadManager>(),
+                            onPageSelected = { page -> onPageSelected(page, false) },
+                            onTransitionSelected = { transition ->
+                                onTransitionSelected(transition)
+                            },
+                            onNavigateToChapter = { chapter, navTarget ->
+                                viewModel.navigateToChapter(chapter, navTarget)
+                            },
+                            onRetryTransition = { chapter ->
+                                viewModel.requestPreloadChapter(chapter.chapter)
+                            },
+                            onRequestPreloadChapter = { chapter ->
+                                viewModel.requestPreloadChapter(chapter.chapter)
+                            },
+                            modifier = Modifier.fillMaxSize(),
+                            navCommands = viewModel.navigationCommands,
+                            preloadController = viewModel.preloadController,
+                        )
                     }
 
                     // Color Filter Overlay
@@ -497,7 +484,9 @@ class ReaderActivity : BaseMainActivity() {
                         onMangaClick = { openMangaScreen() },
                     )
                     val enabledButtons by
-                        readerPreferences.readerBottomButtons().preferenceCollectAsState()
+                        readerPreferences
+                            .readerBottomButtons()
+                            .preferenceCollectAsStateWithLifecycle()
                     val isCommentsVisible = ReaderBottomButton.Comment.isIn(enabledButtons)
                     val isWebViewVisible = ReaderBottomButton.WebView.isIn(enabledButtons)
                     val isChaptersVisible = ReaderBottomButton.ViewChapters.isIn(enabledButtons)
@@ -527,23 +516,26 @@ class ReaderActivity : BaseMainActivity() {
                         } else {
                             readerPreferences.cropBordersWebtoon()
                         }
-                    val cropBorders by cropBordersPref.preferenceCollectAsState()
+                    val cropBorders by cropBordersPref.preferenceCollectAsStateWithLifecycle()
 
                     val viewerMode =
                         ReadingModeType.fromPreference(state.manga?.readingModeType ?: 0)
                     val readingModeIconRes = viewerMode.iconRes
 
                     val defaultOrientation by
-                        readerPreferences.defaultOrientationType().preferenceCollectAsState()
+                        readerPreferences
+                            .defaultOrientationType()
+                            .preferenceCollectAsStateWithLifecycle()
                     val orientation =
                         OrientationType.fromPreference(
                             state.manga?.orientationType ?: defaultOrientation
                         )
                     val rotationIconRes = orientation.iconRes
 
-                    val pageLayout by readerPreferences.pageLayout().preferenceCollectAsState()
+                    val pageLayout by
+                        readerPreferences.pageLayout().preferenceCollectAsStateWithLifecycle()
                     val sliderPosition by
-                        readerPreferences.sliderPosition().preferenceCollectAsState()
+                        readerPreferences.sliderPosition().preferenceCollectAsStateWithLifecycle()
                     val isDoublePage =
                         pageLayout == PageLayout.DOUBLE_PAGES.value ||
                             (pageLayout == PageLayout.AUTOMATIC.value &&

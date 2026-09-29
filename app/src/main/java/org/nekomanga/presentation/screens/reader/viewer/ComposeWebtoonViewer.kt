@@ -47,6 +47,7 @@ import eu.kanade.tachiyomi.ui.reader.model.continuesInto
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
 import eu.kanade.tachiyomi.ui.reader.model.isSameChapter as modelIsSameChapter
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonActiveItemResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollGatingPolicy
@@ -399,6 +400,7 @@ fun ComposeWebtoonViewer(
                             page = item.page,
                             backgroundColor = config.backgroundColor,
                             cropBorders = config.cropBorders,
+                            colorFilter = config.colorFilter,
                             onLongClick = { onPageLongTap(item.page) },
                             modifier = gapModifier,
                         )
@@ -408,6 +410,7 @@ fun ComposeWebtoonViewer(
                             split = item.split,
                             backgroundColor = config.backgroundColor,
                             cropBorders = config.cropBorders,
+                            colorFilter = config.colorFilter,
                             onLongClick = { onPageLongTap(item.page) },
                             modifier = gapModifier,
                         )
@@ -517,10 +520,16 @@ fun ComposeWebtoonViewer(
     val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsStateWithLifecycle()
     val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsStateWithLifecycle()
     val cropBorders by readerPreferences.cropBordersWebtoon().collectAsStateWithLifecycle()
+    val grayscale by readerPreferences.grayscale().collectAsStateWithLifecycle()
+    val invertedColors by readerPreferences.invertedColors().collectAsStateWithLifecycle()
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
         remember(readerTheme, themeBackground) {
             ReaderTheme.fromPreference(readerTheme).color(themeBackground)
+        }
+    val colorFilter =
+        remember(grayscale, invertedColors) {
+            ReaderColorFilter.getColorFilter(grayscale, invertedColors)
         }
 
     val sidePaddingPercent =
@@ -539,6 +548,7 @@ fun ComposeWebtoonViewer(
             initialIndex = initialItemIndex,
             activeChapterId = currentChapterId,
             backgroundColor = backgroundColor,
+            colorFilter = colorFilter,
             contentPadding = PaddingValues(bottom = if (hasMargins) Size.medium else Size.none),
             sidePaddingPercent = sidePaddingPercent,
             hasGaps = hasMargins,

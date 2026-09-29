@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
@@ -55,6 +56,7 @@ fun WebtoonPageItem(
     page: ReaderPage,
     backgroundColor: Color,
     cropBorders: Boolean = false,
+    colorFilter: ColorFilter? = null,
     onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -76,6 +78,7 @@ fun WebtoonPageItem(
         pageProgress = pageProgress,
         backgroundColor = backgroundColor,
         cropBorders = cropBorders,
+        colorFilter = colorFilter,
         onLongClick = onLongClick,
         modifier = modifier,
     )
@@ -86,6 +89,7 @@ fun WebtoonPageItem(
     split: ReaderPageSplit,
     backgroundColor: Color,
     cropBorders: Boolean = false,
+    colorFilter: ColorFilter? = null,
     onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -114,6 +118,7 @@ fun WebtoonPageItem(
         // otherwise differing crop amounts across slices would cause horizontal step/seam
         // discontinuities when scaled to fillMaxWidth.
         cropBorders = false,
+        colorFilter = colorFilter,
         onLongClick = onLongClick,
         modifier = modifier,
     )
@@ -129,6 +134,7 @@ private fun WebtoonPageContent(
     pageProgress: Int,
     backgroundColor: Color,
     cropBorders: Boolean,
+    colorFilter: ColorFilter? = null,
     onLongClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -229,6 +235,7 @@ private fun WebtoonPageContent(
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
             filterQuality = FilterQuality.High,
+            colorFilter = colorFilter,
             modifier =
                 Modifier.fillMaxWidth()
                     .then(

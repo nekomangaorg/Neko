@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
@@ -591,11 +592,17 @@ fun ComposePagerViewer(
     val zoomStart by readerPreferences.zoomStart().collectAsStateWithLifecycle()
     val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsStateWithLifecycle()
     val cropBorders by readerPreferences.cropBorders().collectAsStateWithLifecycle()
+    val grayscale by readerPreferences.grayscale().collectAsStateWithLifecycle()
+    val invertedColors by readerPreferences.invertedColors().collectAsStateWithLifecycle()
 
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
         remember(readerTheme, themeBackground) {
             ReaderTheme.fromPreference(readerTheme).color(themeBackground)
+        }
+    val colorFilter =
+        remember(grayscale, invertedColors) {
+            ReaderColorFilter.getColorFilter(grayscale, invertedColors)
         }
 
     val config =
@@ -603,6 +610,7 @@ fun ComposePagerViewer(
             initialIndex = initialPage,
             activeChapterId = currentChapterId,
             backgroundColor = backgroundColor,
+            colorFilter = colorFilter,
             isRtl = isRtl,
             isVertical = isVertical,
             animatedTransitions = animatedTransitions,

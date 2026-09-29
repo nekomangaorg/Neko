@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Test
 
 class ReaderColorFilterTest {
@@ -25,7 +26,6 @@ class ReaderColorFilterTest {
         assertNotNull(matrix)
 
         val values = matrix!!.values
-        // Standard saturation 0 coefficients
         val r = 0.213f
         val g = 0.715f
         val b = 0.072f
@@ -133,5 +133,20 @@ class ReaderColorFilterTest {
         assertEquals(0f, values[17], 0.001f)
         assertEquals(1f, values[18], 0.001f)
         assertEquals(0f, values[19], 0.001f)
+    }
+
+    @Test
+    fun `getColorFilter returns cached instance for repeated calls`() {
+        val filter1 = ReaderColorFilter.getColorFilter(grayscale = true, invertedColors = false)
+        val filter2 = ReaderColorFilter.getColorFilter(grayscale = true, invertedColors = false)
+        assertSame(filter1, filter2)
+
+        val invert1 = ReaderColorFilter.getColorFilter(grayscale = false, invertedColors = true)
+        val invert2 = ReaderColorFilter.getColorFilter(grayscale = false, invertedColors = true)
+        assertSame(invert1, invert2)
+
+        val both1 = ReaderColorFilter.getColorFilter(grayscale = true, invertedColors = true)
+        val both2 = ReaderColorFilter.getColorFilter(grayscale = true, invertedColors = true)
+        assertSame(both1, both2)
     }
 }

@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.ColorMatrix
  * display effects such as grayscale and inverted colors.
  */
 object ReaderColorFilter {
-    private val INVERTED_COLOR_MATRIX =
+    val INVERTED_MATRIX =
         floatArrayOf(
             -1f,
             0f,
@@ -32,13 +32,71 @@ object ReaderColorFilter {
             0f,
         )
 
+    val GRAYSCALE_MATRIX =
+        floatArrayOf(
+            0.213f,
+            0.715f,
+            0.072f,
+            0f,
+            0f,
+            0.213f,
+            0.715f,
+            0.072f,
+            0f,
+            0f,
+            0.213f,
+            0.715f,
+            0.072f,
+            0f,
+            0f,
+            0f,
+            0f,
+            0f,
+            1f,
+            0f,
+        )
+
+    val INVERTED_GRAYSCALE_MATRIX =
+        floatArrayOf(
+            -0.213f,
+            -0.715f,
+            -0.072f,
+            0f,
+            255f,
+            -0.213f,
+            -0.715f,
+            -0.072f,
+            0f,
+            255f,
+            -0.213f,
+            -0.715f,
+            -0.072f,
+            0f,
+            255f,
+            0f,
+            0f,
+            0f,
+            1f,
+            0f,
+        )
+
+    private val grayscaleFilter by lazy { ColorFilter.colorMatrix(ColorMatrix(GRAYSCALE_MATRIX)) }
+    private val invertedFilter by lazy { ColorFilter.colorMatrix(ColorMatrix(INVERTED_MATRIX)) }
+    private val invertedGrayscaleFilter by lazy {
+        ColorFilter.colorMatrix(ColorMatrix(INVERTED_GRAYSCALE_MATRIX))
+    }
+
     /**
-     * Returns a [ColorFilter] combining [grayscale] and [invertedColors] if either is active, or
-     * `null` if both are disabled.
+     * Returns a cached [ColorFilter] combining [grayscale] and [invertedColors] if either is
+     * active, or `null` if both are disabled.
      */
     fun getColorFilter(grayscale: Boolean, invertedColors: Boolean): ColorFilter? {
-        val matrix = getColorMatrix(grayscale, invertedColors) ?: return null
-        return ColorFilter.colorMatrix(matrix)
+        return when {
+            grayscale && invertedColors -> invertedGrayscaleFilter
+            grayscale -> grayscaleFilter
+            invertedColors -> invertedFilter
+            else -> null
+        }
     }
 
     /**
@@ -46,17 +104,11 @@ object ReaderColorFilter {
      * `null` if both are disabled.
      */
     fun getColorMatrix(grayscale: Boolean, invertedColors: Boolean): ColorMatrix? {
-        if (!grayscale && !invertedColors) return null
-
-        if (grayscale && !invertedColors) {
-            return ColorMatrix().apply { setToSaturation(0f) }
+        return when {
+            grayscale && invertedColors -> ColorMatrix(INVERTED_GRAYSCALE_MATRIX)
+            grayscale -> ColorMatrix(GRAYSCALE_MATRIX)
+            invertedColors -> ColorMatrix(INVERTED_MATRIX)
+            else -> null
         }
-
-        val invertMatrix = ColorMatrix(INVERTED_COLOR_MATRIX)
-        if (grayscale) {
-            val satMatrix = ColorMatrix().apply { setToSaturation(0f) }
-            invertMatrix *= satMatrix
-        }
-        return invertMatrix
     }
 }
