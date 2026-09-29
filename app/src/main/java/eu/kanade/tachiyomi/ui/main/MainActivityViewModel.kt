@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.main
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
+import eu.kanade.tachiyomi.crash.CrashReport
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
@@ -19,6 +21,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -26,6 +29,7 @@ import uy.kohesive.injekt.injectLazy
 class MainActivityViewModel : ViewModel() {
 
     private val updateChecker by lazy { AppUpdateChecker() }
+    private val crashReport by lazy { CrashReport.forContext(Injekt.get<Application>()) }
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
     private val _deepLinkScreen = MutableStateFlow<List<NavKey>?>(null)
@@ -71,6 +75,11 @@ class MainActivityViewModel : ViewModel() {
         _mainScreenState.update { it.copy(showWhatsNewDialog = shouldShow) }
     }
 
+    fun dismissCrashReport() {
+        _mainScreenState.update { it.copy(pendingCrashReport = null) }
+        viewModelScope.launchIO { crashReport.markSeen() }
+    }
+
     init {
         securityPreferences.incognitoMode().changes().observeAndUpdate(viewModelScope) {
             incognitoMode ->
@@ -94,6 +103,17 @@ class MainActivityViewModel : ViewModel() {
 
             if (update is AppUpdateResult.NewUpdate) {
                 _mainScreenState.update { it.copy(appUpdateResult = update) }
+            }
+        }
+
+        viewModelScope.launchIO {
+            val report = runCatching {
+                crashReport.pendingReport()
+            }
+                .onFailure { TimberKt.e(it) { "Could not read the crash report" } }
+                .getOrNull()
+            if (report != null) {
+                _mainScreenState.update { it.copy(pendingCrashReport = report) }
             }
         }
     }

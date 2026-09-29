@@ -20,26 +20,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import eu.kanade.tachiyomi.util.CrashLogUtil
-import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.presentation.components.scaffold.RootScaffold
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun CrashScreen(exception: Throwable?, onRestartClick: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-
+fun CrashScreen(
+    exception: Throwable?,
+    isSharing: Boolean,
+    onShareClick: () -> Unit,
+    onRestartClick: () -> Unit,
+) {
     val scrollBehavior =
         TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState())
 
@@ -65,10 +63,11 @@ fun CrashScreen(exception: Throwable?, onRestartClick: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(Size.small),
             ) {
                 Button(
-                    onClick = { scope.launch { CrashLogUtil(context).dumpLogs(exception) } },
+                    onClick = onShareClick,
+                    enabled = !isSharing,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(text = stringResource(id = R.string.pref_dump_crash_logs))
+                    Text(text = stringResource(id = R.string.share_crash_log))
                 }
                 OutlinedButton(onClick = onRestartClick, modifier = Modifier.fillMaxWidth()) {
                     Text(text = stringResource(R.string.crash_screen_restart_application))

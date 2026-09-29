@@ -37,6 +37,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.Migrations
+import eu.kanade.tachiyomi.crash.shareCrashReport
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -62,6 +63,7 @@ import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
+import org.nekomanga.presentation.components.dialog.CrashReportDialog
 import org.nekomanga.presentation.components.dialog.WhatsNewDialog
 import org.nekomanga.presentation.screens.MainScreen
 import org.nekomanga.presentation.screens.Screens
@@ -199,6 +201,16 @@ class MainActivity : BaseMainActivity() {
                     onSeeWhatsNewClick = {
                         val intent = Intent(Intent.ACTION_VIEW, RELEASE_URL.toUri())
                         startActivity(intent)
+                    },
+                )
+            }
+
+            mainScreenState.pendingCrashReport?.let { report ->
+                CrashReportDialog(
+                    onDismissRequest = { viewModel.dismissCrashReport() },
+                    onShareClick = {
+                        viewModel.dismissCrashReport()
+                        shareCrashReport(report)
                     },
                 )
             }

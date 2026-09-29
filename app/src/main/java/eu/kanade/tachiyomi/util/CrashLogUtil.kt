@@ -2,25 +2,25 @@ package eu.kanade.tachiyomi.util
 
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.os.Process
+import eu.kanade.tachiyomi.crash.CrashReportText
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import eu.kanade.tachiyomi.util.system.withUIContext
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import okio.buffer
 import okio.sink
 import okio.source
-import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.domain.storage.StorageManager
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -34,66 +34,41 @@ class CrashLogUtil(private val context: Context) {
             setSmallIcon(R.drawable.ic_neko_notification)
         }
 
-    suspend fun dumpLogs(exception: Throwable? = null) = withNonCancellableContext {
-        try {
-            val storageManager: StorageManager = Injekt.get()
+    suspend fun dumpLogs() = withNonCancellableContext {
+        withIOContext {
+            try {
+                val storageManager: StorageManager = Injekt.get()
 
-            val uniFile =
-                storageManager
-                    .getCrashLogDirectory()
-                    ?.createFile(
-                        "neko_crash_log-${SimpleDateFormat("yyyyMMddHHmm").format(Date())}.txt"
-                    ) ?: return@withNonCancellableContext
-
-            uniFile.openOutputStream().sink().buffer().use { bufferedSink ->
-                // 1. Write header info as before
-                bufferedSink.writeUtf8(getDebugInfo())
-                if (exception != null) {
-                    bufferedSink.writeUtf8(getExceptionBlock(exception))
-                    bufferedSink.writeUtf8("\n")
+                val uniFile =
+                    storageManager
+                        .getCrashLogDirectory()
+                        ?.createFile(
+                            "neko_crash_log-${SimpleDateFormat("yyyyMMddHHmm").format(Date())}.txt"
+                        )
+                if (uniFile == null) {
+                    withUIContext { context.toast(R.string.crash_log_folder_failed) }
+                    return@withIOContext
                 }
 
-                // 2. Prepare the logcat command to output to stdout
-                val pid = Process.myPid()
-                val command = "logcat --pid=$pid *:D -d"
-                val process = Runtime.getRuntime().exec(command)
+                uniFile.openOutputStream().sink().buffer().use { bufferedSink ->
+                    bufferedSink.writeUtf8(CrashReportText.debugInfo())
+                    bufferedSink.writeUtf8("\n\n")
 
-                // 3. Stream the logcat output directly into the sink
-                process.inputStream.source().use { source -> bufferedSink.writeAll(source) }
+                    val pid = Process.myPid()
+                    val command = "logcat --pid=$pid *:D -d"
+                    val process = Runtime.getRuntime().exec(command)
 
-                process.waitFor()
+                    process.inputStream.source().use { source -> bufferedSink.writeAll(source) }
+
+                    process.waitFor()
+                }
+
+                showNotification(uniFile.uri)
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Could not save the crash log" }
+                withUIContext { context.toast(R.string.crash_log_save_failed) }
             }
-
-            showNotification(uniFile.uri)
-        } catch (e: IOException) {
-            withUIContext { context.toast("Failed to get logs") }
         }
-    }
-
-    fun getDebugInfo(): String {
-        return """
-            App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR}, ${BuildConfig.COMMIT_SHA}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.BUILD_TIME})
-            Android version: ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})
-            Android build ID: ${Build.DISPLAY}
-            Device brand: ${Build.BRAND}
-            Device manufacturer: ${Build.MANUFACTURER}
-            Device name: ${Build.DEVICE}
-            Device model: ${Build.MODEL}
-            Device product name: ${Build.PRODUCT}
-        """
-            .trimIndent()
-    }
-
-    private fun getExceptionBlock(exception: Throwable): String {
-        return """
-            ******************************************************************************************************************************************************************************************************************************
-            Exception that caused crash
-            ******************************************************************************************************************************************************************************************************************************
-            ${exception.stackTraceToString()}
-            ******************************************************************************************************************************************************************************************************************************
-            ******************************************************************************************************************************************************************************************************************************
-        """
-            .trimIndent()
     }
 
     private fun showNotification(uri: Uri) {
