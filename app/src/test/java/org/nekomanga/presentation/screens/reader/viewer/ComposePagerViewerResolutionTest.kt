@@ -714,4 +714,156 @@ class ComposePagerViewerResolutionTest {
 
         assertTrue(result)
     }
+
+    @Test
+    fun `executeNavCommand with ScrollToItem navigates to page 0 when jumping back to page one`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 20)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val config = createConfig(activeChapterId = 1L, animatedTransitions = false)
+
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 5 // User was at page 5
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.ScrollToItem(itemIndex = 0, animated = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPagerState.scrollToPage(0) }
+        }
+
+    @Test
+    fun `resolveItemIndexForPage in RTL resolves target chapter page 0 correctly when previous chapter is prepended`() {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val ch2 = createChapter(2L, pageCount = 3)
+
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+
+        // In RTL, list is reversed: [Ch2 P2, Ch2 P1, Ch2 P0, PrevTrans, Ch1 P2, Ch1 P1, Ch1 P0]
+        val rtlItems =
+            listOf(
+                ReaderUiItem.Page(ch2Pages[2]),
+                ReaderUiItem.Page(ch2Pages[1]),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch1Pages[2]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Page(ch1Pages[0]),
+            )
+
+        // Chapter 2 Page 0 is at index 2
+        val resolvedCh2P0 =
+            resolveItemIndexForPage(items = rtlItems, targetChapterId = 2L, pageIndex = 0)
+        assertEquals(2, resolvedCh2P0)
+
+        // Chapter 2 Page 2 is at index 0
+        val resolvedCh2P2 =
+            resolveItemIndexForPage(items = rtlItems, targetChapterId = 2L, pageIndex = 2)
+        assertEquals(0, resolvedCh2P2)
+
+        // Chapter 1 Page 0 is at index 6
+        val resolvedCh1P0 =
+            resolveItemIndexForPage(items = rtlItems, targetChapterId = 1L, pageIndex = 0)
+        assertEquals(6, resolvedCh1P0)
+    }
+
+    @Test
+    fun `executeNavCommand with SnapToPage in RTL scrolls to correct page index`() = runTest {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+
+        val rtlItems =
+            listOf(
+                ReaderUiItem.Page(ch2Pages[2]),
+                ReaderUiItem.Page(ch2Pages[1]),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch1Pages[2]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Page(ch1Pages[0]),
+            )
+        val config = createConfig(activeChapterId = 2L, isRtl = true)
+
+        val mockPagerState = mockk<PagerState>(relaxed = true)
+        every { mockPagerState.currentPage } returns 0
+
+        // Snap to Chapter 2 Page 0 in RTL (should navigate to item index 2)
+        val result =
+            executeNavCommand(
+                command = ReaderNavCommand.SnapToPage(pageIndex = 0, chapterId = 2L),
+                pagerState = mockPagerState,
+                items = rtlItems,
+                config = config,
+            )
+
+        assertTrue(result)
+        coVerify { mockPagerState.scrollToPage(2) }
+    }
+
+    @Test
+    fun `executeNavCommand with ScrollToPage in RTL animates to correct page index`() = runTest {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+
+        val rtlItems =
+            listOf(
+                ReaderUiItem.Page(ch2Pages[2]),
+                ReaderUiItem.Page(ch2Pages[1]),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch1Pages[2]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Page(ch1Pages[0]),
+            )
+        val config = createConfig(activeChapterId = 2L, isRtl = true, animatedTransitions = true)
+
+        val mockPagerState = mockk<PagerState>(relaxed = true)
+        every { mockPagerState.currentPage } returns 0
+
+        val result =
+            executeNavCommand(
+                command =
+                    ReaderNavCommand.ScrollToPage(pageIndex = 0, chapterId = 2L, animated = true),
+                pagerState = mockPagerState,
+                items = rtlItems,
+                config = config,
+            )
+
+        assertTrue(result)
+        coVerify { mockPagerState.animateScrollToPage(page = 2, animationSpec = any()) }
+    }
+
+    @Test
+    fun `executeNavCommand with ScrollToItem in RTL scrolls to exact item index`() = runTest {
+        val ch2 = createChapter(2L, pageCount = 5)
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+        val rtlItems = ch2Pages.reversed().map { ReaderUiItem.Page(it) }
+        val config = createConfig(activeChapterId = 2L, isRtl = true, animatedTransitions = false)
+
+        val mockPagerState = mockk<PagerState>(relaxed = true)
+        every { mockPagerState.currentPage } returns 0
+
+        // User dragged slider to page 1 (which in RTL maps to item index 4)
+        val result =
+            executeNavCommand(
+                command = ReaderNavCommand.ScrollToItem(itemIndex = 4, animated = false),
+                pagerState = mockPagerState,
+                items = rtlItems,
+                config = config,
+            )
+
+        assertTrue(result)
+        coVerify { mockPagerState.scrollToPage(4) }
+    }
 }

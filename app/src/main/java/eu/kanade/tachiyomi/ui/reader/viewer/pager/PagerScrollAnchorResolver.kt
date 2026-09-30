@@ -26,11 +26,30 @@ object PagerScrollAnchorResolver {
         lastActiveItem: ReaderUiItem?,
         currentVisibleIndex: Int,
         previousItems: List<ReaderUiItem>? = null,
+        isRtl: Boolean = false,
+        activeChapterId: Long? = null,
     ): AnchorTarget? {
         if (items.isEmpty()) return null
 
         val currentItem = items.getOrNull(currentVisibleIndex)
         val activeItem = lastActiveItem
+
+        // If target item belongs to an obsolete chapter, anchor directly to active chapter start
+        if (
+            activeChapterId != null &&
+                activeItem?.chapterId != null &&
+                activeItem.chapterId != activeChapterId
+        ) {
+            val boundaryIndex =
+                if (isRtl) {
+                    items.indexOfLast { it.chapterId == activeChapterId }
+                } else {
+                    items.indexOfFirst { it.chapterId == activeChapterId }
+                }
+            if (boundaryIndex != -1 && boundaryIndex != currentVisibleIndex) {
+                return AnchorTarget(boundaryIndex, items[boundaryIndex])
+            }
+        }
 
         // Fast-path 1: Native Compose key tracking or caller already positioned at equivalent item.
         if (currentItem != null && activeItem != null && currentItem.isEquivalentTo(activeItem)) {
@@ -64,16 +83,40 @@ object PagerScrollAnchorResolver {
             if (toChapter != null) {
                 val toChapterId = toChapter.chapter.id
                 if (trans is ChapterTransition.Next) {
-                    val firstIndex = items.indexOfFirst { it.chapterId == toChapterId }
-                    if (firstIndex != -1) {
-                        return AnchorTarget(firstIndex, items[firstIndex])
+                    val boundaryIndex =
+                        if (isRtl) {
+                            items.indexOfLast { it.chapterId == toChapterId }
+                        } else {
+                            items.indexOfFirst { it.chapterId == toChapterId }
+                        }
+                    if (boundaryIndex != -1) {
+                        return AnchorTarget(boundaryIndex, items[boundaryIndex])
                     }
                 } else if (trans is ChapterTransition.Prev) {
-                    val lastIndex = items.indexOfLast { it.chapterId == toChapterId }
-                    if (lastIndex != -1) {
-                        return AnchorTarget(lastIndex, items[lastIndex])
+                    val boundaryIndex =
+                        if (isRtl) {
+                            items.indexOfFirst { it.chapterId == toChapterId }
+                        } else {
+                            items.indexOfLast { it.chapterId == toChapterId }
+                        }
+                    if (boundaryIndex != -1) {
+                        return AnchorTarget(boundaryIndex, items[boundaryIndex])
                     }
                 }
+            }
+        }
+
+        // Fallback: If target was obsolete or not found, anchor to the boundary of the active
+        // chapter
+        if (newIndex == -1 && activeChapterId != null) {
+            val boundaryIndex =
+                if (isRtl) {
+                    items.indexOfLast { it.chapterId == activeChapterId }
+                } else {
+                    items.indexOfFirst { it.chapterId == activeChapterId }
+                }
+            if (boundaryIndex != -1 && boundaryIndex != currentVisibleIndex) {
+                return AnchorTarget(boundaryIndex, items[boundaryIndex])
             }
         }
 

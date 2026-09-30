@@ -78,6 +78,7 @@ fun ComposePagerViewer(
 
     var lastActiveItem by remember { mutableStateOf(items.getOrNull(initialPage)) }
     var lastProcessedItems by remember { mutableStateOf(items) }
+    var lastProcessedChapterId by remember { mutableStateOf(config.activeChapterId) }
     var pendingNavCommand by remember { mutableStateOf<ReaderNavCommand?>(null) }
 
     val currentItems by rememberUpdatedState(items)
@@ -85,11 +86,12 @@ fun ComposePagerViewer(
     val currentIsNavigating by rememberUpdatedState(isNavigating)
 
     suspend fun executeNavCommand(command: ReaderNavCommand): Boolean {
-        return executeNavCommand(command, pagerState, items, config)
+        return executeNavCommand(command, pagerState, currentItems, currentConfig)
     }
 
     // 1. Immediate pre-measure re-anchor during composition to eliminate 1-frame flashes
-    if (items !== lastProcessedItems) {
+    val chapterChanged = config.activeChapterId != lastProcessedChapterId
+    if (items !== lastProcessedItems || chapterChanged) {
         val pending = pendingNavCommand
         val pendingTarget =
             when (pending) {
@@ -112,8 +114,26 @@ fun ComposePagerViewer(
         if (pendingTarget != null) {
             pendingNavCommand = null
             lastProcessedItems = items
+            lastProcessedChapterId = config.activeChapterId
             pagerState.requestScrollToPage(pendingTarget)
             items.getOrNull(pendingTarget)?.let { lastActiveItem = it }
+        } else if (chapterChanged) {
+            lastProcessedItems = items
+            lastProcessedChapterId = config.activeChapterId
+            val chapterInitialIndex =
+                config.initialIndex.takeIf { it in items.indices }
+                    ?: resolveItemIndexForPage(items, config.activeChapterId, 0)
+                    ?: if (config.isRtl && !config.isVertical) {
+                        items
+                            .indexOfLast { it.chapterId == config.activeChapterId }
+                            .takeIf { it != -1 } ?: 0
+                    } else {
+                        items
+                            .indexOfFirst { it.chapterId == config.activeChapterId }
+                            .takeIf { it != -1 } ?: 0
+                    }
+            pagerState.requestScrollToPage(chapterInitialIndex)
+            items.getOrNull(chapterInitialIndex)?.let { lastActiveItem = it }
         } else {
             val target =
                 PagerScrollAnchorResolver.resolveReanchorTarget(
@@ -121,8 +141,11 @@ fun ComposePagerViewer(
                     lastActiveItem = lastActiveItem,
                     currentVisibleIndex = pagerState.currentPage,
                     previousItems = lastProcessedItems,
+                    isRtl = config.isRtl && !config.isVertical,
+                    activeChapterId = config.activeChapterId,
                 )
             lastProcessedItems = items
+            lastProcessedChapterId = config.activeChapterId
             if (target != null && target.index != pagerState.currentPage) {
                 pagerState.requestScrollToPage(target.index)
                 lastActiveItem = target.item
@@ -131,7 +154,7 @@ fun ComposePagerViewer(
     }
 
     // 2. Fallback post-composition anchor sync
-    LaunchedEffect(items) {
+    LaunchedEffect(items, config.activeChapterId) {
         val pending = pendingNavCommand
         if (pending != null) {
             if (executeNavCommand(pending)) {
@@ -149,6 +172,8 @@ fun ComposePagerViewer(
                         lastActiveItem = lastActiveItem,
                         currentVisibleIndex = pagerState.currentPage,
                         previousItems = lastProcessedItems,
+                        isRtl = config.isRtl && !config.isVertical,
+                        activeChapterId = config.activeChapterId,
                     )
                 if (target != null && target.index != pagerState.currentPage) {
                     try {
@@ -215,9 +240,10 @@ fun ComposePagerViewer(
                         onPageSelected(item.page, item.extraPage != null)
                         val pages = item.page.chapter.pages
                         if (
-                            pages != null && item.page.chapter.chapter.id == config.activeChapterId
+                            pages != null &&
+                                item.page.chapter.chapter.id == currentConfig.activeChapterId
                         ) {
-                            val threshold = maxOf(5, config.preloadPageAmount)
+                            val threshold = maxOf(5, currentConfig.preloadPageAmount)
                             if (pages.size - item.page.number < threshold) {
                                 val nextTransition =
                                     currentItems.firstOrNull {
@@ -225,7 +251,7 @@ fun ComposePagerViewer(
                                             it.transition is ChapterTransition.Next
                                     } as? ReaderUiItem.Transition
                                 nextTransition?.transition?.to?.let {
-                                    config.onRequestPreloadChapter?.invoke(it)
+                                    currentConfig.onRequestPreloadChapter?.invoke(it)
                                 }
                             }
                             if (item.page.number <= threshold) {
@@ -235,7 +261,7 @@ fun ComposePagerViewer(
                                             it.transition is ChapterTransition.Prev
                                     } as? ReaderUiItem.Transition
                                 prevTransition?.transition?.to?.let {
-                                    config.onRequestPreloadChapter?.invoke(it)
+                                    currentConfig.onRequestPreloadChapter?.invoke(it)
                                 }
                             }
                         }
