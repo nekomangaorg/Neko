@@ -106,18 +106,26 @@ internal fun fallbackDecodeBytes(imageWidth: Int, imageHeight: Int, sampleSize: 
     sampledDimension(imageWidth, sampleSize) * sampledDimension(imageHeight, sampleSize) * 4
 
 /**
- * Runs [decode] at [sampleSize]. When it returns null, runs [beforeRetry] and tries once more at
- * double the sample size, and returns that result.
+ * Runs [decode] at [sampleSize]. When it returns null or throws [OutOfMemoryError], runs
+ * [beforeRetry] with that error (null for a null result) and tries once more at double the sample
+ * size, and returns that result. Other throwables, and an [OutOfMemoryError] from the second try,
+ * propagate.
  */
 internal fun <T : Any> decodeOrRetrySmaller(
     sampleSize: Int,
-    beforeRetry: () -> Unit,
+    beforeRetry: (outOfMemory: OutOfMemoryError?) -> Unit,
     decode: (sampleSize: Int) -> T?,
 ): T? {
-    decode(sampleSize)?.let {
-        return it
-    }
-    beforeRetry()
+    val outOfMemory =
+        try {
+            decode(sampleSize)?.let {
+                return it
+            }
+            null
+        } catch (e: OutOfMemoryError) {
+            e
+        }
+    beforeRetry(outOfMemory)
     return decode(sampleSize * 2)
 }
 
