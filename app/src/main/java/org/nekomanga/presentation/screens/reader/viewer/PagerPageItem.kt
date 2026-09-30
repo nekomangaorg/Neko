@@ -177,17 +177,23 @@ fun PagerPageItem(
     ) {
         val viewportWidthPx = constraints.maxWidth.toFloat()
         val viewportHeightPx = constraints.maxHeight.toFloat()
-        // rememberSaveable does not check its inputs against a restored value. Without key(), a
-        // rotation restores this flag and the zoomable states below as saved for the old viewport
-        // size, and telephoto keeps the old zoom level for a page that was dragged or zoomed.
+        val shouldRotateWide =
+            RotateWidePageTransformation.shouldRotateForViewport(
+                rotateWide = config.doublePageRotate,
+                viewportWidth = viewportWidthPx,
+                viewportHeight = viewportHeightPx,
+            )
+
         var autoZoomApplied by
-            key(
+            rememberSaveable(
+                page.chapter.chapter.id,
+                page.index,
                 constraints.maxWidth,
                 constraints.maxHeight,
-                config.doublePageRotate,
+                shouldRotateWide,
                 config.doublePageRotateReverse,
             ) {
-                rememberSaveable(page.chapter.chapter.id, page.index) { mutableStateOf(false) }
+                mutableStateOf(false)
             }
 
         val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
@@ -240,7 +246,12 @@ fun PagerPageItem(
                     }
                 }
 
-            LaunchedEffect(isReady, config.landscapeZoom, config.imageScaleType) {
+            LaunchedEffect(
+                isReady,
+                config.landscapeZoom,
+                config.imageScaleType,
+                shouldRotateWide,
+            ) {
                 if (
                     !autoZoomApplied &&
                         isReady &&
@@ -283,7 +294,7 @@ fun PagerPageItem(
                 remember(
                     page,
                     config.cropBorders,
-                    config.doublePageRotate,
+                    shouldRotateWide,
                     config.doublePageRotateReverse,
                 ) {
                     ImageRequest.Builder(context)
@@ -297,7 +308,7 @@ fun PagerPageItem(
                             if (config.cropBorders) {
                                 transformations.add(CropBordersTransformation(cropTopBottom = true))
                             }
-                            if (config.doublePageRotate) {
+                            if (shouldRotateWide) {
                                 transformations.add(
                                     RotateWidePageTransformation(
                                         rotateWide = true,

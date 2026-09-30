@@ -7,7 +7,8 @@ import coil3.transform.Transformation
 import org.nekomanga.logging.TimberKt
 
 /**
- * Coil 3 image transformation that rotates wide pages (width > height) to fit portrait screens.
+ * Coil 3 image transformation that rotates wide pages (spreads where aspect ratio width /
+ * height > [MIN_WIDE_RATIO]) to fit portrait screens.
  *
  * @param rotateWide Whether wide pages should be rotated.
  * @param reverse Whether the rotation direction is flipped (-90 degrees instead of 90 degrees).
@@ -75,12 +76,32 @@ class RotateWidePageTransformation(
     }
 
     companion object {
+        const val MIN_WIDE_RATIO = 1.05f
+
         fun shouldRotate(width: Int, height: Int, rotateWide: Boolean): Boolean {
-            return rotateWide && width > 0 && height > 0 && width > height
+            return rotateWide &&
+                width > 0 &&
+                height > 0 &&
+                (width.toFloat() / height.toFloat() > MIN_WIDE_RATIO)
         }
 
         fun rotationDegrees(reverse: Boolean): Float {
             return if (reverse) -90f else 90f
+        }
+
+        /**
+         * Determines if wide pages should be rotated given the viewport orientation. Wide pages are
+         * only rotated when the user setting is enabled and the viewport is strictly in portrait
+         * orientation (viewport width < viewport height).
+         */
+        fun shouldRotateForViewport(
+            rotateWide: Boolean,
+            viewportWidth: Float,
+            viewportHeight: Float,
+        ): Boolean {
+            val isPortrait =
+                viewportWidth > 0f && viewportHeight > 0f && viewportWidth < viewportHeight
+            return rotateWide && isPortrait
         }
     }
 }

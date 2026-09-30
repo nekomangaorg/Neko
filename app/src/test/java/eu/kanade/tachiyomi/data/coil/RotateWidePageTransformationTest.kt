@@ -1,8 +1,14 @@
 package eu.kanade.tachiyomi.data.coil
 
+import android.graphics.Bitmap
+import coil3.size.Size as CoilSize
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -53,12 +59,23 @@ class RotateWidePageTransformationTest {
     }
 
     @Test
-    fun `shouldRotate boundary returns true when width is exactly one pixel greater than height`() {
-        assertTrue(RotateWidePageTransformation.shouldRotate(1001, 1000, true))
+    fun `shouldRotate returns false when aspect ratio is at or below MIN_WIDE_RATIO threshold`() {
+        // 1001x1000 is 1.001 (near square) -> false
+        assertFalse(RotateWidePageTransformation.shouldRotate(1001, 1000, true))
+        // 1050x1000 is exactly 1.05 (MIN_WIDE_RATIO boundary) -> false
+        assertFalse(RotateWidePageTransformation.shouldRotate(1050, 1000, true))
     }
 
     @Test
-    fun `shouldRotate boundary returns false when width is exactly one pixel less than height`() {
+    fun `shouldRotate returns true when aspect ratio strictly exceeds MIN_WIDE_RATIO threshold`() {
+        // 1051x1000 is 1.051 (> 1.05f) -> true
+        assertTrue(RotateWidePageTransformation.shouldRotate(1051, 1000, true))
+        // 1100x1000 is 1.10 -> true
+        assertTrue(RotateWidePageTransformation.shouldRotate(1100, 1000, true))
+    }
+
+    @Test
+    fun `shouldRotate boundary returns false when width is less than height`() {
         assertFalse(RotateWidePageTransformation.shouldRotate(1000, 1001, true))
     }
 
@@ -145,4 +162,193 @@ class RotateWidePageTransformationTest {
         assertTrue(stringRepresentation.contains("rotateWide=true"))
         assertTrue(stringRepresentation.contains("reverse=false"))
     }
+
+    // region Viewport Orientation Tests
+
+    @Test
+    fun `given rotateWide true and portrait viewport when evaluating shouldRotateForViewport then returns true`() {
+        // Arrange
+        val rotateWide = true
+        val viewportWidth = 1080f
+        val viewportHeight = 1920f
+
+        // Act
+        val result =
+            RotateWidePageTransformation.shouldRotateForViewport(
+                rotateWide = rotateWide,
+                viewportWidth = viewportWidth,
+                viewportHeight = viewportHeight,
+            )
+
+        // Assert
+        assertTrue(result)
+    }
+
+    @Test
+    fun `given rotateWide true and landscape viewport when evaluating shouldRotateForViewport then returns false`() {
+        // Arrange
+        val rotateWide = true
+        val viewportWidth = 1920f
+        val viewportHeight = 1080f
+
+        // Act
+        val result =
+            RotateWidePageTransformation.shouldRotateForViewport(
+                rotateWide = rotateWide,
+                viewportWidth = viewportWidth,
+                viewportHeight = viewportHeight,
+            )
+
+        // Assert
+        assertFalse(result)
+    }
+
+    @Test
+    fun `given rotateWide true and square viewport when evaluating shouldRotateForViewport then returns false`() {
+        // Arrange
+        val rotateWide = true
+        val viewportWidth = 1080f
+        val viewportHeight = 1080f
+
+        // Act
+        val result =
+            RotateWidePageTransformation.shouldRotateForViewport(
+                rotateWide = rotateWide,
+                viewportWidth = viewportWidth,
+                viewportHeight = viewportHeight,
+            )
+
+        // Assert
+        assertFalse(result)
+    }
+
+    @Test
+    fun `given rotateWide false and portrait viewport when evaluating shouldRotateForViewport then returns false`() {
+        // Arrange
+        val rotateWide = false
+        val viewportWidth = 1080f
+        val viewportHeight = 1920f
+
+        // Act
+        val result =
+            RotateWidePageTransformation.shouldRotateForViewport(
+                rotateWide = rotateWide,
+                viewportWidth = viewportWidth,
+                viewportHeight = viewportHeight,
+            )
+
+        // Assert
+        assertFalse(result)
+    }
+
+    @Test
+    fun `given invalid or non-positive viewport dimensions when evaluating shouldRotateForViewport then returns false`() {
+        // Arrange & Act & Assert
+        assertFalse(RotateWidePageTransformation.shouldRotateForViewport(true, 0f, 1920f))
+        assertFalse(RotateWidePageTransformation.shouldRotateForViewport(true, 1080f, 0f))
+        assertFalse(RotateWidePageTransformation.shouldRotateForViewport(true, -100f, 500f))
+        assertFalse(RotateWidePageTransformation.shouldRotateForViewport(true, 500f, -100f))
+        assertFalse(RotateWidePageTransformation.shouldRotateForViewport(true, 0f, 0f))
+    }
+
+    // endregion
+
+    // region Transform Short-Circuit Tests
+
+    @Test
+    fun `given recycled bitmap when transform called then returns input instance directly without rotating`() =
+        runTest {
+            // Arrange
+            val transformation = RotateWidePageTransformation(rotateWide = true)
+            val mockBitmap =
+                mockk<Bitmap> {
+                    every { width } returns 2000
+                    every { height } returns 1000
+                    every { isRecycled } returns true
+                }
+
+            // Act
+            val result = transformation.transform(mockBitmap, CoilSize.ORIGINAL)
+
+            // Assert
+            assertSame(mockBitmap, result)
+        }
+
+    @Test
+    fun `given portrait bitmap when transform called then returns input instance directly without rotating`() =
+        runTest {
+            // Arrange
+            val transformation = RotateWidePageTransformation(rotateWide = true)
+            val mockBitmap =
+                mockk<Bitmap> {
+                    every { width } returns 1080
+                    every { height } returns 1920
+                    every { isRecycled } returns false
+                }
+
+            // Act
+            val result = transformation.transform(mockBitmap, CoilSize.ORIGINAL)
+
+            // Assert
+            assertSame(mockBitmap, result)
+        }
+
+    @Test
+    fun `given square bitmap when transform called then returns input instance directly without rotating`() =
+        runTest {
+            // Arrange
+            val transformation = RotateWidePageTransformation(rotateWide = true)
+            val mockBitmap =
+                mockk<Bitmap> {
+                    every { width } returns 1000
+                    every { height } returns 1000
+                    every { isRecycled } returns false
+                }
+
+            // Act
+            val result = transformation.transform(mockBitmap, CoilSize.ORIGINAL)
+
+            // Assert
+            assertSame(mockBitmap, result)
+        }
+
+    @Test
+    fun `given aspect ratio at or below MIN_WIDE_RATIO when transform called then returns input instance directly without rotating`() =
+        runTest {
+            // Arrange
+            val transformation = RotateWidePageTransformation(rotateWide = true)
+            val mockBitmap =
+                mockk<Bitmap> {
+                    every { width } returns 1050
+                    every { height } returns 1000
+                    every { isRecycled } returns false
+                }
+
+            // Act
+            val result = transformation.transform(mockBitmap, CoilSize.ORIGINAL)
+
+            // Assert
+            assertSame(mockBitmap, result)
+        }
+
+    @Test
+    fun `given rotateWide false and wide bitmap when transform called then returns input instance directly without rotating`() =
+        runTest {
+            // Arrange
+            val transformation = RotateWidePageTransformation(rotateWide = false)
+            val mockBitmap =
+                mockk<Bitmap> {
+                    every { width } returns 2000
+                    every { height } returns 1000
+                    every { isRecycled } returns false
+                }
+
+            // Act
+            val result = transformation.transform(mockBitmap, CoilSize.ORIGINAL)
+
+            // Assert
+            assertSame(mockBitmap, result)
+        }
+
+    // endregion
 }
