@@ -192,44 +192,64 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         }
 
         private fun nativeFullDecode(imageBytes: ByteArray, pageIndex: Int): CachedDecodedImage? {
-            val decoder = ImageDecoder.newInstance(imageBytes.inputStream())
-            if (decoder == null || decoder.width <= 0 || decoder.height <= 0) {
-                decoder?.recycle()
-                TimberKt.e {
-                    "Cannot fallback decode region: native decoder could not open page $pageIndex"
+            try {
+                val decoder = ImageDecoder.newInstance(imageBytes.inputStream())
+                if (decoder == null || decoder.width <= 0 || decoder.height <= 0) {
+                    decoder?.recycle()
+                    TimberKt.e {
+                        "Cannot fallback decode region: native decoder could not open page $pageIndex"
+                    }
+                    return null
                 }
-                return null
-            }
 
-            val imageWidth = decoder.width
-            val imageHeight = decoder.height
-            val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
-            trimCacheForFullDecode(imageWidth, imageHeight, sampleSize)
-            // decode() returns null both for bad data and when it runs out of memory. A second try
-            // at double the sample size needs a quarter of the memory, so a page that only ran out
-            // of memory loads and the cached pages stay. A corrupt page is decoded twice and then
-            // left alone until Retry.
-            val full =
-                try {
-                    decodeOrRetrySmaller(
-                        sampleSize = sampleSize,
-                        beforeRetry = {
-                            TimberKt.w {
-                                "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size $sampleSize), trying sample size ${sampleSize * 2}"
-                            }
-                        },
-                        decode = { decoder.decode(sampleSize = it) },
-                    )
-                } finally {
-                    decoder.recycle()
+                val imageWidth = decoder.width
+                val imageHeight = decoder.height
+                val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
+                trimCacheForFullDecode(imageWidth, imageHeight, sampleSize)
+                // decode() throws OutOfMemoryError when it runs out of memory, but a failed
+                // allocation inside the AV1 or HEVC decoder still comes back as null, like bad
+                // data. A second try at double the sample size needs a quarter of the memory, so
+                // either failure gets one, and after an OutOfMemoryError the fallback caches are
+                // cleared first. A page that fails twice is left alone until Retry.
+                val full =
+                    try {
+                        decodeOrRetrySmaller(
+                            sampleSize = sampleSize,
+                            beforeRetry = { outOfMemory ->
+                                if (outOfMemory != null) {
+                                    TimberKt.w(outOfMemory) {
+                                        "Native fallback decode ran out of memory for page $pageIndex ($imageWidth x $imageHeight, sample size $sampleSize), trying sample size ${sampleSize * 2}"
+                                    }
+                                    fallbackBitmapCache.evictAll()
+                                    rawBytesCache.evictAll()
+                                } else {
+                                    TimberKt.w {
+                                        "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size $sampleSize), trying sample size ${sampleSize * 2}"
+                                    }
+                                }
+                            },
+                            decode = { decoder.decode(sampleSize = it) },
+                        )
+                    } finally {
+                        decoder.recycle()
+                    }
+                if (full == null) {
+                    TimberKt.e {
+                        "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size ${sampleSize * 2})"
+                    }
+                    return null
                 }
-            if (full == null) {
-                TimberKt.e {
-                    "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size ${sampleSize * 2})"
+                return CachedDecodedImage(full, imageWidth, imageHeight)
+            } catch (e: OutOfMemoryError) {
+                // Covers newInstance, which gets no second try (JXL decodes the whole image
+                // there), and the retry.
+                TimberKt.e(e) {
+                    "OutOfMemoryError during native fallback decode for page $pageIndex"
                 }
+                fallbackBitmapCache.evictAll()
+                rawBytesCache.evictAll()
                 return null
             }
-            return CachedDecodedImage(full, imageWidth, imageHeight)
         }
 
         private fun platformFullDecode(imageBytes: ByteArray, pageIndex: Int): CachedDecodedImage? {
