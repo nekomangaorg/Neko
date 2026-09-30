@@ -54,6 +54,13 @@ import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+private class PagerLayoutSyncAnchor(
+    var lastProcessedItems: List<ReaderUiItem>,
+    var lastProcessedChapterId: Long?,
+    var lastActiveItem: ReaderUiItem?,
+    var preMeasureHandled: Boolean = false,
+)
+
 /**
  * Pure stateless Jetpack Compose viewer for paginated reading (horizontal LTR/RTL or vertical).
  * Decoupled from legacy View models, DownloadManager, and Service Locators.
@@ -76,9 +83,13 @@ fun ComposePagerViewer(
             pageCount = { items.size },
         )
 
-    var lastActiveItem by remember { mutableStateOf(items.getOrNull(initialPage)) }
-    var lastProcessedItems by remember { mutableStateOf(items) }
-    var lastProcessedChapterId by remember { mutableStateOf(config.activeChapterId) }
+    val layoutAnchor = remember {
+        PagerLayoutSyncAnchor(
+            lastProcessedItems = items,
+            lastProcessedChapterId = config.activeChapterId,
+            lastActiveItem = items.getOrNull(initialPage),
+        )
+    }
     var pendingNavCommand by remember { mutableStateOf<ReaderNavCommand?>(null) }
 
     val currentItems by rememberUpdatedState(items)
@@ -90,8 +101,8 @@ fun ComposePagerViewer(
     }
 
     // 1. Immediate pre-measure re-anchor during composition to eliminate 1-frame flashes
-    val chapterChanged = config.activeChapterId != lastProcessedChapterId
-    if (items !== lastProcessedItems || chapterChanged) {
+    val chapterChanged = config.activeChapterId != layoutAnchor.lastProcessedChapterId
+    if (items !== layoutAnchor.lastProcessedItems || chapterChanged) {
         val pending = pendingNavCommand
         val pendingTarget =
             when (pending) {
@@ -111,44 +122,44 @@ fun ComposePagerViewer(
                 else -> null
             }
 
+        layoutAnchor.lastProcessedItems = items
+        layoutAnchor.lastProcessedChapterId = config.activeChapterId
+
         if (pendingTarget != null) {
             pendingNavCommand = null
-            lastProcessedItems = items
-            lastProcessedChapterId = config.activeChapterId
+            layoutAnchor.preMeasureHandled = true
             pagerState.requestScrollToPage(pendingTarget)
-            items.getOrNull(pendingTarget)?.let { lastActiveItem = it }
+            items.getOrNull(pendingTarget)?.let { layoutAnchor.lastActiveItem = it }
         } else if (chapterChanged) {
-            lastProcessedItems = items
-            lastProcessedChapterId = config.activeChapterId
+            layoutAnchor.preMeasureHandled = true
             val chapterInitialIndex =
                 config.initialIndex.takeIf { it in items.indices }
                     ?: resolveItemIndexForPage(items, config.activeChapterId, 0)
-                    ?: if (config.isRtl && !config.isVertical) {
-                        items
-                            .indexOfLast { it.chapterId == config.activeChapterId }
-                            .takeIf { it != -1 } ?: 0
-                    } else {
-                        items
-                            .indexOfFirst { it.chapterId == config.activeChapterId }
-                            .takeIf { it != -1 } ?: 0
-                    }
+                    ?: PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                        items = items,
+                        chapterId = config.activeChapterId,
+                        isRtl = config.isRtl && !config.isVertical,
+                        boundary = PagerScrollAnchorResolver.ChapterBoundary.START,
+                    )
+                    ?: 0
             pagerState.requestScrollToPage(chapterInitialIndex)
-            items.getOrNull(chapterInitialIndex)?.let { lastActiveItem = it }
+            items.getOrNull(chapterInitialIndex)?.let { layoutAnchor.lastActiveItem = it }
         } else {
             val target =
                 PagerScrollAnchorResolver.resolveReanchorTarget(
                     items = items,
-                    lastActiveItem = lastActiveItem,
+                    lastActiveItem = layoutAnchor.lastActiveItem,
                     currentVisibleIndex = pagerState.currentPage,
-                    previousItems = lastProcessedItems,
+                    previousItems = layoutAnchor.lastProcessedItems,
                     isRtl = config.isRtl && !config.isVertical,
                     activeChapterId = config.activeChapterId,
                 )
-            lastProcessedItems = items
-            lastProcessedChapterId = config.activeChapterId
             if (target != null && target.index != pagerState.currentPage) {
+                layoutAnchor.preMeasureHandled = true
                 pagerState.requestScrollToPage(target.index)
-                lastActiveItem = target.item
+                layoutAnchor.lastActiveItem = target.item
+            } else {
+                layoutAnchor.preMeasureHandled = false
             }
         }
     }
@@ -161,26 +172,32 @@ fun ComposePagerViewer(
                 pendingNavCommand = null
             }
         } else {
-            val currentItem = items.getOrNull(pagerState.currentPage)
-            val activeItem = lastActiveItem
-            if (
-                currentItem != null && activeItem != null && !currentItem.isEquivalentTo(activeItem)
-            ) {
-                val target =
-                    PagerScrollAnchorResolver.resolveReanchorTarget(
-                        items = items,
-                        lastActiveItem = lastActiveItem,
-                        currentVisibleIndex = pagerState.currentPage,
-                        previousItems = lastProcessedItems,
-                        isRtl = config.isRtl && !config.isVertical,
-                        activeChapterId = config.activeChapterId,
-                    )
-                if (target != null && target.index != pagerState.currentPage) {
-                    try {
-                        pagerState.scrollToPage(target.index)
-                        lastActiveItem = target.item
-                    } catch (_: CancellationException) {
-                        // Re-anchor interrupted by user gesture
+            val wasPreMeasureHandled = layoutAnchor.preMeasureHandled
+            layoutAnchor.preMeasureHandled = false
+            if (!wasPreMeasureHandled) {
+                val currentItem = items.getOrNull(pagerState.currentPage)
+                val activeItem = layoutAnchor.lastActiveItem
+                if (
+                    currentItem != null &&
+                        activeItem != null &&
+                        !currentItem.isEquivalentTo(activeItem)
+                ) {
+                    val target =
+                        PagerScrollAnchorResolver.resolveReanchorTarget(
+                            items = items,
+                            lastActiveItem = activeItem,
+                            currentVisibleIndex = pagerState.currentPage,
+                            previousItems = layoutAnchor.lastProcessedItems,
+                            isRtl = config.isRtl && !config.isVertical,
+                            activeChapterId = config.activeChapterId,
+                        )
+                    if (target != null && target.index != pagerState.currentPage) {
+                        try {
+                            pagerState.scrollToPage(target.index)
+                            layoutAnchor.lastActiveItem = target.item
+                        } catch (_: CancellationException) {
+                            // Re-anchor interrupted by user gesture
+                        }
                     }
                 }
             }
@@ -232,7 +249,7 @@ fun ComposePagerViewer(
             .distinctUntilChanged()
             .collect { pageIndex ->
                 val item = currentItems.getOrNull(pageIndex) ?: return@collect
-                lastActiveItem = item
+                layoutAnchor.lastActiveItem = item
                 onActiveItemChanged(pageIndex)
 
                 when (item) {

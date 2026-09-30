@@ -396,4 +396,26 @@ class PagerViewerTest {
         val expectedItemIndex = viewer.controller.findPageIndex(viewer.items, page0)
         assertEquals(expectedItemIndex, viewer.requestedPagePosition?.first)
     }
+
+    @Test
+    fun `setChapters correctly recovers and detects chapterChanged when returning to previous chapter after loading failure`() {
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+
+        // User navigates to chapter 2, but it has no pages yet (loading)
+        val chapter2Loading = createChapter(2L, pageCount = 0)
+        chapter2Loading.state = ReaderChapter.State.Loading
+        viewer.setChapters(ViewerChapters(chapter2Loading, chapter1, null))
+        assertNull(viewer.requestedPagePosition)
+
+        // Loading chapter 2 fails or user cancels and navigates back to chapter 1
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+
+        // It MUST detect chapter change back to chapter 1 and move to requestedPage
+        assertNotNull(viewer.requestedPagePosition)
+        val expectedItemIndex = viewer.controller.findPageIndex(viewer.items, chapter1.pages!![0])
+        assertEquals(expectedItemIndex, viewer.requestedPagePosition?.first)
+    }
 }

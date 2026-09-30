@@ -16,6 +16,32 @@ object PagerScrollAnchorResolver {
         val item: ReaderUiItem,
     )
 
+    enum class ChapterBoundary {
+        START,
+        END,
+    }
+
+    /**
+     * Resolves the target item index at the specified [boundary] (START or END) for [chapterId],
+     * taking the viewer reading direction [isRtl] into account.
+     */
+    fun resolveChapterBoundaryIndex(
+        items: List<ReaderUiItem>,
+        chapterId: Long?,
+        isRtl: Boolean,
+        boundary: ChapterBoundary = ChapterBoundary.START,
+    ): Int? {
+        if (items.isEmpty() || chapterId == null || chapterId <= 0L) return null
+        val isForward = (boundary == ChapterBoundary.START) xor isRtl
+        val index =
+            if (isForward) {
+                items.indexOfFirst { it.chapterId == chapterId }
+            } else {
+                items.indexOfLast { it.chapterId == chapterId }
+            }
+        return index.takeIf { it != -1 }
+    }
+
     /**
      * Calculates the new target index when [items] changes, to seamlessly anchor the viewport to
      * the previously read item. Returns null if Compose already maintained the anchor or no
@@ -41,12 +67,13 @@ object PagerScrollAnchorResolver {
                 activeItem.chapterId != activeChapterId
         ) {
             val boundaryIndex =
-                if (isRtl) {
-                    items.indexOfLast { it.chapterId == activeChapterId }
-                } else {
-                    items.indexOfFirst { it.chapterId == activeChapterId }
-                }
-            if (boundaryIndex != -1 && boundaryIndex != currentVisibleIndex) {
+                resolveChapterBoundaryIndex(
+                    items = items,
+                    chapterId = activeChapterId,
+                    isRtl = isRtl,
+                    boundary = ChapterBoundary.START,
+                )
+            if (boundaryIndex != null && boundaryIndex != currentVisibleIndex) {
                 return AnchorTarget(boundaryIndex, items[boundaryIndex])
             }
         }
@@ -82,40 +109,36 @@ object PagerScrollAnchorResolver {
             val toChapter = trans.to
             if (toChapter != null) {
                 val toChapterId = toChapter.chapter.id
-                if (trans is ChapterTransition.Next) {
-                    val boundaryIndex =
-                        if (isRtl) {
-                            items.indexOfLast { it.chapterId == toChapterId }
-                        } else {
-                            items.indexOfFirst { it.chapterId == toChapterId }
-                        }
-                    if (boundaryIndex != -1) {
-                        return AnchorTarget(boundaryIndex, items[boundaryIndex])
+                val boundary =
+                    if (trans is ChapterTransition.Next) {
+                        ChapterBoundary.START
+                    } else {
+                        ChapterBoundary.END
                     }
-                } else if (trans is ChapterTransition.Prev) {
-                    val boundaryIndex =
-                        if (isRtl) {
-                            items.indexOfFirst { it.chapterId == toChapterId }
-                        } else {
-                            items.indexOfLast { it.chapterId == toChapterId }
-                        }
-                    if (boundaryIndex != -1) {
-                        return AnchorTarget(boundaryIndex, items[boundaryIndex])
-                    }
+                val boundaryIndex =
+                    resolveChapterBoundaryIndex(
+                        items = items,
+                        chapterId = toChapterId,
+                        isRtl = isRtl,
+                        boundary = boundary,
+                    )
+                if (boundaryIndex != null) {
+                    return AnchorTarget(boundaryIndex, items[boundaryIndex])
                 }
             }
         }
 
-        // Fallback: If target was obsolete or not found, anchor to the boundary of the active
+        // Fallback: If target was obsolete or not found, anchor to the start boundary of the active
         // chapter
         if (newIndex == -1 && activeChapterId != null) {
             val boundaryIndex =
-                if (isRtl) {
-                    items.indexOfLast { it.chapterId == activeChapterId }
-                } else {
-                    items.indexOfFirst { it.chapterId == activeChapterId }
-                }
-            if (boundaryIndex != -1 && boundaryIndex != currentVisibleIndex) {
+                resolveChapterBoundaryIndex(
+                    items = items,
+                    chapterId = activeChapterId,
+                    isRtl = isRtl,
+                    boundary = ChapterBoundary.START,
+                )
+            if (boundaryIndex != null && boundaryIndex != currentVisibleIndex) {
                 return AnchorTarget(boundaryIndex, items[boundaryIndex])
             }
         }

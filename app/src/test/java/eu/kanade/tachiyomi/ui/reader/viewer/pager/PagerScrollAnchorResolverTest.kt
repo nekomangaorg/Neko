@@ -373,4 +373,78 @@ class PagerScrollAnchorResolverTest {
         assertEquals(2L, targetPage.page.chapter.chapter.id)
         assertEquals(0, targetPage.page.index)
     }
+
+    @Test
+    fun `resolveChapterBoundaryIndex returns correct boundary indices in LTR and RTL`() {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val ch2 = createChapter(2L, pageCount = 3)
+
+        // LTR items: [Ch1 P0 (0), Ch1 P1 (1), Ch1 P2 (2), Trans (3), Ch2 P0 (4), Ch2 P1 (5), Ch2 P2
+        // (6)]
+        val ltrItems =
+            ch1.pages!!.map { ReaderUiItem.Page(it) } +
+                listOf(ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2))) +
+                ch2.pages!!.map { ReaderUiItem.Page(it) }
+
+        // In LTR:
+        // Ch2 START is at index 4
+        assertEquals(
+            4,
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                ltrItems,
+                2L,
+                isRtl = false,
+                PagerScrollAnchorResolver.ChapterBoundary.START,
+            ),
+        )
+        // Ch2 END is at index 6
+        assertEquals(
+            6,
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                ltrItems,
+                2L,
+                isRtl = false,
+                PagerScrollAnchorResolver.ChapterBoundary.END,
+            ),
+        )
+
+        // RTL items: [Ch2 P2 (0), Ch2 P1 (1), Ch2 P0 (2), Trans (3), Ch1 P2 (4), Ch1 P1 (5), Ch1 P0
+        // (6)]
+        val rtlItems =
+            ch2.pages!!.reversed().map { ReaderUiItem.Page(it) } +
+                listOf(ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1))) +
+                ch1.pages!!.reversed().map { ReaderUiItem.Page(it) }
+
+        // In RTL:
+        // Ch2 START (page 0) is at index 2
+        assertEquals(
+            2,
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                rtlItems,
+                2L,
+                isRtl = true,
+                PagerScrollAnchorResolver.ChapterBoundary.START,
+            ),
+        )
+        // Ch2 END (page 2) is at index 0
+        assertEquals(
+            0,
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                rtlItems,
+                2L,
+                isRtl = true,
+                PagerScrollAnchorResolver.ChapterBoundary.END,
+            ),
+        )
+
+        // Non-existent chapter returns null
+        assertNull(
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                rtlItems,
+                999L,
+                isRtl = true,
+                PagerScrollAnchorResolver.ChapterBoundary.START,
+            )
+        )
+    }
 }
