@@ -518,6 +518,9 @@ fun ComposePagerViewer(
     val cropBorders by readerPreferences.cropBorders().collectAsStateWithLifecycle()
     val grayscale by readerPreferences.grayscale().collectAsStateWithLifecycle()
     val invertedColors by readerPreferences.invertedColors().collectAsStateWithLifecycle()
+    val doublePageRotate by readerPreferences.doublePageRotate().collectAsStateWithLifecycle()
+    val doublePageRotateReverse by
+        readerPreferences.doublePageRotateReverse().collectAsStateWithLifecycle()
 
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
@@ -543,8 +546,8 @@ fun ComposePagerViewer(
             shiftDoublePage = viewer.config.shiftDoublePage,
             invertDoublePages = invertDoublePages,
             doublePageGap = doublePageGap,
-            doublePageRotate = viewer.config.doublePageRotate,
-            doublePageRotateReverse = viewer.config.doublePageRotateReverse,
+            doublePageRotate = doublePageRotate,
+            doublePageRotateReverse = doublePageRotateReverse,
             zoomStart = zoomStart,
             zoomDoublePageSpreads = landscapeZoom,
             landscapeZoom = landscapeZoom,

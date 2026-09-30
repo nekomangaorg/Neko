@@ -29,7 +29,9 @@ import coil3.request.maxBitmapSize
 import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
+import coil3.transform.Transformation
 import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
+import eu.kanade.tachiyomi.data.coil.RotateWidePageTransformation
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
@@ -175,12 +177,23 @@ fun PagerPageItem(
     ) {
         val viewportWidthPx = constraints.maxWidth.toFloat()
         val viewportHeightPx = constraints.maxHeight.toFloat()
-        // rememberSaveable does not check its inputs against a restored value. Without key(), a
-        // rotation restores this flag and the zoomable states below as saved for the old viewport
-        // size, and telephoto keeps the old zoom level for a page that was dragged or zoomed.
+        val shouldRotateWide =
+            RotateWidePageTransformation.shouldRotateForViewport(
+                rotateWide = config.doublePageRotate,
+                viewportWidth = viewportWidthPx,
+                viewportHeight = viewportHeightPx,
+            )
+
         var autoZoomApplied by
-            key(constraints.maxWidth, constraints.maxHeight) {
-                rememberSaveable(page.chapter.chapter.id, page.index) { mutableStateOf(false) }
+            rememberSaveable(
+                page.chapter.chapter.id,
+                page.index,
+                constraints.maxWidth,
+                constraints.maxHeight,
+                shouldRotateWide,
+                config.doublePageRotateReverse,
+            ) {
+                mutableStateOf(false)
             }
 
         val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
@@ -233,7 +246,12 @@ fun PagerPageItem(
                     }
                 }
 
-            LaunchedEffect(isReady, config.landscapeZoom, config.imageScaleType) {
+            LaunchedEffect(
+                isReady,
+                config.landscapeZoom,
+                config.imageScaleType,
+                shouldRotateWide,
+            ) {
                 if (
                     !autoZoomApplied &&
                         isReady &&
@@ -273,7 +291,12 @@ fun PagerPageItem(
             }
 
             val model =
-                remember(page, config.cropBorders) {
+                remember(
+                    page,
+                    config.cropBorders,
+                    shouldRotateWide,
+                    config.doublePageRotateReverse,
+                ) {
                     ImageRequest.Builder(context)
                         .data(page)
                         .size(CoilSize.ORIGINAL)
@@ -281,8 +304,20 @@ fun PagerPageItem(
                         .precision(Precision.EXACT)
                         .crossfade(true)
                         .apply {
+                            val transformations = mutableListOf<Transformation>()
                             if (config.cropBorders) {
-                                transformations(CropBordersTransformation(cropTopBottom = true))
+                                transformations.add(CropBordersTransformation(cropTopBottom = true))
+                            }
+                            if (shouldRotateWide) {
+                                transformations.add(
+                                    RotateWidePageTransformation(
+                                        rotateWide = true,
+                                        reverse = config.doublePageRotateReverse,
+                                    )
+                                )
+                            }
+                            if (transformations.isNotEmpty()) {
+                                transformations(transformations)
                             }
                         }
                         .build()
@@ -330,6 +365,10 @@ fun PagerPageItem(
     val cropBorders by readerPreferences.cropBorders().preferenceCollectAsStateWithLifecycle()
     val grayscale by readerPreferences.grayscale().preferenceCollectAsStateWithLifecycle()
     val invertedColors by readerPreferences.invertedColors().preferenceCollectAsStateWithLifecycle()
+    val doublePageRotate by
+        readerPreferences.doublePageRotate().preferenceCollectAsStateWithLifecycle()
+    val doublePageRotateReverse by
+        readerPreferences.doublePageRotateReverse().preferenceCollectAsStateWithLifecycle()
 
     val themeBackground = MaterialTheme.colorScheme.background
     val backgroundColor =
@@ -349,6 +388,8 @@ fun PagerPageItem(
             imageScaleType = imageScaleType,
             doublePageGap = doublePageGap,
             invertDoublePages = invertDoublePages,
+            doublePageRotate = doublePageRotate,
+            doublePageRotateReverse = doublePageRotateReverse,
             landscapeZoom = landscapeZoom,
             zoomStart = zoomStart,
             doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,

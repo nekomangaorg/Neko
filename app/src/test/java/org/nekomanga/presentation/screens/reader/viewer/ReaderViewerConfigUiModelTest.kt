@@ -4,20 +4,24 @@ import androidx.compose.ui.graphics.Color
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReaderViewerConfigUiModelTest {
 
     @Test
-    fun `given default PagerViewerConfigUiModel, then colorFilter is null and background is Black`() {
+    fun `given default PagerViewerConfigUiModel, then colorFilter is null, background is Black, and rotation flags are false`() {
         val config = PagerViewerConfigUiModel()
 
         assertNull(config.colorFilter)
         assertEquals(Color.Black, config.backgroundColor)
+        assertFalse(config.doublePageRotate)
+        assertFalse(config.doublePageRotateReverse)
     }
 
     @Test
@@ -39,6 +43,22 @@ class ReaderViewerConfigUiModelTest {
         val updated = config.copy(initialIndex = 5)
         assertSame(filter, updated.colorFilter)
         assertEquals(5, updated.initialIndex)
+    }
+
+    @Test
+    fun `given PagerViewerConfigUiModel with rotation flags, when copied, then maintains rotation preferences`() {
+        val config =
+            PagerViewerConfigUiModel(
+                doublePageRotate = true,
+                doublePageRotateReverse = true,
+            )
+        assertTrue(config.doublePageRotate)
+        assertTrue(config.doublePageRotateReverse)
+
+        val updated = config.copy(initialIndex = 2)
+        assertTrue(updated.doublePageRotate)
+        assertTrue(updated.doublePageRotateReverse)
+        assertEquals(2, updated.initialIndex)
     }
 
     @Test
@@ -78,5 +98,17 @@ class ReaderViewerConfigUiModelTest {
 
         assertNotEquals(webtoonConfig1, webtoonConfig2)
         assertNotEquals(webtoonConfig1, webtoonConfig3)
+    }
+
+    @Test
+    fun `given configs with differing rotation preferences, then models are not equal`() {
+        val default = PagerViewerConfigUiModel()
+        val rotated = PagerViewerConfigUiModel(doublePageRotate = true)
+        val rotatedFlipped =
+            PagerViewerConfigUiModel(doublePageRotate = true, doublePageRotateReverse = true)
+
+        assertNotEquals(default, rotated)
+        assertNotEquals(rotated, rotatedFlipped)
+        assertNotEquals(default, rotatedFlipped)
     }
 }
