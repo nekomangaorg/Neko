@@ -208,9 +208,10 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 trimCacheForFullDecode(imageWidth, imageHeight, sampleSize)
                 // decode() throws OutOfMemoryError when it runs out of memory, but a failed
                 // allocation inside the AV1 or HEVC decoder still comes back as null, like bad
-                // data. A second try at double the sample size needs a quarter of the memory, so
-                // either failure gets one, and after an OutOfMemoryError the fallback caches are
-                // cleared first. A page that fails twice is left alone until Retry.
+                // data. Either failure gets a second try at double the sample size, and after an
+                // OutOfMemoryError the fallback caches are cleared first. The second try shrinks
+                // the output buffer and bitmap to a quarter, but AVIF and HEIF still decode at
+                // full size first. A page that fails twice is left alone until Retry.
                 val full =
                     try {
                         decodeOrRetrySmaller(
