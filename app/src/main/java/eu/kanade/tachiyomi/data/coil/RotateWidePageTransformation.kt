@@ -18,7 +18,8 @@ class RotateWidePageTransformation(
     val reverse: Boolean = false,
 ) : Transformation() {
 
-    override val cacheKey: String = "${this::class.java.name}_rotate_${rotateWide}_rev_${reverse}"
+    override val cacheKey: String =
+        "RotateWidePageTransformation_rotate_${rotateWide}_rev_${reverse}"
 
     override suspend fun transform(input: Bitmap, size: Size): Bitmap {
         if (!shouldRotate(input.width, input.height, rotateWide) || input.isRecycled) {
@@ -28,7 +29,12 @@ class RotateWidePageTransformation(
         val degrees = rotationDegrees(reverse)
         val sourceBitmap =
             if (input.config == Bitmap.Config.HARDWARE) {
-                input.copy(Bitmap.Config.ARGB_8888, false) ?: return input
+                val copy = input.copy(Bitmap.Config.ARGB_8888, false)
+                if (copy == null) {
+                    TimberKt.e { "Failed to copy HARDWARE bitmap, returning original input" }
+                    return input
+                }
+                copy
             } else {
                 input
             }

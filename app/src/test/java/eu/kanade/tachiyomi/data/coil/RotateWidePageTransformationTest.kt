@@ -350,5 +350,26 @@ class RotateWidePageTransformationTest {
             assertSame(mockBitmap, result)
         }
 
+    @Test
+    fun `given hardware bitmap when copy fails then logs error and returns original input`() =
+        runTest {
+            // Arrange
+            val transformation = RotateWidePageTransformation(rotateWide = true)
+            val mockBitmap =
+                mockk<Bitmap> {
+                    every { width } returns 2000
+                    every { height } returns 1000
+                    every { isRecycled } returns false
+                    every { config } returns Bitmap.Config.HARDWARE
+                    every { copy(Bitmap.Config.ARGB_8888, false) } returns null
+                }
+
+            // Act
+            val result = transformation.transform(mockBitmap, CoilSize.ORIGINAL)
+
+            // Assert
+            assertSame(mockBitmap, result)
+        }
+
     // endregion
 }
