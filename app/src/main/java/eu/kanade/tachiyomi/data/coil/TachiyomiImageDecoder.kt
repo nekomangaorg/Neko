@@ -27,8 +27,12 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
             "Failed to initialize decoder."
         }
 
-        val bitmap = decoder.decode()
-        decoder.recycle()
+        val bitmap =
+            try {
+                decoder.decode()
+            } finally {
+                decoder.recycle()
+            }
 
         check(bitmap != null) { "Failed to decode image." }
         if (
