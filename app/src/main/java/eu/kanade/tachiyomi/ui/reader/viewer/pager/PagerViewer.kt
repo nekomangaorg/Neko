@@ -89,6 +89,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     override fun destroy() {
         super.destroy()
+        panDelegate = null
         scope.cancel()
     }
 
@@ -182,6 +183,32 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         }
     }
 
+    var panDelegate: PagerPanDelegate? = null
+
+    fun canPanLeft(): Boolean = panDelegate?.canPanLeft() == true
+
+    fun canPanRight(): Boolean = panDelegate?.canPanRight() == true
+
+    fun canPanUp(): Boolean = panDelegate?.canPanUp() == true
+
+    fun canPanDown(): Boolean = panDelegate?.canPanDown() == true
+
+    fun panLeft() {
+        panDelegate?.panLeft()
+    }
+
+    fun panRight() {
+        panDelegate?.panRight()
+    }
+
+    fun panUp() {
+        panDelegate?.panUp()
+    }
+
+    fun panDown() {
+        panDelegate?.panDown()
+    }
+
     override fun moveToNext() {
         moveRight()
     }
@@ -192,6 +219,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     /** Moves to the page at the right. */
     open fun moveRight() {
+        if (config.navigateToPan && canPanRight()) {
+            panRight()
+            return
+        }
         val current =
             (requestedPagePosition?.first ?: currentPagePosition).coerceIn(
                 0,
@@ -218,6 +249,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     /** Moves to the page at the left. */
     open fun moveLeft() {
+        if (config.navigateToPan && canPanLeft()) {
+            panLeft()
+            return
+        }
         val current =
             (requestedPagePosition?.first ?: currentPagePosition).coerceIn(
                 0,
@@ -244,11 +279,19 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     /** Moves to the page at the top (or previous). */
     protected open fun moveUp() {
+        if (config.navigateToPan && canPanUp()) {
+            panUp()
+            return
+        }
         moveToPrevious()
     }
 
     /** Moves to the page at the bottom (or next). */
     protected open fun moveDown() {
+        if (config.navigateToPan && canPanDown()) {
+            panDown()
+            return
+        }
         moveToNext()
     }
 

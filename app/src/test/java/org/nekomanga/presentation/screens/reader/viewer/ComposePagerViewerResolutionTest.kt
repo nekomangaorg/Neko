@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -231,11 +232,17 @@ class ComposePagerViewerResolutionTest {
         activeChapterId: Long = 1L,
         animatedTransitions: Boolean = true,
         isRtl: Boolean = false,
+        isVertical: Boolean = false,
+        navigateToPan: Boolean = false,
+        panDelegate: PagerPanDelegate? = null,
     ): PagerViewerConfigUiModel {
         return PagerViewerConfigUiModel(
             activeChapterId = activeChapterId,
             animatedTransitions = animatedTransitions,
             isRtl = isRtl,
+            isVertical = isVertical,
+            navigateToPan = navigateToPan,
+            panDelegate = panDelegate,
             backgroundColor = Color.Black,
         )
     }
@@ -866,4 +873,416 @@ class ComposePagerViewerResolutionTest {
         assertTrue(result)
         coVerify { mockPagerState.scrollToPage(4) }
     }
+
+    @Test
+    fun `executeNavCommand with StepPage in LTR pans right when navigateToPan is enabled and canPanRight returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanRight() } returns true
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    navigateToPan = true,
+                    panDelegate = mockPanDelegate,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPanDelegate.panRight() }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage in LTR advances page when canPanRight returns false`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanRight() } returns false
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    navigateToPan = true,
+                    panDelegate = mockPanDelegate,
+                    animatedTransitions = false,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify(exactly = 0) { mockPanDelegate.panRight() }
+            coVerify { mockPagerState.scrollToPage(1) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage in RTL pans left when forward and canPanLeft returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanLeft() } returns true
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    isRtl = true,
+                    navigateToPan = true,
+                    panDelegate = mockPanDelegate,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 1
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPanDelegate.panLeft() }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage in RTL pans right when backward and canPanRight returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanRight() } returns true
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    isRtl = true,
+                    navigateToPan = true,
+                    panDelegate = mockPanDelegate,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 1
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPanDelegate.panRight() }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage in Vertical pans down when forward and canPanDown returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanDown() } returns true
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    isVertical = true,
+                    navigateToPan = true,
+                    panDelegate = mockPanDelegate,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPanDelegate.panDown() }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage in LTR backward pans left when canPanLeft returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanLeft() } returns true
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    navigateToPan = true,
+                    panDelegate = mockPanDelegate,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 1
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPanDelegate.panLeft() }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage in LTR backward advances to previous page when canPanLeft returns false`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanLeft() } returns false
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    navigateToPan = true,
+                    panDelegate = mockPanDelegate,
+                    animatedTransitions = false,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 2
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify(exactly = 0) { mockPanDelegate.panLeft() }
+            coVerify { mockPagerState.scrollToPage(1) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage when navigateToPan is false does not pan even if canPanRight is true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanRight() } returns true
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    navigateToPan = false,
+                    panDelegate = mockPanDelegate,
+                    animatedTransitions = false,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify(exactly = 0) { mockPanDelegate.panRight() }
+            coVerify { mockPagerState.scrollToPage(1) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage when panDelegate is null advances page safely without NPE`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    navigateToPan = true,
+                    panDelegate = null,
+                    animatedTransitions = false,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPagerState.scrollToPage(1) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage in Vertical backward pans up when canPanUp returns true`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanUp() } returns true
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    isVertical = true,
+                    navigateToPan = true,
+                    panDelegate = mockPanDelegate,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 1
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify { mockPanDelegate.panUp() }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage in Vertical backward moves to previous page when canPanUp returns false`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+            val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+            every { mockPanDelegate.canPanUp() } returns false
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    isVertical = true,
+                    navigateToPan = true,
+                    panDelegate = mockPanDelegate,
+                    animatedTransitions = false,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 2
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify(exactly = 0) { mockPanDelegate.panUp() }
+            coVerify { mockPagerState.scrollToPage(1) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage at first page backward when cannot pan does not scroll past 0`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    navigateToPan = true,
+                    panDelegate = null,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = false),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+        }
+
+    @Test
+    fun `executeNavCommand with StepPage at last page forward when cannot pan does not scroll past lastIndex`() =
+        runTest {
+            val ch1 = createChapter(1L, pageCount = 3)
+            val items =
+                (ch1.state as ReaderChapter.State.Loaded).pages.map { ReaderUiItem.Page(it) }
+
+            val config =
+                createConfig(
+                    activeChapterId = 1L,
+                    navigateToPan = true,
+                    panDelegate = null,
+                )
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 2
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.StepPage(forward = true),
+                    pagerState = mockPagerState,
+                    items = items,
+                    config = config,
+                )
+
+            assertTrue(result)
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+        }
 }

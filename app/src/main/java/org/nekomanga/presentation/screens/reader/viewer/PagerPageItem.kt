@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -63,6 +65,7 @@ fun PagerPageItem(
     config: PagerViewerConfigUiModel,
     extraPage: ReaderPage? = null,
     modifier: Modifier = Modifier,
+    isActive: Boolean = false,
 ) {
     val context = LocalContext.current
 
@@ -197,12 +200,34 @@ fun PagerPageItem(
             }
 
         val zoomSpec = remember { ZoomSpec(maxZoomFactor = 5f) }
+        val zoomableState =
+            key(constraints.maxWidth, constraints.maxHeight) {
+                rememberZoomableState(zoomSpec = zoomSpec)
+            }
+
+        val coroutineScope = rememberCoroutineScope()
+        val panDelegate =
+            remember(zoomableState, viewportWidthPx, viewportHeightPx) {
+                ZoomablePanDelegate(
+                    zoomableState = zoomableState,
+                    viewportWidthPx = viewportWidthPx,
+                    viewportHeightPx = viewportHeightPx,
+                    scope = coroutineScope,
+                )
+            }
+
+        DisposableEffect(isActive, panDelegate, config.navigateToPan) {
+            if (isActive && config.navigateToPan) {
+                config.onActivePanDelegateChanged?.invoke(panDelegate, true)
+            }
+            onDispose {
+                if (isActive && config.navigateToPan) {
+                    config.onActivePanDelegateChanged?.invoke(panDelegate, false)
+                }
+            }
+        }
 
         if (extraPage != null) {
-            val zoomableState =
-                key(constraints.maxWidth, constraints.maxHeight) {
-                    rememberZoomableState(zoomSpec = zoomSpec)
-                }
             DoublePageLayout(
                 page = page,
                 extraPage = extraPage,
@@ -215,10 +240,6 @@ fun PagerPageItem(
                 modifier = Modifier.fillMaxSize(),
             )
         } else if (page.firstHalf != null) {
-            val zoomableState =
-                key(constraints.maxWidth, constraints.maxHeight) {
-                    rememberZoomableState(zoomSpec = zoomSpec)
-                }
             SplitPageLayout(
                 page = page,
                 config = config,
@@ -228,10 +249,6 @@ fun PagerPageItem(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            val zoomableState =
-                key(constraints.maxWidth, constraints.maxHeight) {
-                    rememberZoomableState(zoomSpec = zoomSpec)
-                }
             val imageState = rememberZoomableImageState(zoomableState)
 
             val singlePageZoomType =
@@ -361,6 +378,7 @@ fun PagerPageItem(
         readerPreferences.invertDoublePages().preferenceCollectAsStateWithLifecycle()
     val readerThemePref by readerPreferences.readerTheme().preferenceCollectAsStateWithLifecycle()
     val landscapeZoom by readerPreferences.landscapeZoom().preferenceCollectAsStateWithLifecycle()
+    val navigateToPan by readerPreferences.navigateToPan().preferenceCollectAsStateWithLifecycle()
     val zoomStart by readerPreferences.zoomStart().preferenceCollectAsStateWithLifecycle()
     val cropBorders by readerPreferences.cropBorders().preferenceCollectAsStateWithLifecycle()
     val grayscale by readerPreferences.grayscale().preferenceCollectAsStateWithLifecycle()
@@ -392,6 +410,7 @@ fun PagerPageItem(
             doublePageRotateReverse = doublePageRotateReverse,
             landscapeZoom = landscapeZoom,
             zoomStart = zoomStart,
+            navigateToPan = navigateToPan,
             doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
             longTapEnabled = viewer.config.longTapEnabled,
             menuVisible = viewer.activity.menuVisible,
@@ -402,15 +421,25 @@ fun PagerPageItem(
                 remember(viewer) {
                     { forward -> if (forward) viewer.moveToNext() else viewer.moveToPrevious() }
                 },
+            onActivePanDelegateChanged = { delegate, active ->
+                if (active) {
+                    viewer.panDelegate = delegate
+                } else if (viewer.panDelegate == delegate) {
+                    viewer.panDelegate = null
+                }
+            },
             onPageLongTap = remember(viewer) { { p, ep -> viewer.activity.onPageLongTap(p, ep) } },
             onWidePageDetected = remember(viewer) { { p -> viewer.splitDoublePages(p) } },
         )
+
+    val isActive = viewer.currentPagePosition == viewer.controller.findPageIndex(viewer.items, page)
 
     PagerPageItem(
         page = page,
         config = config,
         extraPage = extraPage,
         modifier = modifier,
+        isActive = isActive,
     )
 }
 

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
+import android.view.KeyEvent
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -417,5 +418,346 @@ class PagerViewerTest {
         assertNotNull(viewer.requestedPagePosition)
         val expectedItemIndex = viewer.controller.findPageIndex(viewer.items, chapter1.pages!![0])
         assertEquals(expectedItemIndex, viewer.requestedPagePosition?.first)
+    }
+
+    @Test
+    fun `moveRight in L2RPagerViewer pans right when navigateToPan is enabled and canPanRight returns true`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 0
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanRight() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        viewer.moveRight()
+
+        verify { mockPanDelegate.panRight() }
+        assertEquals(0, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `moveRight in L2RPagerViewer advances page when navigateToPan is enabled and canPanRight returns false`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 0
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanRight() } returns false
+        viewer.panDelegate = mockPanDelegate
+
+        viewer.moveRight()
+
+        verify(exactly = 0) { mockPanDelegate.panRight() }
+        assertEquals(1, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `moveLeft in R2LPagerViewer pans left when navigateToPan is enabled and canPanLeft returns true`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = R2LPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 4
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanLeft() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        viewer.moveLeft()
+
+        verify { mockPanDelegate.panLeft() }
+        assertEquals(4, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `moveLeft in R2LPagerViewer advances page when navigateToPan is enabled and canPanLeft returns false`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = R2LPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 4
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanLeft() } returns false
+        viewer.panDelegate = mockPanDelegate
+
+        viewer.moveLeft()
+
+        verify(exactly = 0) { mockPanDelegate.panLeft() }
+        assertEquals(3, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `moveRight in L2RPagerViewer advances page without panning when navigateToPan is disabled`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(false)
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 0
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanRight() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        viewer.moveRight()
+
+        verify(exactly = 0) { mockPanDelegate.panRight() }
+        assertEquals(1, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `destroy in PagerViewer cleans up panDelegate`() {
+        val viewer = L2RPagerViewer(mockActivity)
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        viewer.panDelegate = mockPanDelegate
+
+        viewer.destroy()
+
+        assertNull(viewer.panDelegate)
+    }
+
+    private fun mockKeyEvent(
+        keyCode: Int,
+        action: Int = KeyEvent.ACTION_UP,
+        metaState: Int = 0,
+    ): KeyEvent {
+        val event = mockk<KeyEvent>(relaxed = true)
+        every { event.keyCode } returns keyCode
+        every { event.action } returns action
+        every { event.metaState } returns metaState
+        return event
+    }
+
+    @Test
+    fun `moveRight in R2LPagerViewer pans right when navigateToPan is enabled and canPanRight returns true`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = R2LPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 0
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanRight() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        viewer.moveRight()
+
+        verify { mockPanDelegate.panRight() }
+        assertEquals(0, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `moveDown in VerticalPagerViewer pans down when navigateToPan is enabled and canPanDown returns true`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = VerticalPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 0
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanDown() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_DPAD_DOWN))
+
+        assertTrue(handled)
+        verify { mockPanDelegate.panDown() }
+        assertEquals(0, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `moveDown in VerticalPagerViewer advances page when navigateToPan is enabled and canPanDown returns false`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = VerticalPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 0
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanDown() } returns false
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_DPAD_DOWN))
+
+        assertTrue(handled)
+        verify(exactly = 0) { mockPanDelegate.panDown() }
+        assertEquals(1, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `moveUp in VerticalPagerViewer pans up when navigateToPan is enabled and canPanUp returns true`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = VerticalPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 2
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanUp() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_DPAD_UP))
+
+        assertTrue(handled)
+        verify { mockPanDelegate.panUp() }
+        assertEquals(2, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `moveUp in VerticalPagerViewer moves to previous page when navigateToPan is enabled and canPanUp returns false`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = VerticalPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 2
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanUp() } returns false
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_DPAD_UP))
+
+        assertTrue(handled)
+        verify(exactly = 0) { mockPanDelegate.panUp() }
+        assertEquals(1, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `handleKeyEvent with volume down pans down when volume keys and navigateToPan are enabled`() {
+        every { mockReaderPreferences.readWithVolumeKeys() } returns mockPref(true)
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 0
+        viewer.config.volumeKeysEnabled = true
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanDown() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN))
+
+        assertTrue(handled)
+        verify { mockPanDelegate.panDown() }
+        assertEquals(0, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `handleKeyEvent with volume up pans up when volume keys and navigateToPan are enabled`() {
+        every { mockReaderPreferences.readWithVolumeKeys() } returns mockPref(true)
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 2
+        viewer.config.volumeKeysEnabled = true
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanUp() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_VOLUME_UP))
+
+        assertTrue(handled)
+        verify { mockPanDelegate.panUp() }
+        assertEquals(2, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `handleKeyEvent with PAGE_DOWN pans down when navigateToPan is enabled and canPanDown returns true`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 0
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanDown() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_PAGE_DOWN))
+
+        assertTrue(handled)
+        verify { mockPanDelegate.panDown() }
+        assertEquals(0, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `handleKeyEvent with PAGE_UP pans up when navigateToPan is enabled and canPanUp returns true`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 2
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanUp() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_PAGE_UP))
+
+        assertTrue(handled)
+        verify { mockPanDelegate.panUp() }
+        assertEquals(2, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `handleKeyEvent with DPAD_RIGHT in L2RPagerViewer pans right when navigateToPan is enabled and canPanRight returns true`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 0
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanRight() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_DPAD_RIGHT))
+
+        assertTrue(handled)
+        verify { mockPanDelegate.panRight() }
+        assertEquals(0, viewer.currentPagePosition)
+    }
+
+    @Test
+    fun `handleKeyEvent with DPAD_LEFT in L2RPagerViewer pans left when navigateToPan is enabled and canPanLeft returns true`() {
+        every { mockReaderPreferences.navigateToPan() } returns mockPref(true)
+        val viewer = L2RPagerViewer(mockActivity)
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.requestedPagePosition = null
+        viewer.currentPagePosition = 2
+
+        val mockPanDelegate = mockk<PagerPanDelegate>(relaxed = true)
+        every { mockPanDelegate.canPanLeft() } returns true
+        viewer.panDelegate = mockPanDelegate
+
+        val handled = viewer.handleKeyEvent(mockKeyEvent(KeyEvent.KEYCODE_DPAD_LEFT))
+
+        assertTrue(handled)
+        verify { mockPanDelegate.panLeft() }
+        assertEquals(2, viewer.currentPagePosition)
     }
 }

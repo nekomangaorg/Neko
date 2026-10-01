@@ -22,6 +22,10 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
     }
 
     override fun moveRight() {
+        if (config.navigateToPan && canPanRight()) {
+            panRight()
+            return
+        }
         val current =
             (requestedPagePosition?.first ?: currentPagePosition).coerceIn(
                 0,
@@ -47,6 +51,10 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
     }
 
     override fun moveLeft() {
+        if (config.navigateToPan && canPanLeft()) {
+            panLeft()
+            return
+        }
         val current =
             (requestedPagePosition?.first ?: currentPagePosition).coerceIn(
                 0,
