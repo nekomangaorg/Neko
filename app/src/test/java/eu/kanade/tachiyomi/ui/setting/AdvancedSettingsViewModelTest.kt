@@ -137,4 +137,29 @@ class AdvancedSettingsViewModelTest {
 
             job.cancel()
         }
+
+    @Test
+    fun `reindexDownloads when downloadManager returns false does not emit complete toast`() =
+        runTest(testDispatcher) {
+            every { downloadManager.isReindexing } returns false
+            coEvery { downloadManager.reindexDownloads() } returns false
+
+            val viewModel = AdvancedSettingsViewModel()
+
+            val toastEvents = mutableListOf<UiText>()
+            val job =
+                launch(UnconfinedTestDispatcher(testScheduler)) {
+                    viewModel.toastEvent.toList(toastEvents)
+                }
+
+            viewModel.reindexDownloads().join()
+
+            coVerify(exactly = 1) { downloadManager.reindexDownloads() }
+            assertEquals(
+                listOf(R.string.reindex_downloads_invalidate),
+                toastEvents.map { (it as UiText.StringResource).resourceId },
+            )
+
+            job.cancel()
+        }
 }

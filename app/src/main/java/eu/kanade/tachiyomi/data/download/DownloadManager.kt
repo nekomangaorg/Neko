@@ -509,8 +509,15 @@ class DownloadManager(
                 false
             } finally {
                 withContext(NonCancellable) {
-                    notifier.dismissReindexProgress()
-                    cache.isReindexing.set(false)
+                    try {
+                        cache.cancelRenewJob()
+                    } finally {
+                        try {
+                            notifier.dismissReindexProgress()
+                        } finally {
+                            cache.isReindexing.set(false)
+                        }
+                    }
                 }
             }
         }

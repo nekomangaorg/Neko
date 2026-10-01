@@ -16,6 +16,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.storage.StorageManager
@@ -167,7 +169,7 @@ class DownloadCache(
 
     suspend fun cancelRenewJob() {
         val currentJob = synchronized(this) { renewJob }
-        currentJob?.cancelAndJoin()
+        withContext(NonCancellable) { currentJob?.cancelAndJoin() }
     }
 
     /** Renews the downloads cache. */
