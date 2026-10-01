@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
+import java.util.concurrent.atomic.AtomicLong
 import java.util.regex.Pattern
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
@@ -23,7 +24,10 @@ import uy.kohesive.injekt.injectLazy
  *
  * @param context context of application
  */
-internal class DownloadNotifier(private val context: Context) {
+internal class DownloadNotifier(
+    private val context: Context,
+    private val timeProvider: () -> Long = { System.currentTimeMillis() },
+) {
 
     private val securityPreferences: SecurityPreferences by injectLazy()
 
@@ -290,52 +294,39 @@ internal class DownloadNotifier(private val context: Context) {
         }
     }
 
-    private var lastReindexNotificationTime = 0L
+    private val lastReindexNotificationTime = AtomicLong(0L)
 
     fun showReindexProgress(progress: Int, total: Int, title: String? = null) {
-        val now = System.currentTimeMillis()
-        if (progress != 1 && progress != total && now - lastReindexNotificationTime < 200L) {
+        val now = timeProvider()
+        val lastTime = lastReindexNotificationTime.get()
+        if (progress > 0 && progress != 1 && progress != total && now - lastTime < 200L) {
             return
         }
-        lastReindexNotificationTime = now
+        lastReindexNotificationTime.set(now)
 
         context.notificationManager.cancel(Notifications.Id.Download.ReindexComplete)
 
         synchronized(reindexNotificationBuilder) {
             with(reindexNotificationBuilder) {
-                if (securityPreferences.hideNotificationContent().get()) {
-                    setContentTitle(context.getString(R.string.reindex_downloads))
-                    if (total > 0) {
-                        setContentText(
-                            context.getString(
-                                R.string.reindexing_downloads_progress,
-                                progress,
-                                total,
-                            )
-                        )
+                val displayTitle =
+                    if (securityPreferences.hideNotificationContent().get()) {
+                        context.getString(R.string.reindex_downloads)
                     } else {
-                        setContentText(context.getString(R.string.reindex_downloads_invalidate))
-                    }
-                } else {
-                    val displayTitle =
                         title?.chop(30) ?: context.getString(R.string.reindex_downloads)
-                    setContentTitle(displayTitle)
-                    if (total > 0) {
-                        setContentText(
-                            context.getString(
-                                R.string.reindexing_downloads_progress,
-                                progress,
-                                total,
-                            )
-                        )
-                    } else {
-                        setContentText(context.getString(R.string.reindex_downloads_invalidate))
                     }
-                }
+                setContentTitle(displayTitle)
 
                 if (total > 0) {
+                    setContentText(
+                        context.getString(
+                            R.string.reindexing_downloads_progress,
+                            progress,
+                            total,
+                        )
+                    )
                     setProgress(total, progress, false)
                 } else {
+                    setContentText(context.getString(R.string.reindex_downloads_invalidate))
                     setProgress(0, 0, true)
                 }
 
@@ -345,6 +336,7 @@ internal class DownloadNotifier(private val context: Context) {
     }
 
     fun dismissReindexProgress() {
+        lastReindexNotificationTime.set(0L)
         context.notificationManager.cancel(Notifications.Id.Download.ReindexProgress)
     }
 
@@ -365,6 +357,7 @@ internal class DownloadNotifier(private val context: Context) {
                     setContentIntent(
                         NotificationHandler.openDownloadManagerPendingActivity(context)
                     )
+                    setTimeoutAfter(5_000L)
                 }
                 .build()
 

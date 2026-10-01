@@ -129,7 +129,65 @@ class DownloadNotifierTest {
 
         notifier.showReindexComplete()
 
+        verify { mockBuilder.setTimeoutAfter(5_000L) }
         verify { notificationManager.cancel(Notifications.Id.Download.ReindexProgress) }
         verify { notificationManager.notify(Notifications.Id.Download.ReindexComplete, any()) }
+    }
+
+    @Test
+    fun `showReindexProgress with progress 0 does not get throttled`() {
+        val notifier = DownloadNotifier(context)
+
+        notifier.showReindexProgress(0, 0, null)
+        notifier.showReindexProgress(0, 10, null)
+
+        verify { mockBuilder.setProgress(0, 0, true) }
+        verify { mockBuilder.setProgress(10, 0, false) }
+        verify(exactly = 2) {
+            notificationManager.notify(Notifications.Id.Download.ReindexProgress, mockNotification)
+        }
+    }
+
+    @Test
+    fun `showReindexProgress throttles intermediate progress within 200ms`() {
+        var currentTime = 1_000L
+        val notifier = DownloadNotifier(context, timeProvider = { currentTime })
+
+        notifier.showReindexProgress(1, 10, "Title 1")
+        currentTime += 50L
+        notifier.showReindexProgress(2, 10, "Title 2")
+
+        verify { mockBuilder.setContentTitle("Title 1") }
+        verify(exactly = 0) { mockBuilder.setContentTitle("Title 2") }
+        verify(exactly = 1) {
+            notificationManager.notify(Notifications.Id.Download.ReindexProgress, mockNotification)
+        }
+
+        currentTime += 200L
+        notifier.showReindexProgress(3, 10, "Title 3")
+        verify { mockBuilder.setContentTitle("Title 3") }
+        verify(exactly = 2) {
+            notificationManager.notify(Notifications.Id.Download.ReindexProgress, mockNotification)
+        }
+    }
+
+    @Test
+    fun `showReindexProgress does not throttle final completion progress even within 200ms`() {
+        var currentTime = 1_000L
+        val notifier = DownloadNotifier(context, timeProvider = { currentTime })
+
+        notifier.showReindexProgress(1, 10, "Title 1")
+        currentTime += 50L
+        notifier.showReindexProgress(2, 10, "Title 2")
+        currentTime += 50L
+        notifier.showReindexProgress(10, 10, "Title 10")
+
+        verify { mockBuilder.setContentTitle("Title 1") }
+        verify(exactly = 0) { mockBuilder.setContentTitle("Title 2") }
+        verify { mockBuilder.setContentTitle("Title 10") }
+        verify { mockBuilder.setProgress(10, 10, false) }
+        verify(exactly = 2) {
+            notificationManager.notify(Notifications.Id.Download.ReindexProgress, mockNotification)
+        }
     }
 }

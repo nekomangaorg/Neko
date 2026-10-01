@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -177,6 +178,8 @@ class DownloadCache(
         renewJob = scope.launch {
             try {
                 renewCache()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 TimberKt.e(e) { "Failed to renew cache" }
             }
@@ -208,17 +211,18 @@ class DownloadCache(
         }
 
         // 4. Iterate over the folders on disk
-        val mangaDirs = sourceDir.listFiles().orEmpty()
+        val mangaDirs = sourceDir.listFiles().orEmpty().filter { it.isDirectory }
         val total = mangaDirs.size
         onProgress?.invoke(0, total, null)
 
         val newMangaFiles = ConcurrentHashMap<Long, MangaFiles>()
         val progressCounter = AtomicInteger(0)
+        val scanDispatcher = Dispatchers.IO.limitedParallelism(8)
 
         coroutineScope {
             mangaDirs
                 .map { mangaDir ->
-                    async {
+                    async(scanDispatcher) {
                         val dirName = mangaDir.name
                         var title: String? = dirName
                         try {

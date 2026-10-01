@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.system.NetworkState
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.networkStateFlow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -489,7 +490,7 @@ class DownloadManager(
     }
 
     suspend fun reindexDownloads(): Boolean =
-        withContext(NonCancellable + ioDispatcher) {
+        withContext(ioDispatcher) {
             if (!cache.isReindexing.compareAndSet(false, true)) {
                 return@withContext false
             }
@@ -501,12 +502,16 @@ class DownloadManager(
                 }
                 notifier.showReindexComplete()
                 true
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 TimberKt.e(e) { "Error reindexing downloads" }
                 false
             } finally {
-                notifier.dismissReindexProgress()
-                cache.isReindexing.set(false)
+                withContext(NonCancellable) {
+                    notifier.dismissReindexProgress()
+                    cache.isReindexing.set(false)
+                }
             }
         }
 
