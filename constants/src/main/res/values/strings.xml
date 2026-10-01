@@ -1612,6 +1612,8 @@
     <string name="reindex_downloads_summary">Force app to recheck for downloaded chapters.</string>
     <string name="reindex_downloads_invalidate">Reindexing downloads</string>
     <string name="reindex_downloads_complete">Reindexing complete</string>
+    <string name="reindexing_downloads_progress">Reindexing (%1$d/%2$d)</string>
+    <string name="reindex_in_progress">Reindex already in progress</string>
 
 
     <!-- Login dialog -->

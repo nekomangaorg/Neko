@@ -277,4 +277,100 @@ internal class DownloadNotifier(private val context: Context) {
         // Reset download information
         isDownloading = false
     }
+
+    private val reindexNotificationBuilder by lazy {
+        context.notificationBuilder(Notifications.Channel.Downloader.Progress) {
+            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            setSmallIcon(R.drawable.ic_neko_notification)
+            setAutoCancel(false)
+            setOngoing(true)
+            setOnlyAlertOnce(true)
+            color = ContextCompat.getColor(context, R.color.iconOutline)
+            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+        }
+    }
+
+    private var lastReindexNotificationTime = 0L
+
+    fun showReindexProgress(progress: Int, total: Int, title: String? = null) {
+        val now = System.currentTimeMillis()
+        if (progress != 1 && progress != total && now - lastReindexNotificationTime < 200L) {
+            return
+        }
+        lastReindexNotificationTime = now
+
+        context.notificationManager.cancel(Notifications.Id.Download.ReindexComplete)
+
+        synchronized(reindexNotificationBuilder) {
+            with(reindexNotificationBuilder) {
+                if (securityPreferences.hideNotificationContent().get()) {
+                    setContentTitle(context.getString(R.string.reindex_downloads))
+                    if (total > 0) {
+                        setContentText(
+                            context.getString(
+                                R.string.reindexing_downloads_progress,
+                                progress,
+                                total,
+                            )
+                        )
+                    } else {
+                        setContentText(context.getString(R.string.reindex_downloads_invalidate))
+                    }
+                } else {
+                    val displayTitle =
+                        title?.chop(30) ?: context.getString(R.string.reindex_downloads)
+                    setContentTitle(displayTitle)
+                    if (total > 0) {
+                        setContentText(
+                            context.getString(
+                                R.string.reindexing_downloads_progress,
+                                progress,
+                                total,
+                            )
+                        )
+                    } else {
+                        setContentText(context.getString(R.string.reindex_downloads_invalidate))
+                    }
+                }
+
+                if (total > 0) {
+                    setProgress(total, progress, false)
+                } else {
+                    setProgress(0, 0, true)
+                }
+
+                show(Notifications.Id.Download.ReindexProgress)
+            }
+        }
+    }
+
+    fun dismissReindexProgress() {
+        context.notificationManager.cancel(Notifications.Id.Download.ReindexProgress)
+    }
+
+    fun showReindexComplete() {
+        dismissReindexProgress()
+
+        val notification =
+            context
+                .notificationBuilder(Notifications.Channel.Downloader.Progress) {
+                    setLargeIcon(
+                        BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+                    )
+                    setSmallIcon(R.drawable.ic_neko_notification)
+                    setAutoCancel(true)
+                    setContentTitle(context.getString(R.string.reindex_downloads))
+                    setContentText(context.getString(R.string.reindex_downloads_complete))
+                    color = ContextCompat.getColor(context, R.color.iconOutline)
+                    setContentIntent(
+                        NotificationHandler.openDownloadManagerPendingActivity(context)
+                    )
+                }
+                .build()
+
+        context.notificationManager.notify(
+            Notifications.Id.Download.ReindexComplete,
+            notification,
+        )
+    }
 }

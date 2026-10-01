@@ -43,6 +43,8 @@ object Notifications {
         object Download {
             const val Progress = -201
             const val Error = -202
+            const val ReindexProgress = -203
+            const val ReindexComplete = -204
         }
 
         object Library {

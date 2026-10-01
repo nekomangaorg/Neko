@@ -10,12 +10,15 @@ import eu.kanade.tachiyomi.util.lang.isUUID
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -57,6 +60,7 @@ class DownloadCache(
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private var renewJob: Job? = null
+    val isReindexing = AtomicBoolean(false)
 
     private val _changes: MutableSharedFlow<Unit> =
         MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -149,19 +153,26 @@ class DownloadCache(
 
     @Synchronized
     private fun checkRenew() {
+        if (isReindexing.get()) return
         if (lastRenew + renewInterval < System.currentTimeMillis()) {
             renew()
         }
     }
 
     fun forceRenewCache() {
+        if (isReindexing.get()) return
         renew()
+    }
+
+    suspend fun cancelRenewJob() {
+        val currentJob = synchronized(this) { renewJob }
+        currentJob?.cancelAndJoin()
     }
 
     /** Renews the downloads cache. */
     @Synchronized
     private fun renew() {
-        if (renewJob?.isActive == true) return
+        if (isReindexing.get() || renewJob?.isActive == true) return
 
         renewJob = scope.launch {
             try {
@@ -172,14 +183,20 @@ class DownloadCache(
         }
     }
 
-    private suspend fun renewCache() {
+    suspend fun renewCache(
+        onProgress: ((progress: Int, total: Int, currentTitle: String?) -> Unit)? = null
+    ) {
         TimberKt.d { "Renewing cache" }
 
         // Map Source ID to the directory on disk
         val sourceDir =
             storageManager.getDownloadsDirectory()?.listFiles()?.find {
                 it.name == provider.getSourceDirName()
-            } ?: return
+            }
+        if (sourceDir == null) {
+            onProgress?.invoke(0, 0, null)
+            return
+        }
 
         val mangaRepository: MangaRepository = Injekt.get()
         // Optimization: Fetch once
@@ -191,29 +208,41 @@ class DownloadCache(
         }
 
         // 4. Iterate over the folders on disk
+        val mangaDirs = sourceDir.listFiles().orEmpty()
+        val total = mangaDirs.size
+        onProgress?.invoke(0, total, null)
+
         val newMangaFiles = ConcurrentHashMap<Long, MangaFiles>()
+        val progressCounter = AtomicInteger(0)
+
         coroutineScope {
-            sourceDir
-                .listFiles()
-                .orEmpty()
+            mangaDirs
                 .map { mangaDir ->
                     async {
-                        val dirName = mangaDir.name ?: return@async
-                        val manga =
-                            mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@async
-                        val id = manga.id ?: return@async
+                        val dirName = mangaDir.name
+                        var title: String? = dirName
+                        try {
+                            if (dirName == null) return@async
+                            val manga =
+                                mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@async
+                            title = manga.displayTitle()
+                            val id = manga.id ?: return@async
 
-                        val files =
-                            mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
-                                it.name?.substringBeforeLast(".cbz")
-                            }
+                            val files =
+                                mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
+                                    it.name?.substringBeforeLast(".cbz")
+                                }
 
-                        val mangadexIds =
-                            files.mapNotNullTo(mutableSetOf()) {
-                                it.takeLast(36).takeIf { uuid -> uuid.isUUID() }
-                            }
+                            val mangadexIds =
+                                files.mapNotNullTo(mutableSetOf()) {
+                                    it.takeLast(36).takeIf { uuid -> uuid.isUUID() }
+                                }
 
-                        newMangaFiles[id] = MangaFiles(files, mangadexIds)
+                            newMangaFiles[id] = MangaFiles(files, mangadexIds)
+                        } finally {
+                            val current = progressCounter.incrementAndGet()
+                            onProgress?.invoke(current, total, title)
+                        }
                     }
                 }
                 .awaitAll()
