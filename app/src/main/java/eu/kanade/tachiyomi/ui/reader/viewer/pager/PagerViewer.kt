@@ -69,6 +69,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     private var activeChapterId: Long? = null
 
+    private var pendingChapterId: Long? = null
+
     private var pendingPageMove: Pair<ReaderPage, Boolean>? = null
 
     init {
@@ -114,8 +116,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
         TimberKt.d { "setChapters" }
-        val chapterChanged = activeChapterId != chapters.currChapter.chapter.id
-        activeChapterId = chapters.currChapter.chapter.id
+        val targetChapterId = chapters.currChapter.chapter.id
+        val chapterChanged =
+            activeChapterId != targetChapterId ||
+                (pendingChapterId != null && pendingChapterId != targetChapterId)
         val forceTransition = config.alwaysShowChapterTransition
         items =
             controller.buildItems(
@@ -128,7 +132,14 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             )
         activity.updatePagedViewerItems()
 
-        val pages = chapters.currChapter.pages ?: return
+        val pages = chapters.currChapter.pages
+        if (pages == null) {
+            pendingChapterId = targetChapterId
+            return
+        }
+
+        activeChapterId = targetChapterId
+        pendingChapterId = null
         val requestedIndex = min(chapters.currChapter.requestedPage, pages.lastIndex)
         val pending = pendingPageMove
         pendingPageMove = null

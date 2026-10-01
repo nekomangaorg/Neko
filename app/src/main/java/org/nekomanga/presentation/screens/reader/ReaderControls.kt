@@ -377,8 +377,9 @@ private fun HorizontalFloatingSlider(
                                 }
                             },
                             onValueChangeFinished = {
-                                val finalValue = lastValue
+                                val finalValue = draggingValue?.roundToInt() ?: lastValue
                                 draggingValue = null
+                                lastValue = finalValue
                                 currentOnPageChange(finalValue)
                             },
                             valueRange = 0f..targetMax,
@@ -559,8 +560,9 @@ private fun VerticalFloatingSlider(
                             }
                         },
                         onValueChangeFinished = {
-                            val finalValue = lastValue
+                            val finalValue = draggingValue?.roundToInt() ?: lastValue
                             draggingValue = null
+                            lastValue = finalValue
                             currentOnPageChange(finalValue)
                         },
                         colors =

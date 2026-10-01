@@ -213,4 +213,238 @@ class PagerScrollAnchorResolverTest {
         assertEquals(1L, (target.item as ReaderUiItem.Page).page.chapter.chapter.id)
         assertEquals(4, (target.item as ReaderUiItem.Page).page.index)
     }
+
+    @Test
+    fun `resolveReanchorTarget in RTL mode falls back to page 0 of next chapter at last index when Next transition is replaced`() {
+        val ch1 = createChapter(1L, pageCount = 5)
+        val ch2 = createChapter(2L, pageCount = 5)
+
+        val nextTransition = ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2))
+
+        // In RTL, items are reversed: [Ch2 Page 4, Ch2 Page 3, ..., Ch2 Page 0]
+        val rtlNewItems = ch2.pages!!.reversed().map { ReaderUiItem.Page(it) }
+
+        val target =
+            PagerScrollAnchorResolver.resolveReanchorTarget(
+                items = rtlNewItems,
+                lastActiveItem = nextTransition,
+                currentVisibleIndex = 0,
+                isRtl = true,
+                activeChapterId = 2L,
+            )
+
+        assertNotNull(target)
+        // Page 0 of Ch2 is at the last index (4) in RTL list
+        assertEquals(4, target!!.index)
+        val targetPage1 = target.item as ReaderUiItem.Page
+        assertEquals(2L, targetPage1.page.chapter.chapter.id)
+        assertEquals(0, targetPage1.page.index)
+    }
+
+    @Test
+    fun `resolveReanchorTarget in RTL mode falls back to last page of prev chapter at first index when Prev transition is replaced`() {
+        val ch1 = createChapter(1L, pageCount = 5)
+        val ch2 = createChapter(2L, pageCount = 5)
+
+        val prevTransition = ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1))
+
+        // In RTL, items are reversed: [Ch2 pages reversed, Ch1 pages reversed]
+        val rtlNewItems =
+            (ch2.pages!!.reversed() + ch1.pages!!.reversed()).map { ReaderUiItem.Page(it) }
+
+        val target =
+            PagerScrollAnchorResolver.resolveReanchorTarget(
+                items = rtlNewItems,
+                lastActiveItem = prevTransition,
+                currentVisibleIndex = 0,
+                isRtl = true,
+                activeChapterId = 1L,
+            )
+
+        assertNotNull(target)
+        // Last page of Ch1 (Page 4) is at index 5 in the combined reversed list
+        assertEquals(5, target!!.index)
+        val targetPage2 = target.item as ReaderUiItem.Page
+        assertEquals(1L, targetPage2.page.chapter.chapter.id)
+        assertEquals(4, targetPage2.page.index)
+    }
+
+    @Test
+    fun `resolveReanchorTarget anchors to activeChapterId start when activeItem belongs to obsolete chapter`() {
+        val ch1 = createChapter(1L, pageCount = 5)
+        val ch2 = createChapter(2L, pageCount = 5)
+
+        val ch1LastPage = ch1.pages!!.last()
+        val ch1ActiveItem = ReaderUiItem.Page(ch1LastPage)
+
+        // Prepended 2 pages of ch1 + transition + ch2 pages
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1.pages!![3]),
+                ReaderUiItem.Page(ch1.pages!![4]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch2.pages!![0]),
+                ReaderUiItem.Page(ch2.pages!![1]),
+            )
+
+        // Target should anchor to start of Chapter 2 (index 3), NOT index 1 (the prepended Ch1
+        // page)!
+        val target =
+            PagerScrollAnchorResolver.resolveReanchorTarget(
+                items = items,
+                lastActiveItem = ch1ActiveItem,
+                currentVisibleIndex = 1,
+                isRtl = false,
+                activeChapterId = 2L,
+            )
+
+        assertNotNull(target)
+        assertEquals(3, target!!.index)
+        val targetPage3 = target.item as ReaderUiItem.Page
+        assertEquals(2L, targetPage3.page.chapter.chapter.id)
+        assertEquals(0, targetPage3.page.index)
+    }
+
+    @Test
+    fun `resolveReanchorTarget in RTL mode anchors to activeChapterId start at last index when activeItem belongs to obsolete chapter`() {
+        val ch1 = createChapter(1L, pageCount = 5)
+        val ch2 = createChapter(2L, pageCount = 5)
+
+        val ch1LastPage = ch1.pages!!.last()
+        val ch1ActiveItem = ReaderUiItem.Page(ch1LastPage)
+
+        // In RTL, Chapter 2 pages reversed + Transition + Chapter 1 pages reversed
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch2.pages!![1]),
+                ReaderUiItem.Page(ch2.pages!![0]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch1.pages!![4]),
+                ReaderUiItem.Page(ch1.pages!![3]),
+            )
+
+        // Target should anchor to start of Chapter 2 (Page 0, index 1 in RTL list)
+        val target =
+            PagerScrollAnchorResolver.resolveReanchorTarget(
+                items = items,
+                lastActiveItem = ch1ActiveItem,
+                currentVisibleIndex = 3,
+                isRtl = true,
+                activeChapterId = 2L,
+            )
+
+        assertNotNull(target)
+        assertEquals(1, target!!.index)
+        val targetPage = target.item as ReaderUiItem.Page
+        assertEquals(2L, targetPage.page.chapter.chapter.id)
+        assertEquals(0, targetPage.page.index)
+    }
+
+    @Test
+    fun `resolveReanchorTarget in RTL mode preserves reading position when next chapter is appended to front`() {
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch3 = createChapter(3L, pageCount = 3)
+
+        // Initial RTL items for Ch2: [Ch2 P2, Ch2 P1, Ch2 P0]
+        val initialItems = ch2.pages!!.reversed().map { ReaderUiItem.Page(it) }
+        val activeItem = initialItems[2] // User reading Ch2 P0 (index 2)
+
+        // Next chapter Ch3 appended: in RTL, next chapter is at the beginning of the list
+        // [Ch3 P2, Ch3 P1, Ch3 P0, NextTrans, Ch2 P2, Ch2 P1, Ch2 P0]
+        val updatedItems =
+            ch3.pages!!.reversed().map { ReaderUiItem.Page(it) } +
+                listOf(ReaderUiItem.Transition(ChapterTransition.Next(ch2, ch3))) +
+                initialItems
+
+        val target =
+            PagerScrollAnchorResolver.resolveReanchorTarget(
+                items = updatedItems,
+                lastActiveItem = activeItem,
+                currentVisibleIndex = 2,
+                previousItems = initialItems,
+                isRtl = true,
+                activeChapterId = 2L,
+            )
+
+        assertNotNull(target)
+        // Shifted by 3 Ch3 pages + 1 transition = index 2 + 4 = 6
+        assertEquals(6, target!!.index)
+        val targetPage = target.item as ReaderUiItem.Page
+        assertEquals(2L, targetPage.page.chapter.chapter.id)
+        assertEquals(0, targetPage.page.index)
+    }
+
+    @Test
+    fun `resolveChapterBoundaryIndex returns correct boundary indices in LTR and RTL`() {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val ch2 = createChapter(2L, pageCount = 3)
+
+        // LTR items: [Ch1 P0 (0), Ch1 P1 (1), Ch1 P2 (2), Trans (3), Ch2 P0 (4), Ch2 P1 (5), Ch2 P2
+        // (6)]
+        val ltrItems =
+            ch1.pages!!.map { ReaderUiItem.Page(it) } +
+                listOf(ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2))) +
+                ch2.pages!!.map { ReaderUiItem.Page(it) }
+
+        // In LTR:
+        // Ch2 START is at index 4
+        assertEquals(
+            4,
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                ltrItems,
+                2L,
+                isRtl = false,
+                PagerScrollAnchorResolver.ChapterBoundary.START,
+            ),
+        )
+        // Ch2 END is at index 6
+        assertEquals(
+            6,
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                ltrItems,
+                2L,
+                isRtl = false,
+                PagerScrollAnchorResolver.ChapterBoundary.END,
+            ),
+        )
+
+        // RTL items: [Ch2 P2 (0), Ch2 P1 (1), Ch2 P0 (2), Trans (3), Ch1 P2 (4), Ch1 P1 (5), Ch1 P0
+        // (6)]
+        val rtlItems =
+            ch2.pages!!.reversed().map { ReaderUiItem.Page(it) } +
+                listOf(ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1))) +
+                ch1.pages!!.reversed().map { ReaderUiItem.Page(it) }
+
+        // In RTL:
+        // Ch2 START (page 0) is at index 2
+        assertEquals(
+            2,
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                rtlItems,
+                2L,
+                isRtl = true,
+                PagerScrollAnchorResolver.ChapterBoundary.START,
+            ),
+        )
+        // Ch2 END (page 2) is at index 0
+        assertEquals(
+            0,
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                rtlItems,
+                2L,
+                isRtl = true,
+                PagerScrollAnchorResolver.ChapterBoundary.END,
+            ),
+        )
+
+        // Non-existent chapter returns null
+        assertNull(
+            PagerScrollAnchorResolver.resolveChapterBoundaryIndex(
+                rtlItems,
+                999L,
+                isRtl = true,
+                PagerScrollAnchorResolver.ChapterBoundary.START,
+            )
+        )
+    }
 }
