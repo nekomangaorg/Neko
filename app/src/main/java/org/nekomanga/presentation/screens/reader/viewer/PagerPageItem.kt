@@ -230,10 +230,16 @@ fun PagerPageItem(
                 )
             }
 
-        if (isActive && config.navigateToPan) {
-            DisposableEffect(panDelegate) {
-                config.onActivePanDelegateChanged?.invoke(panDelegate, true)
-                onDispose { config.onActivePanDelegateChanged?.invoke(panDelegate, false) }
+        if (config.navigateToPan) {
+            DisposableEffect(panDelegate, isActive) {
+                if (isActive) {
+                    config.onActivePanDelegateChanged?.invoke(panDelegate, true)
+                }
+                onDispose {
+                    if (isActive) {
+                        config.onActivePanDelegateChanged?.invoke(panDelegate, false)
+                    }
+                }
             }
         }
 

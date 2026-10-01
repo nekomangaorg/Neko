@@ -24,53 +24,37 @@ interface PagerPanDelegate {
  * Returns `true` if a pan was executed, or `false` if the page boundary was reached.
  */
 fun PagerPanDelegate.tryStepPan(isVertical: Boolean, isRtl: Boolean, forward: Boolean): Boolean {
-    return if (isVertical) {
-        if (forward) {
+    return when {
+        isVertical && forward ->
             if (canPanDown()) {
                 panDown()
                 true
-            } else {
-                false
-            }
-        } else {
+            } else false
+        isVertical && !forward ->
             if (canPanUp()) {
                 panUp()
                 true
-            } else {
-                false
-            }
-        }
-    } else if (isRtl) {
-        if (forward) {
+            } else false
+        isRtl && forward ->
             if (canPanLeft()) {
                 panLeft()
                 true
-            } else {
-                false
-            }
-        } else {
+            } else false
+        isRtl && !forward ->
             if (canPanRight()) {
                 panRight()
                 true
-            } else {
-                false
-            }
-        }
-    } else {
-        if (forward) {
+            } else false
+        !isRtl && forward ->
             if (canPanRight()) {
                 panRight()
                 true
-            } else {
-                false
-            }
-        } else {
+            } else false
+        !isRtl && !forward ->
             if (canPanLeft()) {
                 panLeft()
                 true
-            } else {
-                false
-            }
-        }
+            } else false
+        else -> false
     }
 }
