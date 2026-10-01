@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.tryStepPan
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -98,27 +99,29 @@ fun ComposePagerViewer(
     val currentConfig by rememberUpdatedState(config)
     val currentIsNavigating by rememberUpdatedState(isNavigating)
 
-    var localActivePanDelegate by remember { mutableStateOf<PagerPanDelegate?>(null) }
-    val effectiveConfig =
-        remember(currentConfig, localActivePanDelegate) {
-            if (currentConfig.onActivePanDelegateChanged == null) {
-                currentConfig.copy(
-                    panDelegate = localActivePanDelegate,
-                    onActivePanDelegateChanged = { delegate, active ->
-                        if (active) {
-                            localActivePanDelegate = delegate
-                        } else if (localActivePanDelegate == delegate) {
-                            localActivePanDelegate = null
-                        }
-                    },
-                )
-            } else {
-                currentConfig
-            }
+    var activePanDelegate by remember { mutableStateOf<PagerPanDelegate?>(null) }
+    val pageItemConfig =
+        remember(currentConfig) {
+            currentConfig.copy(
+                onActivePanDelegateChanged = { delegate, active ->
+                    if (active) {
+                        activePanDelegate = delegate
+                    } else if (activePanDelegate == delegate) {
+                        activePanDelegate = null
+                    }
+                    currentConfig.onActivePanDelegateChanged?.invoke(delegate, active)
+                }
+            )
         }
 
     suspend fun executeNavCommand(command: ReaderNavCommand): Boolean {
-        return executeNavCommand(command, pagerState, currentItems, effectiveConfig)
+        return executeNavCommand(
+            command = command,
+            pagerState = pagerState,
+            items = currentItems,
+            config = currentConfig,
+            panDelegate = activePanDelegate,
+        )
     }
 
     // 1. Immediate pre-measure re-anchor during composition to eliminate 1-frame flashes
@@ -354,7 +357,7 @@ fun ComposePagerViewer(
                 val item = items.getOrNull(index) ?: return@VerticalPager
                 PagerItemContent(
                     item = item,
-                    config = effectiveConfig,
+                    config = pageItemConfig,
                     isActive = index == pagerState.currentPage,
                 )
             }
@@ -369,7 +372,7 @@ fun ComposePagerViewer(
                 val item = items.getOrNull(index) ?: return@HorizontalPager
                 PagerItemContent(
                     item = item,
-                    config = effectiveConfig,
+                    config = pageItemConfig,
                     isActive = index == pagerState.currentPage,
                 )
             }
@@ -598,10 +601,6 @@ fun ComposePagerViewer(
         readerPreferences.doublePageRotateReverse().collectAsStateWithLifecycle()
     val navigateToPan by readerPreferences.navigateToPan().collectAsStateWithLifecycle()
 
-    var activePanDelegate by remember { mutableStateOf<PagerPanDelegate?>(null) }
-
-    LaunchedEffect(activePanDelegate) { viewer.panDelegate = activePanDelegate }
-
     DisposableEffect(viewer) { onDispose { viewer.panDelegate = null } }
 
     val themeBackground = MaterialTheme.colorScheme.background
@@ -634,7 +633,6 @@ fun ComposePagerViewer(
             zoomDoublePageSpreads = landscapeZoom,
             landscapeZoom = landscapeZoom,
             navigateToPan = navigateToPan,
-            panDelegate = activePanDelegate,
             doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
             longTapEnabled = viewer.config.longTapEnabled,
             menuVisible = viewer.activity.menuVisible,
@@ -648,9 +646,9 @@ fun ComposePagerViewer(
                 },
             onActivePanDelegateChanged = { delegate, active ->
                 if (active) {
-                    activePanDelegate = delegate
-                } else if (activePanDelegate == delegate) {
-                    activePanDelegate = null
+                    viewer.panDelegate = delegate
+                } else if (viewer.panDelegate == delegate) {
+                    viewer.panDelegate = null
                 }
             },
             onRetryTransition = onRetryTransition,
@@ -788,6 +786,7 @@ internal suspend fun executeNavCommand(
     pagerState: PagerState,
     items: List<ReaderUiItem>,
     config: PagerViewerConfigUiModel,
+    panDelegate: PagerPanDelegate? = null,
 ): Boolean {
     try {
         when (command) {
@@ -855,58 +854,13 @@ internal suspend fun executeNavCommand(
                 }
             }
             is ReaderNavCommand.StepPage -> {
-                if (config.navigateToPan && config.panDelegate != null) {
-                    val delegate = config.panDelegate
+                if (config.navigateToPan && panDelegate != null) {
                     val panned =
-                        if (config.isVertical) {
-                            if (command.forward) {
-                                if (delegate.canPanDown()) {
-                                    delegate.panDown()
-                                    true
-                                } else {
-                                    false
-                                }
-                            } else {
-                                if (delegate.canPanUp()) {
-                                    delegate.panUp()
-                                    true
-                                } else {
-                                    false
-                                }
-                            }
-                        } else if (config.isRtl) {
-                            if (command.forward) {
-                                if (delegate.canPanLeft()) {
-                                    delegate.panLeft()
-                                    true
-                                } else {
-                                    false
-                                }
-                            } else {
-                                if (delegate.canPanRight()) {
-                                    delegate.panRight()
-                                    true
-                                } else {
-                                    false
-                                }
-                            }
-                        } else {
-                            if (command.forward) {
-                                if (delegate.canPanRight()) {
-                                    delegate.panRight()
-                                    true
-                                } else {
-                                    false
-                                }
-                            } else {
-                                if (delegate.canPanLeft()) {
-                                    delegate.panLeft()
-                                    true
-                                } else {
-                                    false
-                                }
-                            }
-                        }
+                        panDelegate.tryStepPan(
+                            isVertical = config.isVertical,
+                            isRtl = config.isRtl,
+                            forward = command.forward,
+                        )
                     if (panned) return true
                 }
 

@@ -234,7 +234,6 @@ class ComposePagerViewerResolutionTest {
         isRtl: Boolean = false,
         isVertical: Boolean = false,
         navigateToPan: Boolean = false,
-        panDelegate: PagerPanDelegate? = null,
     ): PagerViewerConfigUiModel {
         return PagerViewerConfigUiModel(
             activeChapterId = activeChapterId,
@@ -242,7 +241,6 @@ class ComposePagerViewerResolutionTest {
             isRtl = isRtl,
             isVertical = isVertical,
             navigateToPan = navigateToPan,
-            panDelegate = panDelegate,
             backgroundColor = Color.Black,
         )
     }
@@ -887,7 +885,6 @@ class ComposePagerViewerResolutionTest {
                 createConfig(
                     activeChapterId = 1L,
                     navigateToPan = true,
-                    panDelegate = mockPanDelegate,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
             every { mockPagerState.currentPage } returns 0
@@ -898,6 +895,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -919,7 +917,6 @@ class ComposePagerViewerResolutionTest {
                 createConfig(
                     activeChapterId = 1L,
                     navigateToPan = true,
-                    panDelegate = mockPanDelegate,
                     animatedTransitions = false,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
@@ -931,6 +928,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -952,7 +950,6 @@ class ComposePagerViewerResolutionTest {
                     activeChapterId = 1L,
                     isRtl = true,
                     navigateToPan = true,
-                    panDelegate = mockPanDelegate,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
             every { mockPagerState.currentPage } returns 1
@@ -963,6 +960,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -985,7 +983,6 @@ class ComposePagerViewerResolutionTest {
                     activeChapterId = 1L,
                     isRtl = true,
                     navigateToPan = true,
-                    panDelegate = mockPanDelegate,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
             every { mockPagerState.currentPage } returns 1
@@ -996,6 +993,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -1018,7 +1016,6 @@ class ComposePagerViewerResolutionTest {
                     activeChapterId = 1L,
                     isVertical = true,
                     navigateToPan = true,
-                    panDelegate = mockPanDelegate,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
             every { mockPagerState.currentPage } returns 0
@@ -1029,6 +1026,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -1050,7 +1048,6 @@ class ComposePagerViewerResolutionTest {
                 createConfig(
                     activeChapterId = 1L,
                     navigateToPan = true,
-                    panDelegate = mockPanDelegate,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
             every { mockPagerState.currentPage } returns 1
@@ -1061,6 +1058,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -1082,7 +1080,6 @@ class ComposePagerViewerResolutionTest {
                 createConfig(
                     activeChapterId = 1L,
                     navigateToPan = true,
-                    panDelegate = mockPanDelegate,
                     animatedTransitions = false,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
@@ -1094,6 +1091,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -1114,7 +1112,6 @@ class ComposePagerViewerResolutionTest {
                 createConfig(
                     activeChapterId = 1L,
                     navigateToPan = false,
-                    panDelegate = mockPanDelegate,
                     animatedTransitions = false,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
@@ -1126,6 +1123,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -1144,7 +1142,6 @@ class ComposePagerViewerResolutionTest {
                 createConfig(
                     activeChapterId = 1L,
                     navigateToPan = true,
-                    panDelegate = null,
                     animatedTransitions = false,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
@@ -1156,6 +1153,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = null,
                 )
 
             assertTrue(result)
@@ -1176,7 +1174,6 @@ class ComposePagerViewerResolutionTest {
                     activeChapterId = 1L,
                     isVertical = true,
                     navigateToPan = true,
-                    panDelegate = mockPanDelegate,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
             every { mockPagerState.currentPage } returns 1
@@ -1187,6 +1184,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -1209,7 +1207,6 @@ class ComposePagerViewerResolutionTest {
                     activeChapterId = 1L,
                     isVertical = true,
                     navigateToPan = true,
-                    panDelegate = mockPanDelegate,
                     animatedTransitions = false,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
@@ -1221,6 +1218,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = mockPanDelegate,
                 )
 
             assertTrue(result)
@@ -1239,7 +1237,6 @@ class ComposePagerViewerResolutionTest {
                 createConfig(
                     activeChapterId = 1L,
                     navigateToPan = true,
-                    panDelegate = null,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
             every { mockPagerState.currentPage } returns 0
@@ -1250,6 +1247,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = null,
                 )
 
             assertTrue(result)
@@ -1268,7 +1266,6 @@ class ComposePagerViewerResolutionTest {
                 createConfig(
                     activeChapterId = 1L,
                     navigateToPan = true,
-                    panDelegate = null,
                 )
             val mockPagerState = mockk<PagerState>(relaxed = true)
             every { mockPagerState.currentPage } returns 2
@@ -1279,6 +1276,7 @@ class ComposePagerViewerResolutionTest {
                     pagerState = mockPagerState,
                     items = items,
                     config = config,
+                    panDelegate = null,
                 )
 
             assertTrue(result)

@@ -18,3 +18,59 @@ interface PagerPanDelegate {
 
     fun panDown() {}
 }
+
+/**
+ * Attempts to pan the active zoomed page in the direction corresponding to a step navigation.
+ * Returns `true` if a pan was executed, or `false` if the page boundary was reached.
+ */
+fun PagerPanDelegate.tryStepPan(isVertical: Boolean, isRtl: Boolean, forward: Boolean): Boolean {
+    return if (isVertical) {
+        if (forward) {
+            if (canPanDown()) {
+                panDown()
+                true
+            } else {
+                false
+            }
+        } else {
+            if (canPanUp()) {
+                panUp()
+                true
+            } else {
+                false
+            }
+        }
+    } else if (isRtl) {
+        if (forward) {
+            if (canPanLeft()) {
+                panLeft()
+                true
+            } else {
+                false
+            }
+        } else {
+            if (canPanRight()) {
+                panRight()
+                true
+            } else {
+                false
+            }
+        }
+    } else {
+        if (forward) {
+            if (canPanRight()) {
+                panRight()
+                true
+            } else {
+                false
+            }
+        } else {
+            if (canPanLeft()) {
+                panLeft()
+                true
+            } else {
+                false
+            }
+        }
+    }
+}

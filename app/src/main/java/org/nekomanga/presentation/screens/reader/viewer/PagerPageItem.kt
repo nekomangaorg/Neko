@@ -23,6 +23,7 @@ import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.request.ImageRequest
@@ -52,6 +53,7 @@ import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle as preferenceCollectAsStateWithLifecycle
+import org.nekomanga.presentation.theme.Size
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -206,24 +208,32 @@ fun PagerPageItem(
             }
 
         val coroutineScope = rememberCoroutineScope()
+        val density = LocalDensity.current
+        val panEpsilonPx = remember(density) { with(density) { Size.extraTiny.toPx() } }
         val panDelegate =
-            remember(zoomableState, viewportWidthPx, viewportHeightPx) {
+            remember(
+                zoomableState,
+                viewportWidthPx,
+                viewportHeightPx,
+                config.animatedTransitions,
+                config.doubleTapAnimDuration,
+                panEpsilonPx,
+            ) {
                 ZoomablePanDelegate(
                     zoomableState = zoomableState,
                     viewportWidthPx = viewportWidthPx,
                     viewportHeightPx = viewportHeightPx,
                     scope = coroutineScope,
+                    animated = config.animatedTransitions,
+                    animationDurationMillis = config.doubleTapAnimDuration,
+                    panEpsilonPx = panEpsilonPx,
                 )
             }
 
-        DisposableEffect(isActive, panDelegate, config.navigateToPan) {
-            if (isActive && config.navigateToPan) {
+        if (isActive && config.navigateToPan) {
+            DisposableEffect(panDelegate) {
                 config.onActivePanDelegateChanged?.invoke(panDelegate, true)
-            }
-            onDispose {
-                if (isActive && config.navigateToPan) {
-                    config.onActivePanDelegateChanged?.invoke(panDelegate, false)
-                }
+                onDispose { config.onActivePanDelegateChanged?.invoke(panDelegate, false) }
             }
         }
 

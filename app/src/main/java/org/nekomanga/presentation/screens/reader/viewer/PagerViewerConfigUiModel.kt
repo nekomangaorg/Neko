@@ -36,7 +36,6 @@ data class PagerViewerConfigUiModel(
     val zoomStart: Int = 0,
     val landscapeZoom: Boolean = false,
     val navigateToPan: Boolean = false,
-    val panDelegate: PagerPanDelegate? = null,
     val doubleTapAnimDuration: Int = 300,
     val longTapEnabled: Boolean = true,
     val menuVisible: Boolean = false,
