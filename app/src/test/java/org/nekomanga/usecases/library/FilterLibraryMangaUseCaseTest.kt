@@ -198,6 +198,62 @@ class FilterLibraryMangaUseCaseTest {
     }
 
     @Test
+    fun `when ongoing filter active and item is on hiatus, returns false`() {
+        val manga = mockMangaItem(status = listOf("Hiatus"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.Ongoing)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when publication complete filter active and item is publication completed, returns true`() {
+        val manga = mockMangaItem(status = listOf("Publication Completed"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.PublicationComplete)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when publication complete filter active and item is completed, returns false`() {
+        val manga = mockMangaItem(status = listOf("Completed"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.PublicationComplete)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when hiatus filter active and item is on hiatus, returns true`() {
+        val manga = mockMangaItem(status = listOf("Hiatus"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.Hiatus)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when hiatus filter active and item is ongoing, returns false`() {
+        val manga = mockMangaItem(status = listOf("Ongoing"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.Hiatus)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when cancelled filter active and item is cancelled, returns true`() {
+        val manga = mockMangaItem(status = listOf("Cancelled"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.Cancelled)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when cancelled filter active and item is on hiatus, returns false`() {
+        val manga = mockMangaItem(status = listOf("Hiatus"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.Cancelled)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
     fun `when manga type filter active and item is manga, returns true`() {
         val manga = mockMangaItem(seriesType = FilterMangaType.Manga)
         val filters = LibraryFilters(filterMangaType = FilterMangaType.Manga)
