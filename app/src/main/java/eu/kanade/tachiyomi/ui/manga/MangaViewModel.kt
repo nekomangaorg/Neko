@@ -917,7 +917,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     markAction is ChapterMarkActions.Read ||
                         markAction is ChapterMarkActions.PreviousRead
                 ) {
-                    if (preferences.removeAfterMarkedAsRead().get()) {
+                    if (manga.removeAfterMarkedAsRead(preferences)) {
                         // dont delete bookmarked chapters
                         deleteChapters(
                             updatedChapterList.mapNotNull {

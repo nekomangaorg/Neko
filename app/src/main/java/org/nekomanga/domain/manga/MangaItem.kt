@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.reader.settings.DeleteAfterReadType
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
@@ -168,6 +169,9 @@ val MangaItem.readingModeType: Int
 
 val MangaItem.orientationType: Int
     get() = viewerFlags and OrientationType.MASK
+
+val MangaItem.deleteAfterReadType: Int
+    get() = viewerFlags and DeleteAfterReadType.MASK
 
 fun MangaItem.isLongStrip(): Boolean = this.genre.any { it.equals("long strip", ignoreCase = true) }
 
