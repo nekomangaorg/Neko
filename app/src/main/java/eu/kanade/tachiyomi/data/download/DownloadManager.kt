@@ -71,7 +71,7 @@ class DownloadManager(
     /** Downloader whose only task is to download chapters. */
     private val downloader = Downloader(context, provider, cache, sourceManager)
 
-    private val notifier by lazy { DownloadNotifier(context) }
+    private val notifier by lazy { DownloadNotifier(context) { System.currentTimeMillis() } }
 
     val isReindexing: Boolean
         get() = cache.isReindexing.get()
@@ -509,15 +509,9 @@ class DownloadManager(
                 false
             } finally {
                 withContext(NonCancellable) {
-                    try {
-                        cache.cancelRenewJob()
-                    } finally {
-                        try {
-                            notifier.dismissReindexProgress()
-                        } finally {
-                            cache.isReindexing.set(false)
-                        }
-                    }
+                    cache.cancelRenewJob()
+                    notifier.dismissReindexProgress()
+                    cache.isReindexing.set(false)
                 }
             }
         }
