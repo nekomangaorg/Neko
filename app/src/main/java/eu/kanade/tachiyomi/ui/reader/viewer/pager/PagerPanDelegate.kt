@@ -25,36 +25,21 @@ interface PagerPanDelegate {
  */
 fun PagerPanDelegate.tryStepPan(isVertical: Boolean, isRtl: Boolean, forward: Boolean): Boolean {
     return when {
-        isVertical && forward ->
-            if (canPanDown()) {
-                panDown()
-                true
-            } else false
-        isVertical && !forward ->
-            if (canPanUp()) {
-                panUp()
-                true
-            } else false
-        isRtl && forward ->
-            if (canPanLeft()) {
-                panLeft()
-                true
-            } else false
-        isRtl && !forward ->
-            if (canPanRight()) {
-                panRight()
-                true
-            } else false
-        !isRtl && forward ->
-            if (canPanRight()) {
-                panRight()
-                true
-            } else false
-        !isRtl && !forward ->
-            if (canPanLeft()) {
-                panLeft()
-                true
-            } else false
+        isVertical && forward -> tryPan(::canPanDown, ::panDown)
+        isVertical && !forward -> tryPan(::canPanUp, ::panUp)
+        isRtl && forward -> tryPan(::canPanLeft, ::panLeft)
+        isRtl && !forward -> tryPan(::canPanRight, ::panRight)
+        !isRtl && forward -> tryPan(::canPanRight, ::panRight)
+        !isRtl && !forward -> tryPan(::canPanLeft, ::panLeft)
         else -> false
+    }
+}
+
+private inline fun tryPan(canPan: () -> Boolean, pan: () -> Unit): Boolean {
+    return if (canPan()) {
+        pan()
+        true
+    } else {
+        false
     }
 }
