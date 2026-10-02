@@ -162,7 +162,7 @@ private fun WebtoonPageContent(
             ImageRequest.Builder(context)
                 .data(modelData)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                .maxBitmapSize(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .apply {

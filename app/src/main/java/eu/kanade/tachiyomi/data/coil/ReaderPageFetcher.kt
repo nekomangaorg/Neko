@@ -19,7 +19,9 @@ import coil3.request.Options
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
+import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import kotlin.math.sqrt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -416,11 +418,24 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 val bottom = minOf(decoder.height, top + height)
                 if (top < decoder.height && bottom > top) {
                     val region = Rect(0, top, decoder.width, bottom)
+                    val regionWidth = decoder.width
+                    val regionHeight = bottom - top
+                    var sampleSize = 1
+                    while (
+                        (regionWidth / sampleSize) > GLUtil.maxCanvasTextureSize ||
+                            (regionHeight / sampleSize) > GLUtil.maxCanvasTextureSize ||
+                            ((regionWidth.toLong() / sampleSize) *
+                                (regionHeight.toLong() / sampleSize) *
+                                4L) > GLUtil.MAX_CANVAS_BITMAP_BYTES
+                    ) {
+                        sampleSize *= 2
+                    }
                     val sliceBitmap =
                         decoder.decodeRegion(
                             region,
                             BitmapFactory.Options().apply {
                                 inPreferredConfig = Bitmap.Config.ARGB_8888
+                                inSampleSize = sampleSize
                             },
                         )
                     if (sliceBitmap != null) {
@@ -471,7 +486,39 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             if (cropHeight <= 0) {
                 null
             } else {
-                Bitmap.createBitmap(decoded.bitmap, 0, scaledTop, decoded.bitmap.width, cropHeight)
+                val rawSlice =
+                    Bitmap.createBitmap(
+                        decoded.bitmap,
+                        0,
+                        scaledTop,
+                        decoded.bitmap.width,
+                        cropHeight,
+                    )
+                val maxDim = GLUtil.maxCanvasTextureSize
+                val maxBytes = GLUtil.MAX_CANVAS_BITMAP_BYTES
+                if (
+                    rawSlice.byteCount > maxBytes ||
+                        rawSlice.width > maxDim ||
+                        rawSlice.height > maxDim
+                ) {
+                    val scaleFactor =
+                        minOf(
+                                maxDim.toFloat() / rawSlice.width.toFloat(),
+                                maxDim.toFloat() / rawSlice.height.toFloat(),
+                                sqrt(maxBytes.toDouble() / rawSlice.byteCount.toDouble()).toFloat(),
+                            )
+                            .coerceAtMost(1f)
+                    val targetWidth = (rawSlice.width * scaleFactor).toInt().coerceAtLeast(1)
+                    val targetHeight = (rawSlice.height * scaleFactor).toInt().coerceAtLeast(1)
+                    val scaledSlice =
+                        Bitmap.createScaledBitmap(rawSlice, targetWidth, targetHeight, true)
+                    if (scaledSlice != rawSlice) {
+                        rawSlice.recycle()
+                    }
+                    scaledSlice
+                } else {
+                    rawSlice
+                }
             }
         } catch (e: Exception) {
             TimberKt.e(e) {

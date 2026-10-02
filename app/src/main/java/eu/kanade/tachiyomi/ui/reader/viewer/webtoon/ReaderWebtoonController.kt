@@ -121,7 +121,7 @@ class ReaderWebtoonController(
     fun checkAndTrackTallPage(
         page: ReaderPage,
         screenHeight: Int,
-        maxTextureSize: Int = GLUtil.maxTextureSize,
+        maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
     ): TallSplitResult {
         synchronized(splitCheckLock) {
             if (tallSplitPages.contains(page)) return TallSplitResult.AlreadySplit
@@ -161,7 +161,7 @@ class ReaderWebtoonController(
         fun checkTallPage(
             page: ReaderPage,
             screenHeight: Int,
-            maxTextureSize: Int = GLUtil.maxTextureSize,
+            maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
         ): List<ReaderPageSplit>? = defaultCheckTallPageUseCase(page, screenHeight, maxTextureSize)
 
         /**
@@ -173,7 +173,7 @@ class ReaderWebtoonController(
             outWidth: Int,
             outHeight: Int,
             screenHeight: Int,
-            maxTextureSize: Int = GLUtil.maxTextureSize,
+            maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
         ): List<ReaderPageSplit>? =
             defaultCheckTallPageUseCase.computeSplits(
                 page,

@@ -285,7 +285,7 @@ fun DoublePageLayout(
             ImageRequest.Builder(context)
                 .data(first)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                .maxBitmapSize(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .apply {
@@ -300,7 +300,7 @@ fun DoublePageLayout(
             ImageRequest.Builder(context)
                 .data(second)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                .maxBitmapSize(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .apply {

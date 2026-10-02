@@ -16,7 +16,7 @@ class CheckTallPageUseCase {
     operator fun invoke(
         page: ReaderPage,
         screenHeight: Int,
-        maxTextureSize: Int = GLUtil.maxTextureSize,
+        maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
     ): List<ReaderPageSplit>? {
         val precomputed = page.precomputedSplits
         if (precomputed != null) {
@@ -44,7 +44,7 @@ class CheckTallPageUseCase {
         outWidth: Int,
         outHeight: Int,
         screenHeight: Int,
-        maxTextureSize: Int = GLUtil.maxTextureSize,
+        maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
     ): List<ReaderPageSplit>? {
         if (outHeight <= 0 || outWidth <= 0) return null
         val displayMaxHeight =
@@ -53,12 +53,21 @@ class CheckTallPageUseCase {
             } else {
                 maxTextureSize
             }
-        val isTall = (outHeight.toFloat() / outWidth.toFloat() > 3f) || (outHeight > maxTextureSize)
-        if (!isTall || outHeight <= displayMaxHeight) {
+        val exceedsCanvasLimit =
+            (outWidth.toLong() * outHeight.toLong() * 4L) > GLUtil.MAX_CANVAS_BITMAP_BYTES
+        val isTall =
+            (outHeight.toFloat() / outWidth.toFloat() > 2f) ||
+                (outHeight > maxTextureSize) ||
+                exceedsCanvasLimit
+        val maxSliceHeightByBytes =
+            (GLUtil.MAX_CANVAS_BITMAP_BYTES / (outWidth.toLong() * 4L))
+                .coerceIn(1L, Int.MAX_VALUE.toLong())
+                .toInt()
+        val maxSliceHeight = minOf(displayMaxHeight, maxTextureSize, maxSliceHeightByBytes)
+        if (!isTall || outHeight <= maxSliceHeight) {
             return null
         }
 
-        val maxSliceHeight = minOf(displayMaxHeight, maxTextureSize)
         val partCount = (outHeight - 1) / maxSliceHeight + 1
         if (partCount <= 1) return null
 

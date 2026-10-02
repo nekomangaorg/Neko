@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
+import eu.kanade.tachiyomi.util.system.GLUtil
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -96,7 +97,7 @@ class CheckTallPageUseCaseTest {
         assertEquals(12000, totalHeight)
 
         nonNullSplits.forEach { split ->
-            assertEquals(1000f / 4000f, split.aspectRatio!!, 0.001f)
+            assertEquals(1000f / 4000f, split.aspectRatio, 0.001f)
             assertEquals(page, split.page)
         }
     }
@@ -153,5 +154,53 @@ class CheckTallPageUseCaseTest {
 
         val result = useCase(page, screenHeight = 1000)
         assertNull(result)
+    }
+
+    @Test
+    fun `computeSplits splits images exceeding canvas byte limit even on high maxTextureSize devices`() {
+        val page = createPage()
+        // 4800 x 10080 image (ratio = 2.1 < 3.0, but uncompressed bytes = 193,536,000 > 100MB)
+        // On modern Adreno devices, maxTextureSize can be 16384.
+        val splits =
+            useCase.computeSplits(
+                page,
+                outWidth = 4800,
+                outHeight = 10080,
+                screenHeight = 2560,
+                maxTextureSize = 16384,
+            )
+        assertNotNull(splits)
+        val nonNullSplits = splits!!
+        assertTrue(nonNullSplits.size >= 2)
+        assertEquals(10080, nonNullSplits.sumOf { it.splitHeight })
+
+        // Ensure every slice's byte count is within MAX_CANVAS_BITMAP_BYTES
+        nonNullSplits.forEach { split ->
+            val sliceBytes = 4800L * split.splitHeight.toLong() * 4L
+            assertTrue(
+                "Slice bytes $sliceBytes must not exceed MAX_CANVAS_BITMAP_BYTES",
+                sliceBytes <= GLUtil.MAX_CANVAS_BITMAP_BYTES,
+            )
+        }
+    }
+
+    @Test
+    fun `computeSplits ensures all generated slices do not exceed maxCanvasTextureSize by default`() {
+        val page = createPage()
+        val splits =
+            useCase.computeSplits(
+                page,
+                outWidth = 3000,
+                outHeight = 15000,
+                screenHeight = 2000,
+            )
+        assertNotNull(splits)
+        val nonNullSplits = splits!!
+        nonNullSplits.forEach { split ->
+            assertTrue(
+                "Slice height ${split.splitHeight} must not exceed maxCanvasTextureSize",
+                split.splitHeight <= GLUtil.maxCanvasTextureSize,
+            )
+        }
     }
 }

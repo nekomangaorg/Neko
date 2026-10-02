@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap
 open class MemoryCacheWarmManager(
     private val context: Context,
     private val imageLoaderProvider: (() -> ImageLoader?)? = null,
-    private val maxTextureSizeProvider: () -> Int = { GLUtil.maxTextureSize },
+    private val maxTextureSizeProvider: () -> Int = { GLUtil.maxCanvasTextureSize },
 ) {
     private val activeDisposables = ConcurrentHashMap<String, Disposable>()
 
