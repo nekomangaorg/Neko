@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import coil3.request.maxBitmapSize
 import coil3.request.transformations
 import coil3.size.Precision
+import coil3.size.Scale
 import coil3.size.Size as CoilSize
 import coil3.transform.Transformation
 import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
@@ -332,11 +332,14 @@ fun PagerPageItem(
                 ) {
                     ImageRequest.Builder(context)
                         .data(page)
-                        .size(CoilSize.ORIGINAL)
-                        .maxBitmapSize(
-                            CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize)
-                        )
-                        .precision(Precision.EXACT)
+                        // ZoomableAsyncImage replaces maxBitmapSize with ORIGINAL because it
+                        // expects to sub-sample, which never happens for a ReaderPage. It keeps
+                        // size, so the canvas size cap goes there. Without the cap, a page taller
+                        // than the texture size decodes at full size and draws blank as a hardware
+                        // bitmap or is too large for the canvas as a software one.
+                        .size(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
+                        .scale(Scale.FIT)
+                        .precision(Precision.INEXACT)
                         .crossfade(true)
                         .apply {
                             val transformations = mutableListOf<Transformation>()
