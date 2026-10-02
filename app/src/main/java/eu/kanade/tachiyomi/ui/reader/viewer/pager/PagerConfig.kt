@@ -37,7 +37,7 @@ class PagerConfig(
     var imageCropBorders = false
         private set
 
-    var navigateToPan = false
+    var navigateToPan = readerPreferences.navigateToPan().get()
         private set
 
     var landscapeZoom = false

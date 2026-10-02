@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
 import org.nekomanga.domain.manga.MangaItem
 
 /** Immutable UI configuration state for [ComposePagerViewer]. */
@@ -34,6 +35,7 @@ data class PagerViewerConfigUiModel(
     val doublePageRotateReverse: Boolean = false,
     val zoomStart: Int = 0,
     val landscapeZoom: Boolean = false,
+    val navigateToPan: Boolean = false,
     val doubleTapAnimDuration: Int = 300,
     val longTapEnabled: Boolean = true,
     val menuVisible: Boolean = false,
@@ -42,6 +44,8 @@ data class PagerViewerConfigUiModel(
     val preloadPageAmount: Int = 4,
     val onToggleMenu: () -> Unit = {},
     val onNavigateAdjacent: (forward: Boolean) -> Unit = {},
+    val onActivePanDelegateChanged: ((delegate: PagerPanDelegate?, active: Boolean) -> Unit)? =
+        null,
     val onRetryTransition: (ReaderChapter) -> Unit = {},
     val onNavigateToChapter: ((Chapter, ChapterNavTarget) -> Unit)? = null,
     val onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
