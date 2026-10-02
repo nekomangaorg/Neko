@@ -745,6 +745,7 @@
     <string name="mark_chapters_from_tracker_subtitle">Marks chapters as read, when entering the manga, if unread chapters are lower than the tracker.</string>
 
     <string name="update_tracking_marked_read">Update tracking when marked as read</string>
+    <string name="exclude_categories_from_tracking_updates">Exclude categories from tracking updates</string>
     <string name="reading">Reading</string>
     <string name="currently_reading">Currently Reading</string>
     <string name="dropped">Dropped</string>

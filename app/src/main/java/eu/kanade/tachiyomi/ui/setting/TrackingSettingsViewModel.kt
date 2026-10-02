@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -15,10 +16,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.observeAndUpdate
+import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toTrackServiceItem
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.tracking.TrackUseCases
 import uy.kohesive.injekt.injectLazy
 
@@ -29,6 +35,8 @@ class TrackingSettingsViewModel : ViewModel() {
     private val trackManager: TrackManager by injectLazy()
 
     private val trackUseCases: TrackUseCases by injectLazy()
+
+    private val categoryUseCases: CategoryUseCases by injectLazy()
 
     private val _loginEvent = MutableSharedFlow<MergeLoginEvent>()
     val loginEvent = _loginEvent.asSharedFlow()
@@ -47,6 +55,16 @@ class TrackingSettingsViewModel : ViewModel() {
     val state = _state.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            categoryUseCases.getCategories.observe().distinctUntilChanged().collectLatest {
+                categories ->
+                val allCategories =
+                    (listOf(Category.createSystemCategory().toCategoryItem()) + categories)
+                        .sortedBy { it.order }
+                _state.update { it.copy(allCategories = allCategories) }
+            }
+        }
+
         preferences.autoAddTracker().changes().observeAndUpdate(viewModelScope) { set ->
             _state.update {
                 it.copy(
@@ -168,5 +186,6 @@ class TrackingSettingsViewModel : ViewModel() {
         val mangaBakaUsername: String = "",
         val mangaBakaIsLoggedIn: Boolean = false,
         val mangaBakaAutoAddTrack: Boolean = false,
+        val allCategories: List<CategoryItem> = emptyList(),
     )
 }

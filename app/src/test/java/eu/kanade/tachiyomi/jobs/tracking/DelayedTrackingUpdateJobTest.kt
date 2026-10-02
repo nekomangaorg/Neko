@@ -3,7 +3,9 @@ package eu.kanade.tachiyomi.jobs.tracking
 import android.content.Context
 import androidx.work.ListenableWorker.Result
 import androidx.work.WorkerParameters
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import io.mockk.coEvery
@@ -19,6 +21,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.domain.track.store.DelayedTrackingStore.DelayedTrackingItem
@@ -33,6 +36,8 @@ class DelayedTrackingUpdateJobTest {
     private lateinit var mockTrackRepository: TrackRepository
     private lateinit var trackManager: TrackManager
     private lateinit var delayedTrackingStore: DelayedTrackingStore
+    private lateinit var categoryRepository: CategoryRepository
+    private lateinit var preferences: PreferencesHelper
     private lateinit var context: Context
     private lateinit var workerParams: WorkerParameters
 
@@ -45,10 +50,15 @@ class DelayedTrackingUpdateJobTest {
         delayedTrackingStore = mockk(relaxed = true)
         context = mockk(relaxed = true)
         workerParams = mockk(relaxed = true) { every { runAttemptCount } returns 0 }
+        categoryRepository = mockk(relaxed = true)
+        preferences = mockk(relaxed = true)
+        every { preferences.excludeCategoriesFromTrackingUpdates().get() } returns emptySet()
 
         Injekt.addSingleton(mockTrackRepository)
         Injekt.addSingleton(trackManager)
         Injekt.addSingleton(delayedTrackingStore)
+        Injekt.addSingleton(categoryRepository)
+        Injekt.addSingleton(preferences)
     }
 
     @After
@@ -139,6 +149,34 @@ class DelayedTrackingUpdateJobTest {
             assertEquals(Result.success(), result)
             coVerify(exactly = 1) { service.update(track, true) }
             coVerify(exactly = 1) { mockTrackRepository.insertTrack(updatedTrack) }
+            coVerify(exactly = 1) { delayedTrackingStore.remove(1L) }
+        }
+
+    @Test
+    fun `given manga in an excluded category when doWork then removes from store without updating`() =
+        runTest {
+            val item = DelayedTrackingItem(trackId = 1L, lastChapterRead = 5f)
+            val track =
+                mockk<Track>(relaxed = true) {
+                    every { id } returns 1L
+                    every { manga_id } returns 10L
+                    every { sync_id } returns 2
+                    every { last_chapter_read } returns 3f
+                }
+            val service = mockk<TrackService>(relaxed = true)
+            val category = mockk<Category>(relaxed = true) { every { id } returns 3 }
+
+            every { delayedTrackingStore.getItems() } returns listOf(item)
+            coEvery { mockTrackRepository.getTrackById(1L) } returns track
+            every { trackManager.getService(2) } returns service
+            every { preferences.excludeCategoriesFromTrackingUpdates().get() } returns setOf("3")
+            coEvery { categoryRepository.getCategoriesForManga(10L) } returns listOf(category)
+
+            val job = DelayedTrackingUpdateJob(context, workerParams)
+            val result = job.doWork()
+
+            assertEquals(Result.success(), result)
+            coVerify(exactly = 0) { service.update(any(), any()) }
             coVerify(exactly = 1) { delayedTrackingStore.remove(1L) }
         }
 
