@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.coil
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.BitmapRegionDecoder
+import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.Build
 import android.util.LruCache
@@ -19,7 +20,9 @@ import coil3.request.Options
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
+import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import kotlin.math.sqrt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -133,6 +136,51 @@ internal fun <T : Any> decodeOrRetrySmaller(
 // decodes to 1153x32768 at sample size 2.
 private fun sampledDimension(size: Int, sampleSize: Int): Long =
     (size.toLong() + sampleSize - 1) / sampleSize
+
+/**
+ * Calculates the smallest power-of-two sample size that keeps the decoded region within canvas
+ * limits.
+ */
+internal fun calculateRegionSampleSize(
+    regionWidth: Int,
+    regionHeight: Int,
+    maxDim: Int = GLUtil.maxCanvasTextureSize,
+    maxBytes: Long = GLUtil.MAX_CANVAS_BITMAP_BYTES,
+): Int {
+    var sampleSize = 1
+    while (
+        (regionWidth / sampleSize) > maxDim ||
+            (regionHeight / sampleSize) > maxDim ||
+            ((regionWidth.toLong() / sampleSize) * (regionHeight.toLong() / sampleSize) * 4L) >
+                maxBytes
+    ) {
+        sampleSize *= 2
+    }
+    return sampleSize
+}
+
+/**
+ * Calculates the scale factor to bring a fallback slice within canvas texture dimension and byte
+ * limits.
+ */
+internal fun calculateFallbackSliceScale(
+    cropWidth: Int,
+    cropHeight: Int,
+    bytesPerPixel: Long,
+    maxDim: Int = GLUtil.maxCanvasTextureSize,
+    maxBytes: Long = GLUtil.MAX_CANVAS_BITMAP_BYTES,
+): Float {
+    val rawBytes = cropWidth.toLong() * cropHeight.toLong() * bytesPerPixel
+    if (rawBytes <= maxBytes && cropWidth <= maxDim && cropHeight <= maxDim) {
+        return 1f
+    }
+    return minOf(
+            maxDim.toFloat() / cropWidth.toFloat(),
+            maxDim.toFloat() / cropHeight.toFloat(),
+            sqrt(maxBytes.toDouble() / rawBytes.toDouble()).toFloat(),
+        )
+        .coerceIn(0f, 1f)
+}
 
 class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val options: Options) :
     Fetcher {
@@ -445,11 +493,14 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 val bottom = minOf(decoder.height, top + height)
                 if (top < decoder.height && bottom > top) {
                     val region = Rect(0, top, decoder.width, bottom)
+                    val regionWidth = decoder.width
+                    val regionHeight = bottom - top
                     val sliceBitmap =
                         decoder.decodeRegion(
                             region,
                             BitmapFactory.Options().apply {
                                 inPreferredConfig = Bitmap.Config.ARGB_8888
+                                inSampleSize = calculateRegionSampleSize(regionWidth, regionHeight)
                             },
                         )
                     if (sliceBitmap != null) {
@@ -497,10 +548,32 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             val scaledTop = (top * scale).toInt().coerceIn(0, decoded.bitmap.height - 1)
             val scaledHeight = (height * scale).toInt().coerceAtLeast(1)
             val cropHeight = minOf(scaledHeight, decoded.bitmap.height - scaledTop)
-            if (cropHeight <= 0) {
+            val cropWidth = decoded.bitmap.width
+            if (cropHeight <= 0 || cropWidth <= 0) {
                 null
             } else {
-                Bitmap.createBitmap(decoded.bitmap, 0, scaledTop, decoded.bitmap.width, cropHeight)
+                val bytesPerPixel = if (decoded.bitmap.config == Bitmap.Config.RGB_565) 2L else 4L
+                val scaleFactor = calculateFallbackSliceScale(cropWidth, cropHeight, bytesPerPixel)
+                if (scaleFactor < 1f) {
+                    val matrix = Matrix().apply { postScale(scaleFactor, scaleFactor) }
+                    Bitmap.createBitmap(
+                        decoded.bitmap,
+                        0,
+                        scaledTop,
+                        cropWidth,
+                        cropHeight,
+                        matrix,
+                        true,
+                    )
+                } else {
+                    Bitmap.createBitmap(
+                        decoded.bitmap,
+                        0,
+                        scaledTop,
+                        cropWidth,
+                        cropHeight,
+                    )
+                }
             }
         } catch (e: Exception) {
             TimberKt.e(e) {

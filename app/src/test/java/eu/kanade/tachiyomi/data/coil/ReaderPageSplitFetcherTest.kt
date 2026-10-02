@@ -178,6 +178,106 @@ class ReaderPageSplitFetcherTest {
         assertEquals(listOf("decode 2"), events)
     }
 
+    @Test
+    fun `calculateRegionSampleSize returns 1 for dimensions and byte size within limits`() {
+        val sampleSize = calculateRegionSampleSize(1080, 2000, maxDim = 4096, maxBytes = 100L * MIB)
+        assertEquals(1, sampleSize)
+    }
+
+    @Test
+    fun `calculateRegionSampleSize doubles sample size when dimension exceeds maxDim`() {
+        val sampleSizeHeight =
+            calculateRegionSampleSize(1080, 5000, maxDim = 4096, maxBytes = 100L * MIB)
+        assertEquals(2, sampleSizeHeight)
+
+        val sampleSizeWidth =
+            calculateRegionSampleSize(10000, 1000, maxDim = 4096, maxBytes = 100L * MIB)
+        assertEquals(4, sampleSizeWidth)
+    }
+
+    @Test
+    fun `calculateRegionSampleSize doubles sample size when byte size exceeds maxBytes`() {
+        val sampleSize = calculateRegionSampleSize(6000, 5000, maxDim = 8192, maxBytes = 100L * MIB)
+        assertEquals(2, sampleSize)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale returns 1f for slice within limits`() {
+        val scale =
+            calculateFallbackSliceScale(
+                1080,
+                2000,
+                bytesPerPixel = 4L,
+                maxDim = 4096,
+                maxBytes = 100L * MIB,
+            )
+        assertEquals(1f, scale, 0.0001f)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale downscales when dimension exceeds maxDim`() {
+        val scale =
+            calculateFallbackSliceScale(
+                5000,
+                1000,
+                bytesPerPixel = 4L,
+                maxDim = 4096,
+                maxBytes = 100L * MIB,
+            )
+        assertEquals(4096f / 5000f, scale, 0.0001f)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale downscales when byte count exceeds maxBytes`() {
+        val scale =
+            calculateFallbackSliceScale(
+                6000,
+                5000,
+                bytesPerPixel = 4L,
+                maxDim = 8192,
+                maxBytes = 100L * MIB,
+            )
+        val expected = kotlin.math.sqrt((100.0 * MIB) / (6000L * 5000L * 4L)).toFloat()
+        assertEquals(expected, scale, 0.0001f)
+        assertTrue(scale < 1f)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale respects bytesPerPixel for RGB_565 vs ARGB_8888`() {
+        val scaleArgb =
+            calculateFallbackSliceScale(
+                6000,
+                5000,
+                bytesPerPixel = 4L,
+                maxDim = 8192,
+                maxBytes = 100L * MIB,
+            )
+        assertTrue(scaleArgb < 1f)
+
+        val scaleRgb565 =
+            calculateFallbackSliceScale(
+                6000,
+                5000,
+                bytesPerPixel = 2L,
+                maxDim = 8192,
+                maxBytes = 100L * MIB,
+            )
+        assertEquals(1f, scaleRgb565, 0.0001f)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale allows deep downscaling for extreme narrow aspect ratios`() {
+        val scale =
+            calculateFallbackSliceScale(
+                10000,
+                1,
+                bytesPerPixel = 4L,
+                maxDim = 4096,
+                maxBytes = 100L * MIB,
+            )
+        assertEquals(4096f / 10000f, scale, 0.0001f)
+    }
+
     private fun roundedUp(size: Int, sampleSize: Int): Long =
         (size.toLong() + sampleSize - 1) / sampleSize
 
