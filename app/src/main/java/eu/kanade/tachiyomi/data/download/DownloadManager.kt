@@ -10,9 +10,11 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.system.NetworkState
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.networkStateFlow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -68,6 +70,11 @@ class DownloadManager(
 
     /** Downloader whose only task is to download chapters. */
     private val downloader = Downloader(context, provider, cache, sourceManager)
+
+    private val notifier by lazy { DownloadNotifier(context) { System.currentTimeMillis() } }
+
+    val isReindexing: Boolean
+        get() = cache.isReindexing.get()
 
     /** Queue to delay the deletion of a list of chapters until triggered. */
     private val pendingDeleter = DownloadPendingDeleter(context)
@@ -481,6 +488,32 @@ class DownloadManager(
     fun refreshCache() {
         cache.forceRenewCache()
     }
+
+    suspend fun reindexDownloads(): Boolean =
+        withContext(ioDispatcher) {
+            if (!cache.isReindexing.compareAndSet(false, true)) {
+                return@withContext false
+            }
+            try {
+                notifier.showReindexProgress(0, 0, null)
+                cache.renewCache { progress, total, title ->
+                    notifier.showReindexProgress(progress, total, title)
+                }
+                notifier.showReindexComplete()
+                true
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Error reindexing downloads" }
+                false
+            } finally {
+                withContext(NonCancellable) {
+                    cache.cancelRenewJob()
+                    notifier.dismissReindexProgress()
+                    cache.isReindexing.set(false)
+                }
+            }
+        }
 
     val downloadCacheUpdatedFlow: Flow<Unit>
         get() = cache.changes

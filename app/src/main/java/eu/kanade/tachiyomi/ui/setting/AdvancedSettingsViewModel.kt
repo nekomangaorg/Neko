@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -122,13 +123,15 @@ class AdvancedSettingsViewModel : ViewModel() {
         }
     }
 
-    fun reindexDownloads() {
-        viewModelScope.launchNonCancellable {
-            launchIO {
-                _toastEvent.emit(UiText.StringResource(R.string.reindex_downloads_invalidate))
-                downloadManager.refreshCache()
-                _toastEvent.emit(UiText.StringResource(R.string.reindex_downloads_complete))
-            }
+    fun reindexDownloads(): Job = viewModelScope.launchNonCancellable {
+        if (downloadManager.isReindexing) {
+            _toastEvent.emit(UiText.StringResource(R.string.reindex_in_progress))
+            return@launchNonCancellable
+        }
+        _toastEvent.emit(UiText.StringResource(R.string.reindex_downloads_invalidate))
+        val completed = downloadManager.reindexDownloads()
+        if (completed) {
+            _toastEvent.emit(UiText.StringResource(R.string.reindex_downloads_complete))
         }
     }
 
