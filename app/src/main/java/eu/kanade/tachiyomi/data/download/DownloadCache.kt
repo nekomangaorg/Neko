@@ -226,9 +226,10 @@ class DownloadCache(
                 .map { mangaDir ->
                     async(scanDispatcher) {
                         val dirName = mangaDir.name
-                        var title: String? = dirName
+                        var title: String? = null
                         try {
                             if (dirName == null) return@async
+                            title = dirName
                             val manga =
                                 mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@async
                             title = manga.displayTitle()

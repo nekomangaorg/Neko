@@ -178,6 +178,7 @@ class DownloadCacheTest {
             every { storageManager.getDownloadsDirectory() } returns rootDownloadsDir
 
             val cache = DownloadCache(provider, sourceManager, storageManager)
+            cache.cancelRenewJob()
 
             val changesEmitted = CompletableDeferred<Unit>()
             val changesJob =

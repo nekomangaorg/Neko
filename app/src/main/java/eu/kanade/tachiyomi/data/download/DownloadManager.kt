@@ -495,7 +495,6 @@ class DownloadManager(
                 return@withContext false
             }
             try {
-                cache.cancelRenewJob()
                 notifier.showReindexProgress(0, 0, null)
                 cache.renewCache { progress, total, title ->
                     notifier.showReindexProgress(progress, total, title)
