@@ -87,6 +87,8 @@ fun DoublePageLayout(
     doubleClickToZoomListener: DoubleClickToZoomListener,
     constraints: Constraints,
     isReady: Boolean,
+    onImageError: (ReaderPage, Throwable) -> Unit,
+    onImageSuccess: (ReaderPage) -> Unit,
     modifier: Modifier = Modifier,
     checkWidePage: CheckWidePageUseCase = remember { CheckWidePageUseCase() },
 ) {
@@ -362,7 +364,9 @@ fun DoublePageLayout(
                         } else {
                             Modifier.weight(1f).fillMaxHeight()
                         },
+                    onError = { state -> onImageError(first, state.result.throwable) },
                     onSuccess = { state ->
+                        onImageSuccess(first)
                         val img = state.result.image
                         if (img.width > 0 && img.height > 0) {
                             firstSize = ComposeSize(img.width.toFloat(), img.height.toFloat())
@@ -386,7 +390,9 @@ fun DoublePageLayout(
                         } else {
                             Modifier.weight(1f).fillMaxHeight()
                         },
+                    onError = { state -> onImageError(second, state.result.throwable) },
                     onSuccess = { state ->
+                        onImageSuccess(second)
                         val img = state.result.image
                         if (img.width > 0 && img.height > 0) {
                             secondSize = ComposeSize(img.width.toFloat(), img.height.toFloat())

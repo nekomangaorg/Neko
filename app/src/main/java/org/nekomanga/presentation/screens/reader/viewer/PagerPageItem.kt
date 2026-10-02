@@ -90,8 +90,13 @@ fun PagerPageItem(
         (extraPage?.statusFlow ?: emptyFlow()).collectAsStateWithLifecycle(Page.State.READY)
     val extraPageProgress by (extraPage?.progressFlow ?: emptyFlow()).collectAsStateWithLifecycle(0)
 
+    val retryGeneration by page.retryGenerationFlow.collectAsStateWithLifecycle()
+    val loadErrors = remember(page, extraPage) { PagerImageLoadErrors() }
+
     val isError =
-        pageStatus == Page.State.ERROR || (extraPage != null && extraPageStatus == Page.State.ERROR)
+        pageStatus == Page.State.ERROR ||
+            (extraPage != null && extraPageStatus == Page.State.ERROR) ||
+            loadErrors.hasError
     val isReady =
         pageStatus == Page.State.READY && (extraPage == null || extraPageStatus == Page.State.READY)
 
@@ -155,6 +160,8 @@ fun PagerPageItem(
         }
 
     val onRetry: () -> Unit = {
+        loadErrors.clear()
+        page.retry()
         page.chapter.pageLoader?.retryPage(page)
         extraPage?.chapter?.pageLoader?.retryPage(extraPage)
     }
@@ -243,134 +250,159 @@ fun PagerPageItem(
             }
         }
 
-        if (extraPage != null) {
-            DoublePageLayout(
-                page = page,
-                extraPage = extraPage,
-                config = config,
-                zoomableState = zoomableState,
-                contentScale = contentScale,
-                doubleClickToZoomListener = doubleClickToZoomListener,
-                constraints = constraints,
-                isReady = isReady,
-                modifier = Modifier.fillMaxSize(),
-            )
-        } else if (page.firstHalf != null) {
-            SplitPageLayout(
-                page = page,
-                config = config,
-                zoomableState = zoomableState,
-                doubleClickToZoomListener = doubleClickToZoomListener,
-                contentScale = contentScale,
-                modifier = Modifier.fillMaxSize(),
-            )
-        } else {
-            val imageState = rememberZoomableImageState(zoomableState)
+        // A retry does not change the image requests, and the images load again only for a
+        // changed request, so each retry gets new images.
+        key(retryGeneration) {
+            if (extraPage != null) {
+                DoublePageLayout(
+                    page = page,
+                    extraPage = extraPage,
+                    config = config,
+                    zoomableState = zoomableState,
+                    contentScale = contentScale,
+                    doubleClickToZoomListener = doubleClickToZoomListener,
+                    constraints = constraints,
+                    isReady = isReady,
+                    onImageError = loadErrors::onError,
+                    onImageSuccess = loadErrors::onSuccess,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else if (page.firstHalf != null) {
+                SplitPageLayout(
+                    page = page,
+                    config = config,
+                    zoomableState = zoomableState,
+                    doubleClickToZoomListener = doubleClickToZoomListener,
+                    onImageError = loadErrors::onError,
+                    onImageSuccess = loadErrors::onSuccess,
+                    contentScale = contentScale,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                val imageState = rememberZoomableImageState(zoomableState)
 
-            val singlePageZoomType =
-                remember(config.zoomStart, config.isRtl) {
-                    when (config.zoomStart) {
-                        1 ->
-                            if (config.isRtl) PagerConfig.ZoomType.Right
-                            else PagerConfig.ZoomType.Left
-                        2 -> PagerConfig.ZoomType.Left
-                        3 -> PagerConfig.ZoomType.Right
-                        else -> PagerConfig.ZoomType.Center
-                    }
-                }
-
-            LaunchedEffect(
-                isReady,
-                config.landscapeZoom,
-                config.imageScaleType,
-                shouldRotateWide,
-            ) {
-                if (
-                    !autoZoomApplied &&
-                        isReady &&
-                        config.landscapeZoom &&
-                        config.imageScaleType == 1 &&
-                        viewportWidthPx > 0f &&
-                        viewportHeightPx > 0f
-                ) {
-                    @Suppress("DEPRECATION")
-                    val bounds =
-                        withTimeoutOrNull(2000L) {
-                            snapshotFlow { zoomableState.transformedContentBounds }
-                                .filter { !it.isEmpty }
-                                .first()
-                        }
-
-                    if (bounds != null) {
-                        val isLandscape = bounds.width > bounds.height
-                        if (isLandscape && bounds.height < viewportHeightPx) {
-                            val targetScale = (viewportHeightPx / bounds.height).coerceIn(1f, 3f)
-                            if (targetScale > 1.05f) {
-                                val centroid =
-                                    when (singlePageZoomType) {
-                                        PagerConfig.ZoomType.Right ->
-                                            Offset(viewportWidthPx, viewportHeightPx / 2f)
-                                        PagerConfig.ZoomType.Left ->
-                                            Offset(0f, viewportHeightPx / 2f)
-                                        PagerConfig.ZoomType.Center ->
-                                            Offset(viewportWidthPx / 2f, viewportHeightPx / 2f)
-                                    }
-                                zoomableState.zoomTo(zoomFactor = targetScale, centroid = centroid)
-                            }
+                val singlePageZoomType =
+                    remember(config.zoomStart, config.isRtl) {
+                        when (config.zoomStart) {
+                            1 ->
+                                if (config.isRtl) PagerConfig.ZoomType.Right
+                                else PagerConfig.ZoomType.Left
+                            2 -> PagerConfig.ZoomType.Left
+                            3 -> PagerConfig.ZoomType.Right
+                            else -> PagerConfig.ZoomType.Center
                         }
                     }
-                    autoZoomApplied = true
-                }
-            }
 
-            val model =
-                remember(
-                    page,
-                    config.cropBorders,
+                LaunchedEffect(
+                    isReady,
+                    config.landscapeZoom,
+                    config.imageScaleType,
                     shouldRotateWide,
-                    config.doublePageRotateReverse,
                 ) {
-                    ImageRequest.Builder(context)
-                        .data(page)
-                        // ZoomableAsyncImage replaces maxBitmapSize with ORIGINAL because it
-                        // expects to sub-sample, which never happens for a ReaderPage. It keeps
-                        // size, so the canvas size cap goes there. Without the cap, a page taller
-                        // than the texture size decodes at full size and draws blank as a hardware
-                        // bitmap or is too large for the canvas as a software one.
-                        .size(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
-                        .scale(Scale.FIT)
-                        .precision(Precision.INEXACT)
-                        .crossfade(true)
-                        .apply {
-                            val transformations = mutableListOf<Transformation>()
-                            if (config.cropBorders) {
-                                transformations.add(CropBordersTransformation(cropTopBottom = true))
+                    if (
+                        !autoZoomApplied &&
+                            isReady &&
+                            config.landscapeZoom &&
+                            config.imageScaleType == 1 &&
+                            viewportWidthPx > 0f &&
+                            viewportHeightPx > 0f
+                    ) {
+                        @Suppress("DEPRECATION")
+                        val bounds =
+                            withTimeoutOrNull(2000L) {
+                                snapshotFlow { zoomableState.transformedContentBounds }
+                                    .filter { !it.isEmpty }
+                                    .first()
                             }
-                            if (shouldRotateWide) {
-                                transformations.add(
-                                    RotateWidePageTransformation(
-                                        rotateWide = true,
-                                        reverse = config.doublePageRotateReverse,
+
+                        if (bounds != null) {
+                            val isLandscape = bounds.width > bounds.height
+                            if (isLandscape && bounds.height < viewportHeightPx) {
+                                val targetScale =
+                                    (viewportHeightPx / bounds.height).coerceIn(1f, 3f)
+                                if (targetScale > 1.05f) {
+                                    val centroid =
+                                        when (singlePageZoomType) {
+                                            PagerConfig.ZoomType.Right ->
+                                                Offset(viewportWidthPx, viewportHeightPx / 2f)
+                                            PagerConfig.ZoomType.Left ->
+                                                Offset(0f, viewportHeightPx / 2f)
+                                            PagerConfig.ZoomType.Center ->
+                                                Offset(viewportWidthPx / 2f, viewportHeightPx / 2f)
+                                        }
+                                    zoomableState.zoomTo(
+                                        zoomFactor = targetScale,
+                                        centroid = centroid,
                                     )
-                                )
-                            }
-                            if (transformations.isNotEmpty()) {
-                                transformations(transformations)
+                                }
                             }
                         }
-                        .build()
+                        autoZoomApplied = true
+                    }
                 }
 
-            ZoomableAsyncImage(
-                model = model,
-                contentDescription = null,
-                contentScale = contentScale,
-                alignment = imageAlignment,
-                state = imageState,
-                colorFilter = config.colorFilter,
-                onDoubleClick = doubleClickToZoomListener,
-                modifier = Modifier.fillMaxSize(),
-            )
+                val model =
+                    remember(
+                        page,
+                        loadErrors,
+                        config.cropBorders,
+                        shouldRotateWide,
+                        config.doublePageRotateReverse,
+                    ) {
+                        ImageRequest.Builder(context)
+                            .data(page)
+                            // ZoomableAsyncImage replaces maxBitmapSize with ORIGINAL because it
+                            // expects to sub-sample, which never happens for a ReaderPage. It keeps
+                            // size, so the canvas size cap goes there. Without the cap, a page
+                            // taller than the texture size decodes at full size and draws blank as
+                            // a hardware bitmap or is too large for the canvas as a software one.
+                            .size(
+                                CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize)
+                            )
+                            .scale(Scale.FIT)
+                            .precision(Precision.INEXACT)
+                            .crossfade(true)
+                            // ZoomableAsyncImage has no error callback, but the request it rebuilds
+                            // keeps this listener.
+                            .listener(
+                                onError = { _, result ->
+                                    loadErrors.onError(page, result.throwable)
+                                },
+                                onSuccess = { _, _ -> loadErrors.onSuccess(page) },
+                            )
+                            .apply {
+                                val transformations = mutableListOf<Transformation>()
+                                if (config.cropBorders) {
+                                    transformations.add(
+                                        CropBordersTransformation(cropTopBottom = true)
+                                    )
+                                }
+                                if (shouldRotateWide) {
+                                    transformations.add(
+                                        RotateWidePageTransformation(
+                                            rotateWide = true,
+                                            reverse = config.doublePageRotateReverse,
+                                        )
+                                    )
+                                }
+                                if (transformations.isNotEmpty()) {
+                                    transformations(transformations)
+                                }
+                            }
+                            .build()
+                    }
+
+                ZoomableAsyncImage(
+                    model = model,
+                    contentDescription = null,
+                    contentScale = contentScale,
+                    alignment = imageAlignment,
+                    state = imageState,
+                    colorFilter = config.colorFilter,
+                    onDoubleClick = doubleClickToZoomListener,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
 
         ReaderPageLoadingOverlay(status = combinedStatus, progress = combinedProgress)
@@ -378,7 +410,7 @@ fun PagerPageItem(
         ReaderPageErrorOverlay(
             visible = isError,
             onRetry = onRetry,
-            message = page.errorMessage ?: extraPage?.errorMessage,
+            message = page.errorMessage ?: extraPage?.errorMessage ?: loadErrors.message,
         )
     }
 }
