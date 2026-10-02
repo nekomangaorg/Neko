@@ -159,6 +159,8 @@ fun PagerPageItem(
             }
         }
 
+    val tapClaim = remember { TapNavigationClaim() }
+
     val onRetry: () -> Unit = {
         loadErrors.clear()
         page.retry()
@@ -184,6 +186,7 @@ fun PagerPageItem(
                     config = config,
                     page = page,
                     extraPage = extraPage,
+                    tapClaim = tapClaim,
                 ),
         contentAlignment = Alignment.Center,
     ) {
@@ -411,6 +414,7 @@ fun PagerPageItem(
             visible = isError,
             onRetry = onRetry,
             message = page.errorMessage ?: extraPage?.errorMessage ?: loadErrors.message,
+            tapClaim = tapClaim,
         )
     }
 }
