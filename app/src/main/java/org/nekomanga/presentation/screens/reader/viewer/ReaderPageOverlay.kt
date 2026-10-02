@@ -89,6 +89,7 @@ fun ReaderPageErrorOverlay(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     message: String? = null,
+    tapClaim: TapNavigationClaim? = null,
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -124,7 +125,9 @@ fun ReaderPageErrorOverlay(
                         textAlign = TextAlign.Center,
                     )
                 }
-                Button(onClick = onRetry) { Text(text = stringResource(id = R.string.retry)) }
+                Button(onClick = onRetry, modifier = Modifier.claimTapNavigation(tapClaim)) {
+                    Text(text = stringResource(id = R.string.retry))
+                }
             }
         }
     }
