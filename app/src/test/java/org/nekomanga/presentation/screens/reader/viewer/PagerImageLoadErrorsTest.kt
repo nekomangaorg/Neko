@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -71,5 +72,23 @@ class PagerImageLoadErrorsTest {
 
         assertFalse(errors.hasError)
         assertNull(errors.message)
+    }
+
+    @Test
+    fun `failed pages leave out the partner page that loaded`() {
+        val errors = PagerImageLoadErrors()
+
+        errors.onError(extraPage, IllegalStateException("broken"))
+        errors.onSuccess(page)
+
+        assertEquals(listOf(extraPage), errors.failedPages(page, extraPage))
+    }
+
+    @Test
+    fun `failed pages include a page whose download failed`() {
+        val errors = PagerImageLoadErrors()
+        page.status = Page.State.ERROR
+
+        assertEquals(listOf(page), errors.failedPages(page, null))
     }
 }
