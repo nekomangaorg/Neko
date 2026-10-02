@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.data.network.mangabaka.dto.MangaBakaOAuth
@@ -97,6 +98,16 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override fun displayScore(track: Track): String = track.score.toInt().toString()
+
+    override fun fromTenPointScore(score: Float) = Companion.fromTenPointScore(score)
+
+    override fun statusFromMdList(status: FollowStatus): Int? =
+        when (status) {
+            FollowStatus.ON_HOLD -> PAUSED
+            FollowStatus.DROPPED -> DROPPED
+            FollowStatus.RE_READING -> REREADING
+            else -> super.statusFromMdList(status)
+        }
 
     override suspend fun add(track: Track): Track {
         updateNewTrackInfo(track, PLAN_TO_READ)
@@ -216,6 +227,8 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
         const val PLAN_TO_READ = 5
         const val REREADING = 6
         const val CONSIDERING = 7
+
+        fun fromTenPointScore(score: Float) = score * 10
 
         const val STEP_1 = "STEP_1"
         const val STEP_5 = "STEP_5"

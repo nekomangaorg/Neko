@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import java.text.DecimalFormat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -89,6 +90,14 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     override fun indexToScore(index: Int): Float {
         return if (index > 0) (index + 1) / 2f else 0f
     }
+
+    override fun statusFromMdList(status: FollowStatus): Int? =
+        when (status) {
+            FollowStatus.ON_HOLD -> ON_HOLD
+            FollowStatus.DROPPED -> DROPPED
+            FollowStatus.RE_READING -> READING
+            else -> super.statusFromMdList(status)
+        }
 
     override fun displayScore(track: Track): String {
         val df = DecimalFormat("0.#")

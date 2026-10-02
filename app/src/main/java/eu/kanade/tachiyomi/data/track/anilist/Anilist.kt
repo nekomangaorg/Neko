@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
@@ -120,6 +121,16 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override fun get10PointScore(score: Float) = score / 10
+
+    override fun fromTenPointScore(score: Float) = Companion.fromTenPointScore(score)
+
+    override fun statusFromMdList(status: FollowStatus): Int? =
+        when (status) {
+            FollowStatus.ON_HOLD -> PAUSED
+            FollowStatus.DROPPED -> DROPPED
+            FollowStatus.RE_READING -> REREADING
+            else -> super.statusFromMdList(status)
+        }
 
     override fun displayScore(track: Track): String {
         val score = track.score
@@ -273,6 +284,8 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
 
         const val DEFAULT_STATUS = READING
         const val DEFAULT_SCORE = 0
+
+        fun fromTenPointScore(score: Float) = score * 10
 
         const val POINT_100 = "POINT_100"
         const val POINT_10 = "POINT_10"

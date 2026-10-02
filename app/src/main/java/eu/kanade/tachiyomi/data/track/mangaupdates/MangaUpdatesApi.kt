@@ -61,6 +61,11 @@ class MangaUpdatesApi(interceptor: MangaUpdatesInterceptor, private val client: 
                 )
             )
             .await()
+
+        // Skip the call for a score of 0, where updateSeriesRating would send a DELETE.
+        if (track.score != 0f) {
+            updateSeriesRating(track)
+        }
     }
 
     suspend fun removeSeriesFromList(track: Track): Boolean {
