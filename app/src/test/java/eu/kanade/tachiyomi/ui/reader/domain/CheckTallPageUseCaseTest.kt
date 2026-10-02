@@ -203,4 +203,62 @@ class CheckTallPageUseCaseTest {
             )
         }
     }
+
+    @Test
+    fun `computeSplits respects configurable bytesPerPixel`() {
+        val page = createPage()
+        // With bytesPerPixel = 4L (ARGB_8888), 6000 x 5000 * 4 = 120 MB > 100 MB -> split required
+        val splits4Bytes =
+            useCase.computeSplits(
+                page,
+                outWidth = 6000,
+                outHeight = 5000,
+                screenHeight = 3000,
+                maxTextureSize = 8192,
+                bytesPerPixel = 4L,
+            )
+        assertNotNull(splits4Bytes)
+
+        // With bytesPerPixel = 2L (RGB_565), 6000 x 5000 * 2 = 60 MB <= 100 MB, aspect ratio = 0.83
+        // <= 2f,
+        // height 5000 <= displayMaxHeight 6000 -> no split required
+        val splits2Bytes =
+            useCase.computeSplits(
+                page,
+                outWidth = 6000,
+                outHeight = 5000,
+                screenHeight = 3000,
+                maxTextureSize = 8192,
+                bytesPerPixel = 2L,
+            )
+        assertNull(splits2Bytes)
+    }
+
+    @Test
+    fun `computeSplits splits ultra-wide panoramic scans that exceed canvas byte limit`() {
+        val page = createPage()
+        // 15000 x 2000 panoramic scan: aspect ratio 2000 / 15000 = 0.133 <= 2f,
+        // but 15000 * 2000 * 4 = 120 MB > 100 MB limit
+        val splits =
+            useCase.computeSplits(
+                page,
+                outWidth = 15000,
+                outHeight = 2000,
+                screenHeight = 3000,
+                maxTextureSize = 16384,
+            )
+        assertNotNull(splits)
+        val nonNullSplits = splits!!
+        assertTrue(nonNullSplits.size >= 2)
+        assertEquals(2000, nonNullSplits.sumOf { it.splitHeight })
+
+        // Ensure each slice's byte count is within MAX_CANVAS_BITMAP_BYTES
+        nonNullSplits.forEach { split ->
+            val sliceBytes = 15000L * split.splitHeight.toLong() * 4L
+            assertTrue(
+                "Slice bytes $sliceBytes must not exceed MAX_CANVAS_BITMAP_BYTES",
+                sliceBytes <= GLUtil.MAX_CANVAS_BITMAP_BYTES,
+            )
+        }
+    }
 }

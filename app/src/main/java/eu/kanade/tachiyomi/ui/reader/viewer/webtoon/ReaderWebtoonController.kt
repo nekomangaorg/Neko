@@ -162,7 +162,9 @@ class ReaderWebtoonController(
             page: ReaderPage,
             screenHeight: Int,
             maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
-        ): List<ReaderPageSplit>? = defaultCheckTallPageUseCase(page, screenHeight, maxTextureSize)
+            bytesPerPixel: Long = 4L,
+        ): List<ReaderPageSplit>? =
+            defaultCheckTallPageUseCase(page, screenHeight, maxTextureSize, bytesPerPixel)
 
         /**
          * Pure function that calculates optimal slice splits given dimensions and maximum texture
@@ -174,6 +176,7 @@ class ReaderWebtoonController(
             outHeight: Int,
             screenHeight: Int,
             maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
+            bytesPerPixel: Long = 4L,
         ): List<ReaderPageSplit>? =
             defaultCheckTallPageUseCase.computeSplits(
                 page,
@@ -181,6 +184,7 @@ class ReaderWebtoonController(
                 outHeight,
                 screenHeight,
                 maxTextureSize,
+                bytesPerPixel,
             )
     }
 }
