@@ -160,10 +160,11 @@ fun PagerPageItem(
         }
 
     val onRetry: () -> Unit = {
+        // Retrying a page downloads it again, so leave out a partner page that loaded fine.
+        val failedPages = loadErrors.failedPages(page, extraPage)
         loadErrors.clear()
         page.retry()
-        page.chapter.pageLoader?.retryPage(page)
-        extraPage?.chapter?.pageLoader?.retryPage(extraPage)
+        failedPages.forEach { it.chapter.pageLoader?.retryPage(it) }
     }
 
     val doubleClickToZoomListener =
