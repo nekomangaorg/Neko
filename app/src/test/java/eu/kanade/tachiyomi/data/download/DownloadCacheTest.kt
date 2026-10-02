@@ -12,7 +12,9 @@ import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -85,19 +87,25 @@ class DownloadCacheTest {
         runTest(testDispatcher) {
             val cache = DownloadCache(provider, sourceManager, storageManager)
 
+            val started = CompletableDeferred<Unit>()
             val jobCancelled = CompletableDeferred<Boolean>()
             val callerJob =
                 launch(Dispatchers.Default) {
+                    started.complete(Unit)
                     try {
-                        cache.cancelRenewJob()
-                        jobCancelled.complete(true)
-                    } catch (e: Exception) {
-                        jobCancelled.complete(false)
+                        awaitCancellation()
+                    } finally {
+                        try {
+                            cache.cancelRenewJob()
+                            jobCancelled.complete(true)
+                        } catch (e: Exception) {
+                            jobCancelled.complete(false)
+                        }
                     }
                 }
 
-            callerJob.cancel()
-            callerJob.join()
+            started.await()
+            callerJob.cancelAndJoin()
 
             val completed = jobCancelled.await()
             assertTrue(completed)
