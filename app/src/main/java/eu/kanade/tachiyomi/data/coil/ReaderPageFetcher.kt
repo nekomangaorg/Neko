@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.coil
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.BitmapRegionDecoder
+import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.Build
 import android.util.LruCache
@@ -483,41 +484,40 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             val scaledTop = (top * scale).toInt().coerceIn(0, decoded.bitmap.height - 1)
             val scaledHeight = (height * scale).toInt().coerceAtLeast(1)
             val cropHeight = minOf(scaledHeight, decoded.bitmap.height - scaledTop)
-            if (cropHeight <= 0) {
+            val cropWidth = decoded.bitmap.width
+            if (cropHeight <= 0 || cropWidth <= 0) {
                 null
             } else {
-                val rawSlice =
+                val maxDim = GLUtil.maxCanvasTextureSize
+                val maxBytes = GLUtil.MAX_CANVAS_BITMAP_BYTES
+                val bytesPerPixel = if (decoded.bitmap.config == Bitmap.Config.RGB_565) 2L else 4L
+                val rawBytes = cropWidth.toLong() * cropHeight.toLong() * bytesPerPixel
+                if (rawBytes > maxBytes || cropWidth > maxDim || cropHeight > maxDim) {
+                    val scaleFactor =
+                        minOf(
+                                maxDim.toFloat() / cropWidth.toFloat(),
+                                maxDim.toFloat() / cropHeight.toFloat(),
+                                sqrt(maxBytes.toDouble() / rawBytes.toDouble()).toFloat(),
+                            )
+                            .coerceIn(maxOf(1f / cropWidth, 1f / cropHeight), 1f)
+                    val matrix = Matrix().apply { postScale(scaleFactor, scaleFactor) }
                     Bitmap.createBitmap(
                         decoded.bitmap,
                         0,
                         scaledTop,
-                        decoded.bitmap.width,
+                        cropWidth,
+                        cropHeight,
+                        matrix,
+                        true,
+                    )
+                } else {
+                    Bitmap.createBitmap(
+                        decoded.bitmap,
+                        0,
+                        scaledTop,
+                        cropWidth,
                         cropHeight,
                     )
-                val maxDim = GLUtil.maxCanvasTextureSize
-                val maxBytes = GLUtil.MAX_CANVAS_BITMAP_BYTES
-                if (
-                    rawSlice.byteCount > maxBytes ||
-                        rawSlice.width > maxDim ||
-                        rawSlice.height > maxDim
-                ) {
-                    val scaleFactor =
-                        minOf(
-                                maxDim.toFloat() / rawSlice.width.toFloat(),
-                                maxDim.toFloat() / rawSlice.height.toFloat(),
-                                sqrt(maxBytes.toDouble() / rawSlice.byteCount.toDouble()).toFloat(),
-                            )
-                            .coerceAtMost(1f)
-                    val targetWidth = (rawSlice.width * scaleFactor).toInt().coerceAtLeast(1)
-                    val targetHeight = (rawSlice.height * scaleFactor).toInt().coerceAtLeast(1)
-                    val scaledSlice =
-                        Bitmap.createScaledBitmap(rawSlice, targetWidth, targetHeight, true)
-                    if (scaledSlice != rawSlice) {
-                        rawSlice.recycle()
-                    }
-                    scaledSlice
-                } else {
-                    rawSlice
                 }
             }
         } catch (e: Exception) {

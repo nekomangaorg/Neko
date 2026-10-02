@@ -49,12 +49,19 @@ class CheckTallPageUseCase {
         if (outHeight <= 0 || outWidth <= 0) return null
         val displayMaxHeight =
             if (screenHeight > 0) {
-                minOf(maxOf(screenHeight * 2, 4096), maxTextureSize)
+                minOf(
+                    maxOf(screenHeight * 2, GLUtil.SAFE_CANVAS_BITMAP_DIMENSION),
+                    maxTextureSize,
+                )
             } else {
                 maxTextureSize
             }
         val exceedsCanvasLimit =
             (outWidth.toLong() * outHeight.toLong() * 4L) > GLUtil.MAX_CANVAS_BITMAP_BYTES
+        // A page is eligible for vertical slicing if it matches webtoon strip aspect ratios (>
+        // 2.0f),
+        // exceeds safe hardware texture dimensions, or exceeds the Android RecordingCanvas 100 MB
+        // budget.
         val isTall =
             (outHeight.toFloat() / outWidth.toFloat() > 2f) ||
                 (outHeight > maxTextureSize) ||

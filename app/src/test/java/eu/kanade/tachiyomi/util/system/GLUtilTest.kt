@@ -12,8 +12,13 @@ class GLUtilTest {
     }
 
     @Test
-    fun `maxCanvasTextureSize does not exceed 4096 and is at least minimum default`() {
-        assertTrue(GLUtil.maxCanvasTextureSize <= 4096)
+    fun `SAFE_CANVAS_BITMAP_DIMENSION is 4096`() {
+        assertEquals(4096, GLUtil.SAFE_CANVAS_BITMAP_DIMENSION)
+    }
+
+    @Test
+    fun `maxCanvasTextureSize does not exceed SAFE_CANVAS_BITMAP_DIMENSION and is at least minimum default`() {
+        assertTrue(GLUtil.maxCanvasTextureSize <= GLUtil.SAFE_CANVAS_BITMAP_DIMENSION)
         assertTrue(GLUtil.maxCanvasTextureSize >= 2048)
     }
 

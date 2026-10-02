@@ -69,10 +69,15 @@ class GLUtil private constructor() {
 
         /**
          * Safe maximum dimension for bitmaps rendered onto a hardware-accelerated Canvas. Clamped
-         * to at most 4096 so that a square ARGB_8888 bitmap requires at most 4096 x 4096 x 4 = 64
-         * MB, safely below [MAX_CANVAS_BITMAP_BYTES] (100 MB).
+         * to at most [SAFE_CANVAS_BITMAP_DIMENSION] (4096) so that a square ARGB_8888 bitmap
+         * requires at most 4096 x 4096 x 4 = 64 MB, safely below [MAX_CANVAS_BITMAP_BYTES] (100
+         * MB).
          */
-        val maxCanvasTextureSize: Int by lazy { minOf(maxTextureSize, 4096) }
+        const val SAFE_CANVAS_BITMAP_DIMENSION: Int = 4096
+
+        val maxCanvasTextureSize: Int by lazy {
+            minOf(maxTextureSize, SAFE_CANVAS_BITMAP_DIMENSION)
+        }
     }
 
     init {
