@@ -608,6 +608,10 @@ fun ComposePagerViewer(
         remember(readerTheme, themeBackground) {
             ReaderTheme.fromPreference(readerTheme).color(themeBackground)
         }
+    val smartBackgroundBaseColor =
+        remember(readerTheme, themeBackground) {
+            ReaderTheme.fromPreference(readerTheme).smartBaseColor(themeBackground)
+        }
     val colorFilter =
         remember(grayscale, invertedColors) {
             ReaderColorFilter.getColorFilter(grayscale, invertedColors)
@@ -618,6 +622,7 @@ fun ComposePagerViewer(
             initialIndex = initialPage,
             activeChapterId = currentChapterId,
             backgroundColor = backgroundColor,
+            smartBackgroundBaseColor = smartBackgroundBaseColor,
             colorFilter = colorFilter,
             isRtl = isRtl,
             isVertical = isVertical,

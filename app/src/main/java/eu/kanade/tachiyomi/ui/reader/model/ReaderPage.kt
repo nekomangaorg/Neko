@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
-import android.graphics.drawable.Drawable
 import eu.kanade.tachiyomi.source.model.Page
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicInteger
@@ -13,8 +12,6 @@ open class ReaderPage(
     imageUrl: String? = null,
     mangaDexChapterId: String = "",
     var stream: (() -> InputStream)? = null,
-    var bg: Drawable? = null,
-    var bgType: Int? = null,
 ) : Page(index, url, imageUrl, mangaDexChapterId, null) {
 
     /** Rendered height after image is decoded and laid out (pixels at fit-width). */
