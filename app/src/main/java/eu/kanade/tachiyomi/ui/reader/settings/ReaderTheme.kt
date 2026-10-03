@@ -6,6 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color as ComposeColor
+import androidx.compose.ui.graphics.toArgb
+import eu.kanade.tachiyomi.ui.reader.viewer.SmartBackgroundAnalyzer
 import org.nekomanga.R
 
 enum class ReaderTheme(
@@ -39,6 +41,25 @@ enum class ReaderTheme(
     @Composable
     @ReadOnlyComposable
     fun color(): ComposeColor = color(MaterialTheme.colorScheme.background)
+
+    /**
+     * Color behind a page whose edges are not dark, or null when this theme does not look at the
+     * page.
+     */
+    fun smartBaseColor(themeBackground: ComposeColor): ComposeColor? {
+        return when (this) {
+            WHITE,
+            BLACK -> null
+            SMART_BY_PAGE -> ComposeColor.White
+            SMART_BY_THEME -> themeBackground
+            SMART_BY_THEME_BUT_BLACK ->
+                if (SmartBackgroundAnalyzer.isWhite(themeBackground.toArgb())) {
+                    themeBackground
+                } else {
+                    ComposeColor.Black
+                }
+        }
+    }
 
     fun androidColor(isDark: Boolean): Int {
         return when (this) {
