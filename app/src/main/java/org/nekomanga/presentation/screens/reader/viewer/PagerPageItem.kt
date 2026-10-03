@@ -257,6 +257,22 @@ fun PagerPageItem(
             }
         }
 
+        SmartPageBackground(
+            source =
+                smartBackgroundSource(
+                    page = page,
+                    extraPage = extraPage,
+                    isRtl = config.isRtl,
+                    invertDoublePages = config.invertDoublePages,
+                    rotateWide = shouldRotateWide,
+                    rotateReverse = config.doublePageRotateReverse,
+                ),
+            baseColor = config.smartBackgroundBaseColor,
+            isReady = isReady,
+            isError = isError,
+            colorFilter = config.colorFilter,
+        )
+
         // A retry does not change the image requests, and the images load again only for a
         // changed request, so each retry gets new images.
         key(retryGeneration) {
@@ -457,6 +473,10 @@ fun PagerPageItem(
         remember(readerThemePref, themeBackground) {
             ReaderTheme.fromPreference(readerThemePref).color(themeBackground)
         }
+    val smartBackgroundBaseColor =
+        remember(readerThemePref, themeBackground) {
+            ReaderTheme.fromPreference(readerThemePref).smartBaseColor(themeBackground)
+        }
     val colorFilter =
         remember(grayscale, invertedColors) {
             ReaderColorFilter.getColorFilter(grayscale, invertedColors)
@@ -465,6 +485,7 @@ fun PagerPageItem(
     val config =
         PagerViewerConfigUiModel(
             backgroundColor = backgroundColor,
+            smartBackgroundBaseColor = smartBackgroundBaseColor,
             colorFilter = colorFilter,
             isRtl = viewer.isRtl,
             imageScaleType = imageScaleType,
