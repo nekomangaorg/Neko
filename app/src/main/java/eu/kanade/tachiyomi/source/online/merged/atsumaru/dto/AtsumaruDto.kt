@@ -146,12 +146,16 @@ class ChapterDto(
         if (match != null) {
             val prefix = match.groupValues[1].trim()
             var number = match.groupValues[2]
-            val suffix = match.groupValues[3].trim()
+            // Titles like "Chapter 01 - Name" or "Chapter 5: Name" carry their own separator, and
+            // some stack two ("Chapter 442 - - Name"). Drop them, step 4 adds the " - ".
+            val suffix = match.groupValues[3].trim().replaceFirst(LEADING_SEPARATORS, "")
 
             // 1. Clean the number
             if (number.contains(".")) {
                 number = number.trimEnd('0').trimEnd('.')
             }
+            number =
+                number.trimStart('0').let { if (it.isEmpty() || it.startsWith('.')) "0$it" else it }
 
             // 2. Check for "Official" or "Redraw"
             var tagString: String? = null
@@ -200,6 +204,8 @@ class ChapterDto(
     }
 
     companion object {
+        private val LEADING_SEPARATORS = Regex("""^(?:[-–—:]\s*)+""")
+
         private val DATE_FORMAT: ThreadLocal<SimpleDateFormat> =
             object : ThreadLocal<SimpleDateFormat>() {
                 override fun initialValue(): SimpleDateFormat {
