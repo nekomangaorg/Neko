@@ -35,6 +35,7 @@ import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
+import eu.kanade.tachiyomi.data.coil.maxBitmapBytes
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
@@ -162,7 +163,8 @@ private fun WebtoonPageContent(
             ImageRequest.Builder(context)
                 .data(modelData)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
+                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                .maxBitmapBytes(GLUtil.MAX_CANVAS_BITMAP_BYTES)
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .apply {

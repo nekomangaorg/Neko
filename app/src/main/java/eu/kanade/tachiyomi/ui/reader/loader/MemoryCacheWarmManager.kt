@@ -9,6 +9,7 @@ import coil3.request.crossfade
 import coil3.request.maxBitmapSize
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
+import eu.kanade.tachiyomi.data.coil.maxBitmapBytes
 import eu.kanade.tachiyomi.util.system.GLUtil
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap
 open class MemoryCacheWarmManager(
     private val context: Context,
     private val imageLoaderProvider: (() -> ImageLoader?)? = null,
-    private val maxTextureSizeProvider: () -> Int = { GLUtil.maxCanvasTextureSize },
+    private val maxTextureSizeProvider: () -> Int = { GLUtil.maxTextureSize },
 ) {
     private val activeDisposables = ConcurrentHashMap<String, Disposable>()
 
@@ -54,6 +55,7 @@ open class MemoryCacheWarmManager(
                 .data(data)
                 .size(CoilSize.ORIGINAL)
                 .maxBitmapSize(maxTextureBitmapSize)
+                .maxBitmapBytes(GLUtil.MAX_CANVAS_BITMAP_BYTES)
                 .precision(Precision.EXACT)
                 .crossfade(crossfade)
                 .listener(

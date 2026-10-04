@@ -44,6 +44,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
                 scale = options.scale,
                 precision = options.precision,
                 maxSize = options.maxBitmapSize,
+                maxBytes = options.maxBitmapBytes,
             )
         val sampled =
             try {
@@ -101,7 +102,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
  * Sample size for the native decode and the multiplier for the sampled bitmap, worked out the way
  * Coil's BitmapFactoryDecoder does it for JPEG and PNG. The native decoder knows nothing of the
  * request's size or maxBitmapSize, so without this an AVIF, HEIF or JXL page comes back at full
- * resolution, and a tall one is then too large to draw.
+ * resolution, and a tall one is then too large to draw. [maxBytes] is the request's maxBitmapBytes.
  */
 @OptIn(ExperimentalCoilApi::class)
 internal fun nativeDecodeTarget(
@@ -111,9 +112,10 @@ internal fun nativeDecodeTarget(
     scale: Scale,
     precision: Precision,
     maxSize: Size,
+    maxBytes: Long = 0L,
 ): NativeDecodeTarget {
-    val (dstWidth, dstHeight) =
-        DecodeUtils.computeDstSize(srcWidth, srcHeight, size, scale, maxSize)
+    val limit = byteLimitedMaxSize(srcWidth, srcHeight, maxSize, maxBytes)
+    val (dstWidth, dstHeight) = DecodeUtils.computeDstSize(srcWidth, srcHeight, size, scale, limit)
     val sampleSize =
         DecodeUtils.calculateInSampleSize(srcWidth, srcHeight, dstWidth, dstHeight, scale)
     var multiplier =
@@ -123,7 +125,7 @@ internal fun nativeDecodeTarget(
             dstWidth = dstWidth.toDouble(),
             dstHeight = dstHeight.toDouble(),
             scale = scale,
-            maxSize = maxSize,
+            maxSize = limit,
         )
     // Like BitmapFactoryDecoder, only an exact request may upscale.
     if (precision == Precision.INEXACT) {
