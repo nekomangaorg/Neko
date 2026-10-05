@@ -18,16 +18,23 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.asResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okio.Buffer
+import okio.ForwardingSource
+import okio.buffer
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.nekomanga.R
+import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 
 class DownloaderSaveImageTest {
 
@@ -41,6 +48,8 @@ class DownloaderSaveImageTest {
             every { contentResolver } returns
                 mockk<ContentResolver> { every { getType(any()) } answers { uriType } }
             every { getString(R.string.download_notifier_page_not_image) } returns NOT_IMAGE
+            every { getString(R.string.download_notifier_cannot_create_file) } returns
+                CANNOT_CREATE_FILE
         }
 
     @Before
@@ -131,21 +140,47 @@ class DownloaderSaveImageTest {
         assertEquals(emptyList<String>(), tmpDir.list()!!.toList())
     }
 
+    @Test
+    fun `closes the response when the temp file cannot be created`() {
+        // A directory in the way makes createFile return null.
+        File(tmpDir, "001$TMP_FILE_SUFFIX").mkdir()
+        var closed = false
+        val source =
+            object : ForwardingSource(Buffer().write(PNG_SIGNATURE)) {
+                override fun close() {
+                    closed = true
+                    super.close()
+                }
+            }
+
+        val error =
+            assertThrows(Exception::class.java) {
+                save(response(200, source.buffer().asResponseBody("image/png".toMediaType())))
+            }
+
+        assertEquals(CANNOT_CREATE_FILE, error.message)
+        assertTrue(closed)
+    }
+
     private fun save(response: Response): UniFile =
         Downloader.saveImage(context, response, UniFile.fromFile(tmpDir)!!, "001")
 
     private fun response(code: Int, bytes: ByteArray, contentType: String): Response =
+        response(code, bytes.toResponseBody(contentType.toMediaType()))
+
+    private fun response(code: Int, body: ResponseBody): Response =
         Response.Builder()
             .request(Request.Builder().url(IMAGE_URL).build())
             .protocol(Protocol.HTTP_1_1)
             .code(code)
             .message("message")
-            .body(bytes.toResponseBody(contentType.toMediaType()))
+            .body(body)
             .build()
 
     companion object {
         private const val IMAGE_URL = "https://example.org/data/page1.png"
         private const val NOT_IMAGE = "Downloaded page isn't an image"
+        private const val CANNOT_CREATE_FILE = "Couldn't create a file in the download folder"
         private val PNG_SIGNATURE =
             byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
     }

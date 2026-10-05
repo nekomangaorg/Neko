@@ -673,7 +673,11 @@ class Downloader(
                     HttpPageLoader.httpErrorMessage(response.code, response.request.url.host)
                 )
             }
-            val file = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
+            val file = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")
+            if (file == null) {
+                response.close()
+                throw Exception(context.getString(R.string.download_notifier_cannot_create_file))
+            }
             try {
                 response.body.source().saveTo(file.openOutputStream())
                 val extension = getImageExtension(context, response, file)
