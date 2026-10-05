@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens.reader.viewer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,10 +38,7 @@ import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
 import eu.kanade.tachiyomi.data.coil.RotateWidePageTransformation
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
-import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
@@ -53,11 +49,7 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.ZoomableImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
-import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle as preferenceCollectAsStateWithLifecycle
 import org.nekomanga.presentation.theme.Size
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 /**
  * Pure stateless Composable rendering an individual paginated reader item (single page, paired
@@ -419,87 +411,6 @@ fun PagerPageItem(
             message = page.errorMessage ?: extraPage?.errorMessage ?: loadErrors.message,
         )
     }
-}
-
-/** Legacy compatibility overload for [PagerPageItem] passing [PagerViewer]. */
-@Deprecated("Use stateless PagerPageItem with PagerViewerConfigUiModel")
-@Composable
-fun PagerPageItem(
-    viewer: PagerViewer,
-    page: ReaderPage,
-    extraPage: ReaderPage? = null,
-    modifier: Modifier = Modifier,
-) {
-    val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-    val imageScaleType by readerPreferences.imageScaleType().preferenceCollectAsStateWithLifecycle()
-    val doublePageGap by readerPreferences.doublePageGap().preferenceCollectAsStateWithLifecycle()
-    val invertDoublePages by
-        readerPreferences.invertDoublePages().preferenceCollectAsStateWithLifecycle()
-    val readerThemePref by readerPreferences.readerTheme().preferenceCollectAsStateWithLifecycle()
-    val landscapeZoom by readerPreferences.landscapeZoom().preferenceCollectAsStateWithLifecycle()
-    val navigateToPan by readerPreferences.navigateToPan().preferenceCollectAsStateWithLifecycle()
-    val zoomStart by readerPreferences.zoomStart().preferenceCollectAsStateWithLifecycle()
-    val cropBorders by readerPreferences.cropBorders().preferenceCollectAsStateWithLifecycle()
-    val grayscale by readerPreferences.grayscale().preferenceCollectAsStateWithLifecycle()
-    val invertedColors by readerPreferences.invertedColors().preferenceCollectAsStateWithLifecycle()
-    val doublePageRotate by
-        readerPreferences.doublePageRotate().preferenceCollectAsStateWithLifecycle()
-    val doublePageRotateReverse by
-        readerPreferences.doublePageRotateReverse().preferenceCollectAsStateWithLifecycle()
-
-    val themeBackground = MaterialTheme.colorScheme.background
-    val backgroundColor =
-        remember(readerThemePref, themeBackground) {
-            ReaderTheme.fromPreference(readerThemePref).color(themeBackground)
-        }
-    val colorFilter =
-        remember(grayscale, invertedColors) {
-            ReaderColorFilter.getColorFilter(grayscale, invertedColors)
-        }
-
-    val config =
-        PagerViewerConfigUiModel(
-            backgroundColor = backgroundColor,
-            colorFilter = colorFilter,
-            isRtl = viewer.isRtl,
-            imageScaleType = imageScaleType,
-            doublePageGap = doublePageGap,
-            invertDoublePages = invertDoublePages,
-            doublePageRotate = doublePageRotate,
-            doublePageRotateReverse = doublePageRotateReverse,
-            landscapeZoom = landscapeZoom,
-            zoomStart = zoomStart,
-            navigateToPan = navigateToPan,
-            doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
-            longTapEnabled = viewer.config.longTapEnabled,
-            menuVisible = viewer.activity.menuVisible,
-            cropBorders = cropBorders,
-            navigator = viewer.config.navigator,
-            onToggleMenu = remember(viewer) { { viewer.activity.toggleMenu() } },
-            onNavigateAdjacent =
-                remember(viewer) {
-                    { forward -> if (forward) viewer.moveToNext() else viewer.moveToPrevious() }
-                },
-            onActivePanDelegateChanged = { delegate, active ->
-                if (active) {
-                    viewer.panDelegate = delegate
-                } else if (viewer.panDelegate == delegate) {
-                    viewer.panDelegate = null
-                }
-            },
-            onPageLongTap = remember(viewer) { { p, ep -> viewer.activity.onPageLongTap(p, ep) } },
-            onWidePageDetected = remember(viewer) { { p -> viewer.splitDoublePages(p) } },
-        )
-
-    val isActive = viewer.currentPagePosition == viewer.controller.findPageIndex(viewer.items, page)
-
-    PagerPageItem(
-        page = page,
-        config = config,
-        extraPage = extraPage,
-        modifier = modifier,
-        isActive = isActive,
-    )
 }
 
 private object SmartFitContentScale : ContentScale {

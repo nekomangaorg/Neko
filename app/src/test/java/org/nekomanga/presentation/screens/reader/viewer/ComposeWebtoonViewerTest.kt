@@ -448,4 +448,59 @@ class ComposeWebtoonViewerTest {
         )
         // Passes if no exception is thrown
     }
+
+    @Test
+    fun `calculateDefaultWebtoonIndex resolves requested page in active chapter`() {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[0]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Page(ch1Pages[2]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Page(ch2Pages[1]),
+                ReaderUiItem.Page(ch2Pages[2]),
+            )
+
+        val index =
+            calculateDefaultWebtoonIndex(items = items, currentChapterId = 2L, requestedPage = 1)
+        assertEquals(5, index)
+    }
+
+    @Test
+    fun `calculateDefaultWebtoonIndex defaults to first page of active chapter when requested page is null`() {
+        val ch1 = createChapter(1L, pageCount = 2)
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[0]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Page(ch2Pages[1]),
+            )
+
+        val index =
+            calculateDefaultWebtoonIndex(items = items, currentChapterId = 2L, requestedPage = null)
+        assertEquals(3, index)
+    }
+
+    @Test
+    fun `calculateDefaultWebtoonIndex returns 0 for empty items`() {
+        val index =
+            calculateDefaultWebtoonIndex(
+                items = emptyList(),
+                currentChapterId = 1L,
+                requestedPage = null,
+            )
+        assertEquals(0, index)
+    }
 }

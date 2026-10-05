@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterNavTargetUseCase
+import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
@@ -45,6 +46,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapterTransitionState
 import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.model.ReaderViewerPreferences
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
@@ -104,6 +106,7 @@ import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel
 import org.nekomanga.usecases.chapters.ParseChapterNameUseCase
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -133,8 +136,13 @@ constructor(
 
     private val parseChapterName: ParseChapterNameUseCase by injectLazy()
 
-    private val mutableState = MutableStateFlow(State())
+    private val mutableState =
+        MutableStateFlow(State(viewerPreferences = getInitialViewerPreferences()))
     val state = mutableState.asStateFlow()
+
+    init {
+        observeViewerPreferences()
+    }
 
     private val downloadProvider = DownloadProvider(preferences.context)
 
@@ -1435,13 +1443,32 @@ constructor(
         }
     }
 
+    private val transitionResolver by lazy {
+        try {
+            ResolveChapterTransitionUiModelUseCase(downloadManager)
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
     fun setViewerItems(items: List<ReaderUiItem>) {
-        mutableState.update { it.copy(viewerItems = items) }
+        val resolver = transitionResolver
+        val enriched = items.map { item ->
+            if (item is ReaderUiItem.Transition && item.transitionUiModel == null) {
+                val model =
+                    resolver?.invoke(item.transition, manga)
+                        ?: ChapterTransitionUiModel.from(item.transition)
+                item.copy(transitionUiModel = model)
+            } else {
+                item
+            }
+        }
+        mutableState.update { it.copy(viewerItems = enriched) }
     }
 
     fun updateWebtoonActiveIndex(activeIndex: Int) {
         val items = state.value.viewerItems
-        val preloadAmount = readerPreferences.preloadPageAmount().get()
+        val preloadAmount = state.value.viewerPreferences.preloadPageAmount
         preloadController.onPositionChanged(
             currentIndex = activeIndex,
             items = items,
@@ -1453,7 +1480,7 @@ constructor(
 
     fun updatePagerActiveIndex(activeIndex: Int, isRtl: Boolean) {
         val items = state.value.viewerItems
-        val preloadAmount = readerPreferences.preloadPageAmount().get()
+        val preloadAmount = state.value.viewerPreferences.preloadPageAmount
         preloadController.onPositionChanged(
             currentIndex = activeIndex,
             items = items,
@@ -1461,6 +1488,233 @@ constructor(
             isRtl = isRtl,
             isWebtoon = false,
         )
+    }
+
+    private fun getInitialViewerPreferences(): ReaderViewerPreferences {
+        return try {
+            ReaderViewerPreferences(
+                animatedTransitions = readerPreferences.animatedPageTransitions().get(),
+                animatedTransitionsWebtoon =
+                    readerPreferences.animatedPageTransitionsWebtoon().get(),
+                imageScaleType = readerPreferences.imageScaleType().get(),
+                doublePageGap = readerPreferences.doublePageGap().get(),
+                invertDoublePages = readerPreferences.invertDoublePages().get(),
+                readerTheme = readerPreferences.readerTheme().get(),
+                landscapeZoom = readerPreferences.landscapeZoom().get(),
+                zoomStart = readerPreferences.zoomStart().get(),
+                preloadPageAmount = readerPreferences.preloadPageAmount().get(),
+                cropBorders = readerPreferences.cropBorders().get(),
+                cropBordersWebtoon = readerPreferences.cropBordersWebtoon().get(),
+                grayscale = readerPreferences.grayscale().get(),
+                invertedColors = readerPreferences.invertedColors().get(),
+                doublePageRotate = readerPreferences.doublePageRotate().get(),
+                doublePageRotateReverse = readerPreferences.doublePageRotateReverse().get(),
+                navigateToPan = readerPreferences.navigateToPan().get(),
+                webtoonSidePadding = readerPreferences.webtoonSidePadding().get(),
+                webtoonDisableGaps = readerPreferences.webtoonDisableGaps().get(),
+                webtoonEnableZoomOut = readerPreferences.webtoonEnableZoomOut().get(),
+            )
+        } catch (_: Throwable) {
+            ReaderViewerPreferences()
+        }
+    }
+
+    private fun observeViewerPreferences() {
+        try {
+            readerPreferences
+                .animatedPageTransitions()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(
+                            viewerPreferences = it.viewerPreferences.copy(animatedTransitions = v)
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .animatedPageTransitionsWebtoon()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(
+                            viewerPreferences =
+                                it.viewerPreferences.copy(animatedTransitionsWebtoon = v)
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .imageScaleType()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(imageScaleType = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .doublePageGap()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(doublePageGap = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .invertDoublePages()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(
+                            viewerPreferences = it.viewerPreferences.copy(invertDoublePages = v)
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .readerTheme()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(readerTheme = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .landscapeZoom()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(landscapeZoom = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .zoomStart()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(zoomStart = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .preloadPageAmount()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(
+                            viewerPreferences = it.viewerPreferences.copy(preloadPageAmount = v)
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .cropBorders()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(cropBorders = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .cropBordersWebtoon()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(
+                            viewerPreferences = it.viewerPreferences.copy(cropBordersWebtoon = v)
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .grayscale()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(grayscale = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .invertedColors()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(invertedColors = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .doublePageRotate()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(doublePageRotate = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .doublePageRotateReverse()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(
+                            viewerPreferences =
+                                it.viewerPreferences.copy(doublePageRotateReverse = v)
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .navigateToPan()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = it.viewerPreferences.copy(navigateToPan = v))
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .webtoonSidePadding()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(
+                            viewerPreferences = it.viewerPreferences.copy(webtoonSidePadding = v)
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .webtoonDisableGaps()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(
+                            viewerPreferences = it.viewerPreferences.copy(webtoonDisableGaps = v)
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+            readerPreferences
+                .webtoonEnableZoomOut()
+                .changes()
+                .onEach { v ->
+                    mutableState.update {
+                        it.copy(
+                            viewerPreferences = it.viewerPreferences.copy(webtoonEnableZoomOut = v)
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+        } catch (_: Throwable) {
+            // In unit tests where preference store is not mocked
+        }
     }
 
     fun setChapterTitle(title: String) {
@@ -1546,6 +1800,7 @@ constructor(
         val brightnessOverlayAlpha: Float = 0f,
         val colorFilterOverlayColor: Int = 0,
         val colorFilterOverlayMode: Int = 0,
+        val viewerPreferences: ReaderViewerPreferences = ReaderViewerPreferences(),
     )
 
     sealed class Event {

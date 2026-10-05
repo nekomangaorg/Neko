@@ -6,9 +6,11 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 
 /** Implementation of a left to right PagerViewer. */
+@Deprecated("Use ComposePagerViewer with ReaderViewModel and ReaderNavCommand instead")
 class L2RPagerViewer(activity: ReaderActivity) : PagerViewer(activity)
 
 /** Implementation of a right to left PagerViewer. */
+@Deprecated("Use ComposePagerViewer with ReaderViewModel and ReaderNavCommand instead")
 class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
     override val isRtl: Boolean
         get() = true
@@ -81,4 +83,5 @@ class R2LPagerViewer(activity: ReaderActivity) : PagerViewer(activity) {
 }
 
 /** Implementation of a vertical (top to bottom) PagerViewer. */
+@Deprecated("Use ComposePagerViewer with ReaderViewModel and ReaderNavCommand instead")
 class VerticalPagerViewer(activity: ReaderActivity) : PagerViewer(activity)

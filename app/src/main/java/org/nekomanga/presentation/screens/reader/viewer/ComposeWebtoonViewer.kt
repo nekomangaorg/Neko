@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -33,10 +32,6 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
-import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
-import eu.kanade.tachiyomi.ui.reader.loader.ReaderPreloadController
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -47,25 +42,14 @@ import eu.kanade.tachiyomi.ui.reader.model.areTransitionsEquivalent as modelAreT
 import eu.kanade.tachiyomi.ui.reader.model.continuesInto
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
 import eu.kanade.tachiyomi.ui.reader.model.isSameChapter as modelIsSameChapter
-import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
-import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonActiveItemResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollGatingPolicy
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.receiveAsFlow
-import org.nekomanga.domain.manga.MangaItem
-import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle
 import org.nekomanga.presentation.theme.Size
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 internal class ScrollAnchorState(
     var item: ReaderUiItem? = null,
@@ -407,34 +391,17 @@ fun ComposeWebtoonViewer(
     }
 }
 
-/**
- * Compatibility overload bridging legacy [WebtoonViewer] to the stateless [ComposeWebtoonViewer].
- */
-@Deprecated("Use ComposeWebtoonViewer with WebtoonViewerConfigUiModel directly")
-@Composable
-fun ComposeWebtoonViewer(
-    viewer: WebtoonViewer,
+internal fun calculateDefaultWebtoonIndex(
     items: List<ReaderUiItem>,
-    manga: MangaItem?,
-    downloadManager: DownloadManager,
-    onPageSelected: (ReaderPage) -> Unit,
-    onTransitionSelected: (ChapterTransition) -> Unit,
-    onRetryTransition: (ReaderChapter) -> Unit,
-    onNavigateToChapter: ((Chapter, ChapterNavTarget) -> Unit)? = null,
-    onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
-    modifier: Modifier = Modifier,
-    navCommands: Flow<ReaderNavCommand>? = null,
-    preloadController: ReaderPreloadController? = null,
-) {
-    val currentChapterId =
-        (viewer.currentChapter
-                ?: items
-                    .firstOrNull { it is ReaderUiItem.Page }
-                    ?.let { (it as ReaderUiItem.Page).page.chapter })
-            ?.chapter
-            ?.id
+    currentChapterId: Long?,
+    requestedPage: Int?,
+): Int {
+    if (requestedPage != null && requestedPage >= 0) {
+        val pageMatch = resolveItemIndexForPage(items, currentChapterId, requestedPage)
+        if (pageMatch != null) return pageMatch
+    }
 
-    val defaultPageIndex =
+    val defaultIndex =
         items
             .indexOfFirst {
                 when (it) {
@@ -449,150 +416,7 @@ fun ComposeWebtoonViewer(
                 .takeIf { it != -1 }
             ?: 0
 
-    val initialItemIndex =
-        (viewer.requestedPagePosition?.targetPage ?: defaultPageIndex).coerceIn(
-            0,
-            (items.size - 1).coerceAtLeast(0),
-        )
-
-    val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-    val readerTheme by readerPreferences.readerTheme().collectAsStateWithLifecycle()
-    val webtoonSidePadding by readerPreferences.webtoonSidePadding().collectAsStateWithLifecycle()
-    val animatedTransitions by
-        readerPreferences.animatedPageTransitionsWebtoon().collectAsStateWithLifecycle()
-    val disableGaps by readerPreferences.webtoonDisableGaps().collectAsStateWithLifecycle()
-    val enableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsStateWithLifecycle()
-    val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsStateWithLifecycle()
-    val cropBorders by readerPreferences.cropBordersWebtoon().collectAsStateWithLifecycle()
-    val grayscale by readerPreferences.grayscale().collectAsStateWithLifecycle()
-    val invertedColors by readerPreferences.invertedColors().collectAsStateWithLifecycle()
-    val themeBackground = MaterialTheme.colorScheme.background
-    val backgroundColor =
-        remember(readerTheme, themeBackground) {
-            ReaderTheme.fromPreference(readerTheme).color(themeBackground)
-        }
-    val colorFilter =
-        remember(grayscale, invertedColors) {
-            ReaderColorFilter.getColorFilter(grayscale, invertedColors)
-        }
-
-    val sidePaddingPercent =
-        remember(webtoonSidePadding) { (webtoonSidePadding / 100f).coerceIn(0f, 0.25f) }
-
-    val hasMargins = viewer.hasMargins && !disableGaps
-
-    LaunchedEffect(currentChapterId) {
-        viewer.nextTransition?.to?.let {
-            onRequestPreloadChapter?.invoke(it) ?: viewer.activity.requestPreloadChapter(it)
-        }
-    }
-
-    val config =
-        WebtoonViewerConfigUiModel(
-            initialIndex = initialItemIndex,
-            activeChapterId = currentChapterId,
-            backgroundColor = backgroundColor,
-            colorFilter = colorFilter,
-            contentPadding = PaddingValues(bottom = if (hasMargins) Size.medium else Size.none),
-            sidePaddingPercent = sidePaddingPercent,
-            hasGaps = hasMargins,
-            enableZoomOut = enableZoomOut,
-            animatedTransitions = animatedTransitions,
-            doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
-            longTapEnabled = viewer.config.longTapEnabled,
-            menuVisible = viewer.activity.menuVisible,
-            cropBorders = cropBorders,
-            navigator = viewer.config.navigator,
-            onToggleMenu = { viewer.activity.toggleMenu() },
-            onRetryTransition = onRetryTransition,
-            manga = manga,
-            downloadManager = downloadManager,
-            preloadPageAmount = preloadPageAmount,
-            onNavigateToChapter = onNavigateToChapter,
-            onRequestPreloadChapter =
-                onRequestPreloadChapter
-                    ?: { chapter ->
-                        viewer.activity.requestPreloadChapter(chapter)
-                    },
-        )
-
-    val navChannel = remember { Channel<ReaderNavCommand>(Channel.BUFFERED) }
-
-    LaunchedEffect(viewer.requestedPagePosition) {
-        val req = viewer.requestedPagePosition ?: return@LaunchedEffect
-        navChannel.send(ReaderNavCommand.ScrollToItem(req.targetPage, req.animated))
-        viewer.requestedPagePosition = null
-    }
-
-    LaunchedEffect(viewer.requestedScrollDelta) {
-        val delta = viewer.requestedScrollDelta ?: return@LaunchedEffect
-        navChannel.send(ReaderNavCommand.ScrollByDelta(delta.toFloat()))
-        viewer.requestedScrollDelta = null
-    }
-
-    val transitionResolver =
-        remember(downloadManager) { ResolveChapterTransitionUiModelUseCase(downloadManager) }
-    val enrichedItems =
-        remember(items, manga, transitionResolver) {
-            items.map { item ->
-                if (item is ReaderUiItem.Transition && item.transitionUiModel == null) {
-                    item.copy(transitionUiModel = transitionResolver(item.transition, manga))
-                } else {
-                    item
-                }
-            }
-        }
-
-    val effectiveNavCommands =
-        remember(navCommands) {
-            if (navCommands != null) {
-                merge(navChannel.receiveAsFlow(), navCommands)
-            } else {
-                navChannel.receiveAsFlow()
-            }
-        }
-
-    val effectivePreloadController = preloadController
-
-    LaunchedEffect(enrichedItems, preloadPageAmount, effectivePreloadController) {
-        effectivePreloadController?.onPositionChanged(
-            currentIndex = initialItemIndex,
-            items = enrichedItems,
-            preloadAmount = preloadPageAmount,
-            isRtl = false,
-            isWebtoon = true,
-        )
-    }
-
-    ComposeWebtoonViewer(
-        items = enrichedItems,
-        config = config,
-        navCommands = effectiveNavCommands,
-        onActiveItemChanged = { activeIndex ->
-            if (effectivePreloadController != null) {
-                effectivePreloadController.onPositionChanged(
-                    currentIndex = activeIndex,
-                    items = enrichedItems,
-                    preloadAmount = preloadPageAmount,
-                    isRtl = false,
-                    isWebtoon = true,
-                )
-            } else {
-                viewer.updateActiveIndex(activeIndex)
-            }
-        },
-        onPageSelected = onPageSelected,
-        onTransitionSelected = onTransitionSelected,
-        onPageLongTap = { page ->
-            if (viewer.activity.menuVisible || viewer.config.longTapEnabled) {
-                viewer.activity.onPageLongTap(page)
-            }
-        },
-        onNavigateAdjacent = { forward ->
-            if (forward) viewer.moveToNext() else viewer.moveToPrevious()
-        },
-        modifier = modifier,
-    )
+    return defaultIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
 }
 
 internal fun isSameChapter(a: ReaderChapter, b: ReaderChapter): Boolean = modelIsSameChapter(a, b)
