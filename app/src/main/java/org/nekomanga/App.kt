@@ -44,7 +44,6 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notification
 import java.security.Security
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -181,55 +180,46 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
             .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
 
         // Show notification when the user has been unexpectedly signed out of MangaDex
-        // (auth refresh rejected). The flag is set in MangaDexLoginHelper and cleared on
-        // successful login or manual logout.
-        mangaDexPreferences
-            .unexpectedLogout()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { unexpected ->
-                val notificationManager = NotificationManagerCompat.from(this)
-                if (unexpected) {
-                    if (
-                        ActivityCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.POST_NOTIFICATIONS,
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        return@onEach
+        // (auth refresh rejected). Checked once at startup and cleared so the notification
+        // is only shown once.
+        if (mangaDexPreferences.unexpectedLogout().get()) {
+            mangaDexPreferences.unexpectedLogout().set(false)
+            val notificationManager = NotificationManagerCompat.from(this)
+            if (
+                ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                val tapIntent =
+                    Intent(this, MainActivity::class.java).apply {
+                        action = DeepLinks.Actions.MangaDexSettings
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                     }
-                    val tapIntent =
-                        Intent(this, MainActivity::class.java).apply {
-                            action = DeepLinks.Actions.MangaDexSettings
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        }
-                    val pendingIntent =
-                        PendingIntent.getActivity(
-                            this,
-                            Notifications.Id.Authentication.SessionExpired,
-                            tapIntent,
-                            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-                        )
-                    val body = getString(R.string.mangadex_session_expired_body)
-                    val notification =
-                        notification(Notifications.Channel.Authentication) {
-                            setContentTitle(getString(R.string.mangadex_session_expired_title))
-                            setContentText(body)
-                            setStyle(NotificationCompat.BigTextStyle().bigText(body))
-                            setSmallIcon(R.drawable.ic_neko_notification)
-                            setContentIntent(pendingIntent)
-                            setAutoCancel(true)
-                            priority = NotificationCompat.PRIORITY_HIGH
-                        }
-                    notificationManager.notify(
+                val pendingIntent =
+                    PendingIntent.getActivity(
+                        this,
                         Notifications.Id.Authentication.SessionExpired,
-                        notification,
+                        tapIntent,
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                     )
-                } else {
-                    notificationManager.cancel(Notifications.Id.Authentication.SessionExpired)
-                }
+                val body = getString(R.string.mangadex_session_expired_body)
+                val notification =
+                    notification(Notifications.Channel.Authentication) {
+                        setContentTitle(getString(R.string.mangadex_session_expired_title))
+                        setContentText(body)
+                        setStyle(NotificationCompat.BigTextStyle().bigText(body))
+                        setSmallIcon(R.drawable.ic_neko_notification)
+                        setContentIntent(pendingIntent)
+                        setAutoCancel(true)
+                        priority = NotificationCompat.PRIORITY_HIGH
+                    }
+                notificationManager.notify(
+                    Notifications.Id.Authentication.SessionExpired,
+                    notification,
+                )
             }
-            .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
+        }
     }
 
     override fun onPause(owner: LifecycleOwner) {
