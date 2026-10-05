@@ -26,8 +26,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.request.maxBitmapSize
 import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Scale
@@ -48,7 +50,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
+import me.saket.telephoto.zoomable.ZoomableImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -351,19 +353,20 @@ fun PagerPageItem(
                     ) {
                         ImageRequest.Builder(context)
                             .data(page)
-                            // ZoomableAsyncImage replaces maxBitmapSize with ORIGINAL because it
-                            // expects to sub-sample, which never happens for a ReaderPage. It keeps
-                            // size, so the canvas size cap goes there. Without the cap, a page
-                            // taller than the texture size decodes at full size and draws blank as
-                            // a hardware bitmap or is too large for the canvas as a software one.
+                            // ReaderPageImageSource runs this request as built. Coil's default
+                            // maxBitmapSize of 4096 px is turned off, so the size box is the only
+                            // cap. Without the box, a page taller than the texture size decodes at
+                            // full size and draws blank as a hardware bitmap or is too large for
+                            // the canvas as a software one.
+                            .maxBitmapSize(CoilSize.ORIGINAL)
                             .size(
                                 CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize)
                             )
                             .scale(Scale.FIT)
                             .precision(Precision.INEXACT)
                             .crossfade(true)
-                            // ZoomableAsyncImage has no error callback, but the request it rebuilds
-                            // keeps this listener.
+                            // ZoomableImage has no error callback, so errors come from this
+                            // listener.
                             .listener(
                                 onError = { _, result ->
                                     loadErrors.onError(page, result.throwable)
@@ -392,8 +395,11 @@ fun PagerPageItem(
                             .build()
                     }
 
-                ZoomableAsyncImage(
-                    model = model,
+                val imageSource =
+                    remember(model) { ReaderPageImageSource(model, context.imageLoader) }
+
+                ZoomableImage(
+                    image = imageSource,
                     contentDescription = null,
                     contentScale = contentScale,
                     alignment = imageAlignment,
