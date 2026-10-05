@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
-import android.graphics.drawable.Drawable
 import eu.kanade.tachiyomi.source.model.Page
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.nekomanga.presentation.screens.reader.viewer.CachedSmartBackground
 
 open class ReaderPage(
     index: Int,
@@ -13,8 +13,6 @@ open class ReaderPage(
     imageUrl: String? = null,
     mangaDexChapterId: String = "",
     var stream: (() -> InputStream)? = null,
-    var bg: Drawable? = null,
-    var bgType: Int? = null,
 ) : Page(index, url, imageUrl, mangaDexChapterId, null) {
 
     /** Rendered height after image is decoded and laid out (pixels at fit-width). */
@@ -25,6 +23,9 @@ open class ReaderPage(
 
     /** Pre-calculated splits when tall page splitting is performed upstream. */
     var precomputedSplits: List<ReaderPageSplit>? = null
+
+    /** Smart reader background picked for this page, so a page seen again draws it at once. */
+    @Volatile var smartBackground: CachedSmartBackground? = null
 
     /** Value to check if this page is used to as if it was too wide */
     var shiftedPage: Boolean = false
