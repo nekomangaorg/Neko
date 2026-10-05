@@ -33,6 +33,7 @@ fun Modifier.pagerTapNavigation(
     config: PagerViewerConfigUiModel,
     page: ReaderPage,
     extraPage: ReaderPage? = null,
+    tapClaim: TapNavigationClaim? = null,
     coroutineScope: CoroutineScope? = null,
 ): Modifier = composed {
     val context = LocalContext.current
@@ -49,6 +50,7 @@ fun Modifier.pagerTapNavigation(
     val currentConfig by rememberUpdatedState(config)
     val currentPage by rememberUpdatedState(page)
     val currentExtraPage by rememberUpdatedState(extraPage)
+    val currentTapClaim by rememberUpdatedState(tapClaim)
 
     pointerInput(
         page.chapter.chapter.id,
@@ -160,7 +162,10 @@ fun Modifier.pagerTapNavigation(
                     }
                 }
 
-                if (isMovementPastSlop || isMultiTouch || isLongPressTriggered) {
+                // A control on top of the page, such as Retry, handles its own taps
+                val isClaimed = currentTapClaim?.isClaimed(down.id) == true
+
+                if (isMovementPastSlop || isMultiTouch || isLongPressTriggered || isClaimed) {
                     pendingNavJob?.cancel()
                     pendingNavJob = null
                     pendingNavAction = null
@@ -172,6 +177,7 @@ fun Modifier.pagerTapNavigation(
                     !isLongPressTriggered &&
                         !isMovementPastSlop &&
                         !isMultiTouch &&
+                        !isClaimed &&
                         pointerUp != null
                 ) {
                     val up = pointerUp!!

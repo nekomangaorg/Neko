@@ -59,6 +59,7 @@ fun WebtoonPageItem(
     cropBorders: Boolean = false,
     colorFilter: ColorFilter? = null,
     onLongClick: (() -> Unit)? = null,
+    tapClaim: TapNavigationClaim? = null,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(page) {
@@ -81,6 +82,7 @@ fun WebtoonPageItem(
         cropBorders = cropBorders,
         colorFilter = colorFilter,
         onLongClick = onLongClick,
+        tapClaim = tapClaim,
         modifier = modifier,
     )
 }
@@ -92,6 +94,7 @@ fun WebtoonPageItem(
     cropBorders: Boolean = false,
     colorFilter: ColorFilter? = null,
     onLongClick: (() -> Unit)? = null,
+    tapClaim: TapNavigationClaim? = null,
     modifier: Modifier = Modifier,
 ) {
     val page = split.page
@@ -121,6 +124,7 @@ fun WebtoonPageItem(
         cropBorders = false,
         colorFilter = colorFilter,
         onLongClick = onLongClick,
+        tapClaim = tapClaim,
         modifier = modifier,
     )
 }
@@ -137,6 +141,7 @@ private fun WebtoonPageContent(
     cropBorders: Boolean,
     colorFilter: ColorFilter? = null,
     onLongClick: (() -> Unit)?,
+    tapClaim: TapNavigationClaim?,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -270,6 +275,7 @@ private fun WebtoonPageContent(
             visible = isError,
             onRetry = onRetry,
             message = page.errorMessage ?: loadErrorMessage,
+            tapClaim = tapClaim,
         )
     }
 }
