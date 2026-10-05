@@ -62,7 +62,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
             } else {
                 Bitmap.createScaledBitmap(sampled, width, height, true).also { sampled.recycle() }
             }
-        val isSampled = target.sampleSize > 1 || bitmap !== sampled
+        val isSampled = (target.sampleSize > 1 || bitmap !== sampled) && !target.byteLimited
 
         if (
             options.bitmapConfig == Bitmap.Config.HARDWARE && ImageUtil.canUseHardwareBitmap(bitmap)
@@ -131,10 +131,19 @@ internal fun nativeDecodeTarget(
     if (precision == Precision.INEXACT) {
         multiplier = multiplier.coerceAtMost(1.0)
     }
-    return NativeDecodeTarget(sampleSize, multiplier)
+    val byteLimited = isByteLimited(srcWidth, srcHeight, size, scale, precision, maxSize, limit)
+    return NativeDecodeTarget(sampleSize, multiplier, byteLimited)
 }
 
-internal data class NativeDecodeTarget(val sampleSize: Int, val multiplier: Double) {
+/**
+ * [byteLimited] is true when maxBytes made the image smaller than size and maxSize alone would, see
+ * [isByteLimited].
+ */
+internal data class NativeDecodeTarget(
+    val sampleSize: Int,
+    val multiplier: Double,
+    val byteLimited: Boolean,
+) {
 
     /** Final size for a bitmap the native decoder returned at [sampleSize]. */
     fun outputSize(sampledWidth: Int, sampledHeight: Int): Pair<Int, Int> =

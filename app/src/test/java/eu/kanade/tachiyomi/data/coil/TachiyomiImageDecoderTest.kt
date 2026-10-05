@@ -4,6 +4,7 @@ import coil3.size.Precision
 import coil3.size.Scale
 import coil3.size.Size
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -129,5 +130,31 @@ class TachiyomiImageDecoderTest {
         val (width, height) = target.outputSize(2000, 20_000)
         assertEquals(1, target.sampleSize)
         assertTrue("${width}x$height", width.toLong() * height * 4 <= canvasBytes)
+    }
+
+    @Test
+    fun `page shrunk only by the byte limit counts as byte limited`() {
+        val overLimit =
+            nativeDecodeTarget(
+                2000,
+                20_000,
+                Size.ORIGINAL,
+                Scale.FIT,
+                Precision.EXACT,
+                Size(32_767, 32_767),
+                maxBytes = canvasBytes,
+            )
+        assertTrue(overLimit.byteLimited)
+        val boxFirst =
+            nativeDecodeTarget(
+                2000,
+                20_000,
+                Size.ORIGINAL,
+                Scale.FIT,
+                Precision.EXACT,
+                textureBox,
+                maxBytes = canvasBytes,
+            )
+        assertFalse(boxFirst.byteLimited)
     }
 }
