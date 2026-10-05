@@ -321,7 +321,14 @@ class Downloader(
         }
 
         val chapterDirname = provider.getChapterDirName(dbChapter)
-        val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)!!
+        val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
+        if (tmpDir == null) {
+            val errorMessage = context.getString(R.string.download_notifier_cannot_create_folder)
+            download.errorMessage = errorMessage
+            download.status = Download.State.ERROR
+            notifier.onError(errorMessage, download.chapterItem.name, download.mangaItem.title)
+            return
+        }
 
         val pagesToDownload = if (download.source is MangaDex) 6 else 3
 
@@ -377,7 +384,7 @@ class Downloader(
 
             // Only rename the directory if it's downloaded
             if (preferences.saveChaptersAsCBZ().get()) {
-                archiveChapter(mangaDir, chapterDirname, tmpDir)
+                archiveChapter(context, mangaDir, chapterDirname, tmpDir)
             } else {
                 tmpDir.renameTo(chapterDirname)
                 DiskUtil.createNoMediaFile(tmpDir, context)
@@ -424,7 +431,7 @@ class Downloader(
             // If the image is already downloaded, do nothing. Otherwise download from network
             val file =
                 imageFile
-                    ?: copyImageFromCache(chapterCache, page.imageUrl!!, tmpDir, filename)
+                    ?: copyImageFromCache(context, chapterCache, page.imageUrl!!, tmpDir, filename)
                     ?: downloadImage(page, download.source, tmpDir, filename)
 
             // When the page is ready, set page path, progress (just in case) and status
@@ -526,33 +533,6 @@ class Downloader(
         return downloadedImagesCount == downloadPageCount
     }
 
-    /** Archive the chapter pages as a CBZ. */
-    private fun archiveChapter(mangaDir: UniFile, dirname: String, tmpDir: UniFile) {
-        val zip = mangaDir.createFile("$dirname.cbz$TMP_DIR_SUFFIX")!!
-        ZipOutputStream(BufferedOutputStream(zip.openOutputStream())).use { zipOut ->
-            zipOut.setMethod(ZipEntry.STORED)
-
-            tmpDir.listFiles()?.forEach { img ->
-                img.openInputStream().use { input ->
-                    val data = input.readBytes()
-                    val size = img.length()
-                    val entry =
-                        ZipEntry(img.name).apply {
-                            val crc = CRC32().apply { update(data) }
-                            setCrc(crc.value)
-
-                            compressedSize = size
-                            setSize(size)
-                        }
-                    zipOut.putNextEntry(entry)
-                    zipOut.write(data)
-                }
-            }
-        }
-        zip.renameTo("$dirname.cbz")
-        tmpDir.delete()
-    }
-
     /** Returns true if all the queued downloads are in DOWNLOADED or ERROR state. */
     private fun areAllDownloadsFinished(): Boolean {
         return queueState.value.none { it.status.value <= Download.State.DOWNLOADING.value }
@@ -630,6 +610,7 @@ class Downloader(
          *   not an image.
          */
         internal fun copyImageFromCache(
+            context: Context,
             chapterCache: ChapterCache,
             imageUrl: String,
             tmpDir: UniFile,
@@ -644,13 +625,59 @@ class Downloader(
                 chapterCache.removeFileFromCache(cacheFile.name)
                 return null
             }
-            val tmpFile = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
+            val tmpFile =
+                tmpDir.createFile("$filename$TMP_FILE_SUFFIX")
+                    ?: throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
             cacheFile.inputStream().use { input ->
                 tmpFile.openOutputStream().use { output -> input.copyTo(output) }
             }
             tmpFile.renameTo("$filename.${extension.extension}")
             cacheFile.delete()
             return tmpFile
+        }
+
+        /**
+         * Archives the chapter pages in tmpDir as a CBZ in mangaDir, then deletes tmpDir.
+         *
+         * @param mangaDir the directory of the manga.
+         * @param dirname the name of the chapter directory.
+         * @param tmpDir the temporary directory of the download.
+         */
+        internal fun archiveChapter(
+            context: Context,
+            mangaDir: UniFile,
+            dirname: String,
+            tmpDir: UniFile,
+        ) {
+            val zip =
+                mangaDir.createFile("$dirname.cbz$TMP_DIR_SUFFIX")
+                    ?: throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
+            ZipOutputStream(BufferedOutputStream(zip.openOutputStream())).use { zipOut ->
+                zipOut.setMethod(ZipEntry.STORED)
+
+                tmpDir.listFiles()?.forEach { img ->
+                    img.openInputStream().use { input ->
+                        val data = input.readBytes()
+                        val size = img.length()
+                        val entry =
+                            ZipEntry(img.name).apply {
+                                val crc = CRC32().apply { update(data) }
+                                setCrc(crc.value)
+
+                                compressedSize = size
+                                setSize(size)
+                            }
+                        zipOut.putNextEntry(entry)
+                        zipOut.write(data)
+                    }
+                }
+            }
+            zip.renameTo("$dirname.cbz")
+            tmpDir.delete()
         }
 
         /**

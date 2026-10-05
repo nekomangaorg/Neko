@@ -23,10 +23,13 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.nekomanga.R
+import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import org.nekomanga.domain.reader.ReaderPreferences
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
@@ -38,6 +41,11 @@ class DownloaderCopyImageFromCacheTest {
 
     @get:Rule val folder = TemporaryFolder()
 
+    private val context =
+        mockk<Context> {
+            every { getString(R.string.download_notifier_cannot_create_file) } returns
+                CANNOT_CREATE_FILE
+        }
     private lateinit var chapterCache: ChapterCache
     private lateinit var tmpDir: File
 
@@ -109,8 +117,25 @@ class DownloaderCopyImageFromCacheTest {
         assertEquals(emptyList<String>(), tmpDir.list()!!.toList())
     }
 
+    @Test
+    fun `fails with a message when the temp file cannot be created`() {
+        cache(PNG_SIGNATURE)
+        // A directory in the way makes createFile return null.
+        File(tmpDir, "001$TMP_FILE_SUFFIX").mkdir()
+
+        val error = assertThrows(Exception::class.java) { copy() }
+
+        assertEquals(CANNOT_CREATE_FILE, error.message)
+    }
+
     private fun copy(): UniFile? =
-        Downloader.copyImageFromCache(chapterCache, IMAGE_URL, UniFile.fromFile(tmpDir)!!, "001")
+        Downloader.copyImageFromCache(
+            context,
+            chapterCache,
+            IMAGE_URL,
+            UniFile.fromFile(tmpDir)!!,
+            "001",
+        )
 
     private fun cache(bytes: ByteArray) {
         val response =
@@ -126,6 +151,7 @@ class DownloaderCopyImageFromCacheTest {
 
     companion object {
         private const val IMAGE_URL = "https://example.org/data/page1.png"
+        private const val CANNOT_CREATE_FILE = "Couldn't create a file in the download folder"
         private val PNG_SIGNATURE =
             byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
     }
