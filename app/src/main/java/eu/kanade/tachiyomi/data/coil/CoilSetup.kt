@@ -26,6 +26,9 @@ fun coilImageLoader(context: Context) =
             val diskCacheInit = { CoilDiskCache.get(context) }
             val isCurrSDKPieOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
             components {
+                // First, so that it can hand reader pages on to every decoder below with a size
+                // that fits the canvas.
+                add(MaxBitmapBytesDecoderFactory())
                 if (isCurrSDKPieOrGreater) {
                     add(AnimatedImageDecoder.Factory())
                 } else {

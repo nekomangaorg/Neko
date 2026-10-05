@@ -44,6 +44,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
                 scale = options.scale,
                 precision = options.precision,
                 maxSize = options.maxBitmapSize,
+                maxBytes = options.maxBitmapBytes,
             )
         val sampled =
             try {
@@ -61,7 +62,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
             } else {
                 Bitmap.createScaledBitmap(sampled, width, height, true).also { sampled.recycle() }
             }
-        val isSampled = target.sampleSize > 1 || bitmap !== sampled
+        val isSampled = (target.sampleSize > 1 || bitmap !== sampled) && !target.byteLimited
 
         if (
             options.bitmapConfig == Bitmap.Config.HARDWARE && ImageUtil.canUseHardwareBitmap(bitmap)
@@ -101,7 +102,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
  * Sample size for the native decode and the multiplier for the sampled bitmap, worked out the way
  * Coil's BitmapFactoryDecoder does it for JPEG and PNG. The native decoder knows nothing of the
  * request's size or maxBitmapSize, so without this an AVIF, HEIF or JXL page comes back at full
- * resolution, and a tall one is then too large to draw.
+ * resolution, and a tall one is then too large to draw. [maxBytes] is the request's maxBitmapBytes.
  */
 @OptIn(ExperimentalCoilApi::class)
 internal fun nativeDecodeTarget(
@@ -111,9 +112,10 @@ internal fun nativeDecodeTarget(
     scale: Scale,
     precision: Precision,
     maxSize: Size,
+    maxBytes: Long = 0L,
 ): NativeDecodeTarget {
-    val (dstWidth, dstHeight) =
-        DecodeUtils.computeDstSize(srcWidth, srcHeight, size, scale, maxSize)
+    val limit = byteLimitedMaxSize(srcWidth, srcHeight, maxSize, maxBytes)
+    val (dstWidth, dstHeight) = DecodeUtils.computeDstSize(srcWidth, srcHeight, size, scale, limit)
     val sampleSize =
         DecodeUtils.calculateInSampleSize(srcWidth, srcHeight, dstWidth, dstHeight, scale)
     var multiplier =
@@ -123,16 +125,25 @@ internal fun nativeDecodeTarget(
             dstWidth = dstWidth.toDouble(),
             dstHeight = dstHeight.toDouble(),
             scale = scale,
-            maxSize = maxSize,
+            maxSize = limit,
         )
     // Like BitmapFactoryDecoder, only an exact request may upscale.
     if (precision == Precision.INEXACT) {
         multiplier = multiplier.coerceAtMost(1.0)
     }
-    return NativeDecodeTarget(sampleSize, multiplier)
+    val byteLimited = isByteLimited(srcWidth, srcHeight, size, scale, precision, maxSize, limit)
+    return NativeDecodeTarget(sampleSize, multiplier, byteLimited)
 }
 
-internal data class NativeDecodeTarget(val sampleSize: Int, val multiplier: Double) {
+/**
+ * [byteLimited] is true when maxBytes made the image smaller than size and maxSize alone would, see
+ * [isByteLimited].
+ */
+internal data class NativeDecodeTarget(
+    val sampleSize: Int,
+    val multiplier: Double,
+    val byteLimited: Boolean,
+) {
 
     /** Final size for a bitmap the native decoder returned at [sampleSize]. */
     fun outputSize(sampledWidth: Int, sampledHeight: Int): Pair<Int, Int> =
