@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.BufferedOutputStream
-import java.io.File
 import java.util.Locale
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
@@ -423,16 +422,9 @@ class Downloader(
         try {
             // If the image is already downloaded, do nothing. Otherwise download from network
             val file =
-                when {
-                    imageFile != null -> imageFile
-                    chapterCache.isImageInCache(page.imageUrl!!) ->
-                        copyImageFromCache(
-                            chapterCache.getImageFile(page.imageUrl!!),
-                            tmpDir,
-                            filename,
-                        )
-                    else -> downloadImage(page, download.source, tmpDir, filename)
-                }
+                imageFile
+                    ?: copyImageFromCache(chapterCache, page.imageUrl!!, tmpDir, filename)
+                    ?: downloadImage(page, download.source, tmpDir, filename)
 
             // When the page is ready, set page path, progress (just in case) and status
             splitTallImageIfNeeded(page, tmpDir)
@@ -489,24 +481,6 @@ class Downloader(
                 }
             }
             .first()
-    }
-
-    /**
-     * Copies the image from cache to file in tmpDir.
-     *
-     * @param cacheFile the file from cache.
-     * @param tmpDir the temporary directory of the download.
-     * @param filename the filename of the image.
-     */
-    private fun copyImageFromCache(cacheFile: File, tmpDir: UniFile, filename: String): UniFile {
-        val tmpFile = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
-        cacheFile.inputStream().use { input ->
-            tmpFile.openOutputStream().use { output -> input.copyTo(output) }
-        }
-        val extension = ImageUtil.findImageType(cacheFile.inputStream()) ?: return tmpFile
-        tmpFile.renameTo("$filename.${extension.extension}")
-        cacheFile.delete()
-        return tmpFile
     }
 
     /**
@@ -672,5 +646,39 @@ class Downloader(
 
     companion object {
         const val MIN_DISK_SPACE = 200L * 1024 * 1024
+
+        /**
+         * Copies the image from cache to file in tmpDir.
+         *
+         * @param chapterCache the chapter cache of the reader.
+         * @param imageUrl the url of the image.
+         * @param tmpDir the temporary directory of the download.
+         * @param filename the filename of the image.
+         * @return the copied file, or null when the image is not in the cache or the cached file is
+         *   not an image.
+         */
+        internal fun copyImageFromCache(
+            chapterCache: ChapterCache,
+            imageUrl: String,
+            tmpDir: UniFile,
+            filename: String,
+        ): UniFile? {
+            if (!chapterCache.isImageInCache(imageUrl)) return null
+            val cacheFile = chapterCache.getImageFile(imageUrl)
+            // A cached file that is not an image would stay a .tmp file and fail the download on
+            // every retry, so remove it and let the caller download the page instead.
+            val extension = ImageUtil.findImageType { cacheFile.inputStream() }
+            if (extension == null) {
+                chapterCache.removeFileFromCache(cacheFile.name)
+                return null
+            }
+            val tmpFile = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
+            cacheFile.inputStream().use { input ->
+                tmpFile.openOutputStream().use { output -> input.copyTo(output) }
+            }
+            tmpFile.renameTo("$filename.${extension.extension}")
+            cacheFile.delete()
+            return tmpFile
+        }
     }
 }
