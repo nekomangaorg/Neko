@@ -316,7 +316,7 @@ class Downloader(
             val errorMessage = context.getString(R.string.couldnt_download_low_space)
             download.errorMessage = errorMessage
             download.status = Download.State.ERROR
-            notifier.onError(errorMessage, download.chapterItem.name)
+            notifier.onError(errorMessage, download.chapterItem.name, download.mangaItem.title)
             return
         }
 
