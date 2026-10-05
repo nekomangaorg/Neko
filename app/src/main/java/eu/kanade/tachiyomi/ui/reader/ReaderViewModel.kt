@@ -68,14 +68,17 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -172,8 +175,8 @@ constructor(
 
     private val navigationMutex = Mutex()
 
-    private val _navigationCommands = Channel<ReaderNavCommand>(capacity = Channel.BUFFERED)
-    val navigationCommands: Flow<ReaderNavCommand> = _navigationCommands.receiveAsFlow()
+    private val _navigationCommands = MutableSharedFlow<ReaderNavCommand>(extraBufferCapacity = 64)
+    val navigationCommands: SharedFlow<ReaderNavCommand> = _navigationCommands.asSharedFlow()
 
     private val _transitionState =
         MutableStateFlow<ReaderChapterTransitionState>(ReaderChapterTransitionState.Idle)
@@ -742,7 +745,7 @@ constructor(
             if (targetPage != null && targetPage >= 0) {
                 _transitionState.value =
                     ReaderChapterTransitionState.Settling(chapter.chapter.id, targetPage)
-                _navigationCommands.send(
+                _navigationCommands.emit(
                     ReaderNavCommand.SnapToPage(
                         pageIndex = targetPage,
                         chapterId = chapter.chapter.id,
@@ -767,7 +770,7 @@ constructor(
     }
 
     fun sendNavigationCommand(command: ReaderNavCommand) {
-        viewModelScope.launch { _navigationCommands.send(command) }
+        _navigationCommands.tryEmit(command)
     }
 
     /**
@@ -1521,199 +1524,73 @@ constructor(
 
     private fun observeViewerPreferences() {
         try {
-            readerPreferences
-                .animatedPageTransitions()
-                .changes()
-                .onEach { v ->
+            merge(
+                    readerPreferences.animatedPageTransitions().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(animatedTransitions = it) }
+                    },
+                    readerPreferences.animatedPageTransitionsWebtoon().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(animatedTransitionsWebtoon = it) }
+                    },
+                    readerPreferences.imageScaleType().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(imageScaleType = it) }
+                    },
+                    readerPreferences.doublePageGap().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(doublePageGap = it) }
+                    },
+                    readerPreferences.invertDoublePages().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(invertDoublePages = it) }
+                    },
+                    readerPreferences.readerTheme().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(readerTheme = it) }
+                    },
+                    readerPreferences.landscapeZoom().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(landscapeZoom = it) }
+                    },
+                    readerPreferences.zoomStart().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(zoomStart = it) }
+                    },
+                    readerPreferences.preloadPageAmount().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(preloadPageAmount = it) }
+                    },
+                    readerPreferences.cropBorders().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(cropBorders = it) }
+                    },
+                    readerPreferences.cropBordersWebtoon().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(cropBordersWebtoon = it) }
+                    },
+                    readerPreferences.grayscale().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(grayscale = it) }
+                    },
+                    readerPreferences.invertedColors().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(invertedColors = it) }
+                    },
+                    readerPreferences.doublePageRotate().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(doublePageRotate = it) }
+                    },
+                    readerPreferences.doublePageRotateReverse().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(doublePageRotateReverse = it) }
+                    },
+                    readerPreferences.navigateToPan().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(navigateToPan = it) }
+                    },
+                    readerPreferences.webtoonSidePadding().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(webtoonSidePadding = it) }
+                    },
+                    readerPreferences.webtoonDisableGaps().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(webtoonDisableGaps = it) }
+                    },
+                    readerPreferences.webtoonEnableZoomOut().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(webtoonEnableZoomOut = it) }
+                    },
+                )
+                .onEach { updateFn ->
                     mutableState.update {
-                        it.copy(
-                            viewerPreferences = it.viewerPreferences.copy(animatedTransitions = v)
-                        )
+                        it.copy(viewerPreferences = updateFn(it.viewerPreferences))
                     }
                 }
                 .launchIn(viewModelScope)
-            readerPreferences
-                .animatedPageTransitionsWebtoon()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(
-                            viewerPreferences =
-                                it.viewerPreferences.copy(animatedTransitionsWebtoon = v)
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .imageScaleType()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(imageScaleType = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .doublePageGap()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(doublePageGap = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .invertDoublePages()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(
-                            viewerPreferences = it.viewerPreferences.copy(invertDoublePages = v)
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .readerTheme()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(readerTheme = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .landscapeZoom()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(landscapeZoom = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .zoomStart()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(zoomStart = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .preloadPageAmount()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(
-                            viewerPreferences = it.viewerPreferences.copy(preloadPageAmount = v)
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .cropBorders()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(cropBorders = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .cropBordersWebtoon()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(
-                            viewerPreferences = it.viewerPreferences.copy(cropBordersWebtoon = v)
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .grayscale()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(grayscale = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .invertedColors()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(invertedColors = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .doublePageRotate()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(doublePageRotate = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .doublePageRotateReverse()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(
-                            viewerPreferences =
-                                it.viewerPreferences.copy(doublePageRotateReverse = v)
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .navigateToPan()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(viewerPreferences = it.viewerPreferences.copy(navigateToPan = v))
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .webtoonSidePadding()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(
-                            viewerPreferences = it.viewerPreferences.copy(webtoonSidePadding = v)
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .webtoonDisableGaps()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(
-                            viewerPreferences = it.viewerPreferences.copy(webtoonDisableGaps = v)
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
-            readerPreferences
-                .webtoonEnableZoomOut()
-                .changes()
-                .onEach { v ->
-                    mutableState.update {
-                        it.copy(
-                            viewerPreferences = it.viewerPreferences.copy(webtoonEnableZoomOut = v)
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
-        } catch (_: Throwable) {
-            // In unit tests where preference store is not mocked
+        } catch (e: Exception) {
+            TimberKt.w(e) { "ReaderPreferences could not be observed" }
         }
     }
 

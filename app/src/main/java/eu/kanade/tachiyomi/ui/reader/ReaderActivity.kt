@@ -44,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -92,6 +93,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderKeyNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
@@ -129,16 +131,13 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -376,12 +375,14 @@ class ReaderActivity : BaseMainActivity() {
                     // Native Compose Viewers
                     val currentViewer = viewer
                     val items =
-                        state.viewerItems.ifEmpty {
-                            when (currentViewer) {
-                                is PagerViewer -> currentViewer.items
-                                is WebtoonViewer -> currentViewer.items
-                                else -> emptyList()
-                            }
+                        when (currentViewer) {
+                            is PagerViewer ->
+                                state.viewerItems.takeIf {
+                                    it.isNotEmpty() &&
+                                        !it.any { item -> item is ReaderUiItem.SplitPage }
+                                } ?: currentViewer.items
+                            is WebtoonViewer -> state.viewerItems.ifEmpty { currentViewer.items }
+                            else -> emptyList()
                         }
                     val transitionState by viewModel.transitionState.collectAsStateWithLifecycle()
                     if (currentViewer is PagerViewer && items.isNotEmpty()) {
@@ -399,22 +400,16 @@ class ReaderActivity : BaseMainActivity() {
                             }
                         }
 
-                        val pagerNavChannel = remember {
-                            Channel<ReaderNavCommand>(Channel.BUFFERED)
+                        LaunchedEffect(currentViewer) {
+                            snapshotFlow { currentViewer.requestedPagePosition }
+                                .filterNotNull()
+                                .collect { req ->
+                                    viewModel.sendNavigationCommand(
+                                        ReaderNavCommand.ScrollToItem(req.first, req.second)
+                                    )
+                                    currentViewer.requestedPagePosition = null
+                                }
                         }
-
-                        LaunchedEffect(currentViewer.requestedPagePosition) {
-                            val req = currentViewer.requestedPagePosition ?: return@LaunchedEffect
-                            pagerNavChannel.send(
-                                ReaderNavCommand.ScrollToItem(req.first, req.second)
-                            )
-                            currentViewer.requestedPagePosition = null
-                        }
-
-                        val effectivePagerNavCommands =
-                            remember(viewModel.navigationCommands) {
-                                merge(pagerNavChannel.receiveAsFlow(), viewModel.navigationCommands)
-                            }
 
                         val defaultPagerIndex =
                             calculateDefaultPagerIndex(
@@ -435,6 +430,52 @@ class ReaderActivity : BaseMainActivity() {
 
                         val isRtl = currentViewer is R2LPagerViewer
                         val isVertical = currentViewer is VerticalPagerViewer
+
+                        val onToggleMenu = remember(currentViewer) { { toggleMenu() } }
+                        val onNavigateAdjacent =
+                            remember(viewModel) {
+                                { forward: Boolean ->
+                                    viewModel.sendNavigationCommand(
+                                        ReaderNavCommand.StepPage(forward)
+                                    )
+                                }
+                            }
+                        val onActivePanDelegateChanged =
+                            remember(currentViewer) {
+                                { delegate: PagerPanDelegate?, active: Boolean ->
+                                    if (active) {
+                                        currentViewer.panDelegate = delegate
+                                    } else if (currentViewer.panDelegate == delegate) {
+                                        currentViewer.panDelegate = null
+                                    }
+                                }
+                            }
+                        val onRetryTransition =
+                            remember(viewModel) {
+                                { chapter: ReaderChapter ->
+                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                }
+                            }
+                        val onNavigateToChapter =
+                            remember(viewModel) {
+                                { chapter: Chapter, navTarget: ChapterNavTarget ->
+                                    viewModel.navigateToChapter(chapter, navTarget)
+                                }
+                            }
+                        val onRequestPreloadChapter =
+                            remember(viewModel) {
+                                { chapter: ReaderChapter ->
+                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                }
+                            }
+                        val onPageLongTapCallback =
+                            remember(currentViewer) {
+                                { p: ReaderPage, ep: ReaderPage? -> onPageLongTap(p, ep) }
+                            }
+                        val onWidePageDetected =
+                            remember(currentViewer) {
+                                { page: ReaderPage -> currentViewer.splitDoublePages(page) }
+                            }
 
                         val pagerConfig =
                             PagerViewerConfigUiModel(
@@ -462,60 +503,47 @@ class ReaderActivity : BaseMainActivity() {
                                 cropBorders = prefs.cropBorders,
                                 navigator = currentViewer.config.navigator,
                                 preloadPageAmount = prefs.preloadPageAmount,
-                                onToggleMenu = remember(currentViewer) { { toggleMenu() } },
-                                onNavigateAdjacent =
-                                    remember(currentViewer) {
-                                        { forward ->
-                                            if (forward) currentViewer.moveToNext()
-                                            else currentViewer.moveToPrevious()
-                                        }
-                                    },
-                                onActivePanDelegateChanged = { delegate, active ->
-                                    if (active) {
-                                        currentViewer.panDelegate = delegate
-                                    } else if (currentViewer.panDelegate == delegate) {
-                                        currentViewer.panDelegate = null
-                                    }
-                                },
-                                onRetryTransition = { chapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
-                                },
-                                onNavigateToChapter = { chapter, navTarget ->
-                                    viewModel.navigateToChapter(chapter, navTarget)
-                                },
-                                onRequestPreloadChapter = { chapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
-                                },
-                                onPageLongTap =
-                                    remember(currentViewer) { { p, ep -> onPageLongTap(p, ep) } },
-                                onWidePageDetected =
-                                    remember(currentViewer) {
-                                        { page -> currentViewer.splitDoublePages(page) }
-                                    },
+                                onToggleMenu = onToggleMenu,
+                                onNavigateAdjacent = onNavigateAdjacent,
+                                onActivePanDelegateChanged = onActivePanDelegateChanged,
+                                onRetryTransition = onRetryTransition,
+                                onNavigateToChapter = onNavigateToChapter,
+                                onRequestPreloadChapter = onRequestPreloadChapter,
+                                onPageLongTap = onPageLongTapCallback,
+                                onWidePageDetected = onWidePageDetected,
                             )
 
                         val isNavigating =
                             transitionState is ReaderChapterTransitionState.Loading ||
                                 transitionState is ReaderChapterTransitionState.Settling
 
+                        val onActiveItemChangedPager =
+                            remember(currentViewer, viewModel, isRtl) {
+                                { activeIndex: Int ->
+                                    currentViewer.currentPagePosition = activeIndex
+                                    viewModel.updatePagerActiveIndex(
+                                        activeIndex = activeIndex,
+                                        isRtl = isRtl,
+                                    )
+                                }
+                            }
+                        val onPageSelectedPager = remember {
+                            { page: ReaderPage, hasExtraPage: Boolean ->
+                                onPageSelected(page, hasExtraPage)
+                            }
+                        }
+                        val onTransitionSelectedPager = remember {
+                            { transition: ChapterTransition -> onTransitionSelected(transition) }
+                        }
+
                         ComposePagerViewer(
                             items = items,
                             config = pagerConfig,
-                            onActiveItemChanged = { activeIndex ->
-                                currentViewer.currentPagePosition = activeIndex
-                                viewModel.updatePagerActiveIndex(
-                                    activeIndex = activeIndex,
-                                    isRtl = isRtl,
-                                )
-                            },
-                            onPageSelected = { page, hasExtraPage ->
-                                onPageSelected(page, hasExtraPage)
-                            },
-                            onTransitionSelected = { transition ->
-                                onTransitionSelected(transition)
-                            },
+                            onActiveItemChanged = onActiveItemChangedPager,
+                            onPageSelected = onPageSelectedPager,
+                            onTransitionSelected = onTransitionSelectedPager,
                             modifier = Modifier.fillMaxSize(),
-                            navCommands = effectivePagerNavCommands,
+                            navCommands = viewModel.navigationCommands,
                             isNavigating = isNavigating,
                         )
                     } else if (currentViewer is WebtoonViewer && items.isNotEmpty()) {
@@ -533,31 +561,27 @@ class ReaderActivity : BaseMainActivity() {
                             }
                         }
 
-                        val webtoonNavChannel = remember {
-                            Channel<ReaderNavCommand>(Channel.BUFFERED)
+                        LaunchedEffect(currentViewer) {
+                            snapshotFlow { currentViewer.requestedPagePosition }
+                                .filterNotNull()
+                                .collect { req ->
+                                    viewModel.sendNavigationCommand(
+                                        ReaderNavCommand.ScrollToItem(req.targetPage, req.animated)
+                                    )
+                                    currentViewer.requestedPagePosition = null
+                                }
                         }
 
-                        LaunchedEffect(currentViewer.requestedPagePosition) {
-                            val req = currentViewer.requestedPagePosition ?: return@LaunchedEffect
-                            webtoonNavChannel.send(
-                                ReaderNavCommand.ScrollToItem(req.targetPage, req.animated)
-                            )
-                            currentViewer.requestedPagePosition = null
+                        LaunchedEffect(currentViewer) {
+                            snapshotFlow { currentViewer.requestedScrollDelta }
+                                .filterNotNull()
+                                .collect { delta ->
+                                    viewModel.sendNavigationCommand(
+                                        ReaderNavCommand.ScrollByDelta(delta.toFloat())
+                                    )
+                                    currentViewer.requestedScrollDelta = null
+                                }
                         }
-
-                        LaunchedEffect(currentViewer.requestedScrollDelta) {
-                            val delta = currentViewer.requestedScrollDelta ?: return@LaunchedEffect
-                            webtoonNavChannel.send(ReaderNavCommand.ScrollByDelta(delta.toFloat()))
-                            currentViewer.requestedScrollDelta = null
-                        }
-
-                        val effectiveWebtoonNavCommands =
-                            remember(viewModel.navigationCommands) {
-                                merge(
-                                    webtoonNavChannel.receiveAsFlow(),
-                                    viewModel.navigationCommands,
-                                )
-                            }
 
                         val defaultWebtoonIndex =
                             calculateDefaultWebtoonIndex(
@@ -574,6 +598,26 @@ class ReaderActivity : BaseMainActivity() {
                                 (prefs.webtoonSidePadding / 100f).coerceIn(0f, 0.25f)
                             }
                         val hasMargins = currentViewer.hasMargins && !prefs.webtoonDisableGaps
+
+                        val onToggleMenuWebtoon = remember(currentViewer) { { toggleMenu() } }
+                        val onRetryTransitionWebtoon =
+                            remember(viewModel) {
+                                { chapter: ReaderChapter ->
+                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                }
+                            }
+                        val onNavigateToChapterWebtoon =
+                            remember(viewModel) {
+                                { chapter: Chapter, navTarget: ChapterNavTarget ->
+                                    viewModel.navigateToChapter(chapter, navTarget)
+                                }
+                            }
+                        val onRequestPreloadChapterWebtoon =
+                            remember(viewModel) {
+                                { chapter: ReaderChapter ->
+                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                }
+                            }
 
                         val webtoonConfig =
                             WebtoonViewerConfigUiModel(
@@ -594,40 +638,52 @@ class ReaderActivity : BaseMainActivity() {
                                 menuVisible = menuVisible,
                                 cropBorders = prefs.cropBordersWebtoon,
                                 navigator = currentViewer.config.navigator,
-                                onToggleMenu = { toggleMenu() },
-                                onRetryTransition = { chapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
-                                },
+                                onToggleMenu = onToggleMenuWebtoon,
+                                onRetryTransition = onRetryTransitionWebtoon,
                                 preloadPageAmount = prefs.preloadPageAmount,
-                                onNavigateToChapter = { chapter, navTarget ->
-                                    viewModel.navigateToChapter(chapter, navTarget)
-                                },
-                                onRequestPreloadChapter = { chapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
-                                },
+                                onNavigateToChapter = onNavigateToChapterWebtoon,
+                                onRequestPreloadChapter = onRequestPreloadChapterWebtoon,
                             )
+
+                        val onActiveItemChangedWebtoon =
+                            remember(currentViewer, viewModel) {
+                                { activeIndex: Int ->
+                                    currentViewer.updateActiveIndex(activeIndex)
+                                    viewModel.updateWebtoonActiveIndex(activeIndex)
+                                }
+                            }
+                        val onPageSelectedWebtoon = remember {
+                            { page: ReaderPage -> onPageSelected(page, false) }
+                        }
+                        val onTransitionSelectedWebtoon = remember {
+                            { transition: ChapterTransition -> onTransitionSelected(transition) }
+                        }
+                        val onPageLongTapWebtoon =
+                            remember(currentViewer, menuVisible) {
+                                { page: ReaderPage ->
+                                    if (menuVisible || currentViewer.config.longTapEnabled) {
+                                        onPageLongTap(page)
+                                    }
+                                }
+                            }
+                        val onNavigateAdjacentWebtoon =
+                            remember(viewModel) {
+                                { forward: Boolean ->
+                                    viewModel.sendNavigationCommand(
+                                        ReaderNavCommand.StepPage(forward)
+                                    )
+                                }
+                            }
 
                         ComposeWebtoonViewer(
                             items = items,
                             config = webtoonConfig,
-                            navCommands = effectiveWebtoonNavCommands,
-                            onActiveItemChanged = { activeIndex ->
-                                currentViewer.updateActiveIndex(activeIndex)
-                                viewModel.updateWebtoonActiveIndex(activeIndex)
-                            },
-                            onPageSelected = { page -> onPageSelected(page, false) },
-                            onTransitionSelected = { transition ->
-                                onTransitionSelected(transition)
-                            },
-                            onPageLongTap = { page ->
-                                if (menuVisible || currentViewer.config.longTapEnabled) {
-                                    onPageLongTap(page)
-                                }
-                            },
-                            onNavigateAdjacent = { forward ->
-                                if (forward) currentViewer.moveToNext()
-                                else currentViewer.moveToPrevious()
-                            },
+                            navCommands = viewModel.navigationCommands,
+                            onActiveItemChanged = onActiveItemChangedWebtoon,
+                            onPageSelected = onPageSelectedWebtoon,
+                            onTransitionSelected = onTransitionSelectedWebtoon,
+                            onPageLongTap = onPageLongTapWebtoon,
+                            onNavigateAdjacent = onNavigateAdjacentWebtoon,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
