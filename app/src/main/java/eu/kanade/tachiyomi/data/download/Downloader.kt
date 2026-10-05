@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.manga.toSimpleManga
 import eu.kanade.tachiyomi.util.storage.saveTo
@@ -459,17 +460,7 @@ class Downloader(
         page.progress = 0
         return flow {
             val response = source.getImage(page)
-            val file = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
-            try {
-                response.body.source().saveTo(file.openOutputStream())
-                val extension = getImageExtension(response, file)
-                file.renameTo("$filename.$extension")
-            } catch (e: Exception) {
-                response.close()
-                file.delete()
-                throw e
-            }
-            emit(file)
+            emit(saveImage(context, response, tmpDir, filename))
         }
             // Retry 3 times, waiting 2, 4 and 8 seconds between attempts.
             .retryWhen { _, attempt ->
@@ -481,25 +472,6 @@ class Downloader(
                 }
             }
             .first()
-    }
-
-    /**
-     * Returns the extension of the downloaded image from the network response, or if it's null,
-     * analyze the file. If everything fails, assume it's a jpg.
-     *
-     * @param response the network response of the image.
-     * @param file the file where the image is already downloaded.
-     */
-    private fun getImageExtension(response: Response, file: UniFile): String {
-        // Read content type if available.
-        val mime =
-            response.body.contentType()?.run { if (type == "image") "image/$subtype" else null }
-                // Else guess from the uri.
-                ?: context.contentResolver.getType(file.uri)
-                // Else read magic numbers.
-                ?: ImageUtil.findImageType { file.openInputStream() }?.mime
-
-        return ImageUtil.getExtensionFromMimeType(mime)
     }
 
     private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile) {
@@ -679,6 +651,61 @@ class Downloader(
             tmpFile.renameTo("$filename.${extension.extension}")
             cacheFile.delete()
             return tmpFile
+        }
+
+        /**
+         * Saves the image in the network response to a file in tmpDir.
+         *
+         * @param response the network response of the image.
+         * @param tmpDir the temporary directory of the download.
+         * @param filename the filename of the image.
+         * @return the saved file, named with the image's extension.
+         */
+        internal fun saveImage(
+            context: Context,
+            response: Response,
+            tmpDir: UniFile,
+            filename: String,
+        ): UniFile {
+            if (!response.isSuccessful) {
+                response.close()
+                throw Exception(
+                    HttpPageLoader.httpErrorMessage(response.code, response.request.url.host)
+                )
+            }
+            val file = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
+            try {
+                response.body.source().saveTo(file.openOutputStream())
+                val extension = getImageExtension(context, response, file)
+                file.renameTo("$filename.$extension")
+            } catch (e: Exception) {
+                response.close()
+                file.delete()
+                throw e
+            }
+            return file
+        }
+
+        /**
+         * Returns the extension of the downloaded image from the network response, or if it's null,
+         * analyze the file. Throws when none of them identifies an image.
+         *
+         * @param response the network response of the image.
+         * @param file the file where the image is already downloaded.
+         */
+        private fun getImageExtension(context: Context, response: Response, file: UniFile): String {
+            // Read content type if available.
+            val mime =
+                response.body.contentType()?.run { if (type == "image") "image/$subtype" else null }
+                    // Else guess from the uri. A SAF provider types 001.tmp by its extension, as
+                    // application/octet-stream, which would skip the magic number check.
+                    ?: context.contentResolver.getType(file.uri)?.takeIf { it.startsWith("image/") }
+                    // Else read magic numbers.
+                    ?: ImageUtil.findImageType { file.openInputStream() }?.mime
+                    // An error page served with status 200 lands here.
+                    ?: throw Exception(context.getString(R.string.download_notifier_page_not_image))
+
+            return ImageUtil.getExtensionFromMimeType(mime)
         }
     }
 }

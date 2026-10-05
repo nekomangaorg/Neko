@@ -1118,6 +1118,7 @@
     <string name="couldnt_download_low_space">Couldn\'t download chapters due to low disk space</string>
     <string name="download_notifier_split_page_not_found">Page %d not found while splitting</string>
     <string name="download_notifier_split_failed">Couldn\'t split downloaded image</string>
+    <string name="download_notifier_page_not_image">Downloaded page isn\'t an image</string>
 
     <!-- Download Notification -->
     <string name="group_downloader">Downloads</string>
