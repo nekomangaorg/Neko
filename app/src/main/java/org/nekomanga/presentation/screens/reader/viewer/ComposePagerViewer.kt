@@ -433,9 +433,15 @@ internal fun calculateDefaultPagerIndex(
 ): Int {
     if (requestedPage != null && requestedPage > 0) {
         val match = items.indexOfFirst { item ->
-            item is ReaderUiItem.Page &&
-                item.page.chapter.chapter.id == currentChapterId &&
-                (item.page.index == requestedPage || item.extraPage?.index == requestedPage)
+            when (item) {
+                is ReaderUiItem.Page ->
+                    item.page.chapter.chapter.id == currentChapterId &&
+                        (item.page.index == requestedPage || item.extraPage?.index == requestedPage)
+                is ReaderUiItem.SplitPage ->
+                    item.page.chapter.chapter.id == currentChapterId &&
+                        item.page.index == requestedPage
+                else -> false
+            }
         }
         if (match != -1) return match
     }

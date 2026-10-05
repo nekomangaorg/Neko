@@ -67,4 +67,32 @@ class ReaderViewerPreferencesTest {
         assertEquals(prefs1, prefs2)
         assertEquals(prefs1.hashCode(), prefs2.hashCode())
     }
+
+    @Test
+    fun `given base ReaderViewerPreferences, modifying any individual property produces unequal instance`() {
+        val base = ReaderViewerPreferences()
+
+        assertNotEquals(base, base.copy(animatedTransitions = !base.animatedTransitions))
+        assertNotEquals(
+            base,
+            base.copy(animatedTransitionsWebtoon = !base.animatedTransitionsWebtoon),
+        )
+        assertNotEquals(base, base.copy(imageScaleType = base.imageScaleType + 1))
+        assertNotEquals(base, base.copy(doublePageGap = base.doublePageGap + 10))
+        assertNotEquals(base, base.copy(invertDoublePages = !base.invertDoublePages))
+        assertNotEquals(base, base.copy(readerTheme = base.readerTheme + 1))
+        assertNotEquals(base, base.copy(landscapeZoom = !base.landscapeZoom))
+        assertNotEquals(base, base.copy(zoomStart = base.zoomStart + 1))
+        assertNotEquals(base, base.copy(preloadPageAmount = base.preloadPageAmount + 2))
+        assertNotEquals(base, base.copy(cropBorders = !base.cropBorders))
+        assertNotEquals(base, base.copy(cropBordersWebtoon = !base.cropBordersWebtoon))
+        assertNotEquals(base, base.copy(grayscale = !base.grayscale))
+        assertNotEquals(base, base.copy(invertedColors = !base.invertedColors))
+        assertNotEquals(base, base.copy(doublePageRotate = !base.doublePageRotate))
+        assertNotEquals(base, base.copy(doublePageRotateReverse = !base.doublePageRotateReverse))
+        assertNotEquals(base, base.copy(navigateToPan = !base.navigateToPan))
+        assertNotEquals(base, base.copy(webtoonSidePadding = base.webtoonSidePadding + 5))
+        assertNotEquals(base, base.copy(webtoonDisableGaps = !base.webtoonDisableGaps))
+        assertNotEquals(base, base.copy(webtoonEnableZoomOut = !base.webtoonEnableZoomOut))
+    }
 }

@@ -111,4 +111,72 @@ class ReaderViewerConfigUiModelTest {
         assertNotEquals(rotated, rotatedFlipped)
         assertNotEquals(default, rotatedFlipped)
     }
+
+    @Test
+    fun `given PagerViewerConfigUiModel, modifying dual page properties produces unequal instances`() {
+        val base = PagerViewerConfigUiModel()
+
+        assertNotEquals(base, base.copy(doublePages = true))
+        assertNotEquals(base, base.copy(shiftDoublePage = true))
+        assertNotEquals(base, base.copy(invertDoublePages = true))
+        assertNotEquals(base, base.copy(doublePageGap = 16))
+        assertNotEquals(base, base.copy(zoomDoublePageSpreads = true))
+    }
+
+    @Test
+    fun `given PagerViewerConfigUiModel, modifying navigation or scale properties produces unequal instances`() {
+        val base = PagerViewerConfigUiModel()
+
+        assertNotEquals(base, base.copy(isRtl = true))
+        assertNotEquals(base, base.copy(isVertical = true))
+        assertNotEquals(base, base.copy(imageScaleType = 2))
+        assertNotEquals(base, base.copy(zoomStart = 2))
+        assertNotEquals(base, base.copy(landscapeZoom = true))
+        assertNotEquals(base, base.copy(navigateToPan = true))
+        assertNotEquals(base, base.copy(animatedTransitions = false))
+        assertNotEquals(base, base.copy(preloadPageAmount = 8))
+    }
+
+    @Test
+    fun `given WebtoonViewerConfigUiModel, modifying webtoon-specific properties produces unequal instances`() {
+        val nav = DisabledNavigation()
+        val base = WebtoonViewerConfigUiModel(navigator = nav)
+
+        assertNotEquals(base, base.copy(hasGaps = false))
+        assertNotEquals(base, base.copy(enableZoomOut = true))
+        assertNotEquals(base, base.copy(animatedTransitions = false))
+        assertNotEquals(base, base.copy(sidePaddingPercent = 0.15f))
+        assertNotEquals(base, base.copy(cropBorders = true))
+        assertNotEquals(base, base.copy(preloadPageAmount = 6))
+    }
+
+    @Test
+    fun `given identical configs, equals and hashCode contracts are satisfied`() {
+        val nav = DisabledNavigation()
+        val pager1 =
+            PagerViewerConfigUiModel(
+                navigator = nav,
+                initialIndex = 3,
+                isRtl = true,
+                doublePages = true,
+            )
+        val pager2 =
+            PagerViewerConfigUiModel(
+                navigator = nav,
+                initialIndex = 3,
+                isRtl = true,
+                doublePages = true,
+            )
+
+        assertEquals(pager1, pager2)
+        assertEquals(pager1.hashCode(), pager2.hashCode())
+
+        val webtoon1 =
+            WebtoonViewerConfigUiModel(navigator = nav, initialIndex = 2, hasGaps = false)
+        val webtoon2 =
+            WebtoonViewerConfigUiModel(navigator = nav, initialIndex = 2, hasGaps = false)
+
+        assertEquals(webtoon1, webtoon2)
+        assertEquals(webtoon1.hashCode(), webtoon2.hashCode())
+    }
 }
