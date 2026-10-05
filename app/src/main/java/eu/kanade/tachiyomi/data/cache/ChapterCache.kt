@@ -232,8 +232,6 @@ class ChapterCache(private val context: Context) {
 
             diskCache.flush()
             editor.commit()
-        } catch (e: Exception) {
-            TimberKt.e(e) { "Error puting image to Cache" }
         } finally {
             response.body.close()
             editor?.abortUnlessCommitted()
