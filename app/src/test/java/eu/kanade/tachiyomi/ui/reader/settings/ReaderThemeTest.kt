@@ -39,4 +39,13 @@ class ReaderThemeTest {
             ReaderTheme.SMART_BY_THEME_BUT_BLACK.smartBaseColor(lightBackground),
         )
     }
+
+    @Test
+    fun `smart by theme but black counts a background as white above 740 summed channels`() {
+        val justWhite = Color(0xFFF7F7F7)
+        val justGrey = Color(0xFFF6F6F6)
+
+        assertEquals(justWhite, ReaderTheme.SMART_BY_THEME_BUT_BLACK.smartBaseColor(justWhite))
+        assertEquals(Color.Black, ReaderTheme.SMART_BY_THEME_BUT_BLACK.smartBaseColor(justGrey))
+    }
 }

@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.reader.viewer
 
 import androidx.annotation.ColorInt
+import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
+import eu.kanade.tachiyomi.data.coil.PixelRowColReader
 import eu.kanade.tachiyomi.util.system.toInt
 import kotlin.math.abs
 import kotlin.math.max
@@ -250,8 +252,6 @@ object SmartBackgroundAnalyzer {
         return sampleSize
     }
 
-    internal fun isWhite(@ColorInt color: Int): Boolean = color.isWhite
-
     private val Int.red: Int
         get() = (this shr 16) and 0xFF
 
@@ -337,18 +337,58 @@ fun PagePixels.half(left: Boolean): PagePixels {
 }
 
 /**
- * Two pages side by side, each centered vertically, with [fill] around the shorter one. This is the
- * layout the View reader merged double pages into before analyzing them.
+ * The image without the uniform margins [CropBordersTransformation] trims, or the image itself when
+ * it would trim 2 px or less from every edge, the same as the transformation.
  */
-fun mergedPagePixels(left: PagePixels, right: PagePixels, @ColorInt fill: Int): PagePixels =
-    object : PagePixels {
-        override val width = left.width + right.width
-        override val height = max(left.height, right.height)
+fun PagePixels.croppedBorders(): PagePixels {
+    val source = this
+    val reader =
+        object : PixelRowColReader {
+            override fun readRow(y: Int, width: Int, pixels: IntArray) {
+                for (x in 0 until width) pixels[x] = source.getPixel(x, y)
+            }
 
-        override fun getPixel(x: Int, y: Int): Int {
-            val page = if (x < left.width) left else right
-            val pageX = if (x < left.width) x else x - left.width
-            val pageY = y - (height - page.height) / 2
-            return if (pageY in 0 until page.height) page.getPixel(pageX, pageY) else fill
+            override fun readCol(x: Int, height: Int, pixels: IntArray) {
+                for (y in 0 until height) pixels[y] = source.getPixel(x, y)
+            }
         }
+    val bounds =
+        CropBordersTransformation.calculateCropBounds(width, height, reader, cropTopBottom = true)
+            ?: return this
+    if (
+        bounds.left <= 2 &&
+            bounds.top <= 2 &&
+            width - bounds.right <= 2 &&
+            height - bounds.bottom <= 2
+    ) {
+        return this
     }
+    return object : PagePixels {
+        override val width = bounds.width
+        override val height = bounds.height
+
+        override fun getPixel(x: Int, y: Int): Int =
+            source.getPixel(bounds.left + x, bounds.top + y)
+    }
+}
+
+/**
+ * Two pages side by side at the height of the taller one, with the shorter one scaled up to match.
+ * DoublePageLayout lays out double pages this way.
+ */
+fun mergedPagePixels(left: PagePixels, right: PagePixels): PagePixels {
+    val height = max(left.height, right.height)
+    val leftPage = left.scaledTo((left.width.toLong() * height / left.height).toInt(), height)
+    val rightPage = right.scaledTo((right.width.toLong() * height / right.height).toInt(), height)
+    return object : PagePixels {
+        override val width = leftPage.width + rightPage.width
+        override val height = height
+
+        override fun getPixel(x: Int, y: Int): Int =
+            if (x < leftPage.width) {
+                leftPage.getPixel(x, y)
+            } else {
+                rightPage.getPixel(x - leftPage.width, y)
+            }
+    }
+}

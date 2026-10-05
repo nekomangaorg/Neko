@@ -214,23 +214,45 @@ class SmartBackgroundTest {
     }
 
     @Test
-    fun `merged pages sit side by side, centered vertically on the fill color`() {
-        val fill = 9
+    fun `merged pages sit side by side, the shorter one scaled to the taller one's height`() {
         val merged =
             mergedPagePixels(
                 left = page(2, 4) { _, _ -> 1 },
-                right = page(3, 2) { _, _ -> 2 },
-                fill = fill,
+                right = page(3, 2) { x, y -> 20 + y * 10 + x },
             )
 
-        assertEquals(5, merged.width)
+        assertEquals(8, merged.width)
         assertEquals(4, merged.height)
         assertEquals(1, merged.getPixel(0, 0))
         assertEquals(1, merged.getPixel(1, 3))
-        assertEquals(fill, merged.getPixel(2, 0))
-        assertEquals(2, merged.getPixel(2, 1))
-        assertEquals(2, merged.getPixel(4, 2))
-        assertEquals(fill, merged.getPixel(4, 3))
+        assertEquals(20, merged.getPixel(2, 0))
+        assertEquals(21, merged.getPixel(4, 1))
+        assertEquals(32, merged.getPixel(7, 3))
+    }
+
+    @Test
+    fun `cropped borders drop a uniform margin like CropBordersTransformation`() {
+        // Midtone content with its position in the green and blue channels.
+        fun content(x: Int, y: Int) = 0xFF800000.toInt() or (x shl 8) or y
+        val image = page(40, 40) { x, y -> if (x in 5..34 && y in 5..34) content(x, y) else white }
+
+        val cropped = image.croppedBorders()
+
+        assertEquals(30, cropped.width)
+        assertEquals(30, cropped.height)
+        assertEquals(content(5, 5), cropped.getPixel(0, 0))
+        assertEquals(content(34, 34), cropped.getPixel(29, 29))
+    }
+
+    @Test
+    fun `cropped borders keep the image when every margin is 2 px or less`() {
+        val image = page(40, 40) { x, y -> if (x in 2..37 && y in 2..37) art else white }
+
+        val cropped = image.croppedBorders()
+
+        assertEquals(40, cropped.width)
+        assertEquals(40, cropped.height)
+        assertEquals(white, cropped.getPixel(0, 0))
     }
 
     @Test
