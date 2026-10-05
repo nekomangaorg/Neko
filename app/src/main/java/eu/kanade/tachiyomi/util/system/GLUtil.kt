@@ -10,6 +10,13 @@ class GLUtil private constructor() {
         // Safe minimum default size
         private const val IMAGE_MAX_BITMAP_DIMENSION = 2048
 
+        /**
+         * Android HWUI [android.graphics.RecordingCanvas] throws [RuntimeException] ("Canvas:
+         * trying to draw too large(...) bitmap") if any drawn bitmap exceeds 100 MB (104,857,600
+         * bytes).
+         */
+        const val MAX_CANVAS_BITMAP_BYTES: Long = 100L * 1024 * 1024
+
         val maxTextureSize: Int by lazy {
             try {
                 // Get EGL Display
@@ -58,6 +65,18 @@ class GLUtil private constructor() {
             } catch (_: Throwable) {
                 IMAGE_MAX_BITMAP_DIMENSION
             }
+        }
+
+        /**
+         * Safe maximum dimension for bitmaps rendered onto a hardware-accelerated Canvas. Clamped
+         * to at most [SAFE_CANVAS_BITMAP_DIMENSION] (4096) so that a square ARGB_8888 bitmap
+         * requires at most 4096 x 4096 x 4 = 64 MB, safely below [MAX_CANVAS_BITMAP_BYTES] (100
+         * MB).
+         */
+        const val SAFE_CANVAS_BITMAP_DIMENSION: Int = 4096
+
+        val maxCanvasTextureSize: Int by lazy {
+            minOf(maxTextureSize, SAFE_CANVAS_BITMAP_DIMENSION)
         }
     }
 

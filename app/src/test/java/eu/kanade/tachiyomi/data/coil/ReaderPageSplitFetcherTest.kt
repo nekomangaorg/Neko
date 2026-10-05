@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.data.coil
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -84,7 +86,7 @@ class ReaderPageSplitFetcherTest {
         val result =
             decodeOrRetrySmaller(
                 sampleSize = 2,
-                beforeRetry = { events += "retry" },
+                beforeRetry = { events += "retry $it" },
                 decode = { sampleSize ->
                     events += "decode $sampleSize"
                     if (sampleSize == 4) "bitmap at 4" else null
@@ -92,7 +94,7 @@ class ReaderPageSplitFetcherTest {
             )
 
         assertEquals("bitmap at 4", result)
-        assertEquals(listOf("decode 2", "retry", "decode 4"), events)
+        assertEquals(listOf("decode 2", "retry null", "decode 4"), events)
     }
 
     @Test
@@ -102,7 +104,7 @@ class ReaderPageSplitFetcherTest {
         val result =
             decodeOrRetrySmaller<String>(
                 sampleSize = 1,
-                beforeRetry = { events += "retry" },
+                beforeRetry = { events += "retry $it" },
                 decode = { sampleSize ->
                     events += "decode $sampleSize"
                     null
@@ -110,7 +112,170 @@ class ReaderPageSplitFetcherTest {
             )
 
         assertNull(result)
-        assertEquals(listOf("decode 1", "retry", "decode 2"), events)
+        assertEquals(listOf("decode 1", "retry null", "decode 2"), events)
+    }
+
+    @Test
+    fun `native decode that runs out of memory is retried at double sample size`() {
+        val events = mutableListOf<String>()
+        val error = OutOfMemoryError("at 2")
+        var passed: OutOfMemoryError? = null
+
+        val result =
+            decodeOrRetrySmaller(
+                sampleSize = 2,
+                beforeRetry = {
+                    passed = it
+                    events += "retry"
+                },
+                decode = { sampleSize ->
+                    events += "decode $sampleSize"
+                    if (sampleSize == 2) throw error
+                    "bitmap at $sampleSize"
+                },
+            )
+
+        assertEquals("bitmap at 4", result)
+        assertEquals(listOf("decode 2", "retry", "decode 4"), events)
+        assertSame(error, passed)
+    }
+
+    @Test
+    fun `native decode that runs out of memory twice throws the second error`() {
+        val events = mutableListOf<String>()
+
+        val thrown =
+            assertThrows(OutOfMemoryError::class.java) {
+                decodeOrRetrySmaller<String>(
+                    sampleSize = 2,
+                    beforeRetry = { events += "retry" },
+                    decode = { sampleSize ->
+                        events += "decode $sampleSize"
+                        throw OutOfMemoryError("at $sampleSize")
+                    },
+                )
+            }
+
+        assertEquals("at 4", thrown.message)
+        assertEquals(listOf("decode 2", "retry", "decode 4"), events)
+    }
+
+    @Test
+    fun `native decode that throws something other than out of memory is not retried`() {
+        val events = mutableListOf<String>()
+
+        assertThrows(IllegalStateException::class.java) {
+            decodeOrRetrySmaller<String>(
+                sampleSize = 2,
+                beforeRetry = { events += "retry" },
+                decode = { sampleSize ->
+                    events += "decode $sampleSize"
+                    throw IllegalStateException("Requested region is invalid")
+                },
+            )
+        }
+
+        assertEquals(listOf("decode 2"), events)
+    }
+
+    @Test
+    fun `calculateRegionSampleSize returns 1 for dimensions and byte size within limits`() {
+        val sampleSize = calculateRegionSampleSize(1080, 2000, maxDim = 4096, maxBytes = 100L * MIB)
+        assertEquals(1, sampleSize)
+    }
+
+    @Test
+    fun `calculateRegionSampleSize doubles sample size when dimension exceeds maxDim`() {
+        val sampleSizeHeight =
+            calculateRegionSampleSize(1080, 5000, maxDim = 4096, maxBytes = 100L * MIB)
+        assertEquals(2, sampleSizeHeight)
+
+        val sampleSizeWidth =
+            calculateRegionSampleSize(10000, 1000, maxDim = 4096, maxBytes = 100L * MIB)
+        assertEquals(4, sampleSizeWidth)
+    }
+
+    @Test
+    fun `calculateRegionSampleSize doubles sample size when byte size exceeds maxBytes`() {
+        val sampleSize = calculateRegionSampleSize(6000, 5000, maxDim = 8192, maxBytes = 100L * MIB)
+        assertEquals(2, sampleSize)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale returns 1f for slice within limits`() {
+        val scale =
+            calculateFallbackSliceScale(
+                1080,
+                2000,
+                bytesPerPixel = 4L,
+                maxDim = 4096,
+                maxBytes = 100L * MIB,
+            )
+        assertEquals(1f, scale, 0.0001f)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale downscales when dimension exceeds maxDim`() {
+        val scale =
+            calculateFallbackSliceScale(
+                5000,
+                1000,
+                bytesPerPixel = 4L,
+                maxDim = 4096,
+                maxBytes = 100L * MIB,
+            )
+        assertEquals(4096f / 5000f, scale, 0.0001f)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale downscales when byte count exceeds maxBytes`() {
+        val scale =
+            calculateFallbackSliceScale(
+                6000,
+                5000,
+                bytesPerPixel = 4L,
+                maxDim = 8192,
+                maxBytes = 100L * MIB,
+            )
+        val expected = kotlin.math.sqrt((100.0 * MIB) / (6000L * 5000L * 4L)).toFloat()
+        assertEquals(expected, scale, 0.0001f)
+        assertTrue(scale < 1f)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale respects bytesPerPixel for RGB_565 vs ARGB_8888`() {
+        val scaleArgb =
+            calculateFallbackSliceScale(
+                6000,
+                5000,
+                bytesPerPixel = 4L,
+                maxDim = 8192,
+                maxBytes = 100L * MIB,
+            )
+        assertTrue(scaleArgb < 1f)
+
+        val scaleRgb565 =
+            calculateFallbackSliceScale(
+                6000,
+                5000,
+                bytesPerPixel = 2L,
+                maxDim = 8192,
+                maxBytes = 100L * MIB,
+            )
+        assertEquals(1f, scaleRgb565, 0.0001f)
+    }
+
+    @Test
+    fun `calculateFallbackSliceScale allows deep downscaling for extreme narrow aspect ratios`() {
+        val scale =
+            calculateFallbackSliceScale(
+                10000,
+                1,
+                bytesPerPixel = 4L,
+                maxDim = 4096,
+                maxBytes = 100L * MIB,
+            )
+        assertEquals(4096f / 10000f, scale, 0.0001f)
     }
 
     private fun roundedUp(size: Int, sampleSize: Int): Long =

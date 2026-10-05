@@ -40,6 +40,8 @@ fun SplitPageLayout(
     config: PagerViewerConfigUiModel,
     zoomableState: ZoomableState,
     doubleClickToZoomListener: DoubleClickToZoomListener,
+    onImageError: (ReaderPage, Throwable) -> Unit,
+    onImageSuccess: (ReaderPage) -> Unit,
     contentScale: ContentScale = ContentScale.Fit,
     modifier: Modifier = Modifier,
 ) {
@@ -62,7 +64,7 @@ fun SplitPageLayout(
             ImageRequest.Builder(context)
                 .data(page)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                .maxBitmapSize(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .build()
@@ -88,7 +90,9 @@ fun SplitPageLayout(
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
                 colorFilter = config.colorFilter,
+                onError = { state -> onImageError(page, state.result.throwable) },
                 onSuccess = { state ->
+                    onImageSuccess(page)
                     val img = state.result.image
                     if (img.width > 0 && img.height > 0) {
                         imageSize = ComposeSize(img.width.toFloat(), img.height.toFloat())

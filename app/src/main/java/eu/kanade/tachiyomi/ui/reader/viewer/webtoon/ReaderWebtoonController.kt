@@ -121,7 +121,7 @@ class ReaderWebtoonController(
     fun checkAndTrackTallPage(
         page: ReaderPage,
         screenHeight: Int,
-        maxTextureSize: Int = GLUtil.maxTextureSize,
+        maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
     ): TallSplitResult {
         synchronized(splitCheckLock) {
             if (tallSplitPages.contains(page)) return TallSplitResult.AlreadySplit
@@ -161,8 +161,10 @@ class ReaderWebtoonController(
         fun checkTallPage(
             page: ReaderPage,
             screenHeight: Int,
-            maxTextureSize: Int = GLUtil.maxTextureSize,
-        ): List<ReaderPageSplit>? = defaultCheckTallPageUseCase(page, screenHeight, maxTextureSize)
+            maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
+            bytesPerPixel: Long = 4L,
+        ): List<ReaderPageSplit>? =
+            defaultCheckTallPageUseCase(page, screenHeight, maxTextureSize, bytesPerPixel)
 
         /**
          * Pure function that calculates optimal slice splits given dimensions and maximum texture
@@ -173,7 +175,8 @@ class ReaderWebtoonController(
             outWidth: Int,
             outHeight: Int,
             screenHeight: Int,
-            maxTextureSize: Int = GLUtil.maxTextureSize,
+            maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
+            bytesPerPixel: Long = 4L,
         ): List<ReaderPageSplit>? =
             defaultCheckTallPageUseCase.computeSplits(
                 page,
@@ -181,6 +184,7 @@ class ReaderWebtoonController(
                 outHeight,
                 screenHeight,
                 maxTextureSize,
+                bytesPerPixel,
             )
     }
 }

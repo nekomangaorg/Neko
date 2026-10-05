@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
+import java.util.concurrent.atomic.AtomicLong
 import java.util.regex.Pattern
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
@@ -23,7 +24,10 @@ import uy.kohesive.injekt.injectLazy
  *
  * @param context context of application
  */
-internal class DownloadNotifier(private val context: Context) {
+internal class DownloadNotifier(
+    private val context: Context,
+    private val timeProvider: () -> Long = { System.currentTimeMillis() },
+) {
 
     private val securityPreferences: SecurityPreferences by injectLazy()
 
@@ -276,5 +280,90 @@ internal class DownloadNotifier(private val context: Context) {
 
         // Reset download information
         isDownloading = false
+    }
+
+    private val reindexNotificationBuilder by lazy {
+        context.notificationBuilder(Notifications.Channel.Downloader.Progress) {
+            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            setSmallIcon(R.drawable.ic_neko_notification)
+            setAutoCancel(false)
+            setOngoing(true)
+            setOnlyAlertOnce(true)
+            color = ContextCompat.getColor(context, R.color.iconOutline)
+            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+        }
+    }
+
+    private val lastReindexNotificationTime = AtomicLong(0L)
+
+    fun showReindexProgress(progress: Int, total: Int, title: String? = null) {
+        val now = timeProvider()
+        val lastTime = lastReindexNotificationTime.get()
+        if (progress > 0 && progress != 1 && progress != total && now - lastTime < 200L) {
+            return
+        }
+        lastReindexNotificationTime.set(now)
+
+        context.notificationManager.cancel(Notifications.Id.Download.ReindexComplete)
+
+        synchronized(reindexNotificationBuilder) {
+            with(reindexNotificationBuilder) {
+                val displayTitle =
+                    if (securityPreferences.hideNotificationContent().get()) {
+                        context.getString(R.string.reindex_downloads)
+                    } else {
+                        title?.chop(30) ?: context.getString(R.string.reindex_downloads)
+                    }
+                setContentTitle(displayTitle)
+
+                if (total > 0) {
+                    setContentText(
+                        context.getString(
+                            R.string.reindexing_downloads_progress,
+                            progress,
+                            total,
+                        )
+                    )
+                    setProgress(total, progress, false)
+                } else {
+                    setContentText(context.getString(R.string.reindex_downloads_invalidate))
+                    setProgress(0, 0, true)
+                }
+
+                show(Notifications.Id.Download.ReindexProgress)
+            }
+        }
+    }
+
+    fun dismissReindexProgress() {
+        lastReindexNotificationTime.set(0L)
+        context.notificationManager.cancel(Notifications.Id.Download.ReindexProgress)
+    }
+
+    fun showReindexComplete() {
+        dismissReindexProgress()
+
+        val notification =
+            context
+                .notificationBuilder(Notifications.Channel.Downloader.Progress) {
+                    setLargeIcon(
+                        BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+                    )
+                    setSmallIcon(R.drawable.ic_neko_notification)
+                    setAutoCancel(true)
+                    setContentTitle(context.getString(R.string.reindex_downloads))
+                    setContentText(context.getString(R.string.reindex_downloads_complete))
+                    color = ContextCompat.getColor(context, R.color.iconOutline)
+                    setContentIntent(
+                        NotificationHandler.openDownloadManagerPendingActivity(context)
+                    )
+                    setTimeoutAfter(5_000L)
+                }
+                .build()
+
+        context.notificationManager.notify(
+            Notifications.Id.Download.ReindexComplete,
+            notification,
+        )
     }
 }

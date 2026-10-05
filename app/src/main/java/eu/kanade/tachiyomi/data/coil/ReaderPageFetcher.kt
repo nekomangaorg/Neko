@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.coil
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.BitmapRegionDecoder
+import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.Build
 import android.util.LruCache
@@ -19,7 +20,9 @@ import coil3.request.Options
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
+import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import kotlin.math.sqrt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -106,18 +109,26 @@ internal fun fallbackDecodeBytes(imageWidth: Int, imageHeight: Int, sampleSize: 
     sampledDimension(imageWidth, sampleSize) * sampledDimension(imageHeight, sampleSize) * 4
 
 /**
- * Runs [decode] at [sampleSize]. When it returns null, runs [beforeRetry] and tries once more at
- * double the sample size, and returns that result.
+ * Runs [decode] at [sampleSize]. When it returns null or throws [OutOfMemoryError], runs
+ * [beforeRetry] with that error (null for a null result) and tries once more at double the sample
+ * size, and returns that result. Other throwables, and an [OutOfMemoryError] from the second try,
+ * propagate.
  */
 internal fun <T : Any> decodeOrRetrySmaller(
     sampleSize: Int,
-    beforeRetry: () -> Unit,
+    beforeRetry: (outOfMemory: OutOfMemoryError?) -> Unit,
     decode: (sampleSize: Int) -> T?,
 ): T? {
-    decode(sampleSize)?.let {
-        return it
-    }
-    beforeRetry()
+    val outOfMemory =
+        try {
+            decode(sampleSize)?.let {
+                return it
+            }
+            null
+        } catch (e: OutOfMemoryError) {
+            e
+        }
+    beforeRetry(outOfMemory)
     return decode(sampleSize * 2)
 }
 
@@ -125,6 +136,51 @@ internal fun <T : Any> decodeOrRetrySmaller(
 // decodes to 1153x32768 at sample size 2.
 private fun sampledDimension(size: Int, sampleSize: Int): Long =
     (size.toLong() + sampleSize - 1) / sampleSize
+
+/**
+ * Calculates the smallest power-of-two sample size that keeps the decoded region within canvas
+ * limits.
+ */
+internal fun calculateRegionSampleSize(
+    regionWidth: Int,
+    regionHeight: Int,
+    maxDim: Int = GLUtil.maxCanvasTextureSize,
+    maxBytes: Long = GLUtil.MAX_CANVAS_BITMAP_BYTES,
+): Int {
+    var sampleSize = 1
+    while (
+        (regionWidth / sampleSize) > maxDim ||
+            (regionHeight / sampleSize) > maxDim ||
+            ((regionWidth.toLong() / sampleSize) * (regionHeight.toLong() / sampleSize) * 4L) >
+                maxBytes
+    ) {
+        sampleSize *= 2
+    }
+    return sampleSize
+}
+
+/**
+ * Calculates the scale factor to bring a fallback slice within canvas texture dimension and byte
+ * limits.
+ */
+internal fun calculateFallbackSliceScale(
+    cropWidth: Int,
+    cropHeight: Int,
+    bytesPerPixel: Long,
+    maxDim: Int = GLUtil.maxCanvasTextureSize,
+    maxBytes: Long = GLUtil.MAX_CANVAS_BITMAP_BYTES,
+): Float {
+    val rawBytes = cropWidth.toLong() * cropHeight.toLong() * bytesPerPixel
+    if (rawBytes <= maxBytes && cropWidth <= maxDim && cropHeight <= maxDim) {
+        return 1f
+    }
+    return minOf(
+            maxDim.toFloat() / cropWidth.toFloat(),
+            maxDim.toFloat() / cropHeight.toFloat(),
+            sqrt(maxBytes.toDouble() / rawBytes.toDouble()).toFloat(),
+        )
+        .coerceIn(0f, 1f)
+}
 
 class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val options: Options) :
     Fetcher {
@@ -184,44 +240,65 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         }
 
         private fun nativeFullDecode(imageBytes: ByteArray, pageIndex: Int): CachedDecodedImage? {
-            val decoder = ImageDecoder.newInstance(imageBytes.inputStream())
-            if (decoder == null || decoder.width <= 0 || decoder.height <= 0) {
-                decoder?.recycle()
-                TimberKt.e {
-                    "Cannot fallback decode region: native decoder could not open page $pageIndex"
+            try {
+                val decoder = ImageDecoder.newInstance(imageBytes.inputStream())
+                if (decoder == null || decoder.width <= 0 || decoder.height <= 0) {
+                    decoder?.recycle()
+                    TimberKt.e {
+                        "Cannot fallback decode region: native decoder could not open page $pageIndex"
+                    }
+                    return null
                 }
-                return null
-            }
 
-            val imageWidth = decoder.width
-            val imageHeight = decoder.height
-            val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
-            trimCacheForFullDecode(imageWidth, imageHeight, sampleSize)
-            // decode() returns null both for bad data and when it runs out of memory. A second try
-            // at double the sample size needs a quarter of the memory, so a page that only ran out
-            // of memory loads and the cached pages stay. A corrupt page is decoded twice and then
-            // left alone until Retry.
-            val full =
-                try {
-                    decodeOrRetrySmaller(
-                        sampleSize = sampleSize,
-                        beforeRetry = {
-                            TimberKt.w {
-                                "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size $sampleSize), trying sample size ${sampleSize * 2}"
-                            }
-                        },
-                        decode = { decoder.decode(sampleSize = it) },
-                    )
-                } finally {
-                    decoder.recycle()
+                val imageWidth = decoder.width
+                val imageHeight = decoder.height
+                val sampleSize = fallbackDecodeSampleSize(imageWidth, imageHeight)
+                trimCacheForFullDecode(imageWidth, imageHeight, sampleSize)
+                // decode() throws OutOfMemoryError when it runs out of memory, but a failed
+                // allocation inside the AV1 or HEVC decoder still comes back as null, like bad
+                // data. Either failure gets a second try at double the sample size, and after an
+                // OutOfMemoryError the fallback caches are cleared first. The second try shrinks
+                // the output buffer and bitmap to a quarter, but AVIF and HEIF still decode at
+                // full size first. A page that fails twice is left alone until Retry.
+                val full =
+                    try {
+                        decodeOrRetrySmaller(
+                            sampleSize = sampleSize,
+                            beforeRetry = { outOfMemory ->
+                                if (outOfMemory != null) {
+                                    TimberKt.w(outOfMemory) {
+                                        "Native fallback decode ran out of memory for page $pageIndex ($imageWidth x $imageHeight, sample size $sampleSize), trying sample size ${sampleSize * 2}"
+                                    }
+                                    fallbackBitmapCache.evictAll()
+                                    rawBytesCache.evictAll()
+                                } else {
+                                    TimberKt.w {
+                                        "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size $sampleSize), trying sample size ${sampleSize * 2}"
+                                    }
+                                }
+                            },
+                            decode = { decoder.decode(sampleSize = it) },
+                        )
+                    } finally {
+                        decoder.recycle()
+                    }
+                if (full == null) {
+                    TimberKt.e {
+                        "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size ${sampleSize * 2})"
+                    }
+                    return null
                 }
-            if (full == null) {
-                TimberKt.e {
-                    "Native fallback decode returned no bitmap for page $pageIndex ($imageWidth x $imageHeight, sample size ${sampleSize * 2})"
+                return CachedDecodedImage(full, imageWidth, imageHeight)
+            } catch (e: OutOfMemoryError) {
+                // Covers newInstance, which gets no second try (JXL decodes the whole image
+                // there), and the retry.
+                TimberKt.e(e) {
+                    "OutOfMemoryError during native fallback decode for page $pageIndex"
                 }
+                fallbackBitmapCache.evictAll()
+                rawBytesCache.evictAll()
                 return null
             }
-            return CachedDecodedImage(full, imageWidth, imageHeight)
         }
 
         private fun platformFullDecode(imageBytes: ByteArray, pageIndex: Int): CachedDecodedImage? {
@@ -416,11 +493,14 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 val bottom = minOf(decoder.height, top + height)
                 if (top < decoder.height && bottom > top) {
                     val region = Rect(0, top, decoder.width, bottom)
+                    val regionWidth = decoder.width
+                    val regionHeight = bottom - top
                     val sliceBitmap =
                         decoder.decodeRegion(
                             region,
                             BitmapFactory.Options().apply {
                                 inPreferredConfig = Bitmap.Config.ARGB_8888
+                                inSampleSize = calculateRegionSampleSize(regionWidth, regionHeight)
                             },
                         )
                     if (sliceBitmap != null) {
@@ -468,10 +548,32 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             val scaledTop = (top * scale).toInt().coerceIn(0, decoded.bitmap.height - 1)
             val scaledHeight = (height * scale).toInt().coerceAtLeast(1)
             val cropHeight = minOf(scaledHeight, decoded.bitmap.height - scaledTop)
-            if (cropHeight <= 0) {
+            val cropWidth = decoded.bitmap.width
+            if (cropHeight <= 0 || cropWidth <= 0) {
                 null
             } else {
-                Bitmap.createBitmap(decoded.bitmap, 0, scaledTop, decoded.bitmap.width, cropHeight)
+                val bytesPerPixel = if (decoded.bitmap.config == Bitmap.Config.RGB_565) 2L else 4L
+                val scaleFactor = calculateFallbackSliceScale(cropWidth, cropHeight, bytesPerPixel)
+                if (scaleFactor < 1f) {
+                    val matrix = Matrix().apply { postScale(scaleFactor, scaleFactor) }
+                    Bitmap.createBitmap(
+                        decoded.bitmap,
+                        0,
+                        scaledTop,
+                        cropWidth,
+                        cropHeight,
+                        matrix,
+                        true,
+                    )
+                } else {
+                    Bitmap.createBitmap(
+                        decoded.bitmap,
+                        0,
+                        scaledTop,
+                        cropWidth,
+                        cropHeight,
+                    )
+                }
             }
         } catch (e: Exception) {
             TimberKt.e(e) {

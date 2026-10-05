@@ -16,7 +16,8 @@ class CheckTallPageUseCase {
     operator fun invoke(
         page: ReaderPage,
         screenHeight: Int,
-        maxTextureSize: Int = GLUtil.maxTextureSize,
+        maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
+        bytesPerPixel: Long = 4L,
     ): List<ReaderPageSplit>? {
         val precomputed = page.precomputedSplits
         if (precomputed != null) {
@@ -35,6 +36,7 @@ class CheckTallPageUseCase {
             outHeight = options.outHeight,
             screenHeight = screenHeight,
             maxTextureSize = maxTextureSize,
+            bytesPerPixel = bytesPerPixel,
         )
     }
 
@@ -44,21 +46,39 @@ class CheckTallPageUseCase {
         outWidth: Int,
         outHeight: Int,
         screenHeight: Int,
-        maxTextureSize: Int = GLUtil.maxTextureSize,
+        maxTextureSize: Int = GLUtil.maxCanvasTextureSize,
+        bytesPerPixel: Long = 4L, // Assuming ARGB_8888, adjust if other configs are possible
     ): List<ReaderPageSplit>? {
         if (outHeight <= 0 || outWidth <= 0) return null
         val displayMaxHeight =
             if (screenHeight > 0) {
-                minOf(maxOf(screenHeight * 2, 4096), maxTextureSize)
+                minOf(
+                    maxOf(screenHeight * 2, GLUtil.SAFE_CANVAS_BITMAP_DIMENSION),
+                    maxTextureSize,
+                )
             } else {
                 maxTextureSize
             }
-        val isTall = (outHeight.toFloat() / outWidth.toFloat() > 3f) || (outHeight > maxTextureSize)
-        if (!isTall || outHeight <= displayMaxHeight) {
+        val exceedsCanvasLimit =
+            (outWidth.toLong() * outHeight.toLong() * bytesPerPixel) >
+                GLUtil.MAX_CANVAS_BITMAP_BYTES
+        // A page is eligible for vertical slicing if it matches webtoon strip aspect ratios (>
+        // 2.0f),
+        // exceeds safe hardware texture dimensions, or exceeds the Android RecordingCanvas 100 MB
+        // budget.
+        val isTall =
+            (outHeight.toFloat() / outWidth.toFloat() > 2f) ||
+                (outHeight > maxTextureSize) ||
+                exceedsCanvasLimit
+        val maxSliceHeightByBytes =
+            (GLUtil.MAX_CANVAS_BITMAP_BYTES / (outWidth.toLong() * bytesPerPixel))
+                .coerceIn(1L, Int.MAX_VALUE.toLong())
+                .toInt()
+        val maxSliceHeight = minOf(displayMaxHeight, maxTextureSize, maxSliceHeightByBytes)
+        if (!isTall || outHeight <= maxSliceHeight) {
             return null
         }
 
-        val maxSliceHeight = minOf(displayMaxHeight, maxTextureSize)
         val partCount = (outHeight - 1) / maxSliceHeight + 1
         if (partCount <= 1) return null
 
