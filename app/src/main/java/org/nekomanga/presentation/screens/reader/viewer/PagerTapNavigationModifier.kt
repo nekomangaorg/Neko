@@ -143,9 +143,13 @@ fun Modifier.pagerTapNavigation(
                         }
                     } catch (_: PointerEventTimeoutCancellationException) {
                         if (
-                            !isMovementPastSlop &&
-                                !isMultiTouch &&
-                                (currentConfig.menuVisible || currentConfig.longTapEnabled)
+                            shouldTriggerLongPress(
+                                isMovementPastSlop = isMovementPastSlop,
+                                isMultiTouch = isMultiTouch,
+                                isClaimed = currentTapClaim?.isClaimed(down.id) == true,
+                                menuVisible = currentConfig.menuVisible,
+                                longTapEnabled = currentConfig.longTapEnabled,
+                            )
                         ) {
                             currentConfig.onPageLongTap?.invoke(currentPage, currentExtraPage)
                             isLongPressTriggered = true
@@ -349,6 +353,14 @@ internal fun dispatchNavigation(
         }
     onNavigateAdjacent(forward)
 }
+
+internal fun shouldTriggerLongPress(
+    isMovementPastSlop: Boolean,
+    isMultiTouch: Boolean,
+    isClaimed: Boolean,
+    menuVisible: Boolean,
+    longTapEnabled: Boolean,
+): Boolean = !isMovementPastSlop && !isMultiTouch && !isClaimed && (menuVisible || longTapEnabled)
 
 internal enum class PointerSlopResult {
     VALID_TAP_UP,

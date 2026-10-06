@@ -355,7 +355,6 @@ fun ComposeWebtoonViewer(
                             onRetry = {
                                 item.transition.to?.let { currentConfig.onRetryTransition(it) }
                             },
-                            onTap = { currentConfig.onToggleMenu() },
                             onCardClick = {
                                 val targetChapter = item.transition.to?.chapter
                                 if (targetChapter != null) {
@@ -371,6 +370,7 @@ fun ComposeWebtoonViewer(
                                     )
                                 }
                             },
+                            tapClaim = tapClaim,
                             modifier =
                                 gapModifier
                                     .fillMaxWidth()

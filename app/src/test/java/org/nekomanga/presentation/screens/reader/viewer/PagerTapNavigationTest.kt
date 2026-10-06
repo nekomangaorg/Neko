@@ -764,4 +764,56 @@ class PagerTapNavigationTest {
 
         assertEquals(PointerSlopResult.MOVEMENT_PAST_SLOP, result)
     }
+
+    @Test
+    fun `shouldTriggerLongPress opens the page sheet for a held press with long tap enabled`() {
+        assertTrue(
+            shouldTriggerLongPress(
+                isMovementPastSlop = false,
+                isMultiTouch = false,
+                isClaimed = false,
+                menuVisible = false,
+                longTapEnabled = true,
+            )
+        )
+    }
+
+    @Test
+    fun `shouldTriggerLongPress opens the page sheet while the menu is visible with long tap disabled`() {
+        assertTrue(
+            shouldTriggerLongPress(
+                isMovementPastSlop = false,
+                isMultiTouch = false,
+                isClaimed = false,
+                menuVisible = true,
+                longTapEnabled = false,
+            )
+        )
+    }
+
+    @Test
+    fun `shouldTriggerLongPress ignores a held press with long tap disabled and the menu hidden`() {
+        assertFalse(
+            shouldTriggerLongPress(
+                isMovementPastSlop = false,
+                isMultiTouch = false,
+                isClaimed = false,
+                menuVisible = false,
+                longTapEnabled = false,
+            )
+        )
+    }
+
+    @Test
+    fun `shouldTriggerLongPress ignores a held press on a claimed control such as Retry`() {
+        assertFalse(
+            shouldTriggerLongPress(
+                isMovementPastSlop = false,
+                isMultiTouch = false,
+                isClaimed = true,
+                menuVisible = true,
+                longTapEnabled = true,
+            )
+        )
+    }
 }

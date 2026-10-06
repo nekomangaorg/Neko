@@ -189,7 +189,7 @@ private fun WebtoonPageContent(
 
     val gestureModifier =
         if (onLongClick != null) {
-            Modifier.pointerInput(page, onLongClick) {
+            Modifier.pointerInput(page, onLongClick, tapClaim) {
                 val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
                 val touchSlop = viewConfiguration.touchSlop
                 awaitEachGesture {
@@ -212,8 +212,11 @@ private fun WebtoonPageContent(
                             }
                         }
                     } catch (_: PointerEventTimeoutCancellationException) {
-                        onLongClick()
-                        triggered = true
+                        // Holding Retry is not a long press on the page
+                        if (tapClaim?.isClaimed(down.id) != true) {
+                            onLongClick()
+                            triggered = true
+                        }
                     }
                     if (triggered) {
                         down.consume()

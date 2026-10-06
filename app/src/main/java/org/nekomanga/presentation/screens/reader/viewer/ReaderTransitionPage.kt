@@ -58,6 +58,7 @@ fun ReaderTransitionPage(
     modifier: Modifier = Modifier,
     onTap: ((PointF) -> Unit)? = null,
     onCardClick: (() -> Unit)? = null,
+    tapClaim: TapNavigationClaim? = null,
 ) {
     val tapModifier =
         if (onTap != null) {
@@ -114,7 +115,8 @@ fun ReaderTransitionPage(
                 Modifier.fillMaxWidth()
                     .then(
                         if (onCardClick != null && toChapter != null) {
-                            Modifier.clickable(onClick = onCardClick)
+                            // The card and its Retry button handle their own taps
+                            Modifier.claimTapNavigation(tapClaim).clickable(onClick = onCardClick)
                         } else {
                             Modifier
                         }
