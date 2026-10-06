@@ -470,8 +470,12 @@ class ReaderActivity : BaseMainActivity() {
                                 }
                             }
                         val onPageLongTapCallback =
-                            remember(viewModel) {
-                                { p: ReaderPage, ep: ReaderPage? -> onPageLongTap(p, ep) }
+                            remember(currentViewer, menuVisible) {
+                                { p: ReaderPage, ep: ReaderPage? ->
+                                    if (menuVisible || currentViewer.config.longTapEnabled) {
+                                        onPageLongTap(p, ep)
+                                    }
+                                }
                             }
                         val onWidePageDetected: (ReaderPage) -> Unit =
                             remember(viewModel) {

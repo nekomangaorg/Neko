@@ -745,12 +745,14 @@ constructor(
             if (targetPage != null && targetPage >= 0) {
                 _transitionState.value =
                     ReaderChapterTransitionState.Settling(chapter.chapter.id, targetPage)
-                _navigationCommands.emit(
-                    ReaderNavCommand.SnapToPage(
-                        pageIndex = targetPage,
-                        chapterId = chapter.chapter.id,
+                viewModelScope.launch {
+                    _navigationCommands.emit(
+                        ReaderNavCommand.SnapToPage(
+                            pageIndex = targetPage,
+                            chapterId = chapter.chapter.id,
+                        )
                     )
-                )
+                }
             }
             getChapters()
             _transitionState.value = ReaderChapterTransitionState.Idle
