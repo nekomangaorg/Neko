@@ -381,11 +381,7 @@ class ReaderActivity : BaseMainActivity() {
                     val currentViewer = viewer
                     val items =
                         when (currentViewer) {
-                            is PagerViewer ->
-                                state.viewerItems.takeIf {
-                                    it.isNotEmpty() &&
-                                        !it.any { item -> item is ReaderUiItem.SplitPage }
-                                } ?: currentViewer.items
+                            is PagerViewer -> state.viewerItems.ifEmpty { currentViewer.items }
                             is WebtoonViewer -> state.viewerItems.ifEmpty { currentViewer.items }
                             else -> emptyList()
                         }
@@ -474,12 +470,15 @@ class ReaderActivity : BaseMainActivity() {
                                 }
                             }
                         val onPageLongTapCallback =
-                            remember(currentViewer) {
+                            remember(viewModel) {
                                 { p: ReaderPage, ep: ReaderPage? -> onPageLongTap(p, ep) }
                             }
-                        val onWidePageDetected =
-                            remember(currentViewer) {
-                                { page: ReaderPage -> currentViewer.splitDoublePages(page) }
+                        val onWidePageDetected: (ReaderPage) -> Unit =
+                            remember(viewModel) {
+                                { page: ReaderPage ->
+                                    (viewer as? PagerViewer)?.splitDoublePages(page)
+                                    Unit
+                                }
                             }
 
                         val pagerConfig =

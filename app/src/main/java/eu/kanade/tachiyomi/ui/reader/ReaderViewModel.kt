@@ -770,7 +770,10 @@ constructor(
     }
 
     fun sendNavigationCommand(command: ReaderNavCommand) {
-        _navigationCommands.tryEmit(command)
+        if (!_navigationCommands.tryEmit(command)) {
+            TimberKt.w { "Navigation command buffer full; queuing via coroutine: $command" }
+            viewModelScope.launch { _navigationCommands.emit(command) }
+        }
     }
 
     /**
@@ -1449,7 +1452,8 @@ constructor(
     private val transitionResolver by lazy {
         try {
             ResolveChapterTransitionUiModelUseCase(downloadManager)
-        } catch (_: Throwable) {
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Failed to initialize ResolveChapterTransitionUiModelUseCase" }
             null
         }
     }
