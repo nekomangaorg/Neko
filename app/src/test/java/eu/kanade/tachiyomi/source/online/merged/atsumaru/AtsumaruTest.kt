@@ -35,8 +35,8 @@ class AtsumaruTest {
             "https://cdn.atsu.moe/static/pages/a/b/2.webp"
     }
 
-    private fun chapter(title: String) =
-        ChapterDto(id = "c1", number = 1f, title = title).toSChapter("m1")
+    private fun chapter(title: String, number: Float = 1f) =
+        ChapterDto(id = "c1", number = number, title = title).toSChapter("m1")
 
     @Test
     fun `dash separator in the title is not doubled`() {
@@ -97,5 +97,69 @@ class AtsumaruTest {
     @Test
     fun `title without a number passes through`() {
         chapter("Prologue").name shouldBe "Prologue"
+    }
+
+    @Test
+    fun `title without a number sorts by the source chapter number`() {
+        val chapter = chapter("Afterword", number = 74.1f)
+        chapter.name shouldBe "Afterword"
+        chapter.chapter_txt shouldBe "Ch.74.1"
+    }
+
+    @Test
+    fun `extra keeps its own name and sorts by the source chapter number`() {
+        val chapter = chapter("Extra 1 - ~ love panic ~", number = 2f)
+        chapter.name shouldBe "Extra 1 - ~ love panic ~"
+        chapter.chapter_txt shouldBe "Ch.2"
+    }
+
+    @Test
+    fun `numbered prologue and notice keep their own name`() {
+        val prologue = chapter("Prologue 16", number = 16f)
+        prologue.name shouldBe "Prologue 16"
+        prologue.chapter_txt shouldBe "Ch.16"
+        val notice = chapter("Notice.110", number = 154f)
+        notice.name shouldBe "Notice.110"
+        notice.chapter_txt shouldBe "Ch.154"
+    }
+
+    @Test
+    fun `series words for a chapter still give the chapter number`() {
+        chapter("Episode 308 - Clash").name shouldBe "Ch.308 - Clash"
+        chapter("Ep. 12").chapter_txt shouldBe "Ch.12"
+        chapter("#425").chapter_txt shouldBe "Ch.425"
+    }
+
+    @Test
+    fun `volume then chapter sets both`() {
+        val chapter = chapter("Vol.3 Chapter 19: Dancing in Tears")
+        chapter.name shouldBe "Vol.3 Ch.19 - Dancing in Tears"
+        chapter.vol shouldBe "3"
+        chapter.chapter_txt shouldBe "Ch.19"
+    }
+
+    @Test
+    fun `volume and chapter numbers lose their leading zeros`() {
+        val chapter = chapter("Vol. 01 Ch. 003")
+        chapter.name shouldBe "Vol.1 Ch.3"
+        chapter.vol shouldBe "1"
+    }
+
+    @Test
+    fun `volume without a chapter word sorts by the source chapter number`() {
+        val chapter = chapter("Volume 14: 4 - Well-Prepared Traps (Part 11)", number = 136f)
+        chapter.name shouldBe "Vol.14 - 4 - Well-Prepared Traps (Part 11)"
+        chapter.vol shouldBe ""
+        chapter.chapter_txt shouldBe "Ch.136"
+        chapter("Volume 14 - English Character Cards").name shouldBe
+            "Vol.14 - English Character Cards"
+    }
+
+    @Test
+    fun `whole volume shows the volume and sorts by the source chapter number`() {
+        val chapter = chapter("Volume 5", number = 5f)
+        chapter.name shouldBe "Vol.5"
+        chapter.vol shouldBe ""
+        chapter.chapter_txt shouldBe "Ch.5"
     }
 }

@@ -125,7 +125,10 @@ class ChapterDto(
         return SChapter.create().apply {
             url = "$slug/$id"
             chapter_number = number
-            chapter_txt = parsedName.chapterNum ?: ""
+            vol = parsedName.vol ?: ""
+            // "Extra 1", "Afterword" or "Volume 5" give no chapter number. Atsumaru's own number
+            // keeps them beside the chapters they came out with in the smart order.
+            chapter_txt = parsedName.chapterNum ?: "Ch." + cleanNumber(number.toString())
             name = parsedName.formattedName
             scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
             date?.let { date_upload = parseDate(it) }
@@ -136,26 +139,31 @@ class ChapterDto(
         val tag: String?, // Holds "Official Scans", "Redraw", or null
         val chapterNum: String?, // Holds strictly the "Ch.X" string
         val formattedName: String, // Holds the full "Ch.X - Title" string
+        val vol: String? = null, // Holds the volume number of a "Vol.X Ch.Y" title
     )
 
     fun parseTitle(rawTitle: String): ParsedChapter {
+        val volumeMatch = VOLUME_FIRST.find(rawTitle)
+        if (volumeMatch != null) {
+            return parseVolumeTitle(volumeMatch)
+        }
+
         // Regex remains the same
         val regex = Regex("^(\\D*?)\\s*(\\d+(?:\\.\\d+)?)\\s*(.*)$")
         val match = regex.find(rawTitle)
 
         if (match != null) {
             val prefix = match.groupValues[1].trim()
-            var number = match.groupValues[2]
+            // "Extra 1" or "Prologue 16" is not chapter 1 or 16, keep the title as it is
+            if (prefix.lowercase().trimEnd('.', ':', ' ') in NON_CHAPTER_WORDS) {
+                return ParsedChapter(null, null, rawTitle)
+            }
             // Titles like "Chapter 01 - Name" or "Chapter 5: Name" carry their own separator, and
             // some stack two ("Chapter 442 - - Name"). Drop them, step 4 adds the " - ".
             val suffix = match.groupValues[3].trim().replaceFirst(LEADING_SEPARATORS, "")
 
             // 1. Clean the number
-            if (number.contains(".")) {
-                number = number.trimEnd('0').trimEnd('.')
-            }
-            number =
-                number.trimStart('0').let { if (it.isEmpty() || it.startsWith('.')) "0$it" else it }
+            val number = cleanNumber(match.groupValues[2])
 
             // 2. Check for "Official" or "Redraw"
             var tagString: String? = null
@@ -187,6 +195,32 @@ class ChapterDto(
         return ParsedChapter(null, null, rawTitle)
     }
 
+    // "Vol.3 Chapter 19: Name" sets both numbers. "Volume 14: 4 - Name" and a whole "Volume 5"
+    // keep the volume in the name only. Their chapter number comes from Atsumaru, and a vol that
+    // does not match it can make reorderChapters treat the series as restarting its numbers each
+    // volume.
+    private fun parseVolumeTitle(volumeMatch: MatchResult): ParsedChapter {
+        val volume = cleanNumber(volumeMatch.groupValues[1])
+        val rest = volumeMatch.groupValues[2].trim().replaceFirst(LEADING_SEPARATORS, "")
+        val chapterMatch = CHAPTER_AFTER_VOLUME.find(rest)
+        val chapterString = chapterMatch?.let { "Ch." + cleanNumber(it.groupValues[1]) }
+        val title =
+            chapterMatch?.groupValues?.get(2)?.trim()?.replaceFirst(LEADING_SEPARATORS, "") ?: rest
+
+        val name = listOfNotNull("Vol.$volume", chapterString).joinToString(" ")
+        return ParsedChapter(
+            tag = null,
+            chapterNum = chapterString,
+            formattedName = if (title.isBlank()) name else "$name - $title",
+            vol = volume.takeIf { chapterString != null },
+        )
+    }
+
+    private fun cleanNumber(raw: String): String {
+        val number = if (raw.contains(".")) raw.trimEnd('0').trimEnd('.') else raw
+        return number.trimStart('0').let { if (it.isEmpty() || it.startsWith('.')) "0$it" else it }
+    }
+
     private fun parseDate(dateElement: JsonElement): Long =
         when (dateElement) {
             is JsonPrimitive -> {
@@ -205,6 +239,16 @@ class ChapterDto(
 
     companion object {
         private val LEADING_SEPARATORS = Regex("""^(?:[-–—:]\s*)+""")
+
+        private val VOLUME_FIRST =
+            Regex("""^\s*vol(?:ume)?\.?\s*(\d+(?:\.\d+)?)(.*)$""", RegexOption.IGNORE_CASE)
+
+        private val CHAPTER_AFTER_VOLUME =
+            Regex("""^ch(?:apter)?\.?\s*(\d+(?:\.\d+)?)(.*)$""", RegexOption.IGNORE_CASE)
+
+        // No "special": reorderChapters moves every name starting with "Special" to the top
+        private val NON_CHAPTER_WORDS =
+            setOf("extra", "bonus", "omake", "side story", "prologue", "epilogue", "notice")
 
         private val DATE_FORMAT: ThreadLocal<SimpleDateFormat> =
             object : ThreadLocal<SimpleDateFormat>() {
