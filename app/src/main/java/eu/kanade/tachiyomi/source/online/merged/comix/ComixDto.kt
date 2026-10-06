@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.source.online.merged.comix
 
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import java.text.DecimalFormat
+import eu.kanade.tachiyomi.util.system.formatChapterNumber
 import java.util.Calendar
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -146,7 +146,7 @@ class Chapter(
                         "title/$mangaSlug/$id-chapter-${this@Chapter.number.toString().removeSuffix(".0")}"
                     }
                 }
-            val chapterText = "Ch." + DecimalFormat("0.#").format(this@Chapter.number)
+            val chapterText = "Ch." + this@Chapter.number.toFloat().formatChapterNumber()
             chapter_txt = chapterText
             name = buildString {
                 append(chapterText)
