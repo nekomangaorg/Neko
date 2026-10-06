@@ -27,8 +27,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Crop
-import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,7 +61,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.LayoutDirection
-import eu.kanade.tachiyomi.ui.reader.settings.ReaderSliderPosition
 import kotlin.math.roundToInt
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ToolTipButton
@@ -119,151 +117,85 @@ fun ReaderAppBar(
 
 @Composable
 fun ReaderBottomControls(
-    currentPageText: String,
-    totalPagesText: String,
-    currentPageIndex: Int,
-    totalPages: Int,
-    isRtl: Boolean,
-    isVertical: Boolean = false,
-    sliderPosition: ReaderSliderPosition = ReaderSliderPosition.RIGHT,
-    onPageChange: (Int) -> Unit,
-    onSkipPrevious: () -> Unit,
-    onSkipNext: () -> Unit,
-    visible: Boolean,
-    isLoading: Boolean,
-    pageNumberVisible: Boolean = false,
-    isChaptersVisible: Boolean = true,
-    isCommentsVisible: Boolean = true,
-    isWebViewVisible: Boolean = true,
-    isReadingModeVisible: Boolean = false,
-    isRotationVisible: Boolean = false,
-    isCropBordersVisible: Boolean = false,
-    isGrayscaleVisible: Boolean = false,
-    isDoublePageVisible: Boolean = false,
-    isShiftPageVisible: Boolean = false,
-    isSettingsVisible: Boolean = true,
-    cropBorders: Boolean = false,
-    grayscale: Boolean = false,
-    readingModeIconRes: Int = R.drawable.ic_reader_default_24dp,
-    rotationIconRes: Int = R.drawable.ic_screen_rotation_24dp,
-    doublePageIconRes: Int = R.drawable.ic_book_open_variant_24dp,
-    shiftPageIconRes: Int = R.drawable.ic_page_next_outline_24dp,
-    onChaptersClick: () -> Unit = {},
-    onCommentsClick: () -> Unit = {},
-    onWebviewClick: () -> Unit = {},
-    onReadingModeClick: () -> Unit = {},
-    onRotationClick: () -> Unit = {},
-    onCropBordersClick: () -> Unit = {},
-    onGrayscaleClick: () -> Unit = {},
-    onDoublePageClick: () -> Unit = {},
-    onShiftPageClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {},
+    uiState: ReaderBottomControlsUiState,
+    onAction: (ReaderBottomBarAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val showVerticalSlider = isVertical && sliderPosition != ReaderSliderPosition.HORIZONTAL
-
-    val bottomActionSheetContent =
-        @Composable {
-            BottomActionSheet(
-                isChaptersVisible = isChaptersVisible,
-                isCommentsVisible = isCommentsVisible,
-                isWebViewVisible = isWebViewVisible,
-                isReadingModeVisible = isReadingModeVisible,
-                isRotationVisible = isRotationVisible,
-                isCropBordersVisible = isCropBordersVisible,
-                isGrayscaleVisible = isGrayscaleVisible,
-                isDoublePageVisible = isDoublePageVisible,
-                isShiftPageVisible = isShiftPageVisible,
-                isSettingsVisible = isSettingsVisible,
-                cropBorders = cropBorders,
-                grayscale = grayscale,
-                readingModeIconRes = readingModeIconRes,
-                rotationIconRes = rotationIconRes,
-                doublePageIconRes = doublePageIconRes,
-                shiftPageIconRes = shiftPageIconRes,
-                onChaptersClick = onChaptersClick,
-                onCommentsClick = onCommentsClick,
-                onWebviewClick = onWebviewClick,
-                onReadingModeClick = onReadingModeClick,
-                onRotationClick = onRotationClick,
-                onCropBordersClick = onCropBordersClick,
-                onGrayscaleClick = onGrayscaleClick,
-                onDoublePageClick = onDoublePageClick,
-                onShiftPageClick = onShiftPageClick,
-                onSettingsClick = onSettingsClick,
-            )
-        }
-
     Box(modifier = modifier) {
-        if (showVerticalSlider) {
-            val isLeft = sliderPosition == ReaderSliderPosition.LEFT
-            AnimatedVisibility(
-                visible = visible,
-                enter =
-                    slideInHorizontally(initialOffsetX = { if (isLeft) -it else it }) + fadeIn(),
-                exit =
-                    slideOutHorizontally(targetOffsetX = { if (isLeft) -it else it }) + fadeOut(),
-                modifier =
-                    Modifier.align(if (isLeft) Alignment.CenterStart else Alignment.CenterEnd),
-            ) {
-                VerticalFloatingSlider(
-                    currentPageText = currentPageText,
-                    totalPagesText = totalPagesText,
-                    currentPageIndex = currentPageIndex,
-                    totalPages = totalPages,
-                    onPageChange = onPageChange,
-                    onSkipPrevious = onSkipPrevious,
-                    onSkipNext = onSkipNext,
-                    isLoading = isLoading,
+        when (uiState.sliderState.position) {
+            SliderOrientation.VerticalLeft,
+            SliderOrientation.VerticalRight -> {
+                val isLeft = uiState.sliderState.position == SliderOrientation.VerticalLeft
+                AnimatedVisibility(
+                    visible = uiState.isVisible,
+                    enter =
+                        slideInHorizontally(initialOffsetX = { if (isLeft) -it else it }) +
+                            fadeIn(),
+                    exit =
+                        slideOutHorizontally(targetOffsetX = { if (isLeft) -it else it }) +
+                            fadeOut(),
                     modifier =
-                        Modifier.padding(
-                            start = if (isLeft) Size.smedium else Size.none,
-                            end = if (isLeft) Size.none else Size.smedium,
-                            top = Size.appBarHeight + Size.large,
-                            bottom = Size.huge + Size.large,
-                        ),
-                )
-            }
-
-            AnimatedVisibility(
-                visible = visible,
-                enter = slideInVertically(initialOffsetY = { it }),
-                exit = slideOutVertically(targetOffsetY = { it }),
-                modifier = Modifier.align(Alignment.BottomCenter),
-            ) {
-                bottomActionSheetContent()
-            }
-        } else {
-            AnimatedVisibility(
-                visible = visible,
-                enter = slideInVertically(initialOffsetY = { it }),
-                exit = slideOutVertically(targetOffsetY = { it }),
-                modifier = Modifier.align(Alignment.BottomCenter),
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                        Modifier.align(if (isLeft) Alignment.CenterStart else Alignment.CenterEnd),
                 ) {
-                    HorizontalFloatingSlider(
-                        currentPageText = currentPageText,
-                        totalPagesText = totalPagesText,
-                        currentPageIndex = currentPageIndex,
-                        totalPages = totalPages,
-                        isRtl = isRtl,
-                        onPageChange = onPageChange,
-                        onSkipPrevious = onSkipPrevious,
-                        onSkipNext = onSkipNext,
-                        isLoading = isLoading,
+                    VerticalFloatingSlider(
+                        state = uiState.sliderState,
+                        isLoading = uiState.isLoading,
+                        onPageChange = { onAction(ReaderBottomBarAction.PageChanged(it)) },
+                        onSkipPrevious = { onAction(ReaderBottomBarAction.SkipPrevious) },
+                        onSkipNext = { onAction(ReaderBottomBarAction.SkipNext) },
                         modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(
-                                    start = Size.smedium,
-                                    end = Size.smedium,
-                                    bottom = Size.small,
-                                ),
+                            Modifier.padding(
+                                start = if (isLeft) Size.smedium else Size.none,
+                                end = if (isLeft) Size.none else Size.smedium,
+                                top = Size.appBarHeight + Size.large,
+                                bottom = Size.huge + Size.large,
+                            ),
                     )
+                }
 
-                    bottomActionSheetContent()
+                AnimatedVisibility(
+                    visible = uiState.isVisible,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it }),
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                ) {
+                    BottomActionSheet(
+                        buttons = uiState.buttons,
+                        onButtonClick = { onAction(ReaderBottomBarAction.ButtonClicked(it)) },
+                    )
+                }
+            }
+            SliderOrientation.Horizontal -> {
+                AnimatedVisibility(
+                    visible = uiState.isVisible,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it }),
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        HorizontalFloatingSlider(
+                            state = uiState.sliderState,
+                            isLoading = uiState.isLoading,
+                            onPageChange = { onAction(ReaderBottomBarAction.PageChanged(it)) },
+                            onSkipPrevious = { onAction(ReaderBottomBarAction.SkipPrevious) },
+                            onSkipNext = { onAction(ReaderBottomBarAction.SkipNext) },
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(
+                                        start = Size.smedium,
+                                        end = Size.smedium,
+                                        bottom = Size.small,
+                                    ),
+                        )
+
+                        BottomActionSheet(
+                            buttons = uiState.buttons,
+                            onButtonClick = { onAction(ReaderBottomBarAction.ButtonClicked(it)) },
+                        )
+                    }
                 }
             }
         }
@@ -271,30 +203,26 @@ fun ReaderBottomControls(
 }
 
 @Composable
-private fun HorizontalFloatingSlider(
-    currentPageText: String,
-    totalPagesText: String,
-    currentPageIndex: Int,
-    totalPages: Int,
-    isRtl: Boolean,
+fun HorizontalFloatingSlider(
+    state: ReaderSliderUiState,
+    isLoading: Boolean,
     onPageChange: (Int) -> Unit,
     onSkipPrevious: () -> Unit,
     onSkipNext: () -> Unit,
-    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
     val currentOnPageChange by rememberUpdatedState(onPageChange)
     var draggingValue by remember { mutableStateOf<Float?>(null) }
-    var lastValue by remember { mutableIntStateOf(currentPageIndex) }
+    var lastValue by remember { mutableIntStateOf(state.currentPageIndex) }
 
-    LaunchedEffect(currentPageIndex) {
+    LaunchedEffect(state.currentPageIndex) {
         if (draggingValue == null) {
-            lastValue = currentPageIndex
+            lastValue = state.currentPageIndex
         }
     }
 
-    val isPagesVisible = currentPageText.isNotEmpty() && totalPagesText.isNotEmpty()
+    val isPagesVisible = state.currentPageText.isNotEmpty() && state.totalPagesText.isNotEmpty()
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(Size.small),
@@ -343,8 +271,8 @@ private fun HorizontalFloatingSlider(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    val leftText = if (isRtl) totalPagesText else currentPageText
-                    val rightText = if (isRtl) currentPageText else totalPagesText
+                    val leftText = if (state.isRtl) state.totalPagesText else state.currentPageText
+                    val rightText = if (state.isRtl) state.currentPageText else state.totalPagesText
 
                     Text(
                         text = leftText,
@@ -355,19 +283,39 @@ private fun HorizontalFloatingSlider(
                     )
 
                     val sliderLayoutDirection =
-                        if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
+                        if (state.isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
                     CompositionLocalProvider(LocalLayoutDirection provides sliderLayoutDirection) {
-                        val targetMax = maxOf(totalPages.toFloat(), 1f)
-                        val displayValue =
-                            (draggingValue ?: currentPageIndex.toFloat()).coerceIn(
-                                0f,
-                                targetMax,
-                            )
+                        val targetMax = maxOf(state.totalPages.toFloat(), 1f)
+                        val sliderState =
+                            remember(targetMax) {
+                                SliderState(
+                                    value =
+                                        state.currentPageIndex.toFloat().coerceIn(0f, targetMax),
+                                    trackRange = 0f..targetMax,
+                                )
+                            }
+
+                        LaunchedEffect(state.currentPageIndex, targetMax) {
+                            val expectedSliderValue =
+                                state.currentPageIndex.toFloat().coerceIn(0f, targetMax)
+                            if (
+                                draggingValue == null &&
+                                    !sliderState.isDragging &&
+                                    sliderState.value.roundToInt() !=
+                                        expectedSliderValue.roundToInt()
+                            ) {
+                                sliderState.value = expectedSliderValue
+                            }
+                        }
+
                         Slider(
-                            value = displayValue,
+                            state = sliderState,
+                            modifier = Modifier.weight(1f).padding(horizontal = Size.small),
                             onValueChange = { value ->
-                                draggingValue = value
-                                val roundedValue = value.roundToInt()
+                                val coercedValue = value.coerceIn(0f, targetMax)
+                                sliderState.value = coercedValue
+                                draggingValue = coercedValue
+                                val roundedValue = coercedValue.roundToInt()
                                 if (roundedValue != lastValue) {
                                     lastValue = roundedValue
                                     view.performHapticFeedback(
@@ -382,7 +330,6 @@ private fun HorizontalFloatingSlider(
                                 lastValue = finalValue
                                 currentOnPageChange(finalValue)
                             },
-                            valueRange = 0f..targetMax,
                             colors =
                                 SliderDefaults.colors(
                                     activeTrackColor = MaterialTheme.colorScheme.primary,
@@ -390,7 +337,6 @@ private fun HorizontalFloatingSlider(
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
                                     thumbColor = MaterialTheme.colorScheme.primary,
                                 ),
-                            modifier = Modifier.weight(1f).padding(horizontal = Size.small),
                         )
                     }
 
@@ -434,15 +380,12 @@ private fun HorizontalFloatingSlider(
 }
 
 @Composable
-private fun VerticalFloatingSlider(
-    currentPageText: String,
-    totalPagesText: String,
-    currentPageIndex: Int,
-    totalPages: Int,
+fun VerticalFloatingSlider(
+    state: ReaderSliderUiState,
+    isLoading: Boolean,
     onPageChange: (Int) -> Unit,
     onSkipPrevious: () -> Unit,
     onSkipNext: () -> Unit,
-    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
@@ -450,15 +393,15 @@ private fun VerticalFloatingSlider(
     val currentView by rememberUpdatedState(view)
 
     var draggingValue by remember { mutableStateOf<Float?>(null) }
-    var lastValue by remember { mutableIntStateOf(currentPageIndex) }
+    var lastValue by remember { mutableIntStateOf(state.currentPageIndex) }
 
-    LaunchedEffect(currentPageIndex) {
+    LaunchedEffect(state.currentPageIndex) {
         if (draggingValue == null) {
-            lastValue = currentPageIndex
+            lastValue = state.currentPageIndex
         }
     }
 
-    val isPagesVisible = currentPageText.isNotEmpty() && totalPagesText.isNotEmpty()
+    val isPagesVisible = state.currentPageText.isNotEmpty() && state.totalPagesText.isNotEmpty()
 
     Column(
         verticalArrangement = Arrangement.spacedBy(Size.small),
@@ -513,7 +456,7 @@ private fun VerticalFloatingSlider(
                         if (draggingValue != null) {
                             (draggingValue!!.roundToInt() + 1).toString()
                         } else {
-                            currentPageText
+                            state.currentPageText
                         }
 
                     Text(
@@ -523,17 +466,18 @@ private fun VerticalFloatingSlider(
                         textAlign = TextAlign.Center,
                     )
 
-                    val targetMax = maxOf(totalPages.toFloat(), 1f)
+                    val targetMax = maxOf(state.totalPages.toFloat(), 1f)
                     val sliderState =
                         remember(targetMax) {
                             SliderState(
-                                value = currentPageIndex.toFloat().coerceIn(0f, targetMax),
+                                value = state.currentPageIndex.toFloat().coerceIn(0f, targetMax),
                                 trackRange = 0f..targetMax,
                             )
                         }
 
-                    LaunchedEffect(currentPageIndex, targetMax) {
-                        val expectedSliderValue = currentPageIndex.toFloat().coerceIn(0f, targetMax)
+                    LaunchedEffect(state.currentPageIndex, targetMax) {
+                        val expectedSliderValue =
+                            state.currentPageIndex.toFloat().coerceIn(0f, targetMax)
                         if (
                             draggingValue == null &&
                                 !sliderState.isDragging &&
@@ -575,7 +519,7 @@ private fun VerticalFloatingSlider(
                     )
 
                     Text(
-                        text = totalPagesText,
+                        text = state.totalPagesText,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
@@ -614,33 +558,9 @@ private fun VerticalFloatingSlider(
 }
 
 @Composable
-private fun BottomActionSheet(
-    isChaptersVisible: Boolean,
-    isCommentsVisible: Boolean,
-    isWebViewVisible: Boolean,
-    isReadingModeVisible: Boolean,
-    isRotationVisible: Boolean,
-    isCropBordersVisible: Boolean,
-    isGrayscaleVisible: Boolean,
-    isDoublePageVisible: Boolean,
-    isShiftPageVisible: Boolean,
-    isSettingsVisible: Boolean,
-    cropBorders: Boolean,
-    grayscale: Boolean,
-    readingModeIconRes: Int,
-    rotationIconRes: Int,
-    doublePageIconRes: Int,
-    shiftPageIconRes: Int,
-    onChaptersClick: () -> Unit,
-    onCommentsClick: () -> Unit,
-    onWebviewClick: () -> Unit,
-    onReadingModeClick: () -> Unit,
-    onRotationClick: () -> Unit,
-    onCropBordersClick: () -> Unit,
-    onGrayscaleClick: () -> Unit,
-    onDoublePageClick: () -> Unit,
-    onShiftPageClick: () -> Unit,
-    onSettingsClick: () -> Unit,
+fun BottomActionSheet(
+    buttons: List<ReaderToolbarButtonUiModel>,
+    onButtonClick: (ReaderBottomActionId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -664,81 +584,36 @@ private fun BottomActionSheet(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (isChaptersVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.view_chapters),
-                        painter = painterResource(id = R.drawable.ic_format_list_numbered_24dp),
-                        onClick = onChaptersClick,
-                    )
-                }
-                if (isCommentsVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.comments),
-                        painter = painterResource(id = R.drawable.ic_view_comments_24p),
-                        onClick = onCommentsClick,
-                    )
-                }
-                if (isWebViewVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.open_in_webview),
-                        painter = painterResource(id = R.drawable.ic_open_in_webview_24dp),
-                        onClick = onWebviewClick,
-                    )
-                }
-                if (isReadingModeVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.reading_mode),
-                        painter = painterResource(id = readingModeIconRes),
-                        onClick = onReadingModeClick,
-                    )
-                }
-                if (isRotationVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.rotation),
-                        painter = painterResource(id = rotationIconRes),
-                        onClick = onRotationClick,
-                    )
-                }
-                if (isCropBordersVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.crop_borders),
-                        icon = if (cropBorders) Icons.Default.CropFree else Icons.Default.Crop,
-                        enabledTint =
-                            if (cropBorders) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outline,
-                        onClick = onCropBordersClick,
-                    )
-                }
-                if (isGrayscaleVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.grayscale_toggle),
-                        painter = painterResource(id = R.drawable.ic_palette),
-                        enabledTint =
-                            if (grayscale) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outline,
-                        onClick = onGrayscaleClick,
-                    )
-                }
-                if (isDoublePageVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.double_pages),
-                        painter = painterResource(id = doublePageIconRes),
-                        onClick = onDoublePageClick,
-                    )
-                }
-                if (isShiftPageVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.shift_one_page_over),
-                        painter = painterResource(id = shiftPageIconRes),
-                        onClick = onShiftPageClick,
-                    )
-                }
-                if (isSettingsVisible) {
-                    ToolTipButton(
-                        toolTipLabel = stringResource(R.string.display_options),
-                        painter = painterResource(id = R.drawable.ic_tune_24dp),
-                        onClick = onSettingsClick,
-                    )
+                buttons.forEach { button ->
+                    key(button.id) {
+                        if (button.isVisible) {
+                            val enabledTint =
+                                when (button.toggleStyle) {
+                                    ButtonToggleStyle.PrimaryWhenToggled ->
+                                        if (button.isToggled) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.outline
+                                    ButtonToggleStyle.None -> MaterialTheme.colorScheme.onSurface
+                                }
+                            when (val icon = button.icon) {
+                                is ReaderButtonIcon.Vector -> {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(button.tooltipRes),
+                                        icon = icon.imageVector,
+                                        enabledTint = enabledTint,
+                                        onClick = { onButtonClick(button.id) },
+                                    )
+                                }
+                                is ReaderButtonIcon.Resource -> {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(button.tooltipRes),
+                                        painter = painterResource(id = icon.id),
+                                        enabledTint = enabledTint,
+                                        onClick = { onButtonClick(button.id) },
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -824,6 +699,7 @@ private fun ReaderBottomControlsPreview(
     @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
 ) {
     ThemedPreviews(themeConfig) {
+        val sampleButtons = buildReaderBottomBarButtons()
         Box(
             modifier =
                 Modifier.background(MaterialTheme.colorScheme.surfaceVariant).padding(Size.medium)
@@ -831,81 +707,212 @@ private fun ReaderBottomControlsPreview(
             Column(verticalArrangement = Arrangement.spacedBy(Size.medium)) {
                 // Horizontal normal page state
                 ReaderBottomControls(
-                    currentPageText = "1",
-                    totalPagesText = "24",
-                    currentPageIndex = 0,
-                    totalPages = 23,
-                    isRtl = false,
-                    isVertical = false,
-                    onPageChange = {},
-                    onSkipPrevious = {},
-                    onSkipNext = {},
-                    visible = true,
-                    isLoading = false,
-                    pageNumberVisible = true,
+                    uiState =
+                        ReaderBottomControlsUiState(
+                            isVisible = true,
+                            isLoading = false,
+                            sliderState =
+                                ReaderSliderUiState(
+                                    currentPageText = "1",
+                                    totalPagesText = "24",
+                                    currentPageIndex = 0,
+                                    totalPages = 23,
+                                    isRtl = false,
+                                    position = SliderOrientation.Horizontal,
+                                ),
+                            buttons = sampleButtons,
+                        ),
+                    onAction = {},
                 )
                 // Vertical right-aligned page state
                 ReaderBottomControls(
-                    currentPageText = "1",
-                    totalPagesText = "24",
-                    currentPageIndex = 0,
-                    totalPages = 23,
-                    isRtl = false,
-                    isVertical = true,
-                    sliderPosition = ReaderSliderPosition.RIGHT,
-                    onPageChange = {},
-                    onSkipPrevious = {},
-                    onSkipNext = {},
-                    visible = true,
-                    isLoading = false,
-                    pageNumberVisible = true,
+                    uiState =
+                        ReaderBottomControlsUiState(
+                            isVisible = true,
+                            isLoading = false,
+                            sliderState =
+                                ReaderSliderUiState(
+                                    currentPageText = "1",
+                                    totalPagesText = "24",
+                                    currentPageIndex = 0,
+                                    totalPages = 23,
+                                    isRtl = false,
+                                    position = SliderOrientation.VerticalRight,
+                                ),
+                            buttons = sampleButtons,
+                        ),
+                    onAction = {},
                 )
                 // Vertical left-aligned page state
                 ReaderBottomControls(
-                    currentPageText = "1",
-                    totalPagesText = "24",
-                    currentPageIndex = 0,
-                    totalPages = 23,
-                    isRtl = false,
-                    isVertical = true,
-                    sliderPosition = ReaderSliderPosition.LEFT,
-                    onPageChange = {},
-                    onSkipPrevious = {},
-                    onSkipNext = {},
-                    visible = true,
-                    isLoading = false,
-                    pageNumberVisible = true,
+                    uiState =
+                        ReaderBottomControlsUiState(
+                            isVisible = true,
+                            isLoading = false,
+                            sliderState =
+                                ReaderSliderUiState(
+                                    currentPageText = "1",
+                                    totalPagesText = "24",
+                                    currentPageIndex = 0,
+                                    totalPages = 23,
+                                    isRtl = false,
+                                    position = SliderOrientation.VerticalLeft,
+                                ),
+                            buttons = sampleButtons,
+                        ),
+                    onAction = {},
                 )
                 // Vertical horizontal-slider page state
                 ReaderBottomControls(
-                    currentPageText = "1",
-                    totalPagesText = "24",
-                    currentPageIndex = 0,
-                    totalPages = 23,
-                    isRtl = false,
-                    isVertical = true,
-                    sliderPosition = ReaderSliderPosition.HORIZONTAL,
-                    onPageChange = {},
-                    onSkipPrevious = {},
-                    onSkipNext = {},
-                    visible = true,
-                    isLoading = false,
-                    pageNumberVisible = true,
+                    uiState =
+                        ReaderBottomControlsUiState(
+                            isVisible = true,
+                            isLoading = false,
+                            sliderState =
+                                ReaderSliderUiState(
+                                    currentPageText = "1",
+                                    totalPagesText = "24",
+                                    currentPageIndex = 0,
+                                    totalPages = 23,
+                                    isRtl = false,
+                                    position = SliderOrientation.Horizontal,
+                                ),
+                            buttons = sampleButtons,
+                        ),
+                    onAction = {},
                 )
                 // Transition page state
                 ReaderBottomControls(
-                    currentPageText = "",
-                    totalPagesText = "",
-                    currentPageIndex = 0,
-                    totalPages = 1,
-                    isRtl = false,
-                    isVertical = false,
+                    uiState =
+                        ReaderBottomControlsUiState(
+                            isVisible = true,
+                            isLoading = false,
+                            sliderState =
+                                ReaderSliderUiState(
+                                    currentPageText = "",
+                                    totalPagesText = "",
+                                    currentPageIndex = 0,
+                                    totalPages = 1,
+                                    isRtl = false,
+                                    position = SliderOrientation.Horizontal,
+                                ),
+                            buttons = sampleButtons,
+                        ),
+                    onAction = {},
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun HorizontalFloatingSliderPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        Box(
+            modifier =
+                Modifier.background(MaterialTheme.colorScheme.surfaceVariant).padding(Size.medium)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(Size.medium)) {
+                HorizontalFloatingSlider(
+                    state =
+                        ReaderSliderUiState(
+                            currentPageText = "5",
+                            totalPagesText = "30",
+                            currentPageIndex = 4,
+                            totalPages = 29,
+                        ),
+                    isLoading = false,
                     onPageChange = {},
                     onSkipPrevious = {},
                     onSkipNext = {},
-                    visible = true,
+                )
+                HorizontalFloatingSlider(
+                    state =
+                        ReaderSliderUiState(
+                            currentPageText = "12",
+                            totalPagesText = "45",
+                            currentPageIndex = 11,
+                            totalPages = 44,
+                            isRtl = true,
+                        ),
+                    isLoading = true,
+                    onPageChange = {},
+                    onSkipPrevious = {},
+                    onSkipNext = {},
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun VerticalFloatingSliderPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        Box(
+            modifier =
+                Modifier.background(MaterialTheme.colorScheme.surfaceVariant).padding(Size.medium)
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Size.medium)) {
+                VerticalFloatingSlider(
+                    state =
+                        ReaderSliderUiState(
+                            currentPageText = "5",
+                            totalPagesText = "30",
+                            currentPageIndex = 4,
+                            totalPages = 29,
+                        ),
                     isLoading = false,
-                    pageNumberVisible = true,
+                    onPageChange = {},
+                    onSkipPrevious = {},
+                    onSkipNext = {},
+                )
+                VerticalFloatingSlider(
+                    state =
+                        ReaderSliderUiState(
+                            currentPageText = "1",
+                            totalPagesText = "10",
+                            currentPageIndex = 0,
+                            totalPages = 9,
+                        ),
+                    isLoading = true,
+                    onPageChange = {},
+                    onSkipPrevious = {},
+                    onSkipNext = {},
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun BottomActionSheetPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        Box(
+            modifier =
+                Modifier.background(MaterialTheme.colorScheme.surfaceVariant).padding(Size.medium)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(Size.medium)) {
+                BottomActionSheet(
+                    buttons = buildReaderBottomBarButtons(),
+                    onButtonClick = {},
+                )
+                BottomActionSheet(
+                    buttons =
+                        buildReaderBottomBarButtons(
+                            cropBorders = true,
+                            grayscale = true,
+                            isDoublePage = true,
+                        ),
+                    onButtonClick = {},
                 )
             }
         }

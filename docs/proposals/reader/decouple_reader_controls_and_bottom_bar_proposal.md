@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling ReaderControls and Bottom Action Bar from Parameter Overload & State Sprawl
 
-**Status:** Proposed / Under Review  
+**Status:** Complete / Landed  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
 **Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R7 (Priority: High / UI State Consolidation)  
 **Prerequisites:** Step R6 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
 **Downstream Dependents:** None  
-**Implementation State:** 🟡 Coupled Baseline (41 separate parameters in Composable signature, state sprawl)  
+**Implementation State:** 🟢 Decoupled (ReaderBottomControlsUiState, ReaderBottomBarAction, modular sliders & action bar)  
 
 ---
 
@@ -197,8 +197,8 @@ fun ReaderBottomControls(
 >
 > Consolidating the 41-parameter `ReaderBottomControls` signature into `ReaderBottomControlsUiState` and `ReaderBottomBarAction` simplifies `ReaderActivity` control binding and enables instant previewability for slider and toolbar variants.
 
-- [ ] **Step 1**: Define `ReaderBottomControlsUiState`, `ReaderSliderUiState`, and `ReaderBottomBarAction`.
-- [ ] **Step 2**: Refactor `ReaderBottomControls` to consume the new state model.
-- [ ] **Step 3**: Simplify `BottomActionSheet` into a generic button row iterating over `buttons`.
-- [ ] **Step 4**: Update `ReaderActivity.kt` to bind the unified state flow.
-- [ ] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [x] **Step 1**: Define `ReaderBottomControlsUiState`, `ReaderSliderUiState`, and `ReaderBottomBarAction`.
+- [x] **Step 2**: Refactor `ReaderBottomControls` to consume the new state model.
+- [x] **Step 3**: Simplify `BottomActionSheet` into a generic button row iterating over `buttons`.
+- [x] **Step 4**: Update `ReaderActivity.kt` to bind the unified state flow.
+- [x] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
