@@ -252,7 +252,10 @@ class Downloader(
     fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) {
         if (chapters.isEmpty()) return
 
-        val wasEmpty = queueState.value.isEmpty()
+        // Errored downloads stay in the queue after the downloader stops, so a queue with entries
+        // can still have nothing left to download. A running downloader picks up new chapters
+        // itself; starting the job again would replace its worker with one that exits at once.
+        val canStart = !isRunning && areAllDownloadsFinished()
         val chapterDirFiles = provider.findMangaDir(manga)?.listFiles()?.asList() ?: emptyList()
 
         val chaptersToQueue =
@@ -291,7 +294,7 @@ class Downloader(
             // Start downloader if needed
 
             // Start downloader if needed
-            if (autoStart && wasEmpty) {
+            if (autoStart && canStart) {
                 DownloadJob.start(context)
             } else if (!isRunning && !LibraryUpdateJob.isRunning(context)) {
                 notifier.onPaused()
