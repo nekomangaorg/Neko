@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.cancellation.CancellationException
 import okhttp3.Headers
 import okhttp3.OkHttpClient
@@ -32,7 +33,10 @@ import tachiyomi.core.network.await
 import tachiyomi.core.network.newCachelessCallWithProgress
 import uy.kohesive.injekt.injectLazy
 
-class ImageHandler {
+class ImageHandler(
+    // chapter id and last request time, read and written by concurrent page loads
+    private val tokenTracker: MutableMap<String, Long> = ConcurrentHashMap()
+) {
     val network: NetworkHelper by injectLazy()
     val networkServices: NetworkServices by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
@@ -44,9 +48,6 @@ class ImageHandler {
     private val comikeyHandler: ComikeyHandler by injectLazy()
     private val namiComiHandler: NamiComiHandler by injectLazy()
     private val mangaUpHandler: MangaUpHandler by injectLazy()
-
-    // chapter id and last request time
-    private val tokenTracker = hashMapOf<String, Long>()
 
     private val tag = "||ImageHandler"
 
@@ -121,12 +122,11 @@ class ImageHandler {
     private suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
         val data = page.url.split(",")
         val currentTime = Date().time
+        val lastRequest = tokenTracker[page.mangaDexChapterId]
 
         val mdAtHomeServerUrl =
             when (
-                tokenTracker[page.mangaDexChapterId] != null &&
-                    (currentTime - tokenTracker[page.mangaDexChapterId]!!) <
-                        MdConstants.mdAtHomeTokenLifespan
+                lastRequest != null && currentTime - lastRequest < MdConstants.mdAtHomeTokenLifespan
             ) {
                 true -> data[0]
                 false -> {
