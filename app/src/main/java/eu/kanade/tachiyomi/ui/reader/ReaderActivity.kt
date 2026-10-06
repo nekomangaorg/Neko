@@ -161,11 +161,17 @@ import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle as pref
 import org.nekomanga.presentation.screens.reader.GestureNavigationOverlay
 import org.nekomanga.presentation.screens.reader.PageNumberIndicator
 import org.nekomanga.presentation.screens.reader.ReaderAppBar
+import org.nekomanga.presentation.screens.reader.ReaderBottomActionId
+import org.nekomanga.presentation.screens.reader.ReaderBottomBarAction
 import org.nekomanga.presentation.screens.reader.ReaderBottomControls
+import org.nekomanga.presentation.screens.reader.ReaderBottomControlsUiState
 import org.nekomanga.presentation.screens.reader.ReaderChaptersSheet
 import org.nekomanga.presentation.screens.reader.ReaderPageAction
 import org.nekomanga.presentation.screens.reader.ReaderPageActionsSheet
 import org.nekomanga.presentation.screens.reader.ReaderSettingsSheet
+import org.nekomanga.presentation.screens.reader.ReaderSliderUiState
+import org.nekomanga.presentation.screens.reader.SliderOrientation
+import org.nekomanga.presentation.screens.reader.buildReaderBottomBarButtons
 import org.nekomanga.presentation.screens.reader.viewer.ComposePagerViewer
 import org.nekomanga.presentation.screens.reader.viewer.ComposeWebtoonViewer
 import org.nekomanga.presentation.screens.reader.viewer.PagerViewerConfigUiModel
@@ -857,54 +863,126 @@ class ReaderActivity : BaseMainActivity() {
 
                     val onShiftPageClick: () -> Unit = { shiftDoublePages() }
 
+                    val sliderOrientation =
+                        remember(viewer, sliderPosition) {
+                            SliderOrientation.from(
+                                isVertical =
+                                    viewer is WebtoonViewer || viewer is VerticalPagerViewer,
+                                sliderPosition = sliderPosition,
+                            )
+                        }
+
+                    val sliderState =
+                        remember(
+                            state.currentPageText,
+                            state.totalPagesText,
+                            state.currentPageIndex,
+                            state.totalPages,
+                            viewer,
+                            sliderOrientation,
+                        ) {
+                            ReaderSliderUiState(
+                                currentPageText = state.currentPageText,
+                                totalPagesText = state.totalPagesText,
+                                currentPageIndex = state.currentPageIndex,
+                                totalPages = state.totalPages,
+                                isRtl = viewer is R2LPagerViewer,
+                                position = sliderOrientation,
+                            )
+                        }
+
+                    val bottomButtons =
+                        remember(
+                            isChaptersVisible,
+                            isCommentsVisible,
+                            isWebViewVisible,
+                            isReadingModeVisible,
+                            readingModeIconRes,
+                            isRotationVisible,
+                            rotationIconRes,
+                            isCropBordersVisible,
+                            cropBorders,
+                            isGrayscaleVisible,
+                            grayscale,
+                            isDoublePageVisible,
+                            isDoublePage,
+                            doublePageIconRes,
+                            isShiftPageVisible,
+                            shiftPageIconRes,
+                            isSettingsVisible,
+                        ) {
+                            buildReaderBottomBarButtons(
+                                isChaptersVisible = isChaptersVisible,
+                                isCommentsVisible = isCommentsVisible,
+                                isWebViewVisible = isWebViewVisible,
+                                isReadingModeVisible = isReadingModeVisible,
+                                readingModeIconRes = readingModeIconRes,
+                                isRotationVisible = isRotationVisible,
+                                rotationIconRes = rotationIconRes,
+                                isCropBordersVisible = isCropBordersVisible,
+                                cropBorders = cropBorders,
+                                isGrayscaleVisible = isGrayscaleVisible,
+                                grayscale = grayscale,
+                                isDoublePageVisible = isDoublePageVisible,
+                                isDoublePage = isDoublePage,
+                                doublePageIconRes = doublePageIconRes,
+                                isShiftPageVisible = isShiftPageVisible,
+                                shiftPageIconRes = shiftPageIconRes,
+                                isSettingsVisible = isSettingsVisible,
+                            )
+                        }
+
+                    val bottomControlsUiState =
+                        remember(
+                            state.menuVisible,
+                            state.chaptersSheetVisible,
+                            state.settingsSheetVisible,
+                            state.isLoadingAdjacentChapter,
+                            sliderState,
+                            bottomButtons,
+                        ) {
+                            ReaderBottomControlsUiState(
+                                isVisible =
+                                    state.menuVisible &&
+                                        !state.chaptersSheetVisible &&
+                                        !state.settingsSheetVisible,
+                                isLoading = state.isLoadingAdjacentChapter,
+                                sliderState = sliderState,
+                                buttons = bottomButtons,
+                            )
+                        }
+
                     ReaderBottomControls(
-                        currentPageText = state.currentPageText,
-                        totalPagesText = state.totalPagesText,
-                        currentPageIndex = state.currentPageIndex,
-                        totalPages = state.totalPages,
-                        isRtl = viewer is R2LPagerViewer,
-                        isVertical = viewer is WebtoonViewer || viewer is VerticalPagerViewer,
-                        sliderPosition = sliderPosition,
-                        onPageChange = { index -> moveToPageIndex(index, animated = false) },
-                        onSkipPrevious = { viewModel.navigateAdjacentChapter(forward = false) },
-                        onSkipNext = { viewModel.navigateAdjacentChapter(forward = true) },
-                        visible =
-                            state.menuVisible &&
-                                !state.chaptersSheetVisible &&
-                                !state.settingsSheetVisible,
-                        isLoading = state.isLoadingAdjacentChapter,
-                        pageNumberVisible = state.pageNumberVisible,
-                        isChaptersVisible = isChaptersVisible,
-                        isCommentsVisible = isCommentsVisible,
-                        isWebViewVisible = isWebViewVisible,
-                        isReadingModeVisible = isReadingModeVisible,
-                        isRotationVisible = isRotationVisible,
-                        isCropBordersVisible = isCropBordersVisible,
-                        isGrayscaleVisible = isGrayscaleVisible,
-                        isDoublePageVisible = isDoublePageVisible,
-                        isShiftPageVisible = isShiftPageVisible,
-                        isSettingsVisible = isSettingsVisible,
-                        cropBorders = cropBorders,
-                        grayscale = grayscale,
-                        readingModeIconRes = readingModeIconRes,
-                        rotationIconRes = rotationIconRes,
-                        doublePageIconRes = doublePageIconRes,
-                        shiftPageIconRes = shiftPageIconRes,
-                        onChaptersClick = {
-                            chaptersSheetVisible = true
-                            reEnableBackPressedCallBack()
-                        },
-                        onCommentsClick = { openWebView(true) },
-                        onWebviewClick = { openWebView(false) },
-                        onReadingModeClick = onReadingModeClick,
-                        onRotationClick = onRotationClick,
-                        onCropBordersClick = onCropBordersClick,
-                        onGrayscaleClick = onGrayscaleClick,
-                        onDoublePageClick = onDoublePageClick,
-                        onShiftPageClick = onShiftPageClick,
-                        onSettingsClick = {
-                            settingsSheetVisible = true
-                            reEnableBackPressedCallBack()
+                        uiState = bottomControlsUiState,
+                        onAction = { action ->
+                            when (action) {
+                                is ReaderBottomBarAction.PageChanged ->
+                                    moveToPageIndex(action.pageIndex, animated = false)
+                                ReaderBottomBarAction.SkipPrevious ->
+                                    viewModel.navigateAdjacentChapter(forward = false)
+                                ReaderBottomBarAction.SkipNext ->
+                                    viewModel.navigateAdjacentChapter(forward = true)
+                                is ReaderBottomBarAction.ButtonClicked -> {
+                                    when (action.actionId) {
+                                        ReaderBottomActionId.Chapters -> {
+                                            chaptersSheetVisible = true
+                                            reEnableBackPressedCallBack()
+                                        }
+                                        ReaderBottomActionId.Comments -> openWebView(true)
+                                        ReaderBottomActionId.WebView -> openWebView(false)
+                                        ReaderBottomActionId.ReadingMode -> onReadingModeClick()
+                                        ReaderBottomActionId.Rotation -> onRotationClick()
+                                        ReaderBottomActionId.CropBorders -> onCropBordersClick()
+                                        ReaderBottomActionId.Grayscale -> onGrayscaleClick()
+                                        ReaderBottomActionId.DoublePage -> onDoublePageClick()
+                                        ReaderBottomActionId.ShiftPage -> onShiftPageClick()
+                                        ReaderBottomActionId.Settings -> {
+                                            settingsSheetVisible = true
+                                            reEnableBackPressedCallBack()
+                                        }
+                                    }
+                                }
+                            }
                         },
                         modifier = Modifier.fillMaxSize(),
                     )
