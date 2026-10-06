@@ -4,11 +4,14 @@ import coil3.size.Precision
 import coil3.size.Scale
 import coil3.size.Size
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TachiyomiImageDecoderTest {
 
     private val textureBox = Size(4096, 4096)
+    private val canvasBytes = 100L * 1024 * 1024
 
     @Test
     fun `tall page shrinks to fit a size box`() {
@@ -93,5 +96,65 @@ class TachiyomiImageDecoderTest {
             )
         assertEquals(2, target.sampleSize)
         assertEquals(999 to 9999, target.outputSize(999, 9999))
+    }
+
+    @Test
+    fun `tall narrow page under the byte limit keeps full resolution`() {
+        // A 4096 box gave 273x4096 for this page.
+        val target =
+            nativeDecodeTarget(
+                800,
+                12_000,
+                Size.ORIGINAL,
+                Scale.FIT,
+                Precision.EXACT,
+                Size(32_767, 32_767),
+                maxBytes = canvasBytes,
+            )
+        assertEquals(1, target.sampleSize)
+        assertEquals(800 to 12_000, target.outputSize(800, 12_000))
+    }
+
+    @Test
+    fun `page over the byte limit decodes within it`() {
+        val target =
+            nativeDecodeTarget(
+                2000,
+                20_000,
+                Size.ORIGINAL,
+                Scale.FIT,
+                Precision.EXACT,
+                Size(32_767, 32_767),
+                maxBytes = canvasBytes,
+            )
+        val (width, height) = target.outputSize(2000, 20_000)
+        assertEquals(1, target.sampleSize)
+        assertTrue("${width}x$height", width.toLong() * height * 4 <= canvasBytes)
+    }
+
+    @Test
+    fun `page shrunk only by the byte limit counts as byte limited`() {
+        val overLimit =
+            nativeDecodeTarget(
+                2000,
+                20_000,
+                Size.ORIGINAL,
+                Scale.FIT,
+                Precision.EXACT,
+                Size(32_767, 32_767),
+                maxBytes = canvasBytes,
+            )
+        assertTrue(overLimit.byteLimited)
+        val boxFirst =
+            nativeDecodeTarget(
+                2000,
+                20_000,
+                Size.ORIGINAL,
+                Scale.FIT,
+                Precision.EXACT,
+                textureBox,
+                maxBytes = canvasBytes,
+            )
+        assertFalse(boxFirst.byteLimited)
     }
 }

@@ -35,6 +35,7 @@ import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
+import eu.kanade.tachiyomi.data.coil.maxBitmapBytes
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
@@ -58,6 +59,7 @@ fun WebtoonPageItem(
     cropBorders: Boolean = false,
     colorFilter: ColorFilter? = null,
     onLongClick: (() -> Unit)? = null,
+    tapClaim: TapNavigationClaim? = null,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(page) {
@@ -80,6 +82,7 @@ fun WebtoonPageItem(
         cropBorders = cropBorders,
         colorFilter = colorFilter,
         onLongClick = onLongClick,
+        tapClaim = tapClaim,
         modifier = modifier,
     )
 }
@@ -91,6 +94,7 @@ fun WebtoonPageItem(
     cropBorders: Boolean = false,
     colorFilter: ColorFilter? = null,
     onLongClick: (() -> Unit)? = null,
+    tapClaim: TapNavigationClaim? = null,
     modifier: Modifier = Modifier,
 ) {
     val page = split.page
@@ -120,6 +124,7 @@ fun WebtoonPageItem(
         cropBorders = false,
         colorFilter = colorFilter,
         onLongClick = onLongClick,
+        tapClaim = tapClaim,
         modifier = modifier,
     )
 }
@@ -136,6 +141,7 @@ private fun WebtoonPageContent(
     cropBorders: Boolean,
     colorFilter: ColorFilter? = null,
     onLongClick: (() -> Unit)?,
+    tapClaim: TapNavigationClaim?,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -162,7 +168,8 @@ private fun WebtoonPageContent(
             ImageRequest.Builder(context)
                 .data(modelData)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
+                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                .maxBitmapBytes(GLUtil.MAX_CANVAS_BITMAP_BYTES)
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .apply {
@@ -268,6 +275,7 @@ private fun WebtoonPageContent(
             visible = isError,
             onRetry = onRetry,
             message = page.errorMessage ?: loadErrorMessage,
+            tapClaim = tapClaim,
         )
     }
 }

@@ -367,6 +367,11 @@ class ReaderActivity : BaseMainActivity() {
                     remember(prefs.readerTheme, themeBackground) {
                         ReaderTheme.fromPreference(prefs.readerTheme).color(themeBackground)
                     }
+                val smartBackgroundBaseColor =
+                    remember(prefs.readerTheme, themeBackground) {
+                        ReaderTheme.fromPreference(prefs.readerTheme)
+                            .smartBaseColor(themeBackground)
+                    }
                 val colorFilter =
                     remember(prefs.grayscale, prefs.invertedColors) {
                         ReaderColorFilter.getColorFilter(prefs.grayscale, prefs.invertedColors)
@@ -482,6 +487,7 @@ class ReaderActivity : BaseMainActivity() {
                                 initialIndex = initialPagerIndex,
                                 activeChapterId = currentChapterId,
                                 backgroundColor = backgroundColor,
+                                smartBackgroundBaseColor = smartBackgroundBaseColor,
                                 colorFilter = colorFilter,
                                 isRtl = isRtl,
                                 isVertical = isVertical,

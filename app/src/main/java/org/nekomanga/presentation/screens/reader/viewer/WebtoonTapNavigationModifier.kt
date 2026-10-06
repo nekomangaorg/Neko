@@ -33,6 +33,7 @@ fun Modifier.webtoonTapNavigation(
     doubleTapAnimDuration: Int = 300,
     menuVisible: Boolean = false,
     coroutineScope: CoroutineScope? = null,
+    tapClaim: TapNavigationClaim? = null,
     onToggleMenu: () -> Unit,
     onNavigateAdjacent: (forward: Boolean) -> Unit,
 ): Modifier = composed {
@@ -49,6 +50,7 @@ fun Modifier.webtoonTapNavigation(
     val currentMenuVisible by rememberUpdatedState(menuVisible)
     val currentOnToggleMenu by rememberUpdatedState(onToggleMenu)
     val currentOnNavigateAdjacent by rememberUpdatedState(onNavigateAdjacent)
+    val currentTapClaim by rememberUpdatedState(tapClaim)
 
     pointerInput(enableDoubleTapZoom, doubleTapAnimDuration) {
         var lastTapTime = 0L
@@ -95,10 +97,13 @@ fun Modifier.webtoonTapNavigation(
                         (upPos.y - downPos.y).toDouble(),
                     )
 
+                // Children see the up only after this Initial pass, so a Retry tap is not
+                // consumed yet and has to be recognized by its claimed pointer
                 if (
                     distance < touchSlopPx &&
                         (upTime - downTime < longPressTimeoutMs) &&
-                        !up.isConsumed
+                        !up.isConsumed &&
+                        currentTapClaim?.isClaimed(down.id) != true
                 ) {
                     val screenWidth = size.width.toFloat()
                     val screenHeight = size.height.toFloat()

@@ -18,6 +18,8 @@ data class PagerViewerConfigUiModel(
     val initialIndex: Int = 0,
     val activeChapterId: Long? = null,
     val backgroundColor: Color = Color.Black,
+    /** Base color of the smart reader background, null when the reader theme is not smart. */
+    val smartBackgroundBaseColor: Color? = null,
     val colorFilter: ColorFilter? = null,
     val isRtl: Boolean = false,
     val isVertical: Boolean = false,

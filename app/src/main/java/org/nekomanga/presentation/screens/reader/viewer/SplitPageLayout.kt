@@ -21,6 +21,7 @@ import coil3.request.crossfade
 import coil3.request.maxBitmapSize
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
+import eu.kanade.tachiyomi.data.coil.maxBitmapBytes
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlin.math.roundToInt
@@ -64,7 +65,8 @@ fun SplitPageLayout(
             ImageRequest.Builder(context)
                 .data(page)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
+                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                .maxBitmapBytes(GLUtil.MAX_CANVAS_BITMAP_BYTES)
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .build()

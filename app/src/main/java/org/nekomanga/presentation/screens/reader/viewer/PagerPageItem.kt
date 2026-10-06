@@ -36,6 +36,7 @@ import coil3.size.Size as CoilSize
 import coil3.transform.Transformation
 import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
 import eu.kanade.tachiyomi.data.coil.RotateWidePageTransformation
+import eu.kanade.tachiyomi.data.coil.maxBitmapBytes
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
@@ -153,11 +154,14 @@ fun PagerPageItem(
             }
         }
 
+    val tapClaim = remember { TapNavigationClaim() }
+
     val onRetry: () -> Unit = {
+        // Retrying a page downloads it again, so leave out a partner page that loaded fine.
+        val failedPages = loadErrors.failedPages(page, extraPage)
         loadErrors.clear()
         page.retry()
-        page.chapter.pageLoader?.retryPage(page)
-        extraPage?.chapter?.pageLoader?.retryPage(extraPage)
+        failedPages.forEach { it.chapter.pageLoader?.retryPage(it) }
     }
 
     val doubleClickToZoomListener =
@@ -178,6 +182,7 @@ fun PagerPageItem(
                     config = config,
                     page = page,
                     extraPage = extraPage,
+                    tapClaim = tapClaim,
                 ),
         contentAlignment = Alignment.Center,
     ) {
@@ -243,6 +248,25 @@ fun PagerPageItem(
                 }
             }
         }
+
+        SmartPageBackground(
+            source =
+                smartBackgroundSource(
+                    page = page,
+                    extraPage = extraPage,
+                    isRtl = config.isRtl,
+                    invertDoublePages = config.invertDoublePages,
+                    rotateWide = shouldRotateWide,
+                    rotateReverse = config.doublePageRotateReverse,
+                    cropBorders = config.cropBorders,
+                ),
+            baseColor = config.smartBackgroundBaseColor,
+            isLandscape = constraints.maxWidth > constraints.maxHeight,
+            retryGeneration = retryGeneration,
+            isReady = isReady,
+            isError = isError,
+            colorFilter = config.colorFilter,
+        )
 
         // A retry does not change the image requests, and the images load again only for a
         // changed request, so each retry gets new images.
@@ -346,14 +370,13 @@ fun PagerPageItem(
                         ImageRequest.Builder(context)
                             .data(page)
                             // ReaderPageImageSource runs this request as built. Coil's default
-                            // maxBitmapSize of 4096 px is turned off, so the size box is the only
-                            // cap. Without the box, a page taller than the texture size decodes at
-                            // full size and draws blank as a hardware bitmap or is too large for
-                            // the canvas as a software one.
+                            // maxBitmapSize of 4096 px is turned off, so the size box and the byte
+                            // limit are the only caps. Without the box, a page taller than the
+                            // texture size draws blank as a hardware bitmap. Without the byte
+                            // limit, a page over it is too large for the canvas.
                             .maxBitmapSize(CoilSize.ORIGINAL)
-                            .size(
-                                CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize)
-                            )
+                            .size(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                            .maxBitmapBytes(GLUtil.MAX_CANVAS_BITMAP_BYTES)
                             .scale(Scale.FIT)
                             .precision(Precision.INEXACT)
                             .crossfade(true)
@@ -409,6 +432,7 @@ fun PagerPageItem(
             visible = isError,
             onRetry = onRetry,
             message = page.errorMessage ?: extraPage?.errorMessage ?: loadErrors.message,
+            tapClaim = tapClaim,
         )
     }
 }

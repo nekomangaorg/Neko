@@ -40,6 +40,7 @@ import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Size as CoilSize
 import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
+import eu.kanade.tachiyomi.data.coil.maxBitmapBytes
 import eu.kanade.tachiyomi.ui.reader.domain.CheckWidePageUseCase
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
@@ -287,7 +288,8 @@ fun DoublePageLayout(
             ImageRequest.Builder(context)
                 .data(first)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
+                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                .maxBitmapBytes(GLUtil.MAX_CANVAS_BITMAP_BYTES)
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .apply {
@@ -302,7 +304,8 @@ fun DoublePageLayout(
             ImageRequest.Builder(context)
                 .data(second)
                 .size(CoilSize.ORIGINAL)
-                .maxBitmapSize(CoilSize(GLUtil.maxCanvasTextureSize, GLUtil.maxCanvasTextureSize))
+                .maxBitmapSize(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
+                .maxBitmapBytes(GLUtil.MAX_CANVAS_BITMAP_BYTES)
                 .precision(Precision.EXACT)
                 .crossfade(true)
                 .apply {

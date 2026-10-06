@@ -2,6 +2,7 @@ package org.nekomanga.presentation.screens.reader.viewer
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateMapOf
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import org.nekomanga.logging.TimberKt
 
@@ -31,4 +32,8 @@ class PagerImageLoadErrors {
     fun clear() {
         messages.clear()
     }
+
+    /** The [pages] that failed to download or to decode, which are the ones Retry loads again. */
+    fun failedPages(vararg pages: ReaderPage?): List<ReaderPage> =
+        pages.filterNotNull().filter { it.status == Page.State.ERROR || it in messages }
 }

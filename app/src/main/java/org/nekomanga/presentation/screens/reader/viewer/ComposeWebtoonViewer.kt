@@ -75,6 +75,7 @@ fun ComposeWebtoonViewer(
     val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = config.initialIndex)
     val zoomState = rememberWebtoonZoomState()
     val coroutineScope = rememberCoroutineScope()
+    val tapClaim = remember { TapNavigationClaim() }
 
     val currentItems by rememberUpdatedState(items)
     val activeChapterId by rememberUpdatedState(config.activeChapterId)
@@ -311,6 +312,7 @@ fun ComposeWebtoonViewer(
                         doubleTapAnimDuration = currentConfig.doubleTapAnimDuration,
                         menuVisible = currentConfig.menuVisible,
                         coroutineScope = coroutineScope,
+                        tapClaim = tapClaim,
                         onToggleMenu = currentConfig.onToggleMenu,
                         onNavigateAdjacent = onNavigateAdjacent,
                     ),
@@ -330,6 +332,7 @@ fun ComposeWebtoonViewer(
                             cropBorders = config.cropBorders,
                             colorFilter = config.colorFilter,
                             onLongClick = { onPageLongTap(item.page) },
+                            tapClaim = tapClaim,
                             modifier = gapModifier,
                         )
                     }
@@ -340,6 +343,7 @@ fun ComposeWebtoonViewer(
                             cropBorders = config.cropBorders,
                             colorFilter = config.colorFilter,
                             onLongClick = { onPageLongTap(item.page) },
+                            tapClaim = tapClaim,
                             modifier = gapModifier,
                         )
                     }
