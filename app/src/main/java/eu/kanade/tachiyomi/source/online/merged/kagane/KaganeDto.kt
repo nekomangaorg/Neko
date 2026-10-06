@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.source.online.merged.kagane
 
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import java.text.DecimalFormat
+import eu.kanade.tachiyomi.util.system.formatChapterNumber
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -81,7 +81,7 @@ class ChapterBook(
         val parsedTitle = getParsedTitle()
         TimberKt.d { "$parsedTitle" }
         val chnum = parsedTitle?.first ?: getChapterNumber() ?: number
-        val chtxt = "Ch.${chnum.formatFloat()}"
+        val chtxt = "Ch.${chnum.formatChapterNumber()}"
         val vol = parsedTitle?.second ?: volumeNo.orEmpty()
         val name = mutableListOf<String>()
         if (vol.isNotBlank()) {
@@ -125,14 +125,6 @@ class ChapterBook(
         val match = TITLE_NUMBER_REGEX.find(title.trim()) ?: return null
         val chnum = match.groupValues[1].toFloatOrNull() ?: return null
         return Triple(chnum, match.groupValues[2].takeIf { it.isNotEmpty() }, match.groupValues[3])
-    }
-
-    fun Float.formatFloat(): String {
-        val df = DecimalFormat("#.###")
-        df.minimumFractionDigits = 0
-        df.maximumFractionDigits = 3
-        df.isGroupingUsed = false
-        return df.format(this.toBigDecimal().stripTrailingZeros())
     }
 
     @Serializable class ChapterGroup(val title: String)

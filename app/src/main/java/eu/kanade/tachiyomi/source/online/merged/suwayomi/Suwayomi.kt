@@ -11,8 +11,8 @@ import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.source.online.merged.suwayomi.SuwayomiLang.Companion.fromSuwayomiLang
 import eu.kanade.tachiyomi.util.lang.toResultError
+import eu.kanade.tachiyomi.util.system.formatChapterNumber
 import eu.kanade.tachiyomi.util.system.withIOContext
-import java.text.DecimalFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -538,10 +538,10 @@ class Suwayomi : MergedServerSource() {
                     val chnum = previous.chapter + 0.1f
                     val title = rawName.trimEnd('.')
                     return Name.Sanitized(
-                        "Ch.${chnum.formatFloat()} - $title",
+                        "Ch.${chnum.formatChapterNumber()} - $title",
                         "",
                         chnum,
-                        "Ch.${chnum.formatFloat()}",
+                        "Ch.${chnum.formatChapterNumber()}",
                         title,
                     )
                 } else if (previous.chapter == next - 2) {
@@ -558,12 +558,7 @@ class Suwayomi : MergedServerSource() {
             if (!rawName.contains("end", true)) return Name.NotSane
         }
 
-        val ch =
-            if (chaperNumber == chaperNumber.toLong().toFloat()) {
-                chaperNumber.toLong().toString()
-            } else {
-                chaperNumber.formatFloat()
-            }
+        val ch = chaperNumber.formatChapterNumber()
 
         val chapterName = mutableListOf<String>()
 
@@ -626,14 +621,6 @@ class Suwayomi : MergedServerSource() {
         }
 
         return Name.Sanitized(chapterName.joinToString(" "), vol, chaperNumber, chtxt, title)
-    }
-
-    fun Float.formatFloat(): String {
-        val df = DecimalFormat("#.###")
-        df.minimumFractionDigits = 0
-        df.maximumFractionDigits = 3
-        df.isGroupingUsed = false
-        return df.format(this.toBigDecimal().stripTrailingZeros())
     }
 
     fun String.sanitizeVolume(volumePrefixes: Array<String>): Pair<String, String> {
