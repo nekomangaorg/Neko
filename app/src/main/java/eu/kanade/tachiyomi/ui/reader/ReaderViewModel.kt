@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterNavTargetUseCase
+import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
@@ -45,6 +46,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapterTransitionState
 import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.model.ReaderViewerPreferences
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
@@ -66,14 +68,17 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -104,6 +109,7 @@ import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel
 import org.nekomanga.usecases.chapters.ParseChapterNameUseCase
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -133,8 +139,13 @@ constructor(
 
     private val parseChapterName: ParseChapterNameUseCase by injectLazy()
 
-    private val mutableState = MutableStateFlow(State())
+    private val mutableState =
+        MutableStateFlow(State(viewerPreferences = getInitialViewerPreferences()))
     val state = mutableState.asStateFlow()
+
+    init {
+        observeViewerPreferences()
+    }
 
     private val downloadProvider = DownloadProvider(preferences.context)
 
@@ -164,8 +175,8 @@ constructor(
 
     private val navigationMutex = Mutex()
 
-    private val _navigationCommands = Channel<ReaderNavCommand>(capacity = Channel.BUFFERED)
-    val navigationCommands: Flow<ReaderNavCommand> = _navigationCommands.receiveAsFlow()
+    private val _navigationCommands = MutableSharedFlow<ReaderNavCommand>(extraBufferCapacity = 64)
+    val navigationCommands: SharedFlow<ReaderNavCommand> = _navigationCommands.asSharedFlow()
 
     private val _transitionState =
         MutableStateFlow<ReaderChapterTransitionState>(ReaderChapterTransitionState.Idle)
@@ -734,12 +745,14 @@ constructor(
             if (targetPage != null && targetPage >= 0) {
                 _transitionState.value =
                     ReaderChapterTransitionState.Settling(chapter.chapter.id, targetPage)
-                _navigationCommands.send(
-                    ReaderNavCommand.SnapToPage(
-                        pageIndex = targetPage,
-                        chapterId = chapter.chapter.id,
+                viewModelScope.launch {
+                    _navigationCommands.emit(
+                        ReaderNavCommand.SnapToPage(
+                            pageIndex = targetPage,
+                            chapterId = chapter.chapter.id,
+                        )
                     )
-                )
+                }
             }
             getChapters()
             _transitionState.value = ReaderChapterTransitionState.Idle
@@ -759,7 +772,10 @@ constructor(
     }
 
     fun sendNavigationCommand(command: ReaderNavCommand) {
-        viewModelScope.launch { _navigationCommands.send(command) }
+        if (!_navigationCommands.tryEmit(command)) {
+            TimberKt.w { "Navigation command buffer full; queuing via coroutine: $command" }
+            viewModelScope.launch { _navigationCommands.emit(command) }
+        }
     }
 
     /**
@@ -1435,13 +1451,33 @@ constructor(
         }
     }
 
+    private val transitionResolver by lazy {
+        try {
+            ResolveChapterTransitionUiModelUseCase(downloadManager)
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Failed to initialize ResolveChapterTransitionUiModelUseCase" }
+            null
+        }
+    }
+
     fun setViewerItems(items: List<ReaderUiItem>) {
-        mutableState.update { it.copy(viewerItems = items) }
+        val resolver = transitionResolver
+        val enriched = items.map { item ->
+            if (item is ReaderUiItem.Transition && item.transitionUiModel == null) {
+                val model =
+                    resolver?.invoke(item.transition, manga)
+                        ?: ChapterTransitionUiModel.from(item.transition)
+                item.copy(transitionUiModel = model)
+            } else {
+                item
+            }
+        }
+        mutableState.update { it.copy(viewerItems = enriched) }
     }
 
     fun updateWebtoonActiveIndex(activeIndex: Int) {
         val items = state.value.viewerItems
-        val preloadAmount = readerPreferences.preloadPageAmount().get()
+        val preloadAmount = state.value.viewerPreferences.preloadPageAmount
         preloadController.onPositionChanged(
             currentIndex = activeIndex,
             items = items,
@@ -1453,7 +1489,7 @@ constructor(
 
     fun updatePagerActiveIndex(activeIndex: Int, isRtl: Boolean) {
         val items = state.value.viewerItems
-        val preloadAmount = readerPreferences.preloadPageAmount().get()
+        val preloadAmount = state.value.viewerPreferences.preloadPageAmount
         preloadController.onPositionChanged(
             currentIndex = activeIndex,
             items = items,
@@ -1461,6 +1497,107 @@ constructor(
             isRtl = isRtl,
             isWebtoon = false,
         )
+    }
+
+    private fun getInitialViewerPreferences(): ReaderViewerPreferences {
+        return try {
+            ReaderViewerPreferences(
+                animatedTransitions = readerPreferences.animatedPageTransitions().get(),
+                animatedTransitionsWebtoon =
+                    readerPreferences.animatedPageTransitionsWebtoon().get(),
+                imageScaleType = readerPreferences.imageScaleType().get(),
+                doublePageGap = readerPreferences.doublePageGap().get(),
+                invertDoublePages = readerPreferences.invertDoublePages().get(),
+                readerTheme = readerPreferences.readerTheme().get(),
+                landscapeZoom = readerPreferences.landscapeZoom().get(),
+                zoomStart = readerPreferences.zoomStart().get(),
+                preloadPageAmount = readerPreferences.preloadPageAmount().get(),
+                cropBorders = readerPreferences.cropBorders().get(),
+                cropBordersWebtoon = readerPreferences.cropBordersWebtoon().get(),
+                grayscale = readerPreferences.grayscale().get(),
+                invertedColors = readerPreferences.invertedColors().get(),
+                doublePageRotate = readerPreferences.doublePageRotate().get(),
+                doublePageRotateReverse = readerPreferences.doublePageRotateReverse().get(),
+                navigateToPan = readerPreferences.navigateToPan().get(),
+                webtoonSidePadding = readerPreferences.webtoonSidePadding().get(),
+                webtoonDisableGaps = readerPreferences.webtoonDisableGaps().get(),
+                webtoonEnableZoomOut = readerPreferences.webtoonEnableZoomOut().get(),
+            )
+        } catch (_: Throwable) {
+            ReaderViewerPreferences()
+        }
+    }
+
+    private fun observeViewerPreferences() {
+        try {
+            merge(
+                    readerPreferences.animatedPageTransitions().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(animatedTransitions = it) }
+                    },
+                    readerPreferences.animatedPageTransitionsWebtoon().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(animatedTransitionsWebtoon = it) }
+                    },
+                    readerPreferences.imageScaleType().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(imageScaleType = it) }
+                    },
+                    readerPreferences.doublePageGap().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(doublePageGap = it) }
+                    },
+                    readerPreferences.invertDoublePages().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(invertDoublePages = it) }
+                    },
+                    readerPreferences.readerTheme().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(readerTheme = it) }
+                    },
+                    readerPreferences.landscapeZoom().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(landscapeZoom = it) }
+                    },
+                    readerPreferences.zoomStart().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(zoomStart = it) }
+                    },
+                    readerPreferences.preloadPageAmount().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(preloadPageAmount = it) }
+                    },
+                    readerPreferences.cropBorders().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(cropBorders = it) }
+                    },
+                    readerPreferences.cropBordersWebtoon().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(cropBordersWebtoon = it) }
+                    },
+                    readerPreferences.grayscale().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(grayscale = it) }
+                    },
+                    readerPreferences.invertedColors().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(invertedColors = it) }
+                    },
+                    readerPreferences.doublePageRotate().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(doublePageRotate = it) }
+                    },
+                    readerPreferences.doublePageRotateReverse().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(doublePageRotateReverse = it) }
+                    },
+                    readerPreferences.navigateToPan().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(navigateToPan = it) }
+                    },
+                    readerPreferences.webtoonSidePadding().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(webtoonSidePadding = it) }
+                    },
+                    readerPreferences.webtoonDisableGaps().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(webtoonDisableGaps = it) }
+                    },
+                    readerPreferences.webtoonEnableZoomOut().changes().map {
+                        { p: ReaderViewerPreferences -> p.copy(webtoonEnableZoomOut = it) }
+                    },
+                )
+                .onEach { updateFn ->
+                    mutableState.update {
+                        it.copy(viewerPreferences = updateFn(it.viewerPreferences))
+                    }
+                }
+                .launchIn(viewModelScope)
+        } catch (e: Exception) {
+            TimberKt.w(e) { "ReaderPreferences could not be observed" }
+        }
     }
 
     fun setChapterTitle(title: String) {
@@ -1546,6 +1683,7 @@ constructor(
         val brightnessOverlayAlpha: Float = 0f,
         val colorFilterOverlayColor: Int = 0,
         val colorFilterOverlayMode: Int = 0,
+        val viewerPreferences: ReaderViewerPreferences = ReaderViewerPreferences(),
     )
 
     sealed class Event {

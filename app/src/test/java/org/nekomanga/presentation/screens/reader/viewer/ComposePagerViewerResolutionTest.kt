@@ -1283,4 +1283,211 @@ class ComposePagerViewerResolutionTest {
             coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
             coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
         }
+
+    @Test
+    fun `calculateDefaultPagerIndex resolves requested page in active chapter`() {
+        val ch1 = createChapter(1L, pageCount = 3)
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[0]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Page(ch1Pages[2]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Page(ch2Pages[1]),
+                ReaderUiItem.Page(ch2Pages[2]),
+            )
+
+        val index =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 2L, requestedPage = 1)
+        assertEquals(5, index)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex defaults to first page of active chapter when requested page is null`() {
+        val ch1 = createChapter(1L, pageCount = 2)
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[0]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Page(ch2Pages[1]),
+            )
+
+        val index =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 2L, requestedPage = null)
+        assertEquals(3, index)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex returns 0 for empty items`() {
+        val index =
+            calculateDefaultPagerIndex(
+                items = emptyList(),
+                currentChapterId = 1L,
+                requestedPage = null,
+            )
+        assertEquals(0, index)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex resolves paired extraPage when requestedPage matches extraPage`() {
+        val ch = createChapter(1L, pageCount = 4)
+        val pages = (ch.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(page = pages[0], extraPage = pages[1]),
+                ReaderUiItem.Page(page = pages[2], extraPage = pages[3]),
+            )
+
+        val indexPage1 =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 1L, requestedPage = 1)
+        assertEquals(0, indexPage1)
+
+        val indexPage3 =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 1L, requestedPage = 3)
+        assertEquals(1, indexPage3)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex resolves SplitPage when requestedPage matches split page index`() {
+        val ch = createChapter(1L, pageCount = 2)
+        val pages = (ch.state as ReaderChapter.State.Loaded).pages
+
+        val split1 = ReaderPageSplit(page = pages[1], topOffset = 0, splitHeight = 500)
+        val split2 = ReaderPageSplit(page = pages[1], topOffset = 500, splitHeight = 500)
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(pages[0]),
+                ReaderUiItem.SplitPage(split1),
+                ReaderUiItem.SplitPage(split2),
+            )
+
+        val index =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 1L, requestedPage = 1)
+        // Resolves to first item representing page 1
+        assertEquals(1, index)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex falls back to active chapter first page when requestedPage does not exist`() {
+        val ch1 = createChapter(1L, pageCount = 2)
+        val ch2 = createChapter(2L, pageCount = 3)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[0]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Page(ch2Pages[1]),
+            )
+
+        // Request non-existent page 99 for chapter 2 -> falls back to chapter 2's page 0 (index 3)
+        val index =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 2L, requestedPage = 99)
+        assertEquals(3, index)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex falls back to first page item when currentChapterId is not present`() {
+        val ch = createChapter(1L, pageCount = 2)
+        val pages = (ch.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch, null)),
+                ReaderUiItem.Page(pages[0]),
+                ReaderUiItem.Page(pages[1]),
+            )
+
+        // currentChapterId 999 does not exist in items -> falls back to first page item (index 1)
+        val index =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 999L, requestedPage = null)
+        assertEquals(1, index)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex finds minimum page index when active chapter has non-zero start page`() {
+        val ch = createChapter(1L, pageCount = 5)
+        val pages = (ch.state as ReaderChapter.State.Loaded).pages
+
+        // Chapter items starting at page 3 (pages 0, 1, 2 trimmed or missing)
+        val items =
+            listOf(
+                ReaderUiItem.Page(pages[3]),
+                ReaderUiItem.Page(pages[4]),
+            )
+
+        val index =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 1L, requestedPage = null)
+        assertEquals(0, index)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex handles negative requested page safely`() {
+        val ch = createChapter(1L, pageCount = 3)
+        val pages = (ch.state as ReaderChapter.State.Loaded).pages
+
+        val items =
+            listOf(
+                ReaderUiItem.Page(pages[0]),
+                ReaderUiItem.Page(pages[1]),
+                ReaderUiItem.Page(pages[2]),
+            )
+
+        val index =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 1L, requestedPage = -1)
+        assertEquals(0, index)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex returns 0 when items contain only transitions`() {
+        val ch1 = createChapter(1L, pageCount = 1)
+        val ch2 = createChapter(2L, pageCount = 1)
+
+        val items =
+            listOf(
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch1, null)),
+                ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2)),
+            )
+
+        val index =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 1L, requestedPage = 1)
+        assertEquals(0, index)
+    }
+
+    @Test
+    fun `calculateDefaultPagerIndex resolves SplitPage when requestedPage is 0`() {
+        val ch = createChapter(1L, pageCount = 2)
+        val pages = (ch.state as ReaderChapter.State.Loaded).pages
+
+        val split1 = ReaderPageSplit(page = pages[0], topOffset = 0, splitHeight = 500)
+        val split2 = ReaderPageSplit(page = pages[0], topOffset = 500, splitHeight = 500)
+
+        val items =
+            listOf(
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch, null)),
+                ReaderUiItem.SplitPage(split1),
+                ReaderUiItem.SplitPage(split2),
+                ReaderUiItem.Page(pages[1]),
+            )
+
+        val index =
+            calculateDefaultPagerIndex(items = items, currentChapterId = 1L, requestedPage = 0)
+        assertEquals(1, index)
+    }
 }

@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling ComposePagerViewer & ComposeWebtoonViewer from Legacy Android Views & Direct Injections
 
-**Status:** Proposed / Under Review  
+**Status:** Complete / Landed  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Next Release (Neko 3.8.0 / Step R6: Complete Viewer Decommissioning)  
 **Execution Order:** Reader Track — Phase R1 (Core Navigation, Engine & Viewers), Step R6 (Priority: Critical / Viewer Decoupling)  
 **Prerequisites:** Step R1 ([`decouple_reader_navigation_and_lifecycle_orchestration_proposal.md`](decouple_reader_navigation_and_lifecycle_orchestration_proposal.md)), Step R2 ([`decouple_reader_transition_page_proposal.md`](decouple_reader_transition_page_proposal.md)), Step R4 ([`reader_preloader_engine_proposal.md`](reader_preloader_engine_proposal.md)), Step R5 ([`rock_solid_paged_compose_viewer_proposal.md`](rock_solid_paged_compose_viewer_proposal.md))  
 **Downstream Dependents:** Reader Track Phase R2 Auxiliary Proposals (Steps R7–R10), Step R11 ([`native_compose_webtoon_subsampling_renderer_proposal.md`](native_compose_webtoon_subsampling_renderer_proposal.md))  
-**Implementation State:** 🟡 Scheduled for Next Release (Current release delivers Step R1, Step R2; Step R6 will decommission legacy `WebtoonViewer.kt` and `PagerViewer.kt` and decouple `ComposePagerViewer`)  
+**Implementation State:** 🟢 Landed in `ref/decouple-reader-compose-viewers-r6` (Decoupled pure ComposePagerViewer and ComposeWebtoonViewer, hoisted ReaderViewerPreferences, and deprecated legacy View hierarchies)  
 
 ---
 
@@ -526,12 +526,12 @@ class ComposeWebtoonViewerTest {
 >
 > Decoupling `ComposePagerViewer` and `ComposeWebtoonViewer` from legacy View classes (`PagerViewer`, `WebtoonViewer`), `DownloadManager`, and `Injekt` isolates viewer rendering into pure Jetpack Compose components driven by `PagerViewerConfigUiModel` / `WebtoonViewerConfigUiModel`, completing core viewer decoupling.
 
-- [ ] **Step 1**: Define `PagerViewerConfigUiModel` and `WebtoonViewerConfigUiModel` with complete dual-page preferences.
-- [ ] **Step 2**: Implement `ReaderUiItem.isEquivalentTo` domain identity contract supporting dual pages and pure JVM tests.
-- [ ] **Step 3a**: Extract `BuildWebtoonItemsUseCase` domain interactor and add `BuildWebtoonItemsUseCaseTest`.
-- [ ] **Step 3b**: Extract `BuildPagerItemsUseCase` domain interactor with dual-page chunking and add `BuildPagerItemsUseCaseTest`.
-- [ ] **Step 4**: Hoist preference observation from viewers to `ReaderViewModel`.
-- [ ] **Step 5**: Refactor `ComposePagerViewer.kt` to eliminate legacy view and service dependencies.
-- [ ] **Step 6**: Refactor `ComposeWebtoonViewer.kt` to eliminate legacy view and service dependencies.
-- [ ] **Step 7**: Deprecate `WebtoonViewer` and `PagerViewer`.
-- [ ] **Step 8**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [x] **Step 1**: Define `PagerViewerConfigUiModel` and `WebtoonViewerConfigUiModel` with complete dual-page preferences.
+- [x] **Step 2**: Implement `ReaderUiItem.isEquivalentTo` domain identity contract supporting dual pages and pure JVM tests.
+- [x] **Step 3a**: Extract `BuildWebtoonItemsUseCase` domain interactor and add `BuildWebtoonItemsUseCaseTest`.
+- [x] **Step 3b**: Extract `BuildPagerItemsUseCase` domain interactor with dual-page chunking and add `BuildPagerItemsUseCaseTest`.
+- [x] **Step 4**: Hoist preference observation from viewers to `ReaderViewModel`.
+- [x] **Step 5**: Refactor `ComposePagerViewer.kt` to eliminate legacy view and service dependencies.
+- [x] **Step 6**: Refactor `ComposeWebtoonViewer.kt` to eliminate legacy view and service dependencies.
+- [x] **Step 7**: Deprecate `WebtoonViewer` and `PagerViewer`.
+- [x] **Step 8**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.

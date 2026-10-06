@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -12,7 +11,6 @@ import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
-import org.nekomanga.domain.manga.MangaItem
 
 /** Immutable UI configuration state for [ComposePagerViewer]. */
 @Immutable
@@ -53,12 +51,4 @@ data class PagerViewerConfigUiModel(
     val onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
     val onPageLongTap: ((ReaderPage, ReaderPage?) -> Unit)? = null,
     val onWidePageDetected: ((ReaderPage) -> Unit)? = null,
-    @Deprecated(
-        "Transition pages are now decoupled from DownloadManager and MangaItem via ChapterTransitionUiModel"
-    )
-    val manga: MangaItem? = null,
-    @Deprecated(
-        "Transition pages are now decoupled from DownloadManager and MangaItem via ChapterTransitionUiModel"
-    )
-    val downloadManager: DownloadManager? = null,
 )

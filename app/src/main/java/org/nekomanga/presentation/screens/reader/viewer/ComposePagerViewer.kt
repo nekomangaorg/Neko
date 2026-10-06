@@ -12,9 +12,7 @@ import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,38 +22,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
-import eu.kanade.tachiyomi.ui.reader.loader.ReaderPreloadController
-import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
-import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
-import eu.kanade.tachiyomi.ui.reader.model.ReaderChapterTransitionState
 import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
-import eu.kanade.tachiyomi.ui.reader.settings.ReaderTheme
-import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerScrollAnchorResolver
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.tryStepPan
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.receiveAsFlow
-import org.nekomanga.domain.manga.MangaItem
-import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.presentation.extensions.collectAsStateWithLifecycle
 import org.nekomanga.presentation.theme.Size
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 private class PagerLayoutSyncAnchor(
     var lastProcessedItems: List<ReaderUiItem>,
@@ -406,330 +386,108 @@ private fun PagerItemContent(
             )
         }
         is ReaderUiItem.Transition -> {
-            val uiModel = item.transitionUiModel
-            val downloadManager = config.downloadManager
-            if (uiModel != null) {
-                ReaderTransitionPage(
-                    uiModel = uiModel,
-                    onRetry = { item.transition.to?.let { config.onRetryTransition(it) } },
-                    onTap = { pos: PointF ->
-                        val navigator = config.navigator
-                        when (navigator.getAction(pos)) {
-                            ViewerNavigation.NavigationRegion.MENU -> config.onToggleMenu()
-                            ViewerNavigation.NavigationRegion.NEXT -> {
-                                if (config.menuVisible) config.onToggleMenu()
+            val uiModel = item.transitionUiModel ?: ChapterTransitionUiModel.from(item.transition)
+            ReaderTransitionPage(
+                uiModel = uiModel,
+                onRetry = { item.transition.to?.let { config.onRetryTransition(it) } },
+                onTap = { pos: PointF ->
+                    val navigator = config.navigator
+                    when (navigator.getAction(pos)) {
+                        ViewerNavigation.NavigationRegion.MENU -> config.onToggleMenu()
+                        ViewerNavigation.NavigationRegion.NEXT -> {
+                            if (config.menuVisible) config.onToggleMenu()
+                            config.onNavigateAdjacent(true)
+                        }
+                        ViewerNavigation.NavigationRegion.PREV -> {
+                            if (config.menuVisible) config.onToggleMenu()
+                            config.onNavigateAdjacent(false)
+                        }
+                        ViewerNavigation.NavigationRegion.RIGHT -> {
+                            if (config.menuVisible) config.onToggleMenu()
+                            if (config.isRtl) {
+                                config.onNavigateAdjacent(false)
+                            } else {
                                 config.onNavigateAdjacent(true)
                             }
-                            ViewerNavigation.NavigationRegion.PREV -> {
-                                if (config.menuVisible) config.onToggleMenu()
-                                config.onNavigateAdjacent(false)
-                            }
-                            ViewerNavigation.NavigationRegion.RIGHT -> {
-                                if (config.menuVisible) config.onToggleMenu()
-                                if (config.isRtl) {
-                                    config.onNavigateAdjacent(false)
-                                } else {
-                                    config.onNavigateAdjacent(true)
-                                }
-                            }
-                            ViewerNavigation.NavigationRegion.LEFT -> {
-                                if (config.menuVisible) config.onToggleMenu()
-                                if (config.isRtl) {
-                                    config.onNavigateAdjacent(true)
-                                } else {
-                                    config.onNavigateAdjacent(false)
-                                }
-                            }
                         }
-                    },
-                    modifier = modifier.fillMaxSize(),
-                )
-            } else if (downloadManager != null) {
-                ReaderTransitionPage(
-                    transition = item.transition,
-                    manga = config.manga,
-                    downloadManager = downloadManager,
-                    onRetry = config.onRetryTransition,
-                    onTap = { pos: PointF ->
-                        val navigator = config.navigator
-                        when (navigator.getAction(pos)) {
-                            ViewerNavigation.NavigationRegion.MENU -> config.onToggleMenu()
-                            ViewerNavigation.NavigationRegion.NEXT -> {
-                                if (config.menuVisible) config.onToggleMenu()
+                        ViewerNavigation.NavigationRegion.LEFT -> {
+                            if (config.menuVisible) config.onToggleMenu()
+                            if (config.isRtl) {
                                 config.onNavigateAdjacent(true)
-                            }
-                            ViewerNavigation.NavigationRegion.PREV -> {
-                                if (config.menuVisible) config.onToggleMenu()
+                            } else {
                                 config.onNavigateAdjacent(false)
                             }
-                            ViewerNavigation.NavigationRegion.RIGHT -> {
-                                if (config.menuVisible) config.onToggleMenu()
-                                if (config.isRtl) {
-                                    config.onNavigateAdjacent(false)
-                                } else {
-                                    config.onNavigateAdjacent(true)
-                                }
-                            }
-                            ViewerNavigation.NavigationRegion.LEFT -> {
-                                if (config.menuVisible) config.onToggleMenu()
-                                if (config.isRtl) {
-                                    config.onNavigateAdjacent(true)
-                                } else {
-                                    config.onNavigateAdjacent(false)
-                                }
-                            }
                         }
-                    },
-                    modifier = modifier.fillMaxSize(),
-                )
-            }
+                    }
+                },
+                modifier = modifier.fillMaxSize(),
+            )
         }
     }
 }
 
-/** Legacy compatibility overload for [ComposePagerViewer] integrating [PagerViewer]. */
-@Composable
-fun ComposePagerViewer(
-    viewer: PagerViewer,
+internal fun calculateDefaultPagerIndex(
     items: List<ReaderUiItem>,
-    isRtl: Boolean,
-    isVertical: Boolean,
-    manga: MangaItem?,
-    downloadManager: DownloadManager,
-    onPageSelected: (ReaderPage, Boolean) -> Unit,
-    onTransitionSelected: (ChapterTransition) -> Unit,
-    onNavigateToChapter: (Chapter, ChapterNavTarget) -> Unit,
-    onRequestPreloadChapter: (ReaderChapter) -> Unit,
-    onRetryTransition: (ReaderChapter) -> Unit,
-    modifier: Modifier = Modifier,
-    transitionState: ReaderChapterTransitionState = ReaderChapterTransitionState.Idle,
-    navCommands: Flow<ReaderNavCommand>? = null,
-    preloadController: ReaderPreloadController? = null,
-) {
-    val currentChapterId =
-        (viewer.currentChapter
-                ?: items
-                    .firstOrNull { it is ReaderUiItem.Page }
-                    ?.let { (it as ReaderUiItem.Page).page.chapter })
-            ?.chapter
-            ?.id
-
-    val currentChapter = viewer.currentChapter
-    val defaultPageIndex =
-        remember(items, currentChapterId, currentChapter?.requestedPage) {
-            if (currentChapter != null && currentChapter.requestedPage > 0) {
-                items
-                    .indexOfFirst { item ->
-                        item is ReaderUiItem.Page &&
-                            item.page.chapter.chapter.id == currentChapterId &&
-                            (item.page.index == currentChapter.requestedPage ||
-                                item.extraPage?.index == currentChapter.requestedPage)
-                    }
-                    .takeIf { it != -1 }
-            } else {
-                null
+    currentChapterId: Long?,
+    requestedPage: Int?,
+): Int {
+    if (requestedPage != null && requestedPage > 0) {
+        val match = items.indexOfFirst { item ->
+            when (item) {
+                is ReaderUiItem.Page ->
+                    item.page.chapter.chapter.id == currentChapterId &&
+                        (item.page.index == requestedPage || item.extraPage?.index == requestedPage)
+                is ReaderUiItem.SplitPage ->
+                    item.page.chapter.chapter.id == currentChapterId &&
+                        item.page.index == requestedPage
+                else -> false
             }
-                ?: items
-                    .indexOfFirst { item ->
-                        when (item) {
-                            is ReaderUiItem.Page -> {
-                                item.page.chapter.chapter.id == currentChapterId &&
-                                    (item.page.index == 0 || item.extraPage?.index == 0)
-                            }
-                            is ReaderUiItem.SplitPage -> {
-                                item.page.chapter.chapter.id == currentChapterId &&
-                                    item.page.index == 0
-                            }
-                            else -> false
-                        }
-                    }
-                    .takeIf { it != -1 }
-                ?: run {
-                    var minPageIndex = Int.MAX_VALUE
-                    var targetItemIndex = -1
-                    for (i in items.indices) {
-                        val item = items[i]
-                        val (chId, pageIdx) =
-                            when (item) {
-                                is ReaderUiItem.Page -> {
-                                    val pMin =
-                                        minOf(
-                                            item.page.index,
-                                            item.extraPage?.index ?: Int.MAX_VALUE,
-                                        )
-                                    item.page.chapter.chapter.id to pMin
-                                }
-                                is ReaderUiItem.SplitPage -> {
-                                    item.page.chapter.chapter.id to item.page.index
-                                }
-                                else -> null to Int.MAX_VALUE
-                            }
-                        if (chId == currentChapterId && pageIdx < minPageIndex) {
-                            minPageIndex = pageIdx
-                            targetItemIndex = i
-                        }
-                    }
-                    targetItemIndex.takeIf { it != -1 }
-                }
-                ?: items
-                    .indexOfFirst { it is ReaderUiItem.Page || it is ReaderUiItem.SplitPage }
-                    .takeIf { it != -1 }
-                ?: 0
         }
-
-    val initialPage =
-        (viewer.requestedPagePosition?.first ?: defaultPageIndex).coerceIn(
-            0,
-            (items.size - 1).coerceAtLeast(0),
-        )
-
-    val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-    val animatedTransitions by
-        readerPreferences.animatedPageTransitions().collectAsStateWithLifecycle()
-    val imageScaleType by readerPreferences.imageScaleType().collectAsStateWithLifecycle()
-    val doublePageGap by readerPreferences.doublePageGap().collectAsStateWithLifecycle()
-    val invertDoublePages by readerPreferences.invertDoublePages().collectAsStateWithLifecycle()
-    val readerTheme by readerPreferences.readerTheme().collectAsStateWithLifecycle()
-    val landscapeZoom by readerPreferences.landscapeZoom().collectAsStateWithLifecycle()
-    val zoomStart by readerPreferences.zoomStart().collectAsStateWithLifecycle()
-    val preloadPageAmount by readerPreferences.preloadPageAmount().collectAsStateWithLifecycle()
-    val cropBorders by readerPreferences.cropBorders().collectAsStateWithLifecycle()
-    val grayscale by readerPreferences.grayscale().collectAsStateWithLifecycle()
-    val invertedColors by readerPreferences.invertedColors().collectAsStateWithLifecycle()
-    val doublePageRotate by readerPreferences.doublePageRotate().collectAsStateWithLifecycle()
-    val doublePageRotateReverse by
-        readerPreferences.doublePageRotateReverse().collectAsStateWithLifecycle()
-    val navigateToPan by readerPreferences.navigateToPan().collectAsStateWithLifecycle()
-
-    DisposableEffect(viewer) { onDispose { viewer.panDelegate = null } }
-
-    val themeBackground = MaterialTheme.colorScheme.background
-    val backgroundColor =
-        remember(readerTheme, themeBackground) {
-            ReaderTheme.fromPreference(readerTheme).color(themeBackground)
-        }
-    val smartBackgroundBaseColor =
-        remember(readerTheme, themeBackground) {
-            ReaderTheme.fromPreference(readerTheme).smartBaseColor(themeBackground)
-        }
-    val colorFilter =
-        remember(grayscale, invertedColors) {
-            ReaderColorFilter.getColorFilter(grayscale, invertedColors)
-        }
-
-    val config =
-        PagerViewerConfigUiModel(
-            initialIndex = initialPage,
-            activeChapterId = currentChapterId,
-            backgroundColor = backgroundColor,
-            smartBackgroundBaseColor = smartBackgroundBaseColor,
-            colorFilter = colorFilter,
-            isRtl = isRtl,
-            isVertical = isVertical,
-            animatedTransitions = animatedTransitions,
-            imageScaleType = imageScaleType,
-            doublePages = viewer.config.doublePages,
-            shiftDoublePage = viewer.config.shiftDoublePage,
-            invertDoublePages = invertDoublePages,
-            doublePageGap = doublePageGap,
-            doublePageRotate = doublePageRotate,
-            doublePageRotateReverse = doublePageRotateReverse,
-            zoomStart = zoomStart,
-            zoomDoublePageSpreads = landscapeZoom,
-            landscapeZoom = landscapeZoom,
-            navigateToPan = navigateToPan,
-            doubleTapAnimDuration = viewer.config.doubleTapAnimDuration,
-            longTapEnabled = viewer.config.longTapEnabled,
-            menuVisible = viewer.activity.menuVisible,
-            cropBorders = cropBorders,
-            navigator = viewer.config.navigator,
-            preloadPageAmount = preloadPageAmount,
-            onToggleMenu = remember(viewer) { { viewer.activity.toggleMenu() } },
-            onNavigateAdjacent =
-                remember(viewer) {
-                    { forward -> if (forward) viewer.moveToNext() else viewer.moveToPrevious() }
-                },
-            onActivePanDelegateChanged = { delegate, active ->
-                if (active) {
-                    viewer.panDelegate = delegate
-                } else if (viewer.panDelegate == delegate) {
-                    viewer.panDelegate = null
-                }
-            },
-            onRetryTransition = onRetryTransition,
-            onNavigateToChapter = onNavigateToChapter,
-            onRequestPreloadChapter = onRequestPreloadChapter,
-            onPageLongTap = remember(viewer) { { p, ep -> viewer.activity.onPageLongTap(p, ep) } },
-            onWidePageDetected = remember(viewer) { { page -> viewer.splitDoublePages(page) } },
-            manga = manga,
-            downloadManager = downloadManager,
-        )
-
-    val navChannel = remember { Channel<ReaderNavCommand>(Channel.BUFFERED) }
-
-    LaunchedEffect(viewer.requestedPagePosition) {
-        val req = viewer.requestedPagePosition ?: return@LaunchedEffect
-        navChannel.send(ReaderNavCommand.ScrollToItem(req.first, req.second))
-        viewer.requestedPagePosition = null
+        if (match != -1) return match
     }
 
-    val transitionResolver =
-        remember(downloadManager) { ResolveChapterTransitionUiModelUseCase(downloadManager) }
-    val enrichedItems =
-        remember(items, manga, transitionResolver) {
-            items.map { item ->
-                if (item is ReaderUiItem.Transition && item.transitionUiModel == null) {
-                    item.copy(transitionUiModel = transitionResolver(item.transition, manga))
-                } else {
-                    item
-                }
+    val firstPageMatch = items.indexOfFirst { item ->
+        when (item) {
+            is ReaderUiItem.Page -> {
+                item.page.chapter.chapter.id == currentChapterId &&
+                    (item.page.index == 0 || item.extraPage?.index == 0)
             }
-        }
-
-    val effectiveNavCommands =
-        remember(navCommands) {
-            if (navCommands != null) {
-                merge(navChannel.receiveAsFlow(), navCommands)
-            } else {
-                navChannel.receiveAsFlow()
+            is ReaderUiItem.SplitPage -> {
+                item.page.chapter.chapter.id == currentChapterId && item.page.index == 0
             }
+            else -> false
         }
-
-    val effectivePreloadController = preloadController
-
-    LaunchedEffect(enrichedItems, preloadPageAmount, isRtl, effectivePreloadController) {
-        effectivePreloadController?.onPositionChanged(
-            currentIndex = initialPage,
-            items = enrichedItems,
-            preloadAmount = preloadPageAmount,
-            isRtl = isRtl,
-            isWebtoon = false,
-        )
     }
+    if (firstPageMatch != -1) return firstPageMatch
 
-    val isNavigating =
-        transitionState is ReaderChapterTransitionState.Loading ||
-            transitionState is ReaderChapterTransitionState.Settling
+    var minPageIndex = Int.MAX_VALUE
+    var targetItemIndex = -1
+    for (i in items.indices) {
+        val item = items[i]
+        val (chId, pageIdx) =
+            when (item) {
+                is ReaderUiItem.Page -> {
+                    val pMin =
+                        minOf(
+                            item.page.index,
+                            item.extraPage?.index ?: Int.MAX_VALUE,
+                        )
+                    item.page.chapter.chapter.id to pMin
+                }
+                is ReaderUiItem.SplitPage -> {
+                    item.page.chapter.chapter.id to item.page.index
+                }
+                else -> null to Int.MAX_VALUE
+            }
+        if (chId == currentChapterId && pageIdx < minPageIndex) {
+            minPageIndex = pageIdx
+            targetItemIndex = i
+        }
+    }
+    if (targetItemIndex != -1) return targetItemIndex
 
-    ComposePagerViewer(
-        items = enrichedItems,
-        config = config,
-        onActiveItemChanged = { activeIndex ->
-            viewer.currentPagePosition = activeIndex
-            effectivePreloadController?.onPositionChanged(
-                currentIndex = activeIndex,
-                items = enrichedItems,
-                preloadAmount = preloadPageAmount,
-                isRtl = isRtl,
-                isWebtoon = false,
-            )
-        },
-        onPageSelected = onPageSelected,
-        onTransitionSelected = onTransitionSelected,
-        modifier = modifier,
-        navCommands = effectiveNavCommands,
-        isNavigating = isNavigating,
-    )
+    val anyPage = items.indexOfFirst { it is ReaderUiItem.Page || it is ReaderUiItem.SplitPage }
+    return if (anyPage != -1) anyPage else 0
 }
 
 internal fun resolveItemIndexForPage(
