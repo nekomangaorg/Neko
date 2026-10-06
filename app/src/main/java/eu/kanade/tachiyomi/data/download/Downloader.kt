@@ -335,10 +335,7 @@ class Downloader(
                         if (pages.isEmpty()) {
                             throw Exception(context.getString(R.string.no_pages_found))
                         }
-                        // Don't trust index from source
-                        val reIndexedPages = pages.mapIndexed { index, page ->
-                            Page(index, page.url, page.imageUrl, uri = page.uri)
-                        }
+                        val reIndexedPages = reIndexPages(pages)
                         download.pages = reIndexedPages
                         reIndexedPages
                     }
@@ -646,6 +643,15 @@ class Downloader(
 
     companion object {
         const val MIN_DISK_SPACE = 200L * 1024 * 1024
+
+        /**
+         * Copies the source's pages with our own indexing, since the source's index can't be
+         * trusted. [Page.mangaDexChapterId] has to carry over because ImageHandler asks the at-home
+         * API for that chapter's server.
+         */
+        internal fun reIndexPages(pages: List<Page>): List<Page> = pages.mapIndexed { index, page ->
+            Page(index, page.url, page.imageUrl, page.mangaDexChapterId, page.uri)
+        }
 
         /**
          * Copies the image from cache to file in tmpDir.
