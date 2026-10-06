@@ -64,20 +64,27 @@ object DiskUtil {
         return size
     }
 
-    /** Gets the available space for the disk that a file path points to, in bytes. */
+    /**
+     * Gets the available space for the disk that a file path points to, in bytes. A SAF document
+     * URI's path is not a filesystem path, so this stats the path UniFile resolves for the
+     * document, or returns -1 when UniFile can't resolve one.
+     */
     fun getAvailableStorageSpace(f: UniFile): Long {
         return try {
-            val stat = StatFs(f.uri.path)
+            val stat = StatFs(f.filePath ?: return -1L)
             stat.availableBlocksLong * stat.blockSizeLong
         } catch (_: Exception) {
             -1L
         }
     }
 
-    /** Gets the total space for the disk that a file path points to, in bytes. */
+    /**
+     * Gets the total space for the disk that a file path points to, in bytes, or -1 when UniFile
+     * can't resolve a filesystem path for [f].
+     */
     fun getTotalStorageSpace(f: UniFile): Long {
         return try {
-            val stat = StatFs(f.uri.path)
+            val stat = StatFs(f.filePath ?: return -1L)
             stat.blockCountLong * stat.blockSizeLong
         } catch (_: Exception) {
             -1L
