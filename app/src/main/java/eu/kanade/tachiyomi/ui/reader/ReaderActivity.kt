@@ -91,6 +91,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderKeyNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderViewerResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
@@ -1712,11 +1713,15 @@ class ReaderActivity : BaseMainActivity() {
         val noDefault = manga.viewerFlags == -1
         val mangaViewer = viewModel.getMangaReadingMode()
         val newViewer =
-            when (mangaViewer) {
-                ReadingModeType.LEFT_TO_RIGHT.flagValue -> L2RPagerViewer(this)
-                ReadingModeType.VERTICAL.flagValue -> VerticalPagerViewer(this)
-                ReadingModeType.WEBTOON.flagValue -> WebtoonViewer(this, !manga.isLongStrip())
-                else -> R2LPagerViewer(this)
+            ReaderViewerResolver.resolve(prevViewer, mangaViewer, !manga.isLongStrip()) {
+                readingMode,
+                noWebtoonTag ->
+                when (readingMode) {
+                    ReadingModeType.LEFT_TO_RIGHT.flagValue -> L2RPagerViewer(this)
+                    ReadingModeType.VERTICAL.flagValue -> VerticalPagerViewer(this)
+                    ReadingModeType.WEBTOON.flagValue -> WebtoonViewer(this, noWebtoonTag)
+                    else -> R2LPagerViewer(this)
+                }
             }
 
         if (
@@ -1749,14 +1754,7 @@ class ReaderActivity : BaseMainActivity() {
 
         setOrientation(viewModel.getMangaOrientationType())
 
-        val isSameViewerType =
-            prevViewer != null &&
-                prevViewer::class == newViewer::class &&
-                (prevViewer !is WebtoonViewer ||
-                    (newViewer is WebtoonViewer &&
-                        prevViewer.noWebtoonTag == newViewer.noWebtoonTag))
-
-        if (!isSameViewerType) {
+        if (newViewer !== prevViewer) {
             // Destroy previous viewer if there was one
             prevViewer?.destroy()
             viewer = newViewer
