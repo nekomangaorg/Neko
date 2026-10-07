@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -56,6 +57,7 @@ fun Modifier.webtoonTapNavigation(
         var lastTapTime = 0L
         var lastTapOffset = Offset.Zero
         var pendingSingleTapJob: Job? = null
+        var heldPointer: PointerId? = null
 
         awaitEachGesture {
             val down =
@@ -63,9 +65,11 @@ fun Modifier.webtoonTapNavigation(
                     requireUnconsumed = false,
                     pass = PointerEventPass.Initial,
                 )
+            heldPointer = down.id
             val downPos = down.position
             val downTime = System.currentTimeMillis()
             var pointerUp: PointerInputChange? = null
+            var isMovementPastSlop = false
 
             while (true) {
                 val event = awaitPointerEvent(pass = PointerEventPass.Initial)
@@ -80,11 +84,21 @@ fun Modifier.webtoonTapNavigation(
                         (change.position.y - downPos.y).toDouble(),
                     ) * zoomState.scale
                 if (moveDistance > touchSlopPx) {
-                    // User moved beyond touch slop; cancel any pending single-tap action
-                    pendingSingleTapJob?.cancel()
-                    pendingSingleTapJob = null
+                    isMovementPastSlop = true
                     break
                 }
+            }
+            heldPointer = null
+
+            // Children see the up only after this Initial pass, so a Retry tap is not
+            // consumed yet and has to be recognized by its claimed pointer
+            val isClaimed = currentTapClaim?.isClaimed(down.id) == true
+
+            if (shouldDropPendingTap(isMovementPastSlop, isClaimed)) {
+                pendingSingleTapJob?.cancel()
+                pendingSingleTapJob = null
+                lastTapTime = 0L
+                lastTapOffset = Offset.Zero
             }
 
             if (pointerUp != null) {
@@ -97,13 +111,11 @@ fun Modifier.webtoonTapNavigation(
                         (upPos.y - downPos.y).toDouble(),
                     )
 
-                // Children see the up only after this Initial pass, so a Retry tap is not
-                // consumed yet and has to be recognized by its claimed pointer
                 if (
                     distance < touchSlopPx &&
                         (upTime - downTime < longPressTimeoutMs) &&
                         !up.isConsumed &&
-                        currentTapClaim?.isClaimed(down.id) != true
+                        !isClaimed
                 ) {
                     val screenWidth = size.width.toFloat()
                     val screenHeight = size.height.toFloat()
@@ -147,6 +159,9 @@ fun Modifier.webtoonTapNavigation(
                                 pendingSingleTapJob?.cancel()
                                 pendingSingleTapJob = scope.launch {
                                     delay(doubleTapTimeoutMs)
+                                    if (!canFirePendingTap(heldPointer, currentTapClaim)) {
+                                        return@launch
+                                    }
                                     dispatchTapAction(
                                         action = action,
                                         onToggleMenu = currentOnToggleMenu,
@@ -169,6 +184,22 @@ fun Modifier.webtoonTapNavigation(
         }
     }
 }
+
+/**
+ * Whether a gesture cancels the single tap still waiting out the double-tap timeout. A tap on a
+ * claimed control such as Retry is handled by that control, so the earlier tap must not fire after
+ * it.
+ */
+internal fun shouldDropPendingTap(isMovementPastSlop: Boolean, isClaimed: Boolean): Boolean =
+    isMovementPastSlop || isClaimed
+
+/**
+ * Whether the single tap that waited out the double-tap timeout may fire. A finger that went down
+ * on a claimed control such as Retry during the wait and is still held there drops it, because the
+ * gesture loop only cancels the waiting tap once that finger lifts.
+ */
+internal fun canFirePendingTap(heldPointer: PointerId?, tapClaim: TapNavigationClaim?): Boolean =
+    heldPointer == null || tapClaim?.isClaimed(heldPointer) != true
 
 private fun dispatchTapAction(
     action: ViewerNavigation.NavigationRegion,

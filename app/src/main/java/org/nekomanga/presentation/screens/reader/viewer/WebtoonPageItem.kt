@@ -15,6 +15,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -187,9 +188,13 @@ private fun WebtoonPageContent(
             Modifier.heightIn(min = Size.extraLarge * 10)
         }
 
+    // Read through state so a new lambda or claim does not restart the gesture mid press
+    val currentOnLongClick by rememberUpdatedState(onLongClick)
+    val currentTapClaim by rememberUpdatedState(tapClaim)
+
     val gestureModifier =
         if (onLongClick != null) {
-            Modifier.pointerInput(page, onLongClick) {
+            Modifier.pointerInput(page) {
                 val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
                 val touchSlop = viewConfiguration.touchSlop
                 awaitEachGesture {
@@ -212,8 +217,11 @@ private fun WebtoonPageContent(
                             }
                         }
                     } catch (_: PointerEventTimeoutCancellationException) {
-                        onLongClick()
-                        triggered = true
+                        // Holding Retry is not a long press on the page
+                        if (currentTapClaim?.isClaimed(down.id) != true) {
+                            currentOnLongClick?.invoke()
+                            triggered = true
+                        }
                     }
                     if (triggered) {
                         down.consume()

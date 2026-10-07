@@ -31,4 +31,27 @@ class TapNavigationClaimTest {
 
         assertFalse(claim.isClaimed(PointerId(2)))
     }
+
+    @Test
+    fun `pointers held on two controls are both claimed`() {
+        val claim = TapNavigationClaim()
+
+        claim.claim(PointerId(1))
+        claim.claim(PointerId(2))
+
+        assertTrue(claim.isClaimed(PointerId(1)))
+        assertTrue(claim.isClaimed(PointerId(2)))
+    }
+
+    @Test
+    fun `released pointer is no longer claimed`() {
+        val claim = TapNavigationClaim()
+
+        claim.claim(PointerId(1))
+        claim.claim(PointerId(2))
+        claim.release(PointerId(1))
+
+        assertFalse(claim.isClaimed(PointerId(1)))
+        assertTrue(claim.isClaimed(PointerId(2)))
+    }
 }

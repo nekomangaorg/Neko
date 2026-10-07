@@ -58,6 +58,7 @@ fun ReaderTransitionPage(
     modifier: Modifier = Modifier,
     onTap: ((PointF) -> Unit)? = null,
     onCardClick: (() -> Unit)? = null,
+    tapClaim: TapNavigationClaim? = null,
 ) {
     val tapModifier =
         if (onTap != null) {
@@ -114,7 +115,8 @@ fun ReaderTransitionPage(
                 Modifier.fillMaxWidth()
                     .then(
                         if (onCardClick != null && toChapter != null) {
-                            Modifier.clickable(onClick = onCardClick)
+                            // The card and its Retry button handle their own taps
+                            Modifier.claimTapNavigation(tapClaim).clickable(onClick = onCardClick)
                         } else {
                             Modifier
                         }
@@ -143,6 +145,7 @@ fun ReaderTransitionPage(
                     ChapterPreloadStatusSection(
                         preloadState = toChapter.preloadState,
                         onRetry = onRetry,
+                        tapClaim = tapClaim,
                     )
                 }
             }
@@ -364,6 +367,7 @@ private fun MissingChapterWarningSection(missingChaptersCount: Int) {
 private fun ChapterPreloadStatusSection(
     preloadState: ChapterTransitionUiModel.PreloadState,
     onRetry: () -> Unit,
+    tapClaim: TapNavigationClaim?,
 ) {
     if (preloadState is ChapterTransitionUiModel.PreloadState.Error) {
         Column(
@@ -381,7 +385,9 @@ private fun ChapterPreloadStatusSection(
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(Size.small))
-            Button(onClick = onRetry) { Text(text = stringResource(R.string.retry)) }
+            Button(onClick = onRetry, modifier = Modifier.claimTapNavigation(tapClaim)) {
+                Text(text = stringResource(R.string.retry))
+            }
         }
     }
 }
