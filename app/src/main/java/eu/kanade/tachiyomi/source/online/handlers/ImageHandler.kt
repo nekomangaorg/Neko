@@ -34,9 +34,12 @@ import tachiyomi.core.network.newCachelessCallWithProgress
 import uy.kohesive.injekt.injectLazy
 
 class ImageHandler(
-    // chapter id and last request time, read and written by concurrent page loads
-    private val tokenTracker: MutableMap<String, Long> = ConcurrentHashMap()
+    // chapter id and its latest at home server, read and written by concurrent page loads
+    private val tokenTracker: MutableMap<String, AtHomeServer> = ConcurrentHashMap()
 ) {
+    /** An at home base url and the time it was requested. */
+    data class AtHomeServer(val baseUrl: String, val time: Long)
+
     val network: NetworkHelper by injectLazy()
     val networkServices: NetworkServices by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
@@ -122,25 +125,32 @@ class ImageHandler(
     private suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
         val data = page.url.split(",")
         val currentTime = Date().time
-        val lastRequest = tokenTracker[page.mangaDexChapterId]
+        val lastServer = tokenTracker[page.mangaDexChapterId]
 
         val mdAtHomeServerUrl =
             when (
-                lastRequest != null && currentTime - lastRequest < MdConstants.mdAtHomeTokenLifespan
+                lastServer != null &&
+                    currentTime - lastServer.time < MdConstants.mdAtHomeTokenLifespan
             ) {
-                true -> data[0]
+                true -> lastServer.baseUrl
                 false -> {
                     TimberKt.d { "$tag Time has expired get new at home url isLogged $isLogged" }
-                    updateTokenTracker(page.mangaDexChapterId, currentTime)
+                    // Pages that load during the request, or for a lifespan after it fails, keep
+                    // the current server instead of each asking for a new one.
+                    val currentUrl = lastServer?.baseUrl ?: data[0]
+                    updateTokenTracker(page.mangaDexChapterId, currentUrl, currentTime)
 
-                    networkServices.atHomeService
-                        .getAtHomeServer(
-                            page.mangaDexChapterId,
-                            mangaDexPreferences.usePort443ForImageServer().get(),
-                        )
-                        .getOrResultError("getting image")
-                        .getOrThrow { Exception(it.message()) }
-                        .baseUrl
+                    val newUrl =
+                        networkServices.atHomeService
+                            .getAtHomeServer(
+                                page.mangaDexChapterId,
+                                mangaDexPreferences.usePort443ForImageServer().get(),
+                            )
+                            .getOrResultError("getting image")
+                            .getOrThrow { Exception(it.message()) }
+                            .baseUrl
+                    updateTokenTracker(page.mangaDexChapterId, newUrl, currentTime)
+                    newUrl
                 }
             }
         TimberKt.d {
@@ -173,7 +183,7 @@ class ImageHandler(
         return page.imageUrl?.contains(scanlatorName, true) ?: false
     }
 
-    fun updateTokenTracker(chapterId: String, time: Long) {
-        tokenTracker[chapterId] = time
+    fun updateTokenTracker(chapterId: String, baseUrl: String, time: Long) {
+        tokenTracker[chapterId] = AtHomeServer(baseUrl, time)
     }
 }

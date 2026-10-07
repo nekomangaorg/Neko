@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import java.io.IOException
 import java.util.Collections
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.runTest
@@ -34,6 +35,7 @@ import uy.kohesive.injekt.registry.default.DefaultRegistrar
 class ImageHandlerTest {
 
     private val requestedUrls = Collections.synchronizedList(mutableListOf<String>())
+    private val atHomeService = mockk<MangaDexAtHomeService>()
 
     @Before
     fun setup() {
@@ -63,13 +65,11 @@ class ImageHandlerTest {
         )
         val atHome =
             AtHomeDto(REFRESHED_BASE_URL, AtHomeChapterDto("hash", emptyList(), emptyList()))
+        coEvery { atHomeService.getAtHomeServer(CHAPTER_ID, true) } returns
+            ApiResponse.Success(atHome)
         Injekt.addSingleton(
             mockk<NetworkServices> {
-                every { atHomeService } returns
-                    mockk<MangaDexAtHomeService> {
-                        coEvery { getAtHomeServer(CHAPTER_ID, true) } returns
-                            ApiResponse.Success(atHome)
-                    }
+                every { atHomeService } returns this@ImageHandlerTest.atHomeService
             }
         )
     }
@@ -81,7 +81,11 @@ class ImageHandlerTest {
 
     @Test
     fun `a fresh token uses the page server while the tracker is resizing`() = runTest {
-        val tracker = ResizingTracker(CHAPTER_ID, System.currentTimeMillis())
+        val tracker =
+            ResizingTracker(
+                CHAPTER_ID,
+                ImageHandler.AtHomeServer(PAGE_BASE_URL, System.currentTimeMillis()),
+            )
 
         ImageHandler(tracker).getImage(page(), isLogged = false).close()
 
@@ -91,25 +95,57 @@ class ImageHandlerTest {
     @Test
     fun `an expired token fetches a new at home server`() = runTest {
         val now = System.currentTimeMillis()
-        val tracker = mutableMapOf(CHAPTER_ID to now - TimeUnit.MINUTES.toMillis(6))
+        val tracker = mutableMapOf(CHAPTER_ID to expiredServer(now))
 
         ImageHandler(tracker).getImage(page(), isLogged = false).close()
 
         assertEquals(listOf(REFRESHED_BASE_URL + IMAGE_PATH), requestedUrls)
-        assertTrue(tracker.getValue(CHAPTER_ID) >= now)
+        assertEquals(REFRESHED_BASE_URL, tracker.getValue(CHAPTER_ID).baseUrl)
+        assertTrue(tracker.getValue(CHAPTER_ID).time >= now)
     }
 
-    private fun page() = Page(1, PAGE_BASE_URL, IMAGE_PATH, CHAPTER_ID)
+    @Test
+    fun `pages after a refresh use the refreshed server`() = runTest {
+        val now = System.currentTimeMillis()
+        val handler = ImageHandler(mutableMapOf(CHAPTER_ID to expiredServer(now)))
+
+        handler.getImage(page(), isLogged = false).close()
+        handler.getImage(page(2, SECOND_IMAGE_PATH), isLogged = false).close()
+
+        assertEquals(
+            listOf(REFRESHED_BASE_URL + IMAGE_PATH, REFRESHED_BASE_URL + SECOND_IMAGE_PATH),
+            requestedUrls,
+        )
+    }
+
+    @Test
+    fun `pages after a failed refresh keep the current server`() = runTest {
+        coEvery { atHomeService.getAtHomeServer(CHAPTER_ID, true) } returns
+            ApiResponse.Failure.Exception(IOException("offline"))
+        val handler = ImageHandler(mutableMapOf(CHAPTER_ID to expiredServer()))
+
+        assertTrue(runCatching { handler.getImage(page(), isLogged = false) }.isFailure)
+        handler.getImage(page(2, SECOND_IMAGE_PATH), isLogged = false).close()
+
+        assertEquals(listOf(PAGE_BASE_URL + SECOND_IMAGE_PATH), requestedUrls)
+    }
+
+    private fun expiredServer(now: Long = System.currentTimeMillis()) =
+        ImageHandler.AtHomeServer(PAGE_BASE_URL, now - TimeUnit.MINUTES.toMillis(6))
+
+    private fun page(index: Int = 1, imagePath: String = IMAGE_PATH) =
+        Page(index, PAGE_BASE_URL, imagePath, CHAPTER_ID)
 
     /**
      * Returns the entry on the first read and null after that, which is what a HashMap read sees
      * when another thread's put is moving the entries into a bigger table.
      */
-    private class ResizingTracker(key: String, time: Long) :
-        HashMap<String, Long>(mapOf(key to time)) {
+    private class ResizingTracker(key: String, server: ImageHandler.AtHomeServer) :
+        HashMap<String, ImageHandler.AtHomeServer>(mapOf(key to server)) {
         private var reads = 0
 
-        override fun get(key: String): Long? = if (reads++ == 0) super.get(key) else null
+        override fun get(key: String): ImageHandler.AtHomeServer? =
+            if (reads++ == 0) super.get(key) else null
     }
 
     private companion object {
@@ -117,5 +153,6 @@ class ImageHandlerTest {
         const val PAGE_BASE_URL = "https://page.example.org"
         const val REFRESHED_BASE_URL = "https://refreshed.example.org"
         const val IMAGE_PATH = "/data/hash/1.png"
+        const val SECOND_IMAGE_PATH = "/data/hash/2.png"
     }
 }
