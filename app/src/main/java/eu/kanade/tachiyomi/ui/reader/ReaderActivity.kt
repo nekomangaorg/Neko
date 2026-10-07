@@ -165,13 +165,17 @@ import org.nekomanga.presentation.screens.reader.ReaderBottomActionId
 import org.nekomanga.presentation.screens.reader.ReaderBottomBarAction
 import org.nekomanga.presentation.screens.reader.ReaderBottomControls
 import org.nekomanga.presentation.screens.reader.ReaderBottomControlsUiState
+import org.nekomanga.presentation.screens.reader.ReaderChaptersAction
 import org.nekomanga.presentation.screens.reader.ReaderChaptersSheet
+import org.nekomanga.presentation.screens.reader.ReaderChaptersSheetUiState
 import org.nekomanga.presentation.screens.reader.ReaderPageAction
 import org.nekomanga.presentation.screens.reader.ReaderPageActionsSheet
+import org.nekomanga.presentation.screens.reader.ReaderQuickActionId
 import org.nekomanga.presentation.screens.reader.ReaderSettingsSheet
 import org.nekomanga.presentation.screens.reader.ReaderSliderUiState
 import org.nekomanga.presentation.screens.reader.SliderOrientation
 import org.nekomanga.presentation.screens.reader.buildReaderBottomBarButtons
+import org.nekomanga.presentation.screens.reader.buildReaderChaptersQuickActions
 import org.nekomanga.presentation.screens.reader.viewer.ComposePagerViewer
 import org.nekomanga.presentation.screens.reader.viewer.ComposeWebtoonViewer
 import org.nekomanga.presentation.screens.reader.viewer.PagerViewerConfigUiModel
@@ -932,6 +936,45 @@ class ReaderActivity : BaseMainActivity() {
                             )
                         }
 
+                    val chapterSheetQuickActions =
+                        remember(
+                            isChaptersVisible,
+                            isCommentsVisible,
+                            isWebViewVisible,
+                            isReadingModeVisible,
+                            readingModeIconRes,
+                            isRotationVisible,
+                            rotationIconRes,
+                            isCropBordersVisible,
+                            cropBorders,
+                            isGrayscaleVisible,
+                            grayscale,
+                            isDoublePageVisible,
+                            doublePageIconRes,
+                            isShiftPageVisible,
+                            shiftPageIconRes,
+                            isSettingsVisible,
+                        ) {
+                            buildReaderChaptersQuickActions(
+                                isChaptersVisible = isChaptersVisible,
+                                isCommentsVisible = isCommentsVisible,
+                                isWebViewVisible = isWebViewVisible,
+                                isReadingModeVisible = isReadingModeVisible,
+                                readingModeIconRes = readingModeIconRes,
+                                isRotationVisible = isRotationVisible,
+                                rotationIconRes = rotationIconRes,
+                                isCropBordersVisible = isCropBordersVisible,
+                                cropBorders = cropBorders,
+                                isGrayscaleVisible = isGrayscaleVisible,
+                                grayscale = grayscale,
+                                isDoublePageVisible = isDoublePageVisible,
+                                doublePageIconRes = doublePageIconRes,
+                                isShiftPageVisible = isShiftPageVisible,
+                                shiftPageIconRes = shiftPageIconRes,
+                                isDisplayOptionsVisible = isSettingsVisible,
+                            )
+                        }
+
                     val bottomControlsUiState =
                         remember(
                             state.menuVisible,
@@ -1043,67 +1086,83 @@ class ReaderActivity : BaseMainActivity() {
                                 }
                             }
 
+                            val currentChapterId = viewModel.getCurrentChapter()?.chapter?.id
+                            val chaptersSheetUiState =
+                                remember(
+                                    state.chapterRowUiModels,
+                                    chapterSheetQuickActions,
+                                    currentChapterId,
+                                ) {
+                                    ReaderChaptersSheetUiState(
+                                        chapters = state.chapterRowUiModels,
+                                        quickActions = chapterSheetQuickActions,
+                                        currentChapterIndex =
+                                            state.chapterRowUiModels.indexOfFirst {
+                                                if (currentChapterId != null)
+                                                    it.id == currentChapterId
+                                                else it.isCurrent
+                                            },
+                                        isLoading = false,
+                                    )
+                                }
+
                             ReaderChaptersSheet(
-                                chapters = state.chapters,
-                                isChaptersEnabled = isChaptersVisible,
-                                isCommentsEnabled = isCommentsVisible,
-                                isWebViewEnabled = isWebViewVisible,
-                                isReadingModeEnabled = isReadingModeVisible,
-                                isRotationEnabled = isRotationVisible,
-                                isCropBordersEnabled = isCropBordersVisible,
-                                isGrayscaleEnabled = isGrayscaleVisible,
-                                isDoublePageEnabled = isDoublePageVisible,
-                                isShiftPageEnabled = isShiftPageVisible,
-                                cropBorders = cropBorders,
-                                grayscale = grayscale,
-                                readingModeIconRes = readingModeIconRes,
-                                rotationIconRes = rotationIconRes,
-                                doublePageIconRes = doublePageIconRes,
-                                shiftPageIconRes = shiftPageIconRes,
-                                onChapterClick = { item, index ->
-                                    if (
-                                        item.chapter.id !=
-                                            viewModel.getCurrentChapter()?.chapter?.id
-                                    ) {
-                                        viewModel.navigateToChapter(
-                                            item.chapter,
-                                            ChapterNavTarget.Resume,
-                                        )
-                                        chaptersSheetVisible = false
-                                        reEnableBackPressedCallBack()
-                                    } else {
-                                        chaptersSheetVisible = false
-                                        reEnableBackPressedCallBack()
+                                uiState = chaptersSheetUiState,
+                                onAction = { action ->
+                                    when (action) {
+                                        is ReaderChaptersAction.SelectChapter -> {
+                                            if (
+                                                action.chapterId !=
+                                                    viewModel.getCurrentChapter()?.chapter?.id
+                                            ) {
+                                                viewModel.navigateToChapter(
+                                                    action.chapterId,
+                                                    ChapterNavTarget.Resume,
+                                                )
+                                            }
+                                            chaptersSheetVisible = false
+                                            reEnableBackPressedCallBack()
+                                        }
+                                        is ReaderChaptersAction.ToggleBookmark -> {
+                                            viewModel.toggleBookmark(action.chapterId)
+                                        }
+                                        is ReaderChaptersAction.QuickActionClick -> {
+                                            when (action.actionId) {
+                                                ReaderQuickActionId.Chapters -> {
+                                                    chaptersSheetVisible = false
+                                                    reEnableBackPressedCallBack()
+                                                }
+                                                ReaderQuickActionId.Comments -> {
+                                                    openWebView(true)
+                                                    chaptersSheetVisible = false
+                                                    reEnableBackPressedCallBack()
+                                                }
+                                                ReaderQuickActionId.WebView -> {
+                                                    openWebView(false)
+                                                    chaptersSheetVisible = false
+                                                    reEnableBackPressedCallBack()
+                                                }
+                                                ReaderQuickActionId.ReadingMode ->
+                                                    onReadingModeClick()
+                                                ReaderQuickActionId.Rotation -> onRotationClick()
+                                                ReaderQuickActionId.CropBorders ->
+                                                    onCropBordersClick()
+                                                ReaderQuickActionId.Grayscale -> onGrayscaleClick()
+                                                ReaderQuickActionId.DoublePage ->
+                                                    onDoublePageClick()
+                                                ReaderQuickActionId.ShiftPage -> onShiftPageClick()
+                                                ReaderQuickActionId.DisplayOptions -> {
+                                                    settingsSheetVisible = true
+                                                    chaptersSheetVisible = false
+                                                    reEnableBackPressedCallBack()
+                                                }
+                                            }
+                                        }
+                                        ReaderChaptersAction.Dismiss -> {
+                                            chaptersSheetVisible = false
+                                            reEnableBackPressedCallBack()
+                                        }
                                     }
-                                },
-                                onBookmarkClick = { item ->
-                                    viewModel.toggleBookmark(item.chapter)
-                                    lifecycleScope.launch { viewModel.getChapters() }
-                                },
-                                onCommentsClick = {
-                                    openWebView(true)
-                                    chaptersSheetVisible = false
-                                    reEnableBackPressedCallBack()
-                                },
-                                onWebviewClick = {
-                                    openWebView(false)
-                                    chaptersSheetVisible = false
-                                    reEnableBackPressedCallBack()
-                                },
-                                onReadingModeClick = onReadingModeClick,
-                                onRotationClick = onRotationClick,
-                                onCropBordersClick = onCropBordersClick,
-                                onGrayscaleClick = onGrayscaleClick,
-                                onDoublePageClick = onDoublePageClick,
-                                onShiftPageClick = onShiftPageClick,
-                                onDisplayOptionsClick = {
-                                    settingsSheetVisible = true
-                                    chaptersSheetVisible = false
-                                    reEnableBackPressedCallBack()
-                                },
-                                onDismiss = {
-                                    chaptersSheetVisible = false
-                                    reEnableBackPressedCallBack()
                                 },
                             )
                         }

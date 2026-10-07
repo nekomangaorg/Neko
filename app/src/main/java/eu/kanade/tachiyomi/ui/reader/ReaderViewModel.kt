@@ -95,6 +95,7 @@ import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.manga.defaultReaderType
 import org.nekomanga.domain.manga.displayTitle
@@ -109,6 +110,8 @@ import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.screens.reader.ReaderChapterRowUiModel
+import org.nekomanga.presentation.screens.reader.toReaderChapterRowUiModel
 import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel
 import org.nekomanga.usecases.chapters.ParseChapterNameUseCase
 import tachiyomi.core.util.storage.DiskUtil
@@ -135,6 +138,7 @@ constructor(
     private val securityPreferences: SecurityPreferences = Injekt.get(),
     private val chapterItemFilter: ChapterItemFilter = Injekt.get(),
     private val storageManager: StorageManager = Injekt.get(),
+    private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
 ) : ViewModel() {
 
     private val parseChapterName: ParseChapterNameUseCase by injectLazy()
@@ -444,7 +448,19 @@ constructor(
                     )
                 }
             }
-        mutableState.update { it.copy(chapters = chapterItems) }
+        val hideChapterTitles = dbManga.hideChapterTitle(mangaDetailsPreferences)
+        val uiModels =
+            withContext(Dispatchers.Default) {
+                chapterItems.map {
+                    it.toReaderChapterRowUiModel(preferences.context, hideChapterTitles)
+                }
+            }
+        mutableState.update {
+            it.copy(
+                chapters = chapterItems,
+                chapterRowUiModels = uiModels,
+            )
+        }
 
         return chapterItems
     }
@@ -623,6 +639,29 @@ constructor(
         }
     }
 
+    fun toggleBookmark(chapterId: Long) {
+        viewModelScope.launch {
+            val currentChapters = state.value.chapters
+            val currentUiModels = state.value.chapterRowUiModels
+            val item = currentChapters.find { it.chapter.id == chapterId }
+            val chapter =
+                item?.chapter ?: chapterRepository.getChapterById(chapterId) ?: return@launch
+            val newBookmark = !chapter.bookmark
+            chapter.bookmark = newBookmark
+
+            if (currentUiModels.isNotEmpty()) {
+                val updatedUiModels = currentUiModels.map {
+                    if (it.id == chapterId) it.copy(isBookmarked = newBookmark) else it
+                }
+                mutableState.update { it.copy(chapterRowUiModels = updatedUiModels) }
+            }
+
+            withContext(Dispatchers.IO) {
+                chapterRepository.updateChaptersProgress(listOf(chapter))
+            }
+        }
+    }
+
     /**
      * Called when the viewers decide it's a good time to preload a [chapter] and improve the UX so
      * that the user doesn't have to wait too long to continue reading.
@@ -697,6 +736,21 @@ constructor(
                 }
             } finally {
                 navigationMutex.unlock()
+            }
+        }
+    }
+
+    fun navigateToChapter(
+        chapterId: Long,
+        navTarget: ChapterNavTarget = ChapterNavTarget.Resume,
+    ) {
+        val chapter = state.value.chapters.find { it.chapter.id == chapterId }?.chapter
+        if (chapter != null) {
+            navigateToChapter(chapter, navTarget)
+        } else {
+            viewModelScope.launch {
+                val dbChapter = chapterRepository.getChapterById(chapterId) ?: return@launch
+                navigateToChapter(dbChapter, navTarget)
             }
         }
     }
@@ -1667,6 +1721,7 @@ constructor(
         val pageNumberVisible: Boolean = true,
         val isLoading: Boolean = false,
         val chapters: List<ReaderChapterItem> = emptyList(),
+        val chapterRowUiModels: List<ReaderChapterRowUiModel> = emptyList(),
         // Hoisted UI state from ReaderActivity
         val viewerItems: List<ReaderUiItem> = emptyList(),
         val chapterTitle: String = "",
