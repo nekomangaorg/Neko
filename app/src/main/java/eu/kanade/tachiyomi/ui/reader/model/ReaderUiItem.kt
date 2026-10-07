@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
 import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel
+import org.nekomanga.presentation.screens.reader.viewer.toPreloadState
 
 /**
  * Sealed hierarchy representing a renderable item in Compose reader viewers (pager or webtoon).
@@ -136,6 +137,19 @@ fun ReaderUiItem.continuesInto(next: ReaderUiItem?): Boolean =
         isSameChapter(this.page.chapter, next.page.chapter) &&
         this.page.index == next.page.index &&
         this.split.topOffset + this.split.splitHeight == next.split.topOffset
+
+/**
+ * Current card state of each transition target, keyed by chapter id. The card model is resolved
+ * once when the items are built, and a failed preload does not rebuild them, so viewers read this
+ * map to show a later error or Retry without replacing the items.
+ */
+fun List<ReaderUiItem>.transitionTargetPreloadStates():
+    Map<Long, ChapterTransitionUiModel.PreloadState> = mapNotNull { item ->
+    val target = (item as? ReaderUiItem.Transition)?.transition?.to
+    val id = target?.chapter?.id ?: return@mapNotNull null
+    id to target.state.toPreloadState()
+}
+    .toMap()
 
 internal fun isSameChapter(a: ReaderChapter, b: ReaderChapter): Boolean {
     val aId = a.chapter.id

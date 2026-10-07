@@ -564,6 +564,7 @@ class ReaderActivity : BaseMainActivity() {
                             modifier = Modifier.fillMaxSize(),
                             navCommands = viewModel.navigationCommands,
                             isNavigating = isNavigating,
+                            transitionPreloadStates = state.transitionPreloadStates,
                         )
                     } else if (currentViewer is WebtoonViewer && items.isNotEmpty()) {
                         val currentChapterId =
@@ -704,6 +705,7 @@ class ReaderActivity : BaseMainActivity() {
                             onPageLongTap = onPageLongTapWebtoon,
                             onNavigateAdjacent = onNavigateAdjacentWebtoon,
                             modifier = Modifier.fillMaxSize(),
+                            transitionPreloadStates = state.transitionPreloadStates,
                         )
                     }
 

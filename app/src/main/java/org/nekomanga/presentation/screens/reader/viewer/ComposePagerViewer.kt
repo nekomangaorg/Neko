@@ -58,6 +58,7 @@ fun ComposePagerViewer(
     modifier: Modifier = Modifier,
     navCommands: Flow<ReaderNavCommand>? = null,
     isNavigating: Boolean = false,
+    transitionPreloadStates: Map<Long, ChapterTransitionUiModel.PreloadState> = emptyMap(),
 ) {
     val initialPage = config.initialIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
     val pagerState =
@@ -339,6 +340,7 @@ fun ComposePagerViewer(
                     item = item,
                     config = pageItemConfig,
                     isActive = index == pagerState.currentPage,
+                    transitionPreloadStates = transitionPreloadStates,
                 )
             }
         } else {
@@ -354,6 +356,7 @@ fun ComposePagerViewer(
                     item = item,
                     config = pageItemConfig,
                     isActive = index == pagerState.currentPage,
+                    transitionPreloadStates = transitionPreloadStates,
                 )
             }
         }
@@ -365,6 +368,7 @@ private fun PagerItemContent(
     item: ReaderUiItem,
     config: PagerViewerConfigUiModel,
     isActive: Boolean,
+    transitionPreloadStates: Map<Long, ChapterTransitionUiModel.PreloadState>,
     modifier: Modifier = Modifier,
 ) {
     when (item) {
@@ -386,7 +390,9 @@ private fun PagerItemContent(
             )
         }
         is ReaderUiItem.Transition -> {
-            val uiModel = item.transitionUiModel ?: ChapterTransitionUiModel.from(item.transition)
+            val uiModel =
+                (item.transitionUiModel ?: ChapterTransitionUiModel.from(item.transition))
+                    .withLivePreloadState(transitionPreloadStates)
             ReaderTransitionPage(
                 uiModel = uiModel,
                 onRetry = { item.transition.to?.let { config.onRetryTransition(it) } },

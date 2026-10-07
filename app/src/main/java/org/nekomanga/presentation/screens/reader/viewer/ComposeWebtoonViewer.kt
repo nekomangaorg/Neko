@@ -71,6 +71,7 @@ fun ComposeWebtoonViewer(
     onPageLongTap: (ReaderPage) -> Unit,
     onNavigateAdjacent: (forward: Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    transitionPreloadStates: Map<Long, ChapterTransitionUiModel.PreloadState> = emptyMap(),
 ) {
     val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = config.initialIndex)
     val zoomState = rememberWebtoonZoomState()
@@ -349,7 +350,9 @@ fun ComposeWebtoonViewer(
                     }
                     is ReaderUiItem.Transition -> {
                         val uiModel =
-                            item.transitionUiModel ?: ChapterTransitionUiModel.from(item.transition)
+                            (item.transitionUiModel
+                                    ?: ChapterTransitionUiModel.from(item.transition))
+                                .withLivePreloadState(transitionPreloadStates)
                         ReaderTransitionPage(
                             uiModel = uiModel,
                             onRetry = {

@@ -48,6 +48,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ReaderViewerPreferences
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.ui.reader.model.transitionTargetPreloadStates
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -76,6 +77,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -149,6 +151,7 @@ constructor(
 
     init {
         observeViewerPreferences()
+        observeTransitionTargetStates()
     }
 
     private val downloadProvider = DownloadProvider(preferences.context)
@@ -1529,6 +1532,33 @@ constructor(
         mutableState.update { it.copy(viewerItems = enriched) }
     }
 
+    /**
+     * Keeps [ReaderState.transitionPreloadStates] in step with the transition target chapters. A
+     * failed preload does not rebuild the viewer items, so without this the card keeps the state it
+     * had when the items were built and never shows the error or its Retry. The items themselves
+     * stay untouched: both viewers re-request the preload when the item list changes, and a
+     * replaced list after each failure would retry in a loop.
+     */
+    private fun observeTransitionTargetStates() {
+        state
+            .map { s ->
+                s.viewerItems.mapNotNull { (it as? ReaderUiItem.Transition)?.transition?.to }
+            }
+            .distinctUntilChanged { old, new ->
+                old.size == new.size && old.indices.all { old[it] === new[it] }
+            }
+            .flatMapLatest { targets -> targets.map { it.stateFlow }.merge() }
+            .onEach {
+                mutableState.update { current ->
+                    current.copy(
+                        transitionPreloadStates =
+                            current.viewerItems.transitionTargetPreloadStates()
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun updateWebtoonActiveIndex(activeIndex: Int) {
         val items = state.value.viewerItems
         val preloadAmount = state.value.viewerPreferences.preloadPageAmount
@@ -1724,6 +1754,8 @@ constructor(
         val chapterRowUiModels: List<ReaderChapterRowUiModel> = emptyList(),
         // Hoisted UI state from ReaderActivity
         val viewerItems: List<ReaderUiItem> = emptyList(),
+        /** Live card state of each transition target in [viewerItems], keyed by chapter id. */
+        val transitionPreloadStates: Map<Long, ChapterTransitionUiModel.PreloadState> = emptyMap(),
         val chapterTitle: String = "",
         val showShiftDoublePage: Boolean = false,
         val shiftDoublePageIconRes: Int? = null,
