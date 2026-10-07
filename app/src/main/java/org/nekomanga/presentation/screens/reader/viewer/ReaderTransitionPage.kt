@@ -145,6 +145,7 @@ fun ReaderTransitionPage(
                     ChapterPreloadStatusSection(
                         preloadState = toChapter.preloadState,
                         onRetry = onRetry,
+                        tapClaim = tapClaim,
                     )
                 }
             }
@@ -366,6 +367,7 @@ private fun MissingChapterWarningSection(missingChaptersCount: Int) {
 private fun ChapterPreloadStatusSection(
     preloadState: ChapterTransitionUiModel.PreloadState,
     onRetry: () -> Unit,
+    tapClaim: TapNavigationClaim?,
 ) {
     if (preloadState is ChapterTransitionUiModel.PreloadState.Error) {
         Column(
@@ -383,7 +385,9 @@ private fun ChapterPreloadStatusSection(
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(Size.small))
-            Button(onClick = onRetry) { Text(text = stringResource(R.string.retry)) }
+            Button(onClick = onRetry, modifier = Modifier.claimTapNavigation(tapClaim)) {
+                Text(text = stringResource(R.string.retry))
+            }
         }
     }
 }
