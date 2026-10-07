@@ -87,6 +87,13 @@ class Downloader(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var downloaderJob: Job? = null
 
+    /**
+     * Held by the check that stops the downloader once nothing is left to download and by
+     * [queueChapters] while it adds chapters, so a chapter queued as the last download finishes is
+     * either seen by that check or starts the downloader again.
+     */
+    private val queueLock = Any()
+
     /** Whether the downloader is running. */
     val isRunning: Boolean
         get() = downloaderJob?.isActive ?: false
@@ -225,8 +232,10 @@ class Downloader(
             if (download.status == Download.State.DOWNLOADED) {
                 removeFromQueue(download)
             }
-            if (areAllDownloadsFinished()) {
-                stop()
+            synchronized(queueLock) {
+                if (areAllDownloadsFinished()) {
+                    stop()
+                }
             }
         } catch (e: Throwable) {
             if (e is CancellationException) throw e
@@ -252,7 +261,6 @@ class Downloader(
     fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) {
         if (chapters.isEmpty()) return
 
-        val wasEmpty = queueState.value.isEmpty()
         val chapterDirFiles = provider.findMangaDir(manga)?.listFiles()?.asList() ?: emptyList()
 
         val chaptersToQueue =
@@ -286,12 +294,20 @@ class Downloader(
                 .toList()
 
         if (chaptersToQueue.isNotEmpty()) {
-            addAllToQueue(chaptersToQueue)
+            // Errored downloads stay in the queue after the downloader stops, so a queue with
+            // entries can still have nothing left to download. A running downloader picks up new
+            // chapters itself; starting the job again would replace its worker with one that exits
+            // at once.
+            val canStart: Boolean
+            synchronized(queueLock) {
+                canStart = !isRunning && areAllDownloadsFinished()
+                addAllToQueue(chaptersToQueue)
+            }
 
             // Start downloader if needed
 
             // Start downloader if needed
-            if (autoStart && wasEmpty) {
+            if (autoStart && canStart) {
                 DownloadJob.start(context)
             } else if (!isRunning && !LibraryUpdateJob.isRunning(context)) {
                 notifier.onPaused()
