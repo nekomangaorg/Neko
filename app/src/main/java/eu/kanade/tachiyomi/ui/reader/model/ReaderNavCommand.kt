@@ -16,6 +16,7 @@ sealed interface ReaderNavCommand {
     data class ScrollToItem(
         val itemIndex: Int,
         val animated: Boolean = true,
+        val item: ReaderUiItem? = null,
     ) : ReaderNavCommand
 
     data class StepPage(val forward: Boolean) : ReaderNavCommand

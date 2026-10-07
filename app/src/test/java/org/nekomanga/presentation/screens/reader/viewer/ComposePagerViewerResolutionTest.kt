@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
+import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -1489,5 +1490,112 @@ class ComposePagerViewerResolutionTest {
         val index =
             calculateDefaultPagerIndex(items = items, currentChapterId = 1L, requestedPage = 0)
         assertEquals(1, index)
+    }
+
+    /**
+     * Paging back from chapter 2 into chapter 1. The list on screen was built while chapter 2 was
+     * active; PagerViewer then rebuilt it for chapter 1 and asked for chapter 1's last page, by its
+     * index in the rebuilt list.
+     */
+    private fun chapterSwitchLists(): Pair<List<ReaderUiItem>, List<ReaderUiItem>> {
+        val ch1 = createChapter(1L, pageCount = 4)
+        val ch2 = createChapter(2L, pageCount = 4)
+        val ch1Pages = (ch1.state as ReaderChapter.State.Loaded).pages
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+        val composed =
+            listOf(
+                ReaderUiItem.Page(ch1Pages[2]),
+                ReaderUiItem.Page(ch1Pages[3]),
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch2, ch1)),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Page(ch2Pages[1]),
+                ReaderUiItem.Page(ch2Pages[2]),
+                ReaderUiItem.Page(ch2Pages[3]),
+            )
+        val rebuilt =
+            listOf(
+                ReaderUiItem.Transition(ChapterTransition.Prev(ch1, null)),
+                ReaderUiItem.Page(ch1Pages[0]),
+                ReaderUiItem.Page(ch1Pages[1]),
+                ReaderUiItem.Page(ch1Pages[2]),
+                ReaderUiItem.Page(ch1Pages[3]),
+                ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2)),
+                ReaderUiItem.Page(ch2Pages[0]),
+                ReaderUiItem.Page(ch2Pages[1]),
+            )
+        return composed to rebuilt
+    }
+
+    @Test
+    fun `executeNavCommand defers ScrollToItem whose index belongs to a list not yet composed`() =
+        runTest {
+            val (composed, rebuilt) = chapterSwitchLists()
+            val config = createConfig(activeChapterId = 2L, animatedTransitions = false)
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 1
+
+            // Index 4 is chapter 1's last page in the rebuilt list but chapter 2's second page in
+            // the composed one. Scrolling there selected chapter 2 again and the reader switched
+            // chapters back and forth.
+            val result =
+                executeNavCommand(
+                    command =
+                        ReaderNavCommand.ScrollToItem(
+                            itemIndex = 4,
+                            animated = false,
+                            item = rebuilt[4],
+                        ),
+                    pagerState = mockPagerState,
+                    items = composed,
+                    config = config,
+                )
+
+            assertFalse(result)
+            coVerify(exactly = 0) { mockPagerState.scrollToPage(any()) }
+            coVerify(exactly = 0) { mockPagerState.animateScrollToPage(any(), any()) }
+        }
+
+    @Test
+    fun `resolvePendingNavTarget resolves a deferred ScrollToItem once its list is composed`() {
+        val (_, rebuilt) = chapterSwitchLists()
+
+        val target =
+            resolvePendingNavTarget(
+                pending =
+                    ReaderNavCommand.ScrollToItem(
+                        itemIndex = 4,
+                        animated = false,
+                        item = rebuilt[4],
+                    ),
+                items = rebuilt,
+                activeChapterId = 1L,
+            )
+
+        assertEquals(4, target)
+    }
+
+    @Test
+    fun `resolvePendingNavTarget follows the ScrollToItem item when the list shifted`() {
+        val (_, rebuilt) = chapterSwitchLists()
+        // Chapter 1's previous chapter finished loading and its last two pages were prepended.
+        val ch0 = createChapter(0L, pageCount = 2)
+        val ch0Pages = (ch0.state as ReaderChapter.State.Loaded).pages
+        val shifted =
+            listOf(ReaderUiItem.Page(ch0Pages[0]), ReaderUiItem.Page(ch0Pages[1])) + rebuilt.drop(1)
+
+        val target =
+            resolvePendingNavTarget(
+                pending =
+                    ReaderNavCommand.ScrollToItem(
+                        itemIndex = 4,
+                        animated = false,
+                        item = rebuilt[4],
+                    ),
+                items = shifted,
+                activeChapterId = 1L,
+            )
+
+        assertTrue(shifted[5].isEquivalentTo(rebuilt[4]))
+        assertEquals(5, target)
     }
 }

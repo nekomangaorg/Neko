@@ -107,24 +107,8 @@ fun ComposePagerViewer(
     // 1. Immediate pre-measure re-anchor during composition to eliminate 1-frame flashes
     val chapterChanged = config.activeChapterId != layoutAnchor.lastProcessedChapterId
     if (items !== layoutAnchor.lastProcessedItems || chapterChanged) {
-        val pending = pendingNavCommand
         val pendingTarget =
-            when (pending) {
-                is ReaderNavCommand.SnapToPage ->
-                    resolveItemIndexForPage(
-                        items,
-                        pending.chapterId ?: config.activeChapterId,
-                        pending.pageIndex,
-                    )
-                is ReaderNavCommand.ScrollToPage ->
-                    resolveItemIndexForPage(
-                        items,
-                        pending.chapterId ?: config.activeChapterId,
-                        pending.pageIndex,
-                    )
-                is ReaderNavCommand.ScrollToItem -> pending.itemIndex.takeIf { it in items.indices }
-                else -> null
-            }
+            resolvePendingNavTarget(pendingNavCommand, items, config.activeChapterId)
 
         layoutAnchor.lastProcessedItems = items
         layoutAnchor.lastProcessedChapterId = config.activeChapterId
@@ -426,6 +410,29 @@ private fun PagerItemContent(
     }
 }
 
+/** Item index in [items] that a deferred [pending] command should land on, or null. */
+internal fun resolvePendingNavTarget(
+    pending: ReaderNavCommand?,
+    items: List<ReaderUiItem>,
+    activeChapterId: Long?,
+): Int? =
+    when (pending) {
+        is ReaderNavCommand.SnapToPage ->
+            resolveItemIndexForPage(items, pending.chapterId ?: activeChapterId, pending.pageIndex)
+        is ReaderNavCommand.ScrollToPage ->
+            resolveItemIndexForPage(items, pending.chapterId ?: activeChapterId, pending.pageIndex)
+        is ReaderNavCommand.ScrollToItem -> {
+            val item = pending.item
+            when {
+                item == null -> pending.itemIndex.takeIf { it in items.indices }
+                items.getOrNull(pending.itemIndex)?.isEquivalentTo(item) == true ->
+                    pending.itemIndex
+                else -> items.indexOfFirst { it.isEquivalentTo(item) }.takeIf { it != -1 }
+            }
+        }
+        else -> null
+    }
+
 internal fun calculateDefaultPagerIndex(
     items: List<ReaderUiItem>,
     currentChapterId: Long?,
@@ -554,6 +561,15 @@ internal suspend fun executeNavCommand(
     try {
         when (command) {
             is ReaderNavCommand.ScrollToItem -> {
+                // PagerViewer computed the index against its newest list. The pager can still
+                // hold the list from before a chapter switch, where that index is another
+                // chapter's page; wait for the list that has the item there.
+                val item = command.item
+                if (
+                    item != null && items.getOrNull(command.itemIndex)?.isEquivalentTo(item) != true
+                ) {
+                    return false
+                }
                 val target = command.itemIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
                 if (target in items.indices && pagerState.currentPage != target) {
                     if (command.animated && config.animatedTransitions) {
