@@ -330,6 +330,62 @@ class ReaderPreloadControllerTest {
     }
 
     @Test
+    fun `tall page check finishing after split is turned off does not invoke onPageSplit`() =
+        testScope.runTest {
+            val chapter = createChapter(1L, 5)
+            val page = chapter.pages!![0]
+            val splits =
+                listOf(
+                    ReaderPageSplit(page = page, topOffset = 0, splitHeight = 1000),
+                    ReaderPageSplit(page = page, topOffset = 1000, splitHeight = 1000),
+                )
+            var splitEnabled = true
+            // The user turns Split tall images off while the page is still being measured.
+            every { checkTallPage.invoke(page, any(), any()) } answers
+                {
+                    splitEnabled = false
+                    splits
+                }
+
+            var splitInvoked = false
+            controller =
+                ReaderPreloadControllerImpl(
+                    context = context,
+                    scope = testScope,
+                    memoryCacheWarmManager = memoryWarmManager,
+                    checkTallPage = checkTallPage,
+                    isSplitTallPagesEnabled = { splitEnabled },
+                    onPageSplit = { _, _ -> splitInvoked = true },
+                    getScreenHeight = { 2000 },
+                    ioDispatcher = testDispatcher,
+                )
+
+            controller.onPositionChanged(
+                currentIndex = 0,
+                items = listOf(ReaderUiItem.Page(page)),
+                preloadAmount = 1,
+                isRtl = false,
+                isWebtoon = true,
+            )
+            advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
+            runCurrent()
+
+            assertFalse(splitInvoked)
+            // The result is still cached for when the setting comes back on.
+            assertEquals(splits, page.precomputedSplits)
+            // The whole page is what the reader shows now, so that is what gets warmed.
+            io.mockk.verify(exactly = 1) {
+                memoryWarmManager.warmMemoryCache(
+                    key = any(),
+                    data = page,
+                    crossfade = false,
+                    onSuccess = any(),
+                    onError = any(),
+                )
+            }
+        }
+
+    @Test
     fun `release clears all state and resets to idle`() = testScope.runTest {
         val chapter = createChapter(1L, 5)
         val items = chapter.pages!!.map { ReaderUiItem.Page(it) }

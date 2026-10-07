@@ -570,7 +570,9 @@ class ReaderPreloadControllerImpl(
                 val screenHeight = getScreenHeight()
                 val splits = checkTallPage(page, screenHeight)
                 page.precomputedSplits = splits ?: emptyList()
-                if (splits != null && splits.isNotEmpty()) {
+                // The setting can be turned off while the page is measured. Keep the result for
+                // when it comes back on, but treat the page as whole now.
+                if (splits != null && splits.isNotEmpty() && isSplitTallPagesEnabled()) {
                     if (preloadMemory) {
                         splits.forEach { split ->
                             val splitKey =
