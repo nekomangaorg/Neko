@@ -31,6 +31,7 @@ class BuildWebtoonItemsUseCase(
         screenHeight: Int = 0,
         existingItems: List<ReaderUiItem> = emptyList(),
         hadTransitionForNext: Boolean = false,
+        splitTallPages: Boolean = true,
     ): Result {
         val tallSplitPages = mutableSetOf<ReaderPage>()
         val newItems = mutableListOf<ReaderUiItem>()
@@ -49,6 +50,7 @@ class BuildWebtoonItemsUseCase(
                         existingItems = existingItems,
                         tallSplitPages = tallSplitPages,
                         screenHeight = screenHeight,
+                        splitTallPages = splitTallPages,
                     )
                 )
             }
@@ -66,6 +68,7 @@ class BuildWebtoonItemsUseCase(
                     existingItems = existingItems,
                     tallSplitPages = tallSplitPages,
                     screenHeight = screenHeight,
+                    splitTallPages = splitTallPages,
                 )
             )
         }
@@ -96,6 +99,7 @@ class BuildWebtoonItemsUseCase(
                         existingItems = existingItems,
                         tallSplitPages = tallSplitPages,
                         screenHeight = screenHeight,
+                        splitTallPages = splitTallPages,
                     )
                 )
             }
@@ -115,8 +119,12 @@ class BuildWebtoonItemsUseCase(
         existingItems: List<ReaderUiItem>,
         tallSplitPages: MutableSet<ReaderPage>,
         screenHeight: Int,
+        splitTallPages: Boolean,
     ): List<ReaderUiItem> {
         return pages.flatMap { page ->
+            // Slices from an earlier build stay in existingItems and precomputedSplits, so check
+            // the setting before reusing either.
+            if (!splitTallPages) return@flatMap listOf(ReaderUiItem.Page(page))
             val existingSplits =
                 existingItems.filterIsInstance<ReaderUiItem.SplitPage>().filter {
                     it.page.isFromSamePage(page)
