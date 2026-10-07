@@ -126,7 +126,7 @@ class PageHandler {
             Page(pos + 1, atHomeDto.baseUrl, imgUrl, chapterId)
         }
 
-        imageHandler.updateTokenTracker(chapterId, now)
+        imageHandler.updateTokenTracker(chapterId, atHomeDto.baseUrl, now)
 
         return pages
     }

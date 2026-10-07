@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.cancellation.CancellationException
 import okhttp3.Headers
 import okhttp3.OkHttpClient
@@ -32,7 +33,13 @@ import tachiyomi.core.network.await
 import tachiyomi.core.network.newCachelessCallWithProgress
 import uy.kohesive.injekt.injectLazy
 
-class ImageHandler {
+class ImageHandler(
+    // chapter id and its latest at home server, read and written by concurrent page loads
+    private val tokenTracker: MutableMap<String, AtHomeServer> = ConcurrentHashMap()
+) {
+    /** An at home base url and the time it was requested. */
+    data class AtHomeServer(val baseUrl: String, val time: Long)
+
     val network: NetworkHelper by injectLazy()
     val networkServices: NetworkServices by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
@@ -44,9 +51,6 @@ class ImageHandler {
     private val comikeyHandler: ComikeyHandler by injectLazy()
     private val namiComiHandler: NamiComiHandler by injectLazy()
     private val mangaUpHandler: MangaUpHandler by injectLazy()
-
-    // chapter id and last request time
-    private val tokenTracker = hashMapOf<String, Long>()
 
     private val tag = "||ImageHandler"
 
@@ -121,26 +125,32 @@ class ImageHandler {
     private suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
         val data = page.url.split(",")
         val currentTime = Date().time
+        val lastServer = tokenTracker[page.mangaDexChapterId]
 
         val mdAtHomeServerUrl =
             when (
-                tokenTracker[page.mangaDexChapterId] != null &&
-                    (currentTime - tokenTracker[page.mangaDexChapterId]!!) <
-                        MdConstants.mdAtHomeTokenLifespan
+                lastServer != null &&
+                    currentTime - lastServer.time < MdConstants.mdAtHomeTokenLifespan
             ) {
-                true -> data[0]
+                true -> lastServer.baseUrl
                 false -> {
                     TimberKt.d { "$tag Time has expired get new at home url isLogged $isLogged" }
-                    updateTokenTracker(page.mangaDexChapterId, currentTime)
+                    // Pages that load during the request, or for a lifespan after it fails, keep
+                    // the current server instead of each asking for a new one.
+                    val currentUrl = lastServer?.baseUrl ?: data[0]
+                    updateTokenTracker(page.mangaDexChapterId, currentUrl, currentTime)
 
-                    networkServices.atHomeService
-                        .getAtHomeServer(
-                            page.mangaDexChapterId,
-                            mangaDexPreferences.usePort443ForImageServer().get(),
-                        )
-                        .getOrResultError("getting image")
-                        .getOrThrow { Exception(it.message()) }
-                        .baseUrl
+                    val newUrl =
+                        networkServices.atHomeService
+                            .getAtHomeServer(
+                                page.mangaDexChapterId,
+                                mangaDexPreferences.usePort443ForImageServer().get(),
+                            )
+                            .getOrResultError("getting image")
+                            .getOrThrow { Exception(it.message()) }
+                            .baseUrl
+                    updateTokenTracker(page.mangaDexChapterId, newUrl, currentTime)
+                    newUrl
                 }
             }
         TimberKt.d {
@@ -173,7 +183,7 @@ class ImageHandler {
         return page.imageUrl?.contains(scanlatorName, true) ?: false
     }
 
-    fun updateTokenTracker(chapterId: String, time: Long) {
-        tokenTracker[chapterId] = time
+    fun updateTokenTracker(chapterId: String, baseUrl: String, time: Long) {
+        tokenTracker[chapterId] = AtHomeServer(baseUrl, time)
     }
 }
