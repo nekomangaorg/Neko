@@ -66,6 +66,7 @@ fun Modifier.webtoonTapNavigation(
             val downPos = down.position
             val downTime = System.currentTimeMillis()
             var pointerUp: PointerInputChange? = null
+            var isMovementPastSlop = false
 
             while (true) {
                 val event = awaitPointerEvent(pass = PointerEventPass.Initial)
@@ -80,11 +81,20 @@ fun Modifier.webtoonTapNavigation(
                         (change.position.y - downPos.y).toDouble(),
                     ) * zoomState.scale
                 if (moveDistance > touchSlopPx) {
-                    // User moved beyond touch slop; cancel any pending single-tap action
-                    pendingSingleTapJob?.cancel()
-                    pendingSingleTapJob = null
+                    isMovementPastSlop = true
                     break
                 }
+            }
+
+            // Children see the up only after this Initial pass, so a Retry tap is not
+            // consumed yet and has to be recognized by its claimed pointer
+            val isClaimed = currentTapClaim?.isClaimed(down.id) == true
+
+            if (shouldDropPendingTap(isMovementPastSlop, isClaimed)) {
+                pendingSingleTapJob?.cancel()
+                pendingSingleTapJob = null
+                lastTapTime = 0L
+                lastTapOffset = Offset.Zero
             }
 
             if (pointerUp != null) {
@@ -97,13 +107,11 @@ fun Modifier.webtoonTapNavigation(
                         (upPos.y - downPos.y).toDouble(),
                     )
 
-                // Children see the up only after this Initial pass, so a Retry tap is not
-                // consumed yet and has to be recognized by its claimed pointer
                 if (
                     distance < touchSlopPx &&
                         (upTime - downTime < longPressTimeoutMs) &&
                         !up.isConsumed &&
-                        currentTapClaim?.isClaimed(down.id) != true
+                        !isClaimed
                 ) {
                     val screenWidth = size.width.toFloat()
                     val screenHeight = size.height.toFloat()
@@ -169,6 +177,14 @@ fun Modifier.webtoonTapNavigation(
         }
     }
 }
+
+/**
+ * Whether a gesture cancels the single tap still waiting out the double-tap timeout. A tap on a
+ * claimed control such as Retry is handled by that control, so the earlier tap must not fire after
+ * it.
+ */
+internal fun shouldDropPendingTap(isMovementPastSlop: Boolean, isClaimed: Boolean): Boolean =
+    isMovementPastSlop || isClaimed
 
 private fun dispatchTapAction(
     action: ViewerNavigation.NavigationRegion,
