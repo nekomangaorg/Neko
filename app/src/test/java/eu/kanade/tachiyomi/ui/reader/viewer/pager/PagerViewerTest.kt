@@ -266,6 +266,64 @@ class PagerViewerTest {
     }
 
     @Test
+    fun `rapid moveRight calls advance sequence even when requestedPagePosition is cleared`() {
+        val viewer = L2RPagerViewer(mockActivity)
+        viewer.config.alwaysShowChapterTransition = false
+
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.currentPagePosition = 0
+        viewer.requestedPagePosition = null
+
+        viewer.moveRight()
+        assertEquals(1, viewer.requestedPagePosition?.first)
+        assertEquals(1, viewer.targetPagePosition)
+
+        viewer.requestedPagePosition = null
+        // Intermediate emit from Compose pager while animating
+        viewer.onActiveIndexChanged(0)
+        assertEquals(1, viewer.targetPagePosition)
+
+        viewer.moveRight()
+        assertEquals(2, viewer.requestedPagePosition?.first)
+        assertEquals(2, viewer.targetPagePosition)
+
+        // Finally settles on 2
+        viewer.onActiveIndexChanged(2)
+        assertEquals(2, viewer.currentPagePosition)
+        assertNull(viewer.targetPagePosition)
+    }
+
+    @Test
+    fun `rapid moveLeft calls in R2LPagerViewer advance sequence even when requestedPagePosition is cleared`() {
+        val viewer = R2LPagerViewer(mockActivity)
+        viewer.config.alwaysShowChapterTransition = false
+
+        val chapter1 = createChapter(1L, pageCount = 5)
+        viewer.setChapters(ViewerChapters(chapter1, null, null))
+        viewer.currentPagePosition = 4
+        viewer.requestedPagePosition = null
+
+        viewer.moveLeft()
+        assertEquals(3, viewer.requestedPagePosition?.first)
+        assertEquals(3, viewer.targetPagePosition)
+
+        viewer.requestedPagePosition = null
+        // Intermediate emit from Compose pager while animating
+        viewer.onActiveIndexChanged(4)
+        assertEquals(3, viewer.targetPagePosition)
+
+        viewer.moveLeft()
+        assertEquals(2, viewer.requestedPagePosition?.first)
+        assertEquals(2, viewer.targetPagePosition)
+
+        // Finally settles on 2
+        viewer.onActiveIndexChanged(2)
+        assertEquals(2, viewer.currentPagePosition)
+        assertNull(viewer.targetPagePosition)
+    }
+
+    @Test
     fun `pendingPageMove queues move if page is not yet in items and executes upon setChapters`() {
         val viewer = L2RPagerViewer(mockActivity)
         val chapter1 = createChapter(1L, pageCount = 5)

@@ -43,8 +43,18 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     var items by mutableStateOf<List<ReaderUiItem>>(emptyList())
         private set
 
+    /** Tracks pending programmatic target page to preserve sequence during rapid key presses. */
+    var targetPagePosition: Int? = null
+
     /** Currently active page index in the items list. */
     var currentPagePosition: Int = 0
+
+    fun onActiveIndexChanged(activeIndex: Int) {
+        currentPagePosition = activeIndex
+        if (targetPagePosition == activeIndex) {
+            targetPagePosition = null
+        }
+    }
 
     open val isRtl: Boolean
         get() = false
@@ -90,6 +100,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     override fun destroy() {
         super.destroy()
         panDelegate = null
+        targetPagePosition = null
         scope.cancel()
     }
 
@@ -117,6 +128,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
         TimberKt.d { "setChapters" }
+        targetPagePosition = null
         val targetChapterId = chapters.currChapter.chapter.id
         val chapterChanged =
             activeChapterId != targetChapterId ||
@@ -173,6 +185,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     /** Tells this viewer to move to the given [page]. */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
         TimberKt.d { "moveToPage ${page.number}" }
+        targetPagePosition = null
         val position = controller.findPageIndex(items, page)
         if (position != -1) {
             currentPagePosition = position
@@ -224,7 +237,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             return
         }
         val current =
-            (requestedPagePosition?.first ?: currentPagePosition).coerceIn(
+            (targetPagePosition ?: requestedPagePosition?.first ?: currentPagePosition).coerceIn(
                 0,
                 (items.size - 1).coerceAtLeast(0),
             )
@@ -234,15 +247,18 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 item.transition is ChapterTransition.Next &&
                 item.transition.to != null
         ) {
+            targetPagePosition = null
             triggerLoadChapter(item.transition.to.chapter, navTarget = ChapterNavTarget.Start)
             return
         }
         if (current < items.size - 1) {
             hasMoved = true
             val target = current + 1
+            targetPagePosition = target
             currentPagePosition = target
             requestedPagePosition = target to config.usePageTransitions
         } else if (item !is ReaderUiItem.Transition) {
+            targetPagePosition = null
             activity.viewModel.navigateAdjacentChapter(forward = true)
         }
     }
@@ -254,7 +270,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             return
         }
         val current =
-            (requestedPagePosition?.first ?: currentPagePosition).coerceIn(
+            (targetPagePosition ?: requestedPagePosition?.first ?: currentPagePosition).coerceIn(
                 0,
                 (items.size - 1).coerceAtLeast(0),
             )
@@ -264,15 +280,18 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 item.transition is ChapterTransition.Prev &&
                 item.transition.to != null
         ) {
+            targetPagePosition = null
             triggerLoadChapter(item.transition.to.chapter, navTarget = ChapterNavTarget.End)
             return
         }
         if (current > 0) {
             hasMoved = true
             val target = current - 1
+            targetPagePosition = target
             currentPagePosition = target
             requestedPagePosition = target to config.usePageTransitions
         } else if (item !is ReaderUiItem.Transition) {
+            targetPagePosition = null
             activity.viewModel.navigateAdjacentChapter(forward = false)
         }
     }

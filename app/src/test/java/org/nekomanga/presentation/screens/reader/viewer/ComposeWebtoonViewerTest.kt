@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
@@ -630,5 +631,116 @@ class ComposeWebtoonViewerTest {
 
         assertTrue(isSameChapter(ch1, ch1Clone))
         assertFalse(isSameChapter(ch1, ch2))
+    }
+
+    @Test
+    fun `handleBoundaryNavigation forward at end navigates to chapter when Next transition present`() {
+        val ch1 = createChapter(1L)
+        val ch2 = createChapter(2L)
+        val items = listOf(ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2)))
+        var navigatedChapter: Chapter? = null
+        var targetNav: ChapterNavTarget? = null
+        val config =
+            createConfig()
+                .copy(
+                    onNavigateToChapter = { ch, target ->
+                        navigatedChapter = ch
+                        targetNav = target
+                    }
+                )
+        val mockLazyListState = mockk<LazyListState>(relaxed = true)
+        io.mockk.every { mockLazyListState.canScrollForward } returns false
+
+        handleBoundaryNavigation(
+            forward = true,
+            consumed = 0f,
+            lazyListState = mockLazyListState,
+            items = items,
+            config = config,
+        )
+
+        assertEquals(ch2.chapter, navigatedChapter)
+        assertEquals(ChapterNavTarget.Start, targetNav)
+    }
+
+    @Test
+    fun `handleBoundaryNavigation forward at end falls back to onNavigateAdjacentChapter`() {
+        val ch1 = createChapter(1L)
+        val items = listOf(ReaderUiItem.Transition(ChapterTransition.Next(ch1, null)))
+        var navigatedForward: Boolean? = null
+        val config =
+            createConfig()
+                .copy(
+                    onNavigateToChapter = null,
+                    onNavigateAdjacentChapter = { forward -> navigatedForward = forward },
+                )
+        val mockLazyListState = mockk<LazyListState>(relaxed = true)
+        io.mockk.every { mockLazyListState.canScrollForward } returns false
+
+        handleBoundaryNavigation(
+            forward = true,
+            consumed = 0f,
+            lazyListState = mockLazyListState,
+            items = items,
+            config = config,
+        )
+
+        assertEquals(true, navigatedForward)
+    }
+
+    @Test
+    fun `handleBoundaryNavigation backward at start navigates to prev chapter when Prev transition present`() {
+        val ch1 = createChapter(1L)
+        val ch0 = createChapter(0L)
+        val items = listOf(ReaderUiItem.Transition(ChapterTransition.Prev(ch1, ch0)))
+        var navigatedChapter: Chapter? = null
+        var targetNav: ChapterNavTarget? = null
+        val config =
+            createConfig()
+                .copy(
+                    onNavigateToChapter = { ch, target ->
+                        navigatedChapter = ch
+                        targetNav = target
+                    }
+                )
+        val mockLazyListState = mockk<LazyListState>(relaxed = true)
+        io.mockk.every { mockLazyListState.canScrollBackward } returns false
+
+        handleBoundaryNavigation(
+            forward = false,
+            consumed = 0f,
+            lazyListState = mockLazyListState,
+            items = items,
+            config = config,
+        )
+
+        assertEquals(ch0.chapter, navigatedChapter)
+        assertEquals(ChapterNavTarget.End, targetNav)
+    }
+
+    @Test
+    fun `handleBoundaryNavigation does not navigate when scroll was consumed`() {
+        val ch1 = createChapter(1L)
+        val ch2 = createChapter(2L)
+        val items = listOf(ReaderUiItem.Transition(ChapterTransition.Next(ch1, ch2)))
+        var navigated = false
+        val config =
+            createConfig()
+                .copy(
+                    onNavigateToChapter = { _, _ -> navigated = true },
+                    onNavigateAdjacentChapter = { navigated = true },
+                )
+        val mockLazyListState = mockk<LazyListState>(relaxed = true)
+        io.mockk.every { mockLazyListState.canScrollForward } returns false
+
+        handleBoundaryNavigation(
+            forward = true,
+            consumed = 50f, // Consumed scroll before reaching end
+            lazyListState = mockLazyListState,
+            items = items,
+            config = config,
+        )
+
+        assertFalse(navigated)
     }
 }

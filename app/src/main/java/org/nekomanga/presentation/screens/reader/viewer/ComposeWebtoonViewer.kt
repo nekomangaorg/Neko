@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,6 +47,7 @@ import eu.kanade.tachiyomi.ui.reader.model.withoutCardModel
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonActiveItemResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollGatingPolicy
+import kotlin.math.absoluteValue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -89,15 +91,17 @@ fun ComposeWebtoonViewer(
     var lastActiveItem by remember { mutableStateOf<ReaderUiItem?>(null) }
     var lastDispatchedPage by remember { mutableStateOf<ReaderPage?>(null) }
     var lastProcessedItems by remember { mutableStateOf(items) }
+    var lastProgrammaticScrollTime by remember { mutableLongStateOf(0L) }
 
     // 1. Consume unidirectional programmatic navigation commands
     LaunchedEffect(navCommands) {
         navCommands.collect { cmd ->
+            lastProgrammaticScrollTime = System.currentTimeMillis()
             executeWebtoonNavCommand(
                 command = cmd,
                 lazyListState = lazyListState,
                 items = currentItems,
-                config = config,
+                config = currentConfig,
                 scrollAnchorState = scrollAnchorState,
                 zoomScale = zoomState.scale,
             )
@@ -222,11 +226,34 @@ fun ComposeWebtoonViewer(
                             }
 
                         if (currentPage != null) {
+                            val firstActiveChapterIndex =
+                                if (activeChapterId != null) {
+                                    currentItems.indexOfFirst { uiItem ->
+                                        when (uiItem) {
+                                            is ReaderUiItem.Page ->
+                                                uiItem.page.chapter.chapter.id == activeChapterId
+                                            is ReaderUiItem.SplitPage ->
+                                                uiItem.page.chapter.chapter.id == activeChapterId
+                                            is ReaderUiItem.Transition -> false
+                                        }
+                                    }
+                                } else {
+                                    -1
+                                }
+                            val isBackwardTransition =
+                                activeChapterId != null &&
+                                    firstActiveChapterIndex != -1 &&
+                                    activeIndex < firstActiveChapterIndex
+                            val isProgrammaticScroll =
+                                System.currentTimeMillis() - lastProgrammaticScrollTime < 1500L
+
                             val shouldDispatch =
                                 WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
                                     activeChapterId = activeChapterId,
                                     candidateChapterId = currentPage.chapter.chapter.id,
                                     isScrollInProgress = lazyListState.isScrollInProgress,
+                                    isProgrammaticScroll = isProgrammaticScroll,
+                                    isBackwardTransition = isBackwardTransition,
                                 )
                             if (shouldDispatch && currentPage != lastDispatchedPage) {
                                 lastDispatchedPage = currentPage
@@ -525,23 +552,80 @@ internal suspend fun executeWebtoonNavCommand(
                 val delta = calculateWebtoonStepDelta(lazyListState.layoutInfo.viewportSize.height)
                 val scrollAmount = if (command.forward) delta else -delta
                 val effectiveScrollAmount = calculateEffectiveScrollAmount(scrollAmount, zoomScale)
-                if (config.animatedTransitions) {
-                    lazyListState.animateScrollBy(effectiveScrollAmount)
-                } else {
-                    lazyListState.scrollBy(effectiveScrollAmount)
-                }
+                val consumed =
+                    if (config.animatedTransitions) {
+                        lazyListState.animateScrollBy(effectiveScrollAmount)
+                    } else {
+                        lazyListState.scrollBy(effectiveScrollAmount)
+                    }
+                handleBoundaryNavigation(
+                    forward = command.forward,
+                    consumed = consumed,
+                    lazyListState = lazyListState,
+                    items = items,
+                    config = config,
+                )
             }
             is ReaderNavCommand.ScrollByDelta -> {
                 val scrollAmount = calculateEffectiveScrollAmount(command.delta, zoomScale)
-                if (config.animatedTransitions) {
-                    lazyListState.animateScrollBy(scrollAmount)
-                } else {
-                    lazyListState.scrollBy(scrollAmount)
+                val consumed =
+                    if (config.animatedTransitions) {
+                        lazyListState.animateScrollBy(scrollAmount)
+                    } else {
+                        lazyListState.scrollBy(scrollAmount)
+                    }
+                if (command.delta != 0f) {
+                    handleBoundaryNavigation(
+                        forward = command.delta > 0f,
+                        consumed = consumed,
+                        lazyListState = lazyListState,
+                        items = items,
+                        config = config,
+                    )
                 }
             }
         }
     } catch (_: CancellationException) {
         // Scroll command interrupted by user gesture or next navigation
+    }
+}
+
+internal fun handleBoundaryNavigation(
+    forward: Boolean,
+    consumed: Float,
+    lazyListState: LazyListState,
+    items: List<ReaderUiItem>,
+    config: WebtoonViewerConfigUiModel,
+) {
+    if (items.isEmpty()) return
+    if (forward) {
+        val atEnd = !lazyListState.canScrollForward && consumed.absoluteValue < 1f
+        if (atEnd) {
+            val nextTransition =
+                items.lastOrNull {
+                    it is ReaderUiItem.Transition && it.transition is ChapterTransition.Next
+                } as? ReaderUiItem.Transition
+            val nextChapter = nextTransition?.transition?.to?.chapter
+            if (nextChapter != null && config.onNavigateToChapter != null) {
+                config.onNavigateToChapter.invoke(nextChapter, ChapterNavTarget.Start)
+            } else {
+                config.onNavigateAdjacentChapter?.invoke(true)
+            }
+        }
+    } else {
+        val atStart = !lazyListState.canScrollBackward && consumed.absoluteValue < 1f
+        if (atStart) {
+            val prevTransition =
+                items.firstOrNull {
+                    it is ReaderUiItem.Transition && it.transition is ChapterTransition.Prev
+                } as? ReaderUiItem.Transition
+            val prevChapter = prevTransition?.transition?.to?.chapter
+            if (prevChapter != null && config.onNavigateToChapter != null) {
+                config.onNavigateToChapter.invoke(prevChapter, ChapterNavTarget.End)
+            } else {
+                config.onNavigateAdjacentChapter?.invoke(false)
+            }
+        }
     }
 }
 

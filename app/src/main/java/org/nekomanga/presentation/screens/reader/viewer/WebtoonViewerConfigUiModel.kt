@@ -34,4 +34,5 @@ data class WebtoonViewerConfigUiModel(
     val preloadPageAmount: Int = 4,
     val onNavigateToChapter: ((Chapter, ChapterNavTarget) -> Unit)? = null,
     val onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
+    val onNavigateAdjacentChapter: ((forward: Boolean) -> Unit)? = null,
 )

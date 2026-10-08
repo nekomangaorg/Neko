@@ -11,8 +11,13 @@ object WebtoonScrollGatingPolicy {
         activeChapterId: Long?,
         candidateChapterId: Long?,
         isScrollInProgress: Boolean,
+        isProgrammaticScroll: Boolean = false,
+        isBackwardTransition: Boolean = true,
     ): Boolean {
         val isAdjacentChapter = activeChapterId != null && candidateChapterId != activeChapterId
-        return !isAdjacentChapter || isScrollInProgress
+        if (!isAdjacentChapter) return true
+        if (isProgrammaticScroll) return true
+        if (!isBackwardTransition) return true
+        return isScrollInProgress
     }
 }

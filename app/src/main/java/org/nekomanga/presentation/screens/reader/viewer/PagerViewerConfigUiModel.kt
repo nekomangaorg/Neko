@@ -49,6 +49,7 @@ data class PagerViewerConfigUiModel(
     val onRetryTransition: (ReaderChapter) -> Unit = {},
     val onNavigateToChapter: ((Chapter, ChapterNavTarget) -> Unit)? = null,
     val onRequestPreloadChapter: ((ReaderChapter) -> Unit)? = null,
+    val onNavigateAdjacentChapter: ((forward: Boolean) -> Unit)? = null,
     val onPageLongTap: ((ReaderPage, ReaderPage?) -> Unit)? = null,
     val onWidePageDetected: ((ReaderPage) -> Unit)? = null,
 )
