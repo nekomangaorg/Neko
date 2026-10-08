@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.util.system.activeNetworkState
 import eu.kanade.tachiyomi.util.system.networkStateFlow
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -52,13 +53,15 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
                 applicationContext.activeNetworkState(),
                 preferences.downloadOnlyOverUnmetered().get(),
             )
+        if (!networkCheck) {
+            return Result.failure()
+        }
         // A REPLACE restart can land while the downloader is running, and Downloader.start
         // refuses then. This worker takes over, since the one it replaced is gone.
-        val active =
-            networkCheck && (downloadManager.isRunning || downloadManager.downloaderStart())
+        val active = downloadManager.isRunning || downloadManager.downloaderStart()
 
         if (!active) {
-            return Result.failure()
+            return Result.success()
         }
         try {
             tryToSetForeground()
@@ -82,6 +85,12 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
                 }
                 networkWatcher.cancel()
             }
+        } catch (e: Exception) {
+            // The worker fails, so the downloader would keep going without it
+            if (e !is CancellationException && downloadManager.isRunning) {
+                downloadManager.pauseDownloads()
+            }
+            throw e
         } finally {
             // When the system stops the worker (quota, foreground service timeout) the
             // downloader would keep going without a foreground service, so pause it

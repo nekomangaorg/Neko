@@ -23,6 +23,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -34,6 +35,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.nekomanga.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.api.addSingleton
@@ -48,6 +50,7 @@ class DownloadJobTest {
     private lateinit var context: Context
     private lateinit var workerParams: WorkerParameters
     private lateinit var downloadManager: DownloadManager
+    private lateinit var preferences: PreferencesHelper
     private val networkState = MutableStateFlow(online)
 
     @Volatile private var downloaderRunning = false
@@ -69,12 +72,11 @@ class DownloadJobTest {
             every { isRunning } answers { downloaderRunning }
         }
         Injekt.addSingleton(downloadManager)
-        Injekt.addSingleton(
-            mockk<PreferencesHelper> {
-                every { downloadOnlyOverUnmetered().get() } returns false
-                every { downloadOnlyOverUnmetered().changes() } returns flowOf(false)
-            }
-        )
+        preferences = mockk {
+            every { downloadOnlyOverUnmetered().get() } returns false
+            every { downloadOnlyOverUnmetered().changes() } returns flowOf(false)
+        }
+        Injekt.addSingleton(preferences)
 
         mockkStatic("eu.kanade.tachiyomi.util.system.NetworkStateTrackerKt")
         every { any<Context>().activeNetworkState() } answers { networkState.value }
@@ -132,6 +134,72 @@ class DownloadJobTest {
 
         verify(exactly = 1) { downloadManager.pauseDownloads() }
         assertEquals(false, downloaderRunning)
+    }
+
+    @Test
+    fun `given system stops the worker below API 31 when doWork then downloader is paused`() =
+        runTest {
+            val worker = DownloadJob(context, workerParams)
+            val work = async { worker.doWork() }
+            delay(5.seconds)
+
+            // Below API 31 WorkManager has no reason from JobScheduler and passes UNKNOWN
+            worker.stop(WorkInfo.STOP_REASON_UNKNOWN)
+            work.cancel()
+            advanceUntilIdle()
+
+            verify(exactly = 1) { downloadManager.pauseDownloads() }
+            assertEquals(false, downloaderRunning)
+        }
+
+    @Test
+    fun `given network watcher fails when doWork then downloader is paused`() = runTest {
+        every { any<Context>().networkStateFlow() } returns
+            flow { throw IllegalStateException("too many network callbacks") }
+
+        val result = runCatching { DownloadJob(context, workerParams).doWork() }
+
+        assertTrue(result.exceptionOrNull() is IllegalStateException)
+        verify(exactly = 1) { downloadManager.pauseDownloads() }
+        assertEquals(false, downloaderRunning)
+    }
+
+    @Test
+    fun `given network turns metered with unmetered only on when doWork then worker finishes`() =
+        runTest {
+            every { preferences.downloadOnlyOverUnmetered().get() } returns true
+            every { preferences.downloadOnlyOverUnmetered().changes() } returns flowOf(true)
+            every { context.getString(R.string.no_unmetered_connection) } returns "unmetered"
+            launch {
+                delay(5.seconds)
+                networkState.value = online.copy(isUnmetered = false)
+            }
+
+            val result =
+                withTimeoutOrNull(1.minutes) { DownloadJob(context, workerParams).doWork() }
+
+            assertEquals(Result.success(), result)
+            verify(exactly = 1) { downloadManager.downloaderStop("unmetered") }
+        }
+
+    @Test
+    fun `given nothing to download when doWork then worker succeeds`() = runTest {
+        every { downloadManager.downloaderStart() } returns false
+
+        val result = DownloadJob(context, workerParams).doWork()
+
+        assertEquals(Result.success(), result)
+        verify(exactly = 0) { downloadManager.downloaderStop(any()) }
+    }
+
+    @Test
+    fun `given network offline when doWork then worker fails`() = runTest {
+        networkState.value = offline
+
+        val result = DownloadJob(context, workerParams).doWork()
+
+        assertEquals(Result.failure(), result)
+        verify(exactly = 0) { downloadManager.downloaderStart() }
     }
 
     @Test
