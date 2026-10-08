@@ -52,7 +52,10 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
                 applicationContext.activeNetworkState(),
                 preferences.downloadOnlyOverUnmetered().get(),
             )
-        val active = networkCheck && downloadManager.downloaderStart()
+        // A REPLACE restart can land while the downloader is running, and Downloader.start
+        // refuses then. This worker takes over, since the one it replaced is gone.
+        val active =
+            networkCheck && (downloadManager.isRunning || downloadManager.downloaderStart())
 
         if (!active) {
             return Result.failure()

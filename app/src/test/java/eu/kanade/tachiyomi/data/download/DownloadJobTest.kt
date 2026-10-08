@@ -26,10 +26,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import uy.kohesive.injekt.Injekt
@@ -145,4 +147,22 @@ class DownloadJobTest {
         verify(exactly = 0) { downloadManager.pauseDownloads() }
         assertEquals(true, downloaderRunning)
     }
+
+    @Test
+    fun `given downloader already running when doWork then worker stays until downloads finish`() =
+        runTest {
+            // A REPLACE restart while downloading: Downloader.start refuses because it is running
+            downloaderRunning = true
+            every { downloadManager.downloaderStart() } returns false
+            launch {
+                delay(5.seconds)
+                downloaderRunning = false
+            }
+
+            val result =
+                withTimeoutOrNull(1.minutes) { DownloadJob(context, workerParams).doWork() }
+
+            assertEquals(Result.success(), result)
+            assertTrue(currentTime >= 5_000L)
+        }
 }
