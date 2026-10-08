@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import android.text.TextUtils
+import android.webkit.MimeTypeMap
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -80,6 +81,26 @@ class DownloaderCopyImageFromCacheTest {
                     null
                 }
             }
+        // BitmapFactory is an android.jar stub too, so read the BMP signature instead.
+        every { ImageUtil.findPlatformImageMime(any()) } answers
+            {
+                val head = ByteArray(BMP_SIGNATURE.size)
+                val read = firstArg<() -> InputStream>()().use { it.read(head) }
+                if (read == head.size && head.contentEquals(BMP_SIGNATURE)) "image/bmp" else null
+            }
+
+        mockkStatic(MimeTypeMap::class)
+        every { MimeTypeMap.getSingleton() } returns
+            mockk {
+                every { getExtensionFromMimeType(any()) } answers
+                    {
+                        when (firstArg<String?>()) {
+                            "image/bmp" -> "bmp"
+                            "image/svg+xml" -> "svg"
+                            else -> null
+                        }
+                    }
+            }
     }
 
     @After
@@ -98,6 +119,30 @@ class DownloaderCopyImageFromCacheTest {
         assertEquals("001.png", file?.name)
         assertEquals(listOf("001.png"), tmpDir.list()!!.toList())
         assertArrayEquals(png, File(tmpDir, "001.png").readBytes())
+    }
+
+    @Test
+    fun `copies a cached bmp page`() {
+        val bmp = BMP_SIGNATURE + byteArrayOf(1, 2, 3, 4)
+        cache(bmp)
+
+        val file = copy()
+
+        assertEquals("001.bmp", file?.name)
+        assertArrayEquals(bmp, File(tmpDir, "001.bmp").readBytes())
+    }
+
+    @Test
+    fun `copies a cached svg page`() {
+        val svg =
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"></svg>"
+                .toByteArray()
+        cache(svg)
+
+        val file = copy()
+
+        assertEquals("001.svg", file?.name)
+        assertArrayEquals(svg, File(tmpDir, "001.svg").readBytes())
     }
 
     @Test
@@ -154,5 +199,6 @@ class DownloaderCopyImageFromCacheTest {
         private const val CANNOT_CREATE_FILE = "Couldn't create a file in the download folder"
         private val PNG_SIGNATURE =
             byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
+        private val BMP_SIGNATURE = "BM".toByteArray()
     }
 }

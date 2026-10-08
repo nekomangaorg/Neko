@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.BufferedOutputStream
+import java.io.InputStream
 import java.util.Locale
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
@@ -624,7 +625,10 @@ class Downloader(
             val cacheFile = chapterCache.getImageFile(imageUrl)
             // A cached file that is not an image would stay a .tmp file and fail the download on
             // every retry, so remove it and let the caller download the page instead.
-            val extension = ImageUtil.findImageType { cacheFile.inputStream() }
+            val extension =
+                ImageUtil.findImageType { cacheFile.inputStream() }?.extension
+                    ?: findOtherImageMime { cacheFile.inputStream() }
+                        ?.let { ImageUtil.getExtensionFromMimeType(it) }
             if (extension == null) {
                 chapterCache.removeFileFromCache(cacheFile.name)
                 return null
@@ -637,7 +641,7 @@ class Downloader(
             cacheFile.inputStream().use { input ->
                 tmpFile.openOutputStream().use { output -> input.copyTo(output) }
             }
-            tmpFile.renameTo("$filename.${extension.extension}")
+            tmpFile.renameTo("$filename.$extension")
             cacheFile.delete()
             return tmpFile
         }
@@ -734,10 +738,7 @@ class Downloader(
             // An error page served with status 200, even as image/jpeg, matches none of them.
             val detected =
                 ImageUtil.findImageType { file.openInputStream() }?.mime
-                    ?: ImageUtil.findPlatformImageMime { file.openInputStream() }
-                    ?: SVG_MIME.takeIf {
-                        file.openInputStream().source().buffer().use { DecodeUtils.isSvg(it) }
-                    }
+                    ?: findOtherImageMime { file.openInputStream() }
                     ?: throw Exception(context.getString(R.string.download_notifier_page_not_image))
 
             // Read content type if available.
@@ -750,6 +751,14 @@ class Downloader(
 
             return ImageUtil.getExtensionFromMimeType(mime)
         }
+
+        /**
+         * The mime type of an image the reader decodes without the bundled decoder (BMP through the
+         * platform, SVG through Coil), or null when the stream is neither.
+         */
+        private fun findOtherImageMime(openStream: () -> InputStream): String? =
+            ImageUtil.findPlatformImageMime(openStream)
+                ?: SVG_MIME.takeIf { openStream().source().buffer().use { DecodeUtils.isSvg(it) } }
 
         private const val SVG_MIME = "image/svg+xml"
     }
