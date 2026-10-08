@@ -1092,6 +1092,7 @@ class ReaderActivity : BaseMainActivity() {
                                     state.chapterRowUiModels,
                                     chapterSheetQuickActions,
                                     currentChapterId,
+                                    state.isLoading,
                                 ) {
                                     ReaderChaptersSheetUiState(
                                         chapters = state.chapterRowUiModels,
@@ -1102,7 +1103,7 @@ class ReaderActivity : BaseMainActivity() {
                                                     it.id == currentChapterId
                                                 else it.isCurrent
                                             },
-                                        isLoading = false,
+                                        isLoading = state.isLoading,
                                     )
                                 }
 
@@ -1111,10 +1112,9 @@ class ReaderActivity : BaseMainActivity() {
                                 onAction = { action ->
                                     when (action) {
                                         is ReaderChaptersAction.SelectChapter -> {
-                                            if (
-                                                action.chapterId !=
-                                                    viewModel.getCurrentChapter()?.chapter?.id
-                                            ) {
+                                            val currentChapterId =
+                                                viewModel.getCurrentChapter()?.chapter?.id
+                                            if (action.chapterId != currentChapterId) {
                                                 viewModel.navigateToChapter(
                                                     action.chapterId,
                                                     ChapterNavTarget.Resume,
