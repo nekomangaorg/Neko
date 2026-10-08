@@ -59,13 +59,7 @@ sealed interface ChapterTransitionUiModel {
                         } else {
                             0
                         }
-                    val preloadState =
-                        when (val state = to?.state) {
-                            is ReaderChapter.State.Loading -> PreloadState.Loading
-                            is ReaderChapter.State.Error ->
-                                PreloadState.Error(state.error.message ?: "")
-                            else -> PreloadState.Ready
-                        }
+                    val preloadState = to?.state.toPreloadState()
                     Prev(
                         fromChapterName = transition.from.chapter.name,
                         toChapter =
@@ -87,13 +81,7 @@ sealed interface ChapterTransitionUiModel {
                         } else {
                             0
                         }
-                    val preloadState =
-                        when (val state = to?.state) {
-                            is ReaderChapter.State.Loading -> PreloadState.Loading
-                            is ReaderChapter.State.Error ->
-                                PreloadState.Error(state.error.message ?: "")
-                            else -> PreloadState.Ready
-                        }
+                    val preloadState = to?.state.toPreloadState()
                     Next(
                         fromChapterName = transition.from.chapter.name,
                         toChapter =
@@ -109,5 +97,31 @@ sealed interface ChapterTransitionUiModel {
                 }
             }
         }
+    }
+}
+
+/** Card state for a target chapter in this state. Wait and Loaded both read as ready. */
+fun ReaderChapter.State?.toPreloadState(): ChapterTransitionUiModel.PreloadState =
+    when (this) {
+        is ReaderChapter.State.Loading -> ChapterTransitionUiModel.PreloadState.Loading
+        is ReaderChapter.State.Error ->
+            ChapterTransitionUiModel.PreloadState.Error(error.message ?: "")
+        else -> ChapterTransitionUiModel.PreloadState.Ready
+    }
+
+/** This model with its target chapter in [state], or this model when nothing changes. */
+fun ChapterTransitionUiModel.withPreloadState(
+    state: ChapterTransitionUiModel.PreloadState
+): ChapterTransitionUiModel {
+    val target =
+        when (this) {
+            is ChapterTransitionUiModel.Prev -> toChapter
+            is ChapterTransitionUiModel.Next -> toChapter
+        } ?: return this
+    if (state == target.preloadState) return this
+    val updated = target.copy(preloadState = state)
+    return when (this) {
+        is ChapterTransitionUiModel.Prev -> copy(toChapter = updated)
+        is ChapterTransitionUiModel.Next -> copy(toChapter = updated)
     }
 }

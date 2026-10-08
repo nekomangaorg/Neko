@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
+import eu.kanade.tachiyomi.ui.reader.model.withoutCardModel
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerScrollAnchorResolver
@@ -247,8 +248,11 @@ fun ComposePagerViewer(
         }
     }
 
-    // 6. Track active page changes, dispatch selections, and trigger threshold preloads
-    LaunchedEffect(pagerState, items) {
+    // 6. Track active page changes, dispatch selections, and trigger threshold preloads. Keyed on
+    // the items without their card models, so a transition card showing a new preload state does
+    // not dispatch the selection and request the preload again.
+    val itemsWithoutCards = remember(items) { items.map { it.withoutCardModel() } }
+    LaunchedEffect(pagerState, itemsWithoutCards) {
         snapshotFlow { pagerState.currentPage }
             .distinctUntilChanged()
             .collect { pageIndex ->
@@ -290,7 +294,9 @@ fun ComposePagerViewer(
                     is ReaderUiItem.SplitPage -> onPageSelected(item.page, false)
                     is ReaderUiItem.Transition -> {
                         onTransitionSelected(item.transition)
-                        item.transition.to?.let { config.onRequestPreloadChapter?.invoke(it) }
+                        item.transition.to?.let {
+                            currentConfig.onRequestPreloadChapter?.invoke(it)
+                        }
                     }
                 }
             }

@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
 import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel
+import org.nekomanga.presentation.screens.reader.viewer.toPreloadState
+import org.nekomanga.presentation.screens.reader.viewer.withPreloadState
 
 /**
  * Sealed hierarchy representing a renderable item in Compose reader viewers (pager or webtoon).
@@ -136,6 +138,35 @@ fun ReaderUiItem.continuesInto(next: ReaderUiItem?): Boolean =
         isSameChapter(this.page.chapter, next.page.chapter) &&
         this.page.index == next.page.index &&
         this.split.topOffset + this.split.splitHeight == next.split.topOffset
+
+/**
+ * These items with each transition card showing its target chapter's current state. The card model
+ * is resolved when the items are built, and a failed preload does not rebuild them, so the reader
+ * runs this when a target's state changes. Returns this list when every card is already current,
+ * and keeps each item's [ReaderUiItem.Transition.transition] so the viewers' keys hold.
+ */
+fun List<ReaderUiItem>.withLivePreloadStates(): List<ReaderUiItem> {
+    var changed = false
+    val updated = map { item ->
+        val model = (item as? ReaderUiItem.Transition)?.transitionUiModel ?: return@map item
+        val target = item.transition.to ?: return@map item
+        val live = model.withPreloadState(target.state.toPreloadState())
+        if (live === model) {
+            item
+        } else {
+            changed = true
+            item.copy(transitionUiModel = live)
+        }
+    }
+    return if (changed) updated else this
+}
+
+/**
+ * This item without its transition card model, for viewers that react to which item is shown but
+ * not to a card state change.
+ */
+fun ReaderUiItem.withoutCardModel(): ReaderUiItem =
+    if (this is ReaderUiItem.Transition) copy(transitionUiModel = null) else this
 
 internal fun isSameChapter(a: ReaderChapter, b: ReaderChapter): Boolean {
     val aId = a.chapter.id

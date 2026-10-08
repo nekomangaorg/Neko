@@ -9,8 +9,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel
+import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel.PreloadState
 
 class ReaderUiItemTest {
 
@@ -254,5 +257,161 @@ class ReaderUiItemTest {
             ReaderUiItem.SplitPage(ReaderPageSplit(page, topOffset = 2000, splitHeight = 1000))
 
         assertFalse(top.continuesInto(afterMissingSlice))
+    }
+
+    private fun transitionItem(
+        from: ReaderChapter,
+        to: ReaderChapter?,
+        preloadState: PreloadState = PreloadState.Ready,
+        isNext: Boolean = true,
+    ): ReaderUiItem.Transition {
+        val target = to?.let {
+            ChapterTransitionUiModel.TargetChapterInfo(
+                chapterId = it.chapter.id!!,
+                name = it.chapter.name,
+                preloadState = preloadState,
+            )
+        }
+        return if (isNext) {
+            ReaderUiItem.Transition(
+                transition = ChapterTransition.Next(from = from, to = to),
+                transitionUiModel =
+                    ChapterTransitionUiModel.Next(
+                        fromChapterName = from.chapter.name,
+                        toChapter = target,
+                    ),
+            )
+        } else {
+            ReaderUiItem.Transition(
+                transition = ChapterTransition.Prev(from = from, to = to),
+                transitionUiModel =
+                    ChapterTransitionUiModel.Prev(
+                        fromChapterName = from.chapter.name,
+                        toChapter = target,
+                    ),
+            )
+        }
+    }
+
+    /** The state the card at [index] shows after the items take the live target states. */
+    private fun List<ReaderUiItem>.shownPreloadState(index: Int): PreloadState? =
+        when (
+            val model =
+                (withLivePreloadStates()[index] as ReaderUiItem.Transition).transitionUiModel
+        ) {
+            is ChapterTransitionUiModel.Next -> model.toChapter?.preloadState
+            is ChapterTransitionUiModel.Prev -> model.toChapter?.preloadState
+            null -> null
+        }
+
+    @Test
+    fun `transition shows a preload error raised after the items were built`() {
+        val next = createReaderChapter(2L)
+        val items = listOf(transitionItem(from = createReaderChapter(1L), to = next))
+
+        next.state = ReaderChapter.State.Error(Exception("Error chapter is region locked"))
+
+        assertEquals(
+            PreloadState.Error("Error chapter is region locked"),
+            items.shownPreloadState(0),
+        )
+    }
+
+    @Test
+    fun `prev transition shows a retry in progress`() {
+        val prev = createReaderChapter(1L)
+        val items =
+            listOf(
+                transitionItem(
+                    from = createReaderChapter(2L),
+                    to = prev,
+                    preloadState = PreloadState.Error("timeout"),
+                    isNext = false,
+                )
+            )
+
+        prev.state = ReaderChapter.State.Loading
+
+        assertEquals(PreloadState.Loading, items.shownPreloadState(0))
+    }
+
+    @Test
+    fun `transition drops the error once the chapter loads`() {
+        val next = createReaderChapter(2L)
+        val items =
+            listOf(
+                transitionItem(
+                    from = createReaderChapter(1L),
+                    to = next,
+                    preloadState = PreloadState.Error("timeout"),
+                )
+            )
+
+        next.state = ReaderChapter.State.Loaded(emptyList())
+
+        assertEquals(PreloadState.Ready, items.shownPreloadState(0))
+    }
+
+    @Test
+    fun `live states keep the same list when every card is current`() {
+        val next = createReaderChapter(2L)
+        next.state = ReaderChapter.State.Error(Exception("timeout"))
+        val items =
+            listOf(
+                ReaderUiItem.Page(createReaderPage(chapterId = 1L, index = 0)),
+                transitionItem(
+                    from = createReaderChapter(1L),
+                    to = next,
+                    preloadState = PreloadState.Error("timeout"),
+                ),
+                transitionItem(from = createReaderChapter(2L), to = null),
+            )
+
+        assertSame(items, items.withLivePreloadStates())
+    }
+
+    @Test
+    fun `live states replace only the transition that changed`() {
+        val next = createReaderChapter(2L)
+        val page = ReaderUiItem.Page(createReaderPage(chapterId = 1L, index = 0))
+        val items = listOf(page, transitionItem(from = createReaderChapter(1L), to = next))
+
+        next.state = ReaderChapter.State.Error(Exception("timeout"))
+        val updated = items.withLivePreloadStates()
+
+        assertSame(page, updated[0])
+        assertSame(
+            (items[1] as ReaderUiItem.Transition).transition,
+            (updated[1] as ReaderUiItem.Transition).transition,
+        )
+        assertEquals(PreloadState.Error("timeout"), items.shownPreloadState(1))
+    }
+
+    @Test
+    fun `a card state update is not a new active item`() {
+        val next = createReaderChapter(2L)
+        val before = transitionItem(from = createReaderChapter(1L), to = next)
+        val after =
+            transitionItem(
+                from = createReaderChapter(1L),
+                to = next,
+                preloadState = PreloadState.Error("timeout"),
+            )
+        val page = ReaderUiItem.Page(createReaderPage(chapterId = 1L, index = 0))
+
+        assertNotEquals(before, after)
+        assertEquals(before.withoutCardModel(), after.withoutCardModel())
+        assertSame(page, page.withoutCardModel())
+    }
+
+    @Test
+    fun `automatic preloads skip a chapter that failed and Retry does not`() {
+        val error = ReaderChapter.State.Error(Exception("timeout"))
+
+        assertTrue(ReaderChapter.State.Wait.allowsPreload(isRetry = false))
+        assertFalse(error.allowsPreload(isRetry = false))
+        assertTrue(error.allowsPreload(isRetry = true))
+        assertFalse(ReaderChapter.State.Loading.allowsPreload(isRetry = true))
+        assertFalse(ReaderChapter.State.Loaded(emptyList()).allowsPreload(isRetry = true))
     }
 }
