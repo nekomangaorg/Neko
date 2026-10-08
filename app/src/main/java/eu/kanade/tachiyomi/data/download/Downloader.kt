@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
+import coil3.decode.DecodeUtils
+import coil3.svg.isSvg
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -48,6 +50,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import okhttp3.Response
+import okio.buffer
+import okio.source
 import org.nekomanga.R
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
@@ -719,24 +723,34 @@ class Downloader(
 
         /**
          * Returns the extension of the downloaded image from the network response, or if it's null,
-         * analyze the file. Throws when none of them identifies an image.
+         * analyze the file. Throws when the bytes are not an image the reader can decode, whatever
+         * the response claims.
          *
          * @param response the network response of the image.
          * @param file the file where the image is already downloaded.
          */
         private fun getImageExtension(context: Context, response: Response, file: UniFile): String {
+            // The bundled decoder's formats, then the platform's (BMP), then Coil's SVG check.
+            // An error page served with status 200, even as image/jpeg, matches none of them.
+            val detected =
+                ImageUtil.findImageType { file.openInputStream() }?.mime
+                    ?: ImageUtil.findPlatformImageMime { file.openInputStream() }
+                    ?: SVG_MIME.takeIf {
+                        file.openInputStream().source().buffer().use { DecodeUtils.isSvg(it) }
+                    }
+                    ?: throw Exception(context.getString(R.string.download_notifier_page_not_image))
+
             // Read content type if available.
             val mime =
                 response.body.contentType()?.run { if (type == "image") "image/$subtype" else null }
                     // Else guess from the uri. A SAF provider types 001.tmp by its extension, as
-                    // application/octet-stream, which would skip the magic number check.
+                    // application/octet-stream.
                     ?: context.contentResolver.getType(file.uri)?.takeIf { it.startsWith("image/") }
-                    // Else read magic numbers.
-                    ?: ImageUtil.findImageType { file.openInputStream() }?.mime
-                    // An error page served with status 200 lands here.
-                    ?: throw Exception(context.getString(R.string.download_notifier_page_not_image))
+                    ?: detected
 
             return ImageUtil.getExtensionFromMimeType(mime)
         }
+
+        private const val SVG_MIME = "image/svg+xml"
     }
 }

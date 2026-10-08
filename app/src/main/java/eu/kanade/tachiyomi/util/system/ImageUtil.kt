@@ -78,6 +78,16 @@ object ImageUtil {
         }
     }
 
+    /**
+     * The mime type BitmapFactory reads from the image header, or null when it cannot decode the
+     * stream. Covers formats [findImageType] does not know, such as BMP.
+     */
+    fun findPlatformImageMime(openStream: () -> InputStream): String? {
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        openStream().use { BitmapFactory.decodeStream(it, null, options) }
+        return options.outMimeType?.takeIf { options.outWidth > 0 && options.outHeight > 0 }
+    }
+
     fun getExtensionFromMimeType(mime: String?): String {
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(mime)
             ?: SUPPLEMENTARY_MIMETYPE_MAPPING[mime]
