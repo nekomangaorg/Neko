@@ -74,4 +74,17 @@ class WebtoonScrollGatingPolicyTest {
             )
         assertTrue(result)
     }
+
+    @Test
+    fun `when programmatic scroll is inactive and candidate is backward adjacent chapter, transition is rejected`() {
+        val result =
+            WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
+                activeChapterId = 2L,
+                candidateChapterId = 1L,
+                isScrollInProgress = false,
+                isProgrammaticScroll = false,
+                isBackwardTransition = true,
+            )
+        assertFalse(result)
+    }
 }
