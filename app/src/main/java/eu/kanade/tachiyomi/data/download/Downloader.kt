@@ -25,6 +25,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -186,55 +187,62 @@ class Downloader(
     private fun launchDownloaderJob() {
         if (isRunning) return
 
-        downloaderJob = scope.launch {
-            val activeDownloadsFlow =
-                queueState
-                    .transformLatest { queue ->
-                        while (true) {
-                            val activeDownloads =
-                                queue
-                                    .asSequence()
-                                    .apply { removeFromQueueIf { it.chapterItem.isUnavailable } }
-                                    .filter {
-                                        it.status.value <= Download.State.DOWNLOADING.value &&
-                                            !it.chapterItem.isUnavailable
-                                    } // Ignore completed downloads, leave them in the queue
-                                    .groupBy { it.source }
-                                    .toList()
-                                    .map { (_, downloads) -> downloads.take(2) }
-                                    .flatten()
-                            emit(activeDownloads)
+        // Store the job before it runs. A download that ends at once calls stop(), which cancels
+        // the job through downloaderJob; stored after launch returned, the job could miss that
+        // cancel and keep isRunning true with nothing downloading.
+        downloaderJob =
+            scope.launch(start = CoroutineStart.LAZY) {
+                val activeDownloadsFlow =
+                    queueState
+                        .transformLatest { queue ->
+                            while (true) {
+                                val activeDownloads =
+                                    queue
+                                        .asSequence()
+                                        .apply {
+                                            removeFromQueueIf { it.chapterItem.isUnavailable }
+                                        }
+                                        .filter {
+                                            it.status.value <= Download.State.DOWNLOADING.value &&
+                                                !it.chapterItem.isUnavailable
+                                        } // Ignore completed downloads, leave them in the queue
+                                        .groupBy { it.source }
+                                        .toList()
+                                        .map { (_, downloads) -> downloads.take(2) }
+                                        .flatten()
+                                emit(activeDownloads)
 
-                            if (activeDownloads.isEmpty()) break
-                            // Suspend until a download enters the ERROR state
-                            val activeDownloadsErroredFlow =
-                                combine(activeDownloads.map(Download::statusFlow)) { states ->
-                                        states.contains(Download.State.ERROR)
-                                    }
-                                    .filter { it }
-                            activeDownloadsErroredFlow.first()
+                                if (activeDownloads.isEmpty()) break
+                                // Suspend until a download enters the ERROR state
+                                val activeDownloadsErroredFlow =
+                                    combine(activeDownloads.map(Download::statusFlow)) { states ->
+                                            states.contains(Download.State.ERROR)
+                                        }
+                                        .filter { it }
+                                activeDownloadsErroredFlow.first()
+                            }
                         }
-                    }
-                    .distinctUntilChanged()
+                        .distinctUntilChanged()
 
-            // Use supervisorScope to cancel child jobs when the downloader job is cancelled
-            supervisorScope {
-                val downloadJobs = mutableMapOf<Download, Job>()
+                // Use supervisorScope to cancel child jobs when the downloader job is cancelled
+                supervisorScope {
+                    val downloadJobs = mutableMapOf<Download, Job>()
 
-                activeDownloadsFlow.collectLatest { activeDownloads ->
-                    val downloadJobsToStop = downloadJobs.filter { it.key !in activeDownloads }
-                    downloadJobsToStop.forEach { (download, job) ->
-                        job.cancel()
-                        downloadJobs.remove(download)
-                    }
+                    activeDownloadsFlow.collectLatest { activeDownloads ->
+                        val downloadJobsToStop = downloadJobs.filter { it.key !in activeDownloads }
+                        downloadJobsToStop.forEach { (download, job) ->
+                            job.cancel()
+                            downloadJobs.remove(download)
+                        }
 
-                    val downloadsToStart = activeDownloads.filter { it !in downloadJobs }
-                    downloadsToStart.forEach { download ->
-                        downloadJobs[download] = launchDownloadJob(download)
+                        val downloadsToStart = activeDownloads.filter { it !in downloadJobs }
+                        downloadsToStart.forEach { download ->
+                            downloadJobs[download] = launchDownloadJob(download)
+                        }
                     }
                 }
             }
-        }
+        downloaderJob?.start()
     }
 
     private fun CoroutineScope.launchDownloadJob(download: Download) = launchIO {
