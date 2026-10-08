@@ -16,12 +16,14 @@ import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.unmockkAll
+import io.mockk.verify
 import java.util.Collections
 import kotlin.concurrent.thread
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -118,6 +120,47 @@ class DownloaderRestartTest {
         assertEquals(listOf(2L), downloader.queueState.value.map { it.chapterItem.id })
     }
 
+    @Test
+    fun `removing the only manga in the queue stops the downloader`() {
+        every { anyConstructed<DownloadNotifier>().onComplete() } just runs
+
+        downloader.removeFromQueueAndRestart(manga)
+
+        assertTrue(downloader.queueState.value.isEmpty())
+        assertFalse(downloader.isRunning)
+        verify { DownloadJob.stop(any()) }
+    }
+
+    @Test
+    fun `removing a manga with nothing queued leaves the downloader alone`() {
+        // A restart always writes the queue store from this thread, start() sweeps the queue
+        val testThread = Thread.currentThread()
+        var storeWrites = 0
+        every { activeDownloads.edit() } answers
+            {
+                if (Thread.currentThread() == testThread) storeWrites++
+                mockk(relaxed = true)
+            }
+
+        downloader.removeFromQueueAndRestart(Manga.create("/title/2", "Other").apply { id = 2L })
+
+        assertEquals(0, storeWrites)
+        assertTrue(downloader.isRunning)
+        assertEquals(listOf(1L, 2L), downloader.queueState.value.map { it.chapterItem.id })
+    }
+
+    @Test
+    fun `removing a manga from the queue never reads as stopped`() {
+        val other = Manga.create("/title/2", "Other").apply { id = 2L }
+        downloader.queueChapters(other, listOf(chapter(3, other)), autoStart = false)
+        readIsRunningOnQueueStoreWrites()
+
+        downloader.removeFromQueueAndRestart(manga)
+
+        assertReadsSawRunning()
+        assertEquals(listOf(3L), downloader.queueState.value.map { it.chapterItem.id })
+    }
+
     /**
      * Every queue store write the test thread makes happens between the pause and the start of a
      * restart. Each one starts a thread that reads isRunning and waits until that read has either
@@ -153,7 +196,7 @@ class DownloaderRestartTest {
         }
     }
 
-    private fun chapter(id: Long): Chapter =
+    private fun chapter(id: Long, manga: Manga = this.manga): Chapter =
         Chapter.create().apply {
             this.id = id
             manga_id = manga.id
