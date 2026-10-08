@@ -49,4 +49,42 @@ class WebtoonScrollGatingPolicyTest {
             )
         assertTrue(result)
     }
+
+    @Test
+    fun `when list is idle and candidate is forward adjacent chapter, transition is accepted`() {
+        val result =
+            WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
+                activeChapterId = 1L,
+                candidateChapterId = 2L,
+                isScrollInProgress = false,
+                isBackwardTransition = false,
+            )
+        assertTrue(result)
+    }
+
+    @Test
+    fun `when programmatic scroll is active and candidate is backward adjacent chapter, transition is accepted`() {
+        val result =
+            WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
+                activeChapterId = 2L,
+                candidateChapterId = 1L,
+                isScrollInProgress = false,
+                isProgrammaticScroll = true,
+                isBackwardTransition = true,
+            )
+        assertTrue(result)
+    }
+
+    @Test
+    fun `when programmatic scroll is inactive and candidate is backward adjacent chapter, transition is rejected`() {
+        val result =
+            WebtoonScrollGatingPolicy.shouldDispatchPageSelection(
+                activeChapterId = 2L,
+                candidateChapterId = 1L,
+                isScrollInProgress = false,
+                isProgrammaticScroll = false,
+                isBackwardTransition = true,
+            )
+        assertFalse(result)
+    }
 }

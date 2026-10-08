@@ -479,6 +479,10 @@ class ReaderActivity : BaseMainActivity() {
                                     viewModel.requestPreloadChapter(chapter.chapter)
                                 }
                             }
+                        val onNavigateAdjacentChapter =
+                            remember(viewModel) {
+                                { forward: Boolean -> viewModel.navigateAdjacentChapter(forward) }
+                            }
                         val onPageLongTapCallback =
                             remember(currentViewer, menuVisible) {
                                 { p: ReaderPage, ep: ReaderPage? ->
@@ -528,6 +532,7 @@ class ReaderActivity : BaseMainActivity() {
                                 onRetryTransition = onRetryTransition,
                                 onNavigateToChapter = onNavigateToChapter,
                                 onRequestPreloadChapter = onRequestPreloadChapter,
+                                onNavigateAdjacentChapter = onNavigateAdjacentChapter,
                                 onPageLongTap = onPageLongTapCallback,
                                 onWidePageDetected = onWidePageDetected,
                             )
@@ -539,7 +544,7 @@ class ReaderActivity : BaseMainActivity() {
                         val onActiveItemChangedPager =
                             remember(currentViewer, viewModel, isRtl) {
                                 { activeIndex: Int ->
-                                    currentViewer.currentPagePosition = activeIndex
+                                    currentViewer.onActiveIndexChanged(activeIndex)
                                     viewModel.updatePagerActiveIndex(
                                         activeIndex = activeIndex,
                                         isRtl = isRtl,
@@ -637,6 +642,10 @@ class ReaderActivity : BaseMainActivity() {
                                     viewModel.requestPreloadChapter(chapter.chapter)
                                 }
                             }
+                        val onNavigateAdjacentChapterWebtoon =
+                            remember(viewModel) {
+                                { forward: Boolean -> viewModel.navigateAdjacentChapter(forward) }
+                            }
 
                         val webtoonConfig =
                             WebtoonViewerConfigUiModel(
@@ -662,6 +671,7 @@ class ReaderActivity : BaseMainActivity() {
                                 preloadPageAmount = prefs.preloadPageAmount,
                                 onNavigateToChapter = onNavigateToChapterWebtoon,
                                 onRequestPreloadChapter = onRequestPreloadChapterWebtoon,
+                                onNavigateAdjacentChapter = onNavigateAdjacentChapterWebtoon,
                             )
 
                         val onActiveItemChangedWebtoon =

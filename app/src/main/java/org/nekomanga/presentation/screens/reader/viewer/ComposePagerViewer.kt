@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -649,6 +650,33 @@ internal suspend fun executeNavCommand(
                         )
                     } else {
                         pagerState.scrollToPage(target)
+                    }
+                } else {
+                    val item = items.getOrNull(pagerState.currentPage)
+                    if (command.forward) {
+                        val nextChapter =
+                            (item as? ReaderUiItem.Transition)?.let {
+                                if (it.transition is ChapterTransition.Next)
+                                    it.transition.to?.chapter
+                                else null
+                            }
+                        if (nextChapter != null && config.onNavigateToChapter != null) {
+                            config.onNavigateToChapter.invoke(nextChapter, ChapterNavTarget.Start)
+                        } else {
+                            config.onNavigateAdjacentChapter?.invoke(true)
+                        }
+                    } else {
+                        val prevChapter =
+                            (item as? ReaderUiItem.Transition)?.let {
+                                if (it.transition is ChapterTransition.Prev)
+                                    it.transition.to?.chapter
+                                else null
+                            }
+                        if (prevChapter != null && config.onNavigateToChapter != null) {
+                            config.onNavigateToChapter.invoke(prevChapter, ChapterNavTarget.End)
+                        } else {
+                            config.onNavigateAdjacentChapter?.invoke(false)
+                        }
                     }
                 }
                 return true
