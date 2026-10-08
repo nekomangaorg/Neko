@@ -53,7 +53,15 @@ class DownloadJobTest {
     private lateinit var preferences: PreferencesHelper
     private val networkState = MutableStateFlow(online)
 
-    @Volatile private var downloaderRunning = false
+    private val runningFlow = MutableStateFlow(false)
+    private var downloaderRunning: Boolean
+        get() = runningFlow.value
+        set(value) {
+            runningFlow.value = value
+        }
+
+    /** isRunning also reads true while a restart is between its pause and its start. */
+    @Volatile private var restarting = false
 
     @Before
     fun setup() {
@@ -69,7 +77,8 @@ class DownloadJobTest {
                 }
             every { downloaderStop(any()) } answers { downloaderRunning = false }
             every { pauseDownloads() } answers { downloaderRunning = false }
-            every { isRunning } answers { downloaderRunning }
+            every { isRunning } answers { downloaderRunning || restarting }
+            every { isRunningFlow } returns runningFlow
         }
         Injekt.addSingleton(downloadManager)
         preferences = mockk {
@@ -119,6 +128,41 @@ class DownloadJobTest {
 
             assertEquals(Result.success(), result)
             verify(exactly = 0) { downloadManager.downloaderStop(any()) }
+        }
+
+    @Test
+    fun `given downloads finish when doWork then worker finishes right away`() = runTest {
+        launch {
+            delay(5.5.seconds)
+            downloaderRunning = false
+        }
+
+        val result = withTimeoutOrNull(1.minutes) { DownloadJob(context, workerParams).doWork() }
+
+        assertEquals(Result.success(), result)
+        assertEquals(5_500L, currentTime)
+    }
+
+    @Test
+    fun `given downloader restarts when doWork then worker stays until downloads finish`() =
+        runTest {
+            launch {
+                delay(5.seconds)
+                // A restart pauses and starts again; the pause shows up on the flow first
+                restarting = true
+                downloaderRunning = false
+                delay(5.seconds)
+                downloaderRunning = true
+                restarting = false
+                delay(5.seconds)
+                downloaderRunning = false
+            }
+
+            val result =
+                withTimeoutOrNull(1.minutes) { DownloadJob(context, workerParams).doWork() }
+
+            assertEquals(Result.success(), result)
+            assertEquals(15_000L, currentTime)
         }
 
     @Test
