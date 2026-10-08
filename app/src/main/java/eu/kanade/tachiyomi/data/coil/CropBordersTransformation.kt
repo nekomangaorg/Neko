@@ -1,10 +1,15 @@
 package eu.kanade.tachiyomi.data.coil
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.ColorSpace
+import android.graphics.Paint
 import android.graphics.Rect
+import android.os.Build
 import coil3.size.Size
 import coil3.transform.Transformation
 import kotlin.math.abs
+import org.nekomanga.logging.TimberKt
 
 /** Pure data model representing calculated crop coordinates. */
 data class CropBounds(
@@ -84,13 +89,54 @@ class CropBordersTransformation(
         }
 
         val cropped =
-            Bitmap.createBitmap(
-                softwareBitmap,
-                cropRect.left,
-                cropRect.top,
-                cropRect.width(),
-                cropRect.height(),
-            )
+            try {
+                Bitmap.createBitmap(
+                    softwareBitmap,
+                    cropRect.left,
+                    cropRect.top,
+                    cropRect.width(),
+                    cropRect.height(),
+                )
+            } catch (e: IllegalArgumentException) {
+                TimberKt.w(e) { "Failed to create cropped bitmap directly, falling back to Canvas" }
+                val output =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val cs =
+                            softwareBitmap.colorSpace?.takeIf {
+                                it.model == ColorSpace.Model.RGB &&
+                                    (it as? ColorSpace.Rgb)?.transferParameters != null
+                            } ?: ColorSpace.get(ColorSpace.Named.SRGB)
+                        val cfg =
+                            softwareBitmap.config?.takeUnless { it == Bitmap.Config.HARDWARE }
+                                ?: Bitmap.Config.ARGB_8888
+                        Bitmap.createBitmap(
+                            cropRect.width(),
+                            cropRect.height(),
+                            cfg,
+                            softwareBitmap.hasAlpha(),
+                            cs,
+                        )
+                    } else {
+                        Bitmap.createBitmap(
+                            cropRect.width(),
+                            cropRect.height(),
+                            softwareBitmap.config ?: Bitmap.Config.ARGB_8888,
+                        )
+                    }
+                output.density = softwareBitmap.density
+                val canvas = Canvas(output)
+                val srcRect = Rect(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom)
+                val dstRect = Rect(0, 0, cropRect.width(), cropRect.height())
+                val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+                canvas.drawBitmap(softwareBitmap, srcRect, dstRect, paint)
+                output
+            } catch (e: Throwable) {
+                TimberKt.e(e) { "Failed to crop bitmap" }
+                if (softwareBitmap !== input) {
+                    softwareBitmap.recycle()
+                }
+                return input
+            }
 
         if (softwareBitmap !== input) {
             softwareBitmap.recycle()

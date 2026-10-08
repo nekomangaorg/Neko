@@ -56,8 +56,8 @@ class RotateWidePageTransformation(
                 sourceBitmap.recycle()
             }
             rotated
-        } catch (e: OutOfMemoryError) {
-            TimberKt.e(e) { "OutOfMemoryError rotating wide page" }
+        } catch (e: Throwable) {
+            TimberKt.e(e) { "Error rotating wide page" }
             if (sourceBitmap !== input) {
                 sourceBitmap.recycle()
             }
