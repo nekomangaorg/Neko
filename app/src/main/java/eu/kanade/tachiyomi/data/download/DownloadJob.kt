@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.download
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
@@ -56,30 +57,47 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
         if (!active) {
             return Result.failure()
         }
-        tryToSetForeground()
+        try {
+            tryToSetForeground()
 
-        coroutineScope {
-            // checkNetworkState stops the downloader when the network drops, or turns metered
-            // while unmetered-only is on
-            val networkWatcher =
-                combine(
-                        applicationContext.networkStateFlow(),
-                        preferences.downloadOnlyOverUnmetered().changes(),
-                    ) { state, requireUnmetered ->
-                        checkNetworkState(state, requireUnmetered)
-                    }
-                    .launchIn(this)
+            coroutineScope {
+                // checkNetworkState stops the downloader when the network drops, or turns
+                // metered while unmetered-only is on
+                val networkWatcher =
+                    combine(
+                            applicationContext.networkStateFlow(),
+                            preferences.downloadOnlyOverUnmetered().changes(),
+                        ) { state, requireUnmetered ->
+                            checkNetworkState(state, requireUnmetered)
+                        }
+                        .launchIn(this)
 
-            // Keep the worker running while the downloader runs. The network flow never
-            // completes, so the watcher has to be cancelled before this scope can return.
-            while (!isStopped && downloadManager.isRunning) {
-                delay(1.seconds)
+                // Keep the worker running while the downloader runs. The network flow never
+                // completes, so the watcher has to be cancelled before this scope can return.
+                while (!isStopped && downloadManager.isRunning) {
+                    delay(1.seconds)
+                }
+                networkWatcher.cancel()
             }
-            networkWatcher.cancel()
+        } finally {
+            // When the system stops the worker (quota, foreground service timeout) the
+            // downloader would keep going without a foreground service, so pause it
+            if (stoppedBySystem() && downloadManager.isRunning) {
+                downloadManager.pauseDownloads()
+            }
         }
 
         return Result.success()
     }
+
+    /**
+     * A cancel from the app is a REPLACE restart or [stop], and neither should touch the
+     * downloader. getStopReason is marked API 31 because its values follow JobParameters, but it
+     * reads a field WorkManager sets on every API level: CANCELLED_BY_APP for a cancel, UNKNOWN for
+     * a system stop below API 31.
+     */
+    @SuppressLint("NewApi")
+    private fun stoppedBySystem() = isStopped && stopReason != WorkInfo.STOP_REASON_CANCELLED_BY_APP
 
     private fun checkNetworkState(state: NetworkState, requireUnmetered: Boolean): Boolean {
         return if (state.isOnline) {

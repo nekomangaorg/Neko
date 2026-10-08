@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.download
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker.Result
+import androidx.work.WorkInfo
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.NetworkState
@@ -19,6 +20,7 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -61,6 +63,7 @@ class DownloadJobTest {
                     true
                 }
             every { downloaderStop(any()) } answers { downloaderRunning = false }
+            every { pauseDownloads() } answers { downloaderRunning = false }
             every { isRunning } answers { downloaderRunning }
         }
         Injekt.addSingleton(downloadManager)
@@ -113,4 +116,33 @@ class DownloadJobTest {
             assertEquals(Result.success(), result)
             verify(exactly = 0) { downloadManager.downloaderStop(any()) }
         }
+
+    @Test
+    fun `given system stops the worker when doWork then downloader is paused`() = runTest {
+        val worker = DownloadJob(context, workerParams)
+        val work = async { worker.doWork() }
+        delay(5.seconds)
+
+        // WorkManager sets the stop reason before it cancels doWork
+        worker.stop(WorkInfo.STOP_REASON_QUOTA)
+        work.cancel()
+        advanceUntilIdle()
+
+        verify(exactly = 1) { downloadManager.pauseDownloads() }
+        assertEquals(false, downloaderRunning)
+    }
+
+    @Test
+    fun `given worker is replaced when doWork then downloader keeps running`() = runTest {
+        val worker = DownloadJob(context, workerParams)
+        val work = async { worker.doWork() }
+        delay(5.seconds)
+
+        worker.stop(WorkInfo.STOP_REASON_CANCELLED_BY_APP)
+        work.cancel()
+        advanceUntilIdle()
+
+        verify(exactly = 0) { downloadManager.pauseDownloads() }
+        assertEquals(true, downloaderRunning)
+    }
 }
