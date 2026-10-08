@@ -85,18 +85,20 @@ class Downloader(
     private val notifier by lazy { DownloadNotifier(context) }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var downloaderJob: Job? = null
+    @Volatile private var downloaderJob: Job? = null
 
     /**
      * Held by the check that stops the downloader once nothing is left to download and by
      * [queueChapters] while it adds chapters, so a chapter queued as the last download finishes is
-     * either seen by that check or starts the downloader again.
+     * either seen by that check or starts the downloader again. [updateQueue] and
+     * [removeFromQueueAndRestart] hold it from pause to start, and [isRunning] reads under it, so a
+     * restart never reads as stopped.
      */
     private val queueLock = Any()
 
-    /** Whether the downloader is running. */
+    /** Whether the downloader is running. DownloadJob ends once this reads false. */
     val isRunning: Boolean
-        get() = downloaderJob?.isActive ?: false
+        get() = synchronized(queueLock) { downloaderJob?.isActive ?: false }
 
     /** Whether the downloader is paused */
     @Volatile var isPaused: Boolean = false
@@ -624,9 +626,28 @@ class Downloader(
         removedDownloads.forEach { it.resetStatus() }
     }
 
-    fun removeFromQueue(chapters: List<Chapter>) {
-        val chapterIds = chapters.map { it.id }
-        removeFromQueueIf { it.chapterItem.id in chapterIds }
+    /**
+     * Removes [chapters] from the queue. A running downloader is paused and started again, or
+     * stopped when the queue is left empty.
+     */
+    fun removeFromQueueAndRestart(chapters: List<Chapter>) {
+        synchronized(queueLock) {
+            val wasRunning = isRunning
+            if (wasRunning) {
+                pause()
+            }
+
+            val chapterIds = chapters.map { it.id }
+            removeFromQueueIf { it.chapterItem.id in chapterIds }
+
+            if (wasRunning) {
+                if (queueState.value.isEmpty()) {
+                    stop()
+                } else {
+                    start()
+                }
+            }
+        }
     }
 
     fun removeFromQueue(manga: Manga) {
@@ -640,20 +661,22 @@ class Downloader(
     }
 
     fun updateQueue(downloads: List<Download>) {
-        val wasRunning = isRunning
+        synchronized(queueLock) {
+            val wasRunning = isRunning
 
-        if (downloads.isEmpty()) {
-            clearQueue()
-            stop()
-            return
-        }
+            if (downloads.isEmpty()) {
+                clearQueue()
+                stop()
+                return
+            }
 
-        pause()
-        clearQueueState()
-        addAllToQueue(downloads)
+            pause()
+            clearQueueState()
+            addAllToQueue(downloads)
 
-        if (wasRunning) {
-            start()
+            if (wasRunning) {
+                start()
+            }
         }
     }
 

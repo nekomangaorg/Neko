@@ -340,20 +340,7 @@ class DownloadManager(
     }
 
     private fun removeFromDownloadQueue(chapters: List<Chapter>) {
-        val wasRunning = downloader.isRunning
-        if (wasRunning) {
-            downloader.pause()
-        }
-
-        downloader.removeFromQueue(chapters)
-
-        if (wasRunning) {
-            if (queueState.value.isEmpty()) {
-                downloader.stop()
-            } else if (queueState.value.isNotEmpty()) {
-                downloader.start()
-            }
-        }
+        downloader.removeFromQueueAndRestart(chapters)
     }
 
     /** return the list of all manga folders */
