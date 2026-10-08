@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling ReaderChaptersSheet from Preferences, Context Color Resolvers & Action Bloat
 
-**Status:** Proposed / Under Review  
+**Status:** Completed / Landed  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
 **Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R8 (Priority: Medium / UI Sheet Decoupling)  
 **Prerequisites:** Step R6 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
 **Downstream Dependents:** None  
-**Implementation State:** 🟡 Coupled Baseline (Injekt calls, 28 function parameters, Context-based color math in list items)  
+**Implementation State:** 🟢 Decoupled (Immutable ReaderChaptersSheetUiState, ReaderChaptersAction, background chapter mapping, and previews)  
 
 ---
 
@@ -192,8 +192,8 @@ private fun ChapterListItem(
 >
 > Decoupling `ReaderChaptersSheet` replaces 28 individual parameters, `Injekt.get()`, and Android `Context` color calculations with `ReaderChaptersSheetUiState` and `ReaderChaptersAction`, pre-mapping rows on background dispatchers.
 
-- [ ] **Step 1**: Define `ReaderChaptersSheetUiState`, `ReaderChapterRowUiModel`, and `ReaderChaptersAction`.
-- [ ] **Step 2**: Implement background mapper in `ReaderViewModel`.
-- [ ] **Step 3**: Refactor `ReaderChaptersSheet.kt` to eliminate the 28 parameters and `Injekt.get()`.
-- [ ] **Step 4**: Add `@Preview` annotations for `ReaderChaptersSheet`.
-- [ ] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [x] **Step 1**: Define `ReaderChaptersSheetUiState`, `ReaderChapterRowUiModel`, and `ReaderChaptersAction`.
+- [x] **Step 2**: Implement background mapper in `ReaderViewModel`.
+- [x] **Step 3**: Refactor `ReaderChaptersSheet.kt` to eliminate the 28 parameters and `Injekt.get()`.
+- [x] **Step 4**: Add `@Preview` annotations for `ReaderChaptersSheet`.
+- [x] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
