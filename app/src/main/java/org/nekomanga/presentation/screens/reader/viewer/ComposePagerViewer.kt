@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderNavCommand
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
+import eu.kanade.tachiyomi.ui.reader.model.withoutCardModel
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPanDelegate
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerScrollAnchorResolver
@@ -58,7 +59,6 @@ fun ComposePagerViewer(
     modifier: Modifier = Modifier,
     navCommands: Flow<ReaderNavCommand>? = null,
     isNavigating: Boolean = false,
-    transitionPreloadStates: Map<Long, ChapterTransitionUiModel.PreloadState> = emptyMap(),
 ) {
     val initialPage = config.initialIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
     val pagerState =
@@ -248,8 +248,11 @@ fun ComposePagerViewer(
         }
     }
 
-    // 6. Track active page changes, dispatch selections, and trigger threshold preloads
-    LaunchedEffect(pagerState, items) {
+    // 6. Track active page changes, dispatch selections, and trigger threshold preloads. Keyed on
+    // the items without their card models, so a transition card showing a new preload state does
+    // not dispatch the selection and request the preload again.
+    val itemsWithoutCards = remember(items) { items.map { it.withoutCardModel() } }
+    LaunchedEffect(pagerState, itemsWithoutCards) {
         snapshotFlow { pagerState.currentPage }
             .distinctUntilChanged()
             .collect { pageIndex ->
@@ -291,7 +294,9 @@ fun ComposePagerViewer(
                     is ReaderUiItem.SplitPage -> onPageSelected(item.page, false)
                     is ReaderUiItem.Transition -> {
                         onTransitionSelected(item.transition)
-                        item.transition.to?.let { config.onRequestPreloadChapter?.invoke(it) }
+                        item.transition.to?.let {
+                            currentConfig.onRequestPreloadChapter?.invoke(it)
+                        }
                     }
                 }
             }
@@ -340,7 +345,6 @@ fun ComposePagerViewer(
                     item = item,
                     config = pageItemConfig,
                     isActive = index == pagerState.currentPage,
-                    transitionPreloadStates = transitionPreloadStates,
                 )
             }
         } else {
@@ -356,7 +360,6 @@ fun ComposePagerViewer(
                     item = item,
                     config = pageItemConfig,
                     isActive = index == pagerState.currentPage,
-                    transitionPreloadStates = transitionPreloadStates,
                 )
             }
         }
@@ -368,7 +371,6 @@ private fun PagerItemContent(
     item: ReaderUiItem,
     config: PagerViewerConfigUiModel,
     isActive: Boolean,
-    transitionPreloadStates: Map<Long, ChapterTransitionUiModel.PreloadState>,
     modifier: Modifier = Modifier,
 ) {
     when (item) {
@@ -390,9 +392,7 @@ private fun PagerItemContent(
             )
         }
         is ReaderUiItem.Transition -> {
-            val uiModel =
-                (item.transitionUiModel ?: ChapterTransitionUiModel.from(item.transition))
-                    .withLivePreloadState(transitionPreloadStates)
+            val uiModel = item.transitionUiModel ?: ChapterTransitionUiModel.from(item.transition)
             ReaderTransitionPage(
                 uiModel = uiModel,
                 onRetry = { item.transition.to?.let { config.onRetryTransition(it) } },

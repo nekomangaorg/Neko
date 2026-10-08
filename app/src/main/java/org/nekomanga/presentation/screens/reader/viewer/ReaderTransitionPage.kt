@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -369,7 +370,18 @@ private fun ChapterPreloadStatusSection(
     onRetry: () -> Unit,
     tapClaim: TapNavigationClaim?,
 ) {
-    if (preloadState is ChapterTransitionUiModel.PreloadState.Error) {
+    if (preloadState is ChapterTransitionUiModel.PreloadState.Loading) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = Size.mediumLarge),
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(Size.large),
+                strokeWidth = Size.extraTiny,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+    } else if (preloadState is ChapterTransitionUiModel.PreloadState.Error) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth().padding(top = Size.mediumLarge),

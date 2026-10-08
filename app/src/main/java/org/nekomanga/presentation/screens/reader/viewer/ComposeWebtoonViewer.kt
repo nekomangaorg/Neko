@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.ui.reader.model.areTransitionsEquivalent as modelAreT
 import eu.kanade.tachiyomi.ui.reader.model.continuesInto
 import eu.kanade.tachiyomi.ui.reader.model.isEquivalentTo
 import eu.kanade.tachiyomi.ui.reader.model.isSameChapter as modelIsSameChapter
+import eu.kanade.tachiyomi.ui.reader.model.withoutCardModel
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonActiveItemResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollAnchorResolver
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonScrollGatingPolicy
@@ -71,7 +72,6 @@ fun ComposeWebtoonViewer(
     onPageLongTap: (ReaderPage) -> Unit,
     onNavigateAdjacent: (forward: Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    transitionPreloadStates: Map<Long, ChapterTransitionUiModel.PreloadState> = emptyMap(),
 ) {
     val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = config.initialIndex)
     val zoomState = rememberWebtoonZoomState()
@@ -104,8 +104,11 @@ fun ComposeWebtoonViewer(
         }
     }
 
-    // 2. Eagerly preload next chapter when chapter or items update
-    LaunchedEffect(config.activeChapterId, items) {
+    // 2. Eagerly preload next chapter when chapter or items update. Keyed on the items without
+    // their card models, so a transition card showing a new preload state does not request the
+    // preload again.
+    val itemsWithoutCards = remember(items) { items.map { it.withoutCardModel() } }
+    LaunchedEffect(config.activeChapterId, itemsWithoutCards) {
         val nextTransition =
             items.firstOrNull {
                 it is ReaderUiItem.Transition && it.transition is ChapterTransition.Next
@@ -198,10 +201,15 @@ fun ComposeWebtoonViewer(
             activeIndex to currentItems.getOrNull(activeIndex)
         }
             .filterNotNull()
-            .distinctUntilChanged { old, new -> old.first == new.first && old.second == new.second }
+            .distinctUntilChanged { old, new ->
+                old.first == new.first &&
+                    old.second?.withoutCardModel() == new.second?.withoutCardModel()
+            }
             .collect { (activeIndex, item) ->
                 if (item != null) {
-                    val activeItemChanged = lastActiveItem != item
+                    // A card showing a new preload state is the same active item.
+                    val activeItemChanged =
+                        lastActiveItem?.withoutCardModel() != item.withoutCardModel()
                     lastActiveItem = item
                     if (activeItemChanged) {
                         currentOnActiveItemChanged(activeIndex)
@@ -350,9 +358,7 @@ fun ComposeWebtoonViewer(
                     }
                     is ReaderUiItem.Transition -> {
                         val uiModel =
-                            (item.transitionUiModel
-                                    ?: ChapterTransitionUiModel.from(item.transition))
-                                .withLivePreloadState(transitionPreloadStates)
+                            item.transitionUiModel ?: ChapterTransitionUiModel.from(item.transition)
                         ReaderTransitionPage(
                             uiModel = uiModel,
                             onRetry = {

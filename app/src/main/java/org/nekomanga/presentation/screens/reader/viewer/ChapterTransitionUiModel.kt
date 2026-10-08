@@ -109,21 +109,17 @@ fun ReaderChapter.State?.toPreloadState(): ChapterTransitionUiModel.PreloadState
         else -> ChapterTransitionUiModel.PreloadState.Ready
     }
 
-/**
- * This model with its target chapter's state taken from [liveStates], which is keyed by chapter id.
- * Returns this model when the map has no entry for the target or the entry already matches.
- */
-fun ChapterTransitionUiModel.withLivePreloadState(
-    liveStates: Map<Long, ChapterTransitionUiModel.PreloadState>
+/** This model with its target chapter in [state], or this model when nothing changes. */
+fun ChapterTransitionUiModel.withPreloadState(
+    state: ChapterTransitionUiModel.PreloadState
 ): ChapterTransitionUiModel {
     val target =
         when (this) {
             is ChapterTransitionUiModel.Prev -> toChapter
             is ChapterTransitionUiModel.Next -> toChapter
         } ?: return this
-    val live = liveStates[target.chapterId] ?: return this
-    if (live == target.preloadState) return this
-    val updated = target.copy(preloadState = live)
+    if (state == target.preloadState) return this
+    val updated = target.copy(preloadState = state)
     return when (this) {
         is ChapterTransitionUiModel.Prev -> copy(toChapter = updated)
         is ChapterTransitionUiModel.Next -> copy(toChapter = updated)

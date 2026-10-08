@@ -48,7 +48,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderUiItem
 import eu.kanade.tachiyomi.ui.reader.model.ReaderViewerPreferences
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
-import eu.kanade.tachiyomi.ui.reader.model.transitionTargetPreloadStates
+import eu.kanade.tachiyomi.ui.reader.model.withLivePreloadStates
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -667,9 +667,10 @@ constructor(
 
     /**
      * Called when the viewers decide it's a good time to preload a [chapter] and improve the UX so
-     * that the user doesn't have to wait too long to continue reading.
+     * that the user doesn't have to wait too long to continue reading. A chapter whose last load
+     * failed is loaded again only when [isRetry] is set, which the transition card's Retry does.
      */
-    private suspend fun preload(chapter: ReaderChapter) {
+    private suspend fun preload(chapter: ReaderChapter, isRetry: Boolean = false) {
         val chapterList = getChapterList()
         val targetChapter = chapterList.find { it.chapter.id == chapter.chapter.id } ?: chapter
 
@@ -683,10 +684,7 @@ constructor(
             }
         }
 
-        if (
-            targetChapter.state != ReaderChapter.State.Wait &&
-                targetChapter.state !is ReaderChapter.State.Error
-        ) {
+        if (!targetChapter.state.allowsPreload(isRetry)) {
             return
         }
 
@@ -820,11 +818,11 @@ constructor(
         }
     }
 
-    fun requestPreloadChapter(chapter: Chapter) {
+    fun requestPreloadChapter(chapter: Chapter, isRetry: Boolean = false) {
         viewModelScope.launch {
             val readerChapter =
                 getChapterList().find { it.chapter.id == chapter.id } ?: ReaderChapter(chapter)
-            preload(readerChapter)
+            preload(readerChapter, isRetry)
         }
     }
 
@@ -1533,11 +1531,11 @@ constructor(
     }
 
     /**
-     * Keeps [ReaderState.transitionPreloadStates] in step with the transition target chapters. A
-     * failed preload does not rebuild the viewer items, so without this the card keeps the state it
-     * had when the items were built and never shows the error or its Retry. The items themselves
-     * stay untouched: both viewers re-request the preload when the item list changes, and a
-     * replaced list after each failure would retry in a loop.
+     * Keeps the transition cards in [ReaderState.viewerItems] in step with their target chapters. A
+     * failed preload does not rebuild the items, so without this the card keeps the state it had
+     * when the items were built and never shows the error or its Retry. The viewers ignore card
+     * changes when deciding what to preload, and [preload] skips a failed chapter unless it is a
+     * Retry, so replacing the items here does not start another load.
      */
     private fun observeTransitionTargetStates() {
         state
@@ -1550,10 +1548,7 @@ constructor(
             .flatMapLatest { targets -> targets.map { it.stateFlow }.merge() }
             .onEach {
                 mutableState.update { current ->
-                    current.copy(
-                        transitionPreloadStates =
-                            current.viewerItems.transitionTargetPreloadStates()
-                    )
+                    current.copy(viewerItems = current.viewerItems.withLivePreloadStates())
                 }
             }
             .launchIn(viewModelScope)
@@ -1754,8 +1749,6 @@ constructor(
         val chapterRowUiModels: List<ReaderChapterRowUiModel> = emptyList(),
         // Hoisted UI state from ReaderActivity
         val viewerItems: List<ReaderUiItem> = emptyList(),
-        /** Live card state of each transition target in [viewerItems], keyed by chapter id. */
-        val transitionPreloadStates: Map<Long, ChapterTransitionUiModel.PreloadState> = emptyMap(),
         val chapterTitle: String = "",
         val showShiftDoublePage: Boolean = false,
         val shiftDoublePageIconRes: Int? = null,
