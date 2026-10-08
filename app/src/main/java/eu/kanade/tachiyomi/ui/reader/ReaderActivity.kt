@@ -464,7 +464,7 @@ class ReaderActivity : BaseMainActivity() {
                         val onRetryTransition =
                             remember(viewModel) {
                                 { chapter: ReaderChapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                    viewModel.requestPreloadChapter(chapter.chapter, isRetry = true)
                                 }
                             }
                         val onNavigateToChapter =
@@ -622,7 +622,7 @@ class ReaderActivity : BaseMainActivity() {
                         val onRetryTransitionWebtoon =
                             remember(viewModel) {
                                 { chapter: ReaderChapter ->
-                                    viewModel.requestPreloadChapter(chapter.chapter)
+                                    viewModel.requestPreloadChapter(chapter.chapter, isRetry = true)
                                 }
                             }
                         val onNavigateToChapterWebtoon =

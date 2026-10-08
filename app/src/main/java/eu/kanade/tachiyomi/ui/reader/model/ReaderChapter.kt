@@ -64,5 +64,12 @@ data class ReaderChapter(val chapter: Chapter) {
         class Error(val error: Throwable) : State()
 
         class Loaded(val pages: List<ReaderPage>) : State()
+
+        /**
+         * True when a preload may start from this state. A failed chapter is preloaded again only
+         * on an explicit Retry, so an automatic request cannot loop on a chapter that keeps
+         * failing.
+         */
+        fun allowsPreload(isRetry: Boolean): Boolean = this == Wait || (isRetry && this is Error)
     }
 }

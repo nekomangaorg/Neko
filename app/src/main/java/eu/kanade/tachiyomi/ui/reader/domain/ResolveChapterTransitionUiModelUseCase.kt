@@ -2,12 +2,12 @@ package eu.kanade.tachiyomi.ui.reader.domain
 
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
-import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.viewer.calculateChapterDifference
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.manga.toManga
 import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel
+import org.nekomanga.presentation.screens.reader.viewer.toPreloadState
 
 /**
  * Domain interactor that prepares an immutable [ChapterTransitionUiModel] by evaluating chapter
@@ -42,14 +42,7 @@ class ResolveChapterTransitionUiModelUseCase(private val downloadManager: Downlo
                     } else {
                         0
                     }
-                val preloadState =
-                    when (val state = to?.state) {
-                        is ReaderChapter.State.Loading ->
-                            ChapterTransitionUiModel.PreloadState.Loading
-                        is ReaderChapter.State.Error ->
-                            ChapterTransitionUiModel.PreloadState.Error(state.error.message ?: "")
-                        else -> ChapterTransitionUiModel.PreloadState.Ready
-                    }
+                val preloadState = to?.state.toPreloadState()
                 ChapterTransitionUiModel.Prev(
                     fromChapterName = transition.from.chapter.name,
                     isFromDownloaded = isFromDownloaded,
@@ -79,14 +72,7 @@ class ResolveChapterTransitionUiModelUseCase(private val downloadManager: Downlo
                     } else {
                         0
                     }
-                val preloadState =
-                    when (val state = to?.state) {
-                        is ReaderChapter.State.Loading ->
-                            ChapterTransitionUiModel.PreloadState.Loading
-                        is ReaderChapter.State.Error ->
-                            ChapterTransitionUiModel.PreloadState.Error(state.error.message ?: "")
-                        else -> ChapterTransitionUiModel.PreloadState.Ready
-                    }
+                val preloadState = to?.state.toPreloadState()
                 ChapterTransitionUiModel.Next(
                     fromChapterName = transition.from.chapter.name,
                     isFromDownloaded = isFromDownloaded,
