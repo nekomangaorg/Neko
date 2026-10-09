@@ -198,6 +198,49 @@ class BuildWebtoonItemsUseCaseTest {
     }
 
     @Test
+    fun `invoke drops existing splits when splitting tall pages is off`() {
+        val currChapter = createChapter(1L, pageCount = 2, chapterNumber = 1f)
+        val targetPage = currChapter.pages!![0]
+        val existingItems =
+            listOf(
+                ReaderUiItem.SplitPage(ReaderPageSplit(targetPage, 0, 1000)),
+                ReaderUiItem.SplitPage(ReaderPageSplit(targetPage, 1000, 1000)),
+            )
+
+        val viewerChapters = ViewerChapters(currChapter, null, null)
+        val result = useCase(viewerChapters, existingItems = existingItems, splitTallPages = false)
+
+        val items = result.items
+        // 1 prev trans + 2 whole pages + 1 next trans = 4 items
+        assertEquals(4, items.size)
+        assertEquals(targetPage, (items[1] as ReaderUiItem.Page).page)
+        assertTrue(result.tallSplitPages.isEmpty())
+    }
+
+    @Test
+    fun `invoke ignores precomputedSplits when splitting tall pages is off`() {
+        val currChapter = createChapter(1L, pageCount = 1, chapterNumber = 1f)
+        val page = currChapter.pages!![0]
+        val splits =
+            listOf(
+                ReaderPageSplit(page, 0, 500),
+                ReaderPageSplit(page, 500, 500),
+            )
+        page.precomputedSplits = splits
+
+        val viewerChapters = ViewerChapters(currChapter, null, null)
+        val result = useCase(viewerChapters, screenHeight = 1000, splitTallPages = false)
+
+        val items = result.items
+        // 1 prev trans + 1 whole page + 1 next trans = 3 items
+        assertEquals(3, items.size)
+        assertEquals(page, (items[1] as ReaderUiItem.Page).page)
+        assertTrue(result.tallSplitPages.isEmpty())
+        // Kept so switching the setting back on restores the slices without a new check.
+        assertEquals(splits, page.precomputedSplits)
+    }
+
+    @Test
     fun `invoke preserves non-tall page when precomputedSplits is empty list`() {
         val currChapter = createChapter(1L, pageCount = 1, chapterNumber = 1f)
         val page = currChapter.pages!![0]

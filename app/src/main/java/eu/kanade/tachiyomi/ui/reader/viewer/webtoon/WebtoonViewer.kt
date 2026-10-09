@@ -121,8 +121,9 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
             controller.buildItems(
                 chapters = chapters,
                 forceTransition = forceTransition,
-                screenHeight = if (config.splitTallPages) screenHeight else 0,
+                screenHeight = screenHeight,
                 existingItems = items,
+                splitTallPages = config.splitTallPages,
             )
         val chapterChanged = activeChapterId != chapters.currChapter.chapter.id
         activeChapterId = chapters.currChapter.chapter.id

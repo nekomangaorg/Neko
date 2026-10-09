@@ -61,6 +61,7 @@ class ReaderWebtoonController(
         forceTransition: Boolean,
         screenHeight: Int = 0,
         existingItems: List<ReaderUiItem> = emptyList(),
+        splitTallPages: Boolean = true,
     ): List<ReaderUiItem> {
         tallSplitPages.clear()
         nonTallPages.clear()
@@ -75,6 +76,7 @@ class ReaderWebtoonController(
                 screenHeight = screenHeight,
                 existingItems = existingItems,
                 hadTransitionForNext = hadTransitionForNext,
+                splitTallPages = splitTallPages,
             )
 
         prevTransition = result.prevTransition
