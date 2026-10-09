@@ -64,6 +64,7 @@ import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
 import org.nekomanga.presentation.screens.library.filter.FilterCompleted
+import org.nekomanga.presentation.screens.library.filter.FilterContentRating
 import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
 import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 import org.nekomanga.presentation.screens.library.filter.FilterMerged
@@ -418,6 +419,7 @@ class LibraryViewModel() : ViewModel() {
         combine(
                 libraryPreferences.filterBookmarked().changes(),
                 libraryPreferences.filterCompleted().changes(),
+                libraryPreferences.filterContentRating().changes(),
                 libraryPreferences.filterDownloaded().changes(),
                 libraryPreferences.filterMangaType().changes(),
                 libraryPreferences.filterMerged().changes(),
@@ -429,13 +431,14 @@ class LibraryViewModel() : ViewModel() {
                 LibraryFilters(
                     filterBookmarked = it[0] as FilterBookmarked,
                     filterCompleted = it[1] as FilterCompleted,
-                    filterDownloaded = it[2] as FilterDownloaded,
-                    filterMangaType = it[3] as FilterMangaType,
-                    filterMerged = it[4] as FilterMerged,
-                    filterMissingChapters = it[5] as FilterMissingChapters,
-                    filterTracked = it[6] as FilterTracked,
-                    filterUnavailable = it[7] as FilterUnavailable,
-                    filterUnread = it[8] as FilterUnread,
+                    filterContentRating = it[2] as FilterContentRating,
+                    filterDownloaded = it[3] as FilterDownloaded,
+                    filterMangaType = it[4] as FilterMangaType,
+                    filterMerged = it[5] as FilterMerged,
+                    filterMissingChapters = it[6] as FilterMissingChapters,
+                    filterTracked = it[7] as FilterTracked,
+                    filterUnavailable = it[8] as FilterUnavailable,
+                    filterUnread = it[9] as FilterUnread,
                 )
             }
             .distinctUntilChanged()
@@ -845,6 +848,7 @@ class LibraryViewModel() : ViewModel() {
             libraryPreferences.filterUnread().delete()
             libraryPreferences.filterDownloaded().delete()
             libraryPreferences.filterCompleted().delete()
+            libraryPreferences.filterContentRating().delete()
             libraryPreferences.filterMangaType().delete()
             libraryPreferences.filterBookmarked().delete()
             libraryPreferences.filterMissingChapters().delete()
@@ -859,6 +863,7 @@ class LibraryViewModel() : ViewModel() {
             when (filter) {
                 is FilterBookmarked -> libraryPreferences.filterBookmarked().set(filter)
                 is FilterCompleted -> libraryPreferences.filterCompleted().set(filter)
+                is FilterContentRating -> libraryPreferences.filterContentRating().set(filter)
                 is FilterDownloaded -> libraryPreferences.filterDownloaded().set(filter)
                 is FilterMangaType -> libraryPreferences.filterMangaType().set(filter)
                 is FilterMerged -> libraryPreferences.filterMerged().set(filter)

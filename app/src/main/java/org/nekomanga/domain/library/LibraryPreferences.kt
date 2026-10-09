@@ -4,6 +4,7 @@ import org.nekomanga.presentation.screens.library.LibraryDisplayMode
 import org.nekomanga.presentation.screens.library.LibraryGroup
 import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
 import org.nekomanga.presentation.screens.library.filter.FilterCompleted
+import org.nekomanga.presentation.screens.library.filter.FilterContentRating
 import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
 import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 import org.nekomanga.presentation.screens.library.filter.FilterMerged
@@ -181,6 +182,14 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
             defaultValue = FilterTracked.Inactive,
             serializer = FilterTracked::toInt,
             deserializer = FilterTracked::fromInt,
+        )
+
+    fun filterContentRating() =
+        this.preferenceStore.getObjectFromInt(
+            "pref_filter_content_rating_key",
+            defaultValue = FilterContentRating.Inactive,
+            serializer = FilterContentRating::toInt,
+            deserializer = FilterContentRating::fromInt,
         )
 
     fun filterMangaType() =

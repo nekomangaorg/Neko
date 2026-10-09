@@ -24,6 +24,7 @@ import org.nekomanga.presentation.components.icons.CollapseAllIcon
 import org.nekomanga.presentation.components.icons.ExpandAllIcon
 import org.nekomanga.presentation.screens.library.filter.FilterBookmarked
 import org.nekomanga.presentation.screens.library.filter.FilterCompleted
+import org.nekomanga.presentation.screens.library.filter.FilterContentRating
 import org.nekomanga.presentation.screens.library.filter.FilterDownloaded
 import org.nekomanga.presentation.screens.library.filter.FilterMangaType
 import org.nekomanga.presentation.screens.library.filter.FilterMerged
@@ -107,6 +108,13 @@ fun LibraryButtonBar(
         val completedToggleList = listOf(FilterCompleted.Completed, FilterCompleted.Ongoing)
         val mangaTypeToggleList =
             listOf(FilterMangaType.Manga, FilterMangaType.Manhwa, FilterMangaType.Manhua)
+        val contentRatingToggleList =
+            listOf(
+                FilterContentRating.Safe,
+                FilterContentRating.Suggestive,
+                FilterContentRating.Erotica,
+                FilterContentRating.Pornographic,
+            )
         val bookmarkToggleList = listOf(FilterBookmarked.Bookmarked, FilterBookmarked.NotBookmarked)
         val missingToggleList =
             listOf(FilterMissingChapters.MissingChapter, FilterMissingChapters.NoMissingChapters)
@@ -132,6 +140,11 @@ fun LibraryButtonBar(
         ConnectedToggleButtons(
             libraryScreenState.libraryFilters.filterMangaType,
             mangaTypeToggleList,
+            libraryScreenActions.filterToggled,
+        )
+        ConnectedToggleButtons(
+            libraryScreenState.libraryFilters.filterContentRating,
+            contentRatingToggleList,
             libraryScreenActions.filterToggled,
         )
         ConnectedToggleButtons(
