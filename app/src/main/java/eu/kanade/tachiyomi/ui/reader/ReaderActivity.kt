@@ -416,7 +416,11 @@ class ReaderActivity : BaseMainActivity() {
                                 .filterNotNull()
                                 .collect { req ->
                                     viewModel.sendNavigationCommand(
-                                        ReaderNavCommand.ScrollToItem(req.first, req.second)
+                                        ReaderNavCommand.ScrollToItem(
+                                            itemIndex = req.first,
+                                            animated = req.second,
+                                            item = currentViewer.items.getOrNull(req.first),
+                                        )
                                     )
                                     currentViewer.requestedPagePosition = null
                                 }

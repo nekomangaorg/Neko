@@ -1,7 +1,10 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -83,6 +86,17 @@ class ReaderNavigationStateTest {
         val cmd = ReaderNavCommand.ScrollToItem(itemIndex = 7, animated = false)
         assertEquals(7, cmd.itemIndex)
         assertFalse(cmd.animated)
+    }
+
+    @Test
+    fun `ReaderNavCommand ScrollToItem carries the target item only when given`() {
+        val item = mockk<ReaderUiItem>()
+        val cmd = ReaderNavCommand.ScrollToItem(itemIndex = 7, animated = false, item = item)
+        assertSame(item, cmd.item)
+
+        val cmdDefault = ReaderNavCommand.ScrollToItem(itemIndex = 3)
+        assertNull(cmdDefault.item)
+        assertTrue(cmdDefault.animated)
     }
 
     @Test
