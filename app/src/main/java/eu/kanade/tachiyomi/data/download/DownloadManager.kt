@@ -418,7 +418,7 @@ class DownloadManager(
     suspend fun deleteManga(manga: Manga, removeQueued: Boolean = true) {
         withContext(Dispatchers.IO) {
             if (removeQueued) {
-                downloader.removeFromQueue(manga)
+                downloader.removeFromQueueAndRestart(manga)
             }
             provider.findMangaDir(manga)?.delete()
             cache.removeManga(manga)
