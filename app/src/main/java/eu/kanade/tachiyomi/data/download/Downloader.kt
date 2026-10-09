@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.manga.toSimpleManga
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.BufferedOutputStream
 import java.util.Locale
@@ -24,7 +23,9 @@ import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -66,6 +67,7 @@ class Downloader(
     private val provider: DownloadProvider,
     private val cache: DownloadCache,
     private val sourceManager: SourceManager,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     private val preferences: PreferencesHelper by injectLazy()
     private val readerPreferences: ReaderPreferences by injectLazy()
@@ -85,7 +87,7 @@ class Downloader(
     /** Notifier for the downloader state and progress. */
     private val notifier by lazy { DownloadNotifier(context) }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     @Volatile private var downloaderJob: Job? = null
 
     /**
@@ -137,7 +139,6 @@ class Downloader(
         isPaused = false
 
         launchDownloaderJob()
-        downloaderJob?.invokeOnCompletion { publishRunning() }
         publishRunning()
 
         return pending.isNotEmpty()
@@ -182,11 +183,26 @@ class Downloader(
         notifier.dismissProgress()
     }
 
-    /** Prepares to start downloader job for downloading. */
+    /**
+     * Prepares to start downloader job for downloading. Runs under [queueLock], so [isRunning]
+     * never reads the job between its launch and start, where a lazy job is not active yet.
+     */
     private fun launchDownloaderJob() {
-        if (isRunning) return
+        synchronized(queueLock) {
+            if (isRunning) return
 
-        downloaderJob = scope.launch {
+            // Store the job before it runs. A download that ends at once calls stop(), which
+            // cancels the job through downloaderJob; stored after launch returned, the job could
+            // miss that cancel and keep isRunning true with nothing downloading.
+            val job = createDownloaderJob()
+            downloaderJob = job
+            job.invokeOnCompletion { publishRunning() }
+            job.start()
+        }
+    }
+
+    private fun createDownloaderJob(): Job =
+        scope.launch(start = CoroutineStart.LAZY) {
             val activeDownloadsFlow =
                 queueState
                     .transformLatest { queue ->
@@ -235,9 +251,8 @@ class Downloader(
                 }
             }
         }
-    }
 
-    private fun CoroutineScope.launchDownloadJob(download: Download) = launchIO {
+    private fun CoroutineScope.launchDownloadJob(download: Download) = launch {
         try {
             downloadChapter(download)
 

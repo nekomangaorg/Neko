@@ -24,10 +24,12 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.nekomanga.data.database.repository.MangaRepository
@@ -43,6 +45,7 @@ class DownloaderQueueChaptersTest {
     private lateinit var downloader: Downloader
     private lateinit var mangaRepository: MangaRepository
     private lateinit var provider: DownloadProvider
+    private lateinit var sourceManager: SourceManager
 
     private val manga = Manga.create("/title/1", "Manga").apply { id = 1L }
 
@@ -84,7 +87,7 @@ class DownloaderQueueChaptersTest {
                 every { findMangaDir(any()) } returns null
                 every { chapterDirDoesNotExist(any(), any()) } returns true
             }
-        val sourceManager = mockk<SourceManager> { every { mangaDex } returns mockk() }
+        sourceManager = mockk { every { mangaDex } returns mockk() }
         downloader = Downloader(context, provider, mockk(), sourceManager)
     }
 
@@ -213,6 +216,29 @@ class DownloaderQueueChaptersTest {
 
         // A start before the stop would be cancelled by it, leaving the chapter with no job.
         assertEquals(listOf("start", "stop", "start"), jobCalls.toList())
+    }
+
+    @Test
+    fun `stops a downloader whose last download finishes before start returns`() {
+        every { DownloadJob.stop(any()) } just runs
+        every { anyConstructed<DownloadNotifier>().onComplete() } just runs
+        // Unconfined runs the downloader job inside launch, so its only download finishes and the
+        // downloader stops before start() returns.
+        downloader.pause()
+        downloader = Downloader(context, provider, mockk(), sourceManager, Dispatchers.Unconfined)
+        coEvery { mangaRepository.getMangaById(1L) } coAnswers
+            {
+                downloader.queueState.value.single().status = Download.State.DOWNLOADED
+                null
+            }
+        downloader.queueChapters(manga, listOf(chapter(1)), autoStart = true)
+
+        downloader.start()
+
+        assertFalse(downloader.isRunning)
+        val otherManga = Manga.create("/title/2", "Other").apply { id = 2L }
+        downloader.queueChapters(otherManga, listOf(chapter(2, otherManga)), autoStart = true)
+        verify(exactly = 2) { DownloadJob.start(context) }
     }
 
     private fun waitUntil(condition: () -> Boolean) {
