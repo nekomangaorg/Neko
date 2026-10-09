@@ -552,16 +552,7 @@ class FeedViewModel() : ViewModel() {
     fun moveDownload(downloadItem: DownloadItem, direction: MoveDownloadDirection) {
         viewModelScope.launchIO {
             downloadManager.reorderQueue { queue ->
-                val (moved, others) =
-                    queue.partition { download ->
-                        download.chapterItem.id == downloadItem.chapterItem.chapter.id
-                    }
-                // The download finished or was removed since the list was drawn.
-                if (moved.isEmpty()) return@reorderQueue null
-                when (direction) {
-                    MoveDownloadDirection.Top -> moved + others
-                    MoveDownloadDirection.Bottom -> others + moved
-                }
+                queue.withChapterMoved(downloadItem.chapterItem.chapter.id, direction)
             }
         }
     }
@@ -1102,6 +1093,23 @@ class FeedViewModel() : ViewModel() {
 
         const val HISTORY_ENDLESS_LIMIT = 15
         const val UPDATES_ENDLESS_LIMIT = 200
+    }
+}
+
+/**
+ * The queue with [chapterId]'s download moved to the top or bottom, or null when that chapter is no
+ * longer queued. The download list on screen can still show a chapter that has just finished or
+ * been removed.
+ */
+internal fun List<Download>.withChapterMoved(
+    chapterId: Long,
+    direction: MoveDownloadDirection,
+): List<Download>? {
+    val (moved, rest) = partition { download -> download.chapterItem.id == chapterId }
+    if (moved.isEmpty()) return null
+    return when (direction) {
+        MoveDownloadDirection.Top -> moved + rest
+        MoveDownloadDirection.Bottom -> rest + moved
     }
 }
 
