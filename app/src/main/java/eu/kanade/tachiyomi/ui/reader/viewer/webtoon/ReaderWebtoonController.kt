@@ -91,13 +91,16 @@ class ReaderWebtoonController(
     /**
      * Splits [originalPage] into [insertPages] within [currentItems]. If [insertPages] begins at
      * topOffset == 0, it replaces the monolithic [originalPage]. Otherwise, it inserts the slices
-     * directly after [originalPage].
+     * directly after [originalPage]. Returns [currentItems] unchanged when [splitTallPages] is off,
+     * because the setting can be turned off after the page was measured.
      */
     fun splitPage(
         currentItems: List<ReaderUiItem>,
         originalPage: ReaderPage,
         insertPages: List<ReaderPageSplit>,
+        splitTallPages: Boolean = true,
     ): List<ReaderUiItem> {
+        if (!splitTallPages) return currentItems
         val position = currentItems.indexOfFirst {
             (it as? ReaderUiItem.Page)?.page?.isFromSamePage(originalPage) == true
         }

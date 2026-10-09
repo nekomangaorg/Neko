@@ -12,6 +12,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -208,7 +209,7 @@ class ReaderPreloadControllerTest {
         coVerify(atLeast = 1) { loader.loadPage(any()) }
 
         // Verify memory cache was warmed for pages within memory window
-        io.mockk.verify(atLeast = 1) {
+        verify(atLeast = 1) {
             memoryWarmManager.warmMemoryCache(
                 key = any(),
                 data = any(),
@@ -287,7 +288,7 @@ class ReaderPreloadControllerTest {
     fun `requestPreloadChapter invokes onRequestPreloadChapter callback`() {
         val chapter = createChapter(2L, 5)
         controller.requestPreloadChapter(chapter)
-        io.mockk.verify(exactly = 1) { onPreloadChapter.invoke(chapter) }
+        verify(exactly = 1) { onPreloadChapter.invoke(chapter) }
     }
 
     @Test
@@ -330,6 +331,62 @@ class ReaderPreloadControllerTest {
     }
 
     @Test
+    fun `tall page check finishing after split is turned off does not invoke onPageSplit`() =
+        testScope.runTest {
+            val chapter = createChapter(1L, 5)
+            val page = chapter.pages!![0]
+            val splits =
+                listOf(
+                    ReaderPageSplit(page = page, topOffset = 0, splitHeight = 1000),
+                    ReaderPageSplit(page = page, topOffset = 1000, splitHeight = 1000),
+                )
+            var splitEnabled = true
+            // The user turns Split tall images off while the page is still being measured.
+            every { checkTallPage.invoke(page, any(), any()) } answers
+                {
+                    splitEnabled = false
+                    splits
+                }
+
+            var splitInvoked = false
+            controller =
+                ReaderPreloadControllerImpl(
+                    context = context,
+                    scope = testScope,
+                    memoryCacheWarmManager = memoryWarmManager,
+                    checkTallPage = checkTallPage,
+                    isSplitTallPagesEnabled = { splitEnabled },
+                    onPageSplit = { _, _ -> splitInvoked = true },
+                    getScreenHeight = { 2000 },
+                    ioDispatcher = testDispatcher,
+                )
+
+            controller.onPositionChanged(
+                currentIndex = 0,
+                items = listOf(ReaderUiItem.Page(page)),
+                preloadAmount = 1,
+                isRtl = false,
+                isWebtoon = true,
+            )
+            advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
+            runCurrent()
+
+            assertFalse(splitInvoked)
+            // The result is still cached for when the setting comes back on.
+            assertEquals(splits, page.precomputedSplits)
+            // The whole page is what the reader shows now, so that is what gets warmed.
+            verify(exactly = 1) {
+                memoryWarmManager.warmMemoryCache(
+                    key = any(),
+                    data = page,
+                    crossfade = false,
+                    onSuccess = any(),
+                    onError = any(),
+                )
+            }
+        }
+
+    @Test
     fun `release clears all state and resets to idle`() = testScope.runTest {
         val chapter = createChapter(1L, 5)
         val items = chapter.pages!!.map { ReaderUiItem.Page(it) }
@@ -349,7 +406,7 @@ class ReaderPreloadControllerTest {
         val state = controller.state.value
         assertTrue(state.isIdle)
         assertTrue(state.pageStatuses.isEmpty())
-        io.mockk.verify(atLeast = 1) { memoryWarmManager.release() }
+        verify(atLeast = 1) { memoryWarmManager.release() }
     }
 
     @Test
@@ -434,7 +491,7 @@ class ReaderPreloadControllerTest {
             runCurrent()
 
             val key0 = controller.itemDomainKey(items[0])
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(key = key0, any(), any(), any(), any())
             }
 
@@ -460,7 +517,7 @@ class ReaderPreloadControllerTest {
             advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
             runCurrent()
 
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(key = key0, any(), any(), any(), any())
             }
         }
@@ -537,7 +594,7 @@ class ReaderPreloadControllerTest {
                     finalStatus is PreloadPageStatus.MemoryReady ||
                     finalStatus is PreloadPageStatus.MemoryDecoding,
             )
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(
                     key = key,
                     data = page,
@@ -566,7 +623,7 @@ class ReaderPreloadControllerTest {
 
             val key0 = controller.itemDomainKey(items[0])
             // Should be invoked immediately because isInitial == true bypasses debounce
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(
                     key = key0,
                     data = items[0].page,
@@ -599,7 +656,7 @@ class ReaderPreloadControllerTest {
             val extraKey = "${baseKey}_extra"
 
             // Verify both base page and extraPage were sent to memory warming
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(
                     key = baseKey,
                     data = page,
@@ -608,7 +665,7 @@ class ReaderPreloadControllerTest {
                     onError = any(),
                 )
             }
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(
                     key = extraKey,
                     data = extraPage,
@@ -619,8 +676,6 @@ class ReaderPreloadControllerTest {
             }
 
             // Verify cancelAllExcept was called with a set that includes extraKey
-            io.mockk.verify {
-                memoryWarmManager.cancelAllExcept(match { extraKey in it && baseKey in it })
-            }
+            verify { memoryWarmManager.cancelAllExcept(match { extraKey in it && baseKey in it }) }
         }
 }

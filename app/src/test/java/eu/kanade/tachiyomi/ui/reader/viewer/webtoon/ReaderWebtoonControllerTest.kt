@@ -139,6 +139,24 @@ class ReaderWebtoonControllerTest {
     }
 
     @Test
+    fun `splitPage leaves items whole when split tall pages is off`() {
+        val controller = ReaderWebtoonController()
+        val currChapter = createChapter(1L, pageCount = 3)
+        val viewerChapters = ViewerChapters(currChapter, null, null)
+        val items = controller.buildItems(viewerChapters, forceTransition = false)
+        val targetPage = currChapter.pages!![1]
+        val split1 = ReaderPageSplit(targetPage, 0, 1000)
+        val split2 = ReaderPageSplit(targetPage, 1000, 1000)
+
+        val updatedItems =
+            controller.splitPage(items, targetPage, listOf(split1, split2), splitTallPages = false)
+
+        assertEquals(items, updatedItems)
+        assertTrue(updatedItems.none { it is ReaderUiItem.SplitPage })
+        assertTrue(!controller.tallSplitPages.contains(targetPage))
+    }
+
+    @Test
     fun `computeSplits returns null for normal proportion images`() {
         val chapter = createChapter(1L, pageCount = 1)
         val page = chapter.pages!![0]
