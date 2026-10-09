@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.httpErrorMessage
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -18,6 +19,7 @@ import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.BufferedOutputStream
+import java.io.InputStream
 import java.util.Locale
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
@@ -369,12 +371,19 @@ class Downloader(
             val errorMessage = context.getString(R.string.couldnt_download_low_space)
             download.errorMessage = errorMessage
             download.status = Download.State.ERROR
-            notifier.onError(errorMessage, download.chapterItem.name)
+            notifier.onError(errorMessage, download.chapterItem.name, download.mangaItem.title)
             return
         }
 
         val chapterDirname = provider.getChapterDirName(dbChapter)
-        val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)!!
+        val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
+        if (tmpDir == null) {
+            val errorMessage = context.getString(R.string.download_notifier_cannot_create_folder)
+            download.errorMessage = errorMessage
+            download.status = Download.State.ERROR
+            notifier.onError(errorMessage, download.chapterItem.name, download.mangaItem.title)
+            return
+        }
 
         val pagesToDownload = if (download.source is MangaDex) 6 else 3
 
@@ -427,7 +436,7 @@ class Downloader(
 
             // Only rename the directory if it's downloaded
             if (preferences.saveChaptersAsCBZ().get()) {
-                archiveChapter(mangaDir, chapterDirname, tmpDir)
+                archiveChapter(context, mangaDir, chapterDirname, tmpDir)
             } else {
                 tmpDir.renameTo(chapterDirname)
                 DiskUtil.createNoMediaFile(tmpDir, context)
@@ -474,7 +483,7 @@ class Downloader(
             // If the image is already downloaded, do nothing. Otherwise download from network
             val file =
                 imageFile
-                    ?: copyImageFromCache(chapterCache, page.imageUrl!!, tmpDir, filename)
+                    ?: copyImageFromCache(context, chapterCache, page.imageUrl!!, tmpDir, filename)
                     ?: downloadImage(page, download.source, tmpDir, filename)
 
             // When the page is ready, set page path, progress (just in case) and status
@@ -510,17 +519,7 @@ class Downloader(
         page.progress = 0
         return flow {
             val response = source.getImage(page)
-            val file = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
-            try {
-                response.body.source().saveTo(file.openOutputStream())
-                val extension = getImageExtension(response, file)
-                file.renameTo("$filename.$extension")
-            } catch (e: Exception) {
-                response.close()
-                file.delete()
-                throw e
-            }
-            emit(file)
+            emit(saveImage(context, response, tmpDir, filename))
         }
             // Retry 3 times, waiting 2, 4 and 8 seconds between attempts.
             .retryWhen { _, attempt ->
@@ -532,25 +531,6 @@ class Downloader(
                 }
             }
             .first()
-    }
-
-    /**
-     * Returns the extension of the downloaded image from the network response, or if it's null,
-     * analyze the file. If everything fails, assume it's a jpg.
-     *
-     * @param response the network response of the image.
-     * @param file the file where the image is already downloaded.
-     */
-    private fun getImageExtension(response: Response, file: UniFile): String {
-        // Read content type if available.
-        val mime =
-            response.body.contentType()?.run { if (type == "image") "image/$subtype" else null }
-                // Else guess from the uri.
-                ?: context.contentResolver.getType(file.uri)
-                // Else read magic numbers.
-                ?: ImageUtil.findImageType { file.openInputStream() }?.mime
-
-        return ImageUtil.getExtensionFromMimeType(mime)
     }
 
     private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile) {
@@ -603,33 +583,6 @@ class Downloader(
                 }
             }
         return downloadedImagesCount == downloadPageCount
-    }
-
-    /** Archive the chapter pages as a CBZ. */
-    private fun archiveChapter(mangaDir: UniFile, dirname: String, tmpDir: UniFile) {
-        val zip = mangaDir.createFile("$dirname.cbz$TMP_DIR_SUFFIX")!!
-        ZipOutputStream(BufferedOutputStream(zip.openOutputStream())).use { zipOut ->
-            zipOut.setMethod(ZipEntry.STORED)
-
-            tmpDir.listFiles()?.forEach { img ->
-                img.openInputStream().use { input ->
-                    val data = input.readBytes()
-                    val size = img.length()
-                    val entry =
-                        ZipEntry(img.name).apply {
-                            val crc = CRC32().apply { update(data) }
-                            setCrc(crc.value)
-
-                            compressedSize = size
-                            setSize(size)
-                        }
-                    zipOut.putNextEntry(entry)
-                    zipOut.write(data)
-                }
-            }
-        }
-        zip.renameTo("$dirname.cbz")
-        tmpDir.delete()
     }
 
     /** Returns true if all the queued downloads are in DOWNLOADED or ERROR state. */
@@ -739,6 +692,7 @@ class Downloader(
          *   not an image.
          */
         internal fun copyImageFromCache(
+            context: Context,
             chapterCache: ChapterCache,
             imageUrl: String,
             tmpDir: UniFile,
@@ -748,18 +702,130 @@ class Downloader(
             val cacheFile = chapterCache.getImageFile(imageUrl)
             // A cached file that is not an image would stay a .tmp file and fail the download on
             // every retry, so remove it and let the caller download the page instead.
-            val extension = ImageUtil.findImageType { cacheFile.inputStream() }
+            val extension = findImageExtension { cacheFile.inputStream() }
             if (extension == null) {
                 chapterCache.removeFileFromCache(cacheFile.name)
                 return null
             }
-            val tmpFile = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
+            val tmpFile =
+                tmpDir.createFile("$filename$TMP_FILE_SUFFIX")
+                    ?: throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
             cacheFile.inputStream().use { input ->
                 tmpFile.openOutputStream().use { output -> input.copyTo(output) }
             }
-            tmpFile.renameTo("$filename.${extension.extension}")
+            if (!tmpFile.renameTo("$filename.$extension")) {
+                tmpFile.delete()
+                throw Exception(context.getString(R.string.download_notifier_cannot_create_file))
+            }
             cacheFile.delete()
             return tmpFile
         }
+
+        /**
+         * Archives the chapter pages in tmpDir as a CBZ in mangaDir, then deletes tmpDir.
+         *
+         * @param mangaDir the directory of the manga.
+         * @param dirname the name of the chapter directory.
+         * @param tmpDir the temporary directory of the download.
+         */
+        internal fun archiveChapter(
+            context: Context,
+            mangaDir: UniFile,
+            dirname: String,
+            tmpDir: UniFile,
+        ) {
+            val zip =
+                mangaDir.createFile("$dirname.cbz$TMP_DIR_SUFFIX")
+                    ?: throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
+            // On failure, remove the partial cbz and keep the pages in tmpDir for the next try.
+            try {
+                ZipOutputStream(BufferedOutputStream(zip.openOutputStream())).use { zipOut ->
+                    zipOut.setMethod(ZipEntry.STORED)
+
+                    tmpDir.listFiles()?.forEach { img ->
+                        img.openInputStream().use { input ->
+                            val data = input.readBytes()
+                            val size = img.length()
+                            val entry =
+                                ZipEntry(img.name).apply {
+                                    val crc = CRC32().apply { update(data) }
+                                    setCrc(crc.value)
+
+                                    compressedSize = size
+                                    setSize(size)
+                                }
+                            zipOut.putNextEntry(entry)
+                            zipOut.write(data)
+                        }
+                    }
+                }
+                if (!zip.renameTo("$dirname.cbz")) {
+                    throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
+                }
+            } catch (e: Exception) {
+                zip.delete()
+                throw e
+            }
+            tmpDir.delete()
+        }
+
+        /**
+         * Saves the image in the network response to a file in tmpDir.
+         *
+         * @param response the network response of the image.
+         * @param tmpDir the temporary directory of the download.
+         * @param filename the filename of the image.
+         * @return the saved file, named with the image's extension.
+         */
+        internal fun saveImage(
+            context: Context,
+            response: Response,
+            tmpDir: UniFile,
+            filename: String,
+        ): UniFile = response.use {
+            if (!response.isSuccessful) {
+                throw Exception(httpErrorMessage(response.code, response.request.url.host))
+            }
+            val file =
+                tmpDir.createFile("$filename$TMP_FILE_SUFFIX")
+                    ?: throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
+            try {
+                response.body.source().saveTo(file.openOutputStream())
+                // Read the type from the bytes. Servers send WebP as image/jpeg, and send error
+                // pages with status 200 and an image content type.
+                val extension =
+                    findImageExtension { file.openInputStream() }
+                        ?: throw Exception(
+                            context.getString(R.string.download_notifier_page_not_image)
+                        )
+                if (!file.renameTo("$filename.$extension")) {
+                    throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
+                }
+            } catch (e: Exception) {
+                file.delete()
+                throw e
+            }
+            file
+        }
+
+        /**
+         * The extension of the image in the stream, read from its bytes: the bundled decoder's
+         * formats, then the platform's (BMP). Null when the reader can't decode the stream.
+         */
+        private fun findImageExtension(openStream: () -> InputStream): String? =
+            ImageUtil.findImageType(openStream)?.extension
+                ?: ImageUtil.findPlatformImageMime(openStream)?.let {
+                    ImageUtil.getExtensionFromMimeType(it)
+                }
     }
 }

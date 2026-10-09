@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import android.text.TextUtils
+import android.webkit.MimeTypeMap
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -23,10 +24,14 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.nekomanga.R
+import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import org.nekomanga.domain.reader.ReaderPreferences
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
@@ -38,6 +43,11 @@ class DownloaderCopyImageFromCacheTest {
 
     @get:Rule val folder = TemporaryFolder()
 
+    private val context =
+        mockk<Context> {
+            every { getString(R.string.download_notifier_cannot_create_file) } returns
+                CANNOT_CREATE_FILE
+        }
     private lateinit var chapterCache: ChapterCache
     private lateinit var tmpDir: File
 
@@ -72,6 +82,25 @@ class DownloaderCopyImageFromCacheTest {
                     null
                 }
             }
+        // BitmapFactory is an android.jar stub too, so read the BMP signature instead.
+        every { ImageUtil.findPlatformImageMime(any()) } answers
+            {
+                val head = ByteArray(BMP_SIGNATURE.size)
+                val read = firstArg<() -> InputStream>()().use { it.read(head) }
+                if (read == head.size && head.contentEquals(BMP_SIGNATURE)) "image/bmp" else null
+            }
+
+        mockkStatic(MimeTypeMap::class)
+        every { MimeTypeMap.getSingleton() } returns
+            mockk {
+                every { getExtensionFromMimeType(any()) } answers
+                    {
+                        when (firstArg<String?>()) {
+                            "image/bmp" -> "bmp"
+                            else -> null
+                        }
+                    }
+            }
     }
 
     @After
@@ -93,6 +122,47 @@ class DownloaderCopyImageFromCacheTest {
     }
 
     @Test
+    fun `copies a cached bmp page`() {
+        val bmp = BMP_SIGNATURE + byteArrayOf(1, 2, 3, 4)
+        cache(bmp)
+
+        val file = copy()
+
+        assertEquals("001.bmp", file?.name)
+        assertArrayEquals(bmp, File(tmpDir, "001.bmp").readBytes())
+    }
+
+    @Test
+    fun `drops a cached html page with an inline svg`() {
+        cache(
+            ("<!DOCTYPE html>\n<html><body>" +
+                    "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"></svg>" +
+                    "</body></html>")
+                .toByteArray()
+        )
+
+        val file = copy()
+
+        assertNull(file)
+        assertEquals(emptyList<String>(), tmpDir.list()!!.toList())
+        assertFalse(chapterCache.isImageInCache(IMAGE_URL))
+    }
+
+    @Test
+    fun `fails with a message and keeps the cached page when the copy cannot be renamed`() {
+        cache(PNG_SIGNATURE)
+        // A non-empty directory under the final name makes the rename fail.
+        File(tmpDir, "001.png").mkdir()
+        File(tmpDir, "001.png/x").writeBytes(byteArrayOf(0))
+
+        val error = assertThrows(Exception::class.java) { copy() }
+
+        assertEquals(CANNOT_CREATE_FILE, error.message)
+        assertEquals(listOf("001.png"), tmpDir.list()!!.toList())
+        assertTrue(chapterCache.isImageInCache(IMAGE_URL))
+    }
+
+    @Test
     fun `drops a cached entry that is not an image so the page is downloaded again`() {
         cache("<html><body>Too many requests</body></html>".toByteArray())
 
@@ -109,8 +179,25 @@ class DownloaderCopyImageFromCacheTest {
         assertEquals(emptyList<String>(), tmpDir.list()!!.toList())
     }
 
+    @Test
+    fun `fails with a message when the temp file cannot be created`() {
+        cache(PNG_SIGNATURE)
+        // A directory in the way makes createFile return null.
+        File(tmpDir, "001$TMP_FILE_SUFFIX").mkdir()
+
+        val error = assertThrows(Exception::class.java) { copy() }
+
+        assertEquals(CANNOT_CREATE_FILE, error.message)
+    }
+
     private fun copy(): UniFile? =
-        Downloader.copyImageFromCache(chapterCache, IMAGE_URL, UniFile.fromFile(tmpDir)!!, "001")
+        Downloader.copyImageFromCache(
+            context,
+            chapterCache,
+            IMAGE_URL,
+            UniFile.fromFile(tmpDir)!!,
+            "001",
+        )
 
     private fun cache(bytes: ByteArray) {
         val response =
@@ -126,7 +213,9 @@ class DownloaderCopyImageFromCacheTest {
 
     companion object {
         private const val IMAGE_URL = "https://example.org/data/page1.png"
+        private const val CANNOT_CREATE_FILE = "Couldn't create a file in the download folder"
         private val PNG_SIGNATURE =
             byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
+        private val BMP_SIGNATURE = "BM".toByteArray()
     }
 }

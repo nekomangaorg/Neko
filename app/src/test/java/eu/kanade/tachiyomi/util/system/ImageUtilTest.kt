@@ -1,8 +1,14 @@
 package eu.kanade.tachiyomi.util.system
 
+import android.graphics.BitmapFactory
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.unmockkAll
+import java.io.IOException
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageType
@@ -80,6 +86,25 @@ class ImageUtilTest {
             listOf(ImageUtil.ImageType.AVIF, ImageUtil.ImageType.HEIF, ImageUtil.ImageType.JXL),
             ImageUtil.ImageType.entries.filter { it.needsNativeDecoder },
         )
+    }
+
+    @Test
+    fun `findPlatformImageMime returns null when the stream cannot be opened`() {
+        mockkConstructor(BitmapFactory.Options::class)
+        var opened = false
+
+        val mime =
+            try {
+                ImageUtil.findPlatformImageMime {
+                    opened = true
+                    throw IOException("gone")
+                }
+            } finally {
+                unmockkAll()
+            }
+
+        assertTrue(opened)
+        assertNull(mime)
     }
 
     data class TestCase(
