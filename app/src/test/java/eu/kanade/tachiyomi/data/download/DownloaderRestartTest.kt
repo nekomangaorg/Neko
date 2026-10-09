@@ -45,6 +45,13 @@ class DownloaderRestartTest {
 
     private val manga = Manga.create("/title/1", "Manga").apply { id = 1L }
 
+    /**
+     * Runs on every queue store write, from whichever thread makes it. Tests set this instead of
+     * stubbing edit() again: the downloader writes the store from its own threads, and a call that
+     * lands while MockK is still stubbing it throws "no answer provided" there.
+     */
+    @Volatile private var onStoreWrite: () -> Unit = {}
+
     /** isRunning as read by other threads while the queue store is written. */
     private val readsDuringRestart = Collections.synchronizedList(mutableListOf<Boolean>())
     private val readers = mutableListOf<Thread>()
@@ -67,7 +74,16 @@ class DownloaderRestartTest {
             }
         )
 
-        activeDownloads = mockk(relaxed = true) { every { all } returns emptyMap<String, Any>() }
+        val editor = mockk<SharedPreferences.Editor>(relaxed = true)
+        activeDownloads =
+            mockk(relaxed = true) {
+                every { all } returns emptyMap<String, Any>()
+                every { edit() } answers
+                    {
+                        onStoreWrite()
+                        editor
+                    }
+            }
         val context =
             mockk<Context>(relaxed = true) {
                 every { getSharedPreferences(any(), any()) } returns activeDownloads
@@ -80,6 +96,7 @@ class DownloaderRestartTest {
         every { LibraryUpdateJob.isRunning(any()) } returns false
         mockkConstructor(DownloadNotifier::class)
         every { anyConstructed<DownloadNotifier>().onPaused() } just runs
+        every { anyConstructed<DownloadNotifier>().onComplete() } just runs
 
         val provider =
             mockk<DownloadProvider> {
@@ -122,8 +139,6 @@ class DownloaderRestartTest {
 
     @Test
     fun `removing the only manga in the queue stops the downloader`() {
-        every { anyConstructed<DownloadNotifier>().onComplete() } just runs
-
         downloader.removeFromQueueAndRestart(manga)
 
         assertTrue(downloader.queueState.value.isEmpty())
@@ -136,11 +151,7 @@ class DownloaderRestartTest {
         // A restart always writes the queue store from this thread, start() sweeps the queue
         val testThread = Thread.currentThread()
         var storeWrites = 0
-        every { activeDownloads.edit() } answers
-            {
-                if (Thread.currentThread() == testThread) storeWrites++
-                mockk(relaxed = true)
-            }
+        onStoreWrite = { if (Thread.currentThread() == testThread) storeWrites++ }
 
         downloader.removeFromQueueAndRestart(Manga.create("/title/2", "Other").apply { id = 2L })
 
@@ -169,16 +180,13 @@ class DownloaderRestartTest {
      */
     private fun readIsRunningOnQueueStoreWrites() {
         val testThread = Thread.currentThread()
-        val editor = mockk<SharedPreferences.Editor>(relaxed = true)
-        every { activeDownloads.edit() } answers
-            {
-                if (Thread.currentThread() == testThread) {
-                    val reader = thread { readsDuringRestart += downloader.isRunning }
-                    readers += reader
-                    waitUntil { !reader.isAlive || reader.state == Thread.State.BLOCKED }
-                }
-                editor
+        onStoreWrite = {
+            if (Thread.currentThread() == testThread) {
+                val reader = thread { readsDuringRestart += downloader.isRunning }
+                readers += reader
+                waitUntil { !reader.isAlive || reader.state == Thread.State.BLOCKED }
             }
+        }
     }
 
     private fun assertReadsSawRunning() {
