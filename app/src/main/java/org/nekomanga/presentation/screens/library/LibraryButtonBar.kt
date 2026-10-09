@@ -104,7 +104,14 @@ fun LibraryButtonBar(
             )
 
         val downloadToggleList = listOf(FilterDownloaded.Downloaded, FilterDownloaded.NotDownloaded)
-        val completedToggleList = listOf(FilterCompleted.Completed, FilterCompleted.Ongoing)
+        val completedToggleList =
+            listOf(
+                FilterCompleted.Completed,
+                FilterCompleted.Ongoing,
+                FilterCompleted.PublicationComplete,
+                FilterCompleted.Hiatus,
+                FilterCompleted.Cancelled,
+            )
         val mangaTypeToggleList =
             listOf(FilterMangaType.Manga, FilterMangaType.Manhwa, FilterMangaType.Manhua)
         val bookmarkToggleList = listOf(FilterBookmarked.Bookmarked, FilterBookmarked.NotBookmarked)
