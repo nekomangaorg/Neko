@@ -31,7 +31,7 @@ import uy.kohesive.injekt.api.get
  * @param manga the manga of the chapters.
  * @param errorFromMerged whether there is an error is from a merged source
  * @param readFromMerged a set of merged chapters that have a read status
- * @return a pair of new insertions and deletions.
+ * @return the chapters inserted, deleted and newly marked unavailable.
  */
 suspend fun syncChaptersWithSource(
     appDatabase: AppDatabase,
@@ -41,7 +41,7 @@ suspend fun syncChaptersWithSource(
     manga: Manga,
     errorFromMerged: Boolean = false,
     readFromMerged: Set<String> = emptySet(),
-): Pair<List<Chapter>, List<Chapter>> {
+): ChapterSyncResult {
     val downloadManager: DownloadManager = Injekt.get()
     val libraryPreferences: LibraryPreferences = Injekt.get()
     val mangaDexPreferences: MangaDexPreferences = Injekt.get()
@@ -215,6 +215,10 @@ suspend fun syncChaptersWithSource(
     // Read chapters to push to  remote hosted source.
     val toSync = mutableListOf<Chapter>()
 
+    // Chapters the source now reports as unavailable or no longer lists, for the library update
+    // notification.
+    val nowUnavailable = mutableListOf<Chapter>()
+
     for (sourceChapter in finalChapters) {
         val dbChapter = dbChaptersByUrl[sourceChapter.url]
 
@@ -247,6 +251,9 @@ suspend fun syncChaptersWithSource(
                 dbChapter.chapter_number = sourceChapter.chapter_number
                 dbChapter.mangadex_chapter_id = sourceChapter.mangadex_chapter_id
                 dbChapter.language = sourceChapter.language
+                if (becameUnavailable(dbChapter, sourceChapter)) {
+                    nowUnavailable.add(dbChapter)
+                }
                 dbChapter.isUnavailable = sourceChapter.isUnavailable
                 dbChapter.source_order = sourceChapter.source_order
                 dbChapter.smart_order = sourceChapter.smart_order
@@ -313,7 +320,7 @@ suspend fun syncChaptersWithSource(
             manga.last_update = newestDate
             mangaRepository.updateLastUpdated(manga.id!!, newestDate)
         }
-        return Pair(emptyList(), emptyList())
+        return ChapterSyncResult()
     }
 
     val readded = mutableListOf<Chapter>()
@@ -389,8 +396,34 @@ suspend fun syncChaptersWithSource(
         mangaRepository.updateLastUpdated(manga.id!!, manga.last_update)
     }
     val newChapters = toAdd.subtract(readded.toSet()).toList().filter { !it.isUnavailable }
+    val removed = toDelete - readded.toSet()
+    nowUnavailable.addAll(goneFromSource(removed, sourceChaptersByUrl.keys))
 
-    return Pair(newChapters, toDelete - readded.toSet())
+    return ChapterSyncResult(newChapters, removed, nowUnavailable)
+}
+
+/** Outcome of [syncChaptersWithSource]. */
+data class ChapterSyncResult(
+    val added: List<Chapter> = emptyList(),
+    val removed: List<Chapter> = emptyList(),
+    val nowUnavailable: List<Chapter> = emptyList(),
+)
+
+/**
+ * Removed chapters worth telling the user about: gone from the source, not a local file or a merged
+ * chapter, not a duplicate row of a chapter the source still lists, and not already flagged
+ * unavailable (those were reported when the flag was set; they drop out of the feed once the
+ * include unavailable setting is turned off).
+ */
+internal fun goneFromSource(removed: List<Chapter>, sourceUrls: Set<String>): List<Chapter> {
+    return removed.filter {
+        !it.isLocalSource() && !it.isMergedChapter() && !it.isUnavailable && it.url !in sourceUrls
+    }
+}
+
+/** True when the chapter is available in the db but the source now reports it unavailable. */
+internal fun becameUnavailable(dbChapter: Chapter, sourceChapter: SChapter): Boolean {
+    return !dbChapter.isUnavailable && sourceChapter.isUnavailable
 }
 
 private fun bothMerged(dbChapter: Chapter, sourceChapter: Chapter): Boolean {

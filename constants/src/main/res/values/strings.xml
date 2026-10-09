@@ -293,6 +293,7 @@
     </plurals>
     <string name="notification_update_error">%1$d update(s) failed</string>
     <string name="notification_update_skipped">%1$d update(s) skipped</string>
+    <string name="notification_chapters_unavailable">%1$d manga with chapters that became unavailable</string>
     <string name="skipped_reason_has_unread">Skipped because series has unread chapters</string>
     <string name="skipped_reason_not_started">Skipped because series is not started</string>
     <string name="skipped_reason_completed">Skipped because series is complete</string>
@@ -308,6 +309,7 @@
     </plurals>
     <string name="channel_errors">Errors</string>
     <string name="channel_skipped">Skipped</string>
+    <string name="channel_unavailable">Unavailable chapters</string>
 
     <string name="number_of_migrated">only %d manga needed to be migrated</string>
 
