@@ -423,13 +423,34 @@ internal fun resolvePendingNavTarget(
             resolveItemIndexForPage(items, pending.chapterId ?: activeChapterId, pending.pageIndex)
         is ReaderNavCommand.ScrollToItem -> {
             val item = pending.item
-            when {
-                item == null -> pending.itemIndex.takeIf { it in items.indices }
-                items.getOrNull(pending.itemIndex)?.isEquivalentTo(item) == true ->
-                    pending.itemIndex
-                else -> items.indexOfFirst { it.isEquivalentTo(item) }.takeIf { it != -1 }
+            if (item == null) {
+                pending.itemIndex.takeIf { it in items.indices }
+            } else {
+                resolveScrollToItemIndex(items, pending.itemIndex, item, activeChapterId)
             }
         }
+        else -> null
+    }
+
+/**
+ * Index of [item] in [items] for a ScrollToItem that PagerViewer computed as [itemIndex] against
+ * its newest list, or null to wait for another list.
+ *
+ * The item is followed to another index only when it belongs to [activeChapterId] or is a
+ * transition card. A page of any other chapter can sit in this list as an adjacent chapter preview,
+ * and landing on that copy selects its chapter from the wrong list, which starts the chapter
+ * ping-pong again.
+ */
+internal fun resolveScrollToItemIndex(
+    items: List<ReaderUiItem>,
+    itemIndex: Int,
+    item: ReaderUiItem,
+    activeChapterId: Long?,
+): Int? =
+    when {
+        items.getOrNull(itemIndex)?.isEquivalentTo(item) == true -> itemIndex
+        item is ReaderUiItem.Transition || item.chapterId == activeChapterId ->
+            items.indexOfFirst { it.isEquivalentTo(item) }.takeIf { it != -1 }
         else -> null
     }
 
@@ -563,14 +584,20 @@ internal suspend fun executeNavCommand(
             is ReaderNavCommand.ScrollToItem -> {
                 // PagerViewer computed the index against its newest list. The pager can still
                 // hold the list from before a chapter switch, where that index is another
-                // chapter's page; wait for the list that has the item there.
+                // chapter's page; wait for the list that has the item.
+                if (items.isEmpty()) return false
                 val item = command.item
-                if (
-                    item != null && items.getOrNull(command.itemIndex)?.isEquivalentTo(item) != true
-                ) {
-                    return false
-                }
-                val target = command.itemIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
+                val target =
+                    if (item == null) {
+                        command.itemIndex.coerceIn(0, items.lastIndex)
+                    } else {
+                        resolveScrollToItemIndex(
+                            items,
+                            command.itemIndex,
+                            item,
+                            config.activeChapterId,
+                        ) ?: return false
+                    }
                 if (target in items.indices && pagerState.currentPage != target) {
                     if (command.animated && config.animatedTransitions) {
                         pagerState.animateScrollToPage(

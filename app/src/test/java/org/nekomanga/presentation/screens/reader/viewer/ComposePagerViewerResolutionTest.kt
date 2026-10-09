@@ -1598,4 +1598,125 @@ class ComposePagerViewerResolutionTest {
         assertTrue(shifted[5].isEquivalentTo(rebuilt[4]))
         assertEquals(5, target)
     }
+
+    @Test
+    fun `resolvePendingNavTarget waits when the item is only another chapter's preview`() {
+        val (composed, rebuilt) = chapterSwitchLists()
+
+        // Chapter 1's last page sits at index 1 of the composed list as a preview of the previous
+        // chapter. Landing there would select chapter 1 from chapter 2's list again.
+        val target =
+            resolvePendingNavTarget(
+                pending =
+                    ReaderNavCommand.ScrollToItem(
+                        itemIndex = 4,
+                        animated = false,
+                        item = rebuilt[4],
+                    ),
+                items = composed,
+                activeChapterId = 2L,
+            )
+
+        assertTrue(composed[1].isEquivalentTo(rebuilt[4]))
+        assertNull(target)
+    }
+
+    @Test
+    fun `resolvePendingNavTarget waits on another chapter's preview when that chapter has no id`() {
+        val noId = createChapter(1L, pageCount = 4).apply { chapter.id = null }
+        val noIdPages = (noId.state as ReaderChapter.State.Loaded).pages
+        val ch2 = createChapter(2L, pageCount = 4)
+        val ch2Pages = (ch2.state as ReaderChapter.State.Loaded).pages
+        val composed =
+            listOf(ReaderUiItem.Page(noIdPages[2]), ReaderUiItem.Page(noIdPages[3])) +
+                ch2Pages.map { ReaderUiItem.Page(it) }
+
+        val target =
+            resolvePendingNavTarget(
+                pending =
+                    ReaderNavCommand.ScrollToItem(
+                        itemIndex = 4,
+                        animated = false,
+                        item = ReaderUiItem.Page(noIdPages[3]),
+                    ),
+                items = composed,
+                activeChapterId = 2L,
+            )
+
+        assertNull(target)
+    }
+
+    @Test
+    fun `executeNavCommand follows the ScrollToItem item when the list shifted`() = runTest {
+        val (_, rebuilt) = chapterSwitchLists()
+        val ch0 = createChapter(0L, pageCount = 2)
+        val ch0Pages = (ch0.state as ReaderChapter.State.Loaded).pages
+        val shifted =
+            listOf(ReaderUiItem.Page(ch0Pages[0]), ReaderUiItem.Page(ch0Pages[1])) + rebuilt.drop(1)
+        val config = createConfig(activeChapterId = 1L, animatedTransitions = false)
+        val mockPagerState = mockk<PagerState>(relaxed = true)
+        every { mockPagerState.currentPage } returns 0
+
+        val result =
+            executeNavCommand(
+                command =
+                    ReaderNavCommand.ScrollToItem(
+                        itemIndex = 4,
+                        animated = false,
+                        item = rebuilt[4],
+                    ),
+                pagerState = mockPagerState,
+                items = shifted,
+                config = config,
+            )
+
+        assertTrue(result)
+        coVerify(exactly = 1) { mockPagerState.scrollToPage(5) }
+    }
+
+    @Test
+    fun `executeNavCommand follows a transition card when the list shifted`() = runTest {
+        val (_, rebuilt) = chapterSwitchLists()
+        val ch0 = createChapter(0L, pageCount = 2)
+        val ch0Pages = (ch0.state as ReaderChapter.State.Loaded).pages
+        val shifted =
+            listOf(ReaderUiItem.Page(ch0Pages[0]), ReaderUiItem.Page(ch0Pages[1])) + rebuilt.drop(1)
+        val config = createConfig(activeChapterId = 1L, animatedTransitions = false)
+        val mockPagerState = mockk<PagerState>(relaxed = true)
+        every { mockPagerState.currentPage } returns 0
+
+        val result =
+            executeNavCommand(
+                command =
+                    ReaderNavCommand.ScrollToItem(
+                        itemIndex = 5,
+                        animated = false,
+                        item = rebuilt[5],
+                    ),
+                pagerState = mockPagerState,
+                items = shifted,
+                config = config,
+            )
+
+        assertTrue(result)
+        coVerify(exactly = 1) { mockPagerState.scrollToPage(6) }
+    }
+
+    @Test
+    fun `executeNavCommand defers ScrollToItem without an item while the list is empty`() =
+        runTest {
+            val config = createConfig(activeChapterId = 1L, animatedTransitions = false)
+            val mockPagerState = mockk<PagerState>(relaxed = true)
+            every { mockPagerState.currentPage } returns 0
+
+            val result =
+                executeNavCommand(
+                    command = ReaderNavCommand.ScrollToItem(itemIndex = 2, animated = false),
+                    pagerState = mockPagerState,
+                    items = emptyList(),
+                    config = config,
+                )
+
+            assertFalse(result)
+        }
 }
