@@ -25,6 +25,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -96,7 +97,6 @@ class DownloaderCopyImageFromCacheTest {
                     {
                         when (firstArg<String?>()) {
                             "image/bmp" -> "bmp"
-                            "image/svg+xml" -> "svg"
                             else -> null
                         }
                     }
@@ -133,16 +133,33 @@ class DownloaderCopyImageFromCacheTest {
     }
 
     @Test
-    fun `copies a cached svg page`() {
-        val svg =
-            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"></svg>"
+    fun `drops a cached html page with an inline svg`() {
+        cache(
+            ("<!DOCTYPE html>\n<html><body>" +
+                    "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"></svg>" +
+                    "</body></html>")
                 .toByteArray()
-        cache(svg)
+        )
 
         val file = copy()
 
-        assertEquals("001.svg", file?.name)
-        assertArrayEquals(svg, File(tmpDir, "001.svg").readBytes())
+        assertNull(file)
+        assertEquals(emptyList<String>(), tmpDir.list()!!.toList())
+        assertFalse(chapterCache.isImageInCache(IMAGE_URL))
+    }
+
+    @Test
+    fun `fails with a message and keeps the cached page when the copy cannot be renamed`() {
+        cache(PNG_SIGNATURE)
+        // A non-empty directory under the final name makes the rename fail.
+        File(tmpDir, "001.png").mkdir()
+        File(tmpDir, "001.png/x").writeBytes(byteArrayOf(0))
+
+        val error = assertThrows(Exception::class.java) { copy() }
+
+        assertEquals(CANNOT_CREATE_FILE, error.message)
+        assertEquals(listOf("001.png"), tmpDir.list()!!.toList())
+        assertTrue(chapterCache.isImageInCache(IMAGE_URL))
     }
 
     @Test

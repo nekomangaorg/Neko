@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
 import eu.kanade.tachiyomi.data.cache.ChapterCache
+import eu.kanade.tachiyomi.network.httpErrorMessage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -212,9 +213,5 @@ class HttpPageLoader(
                 TimberKt.e(e) { "Error loading page" }
             }
         }
-    }
-
-    companion object {
-        fun httpErrorMessage(code: Int, host: String): String = "HTTP $code from $host"
     }
 }

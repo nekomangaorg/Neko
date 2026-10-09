@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import coil3.decode.DecodeUtils
-import coil3.svg.isSvg
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -10,11 +8,11 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.httpErrorMessage
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.manga.toSimpleManga
 import eu.kanade.tachiyomi.util.storage.saveTo
@@ -51,8 +49,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import okhttp3.Response
-import okio.buffer
-import okio.source
 import org.nekomanga.R
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
@@ -625,10 +621,7 @@ class Downloader(
             val cacheFile = chapterCache.getImageFile(imageUrl)
             // A cached file that is not an image would stay a .tmp file and fail the download on
             // every retry, so remove it and let the caller download the page instead.
-            val extension =
-                ImageUtil.findImageType { cacheFile.inputStream() }?.extension
-                    ?: findOtherImageMime { cacheFile.inputStream() }
-                        ?.let { ImageUtil.getExtensionFromMimeType(it) }
+            val extension = findImageExtension { cacheFile.inputStream() }
             if (extension == null) {
                 chapterCache.removeFileFromCache(cacheFile.name)
                 return null
@@ -641,7 +634,10 @@ class Downloader(
             cacheFile.inputStream().use { input ->
                 tmpFile.openOutputStream().use { output -> input.copyTo(output) }
             }
-            tmpFile.renameTo("$filename.$extension")
+            if (!tmpFile.renameTo("$filename.$extension")) {
+                tmpFile.delete()
+                throw Exception(context.getString(R.string.download_notifier_cannot_create_file))
+            }
             cacheFile.delete()
             return tmpFile
         }
@@ -664,27 +660,37 @@ class Downloader(
                     ?: throw Exception(
                         context.getString(R.string.download_notifier_cannot_create_file)
                     )
-            ZipOutputStream(BufferedOutputStream(zip.openOutputStream())).use { zipOut ->
-                zipOut.setMethod(ZipEntry.STORED)
+            // On failure, remove the partial cbz and keep the pages in tmpDir for the next try.
+            try {
+                ZipOutputStream(BufferedOutputStream(zip.openOutputStream())).use { zipOut ->
+                    zipOut.setMethod(ZipEntry.STORED)
 
-                tmpDir.listFiles()?.forEach { img ->
-                    img.openInputStream().use { input ->
-                        val data = input.readBytes()
-                        val size = img.length()
-                        val entry =
-                            ZipEntry(img.name).apply {
-                                val crc = CRC32().apply { update(data) }
-                                setCrc(crc.value)
+                    tmpDir.listFiles()?.forEach { img ->
+                        img.openInputStream().use { input ->
+                            val data = input.readBytes()
+                            val size = img.length()
+                            val entry =
+                                ZipEntry(img.name).apply {
+                                    val crc = CRC32().apply { update(data) }
+                                    setCrc(crc.value)
 
-                                compressedSize = size
-                                setSize(size)
-                            }
-                        zipOut.putNextEntry(entry)
-                        zipOut.write(data)
+                                    compressedSize = size
+                                    setSize(size)
+                                }
+                            zipOut.putNextEntry(entry)
+                            zipOut.write(data)
+                        }
                     }
                 }
+                if (!zip.renameTo("$dirname.cbz")) {
+                    throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
+                }
+            } catch (e: Exception) {
+                zip.delete()
+                throw e
             }
-            zip.renameTo("$dirname.cbz")
             tmpDir.delete()
         }
 
@@ -701,65 +707,44 @@ class Downloader(
             response: Response,
             tmpDir: UniFile,
             filename: String,
-        ): UniFile {
+        ): UniFile = response.use {
             if (!response.isSuccessful) {
-                response.close()
-                throw Exception(
-                    HttpPageLoader.httpErrorMessage(response.code, response.request.url.host)
-                )
+                throw Exception(httpErrorMessage(response.code, response.request.url.host))
             }
-            val file = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")
-            if (file == null) {
-                response.close()
-                throw Exception(context.getString(R.string.download_notifier_cannot_create_file))
-            }
+            val file =
+                tmpDir.createFile("$filename$TMP_FILE_SUFFIX")
+                    ?: throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
             try {
                 response.body.source().saveTo(file.openOutputStream())
-                val extension = getImageExtension(context, response, file)
-                file.renameTo("$filename.$extension")
+                // Read the type from the bytes. Servers send WebP as image/jpeg, and send error
+                // pages with status 200 and an image content type.
+                val extension =
+                    findImageExtension { file.openInputStream() }
+                        ?: throw Exception(
+                            context.getString(R.string.download_notifier_page_not_image)
+                        )
+                if (!file.renameTo("$filename.$extension")) {
+                    throw Exception(
+                        context.getString(R.string.download_notifier_cannot_create_file)
+                    )
+                }
             } catch (e: Exception) {
-                response.close()
                 file.delete()
                 throw e
             }
-            return file
+            file
         }
 
         /**
-         * Returns the extension of the downloaded image from the network response, or if it's null,
-         * analyze the file. Throws when the bytes are not an image the reader can decode, whatever
-         * the response claims.
-         *
-         * @param response the network response of the image.
-         * @param file the file where the image is already downloaded.
+         * The extension of the image in the stream, read from its bytes: the bundled decoder's
+         * formats, then the platform's (BMP). Null when the reader can't decode the stream.
          */
-        private fun getImageExtension(context: Context, response: Response, file: UniFile): String {
-            // The bundled decoder's formats, then the platform's (BMP), then Coil's SVG check.
-            // An error page served with status 200, even as image/jpeg, matches none of them.
-            val detected =
-                ImageUtil.findImageType { file.openInputStream() }?.mime
-                    ?: findOtherImageMime { file.openInputStream() }
-                    ?: throw Exception(context.getString(R.string.download_notifier_page_not_image))
-
-            // Read content type if available.
-            val mime =
-                response.body.contentType()?.run { if (type == "image") "image/$subtype" else null }
-                    // Else guess from the uri. A SAF provider types 001.tmp by its extension, as
-                    // application/octet-stream.
-                    ?: context.contentResolver.getType(file.uri)?.takeIf { it.startsWith("image/") }
-                    ?: detected
-
-            return ImageUtil.getExtensionFromMimeType(mime)
-        }
-
-        /**
-         * The mime type of an image the reader decodes without the bundled decoder (BMP through the
-         * platform, SVG through Coil), or null when the stream is neither.
-         */
-        private fun findOtherImageMime(openStream: () -> InputStream): String? =
-            ImageUtil.findPlatformImageMime(openStream)
-                ?: SVG_MIME.takeIf { openStream().source().buffer().use { DecodeUtils.isSvg(it) } }
-
-        private const val SVG_MIME = "image/svg+xml"
+        private fun findImageExtension(openStream: () -> InputStream): String? =
+            ImageUtil.findImageType(openStream)?.extension
+                ?: ImageUtil.findPlatformImageMime(openStream)?.let {
+                    ImageUtil.getExtensionFromMimeType(it)
+                }
     }
 }

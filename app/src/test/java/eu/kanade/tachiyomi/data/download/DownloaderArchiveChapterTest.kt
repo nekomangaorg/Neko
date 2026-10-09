@@ -75,6 +75,30 @@ class DownloaderArchiveChapterTest {
         assertEquals(listOf("001.png", "002.png"), tmpDir.list()!!.sorted())
     }
 
+    @Test
+    fun `removes the partial cbz and keeps the pages when a page cannot be read`() {
+        // A directory among the pages makes its openInputStream throw.
+        File(tmpDir, "003").mkdir()
+
+        assertThrows(Exception::class.java) { archive() }
+
+        assertEquals(listOf(tmpDir.name), mangaDir.list()!!.toList())
+        assertEquals(listOf("001.png", "002.png", "003"), tmpDir.list()!!.sorted())
+    }
+
+    @Test
+    fun `fails with a message and keeps the pages when the cbz cannot be renamed`() {
+        // A non-empty directory under the final name makes the rename fail.
+        File(mangaDir, "$CHAPTER.cbz").mkdir()
+        File(mangaDir, "$CHAPTER.cbz/x").writeBytes(byteArrayOf(0))
+
+        val error = assertThrows(Exception::class.java) { archive() }
+
+        assertEquals(CANNOT_CREATE_FILE, error.message)
+        assertEquals(listOf("$CHAPTER.cbz", tmpDir.name), mangaDir.list()!!.sorted())
+        assertEquals(listOf("001.png", "002.png"), tmpDir.list()!!.sorted())
+    }
+
     private fun archive() {
         Downloader.archiveChapter(
             context,

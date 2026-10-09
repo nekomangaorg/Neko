@@ -83,9 +83,14 @@ object ImageUtil {
      * stream. Covers formats [findImageType] does not know, such as BMP.
      */
     fun findPlatformImageMime(openStream: () -> InputStream): String? {
-        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        openStream().use { BitmapFactory.decodeStream(it, null, options) }
-        return options.outMimeType?.takeIf { options.outWidth > 0 && options.outHeight > 0 }
+        return try {
+            val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            openStream().use { BitmapFactory.decodeStream(it, null, options) }
+            options.outMimeType?.takeIf { options.outWidth > 0 && options.outHeight > 0 }
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Error getting image type from stream" }
+            null
+        }
     }
 
     fun getExtensionFromMimeType(mime: String?): String {

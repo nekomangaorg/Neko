@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.download
 
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.text.TextUtils
@@ -41,12 +40,9 @@ class DownloaderSaveImageTest {
     @get:Rule val folder = TemporaryFolder()
 
     private lateinit var tmpDir: File
-    private var uriType: String? = null
 
     private val context =
         mockk<Context> {
-            every { contentResolver } returns
-                mockk<ContentResolver> { every { getType(any()) } answers { uriType } }
             every { getString(R.string.download_notifier_page_not_image) } returns NOT_IMAGE
             every { getString(R.string.download_notifier_cannot_create_file) } returns
                 CANNOT_CREATE_FILE
@@ -72,7 +68,6 @@ class DownloaderSaveImageTest {
                             "image/png" -> "png"
                             "image/jpeg" -> "jpg"
                             "image/bmp" -> "bmp"
-                            "image/svg+xml" -> "svg"
                             else -> null
                         }
                     }
@@ -105,7 +100,7 @@ class DownloaderSaveImageTest {
     }
 
     @Test
-    fun `saves an image under the extension of its content type`() {
+    fun `saves an image under the extension of its bytes`() {
         val png = PNG_SIGNATURE + byteArrayOf(1, 2, 3, 4)
 
         val file = save(response(200, png, "image/png"))
@@ -118,9 +113,6 @@ class DownloaderSaveImageTest {
     @Test
     fun `reads the image type from the bytes when the content type is not an image`() {
         val png = PNG_SIGNATURE + byteArrayOf(1, 2, 3, 4)
-        // A SAF document provider reports the type of 001.tmp from its extension.
-        uriType = "application/octet-stream"
-
         val file = save(response(200, png, "application/octet-stream"))
 
         assertEquals("001.png", file.name)
@@ -171,22 +163,50 @@ class DownloaderSaveImageTest {
 
     @Test
     fun `reads a bmp from the bytes when the content type is not an image`() {
-        uriType = "application/octet-stream"
-
         val file = save(response(200, BMP, "application/octet-stream"))
 
         assertEquals("001.bmp", file.name)
     }
 
     @Test
-    fun `saves an svg page`() {
-        val svg =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"></svg>"
+    fun `fails an html page with an inline svg and saves nothing`() {
+        val html =
+            "<!DOCTYPE html>\n<html><body>" +
+                "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"></svg>" +
+                "</body></html>"
 
-        val file = save(response(200, svg.toByteArray(), "image/svg+xml"))
+        val error =
+            assertThrows(Exception::class.java) {
+                save(response(200, html.toByteArray(), "image/svg+xml"))
+            }
 
-        assertEquals("001.svg", file.name)
+        assertEquals(NOT_IMAGE, error.message)
+        assertEquals(emptyList<String>(), tmpDir.list()!!.toList())
+    }
+
+    @Test
+    fun `names the page by its bytes when the content type names another format`() {
+        val png = PNG_SIGNATURE + byteArrayOf(1, 2, 3, 4)
+
+        val file = save(response(200, png, "image/jpeg"))
+
+        assertEquals("001.png", file.name)
+        assertEquals(listOf("001.png"), tmpDir.list()!!.toList())
+    }
+
+    @Test
+    fun `fails and saves nothing when the page file cannot be renamed`() {
+        // A non-empty directory under the final name makes the rename fail.
+        File(tmpDir, "001.png").mkdir()
+        File(tmpDir, "001.png/x").writeBytes(byteArrayOf(0))
+
+        val error =
+            assertThrows(Exception::class.java) {
+                save(response(200, PNG_SIGNATURE + byteArrayOf(1, 2), "image/png"))
+            }
+
+        assertEquals(CANNOT_CREATE_FILE, error.message)
+        assertEquals(listOf("001.png"), tmpDir.list()!!.toList())
     }
 
     @Test
