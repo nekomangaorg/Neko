@@ -9,7 +9,9 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.util.chapter.isExcludedFromTrackingUpdates
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.concurrent.TimeUnit
@@ -31,6 +33,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
         val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
         val trackRepository = Injekt.get<TrackRepository>()
         val trackManager = Injekt.get<TrackManager>()
+        val preferences = Injekt.get<PreferencesHelper>()
 
         var hasErrors = false
 
@@ -42,6 +45,11 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
                     return@forEach
                 }
                 if (item.lastChapterRead <= track.last_chapter_read) {
+                    delayedTrackingStore.remove(item.trackId)
+                    return@forEach
+                }
+                // The category may have been excluded after the item was queued
+                if (isExcludedFromTrackingUpdates(track.manga_id, preferences)) {
                     delayedTrackingStore.remove(item.trackId)
                     return@forEach
                 }
