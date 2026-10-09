@@ -22,6 +22,8 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import java.io.FileNotFoundException
+import java.io.InputStream
 import kotlin.math.sqrt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -33,31 +35,52 @@ import okio.source
 import org.nekomanga.logging.TimberKt
 import tachiyomi.decoder.ImageDecoder
 
+/** Waits for [page]'s loader to give it a stream, starting the load when the page is queued. */
+internal suspend fun awaitPageStream(page: ReaderPage): () -> InputStream = coroutineScope {
+    val loader = page.chapter.pageLoader
+    val loadJob =
+        if (loader != null && page.status == Page.State.QUEUE) {
+            launch(Dispatchers.IO) { loader.loadPage(page) }
+        } else {
+            null
+        }
+    try {
+        page.statusFlow.first {
+            (it == Page.State.READY && page.stream != null) || it == Page.State.ERROR
+        }
+    } finally {
+        loadJob?.cancel()
+    }
+    page.stream ?: error("Page stream not available for page ${page.index}")
+}
+
+/**
+ * Opens [stream], or [page]'s stream once its loader has one.
+ *
+ * An online page's stream reads the chapter cache file, which can be gone by the time the page is
+ * shown again: the cache evicts files over its size limit, and a download moves the file out. The
+ * loader then fetches the page again, once.
+ */
+internal suspend fun openReaderPageStream(
+    page: ReaderPage,
+    stream: (() -> InputStream)? = page.stream,
+): InputStream {
+    val streamFn = stream ?: awaitPageStream(page)
+    return try {
+        streamFn()
+    } catch (e: FileNotFoundException) {
+        page.chapter.pageLoader?.retryPage(page)
+        // Loaders that read local files keep the stream, so there is nothing to wait for.
+        if (page.stream != null) throw e
+        awaitPageStream(page)()
+    }
+}
+
 class ReaderPageFetcher(private val page: ReaderPage, private val options: Options) : Fetcher {
 
-    override suspend fun fetch(): FetchResult = coroutineScope {
-        var streamFn = page.stream
-        if (streamFn == null) {
-            val loader = page.chapter.pageLoader
-            val loadJob =
-                if (loader != null && page.status == Page.State.QUEUE) {
-                    launch(Dispatchers.IO) { loader.loadPage(page) }
-                } else {
-                    null
-                }
-            try {
-                page.statusFlow.first {
-                    (it == Page.State.READY && page.stream != null) || it == Page.State.ERROR
-                }
-            } finally {
-                loadJob?.cancel()
-            }
-            streamFn = page.stream
-        }
-
-        val actualStream = streamFn ?: error("Page stream not available for page ${page.index}")
-        val source = actualStream().source().buffer()
-        SourceFetchResult(
+    override suspend fun fetch(): FetchResult {
+        val source = openReaderPageStream(page).source().buffer()
+        return SourceFetchResult(
             source = ImageSource(source = source, fileSystem = options.fileSystem),
             mimeType = null,
             dataSource = DataSource.MEMORY,
@@ -405,31 +428,12 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             }
         }
 
-        var streamFn = split.page.stream
-        if (streamFn == null) {
-            val loader = split.page.chapter.pageLoader
-            val loadJob =
-                if (loader != null && split.page.status == Page.State.QUEUE) {
-                    launch(Dispatchers.IO) { loader.loadPage(split.page) }
-                } else {
-                    null
-                }
-            try {
-                split.page.statusFlow.first {
-                    (it == Page.State.READY && split.page.stream != null) || it == Page.State.ERROR
-                }
-            } finally {
-                loadJob?.cancel()
-            }
-            streamFn = split.page.stream
-        }
-        val actualStream =
-            streamFn ?: error("Page stream not available for page ${split.page.index}")
+        val streamFn = split.page.stream ?: awaitPageStream(split.page)
 
         val imageBytes =
             rawBytesCache.get(cacheKey)?.takeIf { it.retryGeneration >= retryGeneration }?.bytes
                 ?: activeFetches.await("$cacheKey@$retryGeneration") {
-                    actualStream()
+                    openReaderPageStream(split.page, streamFn)
                         .use { it.readBytes() }
                         .also {
                             // LruCache.put would evict a file bigger than the cache right away,
