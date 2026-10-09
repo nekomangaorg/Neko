@@ -28,7 +28,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -400,6 +402,9 @@ class Downloader(
             download.status = Download.State.DOWNLOADED
         } catch (error: Exception) {
             if (error is CancellationException) throw error
+            // Blocking work such as the zip keeps going after the download is cancelled, and fails
+            // when the chapter was deleted meanwhile. A cancelled download reports no error.
+            currentCoroutineContext().ensureActive()
             // If the page list threw, it will resume here
             TimberKt.e(error)
             download.errorMessage = error.message
