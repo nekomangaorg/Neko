@@ -59,7 +59,11 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     suspend fun updateScore(track: Track) {
-        withContext(Dispatchers.IO) { mdex.updateRating(track) }
+        withContext(Dispatchers.IO) {
+            if (mdex.updateRating(track)) {
+                trackRepository.insertTrack(track)
+            }
+        }
     }
 
     override suspend fun update(

@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.track.mangaupdates.dto.copyTo
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.toTrackSearch
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 
@@ -79,6 +80,14 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
         if (index == 0) 0f else _scoreList[index].toFloat()
 
     override fun displayScore(track: Track): String = track.score.toString()
+
+    override fun statusFromMdList(status: FollowStatus): Int? =
+        when (status) {
+            FollowStatus.ON_HOLD -> ON_HOLD_LIST
+            FollowStatus.DROPPED -> UNFINISHED_LIST
+            FollowStatus.RE_READING -> READING_LIST
+            else -> super.statusFromMdList(status)
+        }
 
     override suspend fun add(track: Track): Track {
         track.score = DEFAULT_SCORE.toFloat()

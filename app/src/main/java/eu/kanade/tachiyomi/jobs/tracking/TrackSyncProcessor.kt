@@ -55,6 +55,28 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                 val tracks = tracksByMangaId[manga.id] ?: emptyList()
                 val trackSyncIds = tracks.map { it.sync_id }.toSet()
 
+                // Refresh the existing tracks first so an auto added tracker seeds from
+                // the MdList row MangaDex has now, not the one from before this sync.
+                coroutineScope {
+                    tracks
+                        .mapNotNull { track ->
+                            val service = trackManager.getService(track.sync_id)
+                            if (service != null && service in loggedServices) {
+                                async {
+                                    try {
+                                        val newTrack = service.refresh(track)
+                                        trackRepository.insertTrack(newTrack)
+                                    } catch (e: Exception) {
+                                        if (e !is CancellationException) {
+                                            TimberKt.e(e)
+                                        }
+                                    }
+                                }
+                            } else null
+                        }
+                        .awaitAll()
+                }
+
                 coroutineScope {
                     if (autoAddTrackerIds.isNotEmpty()) {
                         val contentRating = manga.getContentRating()
@@ -115,24 +137,6 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                                 .awaitAll()
                         }
                     }
-
-                    tracks
-                        .mapNotNull { track ->
-                            val service = trackManager.getService(track.sync_id)
-                            if (service != null && service in loggedServices) {
-                                async {
-                                    try {
-                                        val newTrack = service.refresh(track)
-                                        trackRepository.insertTrack(newTrack)
-                                    } catch (e: Exception) {
-                                        if (e !is CancellationException) {
-                                            TimberKt.e(e)
-                                        }
-                                    }
-                                }
-                            } else null
-                        }
-                        .awaitAll()
                 }
             }
             completeNotification()
