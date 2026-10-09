@@ -551,17 +551,11 @@ class FeedViewModel() : ViewModel() {
 
     fun moveDownload(downloadItem: DownloadItem, direction: MoveDownloadDirection) {
         viewModelScope.launchIO {
-            val index =
-                downloadManager.queueState.value.indexOfFirst { download ->
-                    download.chapterItem.id == downloadItem.chapterItem.chapter.id
-                }
-            val mutableDownloads = downloadManager.queueState.value.toMutableList()
-            val downloadList = listOf(mutableDownloads.removeAt(index))
             val list =
-                when (direction) {
-                    MoveDownloadDirection.Top -> downloadList + mutableDownloads
-                    MoveDownloadDirection.Bottom -> mutableDownloads + downloadList
-                }
+                downloadManager.queueState.value.withChapterMoved(
+                    downloadItem.chapterItem.chapter.id,
+                    direction,
+                ) ?: return@launchIO
 
             downloadManager.reorderQueue(list)
         }
@@ -1111,5 +1105,21 @@ class FeedViewModel() : ViewModel() {
 
         const val HISTORY_ENDLESS_LIMIT = 15
         const val UPDATES_ENDLESS_LIMIT = 200
+    }
+}
+
+/**
+ * The queue with [chapterId]'s download moved to the top or bottom, or null when that chapter is no
+ * longer queued. The download list on screen can still show a chapter that has just finished.
+ */
+internal fun List<Download>.withChapterMoved(
+    chapterId: Long,
+    direction: MoveDownloadDirection,
+): List<Download>? {
+    val (moved, rest) = partition { download -> download.chapterItem.id == chapterId }
+    if (moved.isEmpty()) return null
+    return when (direction) {
+        MoveDownloadDirection.Top -> moved + rest
+        MoveDownloadDirection.Bottom -> rest + moved
     }
 }
