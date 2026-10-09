@@ -18,6 +18,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.drop
@@ -51,6 +52,9 @@ class DownloadManager(
 
     val isRunning: Boolean
         get() = downloader.isRunning
+
+    val isRunningFlow: StateFlow<Boolean>
+        get() = downloader.isRunningFlow
 
     val isPaused: Boolean
         get() = downloader.isPaused

@@ -19,12 +19,11 @@ import eu.kanade.tachiyomi.util.system.NetworkState
 import eu.kanade.tachiyomi.util.system.activeNetworkState
 import eu.kanade.tachiyomi.util.system.networkStateFlow
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import org.nekomanga.R
@@ -78,11 +77,10 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
                         }
                         .launchIn(this)
 
-                // Keep the worker running while the downloader runs. The network flow never
+                // Keep the worker running while the downloader runs. A restart reads false on the
+                // flow for a moment, and isRunning waits for it to finish. The network flow never
                 // completes, so the watcher has to be cancelled before this scope can return.
-                while (!isStopped && downloadManager.isRunning) {
-                    delay(1.seconds)
-                }
+                downloadManager.isRunningFlow.first { !it && !downloadManager.isRunning }
                 networkWatcher.cancel()
             }
         } catch (e: Exception) {

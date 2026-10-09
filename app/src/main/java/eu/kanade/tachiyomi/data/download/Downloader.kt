@@ -30,6 +30,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -100,6 +101,14 @@ class Downloader(
     val isRunning: Boolean
         get() = synchronized(queueLock) { downloaderJob?.isActive ?: false }
 
+    private val _isRunningFlow = MutableStateFlow(false)
+
+    /**
+     * [isRunning] as a flow. A restart shows up here as false then true, so a reader that ends on
+     * false has to check [isRunning] too, which waits for the restart to finish.
+     */
+    val isRunningFlow: StateFlow<Boolean> = _isRunningFlow.asStateFlow()
+
     /** Whether the downloader is paused */
     @Volatile var isPaused: Boolean = false
 
@@ -128,6 +137,8 @@ class Downloader(
         isPaused = false
 
         launchDownloaderJob()
+        downloaderJob?.invokeOnCompletion { publishRunning() }
+        publishRunning()
 
         return pending.isNotEmpty()
     }
@@ -251,6 +262,16 @@ class Downloader(
     private fun cancelDownloaderJob() {
         downloaderJob?.cancel()
         downloaderJob = null
+        publishRunning()
+    }
+
+    /**
+     * Copies the job state to [isRunningFlow]. Every change to [downloaderJob] is followed by a
+     * call here, and the calls run one at a time under [queueLock], so the last one to run reads
+     * the final state. Reading outside the lock would let a stale value land last.
+     */
+    private fun publishRunning() {
+        synchronized(queueLock) { _isRunningFlow.value = downloaderJob?.isActive ?: false }
     }
 
     /**
