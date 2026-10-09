@@ -12,6 +12,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -208,7 +209,7 @@ class ReaderPreloadControllerTest {
         coVerify(atLeast = 1) { loader.loadPage(any()) }
 
         // Verify memory cache was warmed for pages within memory window
-        io.mockk.verify(atLeast = 1) {
+        verify(atLeast = 1) {
             memoryWarmManager.warmMemoryCache(
                 key = any(),
                 data = any(),
@@ -287,7 +288,7 @@ class ReaderPreloadControllerTest {
     fun `requestPreloadChapter invokes onRequestPreloadChapter callback`() {
         val chapter = createChapter(2L, 5)
         controller.requestPreloadChapter(chapter)
-        io.mockk.verify(exactly = 1) { onPreloadChapter.invoke(chapter) }
+        verify(exactly = 1) { onPreloadChapter.invoke(chapter) }
     }
 
     @Test
@@ -374,7 +375,7 @@ class ReaderPreloadControllerTest {
             // The result is still cached for when the setting comes back on.
             assertEquals(splits, page.precomputedSplits)
             // The whole page is what the reader shows now, so that is what gets warmed.
-            io.mockk.verify(exactly = 1) {
+            verify(exactly = 1) {
                 memoryWarmManager.warmMemoryCache(
                     key = any(),
                     data = page,
@@ -405,7 +406,7 @@ class ReaderPreloadControllerTest {
         val state = controller.state.value
         assertTrue(state.isIdle)
         assertTrue(state.pageStatuses.isEmpty())
-        io.mockk.verify(atLeast = 1) { memoryWarmManager.release() }
+        verify(atLeast = 1) { memoryWarmManager.release() }
     }
 
     @Test
@@ -490,7 +491,7 @@ class ReaderPreloadControllerTest {
             runCurrent()
 
             val key0 = controller.itemDomainKey(items[0])
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(key = key0, any(), any(), any(), any())
             }
 
@@ -516,7 +517,7 @@ class ReaderPreloadControllerTest {
             advanceTimeBy(ReaderPreloadControllerImpl.DEBOUNCE_DELAY_MS + 10L)
             runCurrent()
 
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(key = key0, any(), any(), any(), any())
             }
         }
@@ -593,7 +594,7 @@ class ReaderPreloadControllerTest {
                     finalStatus is PreloadPageStatus.MemoryReady ||
                     finalStatus is PreloadPageStatus.MemoryDecoding,
             )
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(
                     key = key,
                     data = page,
@@ -622,7 +623,7 @@ class ReaderPreloadControllerTest {
 
             val key0 = controller.itemDomainKey(items[0])
             // Should be invoked immediately because isInitial == true bypasses debounce
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(
                     key = key0,
                     data = items[0].page,
@@ -655,7 +656,7 @@ class ReaderPreloadControllerTest {
             val extraKey = "${baseKey}_extra"
 
             // Verify both base page and extraPage were sent to memory warming
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(
                     key = baseKey,
                     data = page,
@@ -664,7 +665,7 @@ class ReaderPreloadControllerTest {
                     onError = any(),
                 )
             }
-            io.mockk.verify(atLeast = 1) {
+            verify(atLeast = 1) {
                 memoryWarmManager.warmMemoryCache(
                     key = extraKey,
                     data = extraPage,
@@ -675,8 +676,6 @@ class ReaderPreloadControllerTest {
             }
 
             // Verify cancelAllExcept was called with a set that includes extraKey
-            io.mockk.verify {
-                memoryWarmManager.cancelAllExcept(match { extraKey in it && baseKey in it })
-            }
+            verify { memoryWarmManager.cancelAllExcept(match { extraKey in it && baseKey in it }) }
         }
 }

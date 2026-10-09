@@ -195,7 +195,8 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Notifies the viewer that a tall page was split into [insertPages]. */
     fun splitPage(originalPage: ReaderPage, insertPages: List<ReaderPageSplit>) {
         scope.launch {
-            val newItems = controller.splitPage(items, originalPage, insertPages)
+            val newItems =
+                controller.splitPage(items, originalPage, insertPages, config.splitTallPages)
             items = newItems
             activity.updateWebtoonViewerItems()
             preloadEngine.updateActiveIndex(lastActiveIndex, newItems, config.preloadPageAmount)

@@ -1772,7 +1772,7 @@ class ReaderActivity : BaseMainActivity() {
             }
         }
 
-        overlayIsLtr = (viewer ?: newViewer) !is R2LPagerViewer
+        overlayIsLtr = newViewer !is R2LPagerViewer
 
         supportActionBar?.title = manga.userTitle.ifBlank { manga.title }
         chapterTitle = viewModel.getCurrentChapter()?.chapter?.name ?: ""

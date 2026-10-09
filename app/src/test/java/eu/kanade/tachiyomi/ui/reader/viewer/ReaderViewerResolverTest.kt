@@ -82,4 +82,33 @@ class ReaderViewerResolverTest {
         assertEquals(true, result is VerticalPagerViewer)
         assertEquals(listOf(ReadingModeType.VERTICAL.flagValue to false), created)
     }
+
+    @Test
+    fun `webtoon viewer is replaced by a pager viewer when the mode changes`() {
+        val result = resolve(webtoon(noWebtoonTag = false), ReadingModeType.RIGHT_TO_LEFT.flagValue)
+
+        assertEquals(true, result is R2LPagerViewer)
+        assertEquals(listOf(ReadingModeType.RIGHT_TO_LEFT.flagValue to false), created)
+    }
+
+    @Test
+    fun `pager viewer is replaced by a webtoon viewer when the mode changes`() {
+        val result =
+            resolve(
+                mockk<R2LPagerViewer>(),
+                ReadingModeType.WEBTOON.flagValue,
+                noWebtoonTag = true,
+            )
+
+        assertEquals(true, (result as WebtoonViewer).noWebtoonTag)
+        assertEquals(listOf(ReadingModeType.WEBTOON.flagValue to true), created)
+    }
+
+    @Test
+    fun `no current viewer builds a webtoon viewer with the given tag`() {
+        val result = resolve(null, ReadingModeType.WEBTOON.flagValue, noWebtoonTag = true)
+
+        assertEquals(true, (result as WebtoonViewer).noWebtoonTag)
+        assertEquals(listOf(ReadingModeType.WEBTOON.flagValue to true), created)
+    }
 }
