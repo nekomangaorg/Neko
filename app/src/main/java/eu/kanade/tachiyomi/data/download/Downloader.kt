@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.manga.toSimpleManga
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.BufferedOutputStream
 import java.util.Locale
@@ -24,6 +23,7 @@ import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +67,7 @@ class Downloader(
     private val provider: DownloadProvider,
     private val cache: DownloadCache,
     private val sourceManager: SourceManager,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     private val preferences: PreferencesHelper by injectLazy()
     private val readerPreferences: ReaderPreferences by injectLazy()
@@ -86,7 +87,7 @@ class Downloader(
     /** Notifier for the downloader state and progress. */
     private val notifier by lazy { DownloadNotifier(context) }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     @Volatile private var downloaderJob: Job? = null
 
     /**
@@ -138,7 +139,6 @@ class Downloader(
         isPaused = false
 
         launchDownloaderJob()
-        downloaderJob?.invokeOnCompletion { publishRunning() }
         publishRunning()
 
         return pending.isNotEmpty()
@@ -183,69 +183,76 @@ class Downloader(
         notifier.dismissProgress()
     }
 
-    /** Prepares to start downloader job for downloading. */
+    /**
+     * Prepares to start downloader job for downloading. Runs under [queueLock], so [isRunning]
+     * never reads the job between its launch and start, where a lazy job is not active yet.
+     */
     private fun launchDownloaderJob() {
-        if (isRunning) return
+        synchronized(queueLock) {
+            if (isRunning) return
 
-        // Store the job before it runs. A download that ends at once calls stop(), which cancels
-        // the job through downloaderJob; stored after launch returned, the job could miss that
-        // cancel and keep isRunning true with nothing downloading.
-        downloaderJob =
-            scope.launch(start = CoroutineStart.LAZY) {
-                val activeDownloadsFlow =
-                    queueState
-                        .transformLatest { queue ->
-                            while (true) {
-                                val activeDownloads =
-                                    queue
-                                        .asSequence()
-                                        .apply {
-                                            removeFromQueueIf { it.chapterItem.isUnavailable }
-                                        }
-                                        .filter {
-                                            it.status.value <= Download.State.DOWNLOADING.value &&
-                                                !it.chapterItem.isUnavailable
-                                        } // Ignore completed downloads, leave them in the queue
-                                        .groupBy { it.source }
-                                        .toList()
-                                        .map { (_, downloads) -> downloads.take(2) }
-                                        .flatten()
-                                emit(activeDownloads)
+            // Store the job before it runs. A download that ends at once calls stop(), which
+            // cancels the job through downloaderJob; stored after launch returned, the job could
+            // miss that cancel and keep isRunning true with nothing downloading.
+            val job = createDownloaderJob()
+            downloaderJob = job
+            job.invokeOnCompletion { publishRunning() }
+            job.start()
+        }
+    }
 
-                                if (activeDownloads.isEmpty()) break
-                                // Suspend until a download enters the ERROR state
-                                val activeDownloadsErroredFlow =
-                                    combine(activeDownloads.map(Download::statusFlow)) { states ->
-                                            states.contains(Download.State.ERROR)
-                                        }
-                                        .filter { it }
-                                activeDownloadsErroredFlow.first()
-                            }
+    private fun createDownloaderJob(): Job =
+        scope.launch(start = CoroutineStart.LAZY) {
+            val activeDownloadsFlow =
+                queueState
+                    .transformLatest { queue ->
+                        while (true) {
+                            val activeDownloads =
+                                queue
+                                    .asSequence()
+                                    .apply { removeFromQueueIf { it.chapterItem.isUnavailable } }
+                                    .filter {
+                                        it.status.value <= Download.State.DOWNLOADING.value &&
+                                            !it.chapterItem.isUnavailable
+                                    } // Ignore completed downloads, leave them in the queue
+                                    .groupBy { it.source }
+                                    .toList()
+                                    .map { (_, downloads) -> downloads.take(2) }
+                                    .flatten()
+                            emit(activeDownloads)
+
+                            if (activeDownloads.isEmpty()) break
+                            // Suspend until a download enters the ERROR state
+                            val activeDownloadsErroredFlow =
+                                combine(activeDownloads.map(Download::statusFlow)) { states ->
+                                        states.contains(Download.State.ERROR)
+                                    }
+                                    .filter { it }
+                            activeDownloadsErroredFlow.first()
                         }
-                        .distinctUntilChanged()
+                    }
+                    .distinctUntilChanged()
 
-                // Use supervisorScope to cancel child jobs when the downloader job is cancelled
-                supervisorScope {
-                    val downloadJobs = mutableMapOf<Download, Job>()
+            // Use supervisorScope to cancel child jobs when the downloader job is cancelled
+            supervisorScope {
+                val downloadJobs = mutableMapOf<Download, Job>()
 
-                    activeDownloadsFlow.collectLatest { activeDownloads ->
-                        val downloadJobsToStop = downloadJobs.filter { it.key !in activeDownloads }
-                        downloadJobsToStop.forEach { (download, job) ->
-                            job.cancel()
-                            downloadJobs.remove(download)
-                        }
+                activeDownloadsFlow.collectLatest { activeDownloads ->
+                    val downloadJobsToStop = downloadJobs.filter { it.key !in activeDownloads }
+                    downloadJobsToStop.forEach { (download, job) ->
+                        job.cancel()
+                        downloadJobs.remove(download)
+                    }
 
-                        val downloadsToStart = activeDownloads.filter { it !in downloadJobs }
-                        downloadsToStart.forEach { download ->
-                            downloadJobs[download] = launchDownloadJob(download)
-                        }
+                    val downloadsToStart = activeDownloads.filter { it !in downloadJobs }
+                    downloadsToStart.forEach { download ->
+                        downloadJobs[download] = launchDownloadJob(download)
                     }
                 }
             }
-        downloaderJob?.start()
-    }
+        }
 
-    private fun CoroutineScope.launchDownloadJob(download: Download) = launchIO {
+    private fun CoroutineScope.launchDownloadJob(download: Download) = launch {
         try {
             downloadChapter(download)
 

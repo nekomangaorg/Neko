@@ -16,7 +16,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -46,6 +45,7 @@ class DownloaderQueueChaptersTest {
     private lateinit var downloader: Downloader
     private lateinit var mangaRepository: MangaRepository
     private lateinit var provider: DownloadProvider
+    private lateinit var sourceManager: SourceManager
 
     private val manga = Manga.create("/title/1", "Manga").apply { id = 1L }
 
@@ -87,7 +87,7 @@ class DownloaderQueueChaptersTest {
                 every { findMangaDir(any()) } returns null
                 every { chapterDirDoesNotExist(any(), any()) } returns true
             }
-        val sourceManager = mockk<SourceManager> { every { mangaDex } returns mockk() }
+        sourceManager = mockk { every { mangaDex } returns mockk() }
         downloader = Downloader(context, provider, mockk(), sourceManager)
     }
 
@@ -224,11 +224,8 @@ class DownloaderQueueChaptersTest {
         every { anyConstructed<DownloadNotifier>().onComplete() } just runs
         // Unconfined runs the downloader job inside launch, so its only download finishes and the
         // downloader stops before start() returns.
-        mockkStatic(Dispatchers::class)
-        every { Dispatchers.IO } returns Dispatchers.Unconfined
         downloader.pause()
-        downloader =
-            Downloader(context, provider, mockk(), mockk { every { mangaDex } returns mockk() })
+        downloader = Downloader(context, provider, mockk(), sourceManager, Dispatchers.Unconfined)
         coEvery { mangaRepository.getMangaById(1L) } coAnswers
             {
                 downloader.queueState.value.single().status = Download.State.DOWNLOADED
