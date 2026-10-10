@@ -649,8 +649,20 @@ class Downloader(
         store.clear()
     }
 
-    fun updateQueue(downloads: List<Download>) {
+    /**
+     * Replaces the queue with the list [reorder] builds from the current queue, or leaves it alone
+     * when [reorder] returns null. [reorder] runs under [queueLock], so changes made under the lock
+     * while the reorder waits for it, such as chapters [queueChapters] adds, are in the queue it
+     * gets. Keep it short and non-blocking.
+     *
+     * A download can still finish while [reorder] runs, since the download sets its state outside
+     * the lock. It is left out, because adding it back would set it to QUEUE and download it again.
+     */
+    fun updateQueue(reorder: (List<Download>) -> List<Download>?) {
         synchronized(queueLock) {
+            val downloads =
+                reorder(queueState.value)?.filter { it.status != Download.State.DOWNLOADED }
+                    ?: return
             val wasRunning = isRunning
 
             if (downloads.isEmpty()) {
