@@ -22,6 +22,9 @@ import io.mockk.verify
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +33,7 @@ import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.nekomanga.data.database.repository.MangaRepository
@@ -239,6 +243,42 @@ class DownloaderQueueChaptersTest {
         val otherManga = Manga.create("/title/2", "Other").apply { id = 2L }
         downloader.queueChapters(otherManga, listOf(chapter(2, otherManga)), autoStart = true)
         verify(exactly = 2) { DownloadJob.start(context) }
+    }
+
+    @Test
+    fun `keeps a downloader started while pause cancels the old one`() {
+        downloader.pause()
+        downloader = Downloader(context, provider, mockk(), sourceManager, Dispatchers.Unconfined)
+        val activeDownloads = AtomicInteger()
+        val startedDuringPause = AtomicBoolean()
+        val starting = AtomicReference<Thread>()
+        coEvery { mangaRepository.getMangaById(1L) } coAnswers
+            {
+                activeDownloads.incrementAndGet()
+                try {
+                    awaitCancellation()
+                } finally {
+                    activeDownloads.decrementAndGet()
+                    // Unconfined runs this inside pause(), while it cancels the downloader job. A
+                    // start() on another thread gets in before pause() is done with the job.
+                    if (startedDuringPause.compareAndSet(false, true)) {
+                        val thread = thread { downloader.start() }
+                        starting.set(thread)
+                        waitUntil { !thread.isAlive || thread.state == Thread.State.BLOCKED }
+                    }
+                }
+            }
+        downloader.queueChapters(manga, listOf(chapter(1)), autoStart = true)
+        downloader.start()
+
+        downloader.pause()
+        starting.get().join(10_000)
+
+        // The second start() comes after the pause, so its downloader is the one running, and
+        // pausing again cancels its download.
+        assertTrue(downloader.isRunning)
+        downloader.pause()
+        assertEquals(0, activeDownloads.get())
     }
 
     private fun waitUntil(condition: () -> Boolean) {
