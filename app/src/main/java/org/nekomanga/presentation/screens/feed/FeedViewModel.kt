@@ -551,35 +551,33 @@ class FeedViewModel() : ViewModel() {
 
     fun moveDownload(downloadItem: DownloadItem, direction: MoveDownloadDirection) {
         viewModelScope.launchIO {
-            val index =
-                downloadManager.queueState.value.indexOfFirst { download ->
-                    download.chapterItem.id == downloadItem.chapterItem.chapter.id
-                }
-            val mutableDownloads = downloadManager.queueState.value.toMutableList()
-            val downloadList = listOf(mutableDownloads.removeAt(index))
-            val list =
+            downloadManager.reorderQueue { queue ->
+                val (moved, others) =
+                    queue.partition { download ->
+                        download.chapterItem.id == downloadItem.chapterItem.chapter.id
+                    }
+                // The download finished or was removed since the list was drawn.
+                if (moved.isEmpty()) return@reorderQueue null
                 when (direction) {
-                    MoveDownloadDirection.Top -> downloadList + mutableDownloads
-                    MoveDownloadDirection.Bottom -> mutableDownloads + downloadList
+                    MoveDownloadDirection.Top -> moved + others
+                    MoveDownloadDirection.Bottom -> others + moved
                 }
-
-            downloadManager.reorderQueue(list)
+            }
         }
     }
 
     fun moveDownloadSeries(downloadItem: DownloadItem, direction: MoveDownloadDirection) {
         viewModelScope.launchIO {
-            val partitionedPair =
-                downloadManager.queueState.value.partition { download ->
+            downloadManager.reorderQueue { queue ->
+                val partitionedPair = queue.partition { download ->
                     download.mangaItem.id == downloadItem.mangaItem.id
                 }
 
-            val list =
                 when (direction) {
                     MoveDownloadDirection.Top -> partitionedPair.first + partitionedPair.second
                     MoveDownloadDirection.Bottom -> partitionedPair.second + partitionedPair.first
                 }
-            downloadManager.reorderQueue(list)
+            }
         }
     }
 

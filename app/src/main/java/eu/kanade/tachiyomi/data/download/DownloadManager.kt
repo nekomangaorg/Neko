@@ -152,24 +152,22 @@ class DownloadManager(
     suspend fun startDownloadNow(chapter: Chapter) {
         chapter.id ?: return
         if (chapter.isUnavailable) return
-        val existingDownload = getQueuedDownloadOrNull(chapter.id!!)
+        val chapterId = chapter.id!!
         // If not in queue try to start a new download
-        val toAdd = existingDownload ?: Download.fromChapterId(chapter.id!!) ?: return
-        queueState.value.toMutableList().apply {
-            existingDownload?.let { remove(it) }
-            add(0, toAdd)
-            reorderQueue(this)
-        }
+        val toAdd =
+            getQueuedDownloadOrNull(chapterId) ?: Download.fromChapterId(chapterId) ?: return
+        reorderQueue { queue -> listOf(toAdd) + queue.filterNot { it.chapterItem.id == chapterId } }
         startDownloads()
     }
 
     /**
      * Reorders the download queue.
      *
-     * @param downloads value to set the download queue to
+     * @param reorder builds the new queue from the current one, or returns null to leave it alone.
+     *   It runs under the downloader's queue lock, so it must not block.
      */
-    fun reorderQueue(downloads: List<Download>) {
-        downloader.updateQueue(downloads)
+    fun reorderQueue(reorder: (List<Download>) -> List<Download>?) {
+        downloader.updateQueue(reorder)
     }
 
     /**
@@ -190,10 +188,7 @@ class DownloadManager(
      */
     fun addDownloadsToStartOfQueue(downloads: List<Download>) {
         if (downloads.isEmpty()) return
-        queueState.value.toMutableList().apply {
-            addAll(0, downloads)
-            reorderQueue(this)
-        }
+        reorderQueue { queue -> downloads + queue }
         startDownloads()
     }
 
