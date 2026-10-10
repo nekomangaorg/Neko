@@ -275,11 +275,16 @@ class Downloader(
         }
     }
 
-    /** Destroys the downloader job. */
+    /**
+     * Destroys the downloader job. Runs under [queueLock], so a start() on another thread cannot
+     * store a new job between the cancel and the reset and have it dropped while it runs.
+     */
     private fun cancelDownloaderJob() {
-        downloaderJob?.cancel()
-        downloaderJob = null
-        publishRunning()
+        synchronized(queueLock) {
+            downloaderJob?.cancel()
+            downloaderJob = null
+            publishRunning()
+        }
     }
 
     /**
