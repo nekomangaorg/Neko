@@ -97,7 +97,8 @@ class Downloader(
      * [queueChapters] while it adds chapters, so a chapter queued as the last download finishes is
      * either seen by that check or starts the downloader again. [updateQueue] and
      * [removeFromQueueAndRestart] hold it from pause to start, and [isRunning] reads under it, so a
-     * restart never reads as stopped.
+     * restart never reads as stopped. [start], [stop], [pause] and [clearQueue] run under it whole,
+     * so a start on one thread never lands in the middle of a stop, pause or clear on another.
      */
     private val queueLock = Any()
 
@@ -130,59 +131,69 @@ class Downloader(
      * @return true if the downloader is started, false otherwise.
      */
     fun start(): Boolean {
-        if (isRunning || queueState.value.isEmpty()) {
-            return false
+        synchronized(queueLock) {
+            if (isRunning || queueState.value.isEmpty()) {
+                return false
+            }
+
+            queueState.value.apply { removeFromQueueIf { it.chapterItem.isUnavailable } }
+            val pending = queueState.value.filter { it.status != Download.State.DOWNLOADED }
+            pending.forEach {
+                if (it.status != Download.State.QUEUE) it.status = Download.State.QUEUE
+            }
+
+            isPaused = false
+
+            launchDownloaderJob()
+            publishRunning()
+
+            return pending.isNotEmpty()
         }
-
-        queueState.value.apply { removeFromQueueIf { it.chapterItem.isUnavailable } }
-        val pending = queueState.value.filter { it.status != Download.State.DOWNLOADED }
-        pending.forEach { if (it.status != Download.State.QUEUE) it.status = Download.State.QUEUE }
-
-        isPaused = false
-
-        launchDownloaderJob()
-        publishRunning()
-
-        return pending.isNotEmpty()
     }
 
     /** Stops the downloader. */
     fun stop(reason: String? = null) {
-        cancelDownloaderJob()
-        queueState.value
-            .filter { it.status == Download.State.DOWNLOADING }
-            .forEach { it.status = Download.State.ERROR }
+        synchronized(queueLock) {
+            cancelDownloaderJob()
+            queueState.value
+                .filter { it.status == Download.State.DOWNLOADING }
+                .forEach { it.status = Download.State.ERROR }
 
-        if (reason != null) {
-            notifier.onWarning(reason)
-            return
+            if (reason != null) {
+                notifier.onWarning(reason)
+                return
+            }
+
+            if (isPaused && queueState.value.isNotEmpty()) {
+                notifier.onPaused()
+            } else {
+                notifier.onComplete()
+            }
+
+            isPaused = false
+
+            DownloadJob.stop(context)
         }
-
-        if (isPaused && queueState.value.isNotEmpty()) {
-            notifier.onPaused()
-        } else {
-            notifier.onComplete()
-        }
-
-        isPaused = false
-
-        DownloadJob.stop(context)
     }
 
     /** Pauses the downloader */
     fun pause() {
-        cancelDownloaderJob()
-        queueState.value
-            .filter { it.status == Download.State.DOWNLOADING }
-            .forEach { it.status = Download.State.QUEUE }
-        isPaused = true
+        synchronized(queueLock) {
+            cancelDownloaderJob()
+            queueState.value
+                .filter { it.status == Download.State.DOWNLOADING }
+                .forEach { it.status = Download.State.QUEUE }
+            isPaused = true
+        }
     }
 
     /** Removes everything from the queue. */
     fun clearQueue() {
-        cancelDownloaderJob()
-        clearQueueState()
-        notifier.dismissProgress()
+        synchronized(queueLock) {
+            cancelDownloaderJob()
+            clearQueueState()
+            notifier.dismissProgress()
+        }
     }
 
     /**
@@ -275,11 +286,16 @@ class Downloader(
         }
     }
 
-    /** Destroys the downloader job. */
+    /**
+     * Destroys the downloader job. Runs under [queueLock], so a start() on another thread cannot
+     * store a new job between the cancel and the reset and have it dropped while it runs.
+     */
     private fun cancelDownloaderJob() {
-        downloaderJob?.cancel()
-        downloaderJob = null
-        publishRunning()
+        synchronized(queueLock) {
+            downloaderJob?.cancel()
+            downloaderJob = null
+            publishRunning()
+        }
     }
 
     /**
