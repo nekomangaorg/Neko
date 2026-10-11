@@ -37,7 +37,6 @@ import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterNavTargetUseCase
 import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
-import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
 import eu.kanade.tachiyomi.ui.reader.loader.ReaderPreloadController
 import eu.kanade.tachiyomi.ui.reader.loader.ReaderPreloadControllerImpl
 import eu.kanade.tachiyomi.ui.reader.model.ChapterNavTarget
@@ -674,14 +673,9 @@ constructor(
         val chapterList = getChapterList()
         val targetChapter = chapterList.find { it.chapter.id == chapter.chapter.id } ?: chapter
 
-        if (targetChapter.pageLoader is HttpPageLoader) {
-            val manga = manga ?: return
-            val isDownloaded = withIOContext {
-                downloadManager.isChapterDownloaded(targetChapter.chapter, manga.toManga())
-            }
-            if (isDownloaded) {
-                targetChapter.state = ReaderChapter.State.Wait
-            }
+        val loader = loader ?: return
+        if (withIOContext { loader.isDownloadedSinceHttpLoad(targetChapter) }) {
+            targetChapter.state = ReaderChapter.State.Wait
         }
 
         if (!targetChapter.state.allowsPreload(isRetry)) {
@@ -690,7 +684,6 @@ constructor(
 
         TimberKt.d { "Preloading ${targetChapter.chapter.url} - ${targetChapter.chapter.name}" }
 
-        val loader = loader ?: return
         withIOContext {
             try {
                 loader.loadChapter(targetChapter)
