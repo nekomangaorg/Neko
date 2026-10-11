@@ -88,6 +88,20 @@ class ChapterLoader(
         return chapter.state is ReaderChapter.State.Loaded && chapter.pageLoader != null
     }
 
+    /**
+     * Returns true when [chapter] was loaded over HTTP and has been downloaded since. Asks the
+     * cache first, then confirms on disk with the same check [getPageLoader] makes. A cache entry
+     * whose file is gone would otherwise reset the chapter on every preload while each reload picks
+     * [HttpPageLoader] again.
+     */
+    fun isDownloadedSinceHttpLoad(chapter: ReaderChapter): Boolean {
+        if (chapter.pageLoader !is HttpPageLoader) {
+            return false
+        }
+        return downloadManager.isChapterDownloaded(chapter.chapter, manga) &&
+            downloadManager.isChapterDownloaded(chapter.chapter, manga, true)
+    }
+
     /** Returns the page loader to use for this [chapter]. */
     private fun getPageLoader(chapter: ReaderChapter): PageLoader {
         val isDownloaded = downloadManager.isChapterDownloaded(chapter.chapter, manga, true)
