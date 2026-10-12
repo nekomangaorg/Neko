@@ -4,10 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.state.ToggleableState
-import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.getOrElse
@@ -51,6 +49,7 @@ import eu.kanade.tachiyomi.util.chapter.getMissingChapters
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.launchConfirmed
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -58,7 +57,6 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.DateFormat
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -811,14 +809,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 }
         }
     }
-
-    /**
-     * Launches work the user already confirmed, such as a delete once its undo snackbar closes.
-     * Closing the manga page clears this ViewModel before the snackbar reports that it closed, so
-     * work launched in viewModelScope at that point never runs.
-     */
-    private fun launchConfirmed(block: suspend CoroutineScope.() -> Unit) =
-        ProcessLifecycleOwner.get().lifecycleScope.launchIO(block)
 
     /** Delete the list of chapters */
     fun deleteChapters(

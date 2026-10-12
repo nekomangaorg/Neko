@@ -13,6 +13,7 @@ android {
 dependencies {
     implementation(projects.constants)
     implementation(androidx.preferencektx)
+    implementation(androidx.lifecycle.process)
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.serialization.okio)

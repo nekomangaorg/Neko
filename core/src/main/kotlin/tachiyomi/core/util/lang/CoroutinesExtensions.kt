@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.util.system
 
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -45,6 +47,14 @@ fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
 @DelicateCoroutinesApi
 fun launchNow(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED, block)
+
+/**
+ * Launches work the user already confirmed, such as a delete once its undo snackbar closes. Leaving
+ * a screen clears its ViewModel before the snackbar reports that it closed, so work launched in
+ * viewModelScope at that point never runs. The process scope outlives the screen.
+ */
+fun launchConfirmed(block: suspend CoroutineScope.() -> Unit): Job =
+    ProcessLifecycleOwner.get().lifecycleScope.launchIO(block)
 
 fun CoroutineScope.launchUI(block: suspend CoroutineScope.() -> Unit): Job =
     launch(Dispatchers.Main, block = block)
