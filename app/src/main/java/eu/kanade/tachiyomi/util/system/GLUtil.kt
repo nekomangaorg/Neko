@@ -17,6 +17,24 @@ class GLUtil private constructor() {
          */
         const val MAX_CANVAS_BITMAP_BYTES: Long = 100L * 1024 * 1024
 
+        /**
+         * Pixels a HARDWARE bitmap row is assumed to be padded to. Its byte count, which
+         * [android.graphics.RecordingCanvas] checks up to Android 14, uses the graphics buffer's
+         * row stride. Crash reports showed rows padded to a multiple of 64 pixels (5368 drawn as
+         * 5376, 8016 as 8064); 128 leaves a margin for other GPUs.
+         */
+        const val HARDWARE_ROW_ALIGNMENT: Int = 128
+
+        /**
+         * Bytes a [width] x [height] bitmap can count against [MAX_CANVAS_BITMAP_BYTES] when it is
+         * a HARDWARE bitmap, with the row padded to [HARDWARE_ROW_ALIGNMENT].
+         */
+        fun canvasBitmapBytes(width: Int, height: Int, bytesPerPixel: Int = 4): Long {
+            val alignment = HARDWARE_ROW_ALIGNMENT.toLong()
+            val paddedWidth = (width + alignment - 1) / alignment * alignment
+            return paddedWidth * height * bytesPerPixel
+        }
+
         val maxTextureSize: Int by lazy {
             try {
                 // Get EGL Display

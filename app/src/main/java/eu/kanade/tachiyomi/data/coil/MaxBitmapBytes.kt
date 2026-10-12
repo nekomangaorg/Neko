@@ -19,6 +19,7 @@ import coil3.size.Size
 import coil3.size.pxOrElse
 import coil3.util.component1
 import coil3.util.component2
+import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlin.math.sqrt
 
 private val maxBitmapBytesKey = Extras.Key(default = 0L)
@@ -45,7 +46,8 @@ val Options.maxBitmapBytes: Long
  * [maxSize] shrunk so that a [srcWidth] x [srcHeight] image decoded to fit it takes at most
  * [maxBytes] at [bytesPerPixel], or [maxSize] itself when the full size fits. The box is square, so
  * it holds when Coil swaps the sides of a JPEG for its EXIF orientation, and its scale leaves room
- * for decoders to round each side up by a pixel.
+ * for decoders to round each side up by a pixel and for a HARDWARE bitmap's padded row (see
+ * [GLUtil.canvasBitmapBytes]).
  */
 internal fun byteLimitedMaxSize(
     srcWidth: Int,
@@ -54,17 +56,37 @@ internal fun byteLimitedMaxSize(
     maxBytes: Long,
     bytesPerPixel: Int = 4,
 ): Size {
-    val maxPixels = maxBytes / bytesPerPixel
-    if (maxBytes <= 0 || srcWidth.toLong() * srcHeight <= maxPixels) return maxSize
+    if (
+        maxBytes <= 0 ||
+            maxOf(
+                GLUtil.canvasBitmapBytes(srcWidth, srcHeight, bytesPerPixel),
+                GLUtil.canvasBitmapBytes(srcHeight, srcWidth, bytesPerPixel),
+            ) <= maxBytes
+    ) {
+        return maxSize
+    }
+    val maxPixels = (maxBytes / bytesPerPixel).toDouble()
     val w = srcWidth.toDouble()
     val h = srcHeight.toDouble()
-    // Largest scale m with (w * m + 1) * (h * m + 1) <= maxPixels.
-    val scale = (-(w + h) + sqrt((w + h) * (w + h) + 4 * w * h * (maxPixels - 1))) / (2 * w * h)
+    val scale = minOf(paddedRowScale(w, h, maxPixels), paddedRowScale(h, w, maxPixels))
     val side = (maxOf(w, h) * scale).toInt().coerceAtLeast(1)
     return Size(
         minOf(side, maxSize.width.pxOrElse { side }),
         minOf(side, maxSize.height.pxOrElse { side }),
     )
+}
+
+/**
+ * Largest scale m with (width * m + a) * (height * m + 1) <= [maxPixels], where a is
+ * [GLUtil.HARDWARE_ROW_ALIGNMENT]: a row rounded up by a pixel and then padded is at most a pixels
+ * wider. The discriminant equals (width - a * height)^2 + 4 * width * height * [maxPixels], which
+ * is never negative; the coerce only guards floating point rounding.
+ */
+private fun paddedRowScale(width: Double, height: Double, maxPixels: Double): Double {
+    val a = GLUtil.HARDWARE_ROW_ALIGNMENT.toDouble()
+    val b = width + a * height
+    val discriminant = (b * b + 4 * width * height * (maxPixels - a)).coerceAtLeast(0.0)
+    return (-b + sqrt(discriminant)) / (2 * width * height)
 }
 
 /**
