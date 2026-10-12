@@ -152,24 +152,22 @@ class DownloadManager(
     suspend fun startDownloadNow(chapter: Chapter) {
         chapter.id ?: return
         if (chapter.isUnavailable) return
-        val existingDownload = getQueuedDownloadOrNull(chapter.id!!)
+        val chapterId = chapter.id!!
         // If not in queue try to start a new download
-        val toAdd = existingDownload ?: Download.fromChapterId(chapter.id!!) ?: return
-        queueState.value.toMutableList().apply {
-            existingDownload?.let { remove(it) }
-            add(0, toAdd)
-            reorderQueue(this)
-        }
+        val toAdd =
+            getQueuedDownloadOrNull(chapterId) ?: Download.fromChapterId(chapterId) ?: return
+        reorderQueue { queue -> queue.withDownloadsFirst(listOf(toAdd)) }
         startDownloads()
     }
 
     /**
      * Reorders the download queue.
      *
-     * @param downloads value to set the download queue to
+     * @param reorder builds the new queue from the current one, or returns null to leave it alone.
+     *   It runs under the downloader's queue lock, so it must not block.
      */
-    fun reorderQueue(downloads: List<Download>) {
-        downloader.updateQueue(downloads)
+    fun reorderQueue(reorder: (List<Download>) -> List<Download>?) {
+        downloader.updateQueue(reorder)
     }
 
     /**
@@ -190,10 +188,7 @@ class DownloadManager(
      */
     fun addDownloadsToStartOfQueue(downloads: List<Download>) {
         if (downloads.isEmpty()) return
-        queueState.value.toMutableList().apply {
-            addAll(0, downloads)
-            reorderQueue(this)
-        }
+        reorderQueue { queue -> queue.withDownloadsFirst(downloads) }
         startDownloads()
     }
 
@@ -538,4 +533,17 @@ class DownloadManager(
     fun networkStateFlow(): Flow<NetworkState> {
         return context.networkStateFlow()
     }
+}
+
+/**
+ * The queue with [downloads] at the top, in their order, followed by the rest of the queue. A
+ * chapter that is already queued moves to the top once and keeps its queued download. The passed
+ * one can be older: startDownloadNow builds a new download before it takes the queue lock, and the
+ * reader puts back a download it removed when the chapter was opened.
+ */
+internal fun List<Download>.withDownloadsFirst(downloads: List<Download>): List<Download> {
+    val queued = associateBy { it.chapterItem.id }
+    val first = downloads.map { queued[it.chapterItem.id] ?: it }.distinctBy { it.chapterItem.id }
+    val firstIds = first.mapTo(HashSet()) { it.chapterItem.id }
+    return first + filterNot { it.chapterItem.id in firstIds }
 }

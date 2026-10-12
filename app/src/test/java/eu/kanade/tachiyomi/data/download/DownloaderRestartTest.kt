@@ -103,7 +103,7 @@ class DownloaderRestartTest {
     fun `reordering the queue never reads as stopped`() {
         readIsRunningOnQueueStoreWrites()
 
-        downloader.updateQueue(downloader.queueState.value.reversed())
+        downloader.updateQueue { it.reversed() }
 
         assertReadsSawRunning()
     }
