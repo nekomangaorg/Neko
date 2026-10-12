@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -86,6 +85,7 @@ import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
+import org.nekomanga.presentation.components.snackbar.showSnackbarEvent
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
@@ -124,17 +124,11 @@ fun MangaScreen(
     ObserveAsEvents(flow = mangaViewModel.appSnackbarManager.events, snackbarHostState) { event ->
         scope.launch {
             snackbarHostState.currentSnackbarData?.dismiss()
-            val result =
-                snackbarHostState.showSnackbar(
-                    message = event.getFormattedMessage(context),
-                    actionLabel = event.getFormattedActionLabel(context),
-                    duration = event.snackbarDuration,
-                    withDismissAction = true,
-                )
-            when (result) {
-                SnackbarResult.ActionPerformed -> event.action?.invoke()
-                SnackbarResult.Dismissed -> event.dismissAction?.invoke()
-            }
+            snackbarHostState.showSnackbarEvent(
+                event = event,
+                message = event.getFormattedMessage(context),
+                actionLabel = event.getFormattedActionLabel(context),
+            )
         }
     }
 
