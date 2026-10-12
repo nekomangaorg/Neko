@@ -716,11 +716,20 @@ object ImageUtil {
         return options
     }
 
+    /**
+     * Reads the image's dimensions from its header. The webtoon reader calls this on the main
+     * thread, where reading the whole file of an 87 MB page froze the UI for up to 28 seconds.
+     */
     fun extractImageOptions(imageSource: BufferedSource): BitmapFactory.Options {
-        val imageBytes = imageSource.peek().readByteArray()
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)
-        return options
+        imageSource.peek().inputStream().use { BitmapFactory.decodeStream(it, null, options) }
+        if (options.outWidth > 0 && options.outHeight > 0) return options
+        // A codec that cannot get the dimensions from a stream may still get them from the bytes.
+        val imageBytes = imageSource.peek().readByteArray()
+        return BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+            BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, this)
+        }
     }
 
     // Android doesn't include some mappings
