@@ -79,12 +79,14 @@ internal fun byteLimitedMaxSize(
 /**
  * Largest scale m with (width * m + a) * (height * m + 1) <= [maxPixels], where a is
  * [GLUtil.HARDWARE_ROW_ALIGNMENT]: a row rounded up by a pixel and then padded is at most a pixels
- * wider.
+ * wider. The discriminant equals (width - a * height)^2 + 4 * width * height * [maxPixels], which
+ * is never negative; the coerce only guards floating point rounding.
  */
 private fun paddedRowScale(width: Double, height: Double, maxPixels: Double): Double {
     val a = GLUtil.HARDWARE_ROW_ALIGNMENT.toDouble()
     val b = width + a * height
-    return (-b + sqrt(b * b + 4 * width * height * (maxPixels - a))) / (2 * width * height)
+    val discriminant = (b * b + 4 * width * height * (maxPixels - a)).coerceAtLeast(0.0)
+    return (-b + sqrt(discriminant)) / (2 * width * height)
 }
 
 /**
