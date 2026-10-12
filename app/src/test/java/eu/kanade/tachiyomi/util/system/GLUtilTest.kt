@@ -12,6 +12,14 @@ class GLUtilTest {
     }
 
     @Test
+    fun `canvas byte count pads the row like a hardware bitmap`() {
+        // The Android 11 crash: a 5368x4881 page drawn with a 5376 pixel row.
+        assertEquals(104_961_024L, GLUtil.canvasBitmapBytes(5368, 4881))
+        assertEquals(104_857_600L, GLUtil.canvasBitmapBytes(5120, 5120))
+        assertEquals(2L * 128 * 10 * 8, GLUtil.canvasBitmapBytes(129, 10, 8))
+    }
+
+    @Test
     fun `SAFE_CANVAS_BITMAP_DIMENSION is 4096`() {
         assertEquals(4096, GLUtil.SAFE_CANVAS_BITMAP_DIMENSION)
     }

@@ -700,7 +700,7 @@ object ImageUtil {
 
     private fun canUseHardwareBitmap(width: Int, height: Int): Boolean =
         max(width, height) <= GLUtil.maxTextureSize &&
-            (width.toLong() * height.toLong() * 4L) <= GLUtil.MAX_CANVAS_BITMAP_BYTES
+            GLUtil.canvasBitmapBytes(width, height) <= GLUtil.MAX_CANVAS_BITMAP_BYTES
 
     /** Used to check an image's dimensions without loading it in the memory. */
     private fun extractImageOptions(

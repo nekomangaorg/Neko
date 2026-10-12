@@ -1,12 +1,15 @@
 package eu.kanade.tachiyomi.util.system
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
+import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import java.io.IOException
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -86,6 +89,24 @@ class ImageUtilTest {
             listOf(ImageUtil.ImageType.AVIF, ImageUtil.ImageType.HEIF, ImageUtil.ImageType.JXL),
             ImageUtil.ImageType.entries.filter { it.needsNativeDecoder },
         )
+    }
+
+    @Test
+    fun `hardware bitmap check counts the padded row`() {
+        mockkObject(GLUtil.Companion)
+        try {
+            every { GLUtil.maxTextureSize } returns 16_384
+            fun bitmap(width: Int, height: Int) =
+                mockk<Bitmap> {
+                    every { this@mockk.width } returns width
+                    every { this@mockk.height } returns height
+                }
+            // 104,856,000 bytes at 5100 pixels a row, 105,267,200 with the row padded to 5120.
+            assertFalse(ImageUtil.canUseHardwareBitmap(bitmap(5100, 5140)))
+            assertTrue(ImageUtil.canUseHardwareBitmap(bitmap(5120, 5120)))
+        } finally {
+            unmockkAll()
+        }
     }
 
     @Test

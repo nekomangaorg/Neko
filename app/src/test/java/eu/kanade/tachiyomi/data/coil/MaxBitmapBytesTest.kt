@@ -6,6 +6,7 @@ import coil3.size.Dimension
 import coil3.size.Precision
 import coil3.size.Scale
 import coil3.size.Size
+import eu.kanade.tachiyomi.util.system.GLUtil
 import io.mockk.mockk
 import kotlin.math.ceil
 import org.junit.Assert.assertEquals
@@ -28,7 +29,7 @@ class MaxBitmapBytesTest {
     @Test
     fun `wide page over the byte limit gets a smaller box`() {
         // The 8016x6000 PNG from the Discord crash report takes 192 MB at full size.
-        assertEquals(Size(5916, 5916), byteLimitedMaxSize(8016, 6000, textureBox, maxBytes))
+        assertEquals(Size(5832, 5832), byteLimitedMaxSize(8016, 6000, textureBox, maxBytes))
     }
 
     @Test
@@ -39,7 +40,7 @@ class MaxBitmapBytesTest {
     @Test
     fun `original max size gets the byte box`() {
         assertEquals(
-            Size(16_185, 16_185),
+            Size(15_562, 15_562),
             byteLimitedMaxSize(2000, 20_000, Size.ORIGINAL, maxBytes),
         )
     }
@@ -47,7 +48,7 @@ class MaxBitmapBytesTest {
     @Test
     fun `high bit depth page counts 8 bytes per pixel`() {
         // A 16-bit RGB PNG decodes to RGBA_F16: 800x20000 takes 128 MB, 800x12000 takes 77 MB.
-        assertEquals(Size(18_088, 18_088), byteLimitedMaxSize(800, 20_000, textureBox, maxBytes, 8))
+        assertEquals(Size(16_571, 16_571), byteLimitedMaxSize(800, 20_000, textureBox, maxBytes, 8))
         assertEquals(textureBox, byteLimitedMaxSize(800, 12_000, textureBox, maxBytes, 8))
     }
 
@@ -70,6 +71,30 @@ class MaxBitmapBytesTest {
                     val scale = minOf(boxWidth.toDouble() / w, boxHeight.toDouble() / h)
                     val pixels = ceil(w * scale).toLong() * ceil(h * scale).toLong()
                     val bytes = pixels * bytesPerPixel
+                    assertTrue("${w}x$h in $box takes $bytes bytes", bytes <= maxBytes)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `page fitted to the box stays within the limit with a padded hardware row`() {
+        // A HARDWARE bitmap counts its padded buffer row. 5477x4980 is the JPEG from the Android
+        // 11 crash report, drawn as 5368x4881 with a 5376 pixel row.
+        val pages = listOf(5477 to 4980, 8016 to 6000, 2000 to 20_000, 800 to 40_000, 5121 to 5121)
+        for ((width, height) in pages) {
+            for (bytesPerPixel in listOf(4, 8)) {
+                val box = byteLimitedMaxSize(width, height, textureBox, maxBytes, bytesPerPixel)
+                val boxWidth = (box.width as Dimension.Pixels).px
+                val boxHeight = (box.height as Dimension.Pixels).px
+                for ((w, h) in listOf(width to height, height to width)) {
+                    val scale = minOf(boxWidth.toDouble() / w, boxHeight.toDouble() / h)
+                    val bytes =
+                        GLUtil.canvasBitmapBytes(
+                            ceil(w * scale).toInt(),
+                            ceil(h * scale).toInt(),
+                            bytesPerPixel,
+                        )
                     assertTrue("${w}x$h in $box takes $bytes bytes", bytes <= maxBytes)
                 }
             }
