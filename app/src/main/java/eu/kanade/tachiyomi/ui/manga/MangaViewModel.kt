@@ -49,6 +49,7 @@ import eu.kanade.tachiyomi.util.chapter.getMissingChapters
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.launchConfirmed
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -815,7 +816,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         isEverything: Boolean = false,
         canUndo: Boolean = false,
     ) {
-        viewModelScope.launchNonCancellable {
+        launchConfirmed {
             val dbManga = mangaRepository.getMangaById(mangaId)!!
             if (chapterItems.isNotEmpty()) {
                 val delete: suspend () -> Unit = {
@@ -841,7 +842,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             messageRes = R.string.deleted_downloads,
                             actionLabelRes = R.string.undo,
                             action = {},
-                            dismissAction = { viewModelScope.launch { delete() } },
+                            dismissAction = { launchConfirmed { delete() } },
                             snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                         )
                     )
@@ -977,7 +978,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 chapterRepository.updateChaptersProgress(originalDbChapters)
                             }
                         },
-                        dismissAction = { viewModelScope.launchIO { finalizeChapters() } },
+                        dismissAction = { launchConfirmed { finalizeChapters() } },
                         snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                     )
                 )
