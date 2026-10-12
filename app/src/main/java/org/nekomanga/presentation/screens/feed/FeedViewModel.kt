@@ -569,14 +569,7 @@ class FeedViewModel() : ViewModel() {
     fun moveDownloadSeries(downloadItem: DownloadItem, direction: MoveDownloadDirection) {
         viewModelScope.launchIO {
             downloadManager.reorderQueue { queue ->
-                val partitionedPair = queue.partition { download ->
-                    download.mangaItem.id == downloadItem.mangaItem.id
-                }
-
-                when (direction) {
-                    MoveDownloadDirection.Top -> partitionedPair.first + partitionedPair.second
-                    MoveDownloadDirection.Bottom -> partitionedPair.second + partitionedPair.first
-                }
+                queue.withSeriesMoved(downloadItem.mangaItem.id, direction)
             }
         }
     }
@@ -1109,5 +1102,21 @@ class FeedViewModel() : ViewModel() {
 
         const val HISTORY_ENDLESS_LIMIT = 15
         const val UPDATES_ENDLESS_LIMIT = 200
+    }
+}
+
+/**
+ * The queue with [mangaId]'s downloads moved to the top or bottom, or null when none of them is
+ * queued anymore, so the downloader is not paused and restarted for nothing.
+ */
+internal fun List<Download>.withSeriesMoved(
+    mangaId: Long,
+    direction: MoveDownloadDirection,
+): List<Download>? {
+    val (moved, rest) = partition { download -> download.mangaItem.id == mangaId }
+    if (moved.isEmpty()) return null
+    return when (direction) {
+        MoveDownloadDirection.Top -> moved + rest
+        MoveDownloadDirection.Bottom -> rest + moved
     }
 }

@@ -132,7 +132,7 @@ class DownloaderUpdateQueueTest {
         check(adding.await(10, TimeUnit.SECONDS)) { "the chapter was not queued" }
 
         val reordering = thread { downloader.updateQueue { it.reversed() } }
-        waitUntil { !reordering.isAlive || reordering.state == Thread.State.BLOCKED }
+        waitUntil { !reordering.isAlive || reordering.isWaitingInUpdateQueue() }
         finishAdding.countDown()
         queueing.join(10_000)
         reordering.join(10_000)
@@ -168,6 +168,14 @@ class DownloaderUpdateQueueTest {
         assertEquals(listOf(2L), downloader.queueState.value.map { it.chapterItem.id })
         assertEquals(Download.State.DOWNLOADED, download.status)
     }
+
+    /**
+     * Blocked on the queue lock in updateQueue. A latch cannot report that, and BLOCKED alone also
+     * matches a short wait on another monitor before the thread gets there, which would let the
+     * test go on before the reorder is waiting.
+     */
+    private fun Thread.isWaitingInUpdateQueue(): Boolean =
+        state == Thread.State.BLOCKED && stackTrace.firstOrNull()?.methodName == "updateQueue"
 
     private fun waitUntil(condition: () -> Boolean) {
         val deadline = System.currentTimeMillis() + 10_000

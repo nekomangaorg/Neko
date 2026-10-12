@@ -156,7 +156,7 @@ class DownloadManager(
         // If not in queue try to start a new download
         val toAdd =
             getQueuedDownloadOrNull(chapterId) ?: Download.fromChapterId(chapterId) ?: return
-        reorderQueue { queue -> listOf(toAdd) + queue.filterNot { it.chapterItem.id == chapterId } }
+        reorderQueue { queue -> queue.withDownloadsFirst(listOf(toAdd)) }
         startDownloads()
     }
 
@@ -188,7 +188,7 @@ class DownloadManager(
      */
     fun addDownloadsToStartOfQueue(downloads: List<Download>) {
         if (downloads.isEmpty()) return
-        reorderQueue { queue -> downloads + queue }
+        reorderQueue { queue -> queue.withDownloadsFirst(downloads) }
         startDownloads()
     }
 
@@ -533,4 +533,17 @@ class DownloadManager(
     fun networkStateFlow(): Flow<NetworkState> {
         return context.networkStateFlow()
     }
+}
+
+/**
+ * The queue with [downloads] at the top, in their order, followed by the rest of the queue. A
+ * chapter that is already queued moves to the top once and keeps its queued download. The passed
+ * one can be older: startDownloadNow builds a new download before it takes the queue lock, and the
+ * reader puts back a download it removed when the chapter was opened.
+ */
+internal fun List<Download>.withDownloadsFirst(downloads: List<Download>): List<Download> {
+    val queued = associateBy { it.chapterItem.id }
+    val first = downloads.map { queued[it.chapterItem.id] ?: it }.distinctBy { it.chapterItem.id }
+    val firstIds = first.mapTo(HashSet()) { it.chapterItem.id }
+    return first + filterNot { it.chapterItem.id in firstIds }
 }
