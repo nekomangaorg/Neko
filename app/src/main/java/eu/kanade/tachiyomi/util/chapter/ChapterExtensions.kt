@@ -17,6 +17,8 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
     val chapterNumbers =
         this.asSequence()
             .filter { it.isAvailable() }
+            // Negative means no chapter number (a oneshot), which cannot leave a gap
+            .filter { it.chapter.chapterNumber >= 0f }
             .distinctBy {
                 if (it.chapter.chapterText.isNotEmpty()) {
                     "${it.chapter.volume}-${it.chapter.chapterText}"

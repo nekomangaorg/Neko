@@ -13,6 +13,21 @@ class ChapterExtensionsTest {
         count shouldBe "2"
     }
 
+    @Test
+    fun `Unnumbered chapter is not a gap before chapter 1`() {
+        // A MangaDex oneshot with no chapter number keeps the -1 default
+        val list =
+            listOf(
+                createChp(-1f, "Oneshot"),
+                createChp(1f, "test"),
+                createChp(2f, "test2"),
+                createChp(3f, "test3"),
+            )
+        val missing = list.getMissingChapters()
+        missing.count shouldBe ""
+        missing.estimatedChapters shouldBe ""
+    }
+
     private fun createChp(chapNum: Float, chapName: String): ChapterItem {
         return ChapterItem(
             chapter =
