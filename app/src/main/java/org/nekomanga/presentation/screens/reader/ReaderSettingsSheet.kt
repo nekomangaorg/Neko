@@ -11,9 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -28,8 +29,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +38,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
@@ -48,57 +49,32 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.nekomanga.R
-import org.nekomanga.domain.manga.MangaItem
-import org.nekomanga.domain.manga.isLongStrip
-import org.nekomanga.domain.manga.orientationType
-import org.nekomanga.domain.manga.readingModeType
-import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.components.sheets.BaseSheet
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
-import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import org.nekomanga.presentation.theme.ThemeConfig
+import org.nekomanga.presentation.theme.ThemeConfigProvider
+import org.nekomanga.presentation.theme.ThemedPreviews
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ReaderSettingsSheet(
-    manga: MangaItem?,
-    hasMargins: Boolean,
-    hasCutout: Boolean,
-    onReadingModeChange: (ReadingModeType) -> Unit,
-    onOrientationChange: (OrientationType) -> Unit,
-    onOpenReaderSettings: () -> Unit,
-    onDismiss: () -> Unit,
+    uiState: ReaderSettingsUiState,
+    themeColorState: ThemeColorState = defaultThemeColorState(),
+    onAction: (ReaderSettingsAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val readerPreferences: ReaderPreferences = remember { Injekt.get() }
-    val themeColorState = defaultThemeColorState()
     val scope = rememberCoroutineScope()
-
-    val defaultReadingMode by readerPreferences.defaultReadingMode().collectAsState()
-    val currentReadingMode =
-        remember(manga?.readingModeType, manga?.viewerFlags, defaultReadingMode) {
-            if (manga == null) defaultReadingMode
-            else {
-                val viewer =
-                    if (manga.readingModeType == 0) defaultReadingMode else manga.readingModeType
-                if (manga.isLongStrip()) ReadingModeType.WEBTOON.flagValue else viewer
-            }
-        }
-    val isWebtoon = ReadingModeType.isWebtoonType(currentReadingMode)
-
-    val readingModeType = manga?.readingModeType ?: 0
-    val orientationType = manga?.orientationType ?: OrientationType.DEFAULT.flagValue
-
     val tabs =
         listOf(
             stringResource(R.string.general),
-            if (isWebtoon) stringResource(R.string.webtoon) else stringResource(R.string.paged),
+            if (uiState.isWebtoon) stringResource(R.string.webtoon)
+            else stringResource(R.string.paged),
             stringResource(R.string.filter),
         )
 
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(initialPage = uiState.selectedTab, pageCount = { 3 })
     val maxLazyHeight = LocalConfiguration.current.screenHeightDp * 0.6f
 
     BaseSheet(
@@ -148,10 +124,7 @@ fun ReaderSettingsSheet(
                 }
 
                 IconButton(
-                    onClick = {
-                        onOpenReaderSettings()
-                        onDismiss()
-                    },
+                    onClick = { onAction(ReaderSettingsAction.OpenFullSettings) },
                     modifier = Modifier.padding(start = Size.small),
                 ) {
                     Icon(
@@ -166,26 +139,11 @@ fun ReaderSettingsSheet(
                 state = pagerState,
                 modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
             ) { page ->
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    item {
-                        when (page) {
-                            0 ->
-                                GeneralSettingsTab(
-                                    readingModeType = readingModeType,
-                                    orientationType = orientationType,
-                                    onReadingModeChange = onReadingModeChange,
-                                    onOrientationChange = onOrientationChange,
-                                    readerPreferences = readerPreferences,
-                                )
-                            1 ->
-                                LayoutSettingsTab(
-                                    isWebtoon = isWebtoon,
-                                    hasMargins = hasMargins,
-                                    hasCutout = hasCutout,
-                                    readerPreferences = readerPreferences,
-                                )
-                            2 -> FilterSettingsTab(readerPreferences)
-                        }
+                Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                    when (page) {
+                        0 -> GeneralSettingsTab(uiState = uiState, onAction = onAction)
+                        1 -> LayoutSettingsTab(uiState = uiState, onAction = onAction)
+                        2 -> FilterSettingsTab(uiState = uiState, onAction = onAction)
                     }
                 }
             }
@@ -195,33 +153,18 @@ fun ReaderSettingsSheet(
 
 @Composable
 private fun GeneralSettingsTab(
-    readingModeType: Int,
-    orientationType: Int,
-    onReadingModeChange: (ReadingModeType) -> Unit,
-    onOrientationChange: (OrientationType) -> Unit,
-    readerPreferences: ReaderPreferences,
+    uiState: ReaderSettingsUiState,
+    onAction: (ReaderSettingsAction) -> Unit,
 ) {
-    val readerTheme by readerPreferences.readerTheme().collectAsState()
-    val showPageNumber by readerPreferences.showPageNumber().collectAsState()
-    val keepScreenOn by readerPreferences.keepScreenOn().collectAsState()
-    val alwaysShowChapterTransition by
-        readerPreferences.alwaysShowChapterTransition().collectAsState()
-
-    val currentModeIndex =
-        remember(readingModeType) { ReadingModeType.fromPreference(readingModeType).prefValue }
-
-    val currentRotationIndex =
-        remember(orientationType) { OrientationType.fromPreference(orientationType).prefValue }
-
     Column(modifier = Modifier.fillMaxWidth()) {
         val readingModeOptions = stringArrayResource(id = R.array.viewers_selector).toList()
         ReaderChipsSelector(
             label = stringResource(R.string.reading_mode),
             options = readingModeOptions,
-            selectedIndex = currentModeIndex,
+            selectedIndex = uiState.readingModeIndex,
             onSelected = { index ->
                 val readingModeType = ReadingModeType.fromSpinner(index)
-                onReadingModeChange(readingModeType)
+                onAction(ReaderSettingsAction.SetReadingMode(readingModeType))
             },
         )
 
@@ -229,10 +172,10 @@ private fun GeneralSettingsTab(
         ReaderChipsSelector(
             label = stringResource(R.string.rotation),
             options = rotationOptions,
-            selectedIndex = currentRotationIndex,
+            selectedIndex = uiState.rotationIndex,
             onSelected = { index ->
                 val rotationType = OrientationType.fromSpinner(index)
-                onOrientationChange(rotationType)
+                onAction(ReaderSettingsAction.SetOrientation(rotationType))
             },
         )
 
@@ -240,95 +183,85 @@ private fun GeneralSettingsTab(
         ReaderChipsSelector(
             label = stringResource(R.string.background_color),
             options = themeOptions,
-            selectedIndex = readerTheme,
-            onSelected = { index -> readerPreferences.readerTheme().set(index) },
+            selectedIndex = uiState.readerTheme,
+            onSelected = { index -> onAction(ReaderSettingsAction.SetTheme(index)) },
         )
 
-        val sliderPosition by readerPreferences.sliderPosition().collectAsState()
         val sliderOptions = stringArrayResource(id = R.array.slider_position).toList()
         ReaderChipsSelector(
             label = stringResource(R.string.slider_position),
             options = sliderOptions,
-            selectedIndex = sliderPosition.prefValue,
+            selectedIndex = uiState.sliderPosition.prefValue,
             onSelected = { index ->
-                readerPreferences.sliderPosition().set(ReaderSliderPosition.fromSpinner(index))
+                onAction(
+                    ReaderSettingsAction.SetSliderPosition(ReaderSliderPosition.fromSpinner(index))
+                )
             },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.show_page_number),
-            checked = showPageNumber,
-            onCheckedChange = { readerPreferences.showPageNumber().set(it) },
+            checked = uiState.showPageNumber,
+            onCheckedChange = { onAction(ReaderSettingsAction.ToggleShowPageNumber(it)) },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.keep_screen_on),
-            checked = keepScreenOn,
-            onCheckedChange = { readerPreferences.keepScreenOn().set(it) },
+            checked = uiState.keepScreenOn,
+            onCheckedChange = { onAction(ReaderSettingsAction.ToggleKeepScreenOn(it)) },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.always_show_chapter_transition),
-            checked = alwaysShowChapterTransition,
-            onCheckedChange = { readerPreferences.alwaysShowChapterTransition().set(it) },
+            checked = uiState.alwaysShowChapterTransition,
+            onCheckedChange = {
+                onAction(ReaderSettingsAction.ToggleAlwaysShowChapterTransition(it))
+            },
         )
     }
 }
 
 @Composable
 private fun LayoutSettingsTab(
-    isWebtoon: Boolean,
-    hasMargins: Boolean,
-    hasCutout: Boolean,
-    readerPreferences: ReaderPreferences,
+    uiState: ReaderSettingsUiState,
+    onAction: (ReaderSettingsAction) -> Unit,
 ) {
-    if (isWebtoon) {
-        val cropBordersWebtoon by readerPreferences.cropBordersWebtoon().collectAsState()
-        val cropBorders by readerPreferences.cropBorders().collectAsState()
-        val webtoonSidePadding by readerPreferences.webtoonSidePadding().collectAsState()
-        val webtoonEnableZoomOut by readerPreferences.webtoonEnableZoomOut().collectAsState()
-        val webtoonNav by readerPreferences.navigationModeWebtoon().collectAsState()
-        val webtoonInvert by readerPreferences.webtoonNavInverted().collectAsState()
-        val webtoonPageLayout by readerPreferences.webtoonPageLayout().collectAsState()
-        val webtoonInvertDoublePages by
-            readerPreferences.webtoonInvertDoublePages().collectAsState()
-        val webtoonPageTransitions by
-            readerPreferences.animatedPageTransitionsWebtoon().collectAsState()
-        val splitTallImages by readerPreferences.splitTallImagesReader().collectAsState()
-
+    if (uiState.isWebtoon) {
         Column(modifier = Modifier.fillMaxWidth()) {
             ReaderSwitchSetting(
                 label = stringResource(R.string.crop_borders),
-                checked = if (hasMargins) cropBorders else cropBordersWebtoon,
+                checked = uiState.effectiveCropBorders,
                 onCheckedChange = {
-                    if (hasMargins) {
-                        readerPreferences.cropBorders().set(it)
+                    if (uiState.hasMargins) {
+                        onAction(ReaderSettingsAction.ToggleCropBorders(it))
                     } else {
-                        readerPreferences.cropBordersWebtoon().set(it)
+                        onAction(ReaderSettingsAction.ToggleWebtoonCropBorders(it))
                     }
                 },
             )
 
             ReaderSliderSetting(
                 label = stringResource(R.string.pref_webtoon_side_padding),
-                value = webtoonSidePadding.toFloat().coerceIn(0f, 25f),
+                value = uiState.webtoonSidePadding.toFloat().coerceIn(0f, 25f),
                 valueRange = 0f..25f,
                 valueFormatter = { "${it.roundToInt()}%" },
-                onValueChange = { readerPreferences.webtoonSidePadding().set(it.roundToInt()) },
+                onValueChange = {
+                    onAction(ReaderSettingsAction.SetWebtoonSidePadding(it.roundToInt()))
+                },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.enable_zoom_out),
-                checked = webtoonEnableZoomOut,
-                onCheckedChange = { readerPreferences.webtoonEnableZoomOut().set(it) },
+                checked = uiState.webtoonEnableZoomOut,
+                onCheckedChange = { onAction(ReaderSettingsAction.ToggleWebtoonEnableZoomOut(it)) },
             )
 
             val webtoonNavOptions = stringArrayResource(id = R.array.reader_nav).toList()
             ReaderChipsSelector(
                 label = stringResource(R.string.tap_zones),
                 options = webtoonNavOptions,
-                selectedIndex = webtoonNav,
-                onSelected = { readerPreferences.navigationModeWebtoon().set(it) },
+                selectedIndex = uiState.webtoonNav,
+                onSelected = { onAction(ReaderSettingsAction.SetWebtoonNav(it)) },
             )
 
             val invertTappingOptions =
@@ -336,102 +269,92 @@ private fun LayoutSettingsTab(
             ReaderChipsSelector(
                 label = stringResource(R.string.invert_tapping),
                 options = invertTappingOptions,
-                selectedIndex = webtoonInvert.ordinal,
+                selectedIndex = uiState.webtoonInvert.ordinal,
                 onSelected = { index ->
-                    readerPreferences
-                        .webtoonNavInverted()
-                        .set(ViewerNavigation.TappingInvertMode.values()[index])
+                    onAction(
+                        ReaderSettingsAction.SetWebtoonInvertTapping(
+                            ViewerNavigation.TappingInvertMode.values()[index]
+                        )
+                    )
                 },
             )
 
             val webtoonPageLayoutOptions =
                 stringArrayResource(id = R.array.webtoon_page_layouts).toList()
             val selectedWebtoonLayoutIndex =
-                if (webtoonPageLayout == PageLayout.SPLIT_PAGES.webtoonValue) 1 else 0
+                if (uiState.webtoonPageLayout == PageLayout.SPLIT_PAGES) 1 else 0
             ReaderChipsSelector(
                 label = stringResource(R.string.page_layout),
                 options = webtoonPageLayoutOptions,
                 selectedIndex = selectedWebtoonLayoutIndex,
                 onSelected = { index ->
-                    val layoutValue =
-                        if (index == 1) PageLayout.SPLIT_PAGES.webtoonValue
-                        else PageLayout.SINGLE_PAGE.webtoonValue
-                    readerPreferences.webtoonPageLayout().set(layoutValue)
+                    val layout = if (index == 1) PageLayout.SPLIT_PAGES else PageLayout.SINGLE_PAGE
+                    onAction(ReaderSettingsAction.SetWebtoonPageLayout(layout))
                 },
             )
 
-            if (webtoonPageLayout != PageLayout.SINGLE_PAGE.webtoonValue) {
+            if (uiState.webtoonPageLayout != PageLayout.SINGLE_PAGE) {
                 ReaderSwitchSetting(
                     label = stringResource(R.string.invert_double_pages),
-                    checked = webtoonInvertDoublePages,
-                    onCheckedChange = { readerPreferences.webtoonInvertDoublePages().set(it) },
+                    checked = uiState.webtoonInvertDoublePages,
+                    onCheckedChange = {
+                        onAction(ReaderSettingsAction.ToggleWebtoonInvertDoublePages(it))
+                    },
                 )
             }
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.animate_page_transitions_webtoon),
-                checked = webtoonPageTransitions,
-                onCheckedChange = { readerPreferences.animatedPageTransitionsWebtoon().set(it) },
+                checked = uiState.webtoonPageTransitions,
+                onCheckedChange = {
+                    onAction(ReaderSettingsAction.ToggleWebtoonPageTransitions(it))
+                },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.split_tall_images_reader),
-                checked = splitTallImages,
-                onCheckedChange = { readerPreferences.splitTallImagesReader().set(it) },
+                checked = uiState.splitTallImages,
+                onCheckedChange = { onAction(ReaderSettingsAction.ToggleSplitTallImages(it)) },
             )
         }
     } else {
-        val imageScaleType by readerPreferences.imageScaleType().collectAsState()
-        val doublePageGap by readerPreferences.doublePageGap().collectAsState()
-        val navigateToPan by readerPreferences.navigateToPan().collectAsState()
-        val landscapeZoom by readerPreferences.landscapeZoom().collectAsState()
-        val zoomStart by readerPreferences.zoomStart().collectAsState()
-        val cropBorders by readerPreferences.cropBorders().collectAsState()
-        val pageTransitions by readerPreferences.animatedPageTransitions().collectAsState()
-        val pagerNav by readerPreferences.navigationModePager().collectAsState()
-        val pagerInvert by readerPreferences.pagerNavInverted().collectAsState()
-        val pagerCutoutBehavior by readerPreferences.pagerCutoutBehavior().collectAsState()
-        val pageLayoutPref by readerPreferences.pageLayout().collectAsState()
-        val invertDoublePages by readerPreferences.invertDoublePages().collectAsState()
-        val doublePageRotate by readerPreferences.doublePageRotate().collectAsState()
-        val doublePageRotateReverse by readerPreferences.doublePageRotateReverse().collectAsState()
-        val keepScreenOn by readerPreferences.keepScreenOn().collectAsState()
-
         Column(modifier = Modifier.fillMaxWidth()) {
             val scaleOptions = stringArrayResource(id = R.array.image_scale_type).toList()
             ReaderChipsSelector(
                 label = stringResource(R.string.scale_type),
                 options = scaleOptions,
-                selectedIndex = imageScaleType - 1,
-                onSelected = { index -> readerPreferences.imageScaleType().set(index + 1) },
+                selectedIndex = uiState.imageScaleType - 1,
+                onSelected = { index ->
+                    onAction(ReaderSettingsAction.SetImageScaleType(index + 1))
+                },
             )
 
             val zoomStartOptions = stringArrayResource(id = R.array.zoom_start).toList()
             ReaderChipsSelector(
                 label = stringResource(R.string.zoom_start_position),
                 options = zoomStartOptions,
-                selectedIndex = zoomStart - 1,
-                onSelected = { index -> readerPreferences.zoomStart().set(index + 1) },
+                selectedIndex = uiState.zoomStart - 1,
+                onSelected = { index -> onAction(ReaderSettingsAction.SetZoomStart(index + 1)) },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.crop_borders),
-                checked = cropBorders,
-                onCheckedChange = { readerPreferences.cropBorders().set(it) },
+                checked = uiState.cropBorders,
+                onCheckedChange = { onAction(ReaderSettingsAction.ToggleCropBorders(it)) },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.animate_page_transitions),
-                checked = pageTransitions,
-                onCheckedChange = { readerPreferences.animatedPageTransitions().set(it) },
+                checked = uiState.pageTransitions,
+                onCheckedChange = { onAction(ReaderSettingsAction.TogglePageTransitions(it)) },
             )
 
             val pagerNavOptions = stringArrayResource(id = R.array.reader_nav).toList()
             ReaderChipsSelector(
                 label = stringResource(R.string.tap_zones),
                 options = pagerNavOptions,
-                selectedIndex = pagerNav,
-                onSelected = { readerPreferences.navigationModePager().set(it) },
+                selectedIndex = uiState.pagerNav,
+                onSelected = { onAction(ReaderSettingsAction.SetPagerNav(it)) },
             )
 
             val invertTappingOptions =
@@ -439,11 +362,13 @@ private fun LayoutSettingsTab(
             ReaderChipsSelector(
                 label = stringResource(R.string.invert_tapping),
                 options = invertTappingOptions,
-                selectedIndex = pagerInvert.ordinal,
+                selectedIndex = uiState.pagerInvert.ordinal,
                 onSelected = { index ->
-                    readerPreferences
-                        .pagerNavInverted()
-                        .set(ViewerNavigation.TappingInvertMode.values()[index])
+                    onAction(
+                        ReaderSettingsAction.SetPagerInvertTapping(
+                            ViewerNavigation.TappingInvertMode.values()[index]
+                        )
+                    )
                 },
             )
 
@@ -451,65 +376,73 @@ private fun LayoutSettingsTab(
             ReaderChipsSelector(
                 label = stringResource(R.string.page_layout),
                 options = pagedLayoutOptions,
-                selectedIndex = pageLayoutPref,
-                onSelected = { readerPreferences.pageLayout().set(it) },
+                selectedIndex = uiState.pageLayout.value,
+                onSelected = { index ->
+                    onAction(ReaderSettingsAction.SetPageLayout(PageLayout.fromPreference(index)))
+                },
             )
 
-            if (pageLayoutPref != PageLayout.SINGLE_PAGE.value) {
+            if (uiState.pageLayout != PageLayout.SINGLE_PAGE) {
                 ReaderSwitchSetting(
                     label = stringResource(R.string.invert_double_pages),
-                    checked = invertDoublePages,
-                    onCheckedChange = { readerPreferences.invertDoublePages().set(it) },
+                    checked = uiState.invertDoublePages,
+                    onCheckedChange = {
+                        onAction(ReaderSettingsAction.ToggleInvertDoublePages(it))
+                    },
                 )
 
                 val gapOptions = stringArrayResource(id = R.array.double_page_gap).toList()
-                val selectedGapIndex = maxOf(0, gapOptions.indexOf(doublePageGap.toString()))
+                val selectedGapIndex =
+                    maxOf(0, gapOptions.indexOf(uiState.doublePageGap.toString()))
                 ReaderChipsSelector(
                     label = stringResource(R.string.double_page_gap),
                     options = gapOptions,
                     selectedIndex = selectedGapIndex,
                     onSelected = { index ->
-                        readerPreferences.doublePageGap().set(gapOptions[index].toInt())
+                        onAction(ReaderSettingsAction.SetDoublePageGap(gapOptions[index].toInt()))
                     },
                 )
             }
 
-            if (imageScaleType == 1) { // Fit screen / Center Inside
+            if (uiState.imageScaleType == 1) { // Fit screen / Center Inside
                 ReaderSwitchSetting(
                     label = stringResource(R.string.zoom_double_page_spreads),
-                    checked = landscapeZoom,
-                    onCheckedChange = { readerPreferences.landscapeZoom().set(it) },
+                    checked = uiState.landscapeZoom,
+                    onCheckedChange = {
+                        onAction(ReaderSettingsAction.ToggleZoomDoublePageSpreads(it))
+                    },
                 )
             }
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.navigate_pan),
-                checked = navigateToPan,
-                onCheckedChange = { readerPreferences.navigateToPan().set(it) },
+                checked = uiState.navigateToPan,
+                onCheckedChange = { onAction(ReaderSettingsAction.ToggleNavigateToPan(it)) },
             )
 
             ReaderSwitchSetting(
                 label = stringResource(R.string.double_page_rotate),
-                checked = doublePageRotate,
-                onCheckedChange = { readerPreferences.doublePageRotate().set(it) },
+                checked = uiState.doublePageRotate,
+                onCheckedChange = { onAction(ReaderSettingsAction.ToggleDoublePageRotate(it)) },
             )
 
-            if (doublePageRotate) {
+            if (uiState.doublePageRotate) {
                 ReaderSwitchSetting(
                     label = stringResource(R.string.double_page_rotate_reverse),
-                    checked = doublePageRotateReverse,
-                    onCheckedChange = { readerPreferences.doublePageRotateReverse().set(it) },
+                    checked = uiState.doublePageRotateReverse,
+                    onCheckedChange = {
+                        onAction(ReaderSettingsAction.ToggleDoublePageRotateReverse(it))
+                    },
                 )
             }
 
-            val isFullFit = imageScaleType in listOf(2, 4, 6)
-            if (isFullFit && hasCutout && keepScreenOn) {
+            if (uiState.isCutoutVisible) {
                 val cutoutOptions = stringArrayResource(id = R.array.cutout_behavior).toList()
                 ReaderChipsSelector(
                     label = stringResource(R.string.cutout_area_behavior),
                     options = cutoutOptions,
-                    selectedIndex = pagerCutoutBehavior,
-                    onSelected = { readerPreferences.pagerCutoutBehavior().set(it) },
+                    selectedIndex = uiState.pagerCutoutBehavior,
+                    onSelected = { onAction(ReaderSettingsAction.SetPagerCutoutBehavior(it)) },
                 )
             }
         }
@@ -517,101 +450,125 @@ private fun LayoutSettingsTab(
 }
 
 @Composable
-private fun FilterSettingsTab(readerPreferences: ReaderPreferences) {
-    val grayscale by readerPreferences.grayscale().collectAsState()
-    val invertedColors by readerPreferences.invertedColors().collectAsState()
-    val colorFilter by readerPreferences.colorFilter().collectAsState()
-    val colorFilterMode by readerPreferences.colorFilterMode().collectAsState()
-    val colorFilterValue by readerPreferences.colorFilterValue().collectAsState()
-    val customBrightness by readerPreferences.customBrightness().collectAsState()
-    val customBrightnessValue by readerPreferences.customBrightnessValue().collectAsState()
-
-    val alpha = (colorFilterValue shr 24) and 0xFF
-    val red = (colorFilterValue shr 16) and 0xFF
-    val green = (colorFilterValue shr 8) and 0xFF
-    val blue = colorFilterValue and 0xFF
-
+private fun FilterSettingsTab(
+    uiState: ReaderSettingsUiState,
+    onAction: (ReaderSettingsAction) -> Unit,
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ReaderSwitchSetting(
             label = stringResource(R.string.grayscale),
-            checked = grayscale,
-            onCheckedChange = { readerPreferences.grayscale().set(it) },
+            checked = uiState.grayscale,
+            onCheckedChange = { onAction(ReaderSettingsAction.ToggleGrayscale(it)) },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.pref_inverted_colors),
-            checked = invertedColors,
-            onCheckedChange = { readerPreferences.invertedColors().set(it) },
+            checked = uiState.invertedColors,
+            onCheckedChange = { onAction(ReaderSettingsAction.ToggleInvertedColors(it)) },
         )
 
         ReaderSwitchSetting(
             label = stringResource(R.string.use_custom_brightness),
-            checked = customBrightness,
-            onCheckedChange = { readerPreferences.customBrightness().set(it) },
+            checked = uiState.customBrightness,
+            onCheckedChange = { onAction(ReaderSettingsAction.ToggleCustomBrightness(it)) },
         )
 
-        if (customBrightness) {
+        if (uiState.customBrightness) {
             ReaderSliderSetting(
                 label = stringResource(R.string.use_custom_brightness),
-                value = customBrightnessValue.toFloat(),
+                value = uiState.customBrightnessValue.toFloat(),
                 valueRange = -75f..100f,
                 valueFormatter = { it.roundToInt().toString() },
-                onValueChange = { readerPreferences.customBrightnessValue().set(it.roundToInt()) },
+                onValueChange = {
+                    onAction(ReaderSettingsAction.SetCustomBrightnessValue(it.roundToInt()))
+                },
             )
         }
 
         ReaderSwitchSetting(
             label = stringResource(R.string.use_custom_color_filter),
-            checked = colorFilter,
-            onCheckedChange = { readerPreferences.colorFilter().set(it) },
+            checked = uiState.colorFilter,
+            onCheckedChange = { onAction(ReaderSettingsAction.ToggleColorFilter(it)) },
         )
 
-        if (colorFilter) {
+        if (uiState.colorFilter) {
             val blendModes = stringArrayResource(id = R.array.color_filter_modes).toList()
             ReaderChipsSelector(
                 label = stringResource(R.string.color_filter_blend_mode),
                 options = blendModes,
-                selectedIndex = colorFilterMode,
-                onSelected = { readerPreferences.colorFilterMode().set(it) },
+                selectedIndex = uiState.colorFilterMode,
+                onSelected = { onAction(ReaderSettingsAction.SetColorFilterMode(it)) },
             )
 
             ReaderSliderSetting(
                 label = stringResource(R.string.alpha_initial),
-                value = alpha.toFloat(),
+                value = uiState.colorFilterAlpha.toFloat(),
                 valueRange = 0f..255f,
                 valueFormatter = { it.roundToInt().toString() },
                 onValueChange = { value ->
-                    updateColorComponent(value.roundToInt(), ALPHA_MASK, 24, readerPreferences)
+                    onAction(
+                        ReaderSettingsAction.SetColorFilterValue(
+                            uiState.withColorComponent(
+                                value.roundToInt(),
+                                COLOR_FILTER_ALPHA_MASK,
+                                24,
+                            )
+                        )
+                    )
                 },
             )
 
             ReaderSliderSetting(
                 label = stringResource(R.string.red_initial),
-                value = red.toFloat(),
+                value = uiState.colorFilterRed.toFloat(),
                 valueRange = 0f..255f,
                 valueFormatter = { it.roundToInt().toString() },
                 onValueChange = { value ->
-                    updateColorComponent(value.roundToInt(), RED_MASK, 16, readerPreferences)
+                    onAction(
+                        ReaderSettingsAction.SetColorFilterValue(
+                            uiState.withColorComponent(
+                                value.roundToInt(),
+                                COLOR_FILTER_RED_MASK,
+                                16,
+                            )
+                        )
+                    )
                 },
             )
 
             ReaderSliderSetting(
                 label = stringResource(R.string.green_initial),
-                value = green.toFloat(),
+                value = uiState.colorFilterGreen.toFloat(),
                 valueRange = 0f..255f,
                 valueFormatter = { it.roundToInt().toString() },
                 onValueChange = { value ->
-                    updateColorComponent(value.roundToInt(), GREEN_MASK, 8, readerPreferences)
+                    onAction(
+                        ReaderSettingsAction.SetColorFilterValue(
+                            uiState.withColorComponent(
+                                value.roundToInt(),
+                                COLOR_FILTER_GREEN_MASK,
+                                8,
+                            )
+                        )
+                    )
                 },
             )
 
             ReaderSliderSetting(
                 label = stringResource(R.string.blue_initial),
-                value = blue.toFloat(),
+                value = uiState.colorFilterBlue.toFloat(),
                 valueRange = 0f..255f,
                 valueFormatter = { it.roundToInt().toString() },
                 onValueChange = { value ->
-                    updateColorComponent(value.roundToInt(), BLUE_MASK, 0, readerPreferences)
+                    onAction(
+                        ReaderSettingsAction.SetColorFilterValue(
+                            uiState.withColorComponent(
+                                value.roundToInt(),
+                                COLOR_FILTER_BLUE_MASK,
+                                0,
+                            )
+                        )
+                    )
                 },
             )
         }
@@ -747,18 +704,64 @@ fun ReaderSliderSetting(
     }
 }
 
-private fun updateColorComponent(
-    value: Int,
-    mask: Long,
-    bitShift: Int,
-    readerPreferences: ReaderPreferences,
+@Preview
+@Composable
+private fun ReaderSettingsSheetPagedPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
 ) {
-    val currentColor = readerPreferences.colorFilterValue().get()
-    val updatedColor = (value shl bitShift) or (currentColor and mask.inv().toInt())
-    readerPreferences.colorFilterValue().set(updatedColor)
+    ThemedPreviews(themeConfig) {
+        ReaderSettingsSheet(
+            uiState =
+                ReaderSettingsUiState(
+                    isWebtoon = false,
+                    readingMode = ReadingModeType.DEFAULT,
+                    orientation = OrientationType.DEFAULT,
+                    readerTheme = 1,
+                    pageLayout = PageLayout.SINGLE_PAGE,
+                ),
+            onAction = {},
+        )
+    }
 }
 
-private const val ALPHA_MASK: Long = 0xFF000000
-private const val RED_MASK: Long = 0x00FF0000
-private const val GREEN_MASK: Long = 0x0000FF00
-private const val BLUE_MASK: Long = 0x000000FF
+@Preview
+@Composable
+private fun ReaderSettingsSheetWebtoonPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        ReaderSettingsSheet(
+            uiState =
+                ReaderSettingsUiState(
+                    isWebtoon = true,
+                    readingMode = ReadingModeType.WEBTOON,
+                    orientation = OrientationType.DEFAULT,
+                    readerTheme = 1,
+                    webtoonSidePadding = 10,
+                ),
+            onAction = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ReaderSettingsSheetFilterPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        ReaderSettingsSheet(
+            uiState =
+                ReaderSettingsUiState(
+                    selectedTab = 2,
+                    grayscale = true,
+                    customBrightness = true,
+                    customBrightnessValue = 20,
+                    colorFilter = true,
+                    colorFilterMode = 1,
+                    colorFilterValue = 0x80FF0000.toInt(),
+                ),
+            onAction = {},
+        )
+    }
+}

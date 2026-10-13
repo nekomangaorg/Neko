@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling ReaderSettingsSheet from Service Locators, Preference Mutations & Domain Flags
 
-**Status:** Proposed / Under Review  
+**Status:** Accepted / Complete  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
 **Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R9 (Priority: Medium / UI Sheet Decoupling)  
 **Prerequisites:** Step R6 ([`decouple_reader_compose_viewers_proposal.md`](decouple_reader_compose_viewers_proposal.md))  
 **Downstream Dependents:** None  
-**Implementation State:** 🟡 Coupled Baseline (Injekt calls, direct preference mutations, and domain flag parsing in Compose)  
+**Implementation State:** 🟢 Complete (ReaderSettingsUiState, ReaderSettingsAction, and stateless ReaderSettingsSheet)  
 
 ---
 
@@ -179,8 +179,8 @@ private fun GeneralSettingsTab(
 >
 > Decoupling `ReaderSettingsSheet` eliminates `Injekt.get()`, in-Composable preference mutations, and domain flag parsing, hoisting preference streams and mutations into `ReaderViewModel`.
 
-- [ ] **Step 1**: Define `ReaderSettingsUiState` and `ReaderSettingsAction`.
-- [ ] **Step 2**: Add preference flow aggregation and action handler in `ReaderViewModel`.
-- [ ] **Step 3**: Refactor `ReaderSettingsSheet.kt` to be 100% stateless.
-- [ ] **Step 4**: Add `@Preview` annotations for `ReaderSettingsSheet`.
-- [ ] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [x] **Step 1**: Define `ReaderSettingsUiState` and `ReaderSettingsAction`.
+- [x] **Step 2**: Add preference flow aggregation and action handler in `ReaderViewModel`.
+- [x] **Step 3**: Refactor `ReaderSettingsSheet.kt` to be 100% stateless.
+- [x] **Step 4**: Add `@Preview` annotations for `ReaderSettingsSheet`.
+- [x] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
