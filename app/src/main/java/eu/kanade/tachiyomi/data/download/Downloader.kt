@@ -403,7 +403,8 @@ class Downloader(
         } catch (error: Exception) {
             if (error is CancellationException) throw error
             // Blocking work such as the zip keeps going after the download is cancelled, and fails
-            // when the chapter was deleted meanwhile. A cancelled download reports no error.
+            // when the chapter was deleted meanwhile. ensureActive() then throws
+            // CancellationException, so a cancelled download reports no error.
             currentCoroutineContext().ensureActive()
             // If the page list threw, it will resume here
             TimberKt.e(error)

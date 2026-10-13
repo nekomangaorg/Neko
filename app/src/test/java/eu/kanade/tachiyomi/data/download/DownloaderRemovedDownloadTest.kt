@@ -21,8 +21,7 @@ import io.mockk.runs
 import io.mockk.unmockkAll
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -50,7 +49,6 @@ class DownloaderRemovedDownloadTest {
     private val blockingWorkStarted = CountDownLatch(1)
     private val blockingWorkFailed = CountDownLatch(1)
     private val errorReported = CountDownLatch(1)
-    @Volatile private var sawCancel = false
 
     @Before
     fun setup() {
@@ -106,12 +104,14 @@ class DownloaderRemovedDownloadTest {
             mockk<MangaDex> {
                 coEvery { getPageList(any()) } coAnswers
                     {
-                        val job = currentCoroutineContext().job
                         blockingWorkStarted.countDown()
-                        // Blocking work does not stop when its job is cancelled.
-                        sawCancel = waitUntil { job.isCancelled }
-                        blockingWorkFailed.countDown()
-                        throw IllegalArgumentException("invalid entry size")
+                        try {
+                            awaitCancellation()
+                        } finally {
+                            // Like the zip, the work fails with its own error after the cancel.
+                            blockingWorkFailed.countDown()
+                            throw IllegalArgumentException("invalid entry size")
+                        }
                     }
             }
         val sourceManager = mockk<SourceManager> { every { mangaDex } returns source }
@@ -135,19 +135,9 @@ class DownloaderRemovedDownloadTest {
         downloader.removeFromQueueAndRestart(listOf(chapter(1)))
 
         check(blockingWorkFailed.await(10, TimeUnit.SECONDS)) { "the blocking work did not end" }
-        check(sawCancel) { "the download was not cancelled" }
         // An error is reported on the download's thread right after the failure.
         assertFalse(errorReported.await(1, TimeUnit.SECONDS))
         assertEquals(Download.State.NOT_DOWNLOADED, download.status)
-    }
-
-    private fun waitUntil(condition: () -> Boolean): Boolean {
-        val deadline = System.currentTimeMillis() + 10_000
-        while (!condition()) {
-            if (System.currentTimeMillis() >= deadline) return false
-            Thread.sleep(10)
-        }
-        return true
     }
 
     private fun chapter(id: Long): Chapter =
