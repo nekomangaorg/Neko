@@ -748,8 +748,13 @@ class Downloader(
             dirname: String,
             tmpDir: UniFile,
         ) {
+            val zipName = "$dirname.cbz$TMP_DIR_SUFFIX"
+            // Delete a partial cbz left by an earlier try that was killed mid-zip. createFile would
+            // return it, and on SAF openOutputStream() opens in "w" mode, which does not always
+            // truncate, so a longer leftover would leave its tail in the new cbz.
+            mangaDir.findFile(zipName)?.takeIf { it.isFile }?.delete()
             val zip =
-                mangaDir.createFile("$dirname.cbz$TMP_DIR_SUFFIX")
+                mangaDir.createFile(zipName)
                     ?: throw Exception(
                         context.getString(R.string.download_notifier_cannot_create_file)
                     )

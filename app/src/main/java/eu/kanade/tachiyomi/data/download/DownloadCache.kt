@@ -113,9 +113,18 @@ class DownloadCache(
             return
         }
 
+        mangaFiles[id] = readMangaFiles(mangaDir)
+        _changes.tryEmit(Unit)
+    }
+
+    /**
+     * Reads the downloaded chapters in a manga folder. A name ending in [TMP_DIR_SUFFIX] belongs to
+     * a download that has not finished (its page folder or the cbz being written) and is skipped.
+     */
+    private fun readMangaFiles(mangaDir: UniFile): MangaFiles {
         val fileNames =
-            mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
-                it.name?.substringBeforeLast(".cbz")
+            mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) { file ->
+                file.name?.takeUnless { it.endsWith(TMP_DIR_SUFFIX) }?.substringBeforeLast(".cbz")
             }
 
         val mangadexIds =
@@ -123,8 +132,7 @@ class DownloadCache(
                 it.takeLast(36).takeIf { uuid -> uuid.isUUID() }
             }
 
-        mangaFiles[id] = MangaFiles(fileNames, mangadexIds)
-        _changes.tryEmit(Unit)
+        return MangaFiles(fileNames, mangadexIds)
     }
 
     fun getDownloadCount(manga: Manga, forceCheckFolder: Boolean = false): Int {
@@ -235,17 +243,7 @@ class DownloadCache(
                             title = manga.displayTitle()
                             val id = manga.id ?: return@async
 
-                            val files =
-                                mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
-                                    it.name?.substringBeforeLast(".cbz")
-                                }
-
-                            val mangadexIds =
-                                files.mapNotNullTo(mutableSetOf()) {
-                                    it.takeLast(36).takeIf { uuid -> uuid.isUUID() }
-                                }
-
-                            newMangaFiles[id] = MangaFiles(files, mangadexIds)
+                            newMangaFiles[id] = readMangaFiles(mangaDir)
                         } finally {
                             val current = progressCounter.incrementAndGet()
                             onProgress?.invoke(current, total, title)

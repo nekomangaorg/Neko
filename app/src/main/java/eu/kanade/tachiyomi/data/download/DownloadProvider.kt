@@ -99,21 +99,25 @@ class DownloadProvider(
             .mapNotNull { mangaDir?.findFile(it) ?: mangaDir?.findFile("$it.cbz") }
             .firstOrNull()
             ?: mangaDir
-                ?.listFiles { _, filename -> filename.contains(chapter.uuid()) }
+                ?.listFiles { _, filename ->
+                    filename.contains(chapter.uuid()) && !filename.endsWith(TMP_DIR_SUFFIX)
+                }
                 ?.firstOrNull()
     }
 
     fun chapterDirDoesNotExist(chapter: Chapter, chapterDirs: List<UniFile>): Boolean {
+        // A name ending in TMP_DIR_SUFFIX belongs to a download that has not finished.
+        val finishedDirs = chapterDirs.filterNot { it.name.orEmpty().endsWith(TMP_DIR_SUFFIX) }
 
         var found =
             getValidChapterDirNames(chapter).any { chapterDir ->
-                chapterDirs.any { uniFile ->
+                finishedDirs.any { uniFile ->
                     uniFile.nameWithoutExtension!!.equals(chapterDir, true)
                 }
             }
 
         if (!found && chapter.mangadex_chapter_id.isNotEmpty()) {
-            found = chapterDirs.any { uniFile ->
+            found = finishedDirs.any { uniFile ->
                 uniFile.nameWithoutExtension!!.contains(chapter.uuid())
             }
         }
@@ -221,8 +225,13 @@ class DownloadProvider(
      */
     fun findTempChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
         val mangaDir = findMangaDir(manga) ?: return emptyList()
-        return chapters.mapNotNull {
-            mangaDir.findFile("${getChapterDirName(it)}${TMP_DIR_SUFFIX}")
+        return chapters.flatMap {
+            val chapterDirName = getChapterDirName(it)
+            // The page folder, and the cbz if the download stopped while it was being written.
+            listOfNotNull(
+                mangaDir.findFile("$chapterDirName$TMP_DIR_SUFFIX"),
+                mangaDir.findFile("$chapterDirName.cbz$TMP_DIR_SUFFIX"),
+            )
         }
     }
 
