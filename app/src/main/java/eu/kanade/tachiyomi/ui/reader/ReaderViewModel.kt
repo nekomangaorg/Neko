@@ -1745,7 +1745,8 @@ constructor(
                 colorFilterMode = readerPreferences.colorFilterMode().get(),
                 colorFilterValue = readerPreferences.colorFilterValue().get(),
             )
-        } catch (_: Throwable) {
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Failed to get initial reader settings UI state" }
             ReaderSettingsUiState()
         }
     }
@@ -1910,7 +1911,7 @@ constructor(
                 .onEach { updateFn -> _readerSettingsUiState.update { updateFn(it) } }
                 .launchIn(viewModelScope)
         } catch (e: Exception) {
-            TimberKt.w(e) { "ReaderSettings preferences could not be observed" }
+            TimberKt.e(e) { "ReaderSettings preferences could not be observed" }
         }
     }
 

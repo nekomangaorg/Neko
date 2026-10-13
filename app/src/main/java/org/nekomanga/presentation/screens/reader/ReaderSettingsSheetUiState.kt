@@ -7,10 +7,10 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderSliderPosition
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 
-const val COLOR_FILTER_ALPHA_MASK: Long = 0xFF000000
-const val COLOR_FILTER_RED_MASK: Long = 0x00FF0000
-const val COLOR_FILTER_GREEN_MASK: Long = 0x0000FF00
-const val COLOR_FILTER_BLUE_MASK: Long = 0x000000FF
+const val COLOR_FILTER_ALPHA_MASK: Int = 0xFF000000.toInt()
+const val COLOR_FILTER_RED_MASK: Int = 0x00FF0000
+const val COLOR_FILTER_GREEN_MASK: Int = 0x0000FF00
+const val COLOR_FILTER_BLUE_MASK: Int = 0x000000FF
 
 @Immutable
 data class ReaderSettingsUiState(
@@ -80,8 +80,8 @@ data class ReaderSettingsUiState(
     val colorFilterBlue: Int
         get() = colorFilterValue and 0xFF
 
-    fun withColorComponent(value: Int, mask: Long, bitShift: Int): Int {
-        return (value shl bitShift) or (colorFilterValue and mask.inv().toInt())
+    fun withColorComponent(value: Int, mask: Int, bitShift: Int): Int {
+        return (value shl bitShift) or (colorFilterValue and mask.inv())
     }
 }
 
