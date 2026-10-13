@@ -161,6 +161,35 @@ class DownloaderRestartTest {
     }
 
     @Test
+    fun `removing chapters with nothing queued leaves the downloader alone`() {
+        val testThread = Thread.currentThread()
+        var storeWrites = 0
+        onStoreWrite = { if (Thread.currentThread() == testThread) storeWrites++ }
+
+        downloader.removeFromQueueAndRestart(listOf(chapter(99)))
+
+        assertEquals(0, storeWrites)
+        assertTrue(downloader.isRunning)
+        assertEquals(listOf(1L, 2L), downloader.queueState.value.map { it.chapterItem.id })
+    }
+
+    @Test
+    fun `removing the only manga in the queue while paused clears the paused notification`() {
+        // What DownloadManager.pauseDownloads does
+        downloader.pause()
+        downloader.stop()
+        verify(exactly = 1) { anyConstructed<DownloadNotifier>().onPaused() }
+
+        downloader.removeFromQueueAndRestart(manga)
+
+        assertTrue(downloader.queueState.value.isEmpty())
+        assertFalse(downloader.isRunning)
+        assertFalse(downloader.isPaused)
+        verify(exactly = 1) { anyConstructed<DownloadNotifier>().onComplete() }
+        verify(exactly = 2) { DownloadJob.stop(any()) }
+    }
+
+    @Test
     fun `removing a manga from the queue never reads as stopped`() {
         val other = Manga.create("/title/2", "Other").apply { id = 2L }
         downloader.queueChapters(other, listOf(chapter(3, other)), autoStart = false)

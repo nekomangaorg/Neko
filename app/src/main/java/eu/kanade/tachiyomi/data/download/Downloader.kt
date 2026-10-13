@@ -628,23 +628,25 @@ class Downloader(
 
     /**
      * Removes [chapters] from the queue. If any of them is queued, a running downloader is paused
-     * and started again, or stopped when the queue is left empty.
+     * and started again. The downloader is stopped when the queue is left empty.
      */
     fun removeFromQueueAndRestart(chapters: List<Chapter>) {
-        val chapterIds = chapters.map { it.id }
+        if (chapters.isEmpty()) return
+        val chapterIds = chapters.mapTo(HashSet(chapters.size)) { it.id }
         removeFromQueueAndRestartIf { it.chapterItem.id in chapterIds }
     }
 
     /**
      * Removes every download of [manga] from the queue. If it has any, a running downloader is
-     * paused and started again, or stopped when the queue is left empty.
+     * paused and started again. The downloader is stopped when the queue is left empty.
      */
     fun removeFromQueueAndRestart(manga: Manga) {
         removeFromQueueAndRestartIf { it.mangaItem.id == manga.id }
     }
 
     // Cancelled download jobs never reach the stop check in launchDownloadJob, so a downloader
-    // left with nothing to download has to be stopped here.
+    // left with nothing to download has to be stopped here. A paused one too, or its Paused
+    // notification stays up with nothing left to resume.
     private inline fun removeFromQueueAndRestartIf(predicate: (Download) -> Boolean) {
         synchronized(queueLock) {
             // Nothing to remove, so the running downloads are left uninterrupted
@@ -657,12 +659,10 @@ class Downloader(
 
             removeFromQueueIf(predicate)
 
-            if (wasRunning) {
-                if (queueState.value.isEmpty()) {
-                    stop()
-                } else {
-                    start()
-                }
+            if (queueState.value.isEmpty()) {
+                stop()
+            } else if (wasRunning) {
+                start()
             }
         }
     }
