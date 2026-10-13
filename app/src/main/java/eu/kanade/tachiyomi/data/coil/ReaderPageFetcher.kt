@@ -55,17 +55,14 @@ internal suspend fun awaitPageStream(page: ReaderPage): () -> InputStream = coro
 }
 
 /**
- * Opens [stream], or [page]'s stream once its loader has one.
+ * Opens [page]'s stream, waiting for its loader to give it one.
  *
  * An online page's stream reads the chapter cache file, which can be gone by the time the page is
  * shown again: the cache evicts files over its size limit, and a download moves the file out. The
  * loader then fetches the page again, once.
  */
-internal suspend fun openReaderPageStream(
-    page: ReaderPage,
-    stream: (() -> InputStream)? = page.stream,
-): InputStream {
-    val streamFn = stream ?: awaitPageStream(page)
+internal suspend fun openReaderPageStream(page: ReaderPage): InputStream {
+    val streamFn = page.stream ?: awaitPageStream(page)
     return try {
         streamFn()
     } catch (e: FileNotFoundException) {
@@ -428,22 +425,29 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
             }
         }
 
-        val streamFn = split.page.stream ?: awaitPageStream(split.page)
-
         val imageBytes =
             rawBytesCache.get(cacheKey)?.takeIf { it.retryGeneration >= retryGeneration }?.bytes
-                ?: activeFetches.await("$cacheKey@$retryGeneration") {
-                    openReaderPageStream(split.page, streamFn)
-                        .use { it.readBytes() }
-                        .also {
-                            // LruCache.put would evict a file bigger than the cache right away,
-                            // with every other entry.
-                            if (it.size <= rawBytesCache.maxSize()) {
-                                unlessCleared {
-                                    rawBytesCache.put(cacheKey, CachedBytes(it, retryGeneration))
+                ?: run {
+                    // Waiting for the stream starts the page's load. Cancelling that load takes a
+                    // page the reader scrolled past out of the loader's queue, so the wait stays
+                    // out of the shared work, whose scope is never cancelled.
+                    if (split.page.stream == null) awaitPageStream(split.page)
+                    activeFetches.await("$cacheKey@$retryGeneration") {
+                        openReaderPageStream(split.page)
+                            .use { it.readBytes() }
+                            .also {
+                                // LruCache.put would evict a file bigger than the cache right
+                                // away, with every other entry.
+                                if (it.size <= rawBytesCache.maxSize()) {
+                                    unlessCleared {
+                                        rawBytesCache.put(
+                                            cacheKey,
+                                            CachedBytes(it, retryGeneration),
+                                        )
+                                    }
                                 }
                             }
-                        }
+                    }
                 }
 
         val bitmap =

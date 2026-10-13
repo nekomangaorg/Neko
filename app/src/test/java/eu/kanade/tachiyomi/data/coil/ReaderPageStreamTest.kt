@@ -33,6 +33,16 @@ class ReaderPageStreamTest {
         }
     }
 
+    /** Loader that, like HttpPageLoader, fetches a queued page once the reader asks for it. */
+    private class FetchingLoader(private val bytes: ByteArray) : PageLoader() {
+        override suspend fun getPages(): List<ReaderPage> = emptyList()
+
+        override suspend fun loadPage(page: ReaderPage) {
+            page.stream = { bytes.inputStream() }
+            page.status = Page.State.READY
+        }
+    }
+
     /** Loader for local files, which has nothing to fetch again. */
     private class LocalLoader : PageLoader() {
         override suspend fun getPages(): List<ReaderPage> = emptyList()
@@ -40,7 +50,7 @@ class ReaderPageStreamTest {
         override suspend fun loadPage(page: ReaderPage) {}
     }
 
-    private fun readyPage(loader: PageLoader, stream: () -> InputStream): ReaderPage {
+    private fun readyPage(loader: PageLoader?, stream: () -> InputStream): ReaderPage {
         val chapter = ReaderChapter(Chapter.create()).apply { pageLoader = loader }
         return ReaderPage(index = 0, imageUrl = "img_0", stream = stream).apply {
             this.chapter = chapter
@@ -50,6 +60,18 @@ class ReaderPageStreamTest {
 
     private val missingFile: () -> InputStream = {
         throw FileNotFoundException("open failed: ENOENT (No such file or directory)")
+    }
+
+    @Test
+    fun `a queued page is loaded before it is opened`() = runTest {
+        val chapter =
+            ReaderChapter(Chapter.create()).apply {
+                pageLoader = FetchingLoader(byteArrayOf(4, 5, 6))
+            }
+        val page = ReaderPage(index = 0, imageUrl = "img_0").apply { this.chapter = chapter }
+        assertEquals(Page.State.QUEUE, page.status)
+
+        assertArrayEquals(byteArrayOf(4, 5, 6), openReaderPageStream(page).use { it.readBytes() })
     }
 
     @Test
@@ -82,6 +104,15 @@ class ReaderPageStreamTest {
     @Test
     fun `a missing local file is not fetched again`() = runTest {
         val page = readyPage(LocalLoader(), missingFile)
+
+        val error = runCatching { openReaderPageStream(page) }.exceptionOrNull()
+
+        assertTrue(error is FileNotFoundException)
+    }
+
+    @Test
+    fun `a missing file of a page without a loader is not fetched again`() = runTest {
+        val page = readyPage(null, missingFile)
 
         val error = runCatching { openReaderPageStream(page) }.exceptionOrNull()
 
