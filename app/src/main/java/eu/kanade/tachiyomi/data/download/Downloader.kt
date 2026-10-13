@@ -136,7 +136,7 @@ class Downloader(
                 return false
             }
 
-            queueState.value.apply { removeFromQueueIf { it.chapterItem.isUnavailable } }
+            removeFromQueueIf { it.chapterItem.isUnavailable }
             val pending = queueState.value.filter { it.status != Download.State.DOWNLOADED }
             pending.forEach {
                 if (it.status != Download.State.QUEUE) it.status = Download.State.QUEUE
@@ -153,38 +153,57 @@ class Downloader(
 
     /** Stops the downloader. */
     fun stop(reason: String? = null) {
-        synchronized(queueLock) {
-            cancelDownloaderJob()
-            queueState.value
-                .filter { it.status == Download.State.DOWNLOADING }
-                .forEach { it.status = Download.State.ERROR }
-
-            if (reason != null) {
-                notifier.onWarning(reason)
-                return
-            }
-
-            if (isPaused && queueState.value.isNotEmpty()) {
-                notifier.onPaused()
-            } else {
-                notifier.onComplete()
-            }
-
-            isPaused = false
-
-            DownloadJob.stop(context)
-        }
+        val notify = synchronized(queueLock) { stopInternal(reason) }
+        notify()
     }
 
-    /** Pauses the downloader */
+    /**
+     * Pauses the downloader and stops DownloadJob. Both run in one hold of [queueLock], so a start
+     * on another thread lands before the pause or after the stop, never in between.
+     */
     fun pause() {
-        synchronized(queueLock) {
-            cancelDownloaderJob()
-            queueState.value
-                .filter { it.status == Download.State.DOWNLOADING }
-                .forEach { it.status = Download.State.QUEUE }
-            isPaused = true
+        val notify =
+            synchronized(queueLock) {
+                pauseInternal()
+                stopInternal(null)
+            }
+        notify()
+    }
+
+    /**
+     * Cancels the downloader job and puts running downloads back in the queue. Hold [queueLock].
+     */
+    private fun pauseInternal() {
+        cancelDownloaderJob()
+        queueState.value
+            .filter { it.status == Download.State.DOWNLOADING }
+            .forEach { it.status = Download.State.QUEUE }
+        isPaused = true
+    }
+
+    /**
+     * Hold [queueLock]. Returns the notification to post once the lock is released.
+     *
+     * DownloadJob stops under the lock. A [queueChapters] waiting on the lock starts DownloadJob
+     * after it gets the lock, and WorkManager runs cancels and enqueues in call order, so this
+     * cancel never hits the new job.
+     */
+    private fun stopInternal(reason: String?): () -> Unit {
+        cancelDownloaderJob()
+        queueState.value
+            .filter { it.status == Download.State.DOWNLOADING }
+            .forEach { it.status = Download.State.ERROR }
+
+        if (reason != null) {
+            return { notifier.onWarning(reason) }
         }
+
+        val paused = isPaused && queueState.value.isNotEmpty()
+        isPaused = false
+
+        DownloadJob.stop(context)
+
+        return if (paused) notifier::onPaused else notifier::onComplete
     }
 
     /** Removes everything from the queue. */
@@ -287,15 +306,13 @@ class Downloader(
     }
 
     /**
-     * Destroys the downloader job. Runs under [queueLock], so a start() on another thread cannot
-     * store a new job between the cancel and the reset and have it dropped while it runs.
+     * Destroys the downloader job. Hold [queueLock], so a start() on another thread cannot store a
+     * new job between the cancel and the reset and have it dropped while it runs.
      */
     private fun cancelDownloaderJob() {
-        synchronized(queueLock) {
-            downloaderJob?.cancel()
-            downloaderJob = null
-            publishRunning()
-        }
+        downloaderJob?.cancel()
+        downloaderJob = null
+        publishRunning()
     }
 
     /**
@@ -639,7 +656,7 @@ class Downloader(
         synchronized(queueLock) {
             val wasRunning = isRunning
             if (wasRunning) {
-                pause()
+                pauseInternal()
             }
 
             val chapterIds = chapters.map { it.id }
@@ -687,7 +704,7 @@ class Downloader(
                 return
             }
 
-            pause()
+            pauseInternal()
             clearQueueState()
             addAllToQueue(downloads)
 

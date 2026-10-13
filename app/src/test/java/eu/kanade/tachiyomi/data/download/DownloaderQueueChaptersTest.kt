@@ -108,10 +108,12 @@ class DownloaderQueueChaptersTest {
 
         mockkObject(DownloadJob.Companion)
         every { DownloadJob.start(any()) } just runs
+        every { DownloadJob.stop(any()) } just runs
         mockkObject(LibraryUpdateJob.Companion)
         every { LibraryUpdateJob.isRunning(any()) } returns false
         mockkConstructor(DownloadNotifier::class)
         every { anyConstructed<DownloadNotifier>().onPaused() } just runs
+        every { anyConstructed<DownloadNotifier>().onComplete() } just runs
 
         provider =
             mockk<DownloadProvider> {
@@ -203,13 +205,13 @@ class DownloaderQueueChaptersTest {
     fun `starts the job for a chapter queued during stop after the stop`() {
         val jobCalls = Collections.synchronizedList(mutableListOf<String>())
         every { DownloadJob.start(any()) } answers { jobCalls += "start" }
-        every { DownloadJob.stop(any()) } answers { jobCalls += "stop" }
         val stopping = CountDownLatch(1)
         val finishStop = CountDownLatch(1)
-        every { anyConstructed<DownloadNotifier>().onComplete() } answers
+        every { DownloadJob.stop(any()) } answers
             {
                 stopping.countDown()
                 finishStop.await(10, TimeUnit.SECONDS)
+                jobCalls += "stop"
             }
         coEvery { mangaRepository.getMangaById(1L) } coAnswers
             {
@@ -218,8 +220,8 @@ class DownloaderQueueChaptersTest {
             }
         downloader.queueChapters(manga, listOf(chapter(1)), autoStart = true)
         downloader.start()
-        // The last download finished, and its stop() has cancelled the downloader but not
-        // DownloadJob yet.
+        // The last download finished, and its stop() has cancelled the downloader and is stopping
+        // DownloadJob.
         check(stopping.await(10, TimeUnit.SECONDS)) { "the downloader did not stop" }
 
         val otherManga = Manga.create("/title/2", "Other").apply { id = 2L }
@@ -273,72 +275,69 @@ class DownloaderQueueChaptersTest {
     }
 
     @Test
-    fun `keeps a downloader started while pause cancels the old one`() {
+    fun `finishes a pause before a downloader started during it runs`() {
         downloader.pause()
         downloader = Downloader(context, provider, mockk(), sourceManager, Dispatchers.Unconfined)
+        val events = Collections.synchronizedList(mutableListOf<String>())
+        every { DownloadJob.stop(any()) } answers { events += "job stop" }
         val activeDownloads = AtomicInteger()
-        val startedDuringPause = AtomicBoolean()
         val starting = AtomicReference<Thread>()
         coEvery { mangaRepository.getMangaById(1L) } coAnswers
             {
+                events += "download"
                 activeDownloads.incrementAndGet()
                 try {
                     awaitCancellation()
                 } finally {
                     activeDownloads.decrementAndGet()
                     // Unconfined runs this inside pause(), while it cancels the downloader job. A
-                    // start() on another thread gets in before pause() is done with the job.
-                    if (startedDuringPause.compareAndSet(false, true)) {
-                        val thread = thread { downloader.start() }
-                        starting.set(thread)
-                        waitUntil { !thread.isAlive || thread.state == Thread.State.BLOCKED }
+                    // start() on another thread gets in before pause() is done.
+                    if (starting.get() == null) {
+                        starting.set(runUntilDoneOrBlocked { downloader.start() })
                     }
                 }
             }
         downloader.queueChapters(manga, listOf(chapter(1)), autoStart = true)
         downloader.start()
+        events.clear()
 
         downloader.pause()
-        starting.get().join(10_000)
+        checkNotNull(starting.get()) { "pause() cancelled no download" }.join(10_000)
 
-        // The second start() comes after the pause, so its downloader is the one running, and
-        // pausing again cancels its download.
+        // The start() comes after the whole pause, DownloadJob stop included, so the pause cannot
+        // stop its downloader. Pausing again cancels its download.
+        assertEquals(listOf("job stop", "download"), events.toList())
         assertTrue(downloader.isRunning)
         downloader.pause()
         assertEquals(0, activeDownloads.get())
     }
 
     @Test
-    fun `leaves a downloader started as pause finishes unpaused`() {
-        every { DownloadJob.stop(any()) } just runs
-        every { anyConstructed<DownloadNotifier>().onComplete() } just runs
-        val testThread = Thread.currentThread()
-        val armed = AtomicBoolean()
-        val starting = AtomicReference<Thread>()
-        mockkConstructor(Download::class)
-        every { anyConstructed<Download>().status } answers
-            {
-                // The first status read on this thread once armed is pause() looking for running
-                // downloads, after it cancelled the downloader job. A start() on another thread
-                // gets in there.
-                if (Thread.currentThread() === testThread && armed.compareAndSet(true, false)) {
-                    starting.set(runUntilDoneOrBlocked { downloader.start() })
-                }
-                callOriginal()
+    fun `posts stop and pause notifications after releasing the queue lock`() {
+        val postedUnderLock = Collections.synchronizedList(mutableListOf<String>())
+        // isRunning reads under the lock, so a thread calling it waits while the lock is held.
+        fun checkLock(notification: String) {
+            if (runUntilDoneOrBlocked { downloader.isRunning }.isAlive) {
+                postedUnderLock += notification
             }
+        }
+        every { anyConstructed<DownloadNotifier>().onPaused() } answers { checkLock("paused") }
+        every { anyConstructed<DownloadNotifier>().onWarning(any()) } answers
+            {
+                checkLock("warning")
+            }
+        every { anyConstructed<DownloadNotifier>().onComplete() } answers { checkLock("complete") }
         downloader.queueChapters(manga, listOf(chapter(1)), autoStart = true)
         downloader.start()
 
-        armed.set(true)
         downloader.pause()
-        checkNotNull(starting.get()) { "pause() read no status" }.join(10_000)
-
-        // The start() comes after the pause, so the downloader runs unpaused, and stopping it
-        // reports the downloads as finished.
-        assertTrue(downloader.isRunning)
+        downloader.stop("reason")
         downloader.stop()
-        verify(exactly = 0) { anyConstructed<DownloadNotifier>().onPaused() }
+
+        verify(exactly = 1) { anyConstructed<DownloadNotifier>().onPaused() }
+        verify(exactly = 1) { anyConstructed<DownloadNotifier>().onWarning("reason") }
         verify(exactly = 1) { anyConstructed<DownloadNotifier>().onComplete() }
+        assertEquals(emptyList<String>(), postedUnderLock.toList())
     }
 
     @Test
@@ -346,15 +345,15 @@ class DownloaderQueueChaptersTest {
         downloader.pause()
         downloader = Downloader(context, provider, mockk(), sourceManager, Dispatchers.Unconfined)
         val events = Collections.synchronizedList(mutableListOf<String>())
-        every { DownloadJob.stop(any()) } answers { events += "job stop" }
         val starting = AtomicReference<Thread>()
-        // stop() posts its notification after it cancelled the downloader job and before it stops
-        // DownloadJob. A start() on another thread gets in there.
-        every { anyConstructed<DownloadNotifier>().onComplete() } answers
+        // stop() has cancelled the downloader job and is stopping DownloadJob. A start() on another
+        // thread gets in there.
+        every { DownloadJob.stop(any()) } answers
             {
                 if (starting.get() == null) {
                     starting.set(runUntilDoneOrBlocked { downloader.start() })
                 }
+                events += "job stop"
             }
         coEvery { mangaRepository.getMangaById(1L) } coAnswers
             {
@@ -366,22 +365,62 @@ class DownloaderQueueChaptersTest {
         events.clear()
 
         downloader.stop()
-        checkNotNull(starting.get()) { "stop() posted no notification" }.join(10_000)
+        checkNotNull(starting.get()) { "stop() did not stop DownloadJob" }.join(10_000)
 
         // Unconfined runs the new downloader's download inside start(). It has to come after
-        // DownloadJob stopped, or it downloads with no job keeping the app alive.
+        // DownloadJob stopped, or the stop cancels the worker of a running downloader and leaves it
+        // downloading with no job keeping the app alive.
         assertEquals(listOf("job stop", "download"), events.toList())
+    }
+
+    @Test
+    fun `starts the job for a chapter queued while the queue is cleared after the stop`() {
+        every { anyConstructed<DownloadNotifier>().dismissProgress() } just runs
+        val jobCalls = Collections.synchronizedList(mutableListOf<String>())
+        every { DownloadJob.start(any()) } answers { jobCalls += "start" }
+        val otherManga = Manga.create("/title/2", "Other").apply { id = 2L }
+        val queueing = AtomicReference<Thread>()
+        // DownloadManager.clearQueue empties the queue and then stops the downloader. stop() is
+        // stopping DownloadJob when a chapter queued on another thread gets in.
+        every { DownloadJob.stop(any()) } answers
+            {
+                if (queueing.get() == null) {
+                    queueing.set(
+                        runUntilDoneOrBlocked {
+                            downloader.queueChapters(
+                                otherManga,
+                                listOf(chapter(2, otherManga)),
+                                autoStart = true,
+                            )
+                        }
+                    )
+                }
+                jobCalls += "stop"
+            }
+        downloader.queueChapters(manga, listOf(chapter(1)), autoStart = true)
+        downloader.start()
+
+        downloader.clearQueue()
+        downloader.stop()
+        checkNotNull(queueing.get()) { "stop() did not stop DownloadJob" }.join(10_000)
+
+        // WorkManager runs cancels and enqueues in call order, so a start before the stop would be
+        // cancelled by it, leaving the chapter with no job.
+        assertEquals(listOf("start", "stop", "start"), jobCalls.toList())
     }
 
     @Test
     fun `saves a chapter queued while the queue is being cleared`() {
         every { anyConstructed<DownloadNotifier>().dismissProgress() } just runs
         downloader.queueChapters(manga, listOf(chapter(1)), autoStart = false)
+        val testThread = Thread.currentThread()
+        val armed = AtomicBoolean()
         val queueing = AtomicReference<Thread>()
         // clearQueue() empties the queue first and the saved queue after. A chapter queued on
-        // another thread gets in between.
+        // another thread gets in between. Emptying the saved queue is the only write clearQueue()
+        // makes, and the restore write at creation runs on another thread.
         onSaveQueue = {
-            if (calledFrom("clearQueueState") && queueing.get() == null) {
+            if (Thread.currentThread() === testThread && armed.compareAndSet(true, false)) {
                 queueing.set(
                     runUntilDoneOrBlocked {
                         downloader.queueChapters(manga, listOf(chapter(2)), autoStart = false)
@@ -390,6 +429,7 @@ class DownloaderQueueChaptersTest {
             }
         }
 
+        armed.set(true)
         downloader.clearQueue()
         checkNotNull(queueing.get()) { "clearQueue() saved nothing" }.join(10_000)
 
@@ -400,12 +440,13 @@ class DownloaderQueueChaptersTest {
     /** Runs [block] on a new thread and returns once it is done or waits for a lock. */
     private fun runUntilDoneOrBlocked(block: () -> Unit): Thread {
         val thread = thread { block() }
-        waitUntil { !thread.isAlive || thread.state == Thread.State.BLOCKED }
+        waitUntil {
+            !thread.isAlive ||
+                thread.state == Thread.State.BLOCKED ||
+                thread.state == Thread.State.WAITING
+        }
         return thread
     }
-
-    private fun calledFrom(method: String): Boolean =
-        Thread.currentThread().stackTrace.any { it.methodName == method }
 
     private fun waitUntil(condition: () -> Boolean) {
         val deadline = System.currentTimeMillis() + 10_000
