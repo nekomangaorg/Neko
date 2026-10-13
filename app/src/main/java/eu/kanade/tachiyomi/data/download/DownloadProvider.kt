@@ -166,23 +166,37 @@ class DownloadProvider(
     }
 
     /**
-     * Returns a list of all files in manga directory
+     * Returns the files in the manga directory that match none of the chapters, and the temp files
+     * of downloads that are no longer queued.
      *
      * @param chapters the chapters to query.
      * @param manga the manga of the chapter.
-     * @param source the source of the chapter.
+     * @param queuedChapters the queued chapters of the manga, whose temp files a running or paused
+     *   download still uses. Called after the directory is listed, so every temp file in the
+     *   listing was created before the queue was read.
      */
-    fun findUnmatchedChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
+    fun findUnmatchedChapterDirs(
+        chapters: List<Chapter>,
+        manga: Manga,
+        queuedChapters: () -> List<Chapter>,
+    ): List<UniFile> {
         val mangaDir = findMangaDir(manga) ?: return emptyList()
         val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
         val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
         val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
 
-        return mangaDir.listFiles()!!.asList().filter { file ->
+        val files = mangaDir.listFiles()!!.asList()
+        val queuedTempNames =
+            queuedChapters()
+                .map { getChapterDirName(it) }
+                .flatMap { listOf("$it$TMP_DIR_SUFFIX", "$it.cbz$TMP_DIR_SUFFIX") }
+                .toHashSet()
+
+        return files.filter { file ->
             file.name?.let { fileName ->
                 if (fileName.endsWith(TMP_DIR_SUFFIX)) {
-                    return@filter true
+                    return@filter fileName !in queuedTempNames
                 }
                 if (fileName.startsWith("${Constants.LOCAL_SOURCE}_")) {
                     return@filter false
