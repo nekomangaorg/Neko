@@ -177,7 +177,6 @@ class DownloaderRestartTest {
     fun `removing the only manga in the queue while paused clears the paused notification`() {
         // What DownloadManager.pauseDownloads does
         downloader.pause()
-        downloader.stop()
         verify(exactly = 1) { anyConstructed<DownloadNotifier>().onPaused() }
 
         downloader.removeFromQueueAndRestart(manga)
