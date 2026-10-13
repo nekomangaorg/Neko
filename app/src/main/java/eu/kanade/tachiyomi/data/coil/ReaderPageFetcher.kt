@@ -380,6 +380,24 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 (fallbackBitmapCache.maxSize() - expectedBytes).coerceAtLeast(0).toInt()
             )
         }
+
+        private fun createRegionDecoder(
+            imageBytes: ByteArray,
+            pageIndex: Int,
+        ): BitmapRegionDecoder? =
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size)
+                } else {
+                    @Suppress("DEPRECATION")
+                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
+                }
+            } catch (e: Exception) {
+                TimberKt.d(e) {
+                    "BitmapRegionDecoder not supported for page $pageIndex, falling back to full decode"
+                }
+                null
+            }
     }
 
     override suspend fun fetch(): FetchResult = coroutineScope {
@@ -474,29 +492,17 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         cacheKey: String,
         retryGeneration: Int,
     ): Bitmap? {
+        // The create lambda can outlive this fetcher, so it reads no fetcher fields.
+        val pageIndex = split.page.index
+        val create = { createRegionDecoder(imageBytes, pageIndex) }
         val sliceBitmap =
-            regionDecoders.use(imageBytes, { newRegionDecoder(imageBytes, top) }) { decoder ->
+            regionDecoders.use(imageBytes, create) { decoder ->
                 decoder?.let { decodeSlice(it, top, height) }
             }
 
         return sliceBitmap
             ?: fallbackDecodeRegion(imageBytes, top, height, cacheKey, retryGeneration)
     }
-
-    private fun newRegionDecoder(imageBytes: ByteArray, top: Int): BitmapRegionDecoder? =
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size)
-            } else {
-                @Suppress("DEPRECATION")
-                BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
-            }
-        } catch (e: Exception) {
-            TimberKt.d(e) {
-                "BitmapRegionDecoder not supported for page ${split.page.index}, slice offset $top, falling back to full decode"
-            }
-            null
-        }
 
     private fun decodeSlice(decoder: BitmapRegionDecoder, top: Int, height: Int): Bitmap? =
         try {

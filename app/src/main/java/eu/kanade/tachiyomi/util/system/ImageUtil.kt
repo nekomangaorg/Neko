@@ -726,10 +726,8 @@ object ImageUtil {
         if (options.outWidth > 0 && options.outHeight > 0) return options
         // A codec that cannot get the dimensions from a stream may still get them from the bytes.
         val imageBytes = imageSource.peek().readByteArray()
-        return BitmapFactory.Options().apply {
-            inJustDecodeBounds = true
-            BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, this)
-        }
+        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)
+        return options
     }
 
     // Android doesn't include some mappings

@@ -6,7 +6,10 @@ import java.util.IdentityHashMap
  * Region decoders shared by the slices of a page that decode while another slice of the same file
  * is decoding. BitmapRegionDecoder copies the whole file into native memory when it is created, so
  * one decoder per slice made 31 copies of an 87 MB page at once and the system killed the app. A
- * shared BitmapRegionDecoder is safe because it runs one decode at a time under its own lock.
+ * shared BitmapRegionDecoder is safe because it runs one decode at a time under its own lock
+ * (mNativeLock in AOSP). The cost is that the slices of one page decode one after another. The 32
+ * slices of a 750x129357 PNG took about 22 s on an emulator, and memory peaked around 900 MB, where
+ * one decoder per slice got the app killed at 1.1 to 2.1 GB.
  *
  * Decoders are keyed by the byte array they were made from, so bytes read again after a retry get a
  * new decoder. The last slice to finish with a decoder recycles it.
@@ -34,7 +37,9 @@ internal class SharedRegionDecoders<D : Any>(private val recycle: (D) -> Unit) {
             val last =
                 synchronized(entries) {
                     entry.users--
-                    (entry.users == 0).also { if (it) entries.remove(bytes) }
+                    (entry.users == 0).also {
+                        if (it && entries[bytes] === entry) entries.remove(bytes)
+                    }
                 }
             if (last && entry.decoder.isInitialized()) {
                 entry.decoder.value?.let(recycle)

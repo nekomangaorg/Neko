@@ -118,4 +118,19 @@ class SharedRegionDecodersTest {
         assertEquals(1, created.get())
         assertEquals(1, recycled.size)
     }
+
+    @Test
+    fun `a block that throws recycles the decoder after the last user`() {
+        val bytes = ByteArray(8)
+
+        decoders.use(bytes, create(bytes)) {
+            assertThrows(IllegalStateException::class.java) {
+                decoders.use(bytes, create(bytes)) { error("decoding failure") }
+            }
+            assertEquals(emptyList<FakeDecoder>(), recycled)
+        }
+
+        assertEquals(1, created.get())
+        assertEquals(1, recycled.size)
+    }
 }
