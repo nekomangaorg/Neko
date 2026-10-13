@@ -6,8 +6,14 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import java.io.IOException
+import java.io.InputStream
+import okio.Buffer
+import okio.Source
+import okio.Timeout
+import okio.buffer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -126,6 +132,89 @@ class ImageUtilTest {
 
         assertTrue(opened)
         assertNull(mime)
+    }
+
+    @Test
+    fun `extractImageOptions reads the dimensions without reading the whole file`() {
+        val upstream = CountingSource(size = 8L * 1024 * 1024)
+        mockkConstructor(BitmapFactory.Options::class)
+        mockkStatic(BitmapFactory::class)
+        every { BitmapFactory.decodeStream(any(), any(), any()) } answers
+            {
+                // The PNG signature and IHDR chunk are the first 33 bytes.
+                firstArg<InputStream>().read(ByteArray(33))
+                thirdArg<BitmapFactory.Options>().apply {
+                    outWidth = 750
+                    outHeight = 129357
+                }
+                null
+            }
+        every { BitmapFactory.decodeByteArray(any(), any(), any(), any()) } answers
+            {
+                lastArg<BitmapFactory.Options>().apply {
+                    outWidth = 750
+                    outHeight = 129357
+                }
+                null
+            }
+
+        val options =
+            try {
+                upstream.buffer().use { ImageUtil.extractImageOptions(it) }
+            } finally {
+                unmockkAll()
+            }
+
+        assertEquals(750, options.outWidth)
+        assertEquals(129357, options.outHeight)
+        assertTrue("read ${upstream.bytesRead} bytes", upstream.bytesRead < 1024 * 1024)
+    }
+
+    @Test
+    fun `extractImageOptions reads the whole file when the stream gives no dimensions`() {
+        val upstream = CountingSource(size = 64L * 1024)
+        mockkConstructor(BitmapFactory.Options::class)
+        mockkStatic(BitmapFactory::class)
+        every { BitmapFactory.decodeStream(any(), any(), any()) } returns null
+        var decodedBytes = -1
+        every { BitmapFactory.decodeByteArray(any(), any(), any(), any()) } answers
+            {
+                decodedBytes = thirdArg()
+                lastArg<BitmapFactory.Options>().apply {
+                    outWidth = 750
+                    outHeight = 129357
+                }
+                null
+            }
+
+        val options =
+            try {
+                upstream.buffer().use { ImageUtil.extractImageOptions(it) }
+            } finally {
+                unmockkAll()
+            }
+
+        assertEquals(64 * 1024, decodedBytes)
+        assertEquals(750, options.outWidth)
+        assertEquals(129357, options.outHeight)
+    }
+
+    /** A source of [size] zero bytes that counts how many of them were read. */
+    private class CountingSource(private val size: Long) : Source {
+        var bytesRead = 0L
+            private set
+
+        override fun read(sink: Buffer, byteCount: Long): Long {
+            if (bytesRead == size) return -1
+            val count = minOf(byteCount, size - bytesRead)
+            sink.write(ByteArray(count.toInt()))
+            bytesRead += count
+            return count
+        }
+
+        override fun timeout(): Timeout = Timeout.NONE
+
+        override fun close() {}
     }
 
     data class TestCase(

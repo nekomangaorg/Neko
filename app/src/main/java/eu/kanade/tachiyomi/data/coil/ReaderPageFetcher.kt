@@ -214,6 +214,7 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
 
         private val activeFetches = SharedWork<ByteArray>()
         private val activeDecodes = SharedFullDecodes<CachedDecodedImage>()
+        private val regionDecoders = SharedRegionDecoders<BitmapRegionDecoder> { it.recycle() }
 
         fun clearCache() {
             // clear() leaves running work alone because the next reader can already be waiting on
@@ -379,6 +380,24 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
                 (fallbackBitmapCache.maxSize() - expectedBytes).coerceAtLeast(0).toInt()
             )
         }
+
+        private fun createRegionDecoder(
+            imageBytes: ByteArray,
+            pageIndex: Int,
+        ): BitmapRegionDecoder? =
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size)
+                } else {
+                    @Suppress("DEPRECATION")
+                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
+                }
+            } catch (e: Exception) {
+                TimberKt.d(e) {
+                    "BitmapRegionDecoder not supported for page $pageIndex, falling back to full decode"
+                }
+                null
+            }
     }
 
     override suspend fun fetch(): FetchResult = coroutineScope {
@@ -473,51 +492,41 @@ class ReaderPageSplitFetcher(private val split: ReaderPageSplit, private val opt
         cacheKey: String,
         retryGeneration: Int,
     ): Bitmap? {
-        val decoder =
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size)
-                } else {
-                    @Suppress("DEPRECATION")
-                    BitmapRegionDecoder.newInstance(imageBytes, 0, imageBytes.size, false)
-                }
-            } catch (e: Exception) {
-                TimberKt.d(e) {
-                    "BitmapRegionDecoder not supported for page ${split.page.index}, slice offset $top, falling back to full decode"
-                }
+        // The create lambda can outlive this fetcher, so it reads no fetcher fields.
+        val pageIndex = split.page.index
+        val create = { createRegionDecoder(imageBytes, pageIndex) }
+        val sliceBitmap =
+            regionDecoders.use(imageBytes, create) { decoder ->
+                decoder?.let { decodeSlice(it, top, height) }
+            }
+
+        return sliceBitmap
+            ?: fallbackDecodeRegion(imageBytes, top, height, cacheKey, retryGeneration)
+    }
+
+    private fun decodeSlice(decoder: BitmapRegionDecoder, top: Int, height: Int): Bitmap? =
+        try {
+            val bottom = minOf(decoder.height, top + height)
+            if (top < decoder.height && bottom > top) {
+                val region = Rect(0, top, decoder.width, bottom)
+                val regionWidth = decoder.width
+                val regionHeight = bottom - top
+                decoder.decodeRegion(
+                    region,
+                    BitmapFactory.Options().apply {
+                        inPreferredConfig = Bitmap.Config.ARGB_8888
+                        inSampleSize = calculateRegionSampleSize(regionWidth, regionHeight)
+                    },
+                )
+            } else {
                 null
             }
-
-        if (decoder != null) {
-            try {
-                val bottom = minOf(decoder.height, top + height)
-                if (top < decoder.height && bottom > top) {
-                    val region = Rect(0, top, decoder.width, bottom)
-                    val regionWidth = decoder.width
-                    val regionHeight = bottom - top
-                    val sliceBitmap =
-                        decoder.decodeRegion(
-                            region,
-                            BitmapFactory.Options().apply {
-                                inPreferredConfig = Bitmap.Config.ARGB_8888
-                                inSampleSize = calculateRegionSampleSize(regionWidth, regionHeight)
-                            },
-                        )
-                    if (sliceBitmap != null) {
-                        return sliceBitmap
-                    }
-                }
-            } catch (e: Exception) {
-                TimberKt.e(e) {
-                    "BitmapRegionDecoder failed during decodeRegion for page ${split.page.index}, slice offset $top"
-                }
-            } finally {
-                decoder.recycle()
+        } catch (e: Exception) {
+            TimberKt.e(e) {
+                "BitmapRegionDecoder failed during decodeRegion for page ${split.page.index}, slice offset $top"
             }
+            null
         }
-
-        return fallbackDecodeRegion(imageBytes, top, height, cacheKey, retryGeneration)
-    }
 
     private suspend fun fallbackDecodeRegion(
         imageBytes: ByteArray,
