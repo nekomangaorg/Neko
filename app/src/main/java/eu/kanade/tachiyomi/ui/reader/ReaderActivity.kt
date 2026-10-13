@@ -172,6 +172,7 @@ import org.nekomanga.presentation.screens.reader.ReaderChaptersSheetUiState
 import org.nekomanga.presentation.screens.reader.ReaderPageAction
 import org.nekomanga.presentation.screens.reader.ReaderPageActionsSheet
 import org.nekomanga.presentation.screens.reader.ReaderQuickActionId
+import org.nekomanga.presentation.screens.reader.ReaderSettingsAction
 import org.nekomanga.presentation.screens.reader.ReaderSettingsSheet
 import org.nekomanga.presentation.screens.reader.ReaderSliderUiState
 import org.nekomanga.presentation.screens.reader.SliderOrientation
@@ -1053,6 +1054,8 @@ class ReaderActivity : BaseMainActivity() {
                             sheetState =
                                 rememberModalBottomSheetState(skipPartiallyExpanded = true),
                         ) {
+                            val settingsUiState by
+                                viewModel.readerSettingsUiState.collectAsStateWithLifecycle()
                             val hasCutout =
                                 window.decorView.rootWindowInsets?.let { insets ->
                                     if (
@@ -1063,24 +1066,31 @@ class ReaderActivity : BaseMainActivity() {
                                             insets.displayCutout?.safeInsetBottom != null
                                     } else false
                                 } ?: false
+                            val hasMargins = (viewer as? WebtoonViewer)?.hasMargins ?: false
+                            val currentSettingsUiState =
+                                remember(settingsUiState, hasMargins, hasCutout) {
+                                    settingsUiState.copy(
+                                        hasMargins = hasMargins,
+                                        hasCutout = hasCutout,
+                                    )
+                                }
                             ReaderSettingsSheet(
-                                manga = viewModel.manga,
-                                hasMargins = (viewer as? WebtoonViewer)?.hasMargins ?: false,
-                                hasCutout = hasCutout,
-                                onReadingModeChange = { readingMode ->
-                                    viewModel.setMangaReadingMode(readingMode.flagValue)
-                                },
-                                onOrientationChange = { orientation ->
-                                    viewModel.setMangaOrientationType(orientation.flagValue)
-                                },
-                                onOpenReaderSettings = {
-                                    val intent =
-                                        MainActivity.openReaderSettings(this@ReaderActivity)
-                                    startActivity(intent)
-                                },
-                                onDismiss = {
-                                    settingsSheetVisible = false
-                                    reEnableBackPressedCallBack()
+                                uiState = currentSettingsUiState,
+                                onAction = { action ->
+                                    when (action) {
+                                        ReaderSettingsAction.OpenFullSettings -> {
+                                            settingsSheetVisible = false
+                                            reEnableBackPressedCallBack()
+                                            val intent =
+                                                MainActivity.openReaderSettings(this@ReaderActivity)
+                                            startActivity(intent)
+                                        }
+                                        ReaderSettingsAction.Dismiss -> {
+                                            settingsSheetVisible = false
+                                            reEnableBackPressedCallBack()
+                                        }
+                                        else -> viewModel.onReaderSettingsAction(action)
+                                    }
                                 },
                             )
                         }

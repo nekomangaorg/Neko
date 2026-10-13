@@ -49,6 +49,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderViewerPreferences
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.model.withLivePreloadStates
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
+import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.ReaderPreloadEngine
@@ -112,6 +113,8 @@ import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.screens.reader.ReaderChapterRowUiModel
+import org.nekomanga.presentation.screens.reader.ReaderSettingsAction
+import org.nekomanga.presentation.screens.reader.ReaderSettingsUiState
 import org.nekomanga.presentation.screens.reader.toReaderChapterRowUiModel
 import org.nekomanga.presentation.screens.reader.viewer.ChapterTransitionUiModel
 import org.nekomanga.usecases.chapters.ParseChapterNameUseCase
@@ -148,9 +151,14 @@ constructor(
         MutableStateFlow(State(viewerPreferences = getInitialViewerPreferences()))
     val state = mutableState.asStateFlow()
 
+    private val _readerSettingsUiState = MutableStateFlow(getInitialReaderSettingsUiState())
+    val readerSettingsUiState: StateFlow<ReaderSettingsUiState> =
+        _readerSettingsUiState.asStateFlow()
+
     init {
         observeViewerPreferences()
         observeTransitionTargetStates()
+        observeReaderSettings()
     }
 
     private val downloadProvider = DownloadProvider(preferences.context)
@@ -1669,6 +1677,357 @@ constructor(
                 .launchIn(viewModelScope)
         } catch (e: Exception) {
             TimberKt.w(e) { "ReaderPreferences could not be observed" }
+        }
+    }
+
+    private fun getInitialReaderSettingsUiState(): ReaderSettingsUiState {
+        return try {
+            val defaultReadingMode = readerPreferences.defaultReadingMode().get()
+            val currentManga = manga
+            val currentReadingMode =
+                if (currentManga == null) defaultReadingMode
+                else {
+                    val viewer =
+                        if (currentManga.readingModeType == 0) defaultReadingMode
+                        else currentManga.readingModeType
+                    if (currentManga.isLongStrip()) ReadingModeType.WEBTOON.flagValue else viewer
+                }
+            val isWebtoon = ReadingModeType.isWebtoonType(currentReadingMode)
+
+            ReaderSettingsUiState(
+                isWebtoon = isWebtoon,
+                readingMode = ReadingModeType.fromPreference(currentManga?.readingModeType ?: 0),
+                orientation =
+                    OrientationType.fromPreference(
+                        currentManga?.orientationType ?: OrientationType.DEFAULT.flagValue
+                    ),
+                readerTheme = readerPreferences.readerTheme().get(),
+                sliderPosition = readerPreferences.sliderPosition().get(),
+                showPageNumber = readerPreferences.showPageNumber().get(),
+                keepScreenOn = readerPreferences.keepScreenOn().get(),
+                alwaysShowChapterTransition = readerPreferences.alwaysShowChapterTransition().get(),
+                cropBordersWebtoon = readerPreferences.cropBordersWebtoon().get(),
+                webtoonSidePadding = readerPreferences.webtoonSidePadding().get(),
+                webtoonEnableZoomOut = readerPreferences.webtoonEnableZoomOut().get(),
+                webtoonNav = readerPreferences.navigationModeWebtoon().get(),
+                webtoonInvert = readerPreferences.webtoonNavInverted().get(),
+                webtoonPageLayout =
+                    PageLayout.fromPreference(readerPreferences.webtoonPageLayout().get()),
+                webtoonInvertDoublePages = readerPreferences.webtoonInvertDoublePages().get(),
+                webtoonPageTransitions = readerPreferences.animatedPageTransitionsWebtoon().get(),
+                splitTallImages = readerPreferences.splitTallImagesReader().get(),
+                imageScaleType = readerPreferences.imageScaleType().get(),
+                zoomStart = readerPreferences.zoomStart().get(),
+                cropBorders = readerPreferences.cropBorders().get(),
+                pageTransitions = readerPreferences.animatedPageTransitions().get(),
+                pagerNav = readerPreferences.navigationModePager().get(),
+                pagerInvert = readerPreferences.pagerNavInverted().get(),
+                pageLayout = PageLayout.fromPreference(readerPreferences.pageLayout().get()),
+                invertDoublePages = readerPreferences.invertDoublePages().get(),
+                doublePageGap = readerPreferences.doublePageGap().get(),
+                landscapeZoom = readerPreferences.landscapeZoom().get(),
+                navigateToPan = readerPreferences.navigateToPan().get(),
+                doublePageRotate = readerPreferences.doublePageRotate().get(),
+                doublePageRotateReverse = readerPreferences.doublePageRotateReverse().get(),
+                pagerCutoutBehavior = readerPreferences.pagerCutoutBehavior().get(),
+                grayscale = readerPreferences.grayscale().get(),
+                invertedColors = readerPreferences.invertedColors().get(),
+                customBrightness = readerPreferences.customBrightness().get(),
+                customBrightnessValue = readerPreferences.customBrightnessValue().get(),
+                colorFilter = readerPreferences.colorFilter().get(),
+                colorFilterMode = readerPreferences.colorFilterMode().get(),
+                colorFilterValue = readerPreferences.colorFilterValue().get(),
+            )
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Failed to get initial reader settings UI state" }
+            ReaderSettingsUiState()
+        }
+    }
+
+    private fun observeReaderSettings() {
+        try {
+            state
+                .map { it.manga }
+                .distinctUntilChanged()
+                .onEach { manga ->
+                    val defaultReadingMode = readerPreferences.defaultReadingMode().get()
+                    val currentReadingMode =
+                        if (manga == null) defaultReadingMode
+                        else {
+                            val viewer =
+                                if (manga.readingModeType == 0) defaultReadingMode
+                                else manga.readingModeType
+                            if (manga.isLongStrip()) ReadingModeType.WEBTOON.flagValue else viewer
+                        }
+                    val isWebtoon = ReadingModeType.isWebtoonType(currentReadingMode)
+                    _readerSettingsUiState.update { current ->
+                        current.copy(
+                            isWebtoon = isWebtoon,
+                            readingMode =
+                                ReadingModeType.fromPreference(manga?.readingModeType ?: 0),
+                            orientation =
+                                OrientationType.fromPreference(
+                                    manga?.orientationType ?: OrientationType.DEFAULT.flagValue
+                                ),
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+
+            merge(
+                    readerPreferences.readerTheme().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(readerTheme = it) }
+                    },
+                    readerPreferences.sliderPosition().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(sliderPosition = it) }
+                    },
+                    readerPreferences.showPageNumber().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(showPageNumber = it) }
+                    },
+                    readerPreferences.keepScreenOn().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(keepScreenOn = it) }
+                    },
+                    readerPreferences.alwaysShowChapterTransition().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(alwaysShowChapterTransition = it) }
+                    },
+                    readerPreferences.cropBordersWebtoon().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(cropBordersWebtoon = it) }
+                    },
+                    readerPreferences.cropBorders().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(cropBorders = it) }
+                    },
+                    readerPreferences.webtoonSidePadding().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(webtoonSidePadding = it) }
+                    },
+                    readerPreferences.webtoonEnableZoomOut().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(webtoonEnableZoomOut = it) }
+                    },
+                    readerPreferences.navigationModeWebtoon().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(webtoonNav = it) }
+                    },
+                    readerPreferences.webtoonNavInverted().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(webtoonInvert = it) }
+                    },
+                    readerPreferences.webtoonPageLayout().changes().map {
+                        { s: ReaderSettingsUiState ->
+                            s.copy(webtoonPageLayout = PageLayout.fromPreference(it))
+                        }
+                    },
+                    readerPreferences.webtoonInvertDoublePages().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(webtoonInvertDoublePages = it) }
+                    },
+                    readerPreferences.animatedPageTransitionsWebtoon().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(webtoonPageTransitions = it) }
+                    },
+                    readerPreferences.splitTallImagesReader().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(splitTallImages = it) }
+                    },
+                    readerPreferences.imageScaleType().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(imageScaleType = it) }
+                    },
+                    readerPreferences.zoomStart().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(zoomStart = it) }
+                    },
+                    readerPreferences.animatedPageTransitions().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(pageTransitions = it) }
+                    },
+                    readerPreferences.navigationModePager().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(pagerNav = it) }
+                    },
+                    readerPreferences.pagerNavInverted().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(pagerInvert = it) }
+                    },
+                    readerPreferences.pageLayout().changes().map {
+                        { s: ReaderSettingsUiState ->
+                            s.copy(pageLayout = PageLayout.fromPreference(it))
+                        }
+                    },
+                    readerPreferences.invertDoublePages().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(invertDoublePages = it) }
+                    },
+                    readerPreferences.doublePageGap().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(doublePageGap = it) }
+                    },
+                    readerPreferences.landscapeZoom().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(landscapeZoom = it) }
+                    },
+                    readerPreferences.navigateToPan().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(navigateToPan = it) }
+                    },
+                    readerPreferences.doublePageRotate().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(doublePageRotate = it) }
+                    },
+                    readerPreferences.doublePageRotateReverse().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(doublePageRotateReverse = it) }
+                    },
+                    readerPreferences.pagerCutoutBehavior().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(pagerCutoutBehavior = it) }
+                    },
+                    readerPreferences.grayscale().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(grayscale = it) }
+                    },
+                    readerPreferences.invertedColors().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(invertedColors = it) }
+                    },
+                    readerPreferences.customBrightness().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(customBrightness = it) }
+                    },
+                    readerPreferences.customBrightnessValue().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(customBrightnessValue = it) }
+                    },
+                    readerPreferences.colorFilter().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(colorFilter = it) }
+                    },
+                    readerPreferences.colorFilterMode().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(colorFilterMode = it) }
+                    },
+                    readerPreferences.colorFilterValue().changes().map {
+                        { s: ReaderSettingsUiState -> s.copy(colorFilterValue = it) }
+                    },
+                    readerPreferences.defaultReadingMode().changes().map {
+                        { s: ReaderSettingsUiState ->
+                            val currentManga = manga
+                            val currentReadingMode =
+                                if (currentManga == null) it
+                                else {
+                                    val viewer =
+                                        if (currentManga.readingModeType == 0) it
+                                        else currentManga.readingModeType
+                                    if (currentManga.isLongStrip())
+                                        ReadingModeType.WEBTOON.flagValue
+                                    else viewer
+                                }
+                            s.copy(isWebtoon = ReadingModeType.isWebtoonType(currentReadingMode))
+                        }
+                    },
+                )
+                .onEach { updateFn -> _readerSettingsUiState.update { updateFn(it) } }
+                .launchIn(viewModelScope)
+        } catch (e: Exception) {
+            TimberKt.e(e) { "ReaderSettings preferences could not be observed" }
+        }
+    }
+
+    fun onReaderSettingsAction(action: ReaderSettingsAction) {
+        when (action) {
+            is ReaderSettingsAction.SetReadingMode -> {
+                setMangaReadingMode(action.type.flagValue)
+            }
+            is ReaderSettingsAction.SetOrientation -> {
+                setMangaOrientationType(action.type.flagValue)
+            }
+            is ReaderSettingsAction.SetTheme -> {
+                readerPreferences.readerTheme().set(action.themeIndex)
+            }
+            is ReaderSettingsAction.SetSliderPosition -> {
+                readerPreferences.sliderPosition().set(action.position)
+            }
+            is ReaderSettingsAction.ToggleShowPageNumber -> {
+                readerPreferences.showPageNumber().set(action.show)
+            }
+            is ReaderSettingsAction.ToggleKeepScreenOn -> {
+                readerPreferences.keepScreenOn().set(action.keep)
+            }
+            is ReaderSettingsAction.ToggleAlwaysShowChapterTransition -> {
+                readerPreferences.alwaysShowChapterTransition().set(action.show)
+            }
+            is ReaderSettingsAction.ToggleWebtoonCropBorders -> {
+                readerPreferences.cropBordersWebtoon().set(action.crop)
+            }
+            is ReaderSettingsAction.SetWebtoonSidePadding -> {
+                readerPreferences.webtoonSidePadding().set(action.padding)
+            }
+            is ReaderSettingsAction.ToggleWebtoonEnableZoomOut -> {
+                readerPreferences.webtoonEnableZoomOut().set(action.enable)
+            }
+            is ReaderSettingsAction.SetWebtoonNav -> {
+                readerPreferences.navigationModeWebtoon().set(action.mode)
+            }
+            is ReaderSettingsAction.SetWebtoonInvertTapping -> {
+                readerPreferences.webtoonNavInverted().set(action.mode)
+            }
+            is ReaderSettingsAction.SetWebtoonPageLayout -> {
+                readerPreferences.webtoonPageLayout().set(action.layout.webtoonValue)
+            }
+            is ReaderSettingsAction.ToggleWebtoonInvertDoublePages -> {
+                readerPreferences.webtoonInvertDoublePages().set(action.invert)
+            }
+            is ReaderSettingsAction.ToggleWebtoonPageTransitions -> {
+                readerPreferences.animatedPageTransitionsWebtoon().set(action.animate)
+            }
+            is ReaderSettingsAction.ToggleSplitTallImages -> {
+                readerPreferences.splitTallImagesReader().set(action.split)
+            }
+            is ReaderSettingsAction.ToggleWebtoonDisableGaps -> {
+                readerPreferences.webtoonDisableGaps().set(action.disabled)
+            }
+            is ReaderSettingsAction.SetImageScaleType -> {
+                readerPreferences.imageScaleType().set(action.scaleType)
+            }
+            is ReaderSettingsAction.SetZoomStart -> {
+                readerPreferences.zoomStart().set(action.zoomStart)
+            }
+            is ReaderSettingsAction.ToggleCropBorders -> {
+                readerPreferences.cropBorders().set(action.crop)
+            }
+            is ReaderSettingsAction.TogglePageTransitions -> {
+                readerPreferences.animatedPageTransitions().set(action.animate)
+            }
+            is ReaderSettingsAction.SetPagerNav -> {
+                readerPreferences.navigationModePager().set(action.mode)
+            }
+            is ReaderSettingsAction.SetPagerInvertTapping -> {
+                readerPreferences.pagerNavInverted().set(action.mode)
+            }
+            is ReaderSettingsAction.SetPageLayout -> {
+                readerPreferences.pageLayout().set(action.layout.value)
+            }
+            is ReaderSettingsAction.ToggleInvertDoublePages -> {
+                readerPreferences.invertDoublePages().set(action.invert)
+            }
+            is ReaderSettingsAction.SetDoublePageGap -> {
+                readerPreferences.doublePageGap().set(action.gap)
+            }
+            is ReaderSettingsAction.ToggleZoomDoublePageSpreads -> {
+                readerPreferences.landscapeZoom().set(action.zoom)
+            }
+            is ReaderSettingsAction.ToggleNavigateToPan -> {
+                readerPreferences.navigateToPan().set(action.navigate)
+            }
+            is ReaderSettingsAction.ToggleDoublePageRotate -> {
+                readerPreferences.doublePageRotate().set(action.rotate)
+            }
+            is ReaderSettingsAction.ToggleDoublePageRotateReverse -> {
+                readerPreferences.doublePageRotateReverse().set(action.reverse)
+            }
+            is ReaderSettingsAction.SetPagerCutoutBehavior -> {
+                readerPreferences.pagerCutoutBehavior().set(action.behavior)
+            }
+            is ReaderSettingsAction.ToggleGrayscale -> {
+                readerPreferences.grayscale().set(action.grayscale)
+            }
+            is ReaderSettingsAction.ToggleInvertedColors -> {
+                readerPreferences.invertedColors().set(action.inverted)
+            }
+            is ReaderSettingsAction.ToggleCustomBrightness -> {
+                readerPreferences.customBrightness().set(action.enable)
+            }
+            is ReaderSettingsAction.SetCustomBrightnessValue -> {
+                readerPreferences.customBrightnessValue().set(action.value)
+            }
+            is ReaderSettingsAction.ToggleColorFilter -> {
+                readerPreferences.colorFilter().set(action.enable)
+            }
+            is ReaderSettingsAction.SetColorFilterMode -> {
+                readerPreferences.colorFilterMode().set(action.mode)
+            }
+            is ReaderSettingsAction.SetColorFilterValue -> {
+                readerPreferences.colorFilterValue().set(action.value)
+            }
+            ReaderSettingsAction.OpenFullSettings -> {}
+            ReaderSettingsAction.Dismiss -> {
+                setSettingsSheetVisibility(false)
+            }
         }
     }
 
