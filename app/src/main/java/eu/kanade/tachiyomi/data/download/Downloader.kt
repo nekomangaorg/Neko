@@ -99,7 +99,8 @@ class Downloader(
      * [queueChapters] while it adds chapters, so a chapter queued as the last download finishes is
      * either seen by that check or starts the downloader again. [updateQueue] and
      * [removeFromQueueAndRestart] hold it from pause to start, and [isRunning] reads under it, so a
-     * restart never reads as stopped.
+     * restart never reads as stopped. [start], [stop], [pause] and [clearQueue] run under it whole,
+     * so a start on one thread never lands in the middle of a stop, pause or clear on another.
      */
     private val queueLock = Any()
 
@@ -132,47 +133,49 @@ class Downloader(
      * @return true if the downloader is started, false otherwise.
      */
     fun start(): Boolean {
-        if (isRunning || queueState.value.isEmpty()) {
-            return false
+        synchronized(queueLock) {
+            if (isRunning || queueState.value.isEmpty()) {
+                return false
+            }
+
+            removeFromQueueIf { it.chapterItem.isUnavailable }
+            val pending = queueState.value.filter { it.status != Download.State.DOWNLOADED }
+            pending.forEach {
+                if (it.status != Download.State.QUEUE) it.status = Download.State.QUEUE
+            }
+
+            isPaused = false
+
+            launchDownloaderJob()
+            publishRunning()
+
+            return pending.isNotEmpty()
         }
-
-        queueState.value.apply { removeFromQueueIf { it.chapterItem.isUnavailable } }
-        val pending = queueState.value.filter { it.status != Download.State.DOWNLOADED }
-        pending.forEach { if (it.status != Download.State.QUEUE) it.status = Download.State.QUEUE }
-
-        isPaused = false
-
-        launchDownloaderJob()
-        publishRunning()
-
-        return pending.isNotEmpty()
     }
 
     /** Stops the downloader. */
     fun stop(reason: String? = null) {
-        cancelDownloaderJob()
-        queueState.value
-            .filter { it.status == Download.State.DOWNLOADING }
-            .forEach { it.status = Download.State.ERROR }
-
-        if (reason != null) {
-            notifier.onWarning(reason)
-            return
-        }
-
-        if (isPaused && queueState.value.isNotEmpty()) {
-            notifier.onPaused()
-        } else {
-            notifier.onComplete()
-        }
-
-        isPaused = false
-
-        DownloadJob.stop(context)
+        val notify = synchronized(queueLock) { stopInternal(reason) }
+        notify()
     }
 
-    /** Pauses the downloader */
+    /**
+     * Pauses the downloader and stops DownloadJob. Both run in one hold of [queueLock], so a start
+     * on another thread lands before the pause or after the stop, never in between.
+     */
     fun pause() {
+        val notify =
+            synchronized(queueLock) {
+                pauseInternal()
+                stopInternal(null)
+            }
+        notify()
+    }
+
+    /**
+     * Cancels the downloader job and puts running downloads back in the queue. Hold [queueLock].
+     */
+    private fun pauseInternal() {
         cancelDownloaderJob()
         queueState.value
             .filter { it.status == Download.State.DOWNLOADING }
@@ -180,11 +183,38 @@ class Downloader(
         isPaused = true
     }
 
+    /**
+     * Hold [queueLock]. Returns the notification to post once the lock is released.
+     *
+     * DownloadJob stops under the lock. A [queueChapters] waiting on the lock starts DownloadJob
+     * after it gets the lock, and WorkManager runs cancels and enqueues in call order, so this
+     * cancel never hits the new job.
+     */
+    private fun stopInternal(reason: String?): () -> Unit {
+        cancelDownloaderJob()
+        queueState.value
+            .filter { it.status == Download.State.DOWNLOADING }
+            .forEach { it.status = Download.State.ERROR }
+
+        if (reason != null) {
+            return { notifier.onWarning(reason) }
+        }
+
+        val paused = isPaused && queueState.value.isNotEmpty()
+        isPaused = false
+
+        DownloadJob.stop(context)
+
+        return if (paused) notifier::onPaused else notifier::onComplete
+    }
+
     /** Removes everything from the queue. */
     fun clearQueue() {
-        cancelDownloaderJob()
-        clearQueueState()
-        notifier.dismissProgress()
+        synchronized(queueLock) {
+            cancelDownloaderJob()
+            clearQueueState()
+            notifier.dismissProgress()
+        }
     }
 
     /**
@@ -277,7 +307,10 @@ class Downloader(
         }
     }
 
-    /** Destroys the downloader job. */
+    /**
+     * Destroys the downloader job. Hold [queueLock], so a start() on another thread cannot store a
+     * new job between the cancel and the reset and have it dropped while it runs.
+     */
     private fun cancelDownloaderJob() {
         downloaderJob?.cancel()
         downloaderJob = null
@@ -649,7 +682,7 @@ class Downloader(
 
             val wasRunning = isRunning
             if (wasRunning) {
-                pause()
+                pauseInternal()
             }
 
             removeFromQueueIf(predicate)
@@ -690,7 +723,7 @@ class Downloader(
                 return
             }
 
-            pause()
+            pauseInternal()
             clearQueueState()
             addAllToQueue(downloads)
 
