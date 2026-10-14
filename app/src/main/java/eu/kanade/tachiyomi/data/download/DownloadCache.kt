@@ -127,16 +127,10 @@ class DownloadCache(
         _changes.tryEmit(Unit)
     }
 
-    fun getDownloadCount(manga: Manga, forceCheckFolder: Boolean = false): Int {
+    fun getDownloadCount(manga: Manga): Int {
         checkRenew()
-        if (forceCheckFolder) {
-            val mangaDir = provider.findMangaDir(manga) ?: return 0
-            return mangaDir.listFiles { _, filename -> !filename.endsWith(TMP_DIR_SUFFIX) }?.size
-                ?: 0
-        } else {
-            val cache = mangaFiles[manga.id] ?: return 0
-            return cache.files.count { !it.endsWith(TMP_DIR_SUFFIX) }
-        }
+        val cache = mangaFiles[manga.id] ?: return 0
+        return cache.files.count { !it.endsWith(TMP_DIR_SUFFIX) }
     }
 
     fun getDownloadCounts(mangaIds: List<Long>): Map<Long, Int> {

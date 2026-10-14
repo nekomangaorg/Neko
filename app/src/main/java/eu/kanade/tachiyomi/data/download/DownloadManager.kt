@@ -316,12 +316,6 @@ class DownloadManager(
                             pendingDeleter.deletePendingChapter(manga, chapters)
                         }
 
-                        if (
-                            cache.getDownloadCount(manga, true) == 0
-                        ) { // Delete manga directory if empty
-                            chapterDirs.firstOrNull()?.parentFile?.delete()
-                        }
-
                         // Delete manga directory if empty
                         if (mangaDir?.listFiles()?.isEmpty() == true) {
                             deleteManga(manga, removeQueued = false)
