@@ -40,6 +40,13 @@ class DownloadProviderTest {
             mangadex_chapter_id = CHAPTER_UUID
             url = "/chapter/$CHAPTER_UUID"
         }
+    // A merged chapter has no MangaDex id, so only its folder or cbz name can match.
+    private val mergedChapter =
+        Chapter.create().apply {
+            name = "Ch.5 - Coffee"
+            scanlator = "Toonily"
+            url = "/manga/coffee/chapter-5"
+        }
 
     @Before
     fun setup() {
@@ -101,6 +108,35 @@ class DownloadProviderTest {
         File(mangaDir, "$CHAPTER_DIR.cbz").writeBytes(byteArrayOf(0))
 
         assertEquals(false, provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
+    }
+
+    @Test
+    fun `chapterDirDoesNotExist is false for a finished folder`() {
+        File(mangaDir, CHAPTER_DIR).mkdir()
+
+        assertEquals(false, provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
+    }
+
+    @Test
+    fun `chapterDirDoesNotExist is false for the folder of a renamed chapter`() {
+        File(mangaDir, "Ch.3 - Old title - $CHAPTER_UUID").mkdir()
+
+        assertEquals(false, provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
+    }
+
+    @Test
+    fun `chapterDirDoesNotExist is false for a finished folder of a merged chapter`() {
+        File(mangaDir, provider.getChapterDirName(mergedChapter)).mkdir()
+
+        assertEquals(false, provider.chapterDirDoesNotExist(mergedChapter, mangaDirFiles()))
+    }
+
+    @Test
+    fun `chapterDirDoesNotExist is false for a finished cbz of a merged chapter`() {
+        File(mangaDir, "${provider.getChapterDirName(mergedChapter)}.cbz")
+            .writeBytes(byteArrayOf(0))
+
+        assertEquals(false, provider.chapterDirDoesNotExist(mergedChapter, mangaDirFiles()))
     }
 
     @Test

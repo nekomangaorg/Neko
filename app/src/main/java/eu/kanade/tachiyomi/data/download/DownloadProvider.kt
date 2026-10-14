@@ -17,7 +17,6 @@ import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import tachiyomi.core.util.storage.displayablePath
-import tachiyomi.core.util.storage.nameWithoutExtension
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -109,17 +108,17 @@ class DownloadProvider(
         // A name ending in TMP_DIR_SUFFIX belongs to a download that has not finished.
         val finishedDirs = chapterDirs.filterNot { it.name.orEmpty().endsWith(TMP_DIR_SUFFIX) }
 
+        // A folder has no extension, so cutting at the last dot turns "Ch.3 - x" into "Ch".
         var found =
             getValidChapterDirNames(chapter).any { chapterDir ->
                 finishedDirs.any { uniFile ->
-                    uniFile.nameWithoutExtension!!.equals(chapterDir, true)
+                    val name = uniFile.name.orEmpty()
+                    name.equals(chapterDir, true) || name.equals("$chapterDir.cbz", true)
                 }
             }
 
         if (!found && chapter.mangadex_chapter_id.isNotEmpty()) {
-            found = finishedDirs.any { uniFile ->
-                uniFile.nameWithoutExtension!!.contains(chapter.uuid())
-            }
+            found = finishedDirs.any { uniFile -> uniFile.name.orEmpty().contains(chapter.uuid()) }
         }
 
         return !found
