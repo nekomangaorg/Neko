@@ -386,8 +386,15 @@ class DownloadManager(
 
         val filesWithNoChapter =
             provider.findUnmatchedChapterDirs(allChapters, manga) {
-                val queuedIds = queuedChapterIds(manga)
-                allChapters.filter { it.id in queuedIds }
+                // allChapters misses a chapter added after it was read, and the queue keeps the
+                // name a chapter had when it was queued. A download names its temp folder from
+                // the database row when it starts, so either list can hold the matching name.
+                val queued =
+                    queueState.value
+                        .filter { it.mangaItem.id == manga.id }
+                        .map { it.chapterItem.toDbChapter() }
+                val queuedIds = queued.map { it.id }.toSet()
+                queued + allChapters.filter { it.id in queuedIds }
             }
         cleaned += filesWithNoChapter.size
         cache.removeFolders(filesWithNoChapter.mapNotNull { it.name }, manga)
