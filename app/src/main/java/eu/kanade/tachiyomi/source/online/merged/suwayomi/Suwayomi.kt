@@ -177,8 +177,8 @@ class Suwayomi : MergedServerSource() {
                 put(
                     "query",
                     JsonPrimitive(
-                        "mutation REFRESH_LOGIN_TOKEN(\$input RefreshTokenInput!) {" +
-                            "refreshToken(input: \$input) {" +
+                        $$"mutation REFRESH_LOGIN_TOKEN($input RefreshTokenInput!) {" +
+                            $$"refreshToken(input: $input) {" +
                             "accessToken}}"
                     ),
                 )
@@ -203,8 +203,8 @@ class Suwayomi : MergedServerSource() {
                 put(
                     "query",
                     JsonPrimitive(
-                        "mutation GET_LOGIN_TOKEN (\$input: LoginInput!) {" +
-                            "login(input: \$input) {" +
+                        $$"mutation GET_LOGIN_TOKEN ($input: LoginInput!) {" +
+                            $$"login(input: $input) {" +
                             "accessToken refreshToken}}"
                     ),
                 )
@@ -317,8 +317,9 @@ class Suwayomi : MergedServerSource() {
                 (data ?: throw Exception("Failed to search manga")).mangas.nodes.mapNotNull { manga
                     ->
                     manga.source ?: return@mapNotNull null
+                    val title = splitSourceGroup(manga.title, manga.source.name).first
                     SManga.create().apply {
-                        this.title = manga.title
+                        this.title = title
                         this.url =
                             listOf(manga.id, manga.source.name, manga.source.lang)
                                 .joinToString(Constants.SEPARATOR)
@@ -328,6 +329,16 @@ class Suwayomi : MergedServerSource() {
                 }
             }
         }
+    }
+
+    // For multi-merge aggregator sources, that include the original source name at the end
+    fun splitSourceGroup(title: String, sourceName: String): Pair<String, String> {
+        if (sourceName !in aggregatorSources) return title to ""
+        val match = sourceTagRegex.find(title) ?: return title to ""
+        val group = match.groupValues[1].trim()
+        if (group.isEmpty()) return title to ""
+        val cleaned = title.removeRange(match.range).trim()
+        return ("[$group] $cleaned").trim() to group
     }
 
     fun searchMangaFormBuilder(query: String): RequestBody {
@@ -356,12 +367,12 @@ class Suwayomi : MergedServerSource() {
         val parts = mangaUrl.split(separator, limit = 3)
         val mangaId = parts[0]
         val lang = parts.getOrNull(2)?.let { fromSuwayomiLang(it) }
-        var sourceName = parts.getOrElse(1) { "placeholder" }
-        sourceName =
-            when (sourceName) {
+        val rawSourceName = parts.getOrElse(1) { "placeholder" }
+        val sourceName =
+            when (rawSourceName) {
                 // Add zero-width space so that it doesn't match in filteredBySource()
-                in SourceManager.mergeSourceNames -> sourceName + '\u200B'
-                else -> sourceName
+                in SourceManager.mergeSourceNames -> rawSourceName + '\u200B'
+                else -> rawSourceName
             }
 
         return withContext(Dispatchers.IO) {
@@ -370,6 +381,7 @@ class Suwayomi : MergedServerSource() {
                     if (hostUrl().isBlank()) {
                         throw Exception("Invalid host name")
                     }
+                    var mangaTitle: String? = null
                     var chapters =
                         try {
                             client
@@ -390,7 +402,10 @@ class Suwayomi : MergedServerSource() {
                                             it.string()
                                         )
                                         .data
-                                        ?.fetchChapters
+                                        ?.also {
+                                            mangaTitle = it.fetchMangaAndChapters?.manga?.title
+                                        }
+                                        ?.fetchMangaAndChapters
                                         ?.chapters
                                 }
                         } catch (e: Exception) {
@@ -415,11 +430,18 @@ class Suwayomi : MergedServerSource() {
                                             it.string()
                                         )
                                         .data
+                                        ?.also { mangaTitle = it.manga.title }
                                         ?.chapters
                                         ?.nodes ?: throw Exception("Failed to get chapters")
                                 }
                     }
                     chapters = chapters.sortedBy { it.sourceOrder }
+                    var sourceGroup = splitSourceGroup(mangaTitle ?: "", rawSourceName).second
+                    sourceGroup =
+                        when (sourceGroup) {
+                            in SourceManager.mergeSourceNames -> sourceGroup + '\u200B'
+                            else -> sourceGroup
+                        }
                     var previous = Previous()
                     val chapterPairs =
                         chapters
@@ -459,7 +481,11 @@ class Suwayomi : MergedServerSource() {
                                         "/manga/${mangaId}/chapter/${chapter.sourceOrder} ${chapter.id}"
                                     val scanlators = chapter.scanlator?.split(", ") ?: emptyList()
                                     scanlator =
-                                        (listOf(this@Suwayomi.name, sourceName) + scanlators)
+                                        (listOfNotNull(
+                                                this@Suwayomi.name,
+                                                sourceName,
+                                                sourceGroup,
+                                            ) + scanlators)
                                             .joinToString(Constants.SCANLATOR_SEPARATOR)
                                     language = lang
                                     date_upload = chapter.uploadDate
@@ -572,8 +598,8 @@ class Suwayomi : MergedServerSource() {
         val chtxt = "Ch.$ch"
         chapterName.add(chtxt)
         var matched =
-            if (title.startsWith(ch)) {
-                title = title.replaceFirst(ch, "").trimStart('.').trimStart()
+            if (title.startsWith(ch) || title.trimStart('0').startsWith(ch)) {
+                title = title.replaceFirst(ch, "").trimStart('0', '.').trimStart()
                 true
             } else {
                 chapterPrefixes.any { prefix ->
@@ -669,15 +695,22 @@ class Suwayomi : MergedServerSource() {
     // If this mutation fails due to the source, server-side, fetchChapters == null
     fun fetchChaptersFormBuilder(mangaId: Long): RequestBody {
         val variables = buildJsonObject {
-            put("input", buildJsonObject { put("mangaId", JsonPrimitive(mangaId)) })
+            put(
+                "input",
+                buildJsonObject {
+                    put("id", JsonPrimitive(mangaId))
+                    put("fetchChapters", JsonPrimitive(true))
+                    put("fetchManga", JsonPrimitive(false))
+                },
+            )
         }
         return buildJsonObject {
                 put("operationName", JsonPrimitive("FETCH_MANGA_CHAPTERS"))
                 put(
                     "query",
                     JsonPrimitive(
-                        "mutation FETCH_MANGA_CHAPTERS(\$input: FetchChaptersInput!){" +
-                            "fetchChapters(input: \$input) { chapters{" +
+                        $$"mutation FETCH_MANGA_CHAPTERS($input: FetchMangaAndChaptersInput!){" +
+                            $$"fetchMangaAndChapters(input: $input) { manga{title} chapters{" +
                             "id name chapterNumber sourceOrder uploadDate isRead scanlator}}}"
                     ),
                 )
@@ -689,18 +722,16 @@ class Suwayomi : MergedServerSource() {
 
     // Use current server data in case the mutation fails
     fun getChaptersFormBuilder(mangaId: Long): RequestBody {
-        val filter = buildJsonObject {
-            put("mangaId", buildJsonObject { put("equalTo", JsonPrimitive(mangaId)) })
-        }
-        val variables = buildJsonObject { put("filter", filter) }
+        val variables = buildJsonObject { put("mangaId", JsonPrimitive(mangaId)) }
 
         return buildJsonObject {
                 put("operationName", JsonPrimitive("GET_MANGA_CHAPTERS"))
                 put(
                     "query",
                     JsonPrimitive(
-                        "query GET_MANGA_CHAPTERS(\$filter: ChapterFilterInput!) {" +
-                            "chapters(filter: \$filter) { nodes {" +
+                        $$"query GET_MANGA_CHAPTERS($mangaId: Int!) {" +
+                            $$"manga(id: $mangaId){title} " +
+                            $$"chapters(filter: {mangaId: {equalTo: $mangaId}}) { nodes {" +
                             "id name chapterNumber sourceOrder uploadDate isRead scanlator}}}"
                     ),
                 )
@@ -740,8 +771,8 @@ class Suwayomi : MergedServerSource() {
                 put(
                     "query",
                     JsonPrimitive(
-                        "mutation GET_CHAPTER_PAGES_FETCH(\$input:FetchChapterPagesInput!){" +
-                            "fetchChapterPages(input:\$input){pages}}"
+                        $$"mutation GET_CHAPTER_PAGES_FETCH($input:FetchChapterPagesInput!){" +
+                            $$"fetchChapterPages(input:$input){pages}}"
                     ),
                 )
                 put("variables", variables)
@@ -780,8 +811,8 @@ class Suwayomi : MergedServerSource() {
                 put(
                     "query",
                     JsonPrimitive(
-                        "mutation UPDATE_CHAPTERS(\$input:UpdateChaptersInput!){" +
-                            "updateChapters(input:\$input){__typename}}"
+                        $$"mutation UPDATE_CHAPTERS($input:UpdateChaptersInput!){" +
+                            $$"updateChapters(input:$input){__typename}}"
                     ),
                 )
                 put("variables", variables)
@@ -793,6 +824,9 @@ class Suwayomi : MergedServerSource() {
     companion object {
         val name = "Suwayomi"
         val emojiRegex = Regex("^[\\p{So}\\p{Cn}\\p{Cs}\\x{1F000}-\\x{1FFFF}]+")
+        // Trailing "[source]" tag, e.g. "Berserk [MangaPlus]"
+        val sourceTagRegex = Regex("\\s*\\[([^\\[\\]]+)]$")
+        val aggregatorSources = arrayOf("Kagane")
         val volumePrefixes =
             arrayOf(
                 "Volume",
