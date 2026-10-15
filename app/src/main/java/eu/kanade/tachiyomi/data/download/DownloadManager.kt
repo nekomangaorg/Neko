@@ -373,7 +373,9 @@ class DownloadManager(
     ): Int {
         var cleaned = 0
 
-        if (removeNonFavorite && !manga.favorite) {
+        // Deleting the folder of a manga with queued chapters would delete their downloads, so
+        // such a manga gets the same cleanup as a library manga.
+        if (removeNonFavorite && !manga.favorite && queuedChapterIds(manga).isEmpty()) {
             val mangaFolder = provider.getMangaDir(manga)
             cleaned += 1 + (mangaFolder.listFiles()?.size ?: 0)
             mangaFolder.delete()
@@ -381,7 +383,18 @@ class DownloadManager(
             return cleaned
         }
 
-        val filesWithNoChapter = provider.findUnmatchedChapterDirs(allChapters, manga)
+        val filesWithNoChapter =
+            provider.findUnmatchedChapterDirs(allChapters, manga) {
+                // allChapters misses a chapter added after it was read, and the queue keeps the
+                // name a chapter had when it was queued. A download names its temp folder from
+                // the database row when it starts, so either list can hold the matching name.
+                val queued =
+                    queueState.value
+                        .filter { it.mangaItem.id == manga.id }
+                        .map { it.chapterItem.toDbChapter() }
+                val queuedIds = queued.map { it.id }.toSet()
+                queued + allChapters.filter { it.id in queuedIds }
+            }
         cleaned += filesWithNoChapter.size
         cache.removeFolders(filesWithNoChapter.mapNotNull { it.name }, manga)
         filesWithNoChapter.forEach { it.delete() }
@@ -394,7 +407,8 @@ class DownloadManager(
             cache.removeChapters(readChapters, manga)
         }
 
-        if (cache.getDownloadCount(manga) == 0) {
+        // The temp files of queued chapters stay in the folder until their downloads finish.
+        if (cache.getDownloadCount(manga) == 0 && queuedChapterIds(manga).isEmpty()) {
             val mangaFolder = provider.getMangaDir(manga)
             val size = mangaFolder.listFiles()?.size ?: 0
             if (size == 0) {
@@ -406,6 +420,9 @@ class DownloadManager(
         }
         return cleaned
     }
+
+    private fun queuedChapterIds(manga: Manga): Set<Long> =
+        queueState.value.filter { it.mangaItem.id == manga.id }.map { it.chapterItem.id }.toSet()
 
     /**
      * Deletes the directory of a downloaded manga.

@@ -29,6 +29,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.storage.StorageManager
 import uy.kohesive.injekt.Injekt
@@ -235,5 +236,81 @@ class DownloadCacheTest {
         assertFalse(result)
         verify(exactly = 1) { provider.findChapterDir(chapter, manga) }
         cache.scope.cancel()
+    }
+
+    @Test
+    fun `renewCache skips the temp files of an unfinished download`() =
+        runTest(testDispatcher) {
+            val manga = Manga.create("/manga/123", "Sample Manga").apply { id = 123L }
+            coEvery { mangaRepository.getMangaList() } returns listOf(manga)
+
+            val rootDownloadsDir = mockk<UniFile>(relaxed = true)
+            val sourceDir = mockk<UniFile>(relaxed = true)
+            val mangaDir = mangaDirWithUnfinishedDownload()
+
+            every { provider.getSourceDirName() } returns "MangaDex"
+            every { rootDownloadsDir.listFiles() } returns arrayOf(sourceDir)
+            every { sourceDir.name } returns "MangaDex"
+            every { sourceDir.listFiles() } returns arrayOf(mangaDir)
+            every { storageManager.getDownloadsDirectory() } returns rootDownloadsDir
+
+            val cache = DownloadCache(provider, sourceManager, storageManager)
+            cache.cancelRenewJob()
+            cache.renewCache()
+
+            assertEquals(1, cache.getDownloadCount(manga))
+            assertTrue(cache.isChapterDownloaded(chapter(FINISHED_UUID), manga, skipCache = false))
+            assertFalse(
+                cache.isChapterDownloaded(chapter(UNFINISHED_UUID), manga, skipCache = false)
+            )
+            cache.scope.cancel()
+        }
+
+    @Test
+    fun `updateManga skips the temp files of an unfinished download`() {
+        val manga = Manga.create("/manga/123", "Sample Manga").apply { id = 123L }
+        val mangaDir = mangaDirWithUnfinishedDownload()
+        every { provider.findMangaDir(manga) } returns mangaDir
+
+        val cache = DownloadCache(provider, sourceManager, storageManager)
+        cache.updateManga(manga)
+
+        assertEquals(1, cache.getDownloadCount(manga))
+        assertTrue(cache.isChapterDownloaded(chapter(FINISHED_UUID), manga, skipCache = false))
+        assertFalse(cache.isChapterDownloaded(chapter(UNFINISHED_UUID), manga, skipCache = false))
+        cache.scope.cancel()
+    }
+
+    /**
+     * A manga folder with one finished cbz and the leftovers of a download whose zip step did not
+     * finish: the page folder and the partial cbz.
+     */
+    private fun mangaDirWithUnfinishedDownload(): UniFile {
+        val mangaDir = mockk<UniFile>(relaxed = true)
+        val names =
+            listOf(
+                "Ch. 1 - $FINISHED_UUID.cbz",
+                "Ch. 2 - $UNFINISHED_UUID$TMP_DIR_SUFFIX",
+                "Ch. 2 - $UNFINISHED_UUID.cbz$TMP_DIR_SUFFIX",
+            )
+        val files = names.map { name ->
+            mockk<UniFile>(relaxed = true) { every { this@mockk.name } returns name }
+        }
+        every { mangaDir.name } returns "Sample Manga"
+        every { mangaDir.isDirectory } returns true
+        every { mangaDir.listFiles() } returns files.toTypedArray()
+        return mangaDir
+    }
+
+    private fun chapter(uuid: String): Chapter =
+        Chapter.create().apply {
+            name = "Ch. x"
+            mangadex_chapter_id = uuid
+            url = "/chapter/$uuid"
+        }
+
+    companion object {
+        private const val FINISHED_UUID = "01234567-89ab-cdef-0123-456789abcdef"
+        private const val UNFINISHED_UUID = "fedcba98-7654-3210-fedc-ba9876543210"
     }
 }

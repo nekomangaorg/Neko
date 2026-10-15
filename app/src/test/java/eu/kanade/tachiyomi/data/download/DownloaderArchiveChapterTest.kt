@@ -6,14 +6,18 @@ import com.hippo.unifile.UniFile
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.spyk
 import io.mockk.unmockkAll
 import java.io.File
+import java.io.RandomAccessFile
+import java.nio.channels.Channels
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -99,13 +103,40 @@ class DownloaderArchiveChapterTest {
         assertEquals(listOf("001.png", "002.png"), tmpDir.list()!!.sorted())
     }
 
-    private fun archive() {
-        Downloader.archiveChapter(
-            context,
-            UniFile.fromFile(mangaDir)!!,
-            CHAPTER,
-            UniFile.fromFile(tmpDir)!!,
-        )
+    @Test
+    fun `replaces a partial cbz left by an earlier try instead of writing over it`() {
+        // A process death during the zip step leaves a partial cbz behind. Make the output stream
+        // keep old bytes past the end of the write, as SAF's "w" mode is allowed to.
+        File(mangaDir, "$CHAPTER.cbz$TMP_DIR_SUFFIX").writeBytes(ByteArray(LEFTOVER_SIZE) { 7 })
+        val dir = spyk(UniFile.fromFile(mangaDir)!!)
+        every { dir.createFile(any()) } answers
+            {
+                val created = callOriginal()
+                created?.let { file ->
+                    val path = File(file.filePath!!)
+                    spyk(file) {
+                        every { openOutputStream() } answers
+                            {
+                                Channels.newOutputStream(RandomAccessFile(path, "rw").channel)
+                            }
+                    }
+                }
+            }
+
+        archive(dir)
+
+        val cbz = File(mangaDir, "$CHAPTER.cbz")
+        assertTrue(cbz.length() < LEFTOVER_SIZE)
+        ZipFile(cbz).use { zip ->
+            assertEquals(
+                listOf("001.png", "002.png"),
+                zip.entries().toList().map { it.name }.sorted(),
+            )
+        }
+    }
+
+    private fun archive(dir: UniFile = UniFile.fromFile(mangaDir)!!) {
+        Downloader.archiveChapter(context, dir, CHAPTER, UniFile.fromFile(tmpDir)!!)
     }
 
     companion object {
@@ -113,5 +144,6 @@ class DownloaderArchiveChapterTest {
         private const val CANNOT_CREATE_FILE = "Couldn't create a file in the download folder"
         private val PAGE_1 = byteArrayOf(1, 2, 3)
         private val PAGE_2 = byteArrayOf(4, 5, 6, 7)
+        private const val LEFTOVER_SIZE = 200_000
     }
 }

@@ -17,7 +17,6 @@ import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import tachiyomi.core.util.storage.displayablePath
-import tachiyomi.core.util.storage.nameWithoutExtension
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -99,22 +98,27 @@ class DownloadProvider(
             .mapNotNull { mangaDir?.findFile(it) ?: mangaDir?.findFile("$it.cbz") }
             .firstOrNull()
             ?: mangaDir
-                ?.listFiles { _, filename -> filename.contains(chapter.uuid()) }
+                ?.listFiles { _, filename ->
+                    filename.contains(chapter.uuid()) && !filename.endsWith(TMP_DIR_SUFFIX)
+                }
                 ?.firstOrNull()
     }
 
     fun chapterDirDoesNotExist(chapter: Chapter, chapterDirs: List<UniFile>): Boolean {
+        // A name ending in TMP_DIR_SUFFIX belongs to a download that has not finished.
+        val finishedDirs = chapterDirs.filterNot { it.name.orEmpty().endsWith(TMP_DIR_SUFFIX) }
 
-        var found =
-            getValidChapterDirNames(chapter).any { chapterDir ->
-                chapterDirs.any { uniFile ->
-                    uniFile.nameWithoutExtension!!.equals(chapterDir, true)
-                }
-            }
+        // A folder has no extension, so cutting at the last dot turns "Ch.3 - x" into "Ch".
+        val validNames = getValidChapterDirOrFileNames(chapter)
+        var found = finishedDirs.any { uniFile ->
+            val name = uniFile.name.orEmpty()
+            validNames.any { validName -> name.equals(validName, ignoreCase = true) }
+        }
 
-        if (!found && chapter.mangadex_chapter_id.isNotEmpty()) {
-            found = chapterDirs.any { uniFile ->
-                uniFile.nameWithoutExtension!!.contains(chapter.uuid())
+        val chapterId = chapter.mangadex_chapter_id
+        if (!found && chapterId.isNotEmpty()) {
+            found = finishedDirs.any { uniFile ->
+                uniFile.name.orEmpty().contains(chapterId, ignoreCase = true)
             }
         }
 
@@ -137,7 +141,8 @@ class DownloadProvider(
         val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
         val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
 
-        return mangaDir.listFiles()!!.asList().filter { file ->
+        val files = mangaDir.listFiles() ?: return emptyList()
+        return files.filter { file ->
             file.name?.let { fileName ->
                 val mangadexId = fileName.substringAfterLast(" - ", "")
                 // legacy dex id
@@ -162,23 +167,37 @@ class DownloadProvider(
     }
 
     /**
-     * Returns a list of all files in manga directory
+     * Returns the files in the manga directory that match none of the chapters, and the temp files
+     * of downloads that are no longer queued.
      *
      * @param chapters the chapters to query.
      * @param manga the manga of the chapter.
-     * @param source the source of the chapter.
+     * @param queuedChapters the queued chapters of the manga, whose temp files a running or paused
+     *   download still uses. Called after the directory is listed, so every temp file in the
+     *   listing was created before the queue was read.
      */
-    fun findUnmatchedChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
+    fun findUnmatchedChapterDirs(
+        chapters: List<Chapter>,
+        manga: Manga,
+        queuedChapters: () -> List<Chapter>,
+    ): List<UniFile> {
         val mangaDir = findMangaDir(manga) ?: return emptyList()
         val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
         val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
         val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
 
-        return mangaDir.listFiles()!!.asList().filter { file ->
+        val files = mangaDir.listFiles()?.asList() ?: return emptyList()
+        val queuedTempNames =
+            queuedChapters()
+                .map { getChapterDirName(it) }
+                .flatMap { listOf("$it$TMP_DIR_SUFFIX", "$it.cbz$TMP_DIR_SUFFIX") }
+                .toHashSet()
+
+        return files.filter { file ->
             file.name?.let { fileName ->
                 if (fileName.endsWith(TMP_DIR_SUFFIX)) {
-                    return@filter true
+                    return@filter fileName !in queuedTempNames
                 }
                 if (fileName.startsWith("${Constants.LOCAL_SOURCE}_")) {
                     return@filter false
@@ -221,8 +240,13 @@ class DownloadProvider(
      */
     fun findTempChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
         val mangaDir = findMangaDir(manga) ?: return emptyList()
-        return chapters.mapNotNull {
-            mangaDir.findFile("${getChapterDirName(it)}${TMP_DIR_SUFFIX}")
+        return chapters.flatMap {
+            val chapterDirName = getChapterDirName(it)
+            // The page folder, and the cbz if the download stopped while it was being written.
+            listOfNotNull(
+                mangaDir.findFile("$chapterDirName$TMP_DIR_SUFFIX"),
+                mangaDir.findFile("$chapterDirName.cbz$TMP_DIR_SUFFIX"),
+            )
         }
     }
 
