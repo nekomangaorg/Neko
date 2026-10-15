@@ -9,9 +9,11 @@ import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.lang.isUUID
 import java.util.Date
 import java.util.TreeSet
 import org.nekomanga.constants.Constants
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
@@ -56,7 +58,11 @@ suspend fun syncChaptersWithSource(
             .map { MdUtil.getChapterUUID(it.url) }
             .toHashSet()
     dbChapters = dbChapters.mapNotNull { dbChapter ->
-        if (dbChapter.isLocalSource() && dbChapter.name.substringAfterLast(" - ") in chapterUUIDs) {
+        if (
+            dbChapter.isLocalSource() &&
+                (dbChapter.name.substringAfterLast(" - ") in chapterUUIDs ||
+                    isOtherMangaChapter(dbChapter.name, manga, chapterRepository))
+        ) {
             chapterRepository.deleteChapter(dbChapter)
             return@mapNotNull null
         }
@@ -114,6 +120,9 @@ suspend fun syncChaptersWithSource(
                                         file.name!!.substringAfter("${Constants.LOCAL_SOURCE}_")
                                     file.renameTo(correctFileName)
                                 }
+                                return@mapNotNull null
+                            }
+                            if (isOtherMangaChapter(chapterName, manga, chapterRepository)) {
                                 return@mapNotNull null
                             }
                             val dateUploaded = file.lastModified()
@@ -391,6 +400,21 @@ suspend fun syncChaptersWithSource(
     val newChapters = toAdd.subtract(readded.toSet()).toList().filter { !it.isUnavailable }
 
     return Pair(newChapters, toDelete - readded.toSet())
+}
+
+/**
+ * Manga with the same title share one download folder, so a file in it can belong to a different
+ * manga. True when the chapter uuid at the end of the name is stored under another manga.
+ */
+internal suspend fun isOtherMangaChapter(
+    chapterName: String,
+    manga: Manga,
+    chapterRepository: ChapterRepository,
+): Boolean {
+    val uuid = chapterName.substringAfterLast(" - ", "")
+    if (!uuid.isUUID()) return false
+    val owner = chapterRepository.getChapterByUrl(MdConstants.chapterSuffix + uuid) ?: return false
+    return owner.manga_id != manga.id
 }
 
 private fun bothMerged(dbChapter: Chapter, sourceChapter: Chapter): Boolean {

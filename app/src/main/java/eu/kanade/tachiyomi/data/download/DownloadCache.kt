@@ -209,8 +209,9 @@ class DownloadCache(
         // Optimization: Fetch once
         val allManga = mangaRepository.getMangaList()
 
-        // 3. Create lookup map for O(1) access
-        val mangaLookup = allManga.associateBy {
+        // 3. Create lookup map for O(1) access. Manga with the same title share one folder, so
+        // every one of them gets the folder's files.
+        val mangaLookup = allManga.groupBy {
             DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
         }
 
@@ -232,12 +233,19 @@ class DownloadCache(
                         try {
                             if (dirName == null) return@async
                             title = dirName
-                            val manga =
+                            val mangaList =
                                 mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@async
-                            title = manga.displayTitle()
-                            val id = manga.id ?: return@async
+                            title = mangaList.first().displayTitle()
 
-                            newMangaFiles[id] = readMangaFiles(mangaDir)
+                            val dirFiles = readMangaFiles(mangaDir)
+                            mangaList.forEach { manga ->
+                                val id = manga.id ?: return@forEach
+                                newMangaFiles[id] =
+                                    MangaFiles(
+                                        dirFiles.files.toMutableSet(),
+                                        dirFiles.mangadexIds.toMutableSet(),
+                                    )
+                            }
                         } finally {
                             val current = progressCounter.incrementAndGet()
                             onProgress?.invoke(current, total, title)
