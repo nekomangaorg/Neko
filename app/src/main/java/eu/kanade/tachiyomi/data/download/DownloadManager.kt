@@ -311,16 +311,8 @@ class DownloadManager(
                 } else {
 
                     launchNonCancellable {
-                        chapterDirs.forEach {
-                            it.delete()
-                            pendingDeleter.deletePendingChapter(manga, chapters)
-                        }
-
-                        if (
-                            cache.getDownloadCount(manga, true) == 0
-                        ) { // Delete manga directory if empty
-                            chapterDirs.firstOrNull()?.parentFile?.delete()
-                        }
+                        chapterDirs.forEach { it.delete() }
+                        pendingDeleter.deletePendingChapter(manga, chapters)
 
                         // Delete manga directory if empty
                         if (mangaDir?.listFiles()?.isEmpty() == true) {
