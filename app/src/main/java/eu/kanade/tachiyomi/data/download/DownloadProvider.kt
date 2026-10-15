@@ -117,8 +117,11 @@ class DownloadProvider(
                 }
             }
 
-        if (!found && chapter.mangadex_chapter_id.isNotEmpty()) {
-            found = finishedDirs.any { uniFile -> uniFile.name.orEmpty().contains(chapter.uuid()) }
+        val chapterId = chapter.mangadex_chapter_id
+        if (!found && chapterId.isNotEmpty()) {
+            found = finishedDirs.any { uniFile ->
+                uniFile.name.orEmpty().contains(chapterId, ignoreCase = true)
+            }
         }
 
         return !found

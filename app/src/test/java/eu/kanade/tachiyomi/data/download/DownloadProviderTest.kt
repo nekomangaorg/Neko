@@ -148,6 +148,27 @@ class DownloadProviderTest {
     }
 
     @Test
+    fun `chapterDirDoesNotExist is true when only another chapter is downloaded`() {
+        File(mangaDir, OTHER_CHAPTER_DIR).mkdir()
+
+        assertTrue(provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
+    }
+
+    @Test
+    fun `chapterDirDoesNotExist is true for a chapter whose url has no id`() {
+        // The id fallback must not match every name when the url ends in a slash.
+        val noUrlId =
+            Chapter.create().apply {
+                name = "Ch.3 - Sisters"
+                mangadex_chapter_id = CHAPTER_UUID
+                url = "/chapter/"
+            }
+        File(mangaDir, OTHER_CHAPTER_DIR).mkdir()
+
+        assertTrue(provider.chapterDirDoesNotExist(noUrlId, mangaDirFiles()))
+    }
+
+    @Test
     fun `findTempChapterDirs returns the temp folder and the partial cbz`() {
         File(mangaDir, "$CHAPTER_DIR$TMP_DIR_SUFFIX").mkdir()
         File(mangaDir, "$CHAPTER_DIR.cbz$TMP_DIR_SUFFIX").writeBytes(byteArrayOf(0))
