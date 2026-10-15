@@ -13,6 +13,7 @@ import io.mockk.unmockkAll
 import java.io.File
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -107,28 +108,28 @@ class DownloadProviderTest {
     fun `chapterDirDoesNotExist is false for a finished cbz`() {
         File(mangaDir, "$CHAPTER_DIR.cbz").writeBytes(byteArrayOf(0))
 
-        assertEquals(false, provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
+        assertFalse(provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
     }
 
     @Test
     fun `chapterDirDoesNotExist is false for a finished folder`() {
         File(mangaDir, CHAPTER_DIR).mkdir()
 
-        assertEquals(false, provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
+        assertFalse(provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
     }
 
     @Test
     fun `chapterDirDoesNotExist is false for the folder of a renamed chapter`() {
         File(mangaDir, "Ch.3 - Old title - $CHAPTER_UUID").mkdir()
 
-        assertEquals(false, provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
+        assertFalse(provider.chapterDirDoesNotExist(chapter, mangaDirFiles()))
     }
 
     @Test
     fun `chapterDirDoesNotExist is false for a finished folder of a merged chapter`() {
         File(mangaDir, provider.getChapterDirName(mergedChapter)).mkdir()
 
-        assertEquals(false, provider.chapterDirDoesNotExist(mergedChapter, mangaDirFiles()))
+        assertFalse(provider.chapterDirDoesNotExist(mergedChapter, mangaDirFiles()))
     }
 
     @Test
@@ -136,7 +137,7 @@ class DownloadProviderTest {
         File(mangaDir, "${provider.getChapterDirName(mergedChapter)}.cbz")
             .writeBytes(byteArrayOf(0))
 
-        assertEquals(false, provider.chapterDirDoesNotExist(mergedChapter, mangaDirFiles()))
+        assertFalse(provider.chapterDirDoesNotExist(mergedChapter, mangaDirFiles()))
     }
 
     @Test
