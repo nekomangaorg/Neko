@@ -109,13 +109,11 @@ class DownloadProvider(
         val finishedDirs = chapterDirs.filterNot { it.name.orEmpty().endsWith(TMP_DIR_SUFFIX) }
 
         // A folder has no extension, so cutting at the last dot turns "Ch.3 - x" into "Ch".
-        var found =
-            getValidChapterDirNames(chapter).any { chapterDir ->
-                finishedDirs.any { uniFile ->
-                    val name = uniFile.name.orEmpty()
-                    name.equals(chapterDir, true) || name.equals("$chapterDir.cbz", true)
-                }
-            }
+        val validNames = getValidChapterDirOrFileNames(chapter)
+        var found = finishedDirs.any { uniFile ->
+            val name = uniFile.name.orEmpty()
+            validNames.any { validName -> name.equals(validName, ignoreCase = true) }
+        }
 
         val chapterId = chapter.mangadex_chapter_id
         if (!found && chapterId.isNotEmpty()) {
