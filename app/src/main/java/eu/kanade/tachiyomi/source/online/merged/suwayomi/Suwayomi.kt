@@ -332,11 +332,11 @@ class Suwayomi : MergedServerSource() {
     }
 
     // For multi-merge aggregator sources, that include the original source name at the end
-    fun splitSourceGroup(title: String, sourceName: String): Pair<String, String> {
-        if (sourceName !in aggregatorSources) return title to ""
-        val match = sourceTagRegex.find(title) ?: return title to ""
+    fun splitSourceGroup(title: String, sourceName: String): Pair<String, String?> {
+        if (sourceName !in aggregatorSources) return title to null
+        val match = sourceTagRegex.find(title) ?: return title to null
         val group = match.groupValues[1].trim()
-        if (group.isEmpty()) return title to ""
+        if (group.isEmpty()) return title to null
         val cleaned = title.removeRange(match.range).trim()
         return ("[$group] $cleaned").trim() to group
     }
