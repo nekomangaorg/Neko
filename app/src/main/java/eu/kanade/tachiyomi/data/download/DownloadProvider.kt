@@ -141,7 +141,8 @@ class DownloadProvider(
         val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
         val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
 
-        return mangaDir.listFiles()!!.asList().filter { file ->
+        val files = mangaDir.listFiles() ?: return emptyList()
+        return files.filter { file ->
             file.name?.let { fileName ->
                 val mangadexId = fileName.substringAfterLast(" - ", "")
                 // legacy dex id
@@ -186,7 +187,7 @@ class DownloadProvider(
         val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
         val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
 
-        val files = mangaDir.listFiles()!!.asList()
+        val files = mangaDir.listFiles()?.asList() ?: return emptyList()
         val queuedTempNames =
             queuedChapters()
                 .map { getChapterDirName(it) }

@@ -159,6 +159,28 @@ class DownloadProviderTest {
         assertEquals(emptyList<String>(), unmatched.mapNotNull { it.name })
     }
 
+    @Test
+    fun `findUnmatchedChapterDirs returns nothing when the manga folder cannot be listed`() {
+        // listFiles() returns null for a file that is not a folder, as it does on a read error.
+        mangaDir.deleteRecursively()
+        mangaDir.writeBytes(byteArrayOf(0))
+
+        val unmatched = provider.findUnmatchedChapterDirs(listOf(chapter), manga) { emptyList() }
+
+        assertEquals(emptyList<String>(), unmatched.mapNotNull { it.name })
+    }
+
+    @Test
+    fun `findChapterDirs returns nothing when the manga folder cannot be listed`() {
+        mangaDir.deleteRecursively()
+        mangaDir.writeBytes(byteArrayOf(0))
+
+        assertEquals(
+            emptyList<String>(),
+            provider.findChapterDirs(listOf(chapter), manga).mapNotNull { it.name },
+        )
+    }
+
     private fun mangaDirFiles(): List<UniFile> = UniFile.fromFile(mangaDir)!!.listFiles()!!.toList()
 
     companion object {
