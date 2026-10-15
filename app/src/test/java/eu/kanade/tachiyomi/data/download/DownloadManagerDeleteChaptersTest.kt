@@ -116,6 +116,42 @@ class DownloadManagerDeleteChaptersTest {
         assertFalse(mangaDir.exists())
     }
 
+    @Test
+    fun `deleting the last downloaded cbz keeps a chapter that is still downloading`() {
+        val downloadedCbz = File(mangaDir, "Ch.1 - $CHAPTER_1_ID.cbz").apply { writeBytes(PAGE) }
+        val downloading = File(mangaDir, "Ch.2 - ${CHAPTER_2_ID}_tmp").apply { mkdir() }
+        File(downloading, "001.png").writeBytes(PAGE)
+
+        deleteChapters(chapter(1, CHAPTER_1_ID))
+
+        assertFalse(downloadedCbz.exists())
+        assertTrue(File(downloading, "001.png").exists())
+    }
+
+    @Test
+    fun `deleting the last downloaded cbz keeps a chapter that is being archived`() {
+        val downloadedCbz = File(mangaDir, "Ch.1 - $CHAPTER_1_ID.cbz").apply { writeBytes(PAGE) }
+        // The downloader writes the archive next to the page folder before it renames it to .cbz.
+        val downloading = File(mangaDir, "Ch.2 - ${CHAPTER_2_ID}_tmp").apply { mkdir() }
+        File(downloading, "001.png").writeBytes(PAGE)
+        val archiving = File(mangaDir, "Ch.2 - $CHAPTER_2_ID.cbz_tmp").apply { writeBytes(PAGE) }
+
+        deleteChapters(chapter(1, CHAPTER_1_ID))
+
+        assertFalse(downloadedCbz.exists())
+        assertTrue(File(downloading, "001.png").exists())
+        assertTrue(archiving.exists())
+    }
+
+    @Test
+    fun `deleting the last cbz chapter removes the manga folder`() {
+        File(mangaDir, "Ch.1 - $CHAPTER_1_ID.cbz").writeBytes(PAGE)
+
+        deleteChapters(chapter(1, CHAPTER_1_ID))
+
+        assertFalse(mangaDir.exists())
+    }
+
     /** Deletes [chapters] and waits until the manager reports them removed. */
     private fun deleteChapters(vararg chapters: Chapter) = runBlocking {
         withTimeout(10_000) {
