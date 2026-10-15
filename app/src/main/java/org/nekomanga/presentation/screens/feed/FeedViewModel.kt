@@ -1098,8 +1098,8 @@ class FeedViewModel() : ViewModel() {
 
 /**
  * The queue with [chapterId]'s download moved to the top or bottom, or null when that chapter is no
- * longer queued. The download list on screen can still show a chapter that has just finished or
- * been removed.
+ * longer queued or is already there, so the downloader is not paused and restarted for nothing. The
+ * download list on screen can still show a chapter that has just finished or been removed.
  */
 internal fun List<Download>.withChapterMoved(
     chapterId: Long,
@@ -1107,15 +1107,18 @@ internal fun List<Download>.withChapterMoved(
 ): List<Download>? {
     val (moved, rest) = partition { download -> download.chapterItem.id == chapterId }
     if (moved.isEmpty()) return null
-    return when (direction) {
-        MoveDownloadDirection.Top -> moved + rest
-        MoveDownloadDirection.Bottom -> rest + moved
-    }
+    val reordered =
+        when (direction) {
+            MoveDownloadDirection.Top -> moved + rest
+            MoveDownloadDirection.Bottom -> rest + moved
+        }
+    return reordered.takeIf { it != this }
 }
 
 /**
  * The queue with [mangaId]'s downloads moved to the top or bottom, or null when none of them is
- * queued anymore, so the downloader is not paused and restarted for nothing.
+ * queued anymore or they are already there, so the downloader is not paused and restarted for
+ * nothing.
  */
 internal fun List<Download>.withSeriesMoved(
     mangaId: Long,
@@ -1123,8 +1126,10 @@ internal fun List<Download>.withSeriesMoved(
 ): List<Download>? {
     val (moved, rest) = partition { download -> download.mangaItem.id == mangaId }
     if (moved.isEmpty()) return null
-    return when (direction) {
-        MoveDownloadDirection.Top -> moved + rest
-        MoveDownloadDirection.Bottom -> rest + moved
-    }
+    val reordered =
+        when (direction) {
+            MoveDownloadDirection.Top -> moved + rest
+            MoveDownloadDirection.Bottom -> rest + moved
+        }
+    return reordered.takeIf { it != this }
 }

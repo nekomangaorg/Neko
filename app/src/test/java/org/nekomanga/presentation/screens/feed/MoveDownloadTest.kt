@@ -26,9 +26,34 @@ class MoveDownloadTest {
     }
 
     @Test
+    fun `moves a middle chapter to the top`() {
+        val moved = queue.withChapterMoved(2L, MoveDownloadDirection.Top)
+
+        assertEquals(listOf(2L, 1L, 3L), moved?.map { it.chapterItem.id })
+    }
+
+    @Test
+    fun `moves a middle chapter to the bottom`() {
+        val moved = queue.withChapterMoved(2L, MoveDownloadDirection.Bottom)
+
+        assertEquals(listOf(1L, 3L, 2L), moved?.map { it.chapterItem.id })
+    }
+
+    @Test
+    fun `a chapter already at the destination moves nothing`() {
+        assertNull(queue.withChapterMoved(1L, MoveDownloadDirection.Top))
+        assertNull(queue.withChapterMoved(3L, MoveDownloadDirection.Bottom))
+    }
+
+    @Test
     fun `a chapter that already left the queue moves nothing`() {
         assertNull(queue.withChapterMoved(4L, MoveDownloadDirection.Top))
         assertNull(queue.withChapterMoved(4L, MoveDownloadDirection.Bottom))
+    }
+
+    @Test
+    fun `an empty queue moves nothing`() {
+        assertNull(emptyList<Download>().withChapterMoved(1L, MoveDownloadDirection.Top))
     }
 
     private fun download(chapterId: Long): Download = mockk {

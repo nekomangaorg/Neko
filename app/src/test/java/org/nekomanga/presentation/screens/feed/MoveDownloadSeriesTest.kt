@@ -26,6 +26,14 @@ class MoveDownloadSeriesTest {
     }
 
     @Test
+    fun `a series already at the destination moves nothing`() {
+        val grouped = listOf(download(1, 10), download(2, 10), download(3, 20))
+
+        assertNull(grouped.withSeriesMoved(10L, MoveDownloadDirection.Top))
+        assertNull(grouped.withSeriesMoved(20L, MoveDownloadDirection.Bottom))
+    }
+
+    @Test
     fun `a series that already left the queue moves nothing`() {
         assertNull(queue.withSeriesMoved(30L, MoveDownloadDirection.Top))
         assertNull(queue.withSeriesMoved(30L, MoveDownloadDirection.Bottom))
