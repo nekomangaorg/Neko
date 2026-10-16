@@ -597,19 +597,26 @@ class Suwayomi : MergedServerSource() {
 
         val chtxt = "Ch.$ch"
         chapterName.add(chtxt)
+        val bareChapterNumber = chapterNumberRegex(ch).find(title)
         var matched =
-            if (title.startsWith(ch) || title.trimStart('0').startsWith(ch)) {
-                title = title.replaceFirst(ch, "").trimStart('0', '.').trimStart()
+            if (bareChapterNumber != null) {
+                title = title.removeRange(bareChapterNumber.range).trimStart('.', ' ')
                 true
             } else {
                 chapterPrefixes.any { prefix ->
                     if (title.startsWith(prefix)) {
+                        val prefixed = title
                         title = title.replaceFirst(prefix, "").trimStart()
-                        if (!title[0].isDigit()) {
-                            title = prefix + title
+                        if (title.isEmpty() || !title[0].isDigit()) {
+                            title = prefixed
                             return@any false
                         }
-                        title = title.trimStart('0').replaceFirst(ch, "").trimStart()
+                        val afterPrefix = chapterNumberRegex(ch).find(title)
+                        if (afterPrefix == null) {
+                            title = prefixed
+                            return@any false
+                        }
+                        title = title.removeRange(afterPrefix.range).trimStart()
                         // In case the number appears multiple times
                         chapterPrefixes.forEach {
                             if (
@@ -824,8 +831,14 @@ class Suwayomi : MergedServerSource() {
     companion object {
         val name = "Suwayomi"
         val emojiRegex = Regex("^[\\p{So}\\p{Cn}\\p{Cs}\\x{1F000}-\\x{1FFFF}]+")
-        // Trailing "[source]" tag, e.g. "Berserk [MangaPlus]"
+        // Trailing "[source]" tag, e.g. "NARUTO [MANGA Plus]"
         val sourceTagRegex = Regex("\\s*\\[([^\\[\\]]+)]$")
+
+        // 0-tolerant, end-boundary-aware chapter number match
+        val chapterNumberRegex = { ch: String ->
+            Regex("^0*" + Regex.escape(ch) + "(?=$|[^.\\d]|\\.(?!\\d))")
+        }
+
         val aggregatorSources = arrayOf("Kagane")
         val volumePrefixes =
             arrayOf(
