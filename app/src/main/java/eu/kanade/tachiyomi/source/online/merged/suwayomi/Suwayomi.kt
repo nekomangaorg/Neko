@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.source.online.merged.suwayomi.SuwayomiLang.Companion.
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.formatChapterNumber
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlin.math.ceil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -348,9 +349,9 @@ class Suwayomi : MergedServerSource() {
                 put(
                     "query",
                     JsonPrimitive(
-                        "query SEARCH_MANGA(\$input:String){" +
+                        $$"query SEARCH_MANGA($input:String){" +
                             "mangas(condition:{inLibrary:true}," +
-                            "filter:{title:{includesInsensitive:\$input}}){" +
+                            $$"filter:{title:{includesInsensitive:$input}}){" +
                             "nodes{id title thumbnailUrl source{name lang}}}}"
                     ),
                 )
@@ -529,7 +530,12 @@ class Suwayomi : MergedServerSource() {
                 previous.chapter > chaperNumber &&
                 (isNumberedEdgeCase || edgeCases.any { rawName.contains(it, true) })
         ) {
-            var chapterNumber = previous.chapter.toLong()
+            // A source may restart numbering mid-series, opening season 2 at chapter 1.
+            // So we anchor on the slot just before the next chapter instead.
+            val beforeNext =
+                if (next != null && next <= previous.chapter && next > 1) ceil(next).toLong() - 1
+                else null
+            var chapterNumber = beforeNext ?: previous.chapter.toLong()
             val half =
                 if (rawName.contains("season", true) && rawName.contains("announcement", true)) {
                     edgeCases.add("announcement")
@@ -537,17 +543,28 @@ class Suwayomi : MergedServerSource() {
                 } else if (rawName.contains("afterword", true)) {
                     ".5"
                 } else {
-                    if (!previous.premiere) chapterNumber += 1
+                    if (beforeNext == null && !previous.premiere) chapterNumber += 1
                     ""
                 }
             val chtxt = "Ch.$chapterNumber$half"
             val title = removeEndTag(rawName)
-            val name = listOf(chtxt, "-", title).joinToString(" ")
+            val volume =
+                if (half.isNotEmpty()) {
+                    previous.volume
+                } else {
+                    title.sanitizeVolume(volumePrefixes).first.ifEmpty { previous.volume }
+                }
+            val chapterName = mutableListOf<String>()
+            if (volume.isNotEmpty()) chapterName.add("Vol.$volume")
+            chapterName.add(chtxt)
+            chapterName.add("-")
+            chapterName.add(title)
+            val name = chapterName.joinToString(" ")
             edgeCases.remove("season")
             val isFinalEdgeCase = isNumberedEdgeCase || edgeCases.any { rawName.contains(it, true) }
             return Name.Sanitized(
                 name,
-                previous.volume,
+                volume,
                 chapterNumber.toFloat(),
                 chtxt,
                 rawName,
@@ -571,11 +588,12 @@ class Suwayomi : MergedServerSource() {
                         title,
                     )
                 } else if (previous.chapter == next - 2) {
+                    val chnum = (next - 1).formatChapterNumber()
                     return Name.Sanitized(
-                        "Ch.${next - 1} - $rawName",
+                        "Ch.$chnum - $rawName",
                         "",
                         next - 1,
-                        "Ch.${next - 1}",
+                        "Ch.$chnum",
                         rawName,
                     )
                 }
@@ -676,7 +694,7 @@ class Suwayomi : MergedServerSource() {
                         else -> " "
                     }
                 title = title.replaceFirst(prefix, "").trimStart()
-                vol = title.trimStart('0').substringBefore(delimiter, "").trimEnd(',', '.', ';')
+                vol = title.trimStart('0').substringBefore(delimiter).trimEnd(',', '.', ';')
                 title = title.substringAfter(delimiter).trimStart()
                 return@any true
             }
@@ -831,6 +849,7 @@ class Suwayomi : MergedServerSource() {
     companion object {
         val name = "Suwayomi"
         val emojiRegex = Regex("^[\\p{So}\\p{Cn}\\p{Cs}\\x{1F000}-\\x{1FFFF}]+")
+
         // Trailing "[source]" tag, e.g. "NARUTO [MANGA Plus]"
         val sourceTagRegex = Regex("\\s*\\[([^\\[\\]]+)]$")
 
