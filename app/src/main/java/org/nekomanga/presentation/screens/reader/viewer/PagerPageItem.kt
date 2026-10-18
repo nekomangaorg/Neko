@@ -28,15 +28,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import coil3.request.maxBitmapSize
 import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Scale
-import coil3.size.Size as CoilSize
 import coil3.transform.Transformation
 import eu.kanade.tachiyomi.data.coil.CropBordersTransformation
 import eu.kanade.tachiyomi.data.coil.RotateWidePageTransformation
-import eu.kanade.tachiyomi.data.coil.maxBitmapBytes
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
@@ -369,14 +366,7 @@ fun PagerPageItem(
                     ) {
                         ImageRequest.Builder(context)
                             .data(page)
-                            // ReaderPageImageSource runs this request as built. Coil's default
-                            // maxBitmapSize of 4096 px is turned off, so the size box and the byte
-                            // limit are the only caps. Without the box, a page taller than the
-                            // texture size draws blank as a hardware bitmap. Without the byte
-                            // limit, a page over it is too large for the canvas.
-                            .maxBitmapSize(CoilSize.ORIGINAL)
-                            .size(CoilSize(GLUtil.maxTextureSize, GLUtil.maxTextureSize))
-                            .maxBitmapBytes(GLUtil.MAX_CANVAS_BITMAP_BYTES)
+                            .readerPageSizeLimits(GLUtil.maxTextureSize)
                             .scale(Scale.FIT)
                             .precision(Precision.INEXACT)
                             .crossfade(true)
