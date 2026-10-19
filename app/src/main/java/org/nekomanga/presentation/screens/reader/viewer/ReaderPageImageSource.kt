@@ -7,8 +7,12 @@ import coil3.ImageLoader
 import coil3.compose.asPainter
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
+import coil3.request.maxBitmapSize
 import coil3.request.transitionFactory
+import coil3.size.Size as CoilSize
 import coil3.transition.CrossfadeTransition
+import eu.kanade.tachiyomi.data.coil.maxBitmapBytes
+import eu.kanade.tachiyomi.util.system.GLUtil
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -56,3 +60,18 @@ internal suspend fun loadReaderPageImage(
             },
     )
 }
+
+/**
+ * Caps a request run by [ReaderPageImageSource] at a [maxTextureSize] square and at
+ * [GLUtil.MAX_CANVAS_BITMAP_BYTES]. This replaces Coil's default maxBitmapSize of 4096 px, so these
+ * are the only caps. Without the square, a page taller than the texture size draws blank as a
+ * hardware bitmap. Without the byte limit, a page over it is too large for the canvas.
+ *
+ * The square goes in maxBitmapSize and the target size stays original. Before a transformation,
+ * Coil draws an image that is not a bitmap, such as an animated GIF, into a new bitmap scaled to
+ * fit the target size, so a square target would scale a small page up to the texture size.
+ */
+internal fun ImageRequest.Builder.readerPageSizeLimits(maxTextureSize: Int): ImageRequest.Builder =
+    size(CoilSize.ORIGINAL)
+        .maxBitmapSize(CoilSize(maxTextureSize, maxTextureSize))
+        .maxBitmapBytes(GLUtil.MAX_CANVAS_BITMAP_BYTES)

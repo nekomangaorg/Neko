@@ -10,6 +10,10 @@ import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.crossfade
+import coil3.request.maxBitmapSize
+import coil3.size.Size
+import eu.kanade.tachiyomi.data.coil.maxBitmapBytesMemoryCacheKey
+import eu.kanade.tachiyomi.util.system.GLUtil
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -78,5 +82,32 @@ class ReaderPageImageSourceTest {
         coVerify(exactly = 1) { imageLoader.execute(request) }
         assertNull((resolved.delegate as PainterDelegate).painter)
         assertEquals(Duration.ZERO, resolved.crossfadeDuration)
+    }
+
+    @Test
+    fun `page size limits keep the original target size so small pages are not scaled up`() =
+        runTest {
+            val limited =
+                ImageRequest.Builder(mockk<Context>(relaxed = true))
+                    .data("page_0")
+                    .readerPageSizeLimits(maxTextureSize = 16383)
+                    .build()
+
+            assertEquals(Size.ORIGINAL, limited.sizeResolver.size())
+        }
+
+    @Test
+    fun `page size limits cap pages at the texture size and the canvas byte limit`() {
+        val limited =
+            ImageRequest.Builder(mockk<Context>(relaxed = true))
+                .data("page_0")
+                .readerPageSizeLimits(maxTextureSize = 16383)
+                .build()
+
+        assertEquals(Size(16383, 16383), limited.maxBitmapSize)
+        assertEquals(
+            GLUtil.MAX_CANVAS_BITMAP_BYTES.toString(),
+            limited.memoryCacheKeyExtras[maxBitmapBytesMemoryCacheKey],
+        )
     }
 }
