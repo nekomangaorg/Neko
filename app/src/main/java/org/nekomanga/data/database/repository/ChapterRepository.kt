@@ -16,6 +16,8 @@ interface ChapterRepository {
 
     suspend fun getChapterByUrl(url: String): Chapter?
 
+    suspend fun getChaptersByUrls(urls: List<String>): List<Chapter>
+
     suspend fun getChapterByUrlAndMangaId(url: String, mangaId: Long): Chapter?
 
     suspend fun insertChapter(chapter: Chapter): Long
