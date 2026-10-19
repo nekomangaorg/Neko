@@ -267,6 +267,42 @@ class DownloadCacheTest {
         }
 
     @Test
+    fun `renewCache populates cache for every manga when multiple manga share the same title`() =
+        runTest(testDispatcher) {
+            val manga = Manga.create("/manga/123", "Sample Manga").apply { id = 123L }
+            val sameTitleManga = Manga.create("/manga/456", "Sample Manga").apply { id = 456L }
+            coEvery { mangaRepository.getMangaList() } returns listOf(manga, sameTitleManga)
+
+            val rootDownloadsDir = mockk<UniFile>(relaxed = true)
+            val sourceDir = mockk<UniFile>(relaxed = true)
+            val mangaDir =
+                mangaDirWithFiles(
+                    "Ch. 1 - $FINISHED_UUID.cbz",
+                    "Ch. 1 - $SAME_TITLE_MANGA_UUID.cbz",
+                )
+
+            every { provider.getSourceDirName() } returns "MangaDex"
+            every { rootDownloadsDir.listFiles() } returns arrayOf(sourceDir)
+            every { sourceDir.name } returns "MangaDex"
+            every { sourceDir.listFiles() } returns arrayOf(mangaDir)
+            every { storageManager.getDownloadsDirectory() } returns rootDownloadsDir
+
+            val cache = DownloadCache(provider, sourceManager, storageManager)
+            cache.cancelRenewJob()
+            cache.renewCache()
+
+            assertTrue(cache.isChapterDownloaded(chapter(FINISHED_UUID), manga, skipCache = false))
+            assertTrue(
+                cache.isChapterDownloaded(
+                    chapter(SAME_TITLE_MANGA_UUID),
+                    sameTitleManga,
+                    skipCache = false,
+                )
+            )
+            cache.scope.cancel()
+        }
+
+    @Test
     fun `updateManga skips the temp files of an unfinished download`() {
         val manga = Manga.create("/manga/123", "Sample Manga").apply { id = 123L }
         val mangaDir = mangaDirWithUnfinishedDownload()
@@ -285,15 +321,17 @@ class DownloadCacheTest {
      * A manga folder with one finished cbz and the leftovers of a download whose zip step did not
      * finish: the page folder and the partial cbz.
      */
-    private fun mangaDirWithUnfinishedDownload(): UniFile {
+    private fun mangaDirWithUnfinishedDownload(): UniFile =
+        mangaDirWithFiles(
+            "Ch. 1 - $FINISHED_UUID.cbz",
+            "Ch. 2 - $UNFINISHED_UUID$TMP_DIR_SUFFIX",
+            "Ch. 2 - $UNFINISHED_UUID.cbz$TMP_DIR_SUFFIX",
+        )
+
+    /** A manga folder named "Sample Manga" that holds files with the given names. */
+    private fun mangaDirWithFiles(vararg fileNames: String): UniFile {
         val mangaDir = mockk<UniFile>(relaxed = true)
-        val names =
-            listOf(
-                "Ch. 1 - $FINISHED_UUID.cbz",
-                "Ch. 2 - $UNFINISHED_UUID$TMP_DIR_SUFFIX",
-                "Ch. 2 - $UNFINISHED_UUID.cbz$TMP_DIR_SUFFIX",
-            )
-        val files = names.map { name ->
+        val files = fileNames.map { name ->
             mockk<UniFile>(relaxed = true) { every { this@mockk.name } returns name }
         }
         every { mangaDir.name } returns "Sample Manga"
@@ -312,5 +350,6 @@ class DownloadCacheTest {
     companion object {
         private const val FINISHED_UUID = "01234567-89ab-cdef-0123-456789abcdef"
         private const val UNFINISHED_UUID = "fedcba98-7654-3210-fedc-ba9876543210"
+        private const val SAME_TITLE_MANGA_UUID = "0f1e2d3c-4b5a-6978-8796-a5b4c3d2e1f0"
     }
 }
