@@ -314,10 +314,17 @@ class DownloaderQueueChaptersTest {
 
     @Test
     fun `posts stop and pause notifications after releasing the queue lock`() {
+        val queueLock =
+            Downloader::class.java.getDeclaredField("queueLock").run {
+                isAccessible = true
+                get(downloader)
+            }
         val postedUnderLock = Collections.synchronizedList(mutableListOf<String>())
-        // isRunning reads under the lock, so a thread calling it waits while the lock is held.
+        // MockK runs the answer on the thread posting the notification, so only that thread is
+        // checked. The lock held by another thread, such as the cancelled downloader job
+        // publishing that it ended, does not count.
         fun checkLock(notification: String) {
-            if (runUntilDoneOrBlocked { downloader.isRunning }.isAlive) {
+            if (Thread.holdsLock(queueLock)) {
                 postedUnderLock += notification
             }
         }
