@@ -51,7 +51,7 @@ class FollowsSyncProcessor {
         errorNotification: (String) -> Unit,
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
         completeNotification: () -> Unit,
-        updateManga: (List<Long>) -> Unit,
+        updateManga: suspend (List<Long>) -> Unit,
     ): Int {
         return withContext(Dispatchers.IO) {
             TimberKt.d { "Starting from MangaDex sync" }

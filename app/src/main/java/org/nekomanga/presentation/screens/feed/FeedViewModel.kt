@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.feed
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onOk
@@ -344,6 +345,17 @@ class FeedViewModel() : ViewModel() {
 
     fun clearDownloadQueue() {
         viewModelScope.launch { downloadManager.clearQueue() }
+    }
+
+    fun toggleLibraryUpdate(start: Boolean) {
+        viewModelScope.launchIO {
+            val context = Injekt.get<Application>()
+            if (start) {
+                LibraryUpdateJob.startNow(context)
+            } else {
+                LibraryUpdateJob.stop(context)
+            }
+        }
     }
 
     fun toggleUploadsSortOrder() {

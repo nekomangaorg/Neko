@@ -150,7 +150,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
         completeNotification(R.string.sync_to_follows_complete)
     }
 
-    private fun updateManga(libraryMangaList: List<Long>) {
+    private suspend fun updateManga(libraryMangaList: List<Long>) {
         if (libraryMangaList.isNotEmpty()) {
             LibraryUpdateJob.startNow(context.applicationContext, mangaIdsToUse = libraryMangaList)
         }

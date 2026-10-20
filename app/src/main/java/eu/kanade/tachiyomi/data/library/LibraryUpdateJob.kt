@@ -918,18 +918,19 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             }
         }
 
+        /** Blocks until WorkManager answers, so call it off the main thread. */
         fun isRunning(context: Context): Boolean {
             val list = WorkManager.getInstance(context).getWorkInfosByTag(TAG).get()
             return list.any { it.state == WorkInfo.State.RUNNING }
         }
 
-        fun startNow(
+        suspend fun startNow(
             context: Context,
             category: Category? = null,
             mangaToUse: List<LibraryManga>? = null,
             mangaIdsToUse: List<Long>? = null,
         ): Boolean {
-            if (isRunning(context)) {
+            if (withIOContext { isRunning(context) }) {
                 category?.id?.let {
                     if (mangaToUse != null) {
                         instance?.get()?.addMangaToQueue(mangaToUse)
@@ -970,14 +971,13 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             return true
         }
 
-        fun stop(context: Context) {
+        suspend fun stop(context: Context) {
             val wm = WorkManager.getInstance(context)
             val workQuery =
                 WorkQuery.Builder.fromTags(listOf(TAG))
                     .addStates(listOf(WorkInfo.State.RUNNING))
                     .build()
-            wm.getWorkInfos(workQuery)
-                .get()
+            withIOContext { wm.getWorkInfos(workQuery).get() }
                 // Should only return one work but just in case
                 .forEach {
                     wm.cancelWorkById(it.id)

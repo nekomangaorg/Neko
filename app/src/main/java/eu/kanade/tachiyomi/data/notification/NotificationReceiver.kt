@@ -92,7 +92,16 @@ class NotificationReceiver : BroadcastReceiver() {
                 }
             }
             // Cancel library update and dismiss notification
-            ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
+            ACTION_CANCEL_LIBRARY_UPDATE -> {
+                val pendingResult = goAsync()
+                launchIO {
+                    try {
+                        cancelLibraryUpdate(context)
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
+            }
             ACTION_CANCEL_TRACKING_SYNC -> cancelTrackingSync(context)
             ACTION_CANCEL_FOLLOW_SYNC -> cancelFollowSync(context)
             ACTION_CANCEL_UPDATE_DOWNLOAD -> cancelDownloadUpdate(context)
@@ -289,7 +298,7 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param context context of application
      * @param notificationId id of notification
      */
-    private fun cancelLibraryUpdate(context: Context) {
+    private suspend fun cancelLibraryUpdate(context: Context) {
         LibraryUpdateJob.stop(context)
     }
 
