@@ -8,6 +8,9 @@ import org.nekomanga.R
 abstract class ViewerNavigation {
 
     sealed class NavigationRegion(@param:StringRes val nameRes: Int, val colorRes: Int) {
+        val name: String
+            get() = javaClass.simpleName
+
         object MENU : NavigationRegion(R.string.menu, R.color.navigation_menu)
 
         object PREV : NavigationRegion(R.string.previous, R.color.navigation_prev)
@@ -66,10 +69,42 @@ fun RectF.invert(invertMode: ViewerNavigation.TappingInvertMode): RectF {
     val horizontal = invertMode.shouldInvertHorizontal
     val vertical = invertMode.shouldInvertVertical
     return when {
-        horizontal && vertical ->
-            RectF(1f - this.right, 1f - this.bottom, 1f - this.left, 1f - this.top)
-        vertical -> RectF(this.left, 1f - this.bottom, this.right, 1f - this.top)
-        horizontal -> RectF(1f - this.right, this.top, 1f - this.left, this.bottom)
+        horizontal && vertical -> {
+            val l = 1f - this.right
+            val t = 1f - this.bottom
+            val r = 1f - this.left
+            val b = 1f - this.top
+            RectF(l, t, r, b).apply {
+                left = l
+                top = t
+                right = r
+                bottom = b
+            }
+        }
+        vertical -> {
+            val l = this.left
+            val t = 1f - this.bottom
+            val r = this.right
+            val b = 1f - this.top
+            RectF(l, t, r, b).apply {
+                left = l
+                top = t
+                right = r
+                bottom = b
+            }
+        }
+        horizontal -> {
+            val l = 1f - this.right
+            val t = this.top
+            val r = 1f - this.left
+            val b = this.bottom
+            RectF(l, t, r, b).apply {
+                left = l
+                top = t
+                right = r
+                bottom = b
+            }
+        }
         else -> this
     }
 }

@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling GestureNavigationOverlay from ViewerNavigation & Geometry Inversion Math
 
-**Status:** Proposed / Under Review  
+**Status:** Accepted / Complete  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Reader Decoupling  
 **Execution Order:** Reader Track — Phase R2 (Auxiliary Reader UI & Overlays Decoupling), Step R10 (Priority: Low / Educational Overlay)  
 **Prerequisites:** None (Self-Contained Visual Overlay)  
 **Downstream Dependents:** None  
-**Implementation State:** 🟡 Coupled Baseline (Legacy ViewerNavigation classes, invert math, and ContextCompat color resolution in Compose)  
+**Implementation State:** 🟢 Complete (NavigationRegionUiModel, GetNavigationRegionsUseCase, and stateless GestureNavigationOverlay)  
 
 ---
 
@@ -169,7 +169,7 @@ fun GestureNavigationOverlay(
 >
 > Decoupling `GestureNavigationOverlay` isolates coordinate inversion math into `GetNavigationRegionsUseCase` and renders pure `NavigationRegionUiModel` boxes, enabling previewability without requiring runtime viewer instances.
 
-- [ ] **Step 1**: Define `NavigationRegionUiModel`.
-- [ ] **Step 2**: Implement `GetNavigationRegionsUseCase` with unit tests for LTR/RTL and invert modes.
-- [ ] **Step 3**: Refactor `GestureNavigationOverlay.kt` to be 100% stateless and previewable.
-- [ ] **Step 4**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [x] **Step 1**: Define `NavigationRegionUiModel`.
+- [x] **Step 2**: Implement `GetNavigationRegionsUseCase` with unit tests for LTR/RTL and invert modes.
+- [x] **Step 3**: Refactor `GestureNavigationOverlay.kt` to be 100% stateless and previewable.
+- [x] **Step 4**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.

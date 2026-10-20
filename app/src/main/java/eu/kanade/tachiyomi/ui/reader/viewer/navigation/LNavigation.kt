@@ -11,9 +11,45 @@ open class LNavigation : ViewerNavigation() {
 
     override var regions: List<Region> =
         listOf(
-            Region(rectF = RectF(0f, 0.33f, 0.33f, 0.66f), type = NavigationRegion.PREV),
-            Region(rectF = RectF(0f, 0f, 1f, 0.33f), type = NavigationRegion.PREV),
-            Region(rectF = RectF(0.66f, 0.33f, 1f, 0.66f), type = NavigationRegion.NEXT),
-            Region(rectF = RectF(0f, 0.66f, 1f, 1f), type = NavigationRegion.NEXT),
+            Region(
+                rectF =
+                    RectF(0f, 0.33f, 0.33f, 0.66f).apply {
+                        left = 0f
+                        top = 0.33f
+                        right = 0.33f
+                        bottom = 0.66f
+                    },
+                type = NavigationRegion.PREV,
+            ),
+            Region(
+                rectF =
+                    RectF(0f, 0f, 1f, 0.33f).apply {
+                        left = 0f
+                        top = 0f
+                        right = 1f
+                        bottom = 0.33f
+                    },
+                type = NavigationRegion.PREV,
+            ),
+            Region(
+                rectF =
+                    RectF(0.66f, 0.33f, 1f, 0.66f).apply {
+                        left = 0.66f
+                        top = 0.33f
+                        right = 1f
+                        bottom = 0.66f
+                    },
+                type = NavigationRegion.NEXT,
+            ),
+            Region(
+                rectF =
+                    RectF(0f, 0.66f, 1f, 1f).apply {
+                        left = 0f
+                        top = 0.66f
+                        right = 1f
+                        bottom = 1f
+                    },
+                type = NavigationRegion.NEXT,
+            ),
         )
 }

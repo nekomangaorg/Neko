@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
+import eu.kanade.tachiyomi.ui.reader.domain.GetNavigationRegionsUseCase
 import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterNavTargetUseCase
 import eu.kanade.tachiyomi.ui.reader.domain.ResolveChapterTransitionUiModelUseCase
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
@@ -112,6 +113,7 @@ import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.screens.reader.NavigationRegionUiModel
 import org.nekomanga.presentation.screens.reader.ReaderChapterRowUiModel
 import org.nekomanga.presentation.screens.reader.ReaderSettingsAction
 import org.nekomanga.presentation.screens.reader.ReaderSettingsUiState
@@ -146,6 +148,8 @@ constructor(
 ) : ViewModel() {
 
     private val parseChapterName: ParseChapterNameUseCase by injectLazy()
+    private val getNavigationRegionsUseCase: GetNavigationRegionsUseCase =
+        GetNavigationRegionsUseCase()
 
     private val mutableState =
         MutableStateFlow(State(viewerPreferences = getInitialViewerPreferences()))
@@ -2059,18 +2063,32 @@ constructor(
         isLtr: Boolean,
         invertMode: ViewerNavigation.TappingInvertMode,
     ) {
+        val regions = getNavigationRegionsUseCase(navigation, invertMode, isLtr)
         mutableState.update {
             it.copy(
                 overlayNavigation = navigation,
                 overlayVisible = visible,
                 overlayIsLtr = isLtr,
                 overlayInvertMode = invertMode,
+                overlayRegions = regions,
             )
         }
     }
 
     fun setOverlayVisibility(visible: Boolean) {
-        mutableState.update { it.copy(overlayVisible = visible) }
+        mutableState.update { state ->
+            val regions =
+                if (visible && state.overlayRegions.isEmpty() && state.overlayNavigation != null) {
+                    getNavigationRegionsUseCase(
+                        state.overlayNavigation,
+                        state.overlayInvertMode,
+                        state.overlayIsLtr,
+                    )
+                } else {
+                    state.overlayRegions
+                }
+            state.copy(overlayVisible = visible, overlayRegions = regions)
+        }
     }
 
     fun setColorFilterOverlay(color: Int, mode: Int) {
@@ -2112,6 +2130,7 @@ constructor(
         val overlayIsLtr: Boolean = true,
         val overlayInvertMode: ViewerNavigation.TappingInvertMode =
             ViewerNavigation.TappingInvertMode.NONE,
+        val overlayRegions: List<NavigationRegionUiModel> = emptyList(),
         val brightnessOverlayAlpha: Float = 0f,
         val colorFilterOverlayColor: Int = 0,
         val colorFilterOverlayMode: Int = 0,

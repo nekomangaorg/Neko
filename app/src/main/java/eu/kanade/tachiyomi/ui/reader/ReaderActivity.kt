@@ -761,9 +761,7 @@ class ReaderActivity : BaseMainActivity() {
                     }
 
                     GestureNavigationOverlay(
-                        navigation = state.overlayNavigation,
-                        isLtr = state.overlayIsLtr,
-                        invertMode = state.overlayInvertMode,
+                        regions = state.overlayRegions,
                         visible = state.overlayVisible,
                         onDismiss = { overlayVisible = false },
                         modifier = Modifier.fillMaxSize(),

@@ -11,7 +11,25 @@ class RightAndLeftNavigation : ViewerNavigation() {
 
     override var regions: List<Region> =
         listOf(
-            Region(rectF = RectF(0f, 0f, 0.25f, 1f), type = NavigationRegion.LEFT),
-            Region(rectF = RectF(0.75f, 0f, 1f, 1f), type = NavigationRegion.RIGHT),
+            Region(
+                rectF =
+                    RectF(0f, 0f, 0.25f, 1f).apply {
+                        left = 0f
+                        top = 0f
+                        right = 0.25f
+                        bottom = 1f
+                    },
+                type = NavigationRegion.LEFT,
+            ),
+            Region(
+                rectF =
+                    RectF(0.75f, 0f, 1f, 1f).apply {
+                        left = 0.75f
+                        top = 0f
+                        right = 1f
+                        bottom = 1f
+                    },
+                type = NavigationRegion.RIGHT,
+            ),
         )
 }

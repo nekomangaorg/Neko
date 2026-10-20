@@ -11,7 +11,25 @@ class KindlishNavigation : ViewerNavigation() {
 
     override var regions: List<Region> =
         listOf(
-            Region(rectF = RectF(0.33f, 0.33f, 1f, 1f), type = NavigationRegion.NEXT),
-            Region(rectF = RectF(0f, 0.33f, 0.33f, 1f), type = NavigationRegion.PREV),
+            Region(
+                rectF =
+                    RectF(0.33f, 0.33f, 1f, 1f).apply {
+                        left = 0.33f
+                        top = 0.33f
+                        right = 1f
+                        bottom = 1f
+                    },
+                type = NavigationRegion.NEXT,
+            ),
+            Region(
+                rectF =
+                    RectF(0f, 0.33f, 0.33f, 1f).apply {
+                        left = 0f
+                        top = 0.33f
+                        right = 0.33f
+                        bottom = 1f
+                    },
+                type = NavigationRegion.PREV,
+            ),
         )
 }
