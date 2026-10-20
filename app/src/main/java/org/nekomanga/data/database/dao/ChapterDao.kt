@@ -28,6 +28,9 @@ interface ChapterDao {
     @Query("SELECT * FROM chapters WHERE url = :url")
     suspend fun getChapterByUrl(url: String): ChapterEntity?
 
+    @Query("SELECT * FROM chapters WHERE url IN (:urls)")
+    suspend fun getChaptersByUrls(urls: List<String>): List<ChapterEntity>
+
     @Query("SELECT * FROM chapters WHERE url = :url AND manga_id = :mangaId")
     suspend fun getChapterByUrlAndMangaId(url: String, mangaId: Long): ChapterEntity?
 

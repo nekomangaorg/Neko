@@ -9,9 +9,11 @@ import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.lang.isUUID
 import java.util.Date
 import java.util.TreeSet
 import org.nekomanga.constants.Constants
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
@@ -19,7 +21,6 @@ import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
-import tachiyomi.core.util.storage.nameWithoutExtension
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -47,7 +48,8 @@ suspend fun syncChaptersWithSource(
     val mangaDexPreferences: MangaDexPreferences = Injekt.get()
 
     // Chapters from db.
-    var dbChapters = chapterRepository.getChaptersForManga(manga.id!!)
+    val mangaId = manga.id!!
+    var dbChapters = chapterRepository.getChaptersForManga(mangaId)
 
     // Dedup unavailable with local prefix
     val chapterUUIDs =
@@ -55,8 +57,18 @@ suspend fun syncChaptersWithSource(
             .filterNot { it.isLocalSource() || it.isMergedChapter() }
             .map { MdUtil.getChapterUUID(it.url) }
             .toHashSet()
+    val otherMangaLocalUuids =
+        otherMangaChapterUuids(
+            dbChapters
+                .filter { it.isLocalSource() }
+                .mapNotNull { chapterUuid(it.name) }
+                .filterNot { it in chapterUUIDs },
+            mangaId,
+            chapterRepository,
+        )
     dbChapters = dbChapters.mapNotNull { dbChapter ->
-        if (dbChapter.isLocalSource() && dbChapter.name.substringAfterLast(" - ") in chapterUUIDs) {
+        val uuid = if (dbChapter.isLocalSource()) chapterUuid(dbChapter.name) else null
+        if (uuid != null && (uuid in chapterUUIDs || uuid in otherMangaLocalUuids)) {
             chapterRepository.deleteChapter(dbChapter)
             return@mapNotNull null
         }
@@ -101,29 +113,39 @@ suspend fun syncChaptersWithSource(
 
         finalRawSourceChapters =
             if (allDownloads.isNotEmpty()) {
+                val otherMangaUuids =
+                    otherMangaChapterUuids(
+                        allDownloads
+                            .mapNotNull { file -> file.name?.let { chapterUuid(it) } }
+                            .filterNot { it in chapterUUIDs },
+                        mangaId,
+                        chapterRepository,
+                    )
                 val localSourceChapters =
                     allDownloads
                         .mapNotNull { file ->
-                            val chapterName =
-                                file.nameWithoutExtension!!.substringAfter(
-                                    "${Constants.LOCAL_SOURCE}_"
-                                )
-                            if (chapterName.substringAfterLast(" - ") in chapterUUIDs) {
-                                if (file.name!!.startsWith(Constants.LOCAL_SOURCE)) {
-                                    val correctFileName =
-                                        file.name!!.substringAfter("${Constants.LOCAL_SOURCE}_")
-                                    file.renameTo(correctFileName)
+                            val fileName = file.name ?: return@mapNotNull null
+                            val uuid = chapterUuid(fileName)
+                            if (uuid != null && (uuid in chapterUUIDs || uuid in otherMangaUuids)) {
+                                if (fileName.startsWith("${Constants.LOCAL_SOURCE}_")) {
+                                    file.renameTo(
+                                        fileName.removePrefix("${Constants.LOCAL_SOURCE}_")
+                                    )
                                 }
                                 return@mapNotNull null
                             }
+                            val chapterName =
+                                fileName
+                                    .substringBeforeLast('.')
+                                    .substringAfter("${Constants.LOCAL_SOURCE}_")
                             val dateUploaded = file.lastModified()
                             val fileNameSuffix =
-                                file.name?.substringAfter("${Constants.LOCAL_SOURCE}_")
+                                fileName.substringAfter("${Constants.LOCAL_SOURCE}_")
                             val expectedFileName =
                                 DiskUtil.buildValidFilename(
                                     "${Constants.LOCAL_SOURCE}_${fileNameSuffix}"
                                 )
-                            if (file.name != expectedFileName) {
+                            if (fileName != expectedFileName) {
                                 file.renameTo(expectedFileName)
                             }
 
@@ -391,6 +413,26 @@ suspend fun syncChaptersWithSource(
     val newChapters = toAdd.subtract(readded.toSet()).toList().filter { !it.isUnavailable }
 
     return Pair(newChapters, toDelete - readded.toSet())
+}
+
+/** The MangaDex chapter uuid a download or local chapter name ends with, or null if it has none. */
+internal fun chapterUuid(name: String): String? =
+    name.removeSuffix(".cbz").substringAfterLast(" - ", "").trim().takeIf { it.isUUID() }
+
+/**
+ * Manga with the same title share one download folder, so a file in it can belong to a different
+ * manga. Returns the uuids in [uuids] whose chapter the database stores under another manga.
+ */
+internal suspend fun otherMangaChapterUuids(
+    uuids: Collection<String>,
+    mangaId: Long,
+    chapterRepository: ChapterRepository,
+): Set<String> {
+    if (uuids.isEmpty()) return emptySet()
+    return chapterRepository
+        .getChaptersByUrls(uuids.map { MdConstants.chapterSuffix + it })
+        .filter { it.manga_id != mangaId }
+        .mapTo(HashSet()) { MdUtil.getChapterUUID(it.url) }
 }
 
 private fun bothMerged(dbChapter: Chapter, sourceChapter: Chapter): Boolean {

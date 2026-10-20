@@ -11,6 +11,10 @@ import org.nekomanga.data.database.mapper.toChapter
 import org.nekomanga.data.database.mapper.toEntity
 import org.nekomanga.data.database.mapper.toManga
 
+// Android 11 and older ship SQLite before 3.32, which caps a statement at 999 bind variables
+// (SQLITE_MAX_VARIABLE_NUMBER). Exceeding it throws "too many SQL variables"; 900 leaves margin.
+private const val MAX_DB_QUERY_VARIABLES = 900
+
 class ChapterRepositoryImpl(
     private val chapterDao: ChapterDao,
     // Injecting the dispatcher allows for easy testing, defaulting to IO
@@ -36,6 +40,14 @@ class ChapterRepositoryImpl(
 
     override suspend fun getChapterByUrl(url: String): Chapter? {
         return chapterDao.getChapterByUrl(url)?.toChapter()
+    }
+
+    override suspend fun getChaptersByUrls(urls: List<String>): List<Chapter> {
+        return urls
+            .distinct()
+            .chunked(MAX_DB_QUERY_VARIABLES)
+            .flatMap { chunk -> chapterDao.getChaptersByUrls(chunk) }
+            .map { it.toChapter() }
     }
 
     override suspend fun getChapterByUrlAndMangaId(url: String, mangaId: Long): Chapter? {
