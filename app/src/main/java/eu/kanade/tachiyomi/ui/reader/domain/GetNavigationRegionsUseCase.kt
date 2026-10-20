@@ -28,7 +28,7 @@ class GetNavigationRegionsUseCase {
             val rect = region.rectF
             val directional = region.type.directionalRegion(isLtr)
             NavigationRegionUiModel(
-                id = "${region.type.name}_${rect.left}_${rect.top}",
+                id = "${directional.name}_${rect.left}_${rect.top}_${rect.right}_${rect.bottom}",
                 leftFraction = rect.left,
                 topFraction = rect.top,
                 rightFraction = rect.right,

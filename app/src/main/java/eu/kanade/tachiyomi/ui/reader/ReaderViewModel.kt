@@ -53,6 +53,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.ReaderPreloadEngine
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
@@ -2089,6 +2090,26 @@ constructor(
                 }
             state.copy(overlayVisible = visible, overlayRegions = regions)
         }
+    }
+
+    fun showNavigationOverlay() {
+        mutableState.update { state ->
+            val nav = state.overlayNavigation
+            if (nav != null && nav !is DisabledNavigation) {
+                val regions = getNavigationRegionsUseCase(nav, nav.invertMode, state.overlayIsLtr)
+                state.copy(
+                    overlayInvertMode = nav.invertMode,
+                    overlayRegions = regions,
+                    overlayVisible = true,
+                )
+            } else {
+                state
+            }
+        }
+    }
+
+    fun dismissNavigationOverlay() {
+        mutableState.update { it.copy(overlayVisible = false) }
     }
 
     fun setColorFilterOverlay(color: Int, mode: Int) {

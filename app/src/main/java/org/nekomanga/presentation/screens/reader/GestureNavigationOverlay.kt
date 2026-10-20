@@ -5,6 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,13 +15,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -38,6 +44,8 @@ fun GestureNavigationOverlay(
 ) {
     if (regions.isEmpty()) return
 
+    val currentOnDismiss by rememberUpdatedState(onDismiss)
+
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(animationSpec = tween(250)),
@@ -47,13 +55,10 @@ fun GestureNavigationOverlay(
         BoxWithConstraints(
             modifier =
                 Modifier.fillMaxSize().pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            if (event.changes.any { it.changedToDown() }) {
-                                onDismiss()
-                            }
-                        }
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        down.consume()
+                        currentOnDismiss()
                     }
                 }
         ) {
@@ -61,22 +66,24 @@ fun GestureNavigationOverlay(
             val height = maxHeight
 
             regions.forEach { region ->
-                val leftDp = width * region.leftFraction
-                val topDp = height * region.topFraction
-                val rightDp = width * region.rightFraction
-                val bottomDp = height * region.bottomFraction
+                key(region.id) {
+                    val leftDp = width * region.leftFraction
+                    val topDp = height * region.topFraction
+                    val rightDp = width * region.rightFraction
+                    val bottomDp = height * region.bottomFraction
 
-                val regionWidth = rightDp - leftDp
-                val regionHeight = bottomDp - topDp
-
-                Box(
-                    modifier =
-                        Modifier.offset(x = leftDp, y = topDp)
-                            .size(width = regionWidth, height = regionHeight)
-                            .background(region.color)
-                ) {
+                    val regionWidth = rightDp - leftDp
+                    val regionHeight = bottomDp - topDp
                     val regionText = region.label.asString()
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+
+                    Box(
+                        modifier =
+                            Modifier.offset(x = leftDp, y = topDp)
+                                .size(width = regionWidth, height = regionHeight)
+                                .background(region.color)
+                                .clearAndSetSemantics { contentDescription = regionText },
+                        contentAlignment = Alignment.Center,
+                    ) {
                         Text(
                             text = regionText,
                             color = Color.Black,

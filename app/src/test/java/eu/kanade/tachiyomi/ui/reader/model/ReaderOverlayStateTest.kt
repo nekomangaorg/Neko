@@ -33,7 +33,7 @@ class ReaderOverlayStateTest {
         val regions =
             listOf(
                 NavigationRegionUiModel(
-                    id = "NEXT_0.33_0.33",
+                    id = "NEXT_0.33_0.33_1.0_1.0",
                     leftFraction = 0.33f,
                     topFraction = 0.33f,
                     rightFraction = 1f,
@@ -69,7 +69,7 @@ class ReaderOverlayStateTest {
     fun `given ReaderViewModel State with regions, copying with new visibility retains regions`() {
         val region =
             NavigationRegionUiModel(
-                id = "PREV_0.0_0.33",
+                id = "PREV_0.0_0.33_0.33_1.0",
                 leftFraction = 0f,
                 topFraction = 0.33f,
                 rightFraction = 0.33f,

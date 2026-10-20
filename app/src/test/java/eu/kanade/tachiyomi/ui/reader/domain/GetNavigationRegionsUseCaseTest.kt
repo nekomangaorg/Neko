@@ -50,7 +50,7 @@ class GetNavigationRegionsUseCaseTest {
         assertEquals(2, result.size)
 
         val nextRegion = result[0]
-        assertEquals("NEXT_0.33_0.33", nextRegion.id)
+        assertEquals("NEXT_0.33_0.33_1.0_1.0", nextRegion.id)
         assertEquals(0.33f, nextRegion.leftFraction, 0.001f)
         assertEquals(0.33f, nextRegion.topFraction, 0.001f)
         assertEquals(1f, nextRegion.rightFraction, 0.001f)
@@ -60,7 +60,7 @@ class GetNavigationRegionsUseCaseTest {
         assertEquals(Color(0xCCFF124A), nextRegion.color)
 
         val prevRegion = result[1]
-        assertEquals("PREV_0.0_0.33", prevRegion.id)
+        assertEquals("PREV_0.0_0.33_0.33_1.0", prevRegion.id)
         assertEquals(0f, prevRegion.leftFraction, 0.001f)
         assertEquals(0.33f, prevRegion.topFraction, 0.001f)
         assertEquals(0.33f, prevRegion.rightFraction, 0.001f)
@@ -182,7 +182,7 @@ class GetNavigationRegionsUseCaseTest {
 
         // Region 0: NEXT (0f, 0f, 0.33f, 1f)
         val leftStrip = result[0]
-        assertEquals("NEXT_0.0_0.0", leftStrip.id)
+        assertEquals("NEXT_0.0_0.0_0.33_1.0", leftStrip.id)
         assertEquals(0f, leftStrip.leftFraction, 0.001f)
         assertEquals(0f, leftStrip.topFraction, 0.001f)
         assertEquals(0.33f, leftStrip.rightFraction, 0.001f)
@@ -191,7 +191,7 @@ class GetNavigationRegionsUseCaseTest {
 
         // Region 1: PREV (0.33f, 0.66f, 0.66f, 1f)
         val centerBottom = result[1]
-        assertEquals("PREV_0.33_0.66", centerBottom.id)
+        assertEquals("PREV_0.33_0.66_0.66_1.0", centerBottom.id)
         assertEquals(0.33f, centerBottom.leftFraction, 0.001f)
         assertEquals(0.66f, centerBottom.topFraction, 0.001f)
         assertEquals(0.66f, centerBottom.rightFraction, 0.001f)
@@ -200,7 +200,7 @@ class GetNavigationRegionsUseCaseTest {
 
         // Region 2: NEXT (0.66f, 0f, 1f, 1f)
         val rightStrip = result[2]
-        assertEquals("NEXT_0.66_0.0", rightStrip.id)
+        assertEquals("NEXT_0.66_0.0_1.0_1.0", rightStrip.id)
         assertEquals(0.66f, rightStrip.leftFraction, 0.001f)
         assertEquals(0f, rightStrip.topFraction, 0.001f)
         assertEquals(1f, rightStrip.rightFraction, 0.001f)
@@ -316,9 +316,9 @@ class GetNavigationRegionsUseCaseTest {
         val result = useCase(navigation = navigation)
 
         assertEquals(4, result.size)
-        assertEquals("PREV_0.0_0.33", result[0].id)
-        assertEquals("PREV_0.0_0.0", result[1].id)
-        assertEquals("NEXT_0.66_0.33", result[2].id)
-        assertEquals("NEXT_0.0_0.66", result[3].id)
+        assertEquals("PREV_0.0_0.33_0.33_0.66", result[0].id)
+        assertEquals("PREV_0.0_0.0_1.0_0.33", result[1].id)
+        assertEquals("NEXT_0.66_0.33_1.0_0.66", result[2].id)
+        assertEquals("NEXT_0.0_0.66_1.0_1.0", result[3].id)
     }
 }

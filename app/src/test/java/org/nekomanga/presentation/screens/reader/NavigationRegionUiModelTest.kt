@@ -12,7 +12,7 @@ class NavigationRegionUiModelTest {
 
     private val defaultModel =
         NavigationRegionUiModel(
-            id = "NEXT_0.33_0.33",
+            id = "NEXT_0.33_0.33_1.0_1.0",
             leftFraction = 0.33f,
             topFraction = 0.33f,
             rightFraction = 1f,
@@ -23,7 +23,7 @@ class NavigationRegionUiModelTest {
 
     @Test
     fun `given NavigationRegionUiModel, verify properties are correctly assigned`() {
-        assertEquals("NEXT_0.33_0.33", defaultModel.id)
+        assertEquals("NEXT_0.33_0.33_1.0_1.0", defaultModel.id)
         assertEquals(0.33f, defaultModel.leftFraction, 0.0001f)
         assertEquals(0.33f, defaultModel.topFraction, 0.0001f)
         assertEquals(1f, defaultModel.rightFraction, 0.0001f)
@@ -41,7 +41,7 @@ class NavigationRegionUiModelTest {
                 rightFraction = 0.5f,
             )
 
-        assertEquals("NEXT_0.33_0.33", updated.id)
+        assertEquals("NEXT_0.33_0.33_1.0_1.0", updated.id)
         assertEquals(0f, updated.leftFraction, 0.0001f)
         assertEquals(0.33f, updated.topFraction, 0.0001f)
         assertEquals(0.5f, updated.rightFraction, 0.0001f)
@@ -78,7 +78,7 @@ class NavigationRegionUiModelTest {
     fun `given identical NavigationRegionUiModel instances, equals and hashCode contract is satisfied`() {
         val duplicate =
             NavigationRegionUiModel(
-                id = "NEXT_0.33_0.33",
+                id = "NEXT_0.33_0.33_1.0_1.0",
                 leftFraction = 0.33f,
                 topFraction = 0.33f,
                 rightFraction = 1f,
