@@ -98,17 +98,14 @@ class DownloadManager(
     val removedChaptersFlow = _removedChaptersFlow.asSharedFlow()
 
     /**
-     * Tells the downloader to begin downloads.
-     *
-     * @return true if it's started, false otherwise (empty queue).
+     * Starts the downloader through DownloadJob unless the downloader is running. A worker that
+     * still reads as running may be about to finish, so the REPLACE enqueue swaps it for one that
+     * starts the downloader. DownloadJob.start only enqueues and does not wait on WorkManager, so
+     * this is safe on the main thread.
      */
     fun startDownloads() {
         if (downloader.isRunning) return
-        if (DownloadJob.isRunning(context)) {
-            downloader.start()
-        } else {
-            DownloadJob.start(context)
-        }
+        DownloadJob.start(context)
     }
 
     /**
