@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.navigation
 
-import android.graphics.RectF
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NormalizedRect
 
 /**
  * Visualization of default state without any inversion +---+---+---+ | N | M | P | P: Move Right
@@ -12,23 +12,11 @@ class RightAndLeftNavigation : ViewerNavigation() {
     override var regions: List<Region> =
         listOf(
             Region(
-                rectF =
-                    RectF(0f, 0f, 0.25f, 1f).apply {
-                        left = 0f
-                        top = 0f
-                        right = 0.25f
-                        bottom = 1f
-                    },
+                rect = NormalizedRect(0f, 0f, 0.25f, 1f),
                 type = NavigationRegion.LEFT,
             ),
             Region(
-                rectF =
-                    RectF(0.75f, 0f, 1f, 1f).apply {
-                        left = 0.75f
-                        top = 0f
-                        right = 1f
-                        bottom = 1f
-                    },
+                rect = NormalizedRect(0.75f, 0f, 1f, 1f),
                 type = NavigationRegion.RIGHT,
             ),
         )

@@ -25,7 +25,7 @@ class GetNavigationRegionsUseCase {
 
         return navigation.regions.map { regionItem ->
             val region = regionItem.invert(invertMode)
-            val rect = region.rectF
+            val rect = region.rect
             val directional = region.type.directionalRegion(isLtr)
             NavigationRegionUiModel(
                 id = "${directional.name}_${rect.left}_${rect.top}_${rect.right}_${rect.bottom}",

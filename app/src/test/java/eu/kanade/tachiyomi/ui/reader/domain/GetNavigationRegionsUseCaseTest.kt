@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.ui.reader.domain
 
-import android.graphics.RectF
 import androidx.compose.ui.graphics.Color
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NormalizedRect
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.EdgeNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.KindlishNavigation
@@ -241,13 +241,7 @@ class GetNavigationRegionsUseCaseTest {
                 override var regions: List<Region> =
                     listOf(
                         Region(
-                            rectF =
-                                RectF(0.33f, 0f, 0.66f, 0.33f).apply {
-                                    left = 0.33f
-                                    top = 0f
-                                    right = 0.66f
-                                    bottom = 0.33f
-                                },
+                            rect = NormalizedRect(0.33f, 0f, 0.66f, 0.33f),
                             type = NavigationRegion.MENU,
                         )
                     )

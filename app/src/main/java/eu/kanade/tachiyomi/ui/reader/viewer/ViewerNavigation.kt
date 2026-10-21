@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer
 
 import android.graphics.PointF
-import android.graphics.RectF
 import androidx.annotation.StringRes
 import org.nekomanga.R
 
@@ -30,14 +29,37 @@ abstract class ViewerNavigation {
         }
     }
 
-    data class Region(val rectF: RectF, val type: NavigationRegion) {
-        fun invert(invertMode: TappingInvertMode): Region {
-            if (invertMode == TappingInvertMode.NONE) return this
-            return this.copy(rectF = this.rectF.invert(invertMode))
+    data class NormalizedRect(
+        val left: Float,
+        val top: Float,
+        val right: Float,
+        val bottom: Float,
+    ) {
+        fun contains(x: Float, y: Float): Boolean {
+            return x >= left && x < right && y >= top && y < bottom
+        }
+
+        fun invert(invertMode: TappingInvertMode): NormalizedRect {
+            val horizontal = invertMode.shouldInvertHorizontal
+            val vertical = invertMode.shouldInvertVertical
+            return when {
+                horizontal && vertical ->
+                    NormalizedRect(1f - right, 1f - bottom, 1f - left, 1f - top)
+                vertical -> NormalizedRect(left, 1f - bottom, right, 1f - top)
+                horizontal -> NormalizedRect(1f - right, top, 1f - left, bottom)
+                else -> this
+            }
         }
     }
 
-    private var constantMenuRegion: RectF = RectF(0f, 0f, 1f, 0.05f)
+    data class Region(val rect: NormalizedRect, val type: NavigationRegion) {
+        fun invert(invertMode: TappingInvertMode): Region {
+            if (invertMode == TappingInvertMode.NONE) return this
+            return this.copy(rect = this.rect.invert(invertMode))
+        }
+    }
+
+    private var constantMenuRegion: NormalizedRect = NormalizedRect(0f, 0f, 1f, 0.05f)
 
     abstract var regions: List<Region>
 
@@ -46,7 +68,7 @@ abstract class ViewerNavigation {
     fun getAction(pos: PointF): NavigationRegion {
         val x = pos.x
         val y = pos.y
-        val region = regions.map { it.invert(invertMode) }.find { it.rectF.contains(x, y) }
+        val region = regions.map { it.invert(invertMode) }.find { it.rect.contains(x, y) }
         return when {
             region != null -> region.type
             constantMenuRegion.contains(x, y) -> NavigationRegion.MENU
@@ -62,49 +84,5 @@ abstract class ViewerNavigation {
         HORIZONTAL(shouldInvertHorizontal = true),
         VERTICAL(shouldInvertVertical = true),
         BOTH(shouldInvertHorizontal = true, shouldInvertVertical = true),
-    }
-}
-
-fun RectF.invert(invertMode: ViewerNavigation.TappingInvertMode): RectF {
-    val horizontal = invertMode.shouldInvertHorizontal
-    val vertical = invertMode.shouldInvertVertical
-    return when {
-        horizontal && vertical -> {
-            val l = 1f - this.right
-            val t = 1f - this.bottom
-            val r = 1f - this.left
-            val b = 1f - this.top
-            RectF(l, t, r, b).apply {
-                left = l
-                top = t
-                right = r
-                bottom = b
-            }
-        }
-        vertical -> {
-            val l = this.left
-            val t = 1f - this.bottom
-            val r = this.right
-            val b = 1f - this.top
-            RectF(l, t, r, b).apply {
-                left = l
-                top = t
-                right = r
-                bottom = b
-            }
-        }
-        horizontal -> {
-            val l = 1f - this.right
-            val t = this.top
-            val r = 1f - this.left
-            val b = this.bottom
-            RectF(l, t, r, b).apply {
-                left = l
-                top = t
-                right = r
-                bottom = b
-            }
-        }
-        else -> this
     }
 }
