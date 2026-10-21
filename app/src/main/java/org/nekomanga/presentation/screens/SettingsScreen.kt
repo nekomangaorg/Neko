@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -228,6 +229,8 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     clearCache = vm::clearParentCache,
                     toastEvent = vm.toastEvent,
                     cacheData = vm.cacheData.collectAsState().value,
+                    isBackupRunning = vm.isBackupRunning.collectAsStateWithLifecycle().value,
+                    isRestoreRunning = vm.isRestoreRunning.collectAsStateWithLifecycle().value,
                 )
                 .Content()
         }

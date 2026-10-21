@@ -7,8 +7,10 @@ import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.crash.CrashReport
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+import eu.kanade.tachiyomi.data.updater.Release
 import eu.kanade.tachiyomi.data.updater.SimpleGithubRelease
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
@@ -61,6 +63,17 @@ class MainActivityViewModel : ViewModel() {
                             releaseLink = releaseLink,
                         )
                     )
+            )
+        }
+    }
+
+    fun downloadUpdate(release: Release) {
+        viewModelScope.launchIO {
+            AppDownloadInstallJob.start(
+                Injekt.get<Application>(),
+                release.downloadLink,
+                true,
+                version = release.version,
             )
         }
     }

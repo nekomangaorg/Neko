@@ -377,8 +377,9 @@ suspend fun CoroutineWorker.tryToSetForeground() {
     }
 }
 
-fun WorkManager.jobIsRunning(tag: String): Boolean =
+suspend fun WorkManager.jobIsRunning(tag: String): Boolean = withIOContext {
     getWorkInfosForUniqueWork(tag).get().let { list -> list.any { !it.state.isFinished } }
+}
 
 fun Context.appDelegateNightMode(): Int {
     return if (isInNightMode()) {

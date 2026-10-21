@@ -17,6 +17,8 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
@@ -59,10 +61,10 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     }
 
     companion object {
-        fun isManualJobRunning(context: Context): Boolean {
-            val list = WorkManager.getInstance(context).getWorkInfosByTag(TAG_MANUAL).get()
-            return list.any { !it.state.isFinished }
-        }
+        fun isManualJobRunningFlow(context: Context): Flow<Boolean> =
+            WorkManager.getInstance(context).getWorkInfosByTagFlow(TAG_MANUAL).map { list ->
+                list.any { !it.state.isFinished }
+            }
 
         fun cancelTask(context: Context) {
             WorkManager.getInstance(context).cancelUniqueWork(TAG_AUTO)
