@@ -48,6 +48,30 @@ class BackupRestoreJobTest {
         assertFalse(BackupRestoreJob.isRunningFlow(context).first())
     }
 
+    @Test
+    fun `given running restore when isRunningFlow then emits true`() = runTest {
+        every { workManager.getWorkInfosForUniqueWorkFlow(WORK_NAME) } returns
+            flowOf(listOf(workInfo(WorkInfo.State.RUNNING)))
+
+        assertTrue(BackupRestoreJob.isRunningFlow(context).first())
+    }
+
+    @Test
+    fun `given active running and previous finished restore when isRunningFlow then emits true`() =
+        runTest {
+            every { workManager.getWorkInfosForUniqueWorkFlow(WORK_NAME) } returns
+                flowOf(listOf(workInfo(WorkInfo.State.SUCCEEDED), workInfo(WorkInfo.State.RUNNING)))
+
+            assertTrue(BackupRestoreJob.isRunningFlow(context).first())
+        }
+
+    @Test
+    fun `given no restores scheduled when isRunningFlow then emits false`() = runTest {
+        every { workManager.getWorkInfosForUniqueWorkFlow(WORK_NAME) } returns flowOf(emptyList())
+
+        assertFalse(BackupRestoreJob.isRunningFlow(context).first())
+    }
+
     private fun workInfo(workState: WorkInfo.State) =
         mockk<WorkInfo> { every { state } returns workState }
 

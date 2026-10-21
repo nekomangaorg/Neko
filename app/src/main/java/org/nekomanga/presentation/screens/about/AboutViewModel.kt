@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.Release
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
-import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +20,7 @@ import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.snackbar.SnackbarState
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.preferences.GetFormattedBuildTimeUseCase
 import uy.kohesive.injekt.injectLazy
 
@@ -95,13 +96,17 @@ class AboutViewModel : ViewModel() {
     }
 
     fun downloadUpdate(release: Release) {
-        viewModelScope.launchIO {
-            AppDownloadInstallJob.start(
-                application,
-                release.downloadLink,
-                true,
-                version = release.version,
-            )
+        viewModelScope.launchNonCancellable {
+            try {
+                AppDownloadInstallJob.start(
+                    application,
+                    release.downloadLink,
+                    true,
+                    version = release.version,
+                )
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to start update download" }
+            }
         }
     }
 

@@ -131,8 +131,11 @@ class AppDownloadInstallJobStartTest {
             )
         } finally {
             workInfoReleased.countDown()
-            runBlocking { withTimeout(5_000) { job.join() } }
-            callingThread.shutdown()
+            try {
+                runBlocking { withTimeout(5_000) { job.join() } }
+            } finally {
+                callingThread.shutdown()
+            }
         }
     }
 

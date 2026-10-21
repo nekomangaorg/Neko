@@ -93,6 +93,30 @@ class BackupCreatorJobTest {
         assertFalse(BackupCreatorJob.isManualJobRunningFlow(context).first())
     }
 
+    @Test
+    fun `given running manual backup when isManualJobRunningFlow then emits true`() = runTest {
+        every { workManager.getWorkInfosByTagFlow(MANUAL_TAG) } returns
+            flowOf(listOf(workInfo(WorkInfo.State.RUNNING)))
+
+        assertTrue(BackupCreatorJob.isManualJobRunningFlow(context).first())
+    }
+
+    @Test
+    fun `given active running and previous finished backup when isManualJobRunningFlow then emits true`() =
+        runTest {
+            every { workManager.getWorkInfosByTagFlow(MANUAL_TAG) } returns
+                flowOf(listOf(workInfo(WorkInfo.State.SUCCEEDED), workInfo(WorkInfo.State.RUNNING)))
+
+            assertTrue(BackupCreatorJob.isManualJobRunningFlow(context).first())
+        }
+
+    @Test
+    fun `given no backups scheduled when isManualJobRunningFlow then emits false`() = runTest {
+        every { workManager.getWorkInfosByTagFlow(MANUAL_TAG) } returns flowOf(emptyList())
+
+        assertFalse(BackupCreatorJob.isManualJobRunningFlow(context).first())
+    }
+
     private fun workInfo(workState: WorkInfo.State) =
         mockk<WorkInfo> { every { state } returns workState }
 

@@ -333,6 +333,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             }
         }
 
-        suspend fun isRunning(context: Context) = WorkManager.getInstance(context).jobIsRunning(TAG)
+        private suspend fun isRunning(context: Context) =
+            WorkManager.getInstance(context).jobIsRunning(TAG)
     }
 }

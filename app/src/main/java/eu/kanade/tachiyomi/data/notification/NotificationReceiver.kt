@@ -111,6 +111,8 @@ class NotificationReceiver : BroadcastReceiver() {
                             notifyOnInstall,
                             version = version,
                         )
+                    } catch (e: Exception) {
+                        TimberKt.e(e) { "Failed to start app update from notification" }
                     } finally {
                         pendingResult.finish()
                     }
