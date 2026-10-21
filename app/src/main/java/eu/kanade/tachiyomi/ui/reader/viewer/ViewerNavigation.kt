@@ -1,13 +1,15 @@
 package eu.kanade.tachiyomi.ui.reader.viewer
 
 import android.graphics.PointF
-import android.graphics.RectF
 import androidx.annotation.StringRes
 import org.nekomanga.R
 
 abstract class ViewerNavigation {
 
     sealed class NavigationRegion(@param:StringRes val nameRes: Int, val colorRes: Int) {
+        val name: String
+            get() = javaClass.simpleName
+
         object MENU : NavigationRegion(R.string.menu, R.color.navigation_menu)
 
         object PREV : NavigationRegion(R.string.previous, R.color.navigation_prev)
@@ -27,14 +29,37 @@ abstract class ViewerNavigation {
         }
     }
 
-    data class Region(val rectF: RectF, val type: NavigationRegion) {
-        fun invert(invertMode: TappingInvertMode): Region {
-            if (invertMode == TappingInvertMode.NONE) return this
-            return this.copy(rectF = this.rectF.invert(invertMode))
+    data class NormalizedRect(
+        val left: Float,
+        val top: Float,
+        val right: Float,
+        val bottom: Float,
+    ) {
+        fun contains(x: Float, y: Float): Boolean {
+            return x >= left && x < right && y >= top && y < bottom
+        }
+
+        fun invert(invertMode: TappingInvertMode): NormalizedRect {
+            val horizontal = invertMode.shouldInvertHorizontal
+            val vertical = invertMode.shouldInvertVertical
+            return when {
+                horizontal && vertical ->
+                    NormalizedRect(1f - right, 1f - bottom, 1f - left, 1f - top)
+                vertical -> NormalizedRect(left, 1f - bottom, right, 1f - top)
+                horizontal -> NormalizedRect(1f - right, top, 1f - left, bottom)
+                else -> this
+            }
         }
     }
 
-    private var constantMenuRegion: RectF = RectF(0f, 0f, 1f, 0.05f)
+    data class Region(val rect: NormalizedRect, val type: NavigationRegion) {
+        fun invert(invertMode: TappingInvertMode): Region {
+            if (invertMode == TappingInvertMode.NONE) return this
+            return this.copy(rect = this.rect.invert(invertMode))
+        }
+    }
+
+    private var constantMenuRegion: NormalizedRect = NormalizedRect(0f, 0f, 1f, 0.05f)
 
     abstract var regions: List<Region>
 
@@ -43,7 +68,7 @@ abstract class ViewerNavigation {
     fun getAction(pos: PointF): NavigationRegion {
         val x = pos.x
         val y = pos.y
-        val region = regions.map { it.invert(invertMode) }.find { it.rectF.contains(x, y) }
+        val region = regions.map { it.invert(invertMode) }.find { it.rect.contains(x, y) }
         return when {
             region != null -> region.type
             constantMenuRegion.contains(x, y) -> NavigationRegion.MENU
@@ -59,17 +84,5 @@ abstract class ViewerNavigation {
         HORIZONTAL(shouldInvertHorizontal = true),
         VERTICAL(shouldInvertVertical = true),
         BOTH(shouldInvertHorizontal = true, shouldInvertVertical = true),
-    }
-}
-
-fun RectF.invert(invertMode: ViewerNavigation.TappingInvertMode): RectF {
-    val horizontal = invertMode.shouldInvertHorizontal
-    val vertical = invertMode.shouldInvertVertical
-    return when {
-        horizontal && vertical ->
-            RectF(1f - this.right, 1f - this.bottom, 1f - this.left, 1f - this.top)
-        vertical -> RectF(this.left, 1f - this.bottom, this.right, 1f - this.top)
-        horizontal -> RectF(1f - this.right, this.top, 1f - this.left, this.bottom)
-        else -> this
     }
 }

@@ -761,11 +761,9 @@ class ReaderActivity : BaseMainActivity() {
                     }
 
                     GestureNavigationOverlay(
-                        navigation = state.overlayNavigation,
-                        isLtr = state.overlayIsLtr,
-                        invertMode = state.overlayInvertMode,
+                        regions = state.overlayRegions,
                         visible = state.overlayVisible,
-                        onDismiss = { overlayVisible = false },
+                        onDismiss = viewModel::dismissNavigationOverlay,
                         modifier = Modifier.fillMaxSize(),
                     )
                     ReaderAppBar(
@@ -1445,14 +1443,7 @@ class ReaderActivity : BaseMainActivity() {
     }
 
     fun showNavigationAgain() {
-        val nav = overlayNavigation
-        if (
-            nav != null &&
-                nav !is eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
-        ) {
-            overlayInvertMode = nav.invertMode
-            overlayVisible = true
-        }
+        viewModel.showNavigationOverlay()
     }
 
     /**
