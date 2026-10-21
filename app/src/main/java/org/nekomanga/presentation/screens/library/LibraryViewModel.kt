@@ -105,6 +105,7 @@ class LibraryViewModel() : ViewModel() {
     val filterLibraryManga: FilterLibraryMangaUseCase = Injekt.get()
     val groupLibraryManga = GroupLibraryMangaUseCase()
     val categoryUseCases: CategoryUseCases = Injekt.get()
+    private val application: Application = Injekt.get()
 
     private val initialState = run {
         val cachedItems = lastLibraryCategoryItems
@@ -1038,25 +1039,35 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun updateLibrary() {
-        viewModelScope.launchIO { LibraryUpdateJob.startNow(Injekt.get<Application>()) }
+        viewModelScope.launchNonCancellable {
+            try {
+                LibraryUpdateJob.startNow(application)
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to start library update" }
+            }
+        }
     }
 
     fun refreshCategory(categoryItem: CategoryItem) {
-        viewModelScope.launchIO {
-            val mangaToUse =
-                if (categoryItem.isDynamic) {
-                    libraryScreenState.value.items
-                        .firstOrNull { it.categoryItem.id == categoryItem.id }
-                        ?.libraryItems
-                        ?.map { it.toLibraryManga() }
-                } else {
-                    null
-                }
-            LibraryUpdateJob.startNow(
-                Injekt.get<Application>(),
-                categoryItem.toDbCategory(),
-                mangaToUse = mangaToUse,
-            )
+        viewModelScope.launchNonCancellable {
+            try {
+                val mangaToUse =
+                    if (categoryItem.isDynamic) {
+                        libraryScreenState.value.items
+                            .firstOrNull { it.categoryItem.id == categoryItem.id }
+                            ?.libraryItems
+                            ?.map { it.toLibraryManga() }
+                    } else {
+                        null
+                    }
+                LibraryUpdateJob.startNow(
+                    application,
+                    categoryItem.toDbCategory(),
+                    mangaToUse = mangaToUse,
+                )
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to refresh category ${categoryItem.name}" }
+            }
         }
     }
 

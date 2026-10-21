@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +46,7 @@ class FeedViewModel() : ViewModel() {
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val feedRepository: FeedRepository = Injekt.get()
     private val downloadManager: DownloadManager = Injekt.get()
+    private val application: Application = Injekt.get()
     private val _feedScreenState =
         MutableStateFlow(
             FeedScreenState(
@@ -348,12 +350,15 @@ class FeedViewModel() : ViewModel() {
     }
 
     fun toggleLibraryUpdate(start: Boolean) {
-        viewModelScope.launchIO {
-            val context = Injekt.get<Application>()
-            if (start) {
-                LibraryUpdateJob.startNow(context)
-            } else {
-                LibraryUpdateJob.stop(context)
+        viewModelScope.launchNonCancellable {
+            try {
+                if (start) {
+                    LibraryUpdateJob.startNow(application)
+                } else {
+                    LibraryUpdateJob.stop(application)
+                }
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to toggle library update" }
             }
         }
     }

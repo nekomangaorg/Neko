@@ -8,8 +8,10 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.common.util.concurrent.ListenableFuture
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.runs
 import io.mockk.unmockkAll
 import io.mockk.verify
 import java.util.UUID
@@ -116,6 +118,26 @@ class LibraryUpdateJobStartStopTest {
         verify(exactly = 1) { workManager.cancelWorkById(workId) }
     }
 
+    @Test
+    fun `stop re-enqueues periodic work when auto update is cancelled`() = runBlocking {
+        mockkObject(LibraryUpdateJob.Companion)
+        // The real setupTask reads the update interval from LibraryPreferences
+        every { LibraryUpdateJob.setupTask(any(), any()) } just runs
+        val workId = UUID.randomUUID()
+        val runningAuto =
+            mockk<WorkInfo> {
+                every { id } returns workId
+                every { tags } returns setOf(LibraryUpdateJob.TAG, AUTO_WORK_NAME)
+            }
+        every { workManager.getWorkInfos(any<WorkQuery>()) } returns
+            workInfos { listOf(runningAuto) }
+
+        LibraryUpdateJob.stop(context)
+
+        verify(exactly = 1) { workManager.cancelWorkById(workId) }
+        verify(exactly = 1) { LibraryUpdateJob.setupTask(context) }
+    }
+
     /**
      * Runs [call] on a single thread that stands in for the main thread, then checks that the
      * thread can run other work while WorkManager has not answered.
@@ -132,8 +154,11 @@ class LibraryUpdateJobStartStopTest {
             )
         } finally {
             workInfoReleased.countDown()
-            runBlocking { withTimeout(5_000) { job.join() } }
-            callingThread.shutdown()
+            try {
+                runBlocking { withTimeout(5_000) { job.join() } }
+            } finally {
+                callingThread.shutdown()
+            }
         }
     }
 
@@ -142,5 +167,6 @@ class LibraryUpdateJobStartStopTest {
 
     private companion object {
         const val MANUAL_WORK_NAME = "LibraryUpdate-manual"
+        const val AUTO_WORK_NAME = "LibraryUpdate-auto"
     }
 }

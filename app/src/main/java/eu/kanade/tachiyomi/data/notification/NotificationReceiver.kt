@@ -97,6 +97,8 @@ class NotificationReceiver : BroadcastReceiver() {
                 launchIO {
                     try {
                         cancelLibraryUpdate(context)
+                    } catch (e: Exception) {
+                        TimberKt.e(e) { "Failed to cancel library update from notification" }
                     } finally {
                         pendingResult.finish()
                     }
