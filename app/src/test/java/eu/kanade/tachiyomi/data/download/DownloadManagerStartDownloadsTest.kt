@@ -87,7 +87,7 @@ class DownloadManagerStartDownloadsTest {
 
         downloadManager.startDownloads()
 
-        verify { DownloadJob.start(context) }
+        verify(exactly = 1) { DownloadJob.start(context) }
     }
 
     @Test
@@ -101,6 +101,15 @@ class DownloadManagerStartDownloadsTest {
 
         verify(exactly = 1) { DownloadJob.start(context) }
         verify(exactly = 0) { anyConstructed<Downloader>().start() }
+    }
+
+    @Test
+    fun `startDownloads does nothing when downloader is already running`() {
+        every { anyConstructed<Downloader>().isRunning } returns true
+
+        downloadManager.startDownloads()
+
+        verify(exactly = 0) { DownloadJob.start(any()) }
     }
 
     private fun workInfos(result: () -> List<WorkInfo>) =
