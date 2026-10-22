@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.library
 
+import android.app.Application
 import androidx.compose.ui.util.fastAny
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
+import eu.kanade.tachiyomi.util.manga.toLibraryManga
 import eu.kanade.tachiyomi.util.manga.toLibraryMangaItem
 import eu.kanade.tachiyomi.util.system.combine
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -54,6 +56,7 @@ import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
+import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -102,6 +105,7 @@ class LibraryViewModel() : ViewModel() {
     val filterLibraryManga: FilterLibraryMangaUseCase = Injekt.get()
     val groupLibraryManga = GroupLibraryMangaUseCase()
     val categoryUseCases: CategoryUseCases = Injekt.get()
+    private val application: Application = Injekt.get()
 
     private val initialState = run {
         val cachedItems = lastLibraryCategoryItems
@@ -1031,6 +1035,39 @@ class LibraryViewModel() : ViewModel() {
     fun deepLinkSearch(searchQuery: String) {
         _internalLibraryScreenState.update {
             it.copy(searchQuery = searchQuery, initialSearch = searchQuery)
+        }
+    }
+
+    fun updateLibrary() {
+        viewModelScope.launchNonCancellable {
+            try {
+                LibraryUpdateJob.startNow(application)
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to start library update" }
+            }
+        }
+    }
+
+    fun refreshCategory(categoryItem: CategoryItem) {
+        viewModelScope.launchNonCancellable {
+            try {
+                val mangaToUse =
+                    if (categoryItem.isDynamic) {
+                        libraryScreenState.value.items
+                            .firstOrNull { it.categoryItem.id == categoryItem.id }
+                            ?.libraryItems
+                            ?.map { it.toLibraryManga() }
+                    } else {
+                        null
+                    }
+                LibraryUpdateJob.startNow(
+                    application,
+                    categoryItem.toDbCategory(),
+                    mangaToUse = mangaToUse,
+                )
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to refresh category ${categoryItem.name}" }
+            }
         }
     }
 

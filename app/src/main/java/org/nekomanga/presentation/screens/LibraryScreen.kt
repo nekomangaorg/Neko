@@ -34,15 +34,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.manga.toLibraryManga
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R
-import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.UiText
@@ -93,11 +90,7 @@ fun LibraryScreen(
                 onSearchMangaDex = onSearchMangaDex,
                 pagerIndexChanged = libraryViewModel::pagerIndexChanged,
                 scrollPositionChanged = libraryViewModel::scrollPositionChanged,
-                updateLibrary = {
-                    if (!LibraryUpdateJob.isRunning(context)) {
-                        LibraryUpdateJob.startNow(context)
-                    }
-                },
+                updateLibrary = libraryViewModel::updateLibrary,
                 collapseExpandAllCategories = libraryViewModel::collapseExpandAllCategories,
                 clearActiveFilters = libraryViewModel::clearActiveFilters,
                 filterToggled = libraryViewModel::filterToggled,
@@ -146,27 +139,11 @@ fun LibraryScreen(
         }
 
     val libraryCategoryActions =
-        remember(libraryViewModel, context) {
+        remember(libraryViewModel) {
             LibraryCategoryActions(
                 categoryItemClick = libraryViewModel::categoryItemClick,
                 categoryAscendingClick = libraryViewModel::categoryAscendingClick,
-                categoryRefreshClick = { categoryItem ->
-                    LibraryUpdateJob.startNow(
-                        context = context,
-                        categoryItem.toDbCategory(),
-                        mangaToUse =
-                            if (categoryItem.isDynamic) {
-                                val libraryItems =
-                                    libraryViewModel.libraryScreenState.value.items
-                                        .firstOrNull { it.categoryItem.id == categoryItem.id }
-                                        ?.libraryItems
-                                        ?.map { it.toLibraryManga() }
-                                libraryItems
-                            } else {
-                                null
-                            },
-                    )
-                },
+                categoryRefreshClick = libraryViewModel::refreshCategory,
             )
         }
 

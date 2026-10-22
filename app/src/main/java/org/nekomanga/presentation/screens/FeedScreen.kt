@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.toast
@@ -155,13 +154,7 @@ fun FeedScreen(
                     }
                 },
                 toggleShowingDownloads = feedViewModel::toggleShowingDownloads,
-                updateLibrary = { start ->
-                    if (LibraryUpdateJob.isRunning(context) && !start) {
-                        LibraryUpdateJob.stop(context)
-                    } else if (!LibraryUpdateJob.isRunning(context) && start) {
-                        LibraryUpdateJob.startNow(context)
-                    }
-                },
+                updateLibrary = feedViewModel::toggleLibraryUpdate,
             ),
         downloadScreenActions =
             DownloadScreenActions(
