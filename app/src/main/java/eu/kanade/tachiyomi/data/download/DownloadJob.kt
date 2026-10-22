@@ -143,13 +143,6 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
             WorkManager.getInstance(context).cancelUniqueWork(TAG)
         }
 
-        fun isRunning(context: Context): Boolean {
-            return WorkManager.getInstance(context).getWorkInfosForUniqueWork(TAG).get().let { list
-                ->
-                list.count { it.state == WorkInfo.State.RUNNING } == 1
-            }
-        }
-
         fun isRunningFlow(context: Context): Flow<Boolean> {
             return WorkManager.getInstance(context)
                 .getWorkInfosForUniqueWorkLiveData(TAG)
