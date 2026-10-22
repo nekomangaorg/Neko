@@ -271,7 +271,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
 
         private var instance: WeakReference<AppDownloadInstallJob>? = null
 
-        fun start(
+        suspend fun start(
             context: Context,
             url: String?,
             notifyOnInstall: Boolean,
@@ -333,6 +333,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             }
         }
 
-        fun isRunning(context: Context) = WorkManager.getInstance(context).jobIsRunning(TAG)
+        private suspend fun isRunning(context: Context) =
+            WorkManager.getInstance(context).jobIsRunning(TAG)
     }
 }

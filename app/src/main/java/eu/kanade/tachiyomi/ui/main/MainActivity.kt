@@ -23,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
@@ -42,7 +41,6 @@ import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.ui.base.activity.BaseMainActivity
 import eu.kanade.tachiyomi.ui.main.states.SideNavMode
@@ -127,7 +125,6 @@ class MainActivity : BaseMainActivity() {
         }
 
         setComposeContent {
-            val context = LocalContext.current
             val mainScreenState by viewModel.mainScreenState.collectAsStateWithLifecycle()
 
             val lifecycleOwner = LocalLifecycleOwner.current
@@ -292,14 +289,7 @@ class MainActivity : BaseMainActivity() {
                 AppUpdateDialog(
                     release = mainScreenState.appUpdateResult!!.release,
                     onDismissRequest = { viewModel.consumeAppUpdateResult() },
-                    onConfirm = { release ->
-                        AppDownloadInstallJob.start(
-                            context,
-                            release.downloadLink,
-                            true,
-                            version = release.version,
-                        )
-                    },
+                    onConfirm = { release -> viewModel.downloadUpdate(release) },
                 )
             }
         }

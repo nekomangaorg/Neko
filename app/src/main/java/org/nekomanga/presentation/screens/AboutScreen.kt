@@ -41,7 +41,6 @@ import androidx.core.content.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.crash.CrashReportText
-import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.LATEST_COMMIT_URL
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
@@ -113,12 +112,7 @@ fun AboutScreen(
         },
         onDownloadClicked = { release ->
             aboutViewModel.hideUpdateDialog()
-            AppDownloadInstallJob.start(
-                context,
-                release.downloadLink,
-                true,
-                version = release.version,
-            )
+            aboutViewModel.downloadUpdate(release)
         },
         onClickLicenses = { onNavigateTo(Screens.License) },
         onBackPressed = onBackPressed,

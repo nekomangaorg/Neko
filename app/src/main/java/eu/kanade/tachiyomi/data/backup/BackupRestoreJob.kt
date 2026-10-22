@@ -13,10 +13,11 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.util.system.jobIsRunning
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.nekomanga.R
 
 class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) :
@@ -77,6 +78,9 @@ class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) :
             WorkManager.getInstance(context).cancelUniqueWork(TAG)
         }
 
-        fun isRunning(context: Context) = WorkManager.getInstance(context).jobIsRunning(TAG)
+        fun isRunningFlow(context: Context): Flow<Boolean> =
+            WorkManager.getInstance(context).getWorkInfosForUniqueWorkFlow(TAG).map { list ->
+                list.any { !it.state.isFinished }
+            }
     }
 }

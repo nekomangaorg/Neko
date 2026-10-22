@@ -7,12 +7,15 @@ import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.crash.CrashReport
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+import eu.kanade.tachiyomi.data.updater.Release
 import eu.kanade.tachiyomi.data.updater.SimpleGithubRelease
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +34,7 @@ class MainActivityViewModel : ViewModel() {
     private val updateChecker by lazy { AppUpdateChecker() }
     private val crashReport by lazy { CrashReport.forContext(Injekt.get<Application>()) }
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
+    private val application: Application = Injekt.get()
 
     private val _deepLinkScreen = MutableStateFlow<List<NavKey>?>(null)
     val deepLinkScreen: StateFlow<List<NavKey>?> = _deepLinkScreen.asStateFlow()
@@ -62,6 +66,21 @@ class MainActivityViewModel : ViewModel() {
                         )
                     )
             )
+        }
+    }
+
+    fun downloadUpdate(release: Release) {
+        viewModelScope.launchNonCancellable {
+            try {
+                AppDownloadInstallJob.start(
+                    application,
+                    release.downloadLink,
+                    true,
+                    version = release.version,
+                )
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to start update download" }
+            }
         }
     }
 

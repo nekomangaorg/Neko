@@ -1,12 +1,16 @@
 package org.nekomanga.presentation.screens.about
 
+import android.app.Application
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+import eu.kanade.tachiyomi.data.updater.Release
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,12 +20,14 @@ import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.snackbar.SnackbarState
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.preferences.GetFormattedBuildTimeUseCase
 import uy.kohesive.injekt.injectLazy
 
 class AboutViewModel : ViewModel() {
     private val updateChecker by lazy { AppUpdateChecker() }
     private val preferences: PreferencesHelper by injectLazy()
+    private val application: Application by injectLazy()
 
     private val securityPreferences: SecurityPreferences by injectLazy()
     private val getFormattedBuildTimeUseCase: GetFormattedBuildTimeUseCase by injectLazy()
@@ -86,6 +92,21 @@ class AboutViewModel : ViewModel() {
     fun hideUpdateDialog() {
         viewModelScope.launch {
             _aboutScreenState.update { it.copy(shouldShowUpdateDialog = false) }
+        }
+    }
+
+    fun downloadUpdate(release: Release) {
+        viewModelScope.launchNonCancellable {
+            try {
+                AppDownloadInstallJob.start(
+                    application,
+                    release.downloadLink,
+                    true,
+                    version = release.version,
+                )
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to start update download" }
+            }
         }
     }
 

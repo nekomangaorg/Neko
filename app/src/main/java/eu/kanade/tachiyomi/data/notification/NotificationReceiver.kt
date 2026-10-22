@@ -102,7 +102,21 @@ class NotificationReceiver : BroadcastReceiver() {
                 val version = intent.getStringExtra(AppDownloadInstallJob.EXTRA_VERSION) ?: return
                 val notifyOnInstall =
                     intent.getBooleanExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, false)
-                AppDownloadInstallJob.start(context, url, notifyOnInstall, version = version)
+                val pendingResult = goAsync()
+                launchIO {
+                    try {
+                        AppDownloadInstallJob.start(
+                            context,
+                            url,
+                            notifyOnInstall,
+                            version = version,
+                        )
+                    } catch (e: Exception) {
+                        TimberKt.e(e) { "Failed to start app update from notification" }
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
             }
             // Share backup file
             ACTION_SHARE_BACKUP -> {

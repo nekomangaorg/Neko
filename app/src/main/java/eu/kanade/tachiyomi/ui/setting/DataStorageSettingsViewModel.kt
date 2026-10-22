@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
+import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.coil.CoilDiskCache
@@ -45,7 +47,24 @@ class DataStorageSettingsViewModel : ViewModel() {
 
     val cacheData = _cacheData.asStateFlow()
 
+    private val _isBackupRunning = MutableStateFlow(false)
+    val isBackupRunning = _isBackupRunning.asStateFlow()
+
+    private val _isRestoreRunning = MutableStateFlow(false)
+    val isRestoreRunning = _isRestoreRunning.asStateFlow()
+
     init {
+        BackupCreatorJob.isManualJobRunningFlow(applicationContext).observeAndUpdate(
+            viewModelScope
+        ) { isRunning ->
+            _isBackupRunning.value = isRunning
+        }
+
+        BackupRestoreJob.isRunningFlow(applicationContext).observeAndUpdate(viewModelScope) {
+            isRunning ->
+            _isRestoreRunning.value = isRunning
+        }
+
         DiskUtil.observeDiskSpace(applicationContext.cacheDir, applicationContext).observeAndUpdate(
             viewModelScope
         ) { newSize ->

@@ -58,6 +58,8 @@ internal class DataStorageSettingsScreen(
     incognitoMode: Boolean,
     val storagePreferences: StoragePreferences,
     val cacheData: CacheData,
+    val isBackupRunning: Boolean,
+    val isRestoreRunning: Boolean,
     val clearCache: (CacheType) -> Unit,
     val toastEvent: SharedFlow<UiText.StringResource>,
     onNavigationIconClick: (() -> Unit)?,
@@ -246,7 +248,7 @@ internal class DataStorageSettingsScreen(
                                                     Toast.LENGTH_LONG,
                                                 )
                                             }
-                                            if (!BackupCreatorJob.isManualJobRunning(context)) {
+                                            if (!isBackupRunning) {
                                                 showCreateBackupDialog = !showCreateBackupDialog
                                             } else {
                                                 context.toast(R.string.backup_in_progress)
@@ -261,7 +263,7 @@ internal class DataStorageSettingsScreen(
                                                     Toast.LENGTH_LONG,
                                                 )
                                             }
-                                            if (!BackupRestoreJob.isRunning(context)) {
+                                            if (!isRestoreRunning) {
                                                 chooseRestoreFile.launch("*/*")
                                             } else {
                                                 context.toast(R.string.restore_in_progress)
