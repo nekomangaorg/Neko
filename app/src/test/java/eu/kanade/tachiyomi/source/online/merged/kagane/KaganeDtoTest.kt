@@ -11,7 +11,7 @@ class KaganeDtoTest {
         ChapterBook(
                 id = "b1",
                 title = "",
-                createdAt = null,
+                releasedAt = null,
                 number = number,
                 chapterNo = null,
                 volumeNo = null,
