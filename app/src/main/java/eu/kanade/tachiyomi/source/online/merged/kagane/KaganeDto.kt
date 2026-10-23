@@ -69,27 +69,36 @@ class BookIndexDto(
 ) {
     fun toBooks(): List<ChapterBook> {
         // A partial chapter list would make the chapter sync delete the missing chapters.
-        check(books.size == count) { "Incomplete Kagane chapter index" }
+        check(books.size == count) {
+            "Incomplete Kagane chapter index: expected $count, got ${books.size}"
+        }
         // Each row holds one value per entry of fields, in the same order.
+        val idIndex = fields.indexOf("book_id")
+        check(idIndex >= 0) { "Kagane book index missing 'book_id' field" }
+        val titleIndex = fields.indexOf("title")
+        val releasedAtIndex = fields.indexOf("released_at")
+        val sortNoIndex = fields.indexOf("sort_no")
+        val chapterNoIndex = fields.indexOf("chapter_no")
+        val volumeNoIndex = fields.indexOf("volume_no")
+        val groupIxIndex = fields.indexOf("group_ix")
         return books.map { row ->
-            val values = fields.zip(row).toMap()
             ChapterBook(
-                id = checkNotNull(values.string("book_id")) { "Kagane book without book_id" },
-                title = values.string("title").orEmpty(),
-                releasedAt = values["released_at"]?.jsonPrimitive?.longOrNull,
-                number = values["sort_no"]?.jsonPrimitive?.floatOrNull ?: 0f,
-                chapterNo = values.string("chapter_no"),
-                volumeNo = values.string("volume_no"),
+                id = checkNotNull(row.string(idIndex)) { "Kagane book without book_id" },
+                title = row.string(titleIndex).orEmpty(),
+                releasedAt = row.getOrNull(releasedAtIndex)?.jsonPrimitive?.longOrNull,
+                number = row.getOrNull(sortNoIndex)?.jsonPrimitive?.floatOrNull ?: 0f,
+                chapterNo = row.string(chapterNoIndex),
+                volumeNo = row.string(volumeNoIndex),
                 groups =
-                    (values["group_ix"] as? JsonArray).orEmpty().mapNotNull { index ->
+                    (row.getOrNull(groupIxIndex) as? JsonArray).orEmpty().mapNotNull { index ->
                         index.jsonPrimitive.intOrNull?.let { groups.getOrNull(it) }
                     },
             )
         }
     }
 
-    private fun Map<String, JsonElement>.string(field: String): String? =
-        this[field]?.jsonPrimitive?.contentOrNull
+    private fun List<JsonElement>.string(index: Int): String? =
+        getOrNull(index)?.jsonPrimitive?.contentOrNull
 }
 
 class ChapterBook(

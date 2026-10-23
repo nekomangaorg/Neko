@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.source.online.merged.kagane
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getError
 import eu.kanade.tachiyomi.network.NetworkHelper
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -106,6 +105,20 @@ class KaganeTest {
     }
 
     @Test
+    fun `a null or missing release date leaves date_upload at 0`() = runTest {
+        responses[INDEX_PATH] = 200 to UNDATED_INDEX
+
+        val chapters = kagane.fetchChapters("S1").get().orEmpty().map { it.first }
+
+        chapters.map { it.url to it.date_upload } shouldBe
+            listOf(
+                "/series/S1/reader/b3" to 1_770_319_199_000L,
+                "/series/S1/reader/b2" to 0L,
+                "/series/S1/reader/b1" to 0L,
+            )
+    }
+
+    @Test
     fun `an HTTP error from the book index is returned`() = runTest {
         responses[INDEX_PATH] = 500 to ""
 
@@ -116,7 +129,16 @@ class KaganeTest {
     fun `an incomplete book index fails instead of listing part of the chapters`() = runTest {
         responses[INDEX_PATH] = 200 to INCOMPLETE_INDEX
 
-        shouldThrow<IllegalStateException> { kagane.fetchChapters("S1") }
+        kagane.fetchChapters("S1").getError() shouldBe
+            ResultError.Generic("Incomplete Kagane chapter index: expected 3, got 2")
+    }
+
+    @Test
+    fun `a book index without a book_id field fails`() = runTest {
+        responses[INDEX_PATH] = 200 to NO_ID_INDEX
+
+        kagane.fetchChapters("S1").getError() shouldBe
+            ResultError.Generic("Kagane book index missing 'book_id' field")
     }
 
     private companion object {
@@ -136,7 +158,12 @@ class KaganeTest {
             """{"count":2,"fields":["title","released_at","group_ix","volume_no","chapter_no","sort_no","book_id"],"groups":[],"books":[["Chapter 1",1770146399,[],null,"1",1.0,"b1"],["Chapter 2",1770232799,[],null,"2",2.0,"b2"]]}"""
         const val SHUFFLED_INDEX =
             """{"count":3,"fields":["book_id","sort_no","title"],"groups":[],"books":[["b2",2.0,"Chapter 2"],["b3",3.0,"Chapter 3"],["b1",1.0,"Chapter 1"]]}"""
+        // b1 has a null release date and b2's row ends before the released_at column.
+        const val UNDATED_INDEX =
+            """{"count":3,"fields":["book_id","sort_no","released_at"],"groups":[],"books":[["b1",1.0,null],["b2",2.0],["b3",3.0,1770319199]]}"""
         const val INCOMPLETE_INDEX =
             """{"count":3,"fields":["book_id","sort_no","chapter_no","volume_no","group_ix","released_at","title"],"groups":[],"books":[["b1",1.0,"1",null,[],1770146399,"Chapter 1"],["b2",2.0,"2",null,[],1770232799,"Chapter 2"]]}"""
+        const val NO_ID_INDEX =
+            """{"count":1,"fields":["sort_no","title"],"groups":[],"books":[[1.0,"Chapter 1"]]}"""
     }
 }

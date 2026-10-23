@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -195,7 +196,13 @@ class Kagane : ReducedHttpSource() {
             indexResponse.closeQuietly()
             return Err(ResultError.HttpError(indexResponse.code, "HTTP ${indexResponse.code}"))
         }
-        val books = with(json) { indexResponse.parseAs<BookIndexDto>() }.toBooks()
+        val bookIndex = with(json) { indexResponse.parseAs<BookIndexDto>() }
+        val books = runCatching {
+            bookIndex.toBooks()
+        }
+            .getOrElse {
+                return Err(ResultError.Generic(it.toDisplayMessage()))
+            }
         val language = dto.translatedLanguage?.let { KaganeLang.fromKaganeLang(it) }
         val scanlatorSource = dto.sourceId?.let { sourceNames()[it] }
         val chapters =
