@@ -3,13 +3,15 @@ package eu.kanade.tachiyomi.source.online.merged.kagane
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.system.formatChapterNumber
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.floatOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import org.nekomanga.constants.Constants
 import org.nekomanga.logging.TimberKt
 
@@ -56,17 +58,47 @@ class DetailsDto(
     val title: String,
     @SerialName("translated_language") val translatedLanguage: String? = null,
     @SerialName("source_id") val sourceId: String?,
-    @SerialName("series_books") val seriesBooks: List<ChapterBook> = emptyList(),
 )
 
 @Serializable
+class BookIndexDto(
+    val count: Int,
+    val fields: List<String>,
+    val groups: List<ChapterBook.ChapterGroup>,
+    val books: List<List<JsonElement>>,
+) {
+    fun toBooks(): List<ChapterBook> {
+        // A partial chapter list would make the chapter sync delete the missing chapters.
+        check(books.size == count) { "Incomplete Kagane chapter index" }
+        // Each row holds one value per entry of fields, in the same order.
+        return books.map { row ->
+            val values = fields.zip(row).toMap()
+            ChapterBook(
+                id = checkNotNull(values.string("book_id")) { "Kagane book without book_id" },
+                title = values.string("title").orEmpty(),
+                releasedAt = values["released_at"]?.jsonPrimitive?.longOrNull,
+                number = values["sort_no"]?.jsonPrimitive?.floatOrNull ?: 0f,
+                chapterNo = values.string("chapter_no"),
+                volumeNo = values.string("volume_no"),
+                groups =
+                    (values["group_ix"] as? JsonArray).orEmpty().mapNotNull { index ->
+                        index.jsonPrimitive.intOrNull?.let { groups.getOrNull(it) }
+                    },
+            )
+        }
+    }
+
+    private fun Map<String, JsonElement>.string(field: String): String? =
+        this[field]?.jsonPrimitive?.contentOrNull
+}
+
 class ChapterBook(
-    @SerialName("book_id") val id: String,
+    val id: String,
     val title: String,
-    @SerialName("created_at") val createdAt: String?,
-    @SerialName("sort_no") val number: Float = 0f,
-    @SerialName("chapter_no") val chapterNo: String?,
-    @SerialName("volume_no") val volumeNo: String?,
+    val releasedAt: Long?,
+    val number: Float = 0f,
+    val chapterNo: String?,
+    val volumeNo: String?,
     val groups: List<ChapterGroup> = emptyList(),
 ) {
     fun toSChapter(
@@ -106,7 +138,7 @@ class ChapterBook(
             chapter_title = parsedTitle?.third?.trim() ?: title
             chapter_txt = chtxt
             this.name = name.joinToString(" ")
-            date_upload = parseDate(createdAt)
+            date_upload = releasedAt?.let { it * 1000 } ?: 0L
             scanlator =
                 (listOfNotNull(sourceName, scanlatorSource) + groups.map { it.title })
                     .filter { it.isNotBlank() }
@@ -135,24 +167,6 @@ class ChapterBook(
             Regex(
                 """(?i)^ch(?:apter)?\.?\s*(\d+(?:\.\d+)?)\s*(?:-\s*vol(?:ume)?\.?\s*(\d+(?:\.\d+)?))?(.*)$"""
             )
-
-        private val dateFormatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)
-
-        fun parseDate(createdAt: String?): Long {
-            if (createdAt.isNullOrBlank()) return 0L
-            runCatching {
-                return OffsetDateTime.parse(createdAt, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-                    .toInstant()
-                    .toEpochMilli()
-            }
-            return runCatching {
-                    LocalDateTime.parse(createdAt.take(19), dateFormatter)
-                        .toInstant(ZoneOffset.UTC)
-                        .toEpochMilli()
-                }
-                .getOrDefault(0L)
-        }
     }
 }
 

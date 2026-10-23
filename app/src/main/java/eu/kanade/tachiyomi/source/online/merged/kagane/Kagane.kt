@@ -189,13 +189,20 @@ class Kagane : ReducedHttpSource() {
             return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
         }
         val dto = with(json) { response.parseAs<DetailsDto>() }
+        val indexResponse =
+            client.newCall(GET("$apiUrl/series/$mangaUrl/books/index?fields=List", headers)).await()
+        if (!indexResponse.isSuccessful) {
+            indexResponse.closeQuietly()
+            return Err(ResultError.HttpError(indexResponse.code, "HTTP ${indexResponse.code}"))
+        }
+        val books = with(json) { indexResponse.parseAs<BookIndexDto>() }.toBooks()
         val language = dto.translatedLanguage?.let { KaganeLang.fromKaganeLang(it) }
         val scanlatorSource = dto.sourceId?.let { sourceNames()[it] }
         val chapters =
-            dto.seriesBooks.map {
-                it.toSChapter(mangaUrl, Kagane.name, scanlatorSource, language) to false
-            }
-        return Ok(chapters.reversed())
+            books
+                .sortedByDescending { it.number }
+                .map { it.toSChapter(mangaUrl, Kagane.name, scanlatorSource, language) to false }
+        return Ok(chapters)
     }
 
     private val dataSaver: Boolean
@@ -278,6 +285,6 @@ class Kagane : ReducedHttpSource() {
 
     companion object {
         const val name = "Kagane"
-        const val baseUrl = "https://kagane.to"
+        const val baseUrl = "https://kagane.si"
     }
 }
