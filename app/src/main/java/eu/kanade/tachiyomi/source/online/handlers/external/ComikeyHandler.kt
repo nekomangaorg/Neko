@@ -312,7 +312,8 @@ class ComikeyHandler {
     }
 
     companion object {
-        private val RELAY_HOST_REGEX = Regex("""relay-\w+\.(epub\.rocks|comikey\.com)""")
+        private val RELAY_HOST_REGEX =
+            Regex("""relay-\w+\.(epub\.rocks|comikey\.com)""", RegexOption.IGNORE_CASE)
 
         internal fun isRelayManifest(host: String?, path: String?): Boolean =
             host?.matches(RELAY_HOST_REGEX) == true && path?.endsWith("/manifest") == true
@@ -333,16 +334,17 @@ class ComikeyHandler {
                 val imageUrl =
                     requireNotNull(manifestUrl.resolve(href)) { "Invalid Comikey page link" }
                 // Page links carry their own signed query; the manifest query is only a fallback.
-                val url =
+                val resolvedUrl =
                     imageUrl
                         .newBuilder()
                         .encodedQuery(imageUrl.encodedQuery ?: manifestUrl.encodedQuery)
-                        .apply {
-                            if (imageUrl.queryParameter("act") == null) {
-                                addQueryParameter("act", act)
-                            }
-                        }
                         .build()
+                val url =
+                    if (resolvedUrl.queryParameter("act") == null && act.isNotBlank()) {
+                        resolvedUrl.newBuilder().addQueryParameter("act", act).build()
+                    } else {
+                        resolvedUrl
+                    }
 
                 Page(i, imageUrl = url.toString())
             }

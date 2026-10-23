@@ -12,9 +12,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Comikey serves each chapter as a manifest whose page links resolve against the manifest URL. Page
- * requests carry the App Check token in the `act` query parameter unless the page link already has
- * one.
+ * Comikey serves each chapter as a manifest whose page links resolve against the manifest URL. A
+ * page link without a query takes the manifest's. Page requests carry the App Check token in the
+ * `act` query parameter unless their query already has one, and a blank token is left out.
  */
 class ComikeyHandlerTest {
 
@@ -37,6 +37,24 @@ class ComikeyHandlerTest {
         val urls = imageUrls(page("pages/0001.webp"))
 
         assertEquals(listOf("$EPISODE/pages/0001.webp?$MANIFEST_QUERY&act=$ACT"), urls)
+    }
+
+    @Test
+    fun `manifest query that already carries act gets no second one`() {
+        val urls =
+            imageUrls(
+                page("pages/0001.webp"),
+                manifestUrl = "$EPISODE/manifest?act=server&Signature=manifest",
+            )
+
+        assertEquals(listOf("$EPISODE/pages/0001.webp?act=server&Signature=manifest"), urls)
+    }
+
+    @Test
+    fun `blank act is not added`() {
+        val urls = imageUrls(page("pages/0001.webp?Signature=page1"), act = "")
+
+        assertEquals(listOf("$EPISODE/pages/0001.webp?Signature=page1"), urls)
     }
 
     @Test
@@ -112,9 +130,22 @@ class ComikeyHandlerTest {
     }
 
     @Test
+    fun `manifest without pages gives no pages`() {
+        val manifest = ComikeyEpisodeManifest(ComikeyEpisodeManifestMetadata("ltr"), emptyList())
+
+        assertEquals(emptyList<String?>(), imageUrls(manifest))
+    }
+
+    @Test
     fun `manifest request on any relay host is intercepted`() {
         assertTrue(ComikeyHandler.isRelayManifest("relay-us.epub.rocks", "/v1/ep1/manifest"))
         assertTrue(ComikeyHandler.isRelayManifest("relay-eu.comikey.com", "/v1/ep1/manifest"))
+    }
+
+    @Test
+    fun `relay host is matched in any letter case`() {
+        assertTrue(ComikeyHandler.isRelayManifest("RELAY-US.EPUB.ROCKS", "/v1/ep1/manifest"))
+        assertTrue(ComikeyHandler.isRelayManifest("Relay-Eu.Comikey.Com", "/v1/ep1/manifest"))
     }
 
     @Test
@@ -127,13 +158,24 @@ class ComikeyHandlerTest {
         assertFalse(ComikeyHandler.isRelayManifest(null, "/manifest"))
     }
 
-    private fun imageUrls(vararg pages: ComikeyPage, progression: String = "ltr") =
+    private fun imageUrls(
+        vararg pages: ComikeyPage,
+        progression: String = "ltr",
+        manifestUrl: String = MANIFEST_URL,
+        act: String = ACT,
+    ) =
         imageUrls(
-            ComikeyEpisodeManifest(ComikeyEpisodeManifestMetadata(progression), pages.toList())
+            ComikeyEpisodeManifest(ComikeyEpisodeManifestMetadata(progression), pages.toList()),
+            manifestUrl,
+            act,
         )
 
-    private fun imageUrls(manifest: ComikeyEpisodeManifest): List<String?> =
-        ComikeyHandler.pageListFromManifest(manifest, MANIFEST_URL.toHttpUrl(), ACT).map {
+    private fun imageUrls(
+        manifest: ComikeyEpisodeManifest,
+        manifestUrl: String = MANIFEST_URL,
+        act: String = ACT,
+    ): List<String?> =
+        ComikeyHandler.pageListFromManifest(manifest, manifestUrl.toHttpUrl(), act).map {
             it.imageUrl
         }
 
