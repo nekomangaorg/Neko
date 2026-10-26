@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -189,13 +190,26 @@ class Kagane : ReducedHttpSource() {
             return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
         }
         val dto = with(json) { response.parseAs<DetailsDto>() }
+        val indexResponse =
+            client.newCall(GET("$apiUrl/series/$mangaUrl/books/index?fields=List", headers)).await()
+        if (!indexResponse.isSuccessful) {
+            indexResponse.closeQuietly()
+            return Err(ResultError.HttpError(indexResponse.code, "HTTP ${indexResponse.code}"))
+        }
+        val bookIndex = with(json) { indexResponse.parseAs<BookIndexDto>() }
+        val books = runCatching {
+            bookIndex.toBooks()
+        }
+            .getOrElse {
+                return Err(ResultError.Generic(it.toDisplayMessage()))
+            }
         val language = dto.translatedLanguage?.let { KaganeLang.fromKaganeLang(it) }
         val scanlatorSource = dto.sourceId?.let { sourceNames()[it] }
         val chapters =
-            dto.seriesBooks.map {
-                it.toSChapter(mangaUrl, Kagane.name, scanlatorSource, language) to false
-            }
-        return Ok(chapters.reversed())
+            books
+                .sortedByDescending { it.number }
+                .map { it.toSChapter(mangaUrl, Kagane.name, scanlatorSource, language) to false }
+        return Ok(chapters)
     }
 
     private val dataSaver: Boolean
@@ -278,6 +292,6 @@ class Kagane : ReducedHttpSource() {
 
     companion object {
         const val name = "Kagane"
-        const val baseUrl = "https://kagane.to"
+        const val baseUrl = "https://kagane.si"
     }
 }
