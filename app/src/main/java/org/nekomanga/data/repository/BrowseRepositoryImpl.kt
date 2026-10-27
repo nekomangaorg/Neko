@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens.browse
+package org.nekomanga.data.repository
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -11,9 +11,13 @@ import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.ScanlatorGroupRepository
 import org.nekomanga.data.database.repository.UploaderRepository
+import org.nekomanga.domain.browse.BrowseHomeSection
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
@@ -21,25 +25,27 @@ import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class BrowseRepository(
+class BrowseRepositoryImpl(
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex,
-    val loginHelper: MangaDexLoginHelper = Injekt.get(),
+    private val loginHelper: MangaDexLoginHelper = Injekt.get(),
     private val mangaRepository: MangaRepository = Injekt.get(),
     private val scanlatorGroupRepository: ScanlatorGroupRepository = Injekt.get(),
     private val uploaderRepository: UploaderRepository = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
-) {
+) : BrowseRepository {
 
-    fun isLoggedIn() = loginHelper.isLoggedIn()
+    override fun isLoggedIn(): Boolean = loginHelper.isLoggedIn()
 
-    suspend fun getRandomManga(): Result<DisplayManga, ResultError> {
+    override fun isLoggedInFlow(): Flow<Boolean> = loginHelper.isLoggedInFlow()
+
+    override suspend fun getRandomManga(): Result<DisplayManga, ResultError> {
         return mangaDex.getRandomManga().andThen {
             val displayManga = it.toDisplayManga(mangaRepository, mangaDex.id)
             Ok(displayManga)
         }
     }
 
-    suspend fun getSearchPage(
+    override suspend fun getSearchPage(
         page: Int,
         filters: DexFilters,
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
@@ -50,7 +56,7 @@ class BrowseRepository(
         }
     }
 
-    suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
+    override suspend fun getHomePage(): Result<List<BrowseHomeSection>, ResultError> {
         val blockedGroupNames = mangaDexPreferences.blockedGroups().get().toList()
         val blockedGroupUUIDs = coroutineScope {
             val chunks = blockedGroupNames.chunked(900)
@@ -60,9 +66,12 @@ class BrowseRepository(
             val existingGroupNames = existingGroups.map { it.name }.toSet()
             val missingGroupNames = blockedGroupNames.filterNot { it in existingGroupNames }
 
+            val semaphore = Semaphore(5)
             val fetchedGroups =
                 missingGroupNames
-                    .map { name -> async { mangaDex.getScanlatorGroup(group = name) } }
+                    .map { name ->
+                        async { semaphore.withPermit { mangaDex.getScanlatorGroup(group = name) } }
+                    }
                     .awaitAll()
                     .mapNotNull { result -> result.getOrElse { null }?.toScanlatorGroupImpl() }
 
@@ -83,9 +92,12 @@ class BrowseRepository(
                 it in existingUploaderNames
             }
 
+            val semaphore = Semaphore(5)
             val fetchedUploaders =
                 missingUploaderNames
-                    .map { name -> async { mangaDex.getUploader(uploader = name) } }
+                    .map { name ->
+                        async { semaphore.withPermit { mangaDex.getUploader(uploader = name) } }
+                    }
                     .awaitAll()
                     .mapNotNull { result -> result.getOrElse { null }?.toUploaderImpl() }
 
@@ -99,22 +111,21 @@ class BrowseRepository(
             listResults ->
             Ok(
                 listResults.map { listResult ->
-                    HomePageManga(
+                    BrowseHomeSection(
                         displayScreenType = listResult.displayScreenType,
-                        displayManga =
+                        mangaList =
                             listResult.sourceManga
                                 .toDisplayManga(mangaRepository, mangaDex.id)
-                                .distinctBy { it.url }
-                                .toList(),
+                                .distinctBy { it.url },
                     )
                 }
             )
         }
     }
 
-    suspend fun getFollows(): Result<List<DisplayManga>, ResultError> {
+    override suspend fun getFollows(): Result<List<DisplayManga>, ResultError> {
         return mangaDex.fetchAllFollows().andThen { sourceManga ->
-            Ok(sourceManga.toDisplayManga(mangaRepository, mangaDex.id).toList())
+            Ok(sourceManga.toDisplayManga(mangaRepository, mangaDex.id))
         }
     }
 }
