@@ -145,10 +145,14 @@ class FeedRepositoryImpl(
                             ?: return@mapNotNull null
 
                     val itemMangaId = manga.id ?: return@mapNotNull null
+                    val dateToUse =
+                        recentUploadDate
+                            ?: chapter.dateUpload.takeIf { it > 0L }
+                            ?: System.currentTimeMillis()
                     FeedItem(
                         mangaId = itemMangaId,
                         mangaTitle = manga.displayTitle(),
-                        date = recentUploadDate ?: 0L,
+                        date = dateToUse,
                         artwork = manga.toDisplayManga().currentArtwork,
                         chapters = listOf(getChapterItem(manga, chapter)),
                     )
@@ -262,10 +266,11 @@ class FeedRepositoryImpl(
                                 ?.chapter ?: return@mapNotNull null
 
                         val itemMangaId = manga.id ?: return@mapNotNull null
+                        val dateToUse = entry.value.firstOrNull()?.date ?: 0L
                         FeedItem(
                             mangaId = itemMangaId,
                             mangaTitle = manga.displayTitle(),
-                            date = 0L,
+                            date = dateToUse,
                             artwork = manga.toDisplayManga().currentArtwork,
                             lastReadChapter = lastReadChapter,
                             chapters = listOf(chapter.toChapterItem()),
@@ -293,8 +298,8 @@ class FeedRepositoryImpl(
                 mangaRepository
                     .getFavoriteMangaList()
                     .distinctBy { it.id }
-                    .sortedBy { it.date_added }
-                    .takeLast(100)
+                    .sortedByDescending { it.date_added }
+                    .take(100)
             val favoriteMangaIds = favoriteMangaList.mapNotNull { it.id }
             val chaptersMap =
                 chapterRepository.getChaptersForMangaIds(favoriteMangaIds).groupBy { it.manga_id }
@@ -332,8 +337,7 @@ class FeedRepositoryImpl(
                         chapters = listOf(getChapterItem(manga, simpleChapter)),
                     )
                 }
-                .takeLast(6)
-                .reversed()
+                .take(6)
         }
     }
 
@@ -390,8 +394,12 @@ class FeedRepositoryImpl(
                     FeedHistoryGroup.Week -> {
                         val formatter =
                             when (group == FeedHistoryGroup.Week) {
-                                true -> weekDateFormat.get()
-                                false -> dayDateFormat.get()
+                                true ->
+                                    weekDateFormat.get()
+                                        ?: SimpleDateFormat("yyyy-w", Locale.getDefault())
+                                false ->
+                                    dayDateFormat.get()
+                                        ?: SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                             }
                         historyRepository
                             .getRecentHistoryUngrouped(
