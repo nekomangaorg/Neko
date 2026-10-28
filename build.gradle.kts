@@ -32,7 +32,6 @@ subprojects {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.addAll(
             listOf(
-                "-Xcontext-parameters",
                 "-opt-in=kotlin.RequiresOptIn",
                 "-opt-in=kotlin.time.ExperimentalTime",
                 "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",

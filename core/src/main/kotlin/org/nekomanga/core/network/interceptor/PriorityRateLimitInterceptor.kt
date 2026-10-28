@@ -3,6 +3,8 @@ package org.nekomanga.core.network.interceptor
 import java.io.IOException
 import java.util.PriorityQueue
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -34,7 +36,8 @@ class PriorityRateLimitInterceptor(
     private val prioritySelector: (HttpUrl) -> Int,
 ) : Interceptor {
 
-    private val lock = Object()
+    private val lock = ReentrantLock()
+    private val condition = lock.newCondition()
     private val queue = PriorityQueue<Ticket>()
 
     private var tokens = permits.toDouble()
@@ -63,19 +66,19 @@ class PriorityRateLimitInterceptor(
 
         // SINGLE SYNCHRONIZED BLOCK
         // We do not release the lock between "Queueing" and "Checking/Waiting"
-        synchronized(lock) {
+        lock.withLock {
             ticket = Ticket(priority, sequenceCounter++)
             queue.add(ticket)
 
             // Wake up any sleeping threads so they realize a new High Priority ticket has arrived
-            lock.notifyAll()
+            condition.signalAll()
 
             try {
                 while (true) {
                     // 1. Handle Cancellation (Cleanup)
                     if (chain.call().isCanceled()) {
                         queue.remove(ticket)
-                        lock.notifyAll() // Head might have changed
+                        condition.signalAll() // Head might have changed
                         throw IOException("Canceled")
                     }
 
@@ -97,30 +100,28 @@ class PriorityRateLimitInterceptor(
                             // Success: Consume and Exit Loop
                             tokens -= 1.0
                             queue.poll() // Remove self
-                            lock.notifyAll() // Wake up next candidate
+                            condition.signalAll() // Wake up next candidate
                             break
                         } else {
                             // Head, but empty bucket. Wait for refill.
                             val missingTokens = 1.0 - tokens
                             val waitNanos = (missingTokens / refillRatePerNano).toLong()
                             if (waitNanos > 0) {
-                                val millis = waitNanos / 1_000_000
-                                val nanos = (waitNanos % 1_000_000).toInt()
-                                lock.wait(millis, nanos)
+                                condition.awaitNanos(waitNanos)
                             } else {
-                                lock.wait(1) // Safety net
+                                condition.await(1, TimeUnit.MILLISECONDS) // Safety net
                             }
                         }
                     } else {
                         // NOT HEAD.
                         // Someone with higher priority (or older sequence) is ahead.
                         // Sleep indefinitely until notified by the person leaving the queue.
-                        lock.wait()
+                        condition.await()
                     }
                 }
             } catch (e: InterruptedException) {
                 queue.remove(ticket)
-                lock.notifyAll()
+                condition.signalAll()
                 Thread.currentThread().interrupt()
                 throw IOException("Interrupted waiting for rate limit", e)
             }
