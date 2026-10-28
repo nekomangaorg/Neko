@@ -1,7 +1,8 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.app.Application
+import android.content.Context
 import androidx.room.withTransaction
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
@@ -13,12 +14,11 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.fetchMergedChapters
 import eu.kanade.tachiyomi.util.chapter.getChapterNum
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.manga.shouldDownloadNewChapters
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -43,7 +43,6 @@ import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.manga.toManga
 import org.nekomanga.domain.manga.toMangaItem
 import org.nekomanga.domain.manga.uuid
-import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
@@ -80,6 +79,7 @@ class MangaUpdateCoordinator {
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
     private val mangaUseCases: MangaUseCases by injectLazy()
+    private val context: Context by lazy { Injekt.get<Application>().applicationContext }
 
     fun update(mangaItem: MangaItem, isMerging: Boolean) = channelFlow {
         if (!sourceManager.mangaDex.checkIfUp()) {
@@ -225,16 +225,10 @@ class MangaUpdateCoordinator {
             mergeMangaRepository.getMergeMangaList(manga.id!!).map { mergeManga ->
                 async {
                     val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
-                    runCatching { source.fetchChapters(mergeManga.url) }
-                        .getOrElse { e ->
-                            if (e is CancellationException) throw e
-                            TimberKt.e(e) {
-                                "Failed to fetch chapters for merged source: ${source.name}"
-                            }
-                            Err(ResultError.Generic(e.toDisplayMessage()))
-                        }
+                    source
+                        .fetchMergedChapters(mergeManga.url)
                         .onErr {
-                            val msg = "Failed to fetch from ${source.name}: ${it.message()}"
+                            val msg = "Failed to fetch from ${source.name}: ${it.message(context)}"
                             send(MangaResult.Error(text = msg))
 
                             TimberKt.e { msg }

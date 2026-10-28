@@ -20,7 +20,6 @@ import androidx.work.WorkerParameters
 import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onErr
@@ -41,6 +40,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.source.online.fetchMergedChapters
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -97,7 +97,6 @@ import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
 import org.nekomanga.domain.library.ScanlatorFilterOption
-import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
@@ -402,18 +401,12 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                         // in the future check the merge type
                                         val source =
                                             MergeType.getSource(mergeManga.mergeType, sourceManager)
-                                        runCatching { source.fetchChapters(mergeManga.url) }
-                                            .getOrElse { e ->
-                                                if (e is CancellationException) throw e
-                                                TimberKt.e(e) {
-                                                    "Error fetching merged chapters for ${mergeManga.mergeType}"
-                                                }
-                                                Err(ResultError.Generic(e.toDisplayMessage()))
-                                            }
+                                        source
+                                            .fetchMergedChapters(mergeManga.url)
                                             .onErr {
                                                 errorFromMerged = true
                                                 failedUpdates[manga] =
-                                                    "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"
+                                                    "Merged Chapter --${mergeManga.mergeType}-- ${it.message(context)}"
                                             }
                                             .getOrElse { emptyList() }
                                             .map { (sChapter, status) ->
