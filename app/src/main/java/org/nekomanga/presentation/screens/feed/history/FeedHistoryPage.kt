@@ -20,9 +20,9 @@ import androidx.compose.ui.Modifier
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
+import org.nekomanga.domain.feed.FeedHistoryGroup
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.EmptyScreen
-import org.nekomanga.presentation.screens.feed.FeedHistoryGroup
 import org.nekomanga.presentation.screens.feed.FeedManga
 import org.nekomanga.presentation.screens.feed.FeedScreenActions
 import org.nekomanga.presentation.theme.Size

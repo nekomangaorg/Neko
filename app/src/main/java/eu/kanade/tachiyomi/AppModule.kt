@@ -71,6 +71,10 @@ import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.data.database.repository.UploaderRepository
 import org.nekomanga.data.database.repository.UploaderRepositoryImpl
+import org.nekomanga.data.repository.BrowseRepository
+import org.nekomanga.data.repository.BrowseRepositoryImpl
+import org.nekomanga.data.repository.FeedRepository
+import org.nekomanga.data.repository.FeedRepositoryImpl
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -79,8 +83,6 @@ import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.logging.TimberKt
-import org.nekomanga.presentation.screens.browse.BrowseRepository
-import org.nekomanga.presentation.screens.feed.FeedRepository
 import org.nekomanga.presentation.screens.similar.SimilarRepo
 import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.chapters.CalculateChapterFilterUseCase
@@ -254,7 +256,7 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(DisplayRepository())
 
-        addSingleton(BrowseRepository())
+        addSingletonFactory<BrowseRepository> { BrowseRepositoryImpl() }
 
         addSingleton(CalculateChapterFilterUseCase())
         addSingleton(ParseChapterNameUseCase())
@@ -271,7 +273,7 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(TrackUseCases())
 
-        addSingleton(FeedRepository())
+        addSingletonFactory<FeedRepository> { FeedRepositoryImpl() }
 
         addSingleton(AppSnackbarManager())
 

@@ -25,8 +25,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.data.repository.FeedRepository
 import org.nekomanga.logging.TimberKt
-import org.nekomanga.presentation.screens.feed.FeedRepository
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -34,6 +34,7 @@ class MangaShortcutManager(
     val preferences: PreferencesHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
+    val feedRepository: FeedRepository = Injekt.get(),
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
@@ -52,7 +53,7 @@ class MangaShortcutManager(
         withContext(ioDispatcher) {
             val recentManga =
                 if (preferences.showSeriesInShortcuts().get()) {
-                    FeedRepository.getRecentlyReadManga()
+                    feedRepository.getRecentlyReadManga()
                 } else {
                     emptyList()
                 }

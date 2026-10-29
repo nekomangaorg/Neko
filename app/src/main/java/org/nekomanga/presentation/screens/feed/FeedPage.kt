@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import jp.wasabeef.gap.Gap
+import org.nekomanga.domain.feed.FeedHistoryGroup
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.MangaCover

@@ -27,6 +27,8 @@ import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.BrowseFilterRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.repository.BrowseRepository
+import org.nekomanga.domain.browse.BrowseHomeSection
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.filter.DexFilters
@@ -199,7 +201,7 @@ class BrowseViewModel : ViewModel() {
             _browseScreenState.update { state -> state.copy(incognitoMode = it) }
         }
 
-        browseRepository.loginHelper.isLoggedInFlow().observeAndUpdate(viewModelScope) {
+        browseRepository.isLoggedInFlow().observeAndUpdate(viewModelScope) {
             _browseScreenState.update { state -> state.copy(isLoggedIn = it) }
         }
 
@@ -250,10 +252,11 @@ class BrowseViewModel : ViewModel() {
                         )
                     }
                 }
-                .onOk {
+                .onOk { sections ->
                     _browseScreenState.update { state ->
                         state.copy(
-                            homePageManga = it.updateVisibility(preferences),
+                            homePageManga =
+                                sections.toHomePageManga().updateVisibility(preferences),
                             initialLoading = false,
                         )
                     }
@@ -635,5 +638,9 @@ class BrowseViewModel : ViewModel() {
             }
         }
         return isOnline
+    }
+
+    private fun List<BrowseHomeSection>.toHomePageManga(): List<HomePageManga> = map {
+        HomePageManga(displayScreenType = it.displayScreenType, displayManga = it.mangaList)
     }
 }

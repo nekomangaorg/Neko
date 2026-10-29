@@ -5,6 +5,8 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.download.DownloadItem
+import org.nekomanga.domain.feed.FeedHistoryGroup
+import org.nekomanga.domain.feed.FeedItem
 import org.nekomanga.domain.manga.Artwork
 
 @Immutable
@@ -61,13 +63,6 @@ enum class FeedScreenType {
     Summary,
     History,
     Updates,
-}
-
-enum class FeedHistoryGroup {
-    No,
-    Series,
-    Day,
-    Week,
 }
 
 enum class DownloaderStatus {
@@ -127,3 +122,25 @@ data class FeedManga(
     val chapters: List<ChapterItem>,
     val lastReadChapter: String = "",
 )
+
+fun FeedItem.toFeedManga(): FeedManga =
+    FeedManga(
+        mangaTitle = mangaTitle,
+        date = date,
+        mangaId = mangaId,
+        artwork = artwork,
+        chapters = chapters,
+        lastReadChapter = lastReadChapter,
+    )
+
+fun List<FeedItem>.toFeedMangaList(): List<FeedManga> = map { it.toFeedManga() }
+
+fun FeedManga.toFeedItem(): FeedItem =
+    FeedItem(
+        mangaId = mangaId,
+        mangaTitle = mangaTitle,
+        date = date,
+        artwork = artwork,
+        chapters = chapters,
+        lastReadChapter = lastReadChapter,
+    )

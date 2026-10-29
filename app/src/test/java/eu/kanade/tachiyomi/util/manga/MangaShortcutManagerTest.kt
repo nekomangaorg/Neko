@@ -18,6 +18,7 @@ class MangaShortcutManagerTest {
                 preferences = mockk(relaxed = true),
                 coverCache = mockk(relaxed = true),
                 sourceManager = mockk(relaxed = true),
+                feedRepository = mockk(relaxed = true),
             )
     }
 

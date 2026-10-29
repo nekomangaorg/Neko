@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling Presentation Repositories & Eliminating Layer Inversion
 
-**Status:** Proposed / Under Review  
+**Status:** Complete / Landed  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Architectural Decoupling  
 **Execution Order:** Phase 1 (Architectural Foundations & Isolated Wins) — Step 1 (Priority: Critical / Foundation)  
 **Prerequisites:** None (Root Data/Domain Layer Cleanup)  
 **Downstream Dependents:** [`decouple_feed_screen_jobs_and_actions_proposal.md`](decouple_feed_screen_jobs_and_actions_proposal.md), [`decouple_browse_and_display_screen_navigation_proposal.md`](decouple_browse_and_display_screen_navigation_proposal.md)  
-**Implementation State:** 🟡 Coupled Baseline (Repositories defined in `presentation` packages, importing Compose UI utilities, and directly returning UI state models)  
+**Implementation State:** 🟢 Landed in `ref/decouple-presentation-repositories-s1` (Relocated repositories to `data.repository`, purged Compose imports and mutable class state, introduced domain entities `BrowseHomeSection` and `FeedItem`)  
 
 ---
 
@@ -170,8 +170,8 @@ chapterList.any { it.isUnread }
 >
 > Relocating `BrowseRepository` and `FeedRepository` out of presentation packages and into `org.nekomanga.data.repository`, while establishing clean domain return models (`BrowseHomeSection`, feed domain models), is the foundational step for all subsequent Browse and Feed screen refactorings.
 
-- [ ] **Step 1**: Create `BrowseHomeSection` domain model and define `BrowseRepository` interface in `org.nekomanga.data.repository`.
-- [ ] **Step 2**: Relocate `BrowseRepository` implementation, remove `HomePageManga` dependency, and add mapping in `BrowseViewModel`.
-- [ ] **Step 3**: Relocate `FeedRepository`, remove `androidx.compose.ui.util.fastAny`, and extract `SimpleDateFormat` thread-local formatting.
-- [ ] **Step 4**: Move mutable `bySeriesSet` state from `FeedRepository` into `FeedViewModel`.
-- [ ] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [x] **Step 1**: Create `BrowseHomeSection` domain model and define `BrowseRepository` interface in `org.nekomanga.data.repository`.
+- [x] **Step 2**: Relocate `BrowseRepository` implementation, remove `HomePageManga` dependency, and add mapping in `BrowseViewModel`.
+- [x] **Step 3**: Relocate `FeedRepository`, remove `androidx.compose.ui.util.fastAny`, and extract `SimpleDateFormat` thread-local formatting.
+- [x] **Step 4**: Move mutable `bySeriesSet` state from `FeedRepository` into `FeedViewModel`.
+- [x] **Step 5**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.

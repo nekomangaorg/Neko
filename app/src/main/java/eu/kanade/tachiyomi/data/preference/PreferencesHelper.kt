@@ -15,7 +15,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.presentation.screens.feed.FeedHistoryGroup
+import org.nekomanga.domain.feed.FeedHistoryGroup
 import org.nekomanga.presentation.screens.feed.FeedScreenType
 import org.nekomanga.presentation.theme.Themes
 import tachiyomi.core.preference.Preference
