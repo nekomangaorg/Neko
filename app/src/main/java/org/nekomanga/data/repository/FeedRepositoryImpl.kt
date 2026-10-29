@@ -392,14 +392,10 @@ class FeedRepositoryImpl(
                     }
                     FeedHistoryGroup.Day,
                     FeedHistoryGroup.Week -> {
-                        val formatter =
+                        val formatter: SimpleDateFormat =
                             when (group == FeedHistoryGroup.Week) {
-                                true ->
-                                    weekDateFormat.get()
-                                        ?: SimpleDateFormat("yyyy-w", Locale.getDefault())
-                                false ->
-                                    dayDateFormat.get()
-                                        ?: SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                true -> weekDateFormat.get()
+                                false -> dayDateFormat.get()
                             }
                         historyRepository
                             .getRecentHistoryUngrouped(
