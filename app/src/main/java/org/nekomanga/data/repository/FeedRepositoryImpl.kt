@@ -105,8 +105,8 @@ class FeedRepositoryImpl(
                     updatesPage.items
                         .filterNot { current.contains(it.mangaId) }
                         .filter {
-                            it.chapters.none { chapterItem ->
-                                chapterItem.chapter.read || chapterItem.chapter.lastPageRead != 0
+                            it.chapters.any { chapterItem ->
+                                !chapterItem.chapter.read && chapterItem.chapter.lastPageRead == 0
                             }
                         }
                         .groupBy { it.mangaId }
@@ -132,9 +132,7 @@ class FeedRepositoryImpl(
                     val chapters = rawChapters.filter { it.isAvailable(downloadManager, manga) }
 
                     val recentUploadDate =
-                        entry.value
-                            .mapNotNull { it.chapters.firstOrNull() }
-                            .maxOfOrNull { it.chapter.dateUpload }
+                        entry.value.flatMap { it.chapters }.maxOfOrNull { it.chapter.dateUpload }
 
                     val simpleChapterItems = chapters.mapNotNull { ch ->
                         ch.toSimpleChapter()?.toChapterItem()
@@ -266,7 +264,10 @@ class FeedRepositoryImpl(
                                 ?.chapter ?: return@mapNotNull null
 
                         val itemMangaId = manga.id ?: return@mapNotNull null
-                        val dateToUse = latestHistoryItem?.date ?: 0L
+                        val dateToUse =
+                            chapter.dateFetch.takeIf { it > 0L }
+                                ?: chapter.dateUpload.takeIf { it > 0L }
+                                ?: System.currentTimeMillis()
                         FeedItem(
                             mangaId = itemMangaId,
                             mangaTitle = manga.displayTitle(),
