@@ -43,6 +43,7 @@ class FeedRepositoryImpl(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val chapterUseCases: ChapterUseCases = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
+    private val chapterItemSort: ChapterItemSort = ChapterItemSort(),
 ) : FeedRepository {
 
     companion object {
@@ -139,7 +140,7 @@ class FeedRepositoryImpl(
                     }
 
                     val chapter =
-                        ChapterItemSort().getNextUnreadChapter(manga, simpleChapterItems)?.chapter
+                        chapterItemSort.getNextUnreadChapter(manga, simpleChapterItems)?.chapter
                             ?: return@mapNotNull null
 
                     val itemMangaId = manga.id ?: return@mapNotNull null
@@ -259,9 +260,8 @@ class FeedRepositoryImpl(
                             ch.toSimpleChapter()?.toChapterItem()
                         }
                         val chapter =
-                            ChapterItemSort()
-                                .getNextUnreadChapter(manga, simpleChapterItems)
-                                ?.chapter ?: return@mapNotNull null
+                            chapterItemSort.getNextUnreadChapter(manga, simpleChapterItems)?.chapter
+                                ?: return@mapNotNull null
 
                         val itemMangaId = manga.id ?: return@mapNotNull null
                         val dateToUse =

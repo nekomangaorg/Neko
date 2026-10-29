@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapter
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -36,6 +37,7 @@ class FeedRepositoryImplTest {
     private val downloadManager: DownloadManager = mockk()
     private val chapterUseCases: ChapterUseCases = mockk()
     private val mangaDexPreferences: MangaDexPreferences = mockk()
+    private val chapterItemSort: ChapterItemSort = mockk()
 
     private val repository =
         FeedRepositoryImpl(
@@ -45,6 +47,7 @@ class FeedRepositoryImplTest {
             downloadManager = downloadManager,
             chapterUseCases = chapterUseCases,
             mangaDexPreferences = mangaDexPreferences,
+            chapterItemSort = chapterItemSort,
         )
 
     @Test
@@ -538,4 +541,313 @@ class FeedRepositoryImplTest {
         updated.chapters.size shouldBe 1
         updated.chapters.first().chapter.id shouldBe 101L
     }
+
+    @Test
+    fun `getHistoryPage with FeedHistoryGroup_Week formats items using week formatter`() = runTest {
+        val manga =
+            Manga.create(1L).apply {
+                id = 1L
+                title = "Manga 1"
+                url = "/title/1"
+            }
+        val chapter =
+            Chapter.create().apply {
+                id = 101L
+                manga_id = 1L
+                name = "Ch. 1"
+                url = "/ch/101"
+            }
+        val history = History.create(chapter).apply { last_read = 1600000000000L }
+        val mch = MangaChapterHistory(manga, chapter, history)
+
+        coEvery {
+            historyRepository.getRecentHistoryUngrouped(search = "", offset = 0, limit = 25)
+        } returns listOf(mch)
+        every { downloadManager.isChapterDownloaded(any(), any()) } returns false
+        every { downloadManager.getQueuedDownloadOrNull(any()) } returns null
+
+        val result =
+            repository.getHistoryPage(
+                searchQuery = "",
+                offset = 0,
+                limit = 25,
+                group = FeedHistoryGroup.Week,
+            )
+
+        val page = result.get()
+        page shouldNotBe null
+        page!!.items.size shouldBe 1
+        page.items.first().mangaId shouldBe 1L
+    }
+
+    @Test
+    fun `getHistoryPage with FeedHistoryGroup_Day formats items using day formatter`() = runTest {
+        val manga =
+            Manga.create(1L).apply {
+                id = 1L
+                title = "Manga 1"
+                url = "/title/1"
+            }
+        val chapter =
+            Chapter.create().apply {
+                id = 101L
+                manga_id = 1L
+                name = "Ch. 1"
+                url = "/ch/101"
+            }
+        val history = History.create(chapter).apply { last_read = 1600000000000L }
+        val mch = MangaChapterHistory(manga, chapter, history)
+
+        coEvery {
+            historyRepository.getRecentHistoryUngrouped(search = "", offset = 0, limit = 25)
+        } returns listOf(mch)
+        every { downloadManager.isChapterDownloaded(any(), any()) } returns false
+        every { downloadManager.getQueuedDownloadOrNull(any()) } returns null
+
+        val result =
+            repository.getHistoryPage(
+                searchQuery = "",
+                offset = 0,
+                limit = 25,
+                group = FeedHistoryGroup.Day,
+            )
+
+        val page = result.get()
+        page shouldNotBe null
+        page!!.items.size shouldBe 1
+        page.items.first().mangaId shouldBe 1L
+    }
+
+    @Test
+    fun `getSummaryContinueReadingList returns in-progress chapter if present in history`() =
+        runTest {
+            val blockedGroupsPref =
+                mockk<Preference<Set<String>>> { every { get() } returns emptySet() }
+            val blockedUploadersPref =
+                mockk<Preference<Set<String>>> { every { get() } returns emptySet() }
+            every { mangaDexPreferences.blockedGroups() } returns blockedGroupsPref
+            every { mangaDexPreferences.blockedUploaders() } returns blockedUploadersPref
+
+            val manga =
+                Manga.create(1L).apply {
+                    id = 1L
+                    title = "Manga 1"
+                    url = "/title/1"
+                }
+            val chapter =
+                Chapter.create().apply {
+                    id = 101L
+                    manga_id = 1L
+                    name = "Ch. 1"
+                    url = "/ch/101"
+                    read = false
+                    last_page_read = 5
+                }
+            val history = History.create(chapter).apply { last_read = 1000L }
+            val mch = MangaChapterHistory(manga, chapter, history)
+
+            coEvery {
+                historyRepository.getRecentMangaLimit(search = any(), offset = 0, limit = 50)
+            } returns listOf(mch)
+            coEvery {
+                historyRepository.getRecentMangaLimit(
+                    search = any(),
+                    offset = neq(0),
+                    limit = any(),
+                )
+            } returns emptyList()
+            every { downloadManager.isChapterDownloaded(any(), any()) } returns false
+            every { downloadManager.getQueuedDownloadOrNull(any()) } returns null
+
+            val result = repository.getSummaryContinueReadingList()
+
+            val list = result.get()
+            list shouldNotBe null
+            list!!.size shouldBe 1
+            list.first().mangaId shouldBe 1L
+            list.first().chapters.first().chapter.id shouldBe 101L
+        }
+
+    @Test
+    fun `getSummaryContinueReadingList falls back to next unread with most recent lastReadChapter and date`() =
+        runTest {
+            val blockedGroupsPref =
+                mockk<Preference<Set<String>>> { every { get() } returns emptySet() }
+            val blockedUploadersPref =
+                mockk<Preference<Set<String>>> { every { get() } returns emptySet() }
+            every { mangaDexPreferences.blockedGroups() } returns blockedGroupsPref
+            every { mangaDexPreferences.blockedUploaders() } returns blockedUploadersPref
+
+            val manga =
+                Manga.create(1L).apply {
+                    id = 1L
+                    title = "Manga 1"
+                    url = "/title/1"
+                }
+            val chapter1 =
+                Chapter.create().apply {
+                    id = 101L
+                    manga_id = 1L
+                    name = "Ch. 1"
+                    url = "/ch/101"
+                    read = true
+                }
+            val chapter2 =
+                Chapter.create().apply {
+                    id = 102L
+                    manga_id = 1L
+                    name = "Ch. 2"
+                    url = "/ch/102"
+                    read = true
+                }
+            val history1 = History.create(chapter1).apply { last_read = 1000L }
+            val history2 = History.create(chapter2).apply { last_read = 5000L }
+
+            val mch1 = MangaChapterHistory(manga, chapter1, history1)
+            val mch2 = MangaChapterHistory(manga, chapter2, history2)
+
+            coEvery {
+                historyRepository.getRecentMangaLimit(search = any(), offset = 0, limit = 50)
+            } returns listOf(mch1, mch2)
+            coEvery {
+                historyRepository.getRecentMangaLimit(
+                    search = any(),
+                    offset = neq(0),
+                    limit = any(),
+                )
+            } returns emptyList()
+
+            val nextChapter =
+                Chapter.create().apply {
+                    id = 103L
+                    manga_id = 1L
+                    name = "Ch. 3"
+                    url = "/ch/103"
+                    read = false
+                    date_fetch = 9000L
+                    date_upload = 8000L
+                }
+
+            coEvery { mangaRepository.getMangaByIds(listOf(1L)) } returns listOf(manga)
+            coEvery { chapterRepository.getChaptersForMangaIds(listOf(1L)) } returns
+                listOf(chapter1, chapter2, nextChapter)
+            every { downloadManager.isChapterDownloaded(any(), any()) } returns false
+            every { downloadManager.getQueuedDownloadOrNull(any()) } returns null
+
+            val nextSimpleChapter = nextChapter.toSimpleChapter()!!.toChapterItem()
+            every { chapterItemSort.getNextUnreadChapter(manga, any()) } returns nextSimpleChapter
+
+            val result = repository.getSummaryContinueReadingList()
+
+            val list = result.get()
+            list shouldNotBe null
+            list!!.size shouldBe 1
+            val item = list.first()
+            item.mangaId shouldBe 1L
+            // Should be Ch. 2 (from max last_read date 5000L, not Ch. 1)
+            item.lastReadChapter shouldBe "Ch. 2"
+            // Date should be date_fetch 9000L
+            item.date shouldBe 9000L
+            item.chapters.first().chapter.id shouldBe 103L
+        }
+
+    @Test
+    fun `getSummaryUpdatesList filters out read chapters and uses max dateUpload across chapters`() =
+        runTest {
+            val blockedGroupsPref =
+                mockk<Preference<Set<String>>> { every { get() } returns emptySet() }
+            val blockedUploadersPref =
+                mockk<Preference<Set<String>>> { every { get() } returns emptySet() }
+            every { mangaDexPreferences.blockedGroups() } returns blockedGroupsPref
+            every { mangaDexPreferences.blockedUploaders() } returns blockedUploadersPref
+
+            val manga1 =
+                Manga.create(1L).apply {
+                    id = 1L
+                    title = "Manga 1"
+                    url = "/title/1"
+                }
+            val manga2 =
+                Manga.create(1L).apply {
+                    id = 2L
+                    title = "Manga 2"
+                    url = "/title/2"
+                }
+
+            val ch1 =
+                Chapter.create().apply {
+                    id = 101L
+                    manga_id = 1L
+                    name = "Ch. 1"
+                    url = "/ch/101"
+                    read = false
+                    last_page_read = 0
+                    date_upload = 1000L
+                }
+            val ch2 =
+                Chapter.create().apply {
+                    id = 102L
+                    manga_id = 1L
+                    name = "Ch. 2"
+                    url = "/ch/102"
+                    read = false
+                    last_page_read = 0
+                    date_upload = 3000L
+                }
+            // ch3 is read, so manga 2 should be filtered out
+            val ch3 =
+                Chapter.create().apply {
+                    id = 201L
+                    manga_id = 2L
+                    name = "Ch. 201"
+                    url = "/ch/201"
+                    read = true
+                    last_page_read = 0
+                    date_upload = 2000L
+                }
+
+            coEvery {
+                chapterRepository.getRecentChapters(
+                    search = "",
+                    offset = 0,
+                    limit = 100,
+                    sortByFetched = false,
+                )
+            } returns
+                listOf(
+                    MangaChapter(manga1, ch1),
+                    MangaChapter(manga1, ch2),
+                    MangaChapter(manga2, ch3),
+                )
+            coEvery {
+                chapterRepository.getRecentChapters(
+                    search = "",
+                    offset = neq(0),
+                    limit = any(),
+                    sortByFetched = false,
+                )
+            } returns emptyList()
+
+            every { chapterUseCases.validateChapterNotBlocked(any(), any(), any(), any()) } returns
+                true
+            every { downloadManager.isChapterDownloaded(any(), any()) } returns false
+            every { downloadManager.getQueuedDownloadOrNull(any()) } returns null
+
+            coEvery { mangaRepository.getMangaByIds(listOf(1L)) } returns listOf(manga1)
+            coEvery { chapterRepository.getChaptersForMangaIds(listOf(1L)) } returns
+                listOf(ch1, ch2)
+
+            val simpleChapterItem = ch1.toSimpleChapter()!!.toChapterItem()
+            every { chapterItemSort.getNextUnreadChapter(manga1, any()) } returns simpleChapterItem
+
+            val result = repository.getSummaryUpdatesList()
+
+            val list = result.get()
+            list shouldNotBe null
+            list!!.size shouldBe 1
+            val item = list.first()
+            item.mangaId shouldBe 1L
+            // Date should be the max dateUpload across chapters (ch2 has 3000L)
+            item.date shouldBe 3000L
+        }
 }
