@@ -249,9 +249,9 @@ class FeedRepositoryImpl(
                     if (feedMangaFiltered.isNotEmpty()) {
                         feedMangaFiltered.last()
                     } else {
+                        val latestHistoryItem = entry.value.maxByOrNull { it.date }
                         val lastReadChapter =
-                            entry.value.map { it.chapters }.flatten().firstOrNull()?.chapter?.name
-                                ?: ""
+                            latestHistoryItem?.chapters?.firstOrNull()?.chapter?.name ?: ""
                         val mangaId = entry.key
                         val manga = mangasMap[mangaId] ?: return@mapNotNull null
                         val rawChapters = chaptersMap[mangaId] ?: emptyList()
@@ -266,7 +266,7 @@ class FeedRepositoryImpl(
                                 ?.chapter ?: return@mapNotNull null
 
                         val itemMangaId = manga.id ?: return@mapNotNull null
-                        val dateToUse = entry.value.firstOrNull()?.date ?: 0L
+                        val dateToUse = latestHistoryItem?.date ?: 0L
                         FeedItem(
                             mangaId = itemMangaId,
                             mangaTitle = manga.displayTitle(),
@@ -393,9 +393,9 @@ class FeedRepositoryImpl(
                     FeedHistoryGroup.Day,
                     FeedHistoryGroup.Week -> {
                         val formatter: SimpleDateFormat =
-                            when (group == FeedHistoryGroup.Week) {
-                                true -> weekDateFormat.get()
-                                false -> dayDateFormat.get()
+                            when (group) {
+                                FeedHistoryGroup.Week -> weekDateFormat.get()
+                                else -> dayDateFormat.get()
                             }
                         historyRepository
                             .getRecentHistoryUngrouped(

@@ -65,7 +65,7 @@ class BrowseRepositoryImpl(
         val existingGroupNames = existingGroups.map { it.name }.toSet()
         val missingGroupNames = blockedGroupNames.filterNot { it in existingGroupNames }
 
-        val groupSemaphore = Semaphore(5)
+        val groupSemaphore = Semaphore(10)
         val fetchedGroups = coroutineScope {
             missingGroupNames
                 .map { name ->
@@ -88,7 +88,7 @@ class BrowseRepositoryImpl(
         val existingUploaderNames = existingUploaders.map { it.username }.toSet()
         val missingUploaderNames = blockedUploaderNames.filterNot { it in existingUploaderNames }
 
-        val uploaderSemaphore = Semaphore(5)
+        val uploaderSemaphore = Semaphore(10)
         val fetchedUploaders = coroutineScope {
             missingUploaderNames
                 .map { name ->
