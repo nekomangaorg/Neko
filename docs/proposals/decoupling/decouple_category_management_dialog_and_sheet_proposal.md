@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling Category Management Dialogs & Sheets from Validation & Diff Logic
 
-**Status:** Proposed / Under Review  
+**Status:** Completed / Implemented  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
 **Execution Order:** Phase 1 (Architectural Foundations & Isolated Wins) — Step 2 (Priority: High / Core Domain)  
 **Prerequisites:** None  
 **Downstream Dependents:** [`decouple_library_screen_job_dispatching_proposal.md`](decouple_library_screen_job_dispatching_proposal.md)  
-**Implementation State:** 🟡 Coupled Baseline (In-Composable name uniqueness checks, diff algorithms, and plural formatting)  
+**Implementation State:** 🟢 Completed (Extracted UseCases, stateless components, ID lookup)  
 
 ---
 
@@ -196,9 +196,9 @@ fun AddEditCategoryDialog(
 >
 > Extracting pure domain UseCases (`ValidateCategoryNameUseCase`, `CalculateCategoryDiffUseCase`) and making category dialogs/sheets purely stateless establishes clean category domain contracts that can be safely consumed by both Category Settings and the Library Screen.
 
-- [ ] **Step 1**: Implement `ValidateCategoryNameUseCase` and unit tests.
-- [ ] **Step 2**: Implement `CalculateCategoryDiffUseCase` and unit tests.
-- [ ] **Step 3**: Refactor `AddEditCategoryDialog` to be 100% stateless and add `@Preview`.
-- [ ] **Step 4**: Remove `calculateText` from `EditCategorySheet.kt` and hoist button string to ViewModel.
-- [ ] **Step 5**: Update `AddEditCategoriesScreen.kt` to identify categories by ID.
-- [ ] **Step 6**: Validate with `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [x] **Step 1**: Implement `ValidateCategoryNameUseCase` and unit tests.
+- [x] **Step 2**: Implement `CalculateCategoryDiffUseCase` and unit tests.
+- [x] **Step 3**: Refactor `AddEditCategoryDialog` to be 100% stateless and add `@Preview`.
+- [x] **Step 4**: Remove `calculateText` from `EditCategorySheet.kt` and hoist button string to ViewModel.
+- [x] **Step 5**: Update `AddEditCategoriesScreen.kt` to identify categories by ID.
+- [x] **Step 6**: Validate with `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.

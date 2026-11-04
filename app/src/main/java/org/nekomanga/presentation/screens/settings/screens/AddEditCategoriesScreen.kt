@@ -42,6 +42,7 @@ import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.category.AddEditCategoryTopBar
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.usecases.category.ValidateCategoryNameUseCase
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -56,9 +57,11 @@ internal class AddEditCategoriesScreen(
     @Composable
     fun Content() {
         val lazyListState = rememberLazyListState()
-        var showAddDialog by rememberSaveable { mutableStateOf(false) }
-        var editCategoryName by rememberSaveable { mutableStateOf("") }
-        var deleteCategoryName by rememberSaveable { mutableStateOf("") }
+        var isAddingCategory by rememberSaveable { mutableStateOf(false) }
+        var editingCategoryId by rememberSaveable { mutableStateOf<Int?>(null) }
+        var deleteCategoryId by rememberSaveable { mutableStateOf<Int?>(null) }
+        var categoryDialogText by rememberSaveable { mutableStateOf("") }
+        val validateCategoryName = remember { ValidateCategoryNameUseCase() }
         val hapticFeedback = LocalHapticFeedback.current
 
         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
@@ -80,44 +83,70 @@ internal class AddEditCategoriesScreen(
             }
         }
 
-        if (showAddDialog) {
-            AddEditCategoryDialog(
-                currentCategories = categories,
-                onDismiss = { showAddDialog = false },
-                onConfirm = { category -> addUpdateCategory(category, null) },
-            )
-        }
+        val isDialogVisible = isAddingCategory || editingCategoryId != null
+        if (isDialogVisible) {
+            val isEditing = editingCategoryId != null
+            val currentCategory =
+                remember(editingCategoryId, nonSystemCategories) {
+                    editingCategoryId?.let { id -> nonSystemCategories.firstOrNull { it.id == id } }
+                }
+            val currentName = currentCategory?.name.orEmpty()
+            val validationResult =
+                remember(categoryDialogText, categories, currentName, isEditing) {
+                    validateCategoryName(
+                        name = categoryDialogText,
+                        existingNames = categories.map { it.name },
+                        currentName = if (isEditing) currentName else "",
+                    )
+                }
+            val errorText =
+                when (validationResult) {
+                    is ValidateCategoryNameUseCase.ValidationResult.Duplicate ->
+                        stringResource(R.string.category_with_name_exists)
+                    else -> null
+                }
 
-        if (editCategoryName.isNotEmpty()) {
             AddEditCategoryDialog(
-                categorySelected = editCategoryName,
-                currentCategories = categories,
-                onDismiss = { editCategoryName = "" },
-                onConfirm = { categoryName ->
-                    val id = nonSystemCategories.first { it.name.equals(editCategoryName, true) }.id
-                    addUpdateCategory(categoryName, id)
+                title =
+                    stringResource(
+                        id = if (isEditing) R.string.edit_category else R.string.new_category
+                    ),
+                text = categoryDialogText,
+                errorText = errorText,
+                canConfirm = validationResult is ValidateCategoryNameUseCase.ValidationResult.Valid,
+                onTextChanged = { categoryDialogText = it },
+                onDismiss = {
+                    isAddingCategory = false
+                    editingCategoryId = null
+                    categoryDialogText = ""
+                },
+                onConfirm = {
+                    addUpdateCategory(categoryDialogText.trim(), editingCategoryId)
+                    isAddingCategory = false
+                    editingCategoryId = null
+                    categoryDialogText = ""
                 },
             )
         }
 
-        if (deleteCategoryName.isNotEmpty()) {
+        val categoryToDelete =
+            remember(deleteCategoryId, nonSystemCategories) {
+                deleteCategoryId?.let { id -> nonSystemCategories.firstOrNull { it.id == id } }
+            }
 
+        if (categoryToDelete != null) {
             ConfirmationDialog(
                 title = stringResource(R.string.confirm_category_deletion),
                 body =
                     stringResource(
                         R.string.confirm_category_deletion_message_in,
-                        deleteCategoryName,
+                        categoryToDelete.name,
                     ),
                 confirmButton = stringResource(R.string.delete),
-                onDismiss = { deleteCategoryName = "" },
+                onDismiss = { deleteCategoryId = null },
                 onConfirm = {
-                    val category = nonSystemCategories.firstOrNull {
-                        it.name.equals(deleteCategoryName, true)
-                    }
-                    if (category != null) {
-                        deleteCategory(category.id)
-                    }
+                    deleteCategory(categoryToDelete.id)
+                    deleteCategoryId = null
                 },
             )
         }
@@ -140,11 +169,10 @@ internal class AddEditCategoriesScreen(
                     state = lazyListState,
                     verticalArrangement = Arrangement.spacedBy(Size.small),
                 ) {
-                    items(items = categoriesState, key = { category -> category.name }) { category
-                        ->
+                    items(items = categoriesState, key = { category -> category.id }) { category ->
                         // skip the default category
                         if (category.id != 0) {
-                            ReorderableItem(reorderableState, category.name) { isDragging ->
+                            ReorderableItem(reorderableState, category.id) { isDragging ->
                                 val interactionSource = remember { MutableInteractionSource() }
                                 ElevatedCard(
                                     modifier =
@@ -181,16 +209,19 @@ internal class AddEditCategoriesScreen(
                                         }
                                         Text(text = category.name, modifier = Modifier.weight(1f))
 
-                                        IconButton(onClick = { editCategoryName = category.name }) {
+                                        IconButton(
+                                            onClick = {
+                                                editingCategoryId = category.id
+                                                categoryDialogText = category.name
+                                            }
+                                        ) {
                                             Icon(
                                                 imageVector = Icons.Filled.Edit,
                                                 contentDescription =
                                                     stringResource(id = R.string.edit),
                                             )
                                         }
-                                        IconButton(
-                                            onClick = { deleteCategoryName = category.name }
-                                        ) {
+                                        IconButton(onClick = { deleteCategoryId = category.id }) {
                                             Icon(
                                                 imageVector = Icons.Filled.Delete,
                                                 contentDescription =
@@ -211,7 +242,10 @@ internal class AddEditCategoriesScreen(
                                 bottom = contentPadding.calculateBottomPadding(),
                                 end = Size.small,
                             ),
-                    onClick = { showAddDialog = true },
+                    onClick = {
+                        categoryDialogText = ""
+                        isAddingCategory = true
+                    },
                     icon = { Icon(Icons.Default.Add, null) },
                     text = { Text(text = stringResource(R.string.add)) },
                 )
