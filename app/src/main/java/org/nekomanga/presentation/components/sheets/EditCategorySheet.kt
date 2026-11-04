@@ -19,6 +19,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,41 +37,65 @@ import org.nekomanga.presentation.components.dialog.AddEditCategoryDialog
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.usecases.category.CalculateCategoryDiffUseCase
+import org.nekomanga.usecases.category.CalculateCategoryDiffUseCase.CategoryActionType
+import org.nekomanga.usecases.category.CalculateCategoryDiffUseCase.DiffResult
+import org.nekomanga.usecases.category.ValidateCategoryNameUseCase
 
 @Composable
 fun EditCategorySheet(
     addingToLibrary: Boolean,
     categories: List<CategoryItem>,
-    mangaCategories: List<CategoryItem> = listOf(),
+    selectedCategoryIds: Set<Int>,
+    confirmButtonText: String,
     themeColorState: ThemeColorState = defaultThemeColorState(),
     cancelClick: () -> Unit,
     addNewCategory: (String) -> Unit,
-    confirmClicked: (List<CategoryItem>) -> Unit,
+    confirmClicked: () -> Unit,
+    onCategoryToggled: (categoryId: Int, isChecked: Boolean) -> Unit,
     addToLibraryClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
-        val context = LocalContext.current
-
-        val enabledCategories = remember { mangaCategories.associateBy { it.id }.toMutableMap() }
-        val acceptText = remember {
-            mutableStateOf(
-                calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
-            )
-        }
-
-        var showAddCategoryDialog by remember { mutableStateOf(false) }
+        var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
+        var newCategoryText by rememberSaveable { mutableStateOf("") }
+        val validateCategoryName = remember { ValidateCategoryNameUseCase() }
 
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .4
 
         BaseSheet(themeColor = themeColorState) {
             if (showAddCategoryDialog) {
+                val validationResult =
+                    remember(newCategoryText, categories) {
+                        validateCategoryName(
+                            name = newCategoryText,
+                            existingNames = categories.map { it.name },
+                        )
+                    }
+                val errorText =
+                    when (validationResult) {
+                        is ValidateCategoryNameUseCase.ValidationResult.Duplicate ->
+                            stringResource(R.string.category_with_name_exists)
+                        else -> null
+                    }
                 AddEditCategoryDialog(
                     themeColorState = themeColorState,
-                    currentCategories = categories,
-                    onDismiss = { showAddCategoryDialog = false },
-                    onConfirm = { category -> addNewCategory(category) },
+                    title = stringResource(R.string.new_category),
+                    text = newCategoryText,
+                    errorText = errorText,
+                    canConfirm =
+                        validationResult is ValidateCategoryNameUseCase.ValidationResult.Valid,
+                    onTextChanged = { newCategoryText = it },
+                    onDismiss = {
+                        showAddCategoryDialog = false
+                        newCategoryText = ""
+                    },
+                    onConfirm = {
+                        addNewCategory(newCategoryText.trim())
+                        showAddCategoryDialog = false
+                        newCategoryText = ""
+                    },
                 )
             }
 
@@ -88,7 +113,10 @@ fun EditCategorySheet(
                     text = stringResource(stringRes),
                     style = MaterialTheme.typography.titleLarge,
                 )
-                TextButton(modifier = paddingModifier, onClick = { showAddCategoryDialog = true }) {
+                TextButton(
+                    modifier = paddingModifier,
+                    onClick = { showAddCategoryDialog = true },
+                ) {
                     Text(
                         text = stringResource(id = R.string.plus_new_category),
                         style =
@@ -106,27 +134,11 @@ fun EditCategorySheet(
             ) {
                 items(items = categories, key = { category -> category.id }) {
                     category: CategoryItem ->
-                    var state by remember {
-                        mutableStateOf(enabledCategories.contains(category.id))
-                    }
+                    val isChecked = selectedCategoryIds.contains(category.id)
                     CheckboxRow(
                         modifier = Modifier.fillMaxWidth(),
-                        checkedState = state,
-                        checkedChange = { newState ->
-                            state = newState
-                            if (state) {
-                                enabledCategories[category.id] = category
-                            } else {
-                                enabledCategories.remove(category.id)
-                            }
-                            acceptText.value =
-                                calculateText(
-                                    context,
-                                    mangaCategories,
-                                    enabledCategories,
-                                    addingToLibrary,
-                                )
-                        },
+                        checkedState = isChecked,
+                        checkedChange = { newState -> onCategoryToggled(category.id, newState) },
                         rowText = category.name,
                         themeColorState = themeColorState,
                     )
@@ -153,7 +165,7 @@ fun EditCategorySheet(
                 }
                 ElevatedButton(
                     onClick = {
-                        confirmClicked(enabledCategories.values.toList())
+                        confirmClicked()
                         addToLibraryClick()
                         cancelClick()
                     },
@@ -163,7 +175,7 @@ fun EditCategorySheet(
                         ),
                 ) {
                     Text(
-                        text = acceptText.value,
+                        text = confirmButtonText,
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.surface,
                     )
@@ -173,56 +185,75 @@ fun EditCategorySheet(
     }
 }
 
-private fun calculateText(
-    context: Context,
-    initialMangaCategories: List<CategoryItem>,
-    currentlySelectedCategories: Map<Int, CategoryItem>,
+/** Stateful overload that retains selected category state and calculates button diff text. */
+@Composable
+fun EditCategorySheet(
     addingToLibrary: Boolean,
-): String {
-    val initialIds = initialMangaCategories.map { it.id }.toSet()
-    val same = currentlySelectedCategories.filter { initialIds.contains(it.key) }.values.toList()
-    val difference =
-        currentlySelectedCategories.filterNot { initialIds.contains(it.key) }.values.toList()
+    categories: List<CategoryItem>,
+    mangaCategories: List<CategoryItem> = listOf(),
+    themeColorState: ThemeColorState = defaultThemeColorState(),
+    cancelClick: () -> Unit,
+    addNewCategory: (String) -> Unit,
+    confirmClicked: (List<CategoryItem>) -> Unit,
+    addToLibraryClick: () -> Unit = {},
+) {
+    val initialCategoryIds = remember(mangaCategories) { mangaCategories.map { it.id }.toSet() }
+    var selectedCategoryIds by
+        rememberSaveable(mangaCategories) { mutableStateOf(initialCategoryIds) }
+    val calculateCategoryDiff = remember { CalculateCategoryDiffUseCase() }
+    val idToNameMap = remember(categories) { categories.associate { it.id to it.name } }
+    val context = LocalContext.current
 
-    val addingMore =
-        initialMangaCategories.isNotEmpty() &&
-            difference.isNotEmpty() &&
-            same.size == initialMangaCategories.size
-    val nothingChanged = difference.isEmpty() && same.size == initialIds.size
-    val removing = same.size < initialIds.size && difference.isEmpty()
-
-    fun quantity(size: Int) =
-        context.resources.getQuantityString(R.plurals.category_plural, size, size)
-
-    return context.getString(
-        when {
-            addingToLibrary || (addingMore && !nothingChanged) -> R.string.add_to_
-            removing -> R.string.remove_from_
-            nothingChanged -> R.string.keep_in_
-            else -> R.string.move_to_
-        },
-        when {
-            same.size == 1 && nothingChanged -> same.first().name
-            difference.isEmpty() && initialIds.isNotEmpty() && initialIds.size == same.size ->
-                quantity(same.size)
-            difference.isEmpty() && same.isEmpty() && initialIds.isNotEmpty() ->
-                quantity(initialIds.size)
-            same.isEmpty() && difference.isEmpty() ->
-                context.getString(R.string.default_category).lowercase(Locale.ROOT)
-            difference.size == 1 && !nothingChanged -> difference.first().name
-            same.size == 1 && !nothingChanged && same.size == initialIds.size -> same.first().name
-            difference.size > 1 ->
-                context.resources.getQuantityString(
-                    R.plurals.category_plural,
-                    difference.size,
-                    difference.size,
+    val confirmButtonText =
+        remember(selectedCategoryIds, initialCategoryIds, idToNameMap, addingToLibrary) {
+            val diff =
+                calculateCategoryDiff(
+                    initialCategoryIds = initialCategoryIds,
+                    selectedCategoryIds = selectedCategoryIds,
+                    idToNameMap = idToNameMap,
+                    isAddingToLibrary = addingToLibrary,
                 )
-            else ->
-                context.resources.getQuantityString(
-                    R.plurals.category_plural,
-                    initialIds.size - same.size,
-                    initialIds.size - same.size,
-                )
+            diff.toButtonText(context)
+        }
+
+    EditCategorySheet(
+        addingToLibrary = addingToLibrary,
+        categories = categories,
+        selectedCategoryIds = selectedCategoryIds,
+        confirmButtonText = confirmButtonText,
+        themeColorState = themeColorState,
+        cancelClick = cancelClick,
+        addNewCategory = addNewCategory,
+        confirmClicked = {
+            val selectedCategories = categories.filter { selectedCategoryIds.contains(it.id) }
+            confirmClicked(selectedCategories)
         },
+        onCategoryToggled = { categoryId, isChecked ->
+            selectedCategoryIds =
+                if (isChecked) {
+                    selectedCategoryIds + categoryId
+                } else {
+                    selectedCategoryIds - categoryId
+                }
+        },
+        addToLibraryClick = addToLibraryClick,
     )
+}
+
+/** Resolves the localized button label for category operations from a domain diff result. */
+private fun DiffResult.toButtonText(context: Context): String {
+    val stringRes =
+        when (actionType) {
+            CategoryActionType.Add -> R.string.add_to_
+            CategoryActionType.Remove -> R.string.remove_from_
+            CategoryActionType.Keep -> R.string.keep_in_
+            CategoryActionType.Move -> R.string.move_to_
+        }
+    val arg =
+        when {
+            targetName != null -> targetName
+            count == 0 -> context.getString(R.string.default_category).lowercase(Locale.ROOT)
+            else -> context.resources.getQuantityString(R.plurals.category_plural, count, count)
+        }
+    return context.getString(stringRes, arg)
 }

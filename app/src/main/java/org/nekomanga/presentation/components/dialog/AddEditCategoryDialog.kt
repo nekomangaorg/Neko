@@ -13,70 +13,50 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import org.nekomanga.R
-import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.presentation.theme.ThemeConfig
+import org.nekomanga.presentation.theme.ThemeConfigProvider
+import org.nekomanga.presentation.theme.ThemedPreviews
 
-/** Simple Dialog to add a new category */
+/** Simple stateless Dialog to add or edit a category */
 @Composable
 fun AddEditCategoryDialog(
     themeColorState: ThemeColorState = defaultThemeColorState(),
-    categorySelected: String = "",
-    currentCategories: List<CategoryItem>,
+    title: String,
+    text: String,
+    errorText: String? = null,
+    canConfirm: Boolean = false,
+    onTextChanged: (String) -> Unit,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit,
+    onConfirm: () -> Unit,
 ) {
-    var categoryText by
-        rememberSaveable(stateSaver = TextFieldValue.Saver) {
-            mutableStateOf(TextFieldValue(categorySelected))
-        }
-    var validCategory by rememberSaveable { mutableStateOf(false) }
-
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration,
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
-        val canSave =
-            validCategory &&
-                categoryText.text.isNotBlank() &&
-                (categorySelected.isBlank() || categorySelected != categoryText.text)
         val saveAction = {
-            if (canSave) {
-                onConfirm(categoryText.text)
-                onDismiss()
+            if (canConfirm) {
+                onConfirm()
             }
         }
 
         AlertDialog(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.tiny),
-            title = {
-                Text(
-                    text =
-                        if (categorySelected.isBlank()) stringResource(id = R.string.new_category)
-                        else stringResource(R.string.edit_category)
-                )
-            },
+            title = { Text(text = title) },
             text = {
                 Column {
                     OutlinedTextField(
                         modifier = Modifier.runOnEnterKeyPressed(saveAction),
-                        value = categoryText,
-                        onValueChange = { newCategory ->
-                            categoryText = newCategory
-                            validCategory = currentCategories.none {
-                                it.name.equals(categoryText.text, true)
-                            }
-                        },
+                        value = text,
+                        onValueChange = onTextChanged,
                         singleLine = true,
                         maxLines = 1,
                         colors =
@@ -85,17 +65,10 @@ fun AddEditCategoryDialog(
                                 focusedLabelColor = themeColorState.primaryColor,
                                 focusedBorderColor = themeColorState.primaryColor,
                             ),
-                        isError =
-                            !categoryText.text.isBlank() &&
-                                (!validCategory && categorySelected.isBlank() ||
-                                    (!validCategory && categoryText.text != categorySelected)),
+                        isError = errorText != null,
                         supportingText = {
-                            if (
-                                !categoryText.text.isBlank() &&
-                                    (!validCategory && categorySelected.isBlank() ||
-                                        (!validCategory && categoryText.text != categorySelected))
-                            ) {
-                                Text(text = stringResource(R.string.category_with_name_exists))
+                            if (errorText != null) {
+                                Text(text = errorText)
                             }
                         },
                     )
@@ -105,7 +78,7 @@ fun AddEditCategoryDialog(
             confirmButton = {
                 TextButton(
                     onClick = saveAction,
-                    enabled = canSave,
+                    enabled = canConfirm,
                     colors =
                         ButtonDefaults.textButtonColors(
                             contentColor = themeColorState.primaryColor
@@ -125,6 +98,58 @@ fun AddEditCategoryDialog(
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AddEditCategoryDialogDefaultPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        AddEditCategoryDialog(
+            title = "New category",
+            text = "",
+            canConfirm = false,
+            onTextChanged = {},
+            onDismiss = {},
+            onConfirm = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AddEditCategoryDialogEditingPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        AddEditCategoryDialog(
+            title = "Edit category",
+            text = "Action",
+            canConfirm = true,
+            onTextChanged = {},
+            onDismiss = {},
+            onConfirm = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AddEditCategoryDialogErrorPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        AddEditCategoryDialog(
+            title = "New category",
+            text = "Existing Category",
+            errorText = "A category with this name already exists",
+            canConfirm = false,
+            onTextChanged = {},
+            onDismiss = {},
+            onConfirm = {},
         )
     }
 }
