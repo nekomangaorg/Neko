@@ -27,6 +27,7 @@ class CalculateCategoryDiffUseCase {
         val actionType =
             when {
                 isAddingToLibrary ||
+                    (initialCategoryIds.isEmpty() && selectedCategoryIds.isNotEmpty()) ||
                     (initialCategoryIds.isNotEmpty() &&
                         addedIds.isNotEmpty() &&
                         sameIds.size == initialCategoryIds.size) -> CategoryActionType.Add

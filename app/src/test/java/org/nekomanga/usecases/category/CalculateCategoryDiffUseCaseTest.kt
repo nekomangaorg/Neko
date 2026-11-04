@@ -278,4 +278,34 @@ class CalculateCategoryDiffUseCaseTest {
         result.targetName shouldBe "Dynamic"
         result.count shouldBe 1
     }
+
+    @Test
+    fun `given empty initial categories and adding single category when not adding to library then returns Add with target name`() {
+        val result =
+            useCase(
+                initialCategoryIds = emptySet(),
+                selectedCategoryIds = setOf(1),
+                idToNameMap = idToNameMap,
+                isAddingToLibrary = false,
+            )
+
+        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Add
+        result.targetName shouldBe "Action"
+        result.count shouldBe 1
+    }
+
+    @Test
+    fun `given empty initial categories and adding multiple categories when not adding to library then returns Add with null target name`() {
+        val result =
+            useCase(
+                initialCategoryIds = emptySet(),
+                selectedCategoryIds = setOf(1, 2),
+                idToNameMap = idToNameMap,
+                isAddingToLibrary = false,
+            )
+
+        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Add
+        result.targetName shouldBe null
+        result.count shouldBe 2
+    }
 }
