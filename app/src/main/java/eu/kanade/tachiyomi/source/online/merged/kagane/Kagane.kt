@@ -73,14 +73,21 @@ class Kagane : ReducedHttpSource() {
             } ?: return chain.proceed(request)
 
         var response = chain.proceed(request)
+        // CloudflareInterceptor wraps this interceptor and solves the challenge itself. A new
+        // token can't get past one, and a failed token fetch would hide the challenge.
+        if (response.header("cf-mitigated") == "challenge") {
+            return response
+        }
         if (response.code == 401 || response.code == 403 || response.code == 507) {
             response.close()
             // A 403 HTML page is the image host blocking this network, and a new token
-            // gets the same page. Cloudflare challenges are left to CloudflareInterceptor.
+            // gets the same page.
             if (
                 response.code == 403 &&
-                    response.header("Content-Type").orEmpty().startsWith("text/html") &&
-                    response.header("cf-mitigated") != "challenge"
+                    response
+                        .header("Content-Type")
+                        .orEmpty()
+                        .startsWith("text/html", ignoreCase = true)
             ) {
                 throw IOException("${url.host} is blocking this network, try another connection")
             }

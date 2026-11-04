@@ -84,6 +84,8 @@ class KaganeTest {
 
     /**
      * Kagane's token interceptor with the fake server behind it, where the network is in the app.
+     * CloudflareInterceptor is not in this chain, so a challenge response reaches the test as it
+     * would reach that interceptor.
      */
     private fun imageClient() =
         OkHttpClient.Builder()
@@ -198,6 +200,19 @@ class KaganeTest {
     }
 
     @Test
+    fun `a 403 HTML page is recognized when its Content-Type is upper case`() {
+        responses[IMAGE_PATH] = 403 to "<!DOCTYPE html><title>Attention Required!</title>"
+        responseHeaders[IMAGE_PATH] = Headers.headersOf("Content-Type", "TEXT/HTML")
+
+        val error =
+            assertThrows(IOException::class.java) {
+                imageClient().newCall(GET(IMAGE_URL)).execute()
+            }
+
+        error.message shouldBe "cdn.test is blocking this network, try another connection"
+    }
+
+    @Test
     fun `a 403 without an HTML page fetches a new token and retries`() {
         responses[IMAGE_PATH] = 403 to ""
         responses[INTEGRITY_PATH] = 200 to INTEGRITY
@@ -213,12 +228,11 @@ class KaganeTest {
         responses[IMAGE_PATH] = 403 to "<!DOCTYPE html><title>Just a moment...</title>"
         responseHeaders[IMAGE_PATH] =
             Headers.headersOf("Content-Type", HTML, "cf-mitigated", "challenge")
-        responses[INTEGRITY_PATH] = 200 to INTEGRITY
-        responses[CHALLENGE_PATH] = 200 to CHALLENGE
 
         val response = imageClient().newCall(GET(IMAGE_URL)).execute()
 
         response.use { it.header("cf-mitigated") shouldBe "challenge" }
+        requests.map { it.url.encodedPath } shouldBe listOf(IMAGE_PATH)
     }
 
     private companion object {
