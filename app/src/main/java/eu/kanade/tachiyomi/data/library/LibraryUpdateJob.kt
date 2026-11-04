@@ -402,7 +402,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                         val source =
                                             MergeType.getSource(mergeManga.mergeType, sourceManager)
                                         source
-                                            .fetchMergedChapters(mergeManga.url)
+                                            .fetchMergedChapters(mergeManga, chapterRepository)
                                             .onErr {
                                                 errorFromMerged = true
                                                 failedUpdates[manga] =

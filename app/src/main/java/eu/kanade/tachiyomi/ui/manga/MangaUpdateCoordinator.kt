@@ -226,7 +226,7 @@ class MangaUpdateCoordinator {
                 async {
                     val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
                     source
-                        .fetchMergedChapters(mergeManga.url)
+                        .fetchMergedChapters(mergeManga, chapterRepository)
                         .onErr {
                             val msg = "Failed to fetch from ${source.name}: ${it.message(context)}"
                             send(MangaResult.Error(text = msg))
