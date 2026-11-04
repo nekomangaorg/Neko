@@ -34,6 +34,9 @@ data class ReaderChapter(val chapter: Chapter) {
 
     fun unref() {
         references--
+        if (references < 0) {
+            TimberKt.w { "References of chapter ${chapter.name} dropped below 0 ($references)" }
+        }
         if (references == 0) {
             if (pageLoader != null) {
                 TimberKt.d { "Recycling chapter ${chapter.name}" }

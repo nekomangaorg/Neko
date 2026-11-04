@@ -80,6 +80,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -598,14 +599,10 @@ constructor(
             )
 
         withUIContext {
-            mutableState.update {
-                // Add new references first to avoid unnecessary recycling
-                newChapters.ref()
-                it.viewerChapters?.unref()
-
-                chapterToDownload = deleteChapterFromDownloadQueue(newChapters.currChapter)
-                it.copy(viewerChapters = newChapters)
-            }
+            // The queue delete can suspend. A swap landing during it would recycle any chapter of
+            // this set that holds no reference yet, so this swap goes first.
+            mutableState.swapViewerChapters(newChapters)
+            chapterToDownload = deleteChapterFromDownloadQueue(newChapters.currChapter)
         }
         return newChapters
     }
@@ -2179,4 +2176,18 @@ constructor(
 
         data class ShareTrackingError(val errors: List<Pair<TrackService, String?>>) : Event()
     }
+}
+
+/**
+ * Replaces the viewer chapters in this state with [newChapters], adding one reference to each new
+ * chapter and releasing one from each replaced chapter. The counts stay outside the lambda because
+ * [getAndUpdate] runs it again when another write lands between its read and its set, and releasing
+ * a chapter can cause that write through the transition card collector.
+ */
+internal fun MutableStateFlow<ReaderViewModel.State>.swapViewerChapters(
+    newChapters: ViewerChapters
+) {
+    // Add new references first to avoid unnecessary recycling
+    newChapters.ref()
+    getAndUpdate { it.copy(viewerChapters = newChapters) }.viewerChapters?.unref()
 }
