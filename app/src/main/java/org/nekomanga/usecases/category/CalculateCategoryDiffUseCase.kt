@@ -27,13 +27,10 @@ class CalculateCategoryDiffUseCase {
         val actionType =
             when {
                 isAddingToLibrary ||
-                    (initialCategoryIds.isEmpty() && selectedCategoryIds.isNotEmpty()) ||
-                    (initialCategoryIds.isNotEmpty() &&
-                        addedIds.isNotEmpty() &&
-                        sameIds.size == initialCategoryIds.size) -> CategoryActionType.Add
+                    (initialCategoryIds.isEmpty() && selectedCategoryIds.isNotEmpty()) ->
+                    CategoryActionType.Add
                 removedIds.isNotEmpty() && addedIds.isEmpty() -> CategoryActionType.Remove
-                addedIds.isEmpty() && sameIds.size == initialCategoryIds.size ->
-                    CategoryActionType.Keep
+                addedIds.isEmpty() && removedIds.isEmpty() -> CategoryActionType.Keep
                 else -> CategoryActionType.Move
             }
 
@@ -41,7 +38,10 @@ class CalculateCategoryDiffUseCase {
             when {
                 sameIds.size == 1 && actionType == CategoryActionType.Keep ->
                     idToNameMap[sameIds.first()]
-                addedIds.size == 1 -> idToNameMap[addedIds.first()]
+                addedIds.size == 1 && actionType != CategoryActionType.Remove ->
+                    idToNameMap[addedIds.first()]
+                removedIds.size == 1 && actionType == CategoryActionType.Remove ->
+                    idToNameMap[removedIds.first()]
                 else -> null
             }
 

@@ -67,7 +67,7 @@ class CalculateCategoryDiffUseCaseTest {
     }
 
     @Test
-    fun `given existing category and adding one more when calculating diff then returns Add with new category name`() {
+    fun `given existing category and adding one more when calculating diff then returns Move with new category name`() {
         val result =
             useCase(
                 initialCategoryIds = setOf(1),
@@ -76,13 +76,13 @@ class CalculateCategoryDiffUseCaseTest {
                 isAddingToLibrary = false,
             )
 
-        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Add
+        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Move
         result.targetName shouldBe "Comedy"
-        result.count shouldBe 1
+        result.count shouldBe 2
     }
 
     @Test
-    fun `given existing category and adding multiple more when calculating diff then returns Add with null target name`() {
+    fun `given existing category and adding multiple more when calculating diff then returns Move with null target name`() {
         val result =
             useCase(
                 initialCategoryIds = setOf(1),
@@ -91,9 +91,9 @@ class CalculateCategoryDiffUseCaseTest {
                 isAddingToLibrary = false,
             )
 
-        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Add
+        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Move
         result.targetName shouldBe null
-        result.count shouldBe 2
+        result.count shouldBe 3
     }
 
     @Test
@@ -127,7 +127,7 @@ class CalculateCategoryDiffUseCaseTest {
     }
 
     @Test
-    fun `given removing one category when calculating diff then returns Remove with count 1`() {
+    fun `given removing one category when calculating diff then returns Remove with target name and count 1`() {
         val result =
             useCase(
                 initialCategoryIds = setOf(1, 2),
@@ -137,7 +137,7 @@ class CalculateCategoryDiffUseCaseTest {
             )
 
         result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Remove
-        result.targetName shouldBe null
+        result.targetName shouldBe "Comedy"
         result.count shouldBe 1
     }
 
@@ -258,9 +258,9 @@ class CalculateCategoryDiffUseCaseTest {
                 isAddingToLibrary = false,
             )
 
-        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Add
+        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Move
         result.targetName shouldBe null
-        result.count shouldBe 1
+        result.count shouldBe 2
     }
 
     @Test
@@ -274,9 +274,9 @@ class CalculateCategoryDiffUseCaseTest {
                 isAddingToLibrary = false,
             )
 
-        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Add
+        result.actionType shouldBe CalculateCategoryDiffUseCase.CategoryActionType.Move
         result.targetName shouldBe "Dynamic"
-        result.count shouldBe 1
+        result.count shouldBe 2
     }
 
     @Test
