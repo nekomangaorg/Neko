@@ -20,9 +20,11 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import okhttp3.internal.closeQuietly
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
@@ -55,7 +57,7 @@ class Kagane : ReducedHttpSource() {
     private var integrityExp = 0L
     private val integrityMutex = Mutex()
 
-    private fun refreshTokenInterceptor(chain: okhttp3.Interceptor.Chain): okhttp3.Response {
+    internal fun refreshTokenInterceptor(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val url = request.url
         if (!url.queryParameterNames.contains("token")) {
@@ -71,8 +73,24 @@ class Kagane : ReducedHttpSource() {
             } ?: return chain.proceed(request)
 
         var response = chain.proceed(request)
+        // CloudflareInterceptor wraps this interceptor and solves the challenge itself. A new
+        // token can't get past one, and a failed token fetch would hide the challenge.
+        if (response.header("cf-mitigated") == "challenge") {
+            return response
+        }
         if (response.code == 401 || response.code == 403 || response.code == 507) {
             response.close()
+            // A 403 HTML page is the image host blocking this network, and a new token
+            // gets the same page.
+            if (
+                response.code == 403 &&
+                    response
+                        .header("Content-Type")
+                        .orEmpty()
+                        .startsWith("text/html", ignoreCase = true)
+            ) {
+                throw IOException("${url.host} is blocking this network, try another connection")
+            }
             val token =
                 runBlocking { runCatching { getChallengeResponse(chapterId).accessToken } }
                     .getOrNull() ?: throw IOException("Failed to retrieve token")
@@ -288,10 +306,12 @@ class Kagane : ReducedHttpSource() {
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String = baseUrl + simpleChapter.url
 
-    override fun imageRequest(page: Page): Request = GET(page.imageUrl!!, headers)
+    // The image host answers 404 without the site's Origin.
+    override fun imageRequest(page: Page): Request =
+        super.imageRequest(page).newBuilder().header("Origin", baseUrl).build()
 
     companion object {
         const val name = "Kagane"
-        const val baseUrl = "https://kagane.si"
+        const val baseUrl = "https://kagane.moe"
     }
 }
