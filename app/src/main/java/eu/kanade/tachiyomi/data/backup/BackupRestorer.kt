@@ -6,6 +6,7 @@ import androidx.room.withTransaction
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
+import eu.kanade.tachiyomi.data.backup.models.combineRows
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -278,24 +279,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     ): RestorableItem? {
         val title = backupMangaList.firstOrNull()?.title ?: return null
         try {
-            val backupManga =
-                if (backupMangaList.size == 1) {
-                    backupMangaList.first()
-                } else {
-                    val tempCategories = backupMangaList.flatMap { it.categories }.distinct()
-                    val tempChapters = backupMangaList.flatMap { it.chapters }.distinct()
-                    val tempHistory = backupMangaList.flatMap { it.history }.distinct()
-                    val tempTracks = backupMangaList.flatMap { it.tracking }.distinct()
-
-                    backupMangaList
-                        .first()
-                        .copy(
-                            categories = tempCategories,
-                            chapters = tempChapters,
-                            history = tempHistory,
-                            tracking = tempTracks,
-                        )
-                }
+            val backupManga = backupMangaList.combineRows()
 
             backupManga.source = SourceManager.getId(MdLang.ENGLISH.lang)
             val manga = backupManga.getMangaImpl()

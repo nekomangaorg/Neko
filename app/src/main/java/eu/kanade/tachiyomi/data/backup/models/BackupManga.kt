@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
@@ -110,4 +111,25 @@ data class BackupManga(
             )
         }
     }
+}
+
+/**
+ * A backup can list one title on several rows, and restore writes them as one manga. The first row
+ * gives the details, and the lists come from every row.
+ */
+internal fun List<BackupManga>.combineRows(): BackupManga {
+    if (size == 1) return first()
+    return first()
+        .copy(
+            categories = flatMap { it.categories }.distinct(),
+            chapters = flatMap { it.chapters }.distinct(),
+            history = flatMap { it.history }.distinct(),
+            tracking = flatMap { it.tracking }.distinct(),
+            mergeMangaList =
+                flatMap { it.mergeMangaList }
+                    .distinctBy { merge ->
+                        val type = MergeType.getById(merge.mergeType)
+                        type to merge.url.takeIf { type.multiMerge }
+                    },
+        )
 }
