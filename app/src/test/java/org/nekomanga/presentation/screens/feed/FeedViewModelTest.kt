@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.feed
 
 import android.app.Application
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -35,6 +36,7 @@ import org.nekomanga.domain.feed.FeedHistoryGroup
 import org.nekomanga.domain.feed.FeedItem
 import org.nekomanga.domain.feed.FeedPage
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.network.ResultError
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
@@ -266,5 +268,137 @@ class FeedViewModelTest {
             // Next page (offset = 15) must pass seenIds containing manga ID 1
             seenIdsPage1.captured shouldContainExactly setOf(1L)
             viewModel.historyScreenPagingState.value.historyFeedMangaList.size shouldBe 2
+        }
+
+    @Test
+    fun `given populated history with offset zero when refreshHistoryFeed runs then items are not wiped out`() =
+        runTest {
+            val item = createFeedItem(1L, "Manga 1")
+
+            coEvery {
+                mockFeedRepository.getHistoryPage(
+                    offset = 0,
+                    limit = any(),
+                    group = FeedHistoryGroup.Series,
+                    seenMangaIds = any(),
+                )
+            } returns Ok(FeedPage(hasNextPage = false, items = listOf(item)))
+
+            val viewModel = FeedViewModel()
+            advanceUntilIdle()
+
+            viewModel.historyScreenPagingState.value.historyFeedMangaList.size shouldBe 1
+
+            // Switch to Summary and back to History:
+            // Since history already has items, switching back calls refreshHistoryFeed()
+            viewModel.switchViewType(FeedScreenType.Summary)
+            advanceUntilIdle()
+
+            viewModel.switchViewType(FeedScreenType.History)
+            advanceUntilIdle()
+
+            // Feed must not be erased
+            viewModel.historyScreenPagingState.value.historyFeedMangaList.size shouldBe 1
+            viewModel.historyScreenPagingState.value.historyFeedMangaList.first().mangaId shouldBe
+                1L
+        }
+
+    @Test
+    fun `given partial failure during history refresh then existing history is preserved and not corrupted`() =
+        runTest {
+            val item1 = createFeedItem(1L, "Manga 1")
+            val item2 = createFeedItem(2L, "Manga 2")
+
+            coEvery {
+                mockFeedRepository.getHistoryPage(
+                    offset = 0,
+                    limit = any(),
+                    group = FeedHistoryGroup.Series,
+                    seenMangaIds = any(),
+                )
+            } returns Ok(FeedPage(hasNextPage = true, items = listOf(item1)))
+
+            coEvery {
+                mockFeedRepository.getHistoryPage(
+                    offset = 15,
+                    limit = any(),
+                    group = FeedHistoryGroup.Series,
+                    seenMangaIds = any(),
+                )
+            } returns Ok(FeedPage(hasNextPage = false, items = listOf(item2)))
+
+            val viewModel = FeedViewModel()
+            advanceUntilIdle()
+
+            viewModel.loadNextPage()
+            advanceUntilIdle()
+
+            viewModel.historyScreenPagingState.value.historyFeedMangaList.size shouldBe 2
+
+            // Simulate failure on refreshing page at offset 15
+            coEvery {
+                mockFeedRepository.getHistoryPage(
+                    offset = 15,
+                    limit = any(),
+                    group = FeedHistoryGroup.Series,
+                    seenMangaIds = any(),
+                )
+            } returns Err(ResultError.Generic("Network failure"))
+
+            // Trigger tab switch to run refreshHistoryFeed()
+            viewModel.switchViewType(FeedScreenType.Summary)
+            advanceUntilIdle()
+
+            viewModel.switchViewType(FeedScreenType.History)
+            advanceUntilIdle()
+
+            // Assert: Since page 15 failed, the entire list was not corrupted with partial page 0
+            // data
+            viewModel.historyScreenPagingState.value.historyFeedMangaList.size shouldBe 2
+        }
+
+    @Test
+    fun `given saved items and offsets when viewModel recreated then state and offsets are restored`() =
+        runTest {
+            val item1 = createFeedItem(1L, "Manga 1")
+            val item2 = createFeedItem(2L, "Manga 2")
+
+            coEvery {
+                mockFeedRepository.getHistoryPage(
+                    offset = 0,
+                    limit = any(),
+                    group = FeedHistoryGroup.Series,
+                    seenMangaIds = any(),
+                )
+            } returns Ok(FeedPage(hasNextPage = true, items = listOf(item1)))
+
+            coEvery {
+                mockFeedRepository.getHistoryPage(
+                    offset = 15,
+                    limit = any(),
+                    group = FeedHistoryGroup.Series,
+                    seenMangaIds = any(),
+                )
+            } returns Ok(FeedPage(hasNextPage = false, items = listOf(item2)))
+
+            val viewModel1 = FeedViewModel()
+            advanceUntilIdle()
+
+            viewModel1.loadNextPage()
+            advanceUntilIdle()
+
+            viewModel1.historyScreenPagingState.value.offset shouldBe 30
+            viewModel1.historyScreenPagingState.value.historyFeedMangaList.size shouldBe 2
+
+            // Save items on clearing
+            viewModel1.saveItems()
+
+            // Create new ViewModel instance (simulating Activity / ViewModel recreation)
+            val viewModel2 = FeedViewModel()
+            advanceUntilIdle()
+
+            // Assert: Items and offset restored from cache
+            viewModel2.historyScreenPagingState.value.offset shouldBe 30
+            viewModel2.historyScreenPagingState.value.historyFeedMangaList.size shouldBe 2
         }
 }
