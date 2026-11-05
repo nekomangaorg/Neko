@@ -51,6 +51,48 @@ class BackupMangaTest {
     }
 
     @Test
+    fun `chapter on both rows is restored once with the furthest progress`() {
+        val chapterUrl = "/chapter/a"
+        val first =
+            row()
+                .copy(
+                    chapters =
+                        listOf(
+                            BackupChapter(
+                                url = chapterUrl,
+                                name = "Ch.1",
+                                bookmark = true,
+                                dateFetch = 1L,
+                            )
+                        )
+                )
+        val second =
+            row()
+                .copy(
+                    chapters =
+                        listOf(
+                            BackupChapter(
+                                url = chapterUrl,
+                                name = "Ch.1",
+                                read = true,
+                                lastPageRead = 7,
+                                pagesLeft = 2,
+                                dateFetch = 2L,
+                            )
+                        )
+                )
+
+        val chapters = listOf(first, second).combineRows().chapters
+
+        assertEquals(listOf(chapterUrl), chapters.map { it.url })
+        val chapter = chapters.single()
+        assertEquals(true, chapter.read)
+        assertEquals(true, chapter.bookmark)
+        assertEquals(7, chapter.lastPageRead)
+        assertEquals(2, chapter.pagesLeft)
+    }
+
+    @Test
     fun `first row gives the details and the other lists come from every row`() {
         val first =
             row()

@@ -122,7 +122,8 @@ internal fun List<BackupManga>.combineRows(): BackupManga {
     return first()
         .copy(
             categories = flatMap { it.categories }.distinct(),
-            chapters = flatMap { it.chapters }.distinct(),
+            chapters =
+                flatMap { it.chapters }.groupBy { it.url }.values.map { it.combineProgress() },
             history = flatMap { it.history }.distinct(),
             tracking = flatMap { it.tracking }.distinct(),
             mergeMangaList =
@@ -131,5 +132,17 @@ internal fun List<BackupManga>.combineRows(): BackupManga {
                         val type = MergeType.getById(merge.mergeType)
                         type to merge.url.takeIf { type.multiMerge }
                     },
+        )
+}
+
+/** Restore inserts every chapter it is given, so the rows of one chapter url become one chapter. */
+private fun List<BackupChapter>.combineProgress(): BackupChapter {
+    val furthest = maxBy { it.lastPageRead }
+    return first()
+        .copy(
+            read = any { it.read },
+            bookmark = any { it.bookmark },
+            lastPageRead = furthest.lastPageRead,
+            pagesLeft = furthest.pagesLeft,
         )
 }
