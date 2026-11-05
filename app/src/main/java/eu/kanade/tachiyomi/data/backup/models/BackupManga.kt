@@ -115,12 +115,14 @@ data class BackupManga(
 
 /**
  * A backup can list one title on several rows, and restore writes them as one manga. The first row
- * gives the details, and the lists come from every row.
+ * gives the details, and the lists come from every row. The title stays in the library if any row
+ * is a favorite.
  */
 internal fun List<BackupManga>.combineRows(): BackupManga {
     if (size == 1) return first()
     return first()
         .copy(
+            favorite = any { it.favorite },
             categories = flatMap { it.categories }.distinct(),
             chapters =
                 flatMap { it.chapters }.groupBy { it.url }.values.map { it.combineProgress() },

@@ -93,6 +93,13 @@ class BackupMangaTest {
     }
 
     @Test
+    fun `title stays in the library when only a later row is a favorite`() {
+        val rows = listOf(row().copy(favorite = false), row().copy(favorite = true))
+
+        assertEquals(true, rows.combineRows().favorite)
+    }
+
+    @Test
     fun `first row gives the details and the other lists come from every row`() {
         val first =
             row()

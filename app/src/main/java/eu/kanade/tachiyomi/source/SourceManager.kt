@@ -48,7 +48,18 @@ open class SourceManager {
         return possibleIds.contains(sourceKey)
     }
 
+    /**
+     * A manga row holds [UNSET_SOURCE] until something sets its source. A library section refresh
+     * used to write that value over real rows, and a database or backup can still hold them. Neko
+     * only stores MangaDex titles, so those rows are MangaDex too.
+     */
+    fun isMangadexOrUnset(sourceKey: Long): Boolean {
+        return sourceKey == UNSET_SOURCE || isMangadex(sourceKey)
+    }
+
     companion object {
+
+        private const val UNSET_SOURCE = -1L
 
         val mergeSourceNames =
             listOf<String>(
