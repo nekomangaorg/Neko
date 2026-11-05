@@ -786,11 +786,17 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         return null
     }
 
-    private fun addMangaToQueue(manga: List<LibraryManga>) {
+    private fun addMangaToQueue(mangaIds: List<Long>) {
         extraScope.launch {
+            val ids = mangaIds.toSet()
+            val libraryManga = mangaRepository.getLibraryList().filter { it.id in ids }
             val tracksByMangaId = trackRepository.getAllTracks().groupBy { it.manga_id }
             val mangaToAdd =
-                getAndFilterMangaToUpdate(manga, tracksByMangaId = tracksByMangaId, categoryId = -1)
+                getAndFilterMangaToUpdate(
+                    libraryManga,
+                    tracksByMangaId = tracksByMangaId,
+                    categoryId = -1,
+                )
 
             addManga(mangaToAdd)
         }
@@ -920,13 +926,12 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         suspend fun startNow(
             context: Context,
             category: Category? = null,
-            mangaToUse: List<LibraryManga>? = null,
             mangaIdsToUse: List<Long>? = null,
         ): Boolean {
             if (withIOContext { isRunning(context) }) {
                 category?.id?.let {
-                    if (mangaToUse != null) {
-                        instance?.get()?.addMangaToQueue(mangaToUse)
+                    if (mangaIdsToUse != null) {
+                        instance?.get()?.addMangaToQueue(mangaIdsToUse)
                     } else {
                         instance?.get()?.addCategory(it)
                     }
@@ -938,12 +943,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val builder = Data.Builder()
 
             val libraryPreferences = Injekt.injectLazy<LibraryPreferences>()
-            if (mangaToUse != null) {
-                builder.putBoolean(KEY_MANGA_LIST, true)
-                libraryPreferences.value
-                    .libraryUpdateIds()
-                    .set(mangaToUse.mapNotNull { it.id }.toLongArray().joinToString("||"))
-            } else if (mangaIdsToUse != null) {
+            if (mangaIdsToUse != null) {
                 builder.putBoolean(KEY_MANGA_LIST, true)
                 libraryPreferences.value
                     .libraryUpdateIds()

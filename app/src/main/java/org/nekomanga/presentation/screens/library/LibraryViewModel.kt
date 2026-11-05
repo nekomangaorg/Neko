@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
-import eu.kanade.tachiyomi.util.manga.toLibraryManga
 import eu.kanade.tachiyomi.util.manga.toLibraryMangaItem
 import eu.kanade.tachiyomi.util.system.combine
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -1051,19 +1050,19 @@ class LibraryViewModel() : ViewModel() {
     fun refreshCategory(categoryItem: CategoryItem) {
         viewModelScope.launchNonCancellable {
             try {
-                val mangaToUse =
+                val mangaIds =
                     if (categoryItem.isDynamic) {
                         libraryScreenState.value.items
                             .firstOrNull { it.categoryItem.id == categoryItem.id }
                             ?.libraryItems
-                            ?.map { it.toLibraryManga() }
+                            ?.map { it.displayManga.mangaId }
                     } else {
                         null
                     }
                 LibraryUpdateJob.startNow(
                     application,
                     categoryItem.toDbCategory(),
-                    mangaToUse = mangaToUse,
+                    mangaIdsToUse = mangaIds,
                 )
             } catch (e: Exception) {
                 TimberKt.e(e) { "Failed to refresh category ${categoryItem.name}" }
