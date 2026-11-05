@@ -85,11 +85,12 @@ class FollowsSyncProcessor {
                     val mangaIdsToUpdate = listManga.mapNotNull { networkManga ->
                         updateNotification(networkManga.title, count.andIncrement, listManga.size)
 
+                        // A title can have several rows, and a row wiped by a section refresh has
+                        // source -1, so read every row of this url. A row in the library wins,
+                        // then the oldest, because a copy from an earlier Pull has nothing merged.
+                        val rows = mangaRepository.getMangaByUrls(listOf(networkManga.url))
                         var dbManga =
-                            mangaRepository.getMangaByUrlAndSource(
-                                networkManga.url,
-                                sourceManager.mangaDex.id,
-                            )
+                            rows.find { it.favorite } ?: rows.sortedBy { it.id }.firstOrNull()
                         if (dbManga == null) {
                             dbManga =
                                 Manga.create(
