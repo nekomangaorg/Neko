@@ -30,7 +30,8 @@ import uy.kohesive.injekt.api.get
  * @param db the database.
  * @param rawSourceChapters a list of chapters from the source.
  * @param manga the manga of the chapters.
- * @param errorFromMerged whether there is an error is from a merged source
+ * @param errorFromMerged whether merged chapters missing from [rawSourceChapters] stay in the db,
+ *   for when a merged source failed or was not asked
  * @param readFromMerged a set of merged chapters that have a read status
  * @return a pair of new insertions and deletions.
  */
