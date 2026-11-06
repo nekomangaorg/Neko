@@ -526,6 +526,8 @@ constructor(
                     mangaRepository = mangaRepository,
                     manga = manga,
                     rawSourceChapters = chapters,
+                    // The list holds MangaDex chapters only, it says nothing about the merged ones.
+                    errorFromMerged = true,
                 )
                 val currentChapter =
                     chapterRepository.getChapterByUrl(MdConstants.chapterSuffix + urlChapterId)
