@@ -27,6 +27,7 @@ import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -57,6 +58,7 @@ class StatusSyncJobTest {
     private val mangaRepository: MangaRepository = mockk {
         coEvery { getMangaByIds(any()) } returns emptyList()
         coEvery { getLibraryList() } returns emptyList()
+        coEvery { getMangaByUrls(any()) } returns emptyList()
     }
     private val mangaDex: MangaDex = mockk { coEvery { fetchAllFollows() } returns Ok(emptyList()) }
 
@@ -155,6 +157,34 @@ class StatusSyncJobTest {
         assertEquals(Result.success(), runJob(queuedByOldVersion))
 
         coVerify(exactly = 1) { mangaRepository.getMangaByIds(listOf(5L, 7L)) }
+        coVerify(exactly = 0) { mangaRepository.getLibraryList() }
+        coVerify(exactly = 0) { mangaDex.fetchAllFollows() }
+    }
+
+    @Test
+    fun `an empty selection queues nothing`() {
+        StatusSyncJob.startSelectedNow(workManager, emptyList())
+
+        verify(exactly = 0) {
+            workManager.enqueueUniqueWork(any(), any(), any<OneTimeWorkRequest>())
+        }
+    }
+
+    @Test
+    fun `blank selected ids push nothing and not the whole library`() = runTest {
+        val blankIds = Data.Builder().putString("selected_manga_ids", "").build()
+
+        assertEquals(Result.success(), runJob(blankIds))
+
+        coVerify(exactly = 0) { mangaRepository.getMangaByIds(any()) }
+        coVerify(exactly = 0) { mangaRepository.getLibraryList() }
+    }
+
+    @Test
+    fun `a job with no input pushes and pulls nothing`() = runTest {
+        assertEquals(Result.success(), runJob(Data.EMPTY))
+
+        coVerify(exactly = 0) { mangaRepository.getMangaByIds(any()) }
         coVerify(exactly = 0) { mangaRepository.getLibraryList() }
         coVerify(exactly = 0) { mangaDex.fetchAllFollows() }
     }

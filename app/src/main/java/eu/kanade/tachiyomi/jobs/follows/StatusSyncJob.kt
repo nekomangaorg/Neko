@@ -73,17 +73,26 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
             return@coroutineScope Result.failure()
         }
         try {
-            when (val ids = inputData.getString(SYNC_TYPE)) {
-                null,
-                "0" -> {
-                    TimberKt.d { "sync to MangaDex" }
+            val selectedIds = inputData.getString(SELECTED_MANGA_IDS)
+            val syncType = inputData.getString(SYNC_TYPE)
+            when {
+                selectedIds != null -> {
+                    TimberKt.d { "sync selected manga to MangaDex" }
                     followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        inputData.getString(SELECTED_MANGA_IDS),
+                        selectedIds,
                     )
                 }
-                "1" -> {
+                syncType == entireLibraryToDex -> {
+                    TimberKt.d { "sync entire library to MangaDex" }
+                    followsSyncProcessor.toMangaDex(
+                        ::updateNotificationProgress,
+                        ::completeNotificationToDex,
+                        null,
+                    )
+                }
+                syncType == followsFromDex -> {
                     TimberKt.d { "sync from MangaDex" }
 
                     val total =
@@ -103,14 +112,14 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
                         )
                     }
                 }
-                else -> {
-                    // Queued by a version that put the selected ids in SYNC_TYPE
+                // Queued by a version that put the selected ids in SYNC_TYPE
+                !syncType.isNullOrBlank() -> {
                     TimberKt.d { "sync to MangaDex with given ids" }
 
                     followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        ids,
+                        syncType,
                     )
                 }
             }
@@ -198,6 +207,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
         }
 
         fun startSelectedNow(workManager: WorkManager, mangaIds: List<Long>) {
+            if (mangaIds.isEmpty()) return
             enqueue(
                 workManager,
                 Data.Builder().putString(SELECTED_MANGA_IDS, mangaIds.joinToString()).build(),
