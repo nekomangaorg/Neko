@@ -1,15 +1,26 @@
 package org.nekomanga.data.database.repository
 
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveAtMostSize
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.nekomanga.data.database.dao.LibraryDao
 import org.nekomanga.data.database.dao.MangaDao
+import org.nekomanga.data.database.mapper.toEntity
+import org.nekomanga.data.database.model.LibraryMangaRaw
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.library.ScanlatorFilterOption
 import org.nekomanga.domain.site.MangaDexPreferences
 
 class MangaRepositoryImplTest {
@@ -69,6 +80,61 @@ class MangaRepositoryImplTest {
         capturedQueries.flatten() shouldContainExactlyInAnyOrder
             listOf("/title/uuid-1", "/manga/uuid-1")
     }
+
+    @Test
+    fun `observeLibrary gives a slow collector the latest library and skips the lists between`() =
+        runTest {
+            val libraryDao =
+                mockk<LibraryDao> {
+                    every { observeLibrary() } returns
+                        flow {
+                            emit(listOf(rawManga(1L)))
+                            delay(10)
+                            emit(listOf(rawManga(2L)))
+                            delay(10)
+                            emit(listOf(rawManga(3L)))
+                        }
+                }
+            val mangaDexPreferences =
+                mockk<MangaDexPreferences> {
+                    every { blockedGroups().changes() } returns flowOf(emptySet())
+                    every { blockedUploaders().changes() } returns flowOf(emptySet())
+                }
+            val libraryPreferences =
+                mockk<LibraryPreferences> {
+                    every { chapterScanlatorFilterOption().changes() } returns
+                        flowOf(ScanlatorFilterOption.ANY)
+                }
+            val libraryRepository =
+                MangaRepositoryImpl(
+                    libraryDao = libraryDao,
+                    mangaDao = mangaDao,
+                    mangaDexPreferences = mangaDexPreferences,
+                    libraryPreferences = libraryPreferences,
+                    ioDispatcher = UnconfinedTestDispatcher(testScheduler),
+                )
+
+            val seen = libraryRepository.observeLibrary().onEach { delay(1_000) }.toList()
+
+            assertEquals(listOf(1L, 3L), seen.map { it.single().id })
+        }
+
+    private fun rawManga(id: Long) =
+        LibraryMangaRaw(
+            manga =
+                MangaImpl()
+                    .apply {
+                        this.id = id
+                        url = "/title/uuid-$id"
+                        title = "Title $id"
+                    }
+                    .toEntity(),
+            unread = "",
+            hasRead = "",
+            bookmarkCount = 0,
+            unavailableCount = 0,
+            category = 0,
+        )
 
     @Test
     fun `getMangaByIds splits id list so no query exceeds the SQLite variable limit`() = runTest {
