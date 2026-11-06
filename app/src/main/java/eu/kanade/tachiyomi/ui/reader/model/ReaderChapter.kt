@@ -33,6 +33,10 @@ data class ReaderChapter(val chapter: Chapter) {
     }
 
     fun unref() {
+        if (references == 0) {
+            TimberKt.w { "Chapter ${chapter.name} released with no references left" }
+            return
+        }
         references--
         if (references == 0) {
             if (pageLoader != null) {
