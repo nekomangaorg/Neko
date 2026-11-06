@@ -4,11 +4,9 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 import org.nekomanga.data.database.model.LibraryMangaRaw
 
 @Dao
@@ -27,7 +25,7 @@ abstract class LibraryDao(private val database: RoomDatabase) {
         database.invalidationTracker
             .createFlow("manga", "chapters", "manga_categories", "merge_manga")
             .conflate()
-            .map { withContext(Dispatchers.IO) { getLibraryList() } }
+            .map { getLibraryList() }
 
     // A big library takes several cursor windows to read, and without the transaction a write that
     // drops a row between two of them makes the cursor read past the last row and throw.
