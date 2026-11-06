@@ -73,17 +73,26 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
             return@coroutineScope Result.failure()
         }
         try {
-            when (val ids = inputData.getString(SYNC_TYPE)) {
-                null,
-                "0" -> {
-                    TimberKt.d { "sync to MangaDex" }
+            val selectedIds = inputData.getString(SELECTED_MANGA_IDS)
+            val syncType = inputData.getString(SYNC_TYPE)
+            when {
+                selectedIds != null -> {
+                    TimberKt.d { "sync selected manga to MangaDex" }
+                    followsSyncProcessor.toMangaDex(
+                        ::updateNotificationProgress,
+                        ::completeNotificationToDex,
+                        selectedIds,
+                    )
+                }
+                syncType == entireLibraryToDex -> {
+                    TimberKt.d { "sync entire library to MangaDex" }
                     followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
                         null,
                     )
                 }
-                "1" -> {
+                syncType == followsFromDex -> {
                     TimberKt.d { "sync from MangaDex" }
 
                     val total =
@@ -103,13 +112,14 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
                         )
                     }
                 }
-                else -> {
+                // Queued by a version that put the selected ids in SYNC_TYPE
+                !syncType.isNullOrBlank() -> {
                     TimberKt.d { "sync to MangaDex with given ids" }
 
                     followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        ids,
+                        syncType,
                     )
                 }
             }
@@ -183,22 +193,35 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
         val TAG = "follow_sync_job"
         private const val SYNC_TYPE = "sync_type"
 
+        // Own key, because a selected manga with id 1 in SYNC_TYPE reads as followsFromDex
+        private const val SELECTED_MANGA_IDS = "selected_manga_ids"
+
         const val entireLibraryToDex: String = "0"
         const val followsFromDex = "1"
 
-        fun startNow(workManager: WorkManager, syncType: String) {
+        fun startNow(context: Context, syncType: String) {
+            enqueue(
+                WorkManager.getInstance(context),
+                Data.Builder().putString(SYNC_TYPE, syncType).build(),
+            )
+        }
+
+        fun startSelectedNow(workManager: WorkManager, mangaIds: List<Long>) {
+            if (mangaIds.isEmpty()) return
+            enqueue(
+                workManager,
+                Data.Builder().putString(SELECTED_MANGA_IDS, mangaIds.joinToString()).build(),
+            )
+        }
+
+        private fun enqueue(workManager: WorkManager, input: Data) {
             val request =
                 OneTimeWorkRequestBuilder<StatusSyncJob>()
                     .addTag(TAG)
                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(Data.Builder().putString(SYNC_TYPE, syncType).build())
+                    .setInputData(input)
                     .build()
             workManager.enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
-        }
-
-        fun startNow(context: Context, syncType: String) {
-            val workManager = WorkManager.getInstance(context)
-            startNow(workManager, syncType)
         }
 
         fun stop(context: Context) {
