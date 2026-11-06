@@ -86,6 +86,10 @@ class MangaDexPreferences(private val preferenceStore: PreferenceStore) {
         }
     }
 
+    /** The selected manga a queued follows push is waiting to send */
+    fun followsPushIds() =
+        this.preferenceStore.getString(Preference.appStateKey("follows_push_ids"))
+
     fun mangaDexPullToLibraryIndices() =
         this.preferenceStore.getStringSet("pref_mangadex_sync_to_library_indexes", emptySet())
 }

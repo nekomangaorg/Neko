@@ -28,8 +28,12 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -42,6 +46,7 @@ import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
+import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.api.addSingleton
@@ -62,6 +67,13 @@ class StatusSyncJobTest {
     }
     private val mangaDex: MangaDex = mockk { coEvery { fetchAllFollows() } returns Ok(emptyList()) }
 
+    private var storedPushIds = ""
+    private val followsPushIds: Preference<String> = mockk {
+        every { get() } answers { storedPushIds }
+        every { set(any()) } answers { storedPushIds = firstArg() }
+        every { delete() } answers { storedPushIds = "" }
+    }
+
     @Before
     fun setup() {
         Injekt = InjektScope(DefaultRegistrar())
@@ -77,6 +89,7 @@ class StatusSyncJobTest {
         Injekt.addSingleton(
             mockk<MangaDexPreferences> {
                 every { mangaDexPullToLibraryIndices().get() } returns emptySet()
+                every { followsPushIds() } returns this@StatusSyncJobTest.followsPushIds
             }
         )
         Injekt.addSingleton(
@@ -162,19 +175,22 @@ class StatusSyncJobTest {
     }
 
     @Test
-    fun `an empty selection queues nothing`() {
+    fun `an empty selection queues nothing and keeps the ids of a queued push`() {
+        storedPushIds = "5,7"
+
         StatusSyncJob.startSelectedNow(workManager, emptyList())
 
         verify(exactly = 0) {
             workManager.enqueueUniqueWork(any(), any(), any<OneTimeWorkRequest>())
         }
+        assertEquals("5,7", storedPushIds)
     }
 
     @Test
-    fun `blank selected ids push nothing and not the whole library`() = runTest {
-        val blankIds = Data.Builder().putString("selected_manga_ids", "").build()
+    fun `a selected push with no stored ids pushes nothing and not the whole library`() = runTest {
+        val noStoredIds = Data.Builder().putBoolean("selected_manga", true).build()
 
-        assertEquals(Result.success(), runJob(blankIds))
+        assertEquals(Result.success(), runJob(noStoredIds))
 
         coVerify(exactly = 0) { mangaRepository.getMangaByIds(any()) }
         coVerify(exactly = 0) { mangaRepository.getLibraryList() }
@@ -187,6 +203,74 @@ class StatusSyncJobTest {
         coVerify(exactly = 0) { mangaRepository.getMangaByIds(any()) }
         coVerify(exactly = 0) { mangaRepository.getLibraryList() }
         coVerify(exactly = 0) { mangaDex.fetchAllFollows() }
+    }
+
+    @Test
+    fun `a selection too big for the job input is queued and every id is pushed`() = runTest {
+        val selection = (10_000_000L until 10_002_500L).toList()
+        val pushed = mutableListOf<List<Long>>()
+        coEvery { mangaRepository.getMangaByIds(capture(pushed)) } returns emptyList()
+
+        StatusSyncJob.startSelectedNow(workManager, selection)
+
+        assertEquals(Result.success(), runJob(queuedRequest.captured.workSpec.input))
+        assertEquals(selection, pushed.flatten())
+    }
+
+    @Test
+    fun `the stored ids are removed when the push finishes`() = runTest {
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L, 7L))
+
+        assertEquals(Result.success(), runJob(queuedRequest.captured.workSpec.input))
+
+        assertEquals("", storedPushIds)
+    }
+
+    @Test
+    fun `a push stopped part way still has its ids when WorkManager runs it again`() = runTest {
+        var pushes = 0
+        val pushStarted = CompletableDeferred<Unit>()
+        coEvery { mangaRepository.getMangaByIds(listOf(5L, 7L)) } coAnswers
+            {
+                pushes++
+                if (pushes == 1) {
+                    pushStarted.complete(Unit)
+                    awaitCancellation()
+                }
+                emptyList()
+            }
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L, 7L))
+        val input = queuedRequest.captured.workSpec.input
+
+        val stopped = launch { runJob(input) }
+        pushStarted.await()
+        stopped.cancelAndJoin()
+
+        assertEquals(Result.success(), runJob(input))
+        assertEquals(2, pushes)
+    }
+
+    @Test
+    fun `a new selection replaces the ids a cancelled push left behind`() = runTest {
+        storedPushIds = "1,2,3"
+        val pushed = mutableListOf<List<Long>>()
+        coEvery { mangaRepository.getMangaByIds(capture(pushed)) } returns emptyList()
+
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L))
+
+        assertEquals(Result.success(), runJob(queuedRequest.captured.workSpec.input))
+        assertEquals(listOf(5L), pushed.flatten())
+    }
+
+    @Test
+    fun `ids a cancelled push left behind are not pushed by a pull from settings`() = runTest {
+        storedPushIds = "1,2,3"
+
+        StatusSyncJob.startNow(context, StatusSyncJob.followsFromDex)
+
+        assertEquals(Result.success(), runJob(queuedRequest.captured.workSpec.input))
+        coVerify(exactly = 1) { mangaDex.fetchAllFollows() }
+        coVerify(exactly = 0) { mangaRepository.getMangaByIds(any()) }
     }
 
     private suspend fun runJob(input: Data): Result {

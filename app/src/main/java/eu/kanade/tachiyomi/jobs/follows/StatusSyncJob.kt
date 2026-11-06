@@ -30,7 +30,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 /** WorkManager job that syncs FollowsList to and from Neko */
@@ -40,6 +43,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
     private val followsSyncProcessor: FollowsSyncProcessor by injectLazy()
     val source: SourceManager by injectLazy()
     private val loginHelper: MangaDexLoginHelper by injectLazy()
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
     private val progressNotification =
         applicationContext.notificationBuilder(Notifications.Channel.Status).apply {
@@ -73,16 +77,18 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
             return@coroutineScope Result.failure()
         }
         try {
-            val selectedIds = inputData.getString(SELECTED_MANGA_IDS)
             val syncType = inputData.getString(SYNC_TYPE)
             when {
-                selectedIds != null -> {
+                inputData.getBoolean(SELECTED_MANGA, false) -> {
                     TimberKt.d { "sync selected manga to MangaDex" }
+                    val pushIds = mangaDexPreferences.followsPushIds()
                     followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        selectedIds,
+                        pushIds.get(),
                     )
+                    // Last, because WorkManager runs a stopped job again with the same input
+                    pushIds.delete()
                 }
                 syncType == entireLibraryToDex -> {
                     TimberKt.d { "sync entire library to MangaDex" }
@@ -193,8 +199,9 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
         val TAG = "follow_sync_job"
         private const val SYNC_TYPE = "sync_type"
 
-        // Own key, because a selected manga with id 1 in SYNC_TYPE reads as followsFromDex
-        private const val SELECTED_MANGA_IDS = "selected_manga_ids"
+        // The ids wait in followsPushIds, since WorkManager refuses input over 10240 bytes, about
+        // 1500 ids
+        private const val SELECTED_MANGA = "selected_manga"
 
         const val entireLibraryToDex: String = "0"
         const val followsFromDex = "1"
@@ -208,10 +215,8 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
 
         fun startSelectedNow(workManager: WorkManager, mangaIds: List<Long>) {
             if (mangaIds.isEmpty()) return
-            enqueue(
-                workManager,
-                Data.Builder().putString(SELECTED_MANGA_IDS, mangaIds.joinToString()).build(),
-            )
+            Injekt.get<MangaDexPreferences>().followsPushIds().set(mangaIds.joinToString(","))
+            enqueue(workManager, Data.Builder().putBoolean(SELECTED_MANGA, true).build())
         }
 
         private fun enqueue(workManager: WorkManager, input: Data) {
