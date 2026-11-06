@@ -31,6 +31,11 @@ class MdUtil {
             return url.trimEnd('/').substringAfterLast("/")
         }
 
+        private val MANGA_URL =
+            Regex("/(title|manga)/[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}/?")
+
+        fun isMangaUrl(url: String) = MANGA_URL.matches(url)
+
         fun getChapterUUID(url: String) = url.substringAfterLast("/")
 
         fun cleanString(dirtyString: String): String {

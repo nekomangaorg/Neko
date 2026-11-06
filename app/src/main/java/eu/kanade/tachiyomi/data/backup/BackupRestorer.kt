@@ -6,6 +6,7 @@ import androidx.room.withTransaction
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
+import eu.kanade.tachiyomi.data.backup.models.combineRows
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -112,21 +113,31 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
 
     private suspend fun performRestore(uri: Uri): Boolean {
         val backup = BackupUtil.decodeBackup(context, uri)
-        val partitionedList = backup.backupManga.partition { sourceManager.isMangadex(it.source) }
+        val partitionedList =
+            backup.backupManga.partition { sourceManager.isMangadexOrUnset(it.source, it.url) }
 
         // [OPTIMIZATION] Pre-fetch all existing MangaDex manga IDs to avoid N read queries
+        val dbDexManga =
+            mangaRepository.getMangaList().filter {
+                sourceManager.isMangadexOrUnset(it.source, it.url)
+            }
         val dbMangaMap =
-            mangaRepository
-                .getMangaList()
-                .filter { sourceManager.isMangadex(it.source) }
+            dbDexManga
+                // associateBy keeps the last row, and a title with an unset row and a proper row
+                // should match the proper one
+                .sortedBy { sourceManager.isMangadex(it.source) }
                 .associateBy { MdUtil.getMangaUUID(it.url) }
+        val doubledRows = dbDexManga.size - dbMangaMap.size
+        if (doubledRows > 0) {
+            TimberKt.w { "Restore leaves $doubledRows doubled manga rows in the database" }
+        }
 
         return coroutineScope {
-            val dexManga = partitionedList.first
+            val dexManga = partitionedList.first.groupBy { MdUtil.getMangaUUID(it.url) }
             skippedTitles = partitionedList.second.map { it.title }
-            totalAmount = backup.backupManga.size
-            skippedAmount = totalAmount - dexManga.size
+            skippedAmount = partitionedList.second.size
             restoreAmount = dexManga.size
+            totalAmount = restoreAmount + skippedAmount
 
             if (backup.backupCategories.isNotEmpty()) {
                 restoreCategories(backup.backupCategories)
@@ -134,7 +145,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
 
             // Batch parameters
             val batchSize = 100 // Safe size for SQLite transactions
-            val chunks = dexManga.groupBy { MdUtil.getMangaUUID(it.url) }.entries.chunked(batchSize)
+            val chunks = dexManga.entries.chunked(batchSize)
             val semaphore = Semaphore(8) // concurrency limit for CPU prep
 
             chunks.forEach { chunk ->
@@ -278,24 +289,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     ): RestorableItem? {
         val title = backupMangaList.firstOrNull()?.title ?: return null
         try {
-            val backupManga =
-                if (backupMangaList.size == 1) {
-                    backupMangaList.first()
-                } else {
-                    val tempCategories = backupMangaList.flatMap { it.categories }.distinct()
-                    val tempChapters = backupMangaList.flatMap { it.chapters }.distinct()
-                    val tempHistory = backupMangaList.flatMap { it.history }.distinct()
-                    val tempTracks = backupMangaList.flatMap { it.tracking }.distinct()
-
-                    backupMangaList
-                        .first()
-                        .copy(
-                            categories = tempCategories,
-                            chapters = tempChapters,
-                            history = tempHistory,
-                            tracking = tempTracks,
-                        )
-                }
+            val backupManga = backupMangaList.combineRows()
 
             backupManga.source = SourceManager.getId(MdLang.ENGLISH.lang)
             val manga = backupManga.getMangaImpl()

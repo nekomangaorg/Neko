@@ -4,7 +4,9 @@ import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.TrackImpl
+import eu.kanade.tachiyomi.source.SourceManager
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
@@ -110,4 +112,65 @@ data class BackupManga(
             )
         }
     }
+}
+
+/**
+ * A backup can list one title on several rows, and restore writes them as one manga. The first row
+ * with a source gives the details, since a row that lost its source can have lost them too. Each
+ * user setting comes from the first row that has it, and the lists come from every row. The title
+ * stays in the library if any row is a favorite.
+ */
+internal fun List<BackupManga>.combineRows(): BackupManga {
+    if (size == 1) return first()
+    val base = firstOrNull { it.source != SourceManager.UNSET_SOURCE } ?: first()
+    return base.copy(
+        dateAdded = combineDateAdded(),
+        customTitle = firstNotBlank { it.customTitle },
+        scanlatorFilter = firstNotBlank { it.scanlatorFilter },
+        alternativeArtwork = firstNotBlank { it.alternativeArtwork },
+        viewer_flags =
+            map { it.viewer_flags ?: it.viewer }.firstOrNull { it != 0 } ?: base.viewer_flags,
+        chapterFlags = map { it.chapterFlags }.firstOrNull { it != 0 } ?: 0,
+        favorite = any { it.favorite },
+        categories = flatMap { it.categories }.distinct(),
+        chapters = flatMap { it.chapters }.groupBy { it.url }.values.map { it.combineProgress() },
+        history = flatMap { it.history }.distinct(),
+        tracking = flatMap { it.tracking }.distinct(),
+        mergeMangaList =
+            flatMap { it.mergeMangaList }
+                .distinctBy { merge ->
+                    val type = MergeType.getById(merge.mergeType)
+                    type to merge.url.takeIf { type.multiMerge }
+                },
+    )
+}
+
+private inline fun List<BackupManga>.firstNotBlank(field: (BackupManga) -> String?): String? =
+    firstNotNullOfOrNull { row ->
+        field(row)?.takeIf { it.isNotBlank() }
+    }
+
+/**
+ * The earliest date on any row. A row that lost its source has date_added 0, and the copy Pull
+ * inserted next to it holds the time of that Pull. Using that time would hide every chapter fetched
+ * before it from the update queries (date_fetch > date_added), so when a row has no date the
+ * chapter fetch times count too.
+ */
+private fun List<BackupManga>.combineDateAdded(): Long {
+    val dates = map { it.dateAdded }
+    val known = if (0L in dates) dates + flatMap { it.chapters }.map { it.dateFetch } else dates
+    return known.filter { it > 0L }.minOrNull() ?: 0L
+}
+
+/** Restore inserts every chapter it is given, so the rows of one chapter url become one chapter. */
+private fun List<BackupChapter>.combineProgress(): BackupChapter {
+    val isRead = any { it.read }
+    val furthest = maxBy { it.lastPageRead }
+    return first()
+        .copy(
+            read = isRead,
+            bookmark = any { it.bookmark },
+            lastPageRead = furthest.lastPageRead,
+            pagesLeft = if (isRead) 0 else furthest.pagesLeft,
+        )
 }

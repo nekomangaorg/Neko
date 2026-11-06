@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
 import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
 import eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral
 import eu.kanade.tachiyomi.source.online.utils.MdLang
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.security.MessageDigest
 import org.nekomanga.constants.Constants
 
@@ -48,7 +49,18 @@ open class SourceManager {
         return possibleIds.contains(sourceKey)
     }
 
+    /**
+     * A manga row holds [UNSET_SOURCE] until something sets its source. A library section refresh
+     * used to write that value over real rows, and a database or backup can still hold them. Such a
+     * row counts as MangaDex when its url is a MangaDex manga url.
+     */
+    fun isMangadexOrUnset(sourceKey: Long, url: String): Boolean {
+        return isMangadex(sourceKey) || (sourceKey == UNSET_SOURCE && MdUtil.isMangaUrl(url))
+    }
+
     companion object {
+
+        const val UNSET_SOURCE = -1L
 
         val mergeSourceNames =
             listOf<String>(
