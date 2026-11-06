@@ -28,25 +28,43 @@ class ReaderChapterTest {
         Timber.uprootAll()
     }
 
+    private fun readerChapter() =
+        ReaderChapter(
+            Chapter.create().apply {
+                url = "/chapter/1"
+                name = "Chapter 1"
+            }
+        )
+
     @Test
-    fun `unref warns only when the references drop below zero`() {
+    fun `unref with no references left keeps the count at zero and warns`() {
         // Given a chapter holding one reference
-        val chapter =
-            ReaderChapter(
-                    Chapter.create().apply {
-                        url = "/chapter/1"
-                        name = "Chapter 1"
-                    }
-                )
-                .apply { ref() }
+        val chapter = readerChapter().apply { ref() }
 
         // When it is released once and then once more
         chapter.unref()
         val warningsAtZero = warnings.size
         chapter.unref()
 
-        // Then only the release below zero warns
+        // Then the count stays at zero and only the extra release warns
+        assertEquals(0, chapter.references)
         assertEquals(0, warningsAtZero)
         assertEquals(1, warnings.size)
+    }
+
+    @Test
+    fun `a chapter released once too often still recycles on its next release`() {
+        // Given a chapter released once more than it was referenced
+        val chapter = readerChapter().apply { ref() }
+        chapter.unref()
+        chapter.unref()
+
+        // When it is loaded again and released
+        chapter.ref()
+        chapter.state = ReaderChapter.State.Loading
+        chapter.unref()
+
+        // Then that release recycles it
+        assertEquals(ReaderChapter.State.Wait, chapter.state)
     }
 }

@@ -601,10 +601,23 @@ constructor(
         withUIContext {
             // The queue delete can suspend. A swap landing during it would recycle any chapter of
             // this set that holds no reference yet, so this swap goes first.
-            mutableState.swapViewerChapters(newChapters)
+            swapViewerChapters(newChapters)
             chapterToDownload = deleteChapterFromDownloadQueue(newChapters.currChapter)
         }
         return newChapters
+    }
+
+    /**
+     * Replaces the viewer chapters with [newChapters], adding one reference to each new chapter and
+     * releasing one from each replaced chapter. Call it on Main only, since the counts are plain
+     * ints. They stay outside the lambda because [getAndUpdate] runs it again when another write
+     * lands between its read and its set, and releasing a chapter can cause that write through the
+     * transition card collector.
+     */
+    private fun swapViewerChapters(newChapters: ViewerChapters) {
+        // Add new references first to avoid unnecessary recycling
+        newChapters.ref()
+        mutableState.getAndUpdate { it.copy(viewerChapters = newChapters) }.viewerChapters?.unref()
     }
 
     /**
@@ -2176,18 +2189,4 @@ constructor(
 
         data class ShareTrackingError(val errors: List<Pair<TrackService, String?>>) : Event()
     }
-}
-
-/**
- * Replaces the viewer chapters in this state with [newChapters], adding one reference to each new
- * chapter and releasing one from each replaced chapter. The counts stay outside the lambda because
- * [getAndUpdate] runs it again when another write lands between its read and its set, and releasing
- * a chapter can cause that write through the transition card collector.
- */
-internal fun MutableStateFlow<ReaderViewModel.State>.swapViewerChapters(
-    newChapters: ViewerChapters
-) {
-    // Add new references first to avoid unnecessary recycling
-    newChapters.ref()
-    getAndUpdate { it.copy(viewerChapters = newChapters) }.viewerChapters?.unref()
 }
