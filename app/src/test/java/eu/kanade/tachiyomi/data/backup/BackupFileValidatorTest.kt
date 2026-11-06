@@ -30,7 +30,7 @@ class BackupFileValidatorTest {
     fun setup() {
         Injekt = InjektScope(DefaultRegistrar())
         every { sourceManager.isMangadex(any()) } answers { callOriginal() }
-        every { sourceManager.isMangadexOrUnset(any()) } answers { callOriginal() }
+        every { sourceManager.isMangadexOrUnset(any(), any()) } answers { callOriginal() }
         Injekt.addSingleton(sourceManager)
     }
 
@@ -42,6 +42,11 @@ class BackupFileValidatorTest {
     @Test
     fun `backup holding only rows with source -1 does not warn about missing MangaDex manga`() {
         assertFalse(validate(row(source = -1L)).missingMangaDexEntries)
+    }
+
+    @Test
+    fun `backup holding only rows with source -1 and other urls warns about missing MangaDex manga`() {
+        assertTrue(validate(row(source = -1L, url = "/manga/12345")).missingMangaDexEntries)
     }
 
     @Test
@@ -60,6 +65,6 @@ class BackupFileValidatorTest {
         return BackupFileValidator(mockk(relaxed = true)).validate(context, uri)
     }
 
-    private fun row(source: Long) =
-        BackupManga(source = source, url = "/manga/00000000-0000-4000-8000-000000000001")
+    private fun row(source: Long, url: String = "/manga/00000000-0000-4000-8000-000000000001") =
+        BackupManga(source = source, url = url)
 }

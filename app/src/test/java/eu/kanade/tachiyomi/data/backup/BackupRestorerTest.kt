@@ -100,7 +100,7 @@ class BackupRestorerTest {
             }
 
         every { sourceManager.isMangadex(any()) } answers { callOriginal() }
-        every { sourceManager.isMangadexOrUnset(any()) } answers { callOriginal() }
+        every { sourceManager.isMangadexOrUnset(any(), any()) } answers { callOriginal() }
         coEvery { categoryRepository.getCategories() } returns emptyList()
         coEvery { chapterRepository.getChaptersForMangaIds(any()) } returns emptyList()
         coEvery { historyRepository.getHistoryByMangaIds(any()) } returns emptyList()
@@ -193,6 +193,14 @@ class BackupRestorerTest {
     }
 
     @Test
+    fun `row with source -1 and a url that is not MangaDex stays skipped`() {
+        restore(backupRow(source = -1L, url = "/manga/12345"))
+
+        assertEquals(emptyList<Manga>(), insertedManga)
+        assertResult(restored = 0, restoreAmount = 0, skipped = 1, total = 1)
+    }
+
+    @Test
     fun `row from another source stays skipped`() {
         restore(backupRow(source = 12_345L))
 
@@ -229,13 +237,14 @@ class BackupRestorerTest {
 
     private fun backupRow(
         source: Long,
+        url: String = "/manga/$UUID",
         dateAdded: Long = 0L,
         merges: List<BackupMergeManga> = emptyList(),
         chapters: List<BackupChapter> = emptyList(),
     ) =
         BackupManga(
             source = source,
-            url = "/manga/$UUID",
+            url = url,
             title = TITLE,
             dateAdded = dateAdded,
             chapters = chapters,

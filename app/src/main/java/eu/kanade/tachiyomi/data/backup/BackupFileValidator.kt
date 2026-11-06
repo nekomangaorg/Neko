@@ -40,7 +40,9 @@ class BackupFileValidator(private val trackManager: TrackManager = Injekt.get())
         val trackers = backup.backupManga.flatMap { it.tracking }.map { it.syncId }.distinct()
 
         val hasDexEntries =
-            backup.backupManga.any { backupManager.sourceManager.isMangadexOrUnset(it.source) }
+            backup.backupManga.any {
+                backupManager.sourceManager.isMangadexOrUnset(it.source, it.url)
+            }
 
         val missingTrackers =
             trackers

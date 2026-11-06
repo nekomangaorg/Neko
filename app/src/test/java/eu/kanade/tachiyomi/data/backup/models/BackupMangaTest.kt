@@ -50,46 +50,52 @@ class BackupMangaTest {
         assertEquals(listOf(MergeType.Toonily to "/toonily/a"), restoredMerges(rows))
     }
 
+    private fun rowWithChapter(chapter: BackupChapter) = row().copy(chapters = listOf(chapter))
+
+    private fun chapter(
+        read: Boolean = false,
+        bookmark: Boolean = false,
+        lastPageRead: Int = 0,
+        pagesLeft: Int = 0,
+    ) =
+        BackupChapter(
+            url = "/chapter/a",
+            name = "Ch.1",
+            read = read,
+            bookmark = bookmark,
+            lastPageRead = lastPageRead,
+            pagesLeft = pagesLeft,
+        )
+
     @Test
     fun `chapter on both rows is restored once with the furthest progress`() {
-        val chapterUrl = "/chapter/a"
-        val first =
-            row()
-                .copy(
-                    chapters =
-                        listOf(
-                            BackupChapter(
-                                url = chapterUrl,
-                                name = "Ch.1",
-                                bookmark = true,
-                                dateFetch = 1L,
-                            )
-                        )
-                )
-        val second =
-            row()
-                .copy(
-                    chapters =
-                        listOf(
-                            BackupChapter(
-                                url = chapterUrl,
-                                name = "Ch.1",
-                                read = true,
-                                lastPageRead = 7,
-                                pagesLeft = 2,
-                                dateFetch = 2L,
-                            )
-                        )
-                )
+        val rows =
+            listOf(
+                rowWithChapter(chapter(bookmark = true, lastPageRead = 3, pagesLeft = 9)),
+                rowWithChapter(chapter(lastPageRead = 7, pagesLeft = 5)),
+            )
 
-        val chapters = listOf(first, second).combineRows().chapters
+        val combined = rows.combineRows().chapters.single()
 
-        assertEquals(listOf(chapterUrl), chapters.map { it.url })
-        val chapter = chapters.single()
-        assertEquals(true, chapter.read)
-        assertEquals(true, chapter.bookmark)
-        assertEquals(7, chapter.lastPageRead)
-        assertEquals(2, chapter.pagesLeft)
+        assertEquals(false, combined.read)
+        assertEquals(true, combined.bookmark)
+        assertEquals(7, combined.lastPageRead)
+        assertEquals(5, combined.pagesLeft)
+    }
+
+    @Test
+    fun `chapter read on one row has no pages left`() {
+        val rows =
+            listOf(
+                rowWithChapter(chapter(read = true)),
+                rowWithChapter(chapter(lastPageRead = 5, pagesLeft = 12)),
+            )
+
+        val combined = rows.combineRows().chapters.single()
+
+        assertEquals(true, combined.read)
+        assertEquals(5, combined.lastPageRead)
+        assertEquals(0, combined.pagesLeft)
     }
 
     @Test
@@ -97,6 +103,116 @@ class BackupMangaTest {
         val rows = listOf(row().copy(favorite = false), row().copy(favorite = true))
 
         assertEquals(true, rows.combineRows().favorite)
+    }
+
+    @Test
+    fun `row with a source gives the details when a row without one comes first`() {
+        val rows = listOf(row().copy(source = -1L, title = "lost"), row().copy(title = "kept"))
+
+        assertEquals("kept", rows.combineRows().title)
+    }
+
+    @Test
+    fun `user settings on a later row are kept when the first row lost its source`() {
+        val rows =
+            listOf(
+                row().copy(source = -1L, customTitle = " ", viewer_flags = 0),
+                row()
+                    .copy(
+                        customTitle = "My title",
+                        alternativeArtwork = "/art.png",
+                        scanlatorFilter = "Group A",
+                        viewer_flags = 1,
+                        chapterFlags = 4353,
+                    ),
+            )
+
+        val combined = rows.combineRows()
+
+        assertEquals("My title", combined.customTitle)
+        assertEquals("/art.png", combined.alternativeArtwork)
+        assertEquals("Group A", combined.scanlatorFilter)
+        assertEquals(1, combined.viewer_flags)
+        assertEquals(4353, combined.chapterFlags)
+    }
+
+    @Test
+    fun `settings on the row without a source are kept over the empty ones of its copy`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        source = -1L,
+                        customTitle = "My title",
+                        alternativeArtwork = "/art.png",
+                        scanlatorFilter = "Group A",
+                        viewer_flags = 3,
+                        chapterFlags = 64,
+                    ),
+                row().copy(viewer_flags = 0, chapterFlags = 0),
+            )
+
+        val combined = rows.combineRows()
+
+        assertEquals("My title", combined.customTitle)
+        assertEquals("/art.png", combined.alternativeArtwork)
+        assertEquals("Group A", combined.scanlatorFilter)
+        assertEquals(3, combined.viewer_flags)
+        assertEquals(64, combined.chapterFlags)
+    }
+
+    @Test
+    fun `reader mode on a row from before viewer flags existed is kept`() {
+        val rows = listOf(row().copy(source = -1L, viewer = 2), row())
+
+        assertEquals(2, rows.combineRows().getMangaImpl().viewer_flags)
+    }
+
+    @Test
+    fun `rows that all have a date keep the earliest and ignore chapter fetches`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        dateAdded = 20L,
+                        chapters =
+                            listOf(BackupChapter(url = "/chapter/a", name = "", dateFetch = 5L)),
+                    ),
+                row().copy(dateAdded = 10L),
+            )
+
+        assertEquals(10L, rows.combineRows().dateAdded)
+    }
+
+    @Test
+    fun `row with no date takes the earliest chapter fetch over the date of its copy`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        source = -1L,
+                        chapters =
+                            listOf(
+                                BackupChapter(url = "/chapter/a", name = "", dateFetch = 8L),
+                                BackupChapter(url = "/chapter/b", name = "", dateFetch = 5L),
+                            ),
+                    ),
+                row().copy(dateAdded = 20L),
+            )
+
+        assertEquals(5L, rows.combineRows().dateAdded)
+    }
+
+    @Test
+    fun `row with no date and no chapters takes the date of its copy`() {
+        val rows = listOf(row().copy(source = -1L), row().copy(dateAdded = 20L))
+
+        assertEquals(20L, rows.combineRows().dateAdded)
+    }
+
+    @Test
+    fun `rows with no date and no chapters stay at zero`() {
+        assertEquals(0L, listOf(row(), row()).combineRows().dateAdded)
     }
 
     @Test
