@@ -765,7 +765,7 @@ class FeedViewModel() : ViewModel() {
             val limit = UPDATES_ENDLESS_LIMIT
             var fetchFailed = false
 
-            for (i in 0 until currentOffset step limit) {
+            for (i in 0..currentOffset step limit) {
                 feedRepository
                     .getUpdatesPage(
                         offset = i,
@@ -780,7 +780,7 @@ class FeedViewModel() : ViewModel() {
                 if (fetchFailed) break
             }
 
-            if (!fetchFailed && mutableFeedManga.isNotEmpty()) {
+            if (!fetchFailed) {
                 _updatesScreenPagingState.update { state ->
                     state.copy(updatesFeedMangaList = mutableFeedManga.toList())
                 }
@@ -804,7 +804,7 @@ class FeedViewModel() : ViewModel() {
             val limit = HISTORY_ENDLESS_LIMIT
             var fetchFailed = false
 
-            for (i in 0 until currentOffset step limit) {
+            for (i in 0..currentOffset step limit) {
                 val seenIds =
                     if (
                         i > 0 &&
@@ -830,7 +830,7 @@ class FeedViewModel() : ViewModel() {
                 if (fetchFailed) break
             }
 
-            if (!fetchFailed && mutableFeedManga.isNotEmpty()) {
+            if (!fetchFailed) {
                 _historyScreenPagingState.update { state ->
                     state.copy(historyFeedMangaList = mutableFeedManga.toList())
                 }
