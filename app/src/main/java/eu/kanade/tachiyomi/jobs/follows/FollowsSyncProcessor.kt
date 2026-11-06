@@ -75,6 +75,8 @@ class FollowsSyncProcessor {
                             .filter { it.key in syncFollowStatusInts }
                             .values
                             .flatten()
+                            // The rows are read once below, so a repeated title would insert twice
+                            .distinctBy { it.url }
 
                     TimberKt.d { "total number from mangadex is ${listManga.size}" }
 
@@ -82,13 +84,19 @@ class FollowsSyncProcessor {
                     val defaultCategoryId = libraryPreference.defaultCategory().get()
                     val defaultCategory = categories.find { it.id == defaultCategoryId }
 
+                    // A title can have several rows, and a row wiped by a section refresh has
+                    // source -1, so read every row of these urls.
+                    val rowsByUuid =
+                        mangaRepository.getMangaByUrls(listManga.map { it.url }).groupBy {
+                            it.uuid()
+                        }
+
                     val mangaIdsToUpdate = listManga.mapNotNull { networkManga ->
                         updateNotification(networkManga.title, count.andIncrement, listManga.size)
 
-                        // A title can have several rows, and a row wiped by a section refresh has
-                        // source -1, so read every row of this url. A row in the library wins,
-                        // then the oldest, because a copy from an earlier Pull has nothing merged.
-                        val rows = mangaRepository.getMangaByUrls(listOf(networkManga.url))
+                        // A row in the library wins, then the oldest, because a copy from an
+                        // earlier Pull has nothing merged.
+                        val rows = rowsByUuid[MdUtil.getMangaUUID(networkManga.url)].orEmpty()
                         var dbManga =
                             rows.find { it.favorite } ?: rows.sortedBy { it.id }.firstOrNull()
                         if (dbManga == null) {
@@ -116,6 +124,10 @@ class FollowsSyncProcessor {
                         if (!dbManga.favorite) {
                             countOfAdded.incrementAndGet()
                             dbManga.favorite = true
+                            // Lookups by url and source miss a row that lost its source
+                            if (!sourceManager.isMangadex(dbManga.source)) {
+                                dbManga.source = sourceManager.mangaDex.id
+                            }
 
                             mangaRepository.updateManga(dbManga)
 
