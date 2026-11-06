@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.library
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.Data
+import androidx.work.ListenableWorker
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -45,6 +46,7 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -260,6 +262,44 @@ class LibraryUpdateJobQueueTest {
             assertTrue(input.getBoolean(LibraryUpdateJob.KEY_MANGA_LIST, false))
             // doWork filters by this category when it is set, and a section is not a category
             assertEquals(-1, input.getInt(LibraryUpdateJob.KEY_CATEGORY, -1))
+        }
+
+    @Test
+    fun `ids with no category join a running update`() = duringRunningUpdate {
+        libraryRows = listOf(libraryRow(2))
+
+        LibraryUpdateJob.startNow(context, mangaIdsToUse = listOf(2L))
+
+        coVerify(timeout = WAIT_MILLIS) { mangaRepository.updateManga(match { it.id == 2L }) }
+    }
+
+    @Test
+    fun `refreshing a section with no manga starts no job`() =
+        runBlocking<Unit> {
+            every { workManager.getWorkInfosByTag(LibraryUpdateJob.TAG) } returns
+                mockk<ListenableFuture<List<WorkInfo>>> { every { get() } returns emptyList() }
+
+            val started = LibraryUpdateJob.startNow(context, section, mangaIdsToUse = emptyList())
+
+            assertFalse(started)
+            verify(exactly = 0) { libraryPreferences.libraryUpdateIds().set(any()) }
+            verify(exactly = 0) {
+                workManager.enqueueUniqueWork(any<String>(), any(), any<OneTimeWorkRequest>())
+            }
+        }
+
+    @Test
+    fun `a job started with no saved ids updates nothing and succeeds`() =
+        runBlocking<Unit> {
+            every { workerParams.inputData } returns
+                Data.Builder().putBoolean(LibraryUpdateJob.KEY_MANGA_LIST, true).build()
+            every { libraryPreferences.libraryUpdateIds().get() } returns ""
+            finishJob.complete(Unit)
+
+            val result = LibraryUpdateJob(context, workerParams).doWork()
+
+            assertEquals(ListenableWorker.Result.success(), result)
+            coVerify(exactly = 0) { mangaRepository.updateManga(any()) }
         }
 
     private fun duringRunningUpdate(block: suspend () -> Unit) = runBlocking {

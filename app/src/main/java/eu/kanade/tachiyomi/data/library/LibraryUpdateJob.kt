@@ -192,7 +192,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             .libraryUpdateIds()
                             .get()
                             .splitToSequence("||")
-                            .map { it.toLong() }
+                            .mapNotNull { it.toLongOrNull() }
                             .toSet()
                     libraryPreferences.libraryUpdateIds().delete()
                     set
@@ -928,13 +928,19 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             category: Category? = null,
             mangaIdsToUse: List<Long>? = null,
         ): Boolean {
+            if (mangaIdsToUse?.isEmpty() == true) return false
+
             if (withIOContext { isRunning(context) }) {
-                category?.id?.let {
-                    if (mangaIdsToUse != null) {
-                        instance?.get()?.addMangaToQueue(mangaIdsToUse)
-                    } else {
-                        instance?.get()?.addCategory(it)
-                    }
+                val job = instance?.get()
+                val categoryId = category?.id
+                when {
+                    mangaIdsToUse == null && categoryId == null -> Unit
+                    job == null ->
+                        TimberKt.w {
+                            "Library update is running with no job, dropping this request"
+                        }
+                    mangaIdsToUse != null -> job.addMangaToQueue(mangaIdsToUse)
+                    categoryId != null -> job.addCategory(categoryId)
                 }
 
                 // Already running either as a scheduled or manual job
