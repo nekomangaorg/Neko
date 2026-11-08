@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -47,6 +48,8 @@ class MangaRepositoryImpl(
                 }
             }
             .distinctUntilChanged()
+            // A slow collector gets the latest library, not every list in between
+            .conflate()
             .flowOn(ioDispatcher)
     }
 
