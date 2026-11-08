@@ -162,8 +162,8 @@ class FollowsSyncProcessor {
             val countNew = AtomicInteger(0)
 
             val listManga =
-                ids?.split(", ")
-                    ?.map { it.toLong() }
+                ids?.split(",")
+                    ?.mapNotNull { it.trim().toLongOrNull() }
                     ?.chunked(900)
                     ?.flatMap { chunk -> mangaRepository.getMangaByIds(chunk) }
                     ?.toList() ?: mangaRepository.getLibraryList()

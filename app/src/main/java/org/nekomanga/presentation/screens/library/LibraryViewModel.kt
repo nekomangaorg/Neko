@@ -1074,11 +1074,8 @@ class LibraryViewModel() : ViewModel() {
     fun syncMangaToDex() {
         viewModelScope.launchIO {
             val mangaIds =
-                libraryScreenState.value.selectedItems
-                    .map { it.displayManga.mangaId }
-                    .distinct()
-                    .joinToString()
-            StatusSyncJob.startNow(workManager, mangaIds)
+                libraryScreenState.value.selectedItems.map { it.displayManga.mangaId }.distinct()
+            StatusSyncJob.startSelectedNow(workManager, mangaIds)
             _internalLibraryScreenState.update { it.copy(selectedItems = listOf()) }
         }
     }
