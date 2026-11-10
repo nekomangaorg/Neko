@@ -69,12 +69,12 @@ data class PullMangaDexFollowDialogState(
                     val options =
                         (list[0] as List<*>)
                             .filterIsInstance<String>()
-                            .map { FollowStatus.valueOf(it) }
+                            .mapNotNull { runCatching { FollowStatus.valueOf(it) }.getOrNull() }
                             .toSet()
                     val selected =
                         (list[1] as List<*>)
                             .filterIsInstance<String>()
-                            .map { FollowStatus.valueOf(it) }
+                            .mapNotNull { runCatching { FollowStatus.valueOf(it) }.getOrNull() }
                             .toSet()
                     PullMangaDexFollowDialogState(
                         followStatusOptions = options,

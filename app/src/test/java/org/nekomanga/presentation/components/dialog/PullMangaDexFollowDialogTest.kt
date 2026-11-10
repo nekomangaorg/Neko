@@ -66,4 +66,21 @@ class PullMangaDexFollowDialogTest {
         val restored = PullMangaDexFollowDialogState.Saver.restore(saved!!)
         assertEquals(originalState, restored)
     }
+
+    @Test
+    fun saverSafelyIgnoresUnknownOrObsoleteEnumStrings() {
+        val savedWithUnknownValues =
+            listOf(
+                listOf("READING", "OBSOLETE_STATUS_1", "DROPPED"),
+                listOf("DROPPED", "UNKNOWN_STATUS_2"),
+            )
+
+        val restored = PullMangaDexFollowDialogState.Saver.restore(savedWithUnknownValues)
+        assertNotNull(restored)
+        assertEquals(
+            setOf(FollowStatus.READING, FollowStatus.DROPPED),
+            restored!!.followStatusOptions,
+        )
+        assertEquals(setOf(FollowStatus.DROPPED), restored.selectedStatuses)
+    }
 }
