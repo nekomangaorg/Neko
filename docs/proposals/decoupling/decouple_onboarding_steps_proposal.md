@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling Onboarding Steps from Service Locators, Direct Preferences & Activity Lifecycle
 
-**Status:** Proposed / Under Review  
+**Status:** Completed / Landed  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Architectural Decoupling  
 **Execution Order:** Phase 1 (Architectural Foundations & Isolated Wins) — Step 4 (Priority: Low-Medium / Isolated Flow)  
 **Prerequisites:** None (Self-Contained Onboarding Wizard)  
 **Downstream Dependents:** None (Independent Leaf Flow)  
-**Implementation State:** 🟡 Coupled Baseline (Service locator calls, internal mutable state, direct preference writes, and Activity recreation inside UI step objects)  
+**Implementation State:** 🟢 Decoupled (Stateless steps with UI state models, OnboardingViewModel, and lifecycle-bounded Compose collections)  
 
 ---
 
@@ -223,9 +223,9 @@ fun ThemeStepContent(
 >
 > Decoupling `StorageStep` and `ThemeStep` from `Injekt.get()`, `PreferencesHelper`, and `ActivityCompat.recreate()` modernizes the first-run onboarding sequence into pure stateless composables with zero blast radius on existing core workflows.
 
-- [ ] **Step 1**: Define `StorageStepUiState` and `ThemeStepUiState` models.
-- [ ] **Step 2**: Add state flows and theme update handlers to `OnboardingViewModel`.
-- [ ] **Step 3**: Refactor `StorageStep.kt` to be stateless and remove `Injekt.get()`.
-- [ ] **Step 4**: Refactor `ThemeStep.kt` to be stateless, removing `Injekt` and direct `ActivityCompat.recreate()`.
-- [ ] **Step 5**: Add Compose previews for each onboarding step.
-- [ ] **Step 6**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.
+- [x] **Step 1**: Define `StorageStepUiState` and `ThemeStepUiState` models.
+- [x] **Step 2**: Add state flows and theme update handlers to `OnboardingViewModel`.
+- [x] **Step 3**: Refactor `StorageStep.kt` to be stateless and remove `Injekt.get()`.
+- [x] **Step 4**: Refactor `ThemeStep.kt` to be stateless, removing `Injekt` and direct `ActivityCompat.recreate()`.
+- [x] **Step 5**: Add Compose previews for each onboarding step.
+- [x] **Step 6**: Run `./gradlew ktfmtFormat` and `./gradlew testDebugUnitTest`.

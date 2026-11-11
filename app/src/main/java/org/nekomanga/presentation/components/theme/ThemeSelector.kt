@@ -24,6 +24,44 @@ import org.nekomanga.presentation.theme.Themes
 
 @Composable
 fun ThemeSelector(
+    currentTheme: Themes,
+    darkThemeSelector: Boolean,
+    onThemeChange: (Themes) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val supportsDynamic = DynamicColors.isDynamicColorAvailable()
+
+    val themes =
+        remember(darkThemeSelector, supportsDynamic) {
+            Themes.entries
+                .filter {
+                    (if (darkThemeSelector) (it.isDarkTheme() || it.followsSystem())
+                    else (!it.isDarkTheme() || it.followsSystem())) &&
+                        (it.styleRes() != R.style.Theme_Neko_Monet || supportsDynamic)
+                }
+                .toSet()
+        }
+
+    Row(
+        modifier = modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(Size.medium),
+    ) {
+        Gap(Size.small)
+
+        themes.forEach { theme ->
+            ThemeItem(
+                theme = theme,
+                isDarkTheme = darkThemeSelector,
+                selected = theme == currentTheme,
+                onClick = { onThemeChange(theme) },
+            )
+        }
+        Gap(Size.small)
+    }
+}
+
+@Composable
+fun ThemeSelector(
     modifier: Modifier = Modifier,
     preferences: PreferencesHelper,
     darkThemeSelector: Boolean,

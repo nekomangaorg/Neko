@@ -26,9 +26,8 @@ fun ThemeFollowSystemSwitch(
     modifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     nightMode: Int,
-    nightModePreference: Preference<Int>,
+    onToggle: (Boolean) -> Unit,
 ) {
-    val context = LocalContext.current
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -38,17 +37,31 @@ fun ThemeFollowSystemSwitch(
         Switch(
             checked = nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
             colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary),
-            onCheckedChange = {
-                when (it) {
-                    true -> {
-                        nightModePreference.set(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                        (context as? Activity)?.let { activity ->
-                            ActivityCompat.recreate(activity)
-                        }
-                    }
-                    false -> nightModePreference.set(context.appDelegateNightMode())
-                }
-            },
+            onCheckedChange = onToggle,
         )
     }
+}
+
+@Composable
+fun ThemeFollowSystemSwitch(
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current,
+    nightMode: Int,
+    nightModePreference: Preference<Int>,
+) {
+    val context = LocalContext.current
+    ThemeFollowSystemSwitch(
+        modifier = modifier,
+        textStyle = textStyle,
+        nightMode = nightMode,
+        onToggle = { isChecked ->
+            when (isChecked) {
+                true -> {
+                    nightModePreference.set(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                    (context as? Activity)?.let { activity -> ActivityCompat.recreate(activity) }
+                }
+                false -> nightModePreference.set(context.appDelegateNightMode())
+            }
+        },
+    )
 }
