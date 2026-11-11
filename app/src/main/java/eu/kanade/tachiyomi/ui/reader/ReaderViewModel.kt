@@ -9,8 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.withTransaction
 import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onErr
-import com.github.michaelbull.result.onOk
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -501,40 +501,46 @@ constructor(
                     this.url = url
                     title = ""
                 })
-        mangaDex.fetchMangaAndChapterDetails(tempManga, false).onOk { fetchedInfo ->
-            val networkManga = fetchedInfo.sManga!!
-            val chapters = fetchedInfo.sChapters
-
-            tempManga.copyFrom(networkManga)
-            tempManga.title = networkManga.title
-
-            if (dbManga == null) {
-                val insertedId = mangaRepository.insertManga(tempManga)
-                tempManga.id = insertedId
-            } else {
-                mangaRepository.updateManga(tempManga)
+        val fetchedInfo =
+            mangaDex.fetchMangaAndChapterDetails(tempManga, false).getOrThrow {
+                Exception(it.message())
             }
-            val manga = mangaRepository.getMangaByUrl(tempManga.url)!!
+        val networkManga = fetchedInfo.sManga!!
+        val chapters = fetchedInfo.sChapters
 
-            TimberKt.d { "tempManga id ${tempManga.id}" }
-            TimberKt.d { "Manga id ${manga.id}" }
+        tempManga.copyFrom(networkManga)
+        tempManga.title = networkManga.title
 
-            if (chapters.isNotEmpty()) {
-                syncChaptersWithSource(
-                    appDatabase = appDatabase,
-                    chapterRepository = chapterRepository,
-                    mangaRepository = mangaRepository,
-                    manga = manga,
-                    rawSourceChapters = chapters,
-                )
-                val currentChapter =
-                    chapterRepository.getChapterByUrl(MdConstants.chapterSuffix + urlChapterId)
-                if (currentChapter?.id != null && !currentChapter.isUnavailable) {
-                    withContext(Dispatchers.Main) { init(manga.id!!, currentChapter.id!!) }
-                } else {
-                    throw Exception("Chapter not found")
-                }
-            }
+        if (dbManga == null) {
+            val insertedId = mangaRepository.insertManga(tempManga)
+            tempManga.id = insertedId
+        } else {
+            mangaRepository.updateManga(tempManga)
+        }
+        val manga =
+            mangaRepository.getMangaByUrl(tempManga.url)
+                ?: throw Exception(Injekt.get<Application>().getString(R.string.manga_not_found))
+
+        TimberKt.d { "tempManga id ${tempManga.id}" }
+        TimberKt.d { "Manga id ${manga.id}" }
+
+        if (chapters.isNotEmpty()) {
+            syncChaptersWithSource(
+                appDatabase = appDatabase,
+                chapterRepository = chapterRepository,
+                mangaRepository = mangaRepository,
+                manga = manga,
+                rawSourceChapters = chapters,
+                // The list holds MangaDex chapters only, it says nothing about the merged ones.
+                preserveMissingMergedChapters = true,
+            )
+        }
+        val currentChapter =
+            chapterRepository.getChapterByUrl(MdConstants.chapterSuffix + urlChapterId)
+        if (currentChapter?.id != null && !currentChapter.isUnavailable) {
+            withContext(Dispatchers.Main) { init(manga.id!!, currentChapter.id!!) }
+        } else {
+            throw Exception(Injekt.get<Application>().getString(R.string.chapter_not_found))
         }
     }
 
