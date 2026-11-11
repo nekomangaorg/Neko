@@ -82,7 +82,7 @@ class BrowseRepositoryImplTest {
 
         every { mangaDex.id } returns 1L
         coEvery { mangaDex.getRandomManga() } returns Ok(sourceManga)
-        coEvery { mangaRepository.getMangaByUrlAndSource("/title/123", 1L) } returns dbManga
+        coEvery { mangaRepository.getMangaByUrls(listOf("/title/123")) } returns listOf(dbManga)
 
         val result = repository.getRandomManga()
 

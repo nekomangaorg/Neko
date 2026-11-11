@@ -212,6 +212,50 @@ class SimilarRepoTest {
         }
 
     @Test
+    fun `given two rows for one url when fetchSimilar called then shows the library entry`() =
+        runTest {
+            // Arrange
+            val mockSimilarDb = mockk<MangaSimilar>()
+            coEvery { similarRepository.getSimilar(dexId) } returns mockSimilarDb
+
+            val similarManga =
+                listOf(
+                    SourceManga(
+                        url = "/manga/dup-1",
+                        currentThumbnail = "https://thumb/dup1.jpg",
+                        title = "Doubled Manga",
+                        displayText = "90.00% match",
+                    ),
+                )
+
+            coEvery { similarHandler.fetchRelated(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchRecommended(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchSimilar(dexId, false) } returns similarManga
+            coEvery { similarHandler.fetchSimilarExternalMUManga(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchAnilist(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchSimilarExternalMalManga(dexId, false) } returns
+                emptyList()
+
+            // A library entry with a lost source and a newer copy of it, in the order SQLite
+            // answers through the url index
+            val libraryEntry =
+                Manga.create("/manga/dup-1", "Doubled Manga", -1L).apply {
+                    id = 301L
+                    favorite = true
+                }
+            val copy = Manga.create("/manga/dup-1", "Doubled Manga", sourceId).apply { id = 302L }
+            coEvery { mangaRepository.getMangaByUrls(listOf("/manga/dup-1")) } returns
+                listOf(libraryEntry, copy)
+
+            // Act
+            val result = similarRepo.fetchSimilar(dexId, forceRefresh = false)
+
+            // Assert
+            assertEquals(301L, result.single().manga.single().mangaId)
+            coVerify(exactly = 0) { mangaRepository.insertMangaList(any()) }
+        }
+
+    @Test
     fun `given a source throws exception when fetchSimilar called then gracefully returns results from other sources`() =
         runTest {
             // Arrange
