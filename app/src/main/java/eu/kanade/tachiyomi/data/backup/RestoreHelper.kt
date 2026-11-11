@@ -406,9 +406,9 @@ class RestoreHelper(val context: Context) {
     ) {
         val dbMergeMangaList =
             preFetchedDbMergeMangaList ?: mergeMangaRepository.getMergeMangaList(manga.id!!)
+        val dbMergeKeys = dbMergeMangaList.map { it.mergeType.mergeKey(it.url) }.toSet()
         mergeMangaList.forEach { mergeManga ->
-            val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }
-            if (dbMergeManga == null) {
+            if (mergeManga.mergeType.mergeKey(mergeManga.url) !in dbMergeKeys) {
                 val newMergeManga = mergeManga.copy(mangaId = manga.id!!)
                 mergeMangaRepository.insertMergeManga(newMergeManga)
             }
