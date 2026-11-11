@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.NetworkState
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
@@ -400,5 +401,90 @@ class FeedViewModelTest {
             // Assert: Items and offset restored from cache
             viewModel2.historyScreenPagingState.value.offset shouldBe 30
             viewModel2.historyScreenPagingState.value.historyFeedMangaList.size shouldBe 2
+        }
+
+    @Test
+    fun `given 1 page loaded when refreshHistoryFeed runs then only offset 0 is queried and not offset 15`() =
+        runTest {
+            val item1 = createFeedItem(1L, "Manga 1")
+            val capturedOffsets = mutableListOf<Int>()
+
+            coEvery {
+                mockFeedRepository.getHistoryPage(
+                    searchQuery = any(),
+                    offset = capture(capturedOffsets),
+                    limit = any(),
+                    group = FeedHistoryGroup.Series,
+                    seenMangaIds = any(),
+                )
+            } answers
+                {
+                    val offset = secondArg<Int>()
+                    if (offset == 0) {
+                        Ok(FeedPage(hasNextPage = true, items = listOf(item1)))
+                    } else {
+                        Ok(FeedPage(hasNextPage = false, items = emptyList()))
+                    }
+                }
+
+            val viewModel = FeedViewModel()
+            advanceUntilIdle()
+
+            // Page 0 loaded, offset is 15
+            viewModel.historyScreenPagingState.value.offset shouldBe 15
+            viewModel.historyScreenPagingState.value.historyFeedMangaList.size shouldBe 1
+
+            // Switch to Summary and back to History to trigger refreshHistoryFeed
+            viewModel.switchViewType(FeedScreenType.Summary)
+            advanceUntilIdle()
+
+            viewModel.switchViewType(FeedScreenType.History)
+            advanceUntilIdle()
+
+            // Verify offset 0 was queried for initial load and refresh
+            capturedOffsets.filter { it == 0 }.size shouldBe 2
+
+            // Verify offset 15 was NEVER queried during refresh
+            capturedOffsets shouldNotContain 15
+        }
+
+    @Test
+    fun `given history refreshed when hasNextPage changes then hasMoreResults is updated`() =
+        runTest {
+            val item1 = createFeedItem(1L, "Manga 1")
+
+            // Initial load has next page
+            coEvery {
+                mockFeedRepository.getHistoryPage(
+                    offset = 0,
+                    limit = any(),
+                    group = FeedHistoryGroup.Series,
+                    seenMangaIds = any(),
+                )
+            } returns Ok(FeedPage(hasNextPage = true, items = listOf(item1)))
+
+            val viewModel = FeedViewModel()
+            advanceUntilIdle()
+
+            viewModel.historyScreenPagingState.value.hasMoreResults shouldBe true
+
+            // During refresh, hasNextPage becomes false (e.g. no more history)
+            coEvery {
+                mockFeedRepository.getHistoryPage(
+                    offset = 0,
+                    limit = any(),
+                    group = FeedHistoryGroup.Series,
+                    seenMangaIds = any(),
+                )
+            } returns Ok(FeedPage(hasNextPage = false, items = listOf(item1)))
+
+            viewModel.switchViewType(FeedScreenType.Summary)
+            advanceUntilIdle()
+
+            viewModel.switchViewType(FeedScreenType.History)
+            advanceUntilIdle()
+
+            // hasMoreResults must be updated to false
+            viewModel.historyScreenPagingState.value.hasMoreResults shouldBe false
         }
 }
