@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.stats
 
+import android.icu.text.NumberFormat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -32,11 +33,14 @@ import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedStatManga
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedState
+import org.nekomanga.presentation.screens.stats.StatsConstants.SimpleStatMetricUiModel
 import org.nekomanga.presentation.screens.stats.StatsHelper.getReadDuration
 import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.library.ShouldUpdateMangaUseCase
+import org.nekomanga.usecases.stats.AggregateDetailedStatsUseCase
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -55,6 +59,7 @@ class StatsViewModel() : ViewModel() {
     private val trackManager: TrackManager = Injekt.get()
     private val downloadManager: DownloadManager = Injekt.get()
     private val shouldUpdateMangaUseCase: ShouldUpdateMangaUseCase by injectLazy()
+    private val aggregateDetailedStatsUseCase: AggregateDetailedStatsUseCase by injectLazy()
 
     private val _simpleState = MutableStateFlow(StatsConstants.SimpleState())
     val simpleState: StateFlow<StatsConstants.SimpleState> = _simpleState.asStateFlow()
@@ -100,36 +105,150 @@ class StatsViewModel() : ViewModel() {
                 mergedManga.mangaId in favoritedMangaIds
             }
 
+        val numberFormat = NumberFormat.getInstance(NumberFormat.NUMBERSTYLE)
+        val na = prefs.context.getString(R.string.n_a)
+        val never = prefs.context.getString(R.string.never)
+
+        val mangaCount = libraryList.count()
+        val chapterCount = libraryList.sumOf { it.totalChapters }
+        val readCount = libraryList.sumOf { it.read }
+        val bookmarkCount = libraryList.sumOf { it.bookmarkCount }
+        val unavailableCount = libraryList.sumOf { it.unavailableCount }
+        val trackedCount = getMangaByTrackCount(libraryList, tracks)
+        val globalUpdateCount = getGlobalUpdateManga(libraryList, tracksByMangaId).count()
+        val downloadCount = libraryList.sumOf { getDownloadCount(it) }
+        val tagCount =
+            libraryList
+                .mapNotNull { it.getGenres() }
+                .flatten()
+                .distinct()
+                .count { !it.contains("content rating:", true) }
+        val trackerCount = getLoggedTrackers().count()
+        val readDuration = getReadDuration()
+        val averageMangaRating = getAverageMangaRating(libraryList)
+        val userScore = getUserScore(tracks)
+
+        val userScoreStr =
+            when (userScore == 0.0) {
+                true -> na
+                false -> userScore.toString()
+            }
+        val libUpdates =
+            when (lastUpdate == 0L) {
+                true -> na
+                false -> lastUpdate.timeSpanFromNow
+            }
+        val libUpdateAttempt =
+            when (lastUpdateAttempt == 0L) {
+                true -> never
+                false -> lastUpdateAttempt.timeSpanFromNow
+            }
+        val lastUpdateDurationStr =
+            when (lastUpdateDuration.isEmpty()) {
+                true -> never
+                false -> lastUpdateDuration
+            }
+
+        val mergeCounts =
+            mergedMangaList.groupBy { it.mergeType }.map { it.key to it.value.size }.toList()
+
+        val mergeMetrics = mergeCounts.mapNotNull {
+            if (it.second > 0) {
+                SimpleStatMetricUiModel(
+                    title = UiText.String("${it.first.scanlatorName} merged"),
+                    formattedValue = it.second.toString(),
+                )
+            } else {
+                null
+            }
+        }
+
+        val simpleMetrics =
+            listOf(
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.total_manga),
+                    formattedValue = numberFormat.format(mangaCount),
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.total_chapters),
+                    formattedValue = numberFormat.format(chapterCount),
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.chapters_read),
+                    formattedValue = numberFormat.format(readCount),
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.chapters_bookmarked),
+                    formattedValue = numberFormat.format(bookmarkCount),
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.chapters_unavailable),
+                    formattedValue = numberFormat.format(unavailableCount),
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.read_duration),
+                    formattedValue = readDuration,
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.last_library_update),
+                    formattedValue = libUpdates,
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.last_library_update_duration),
+                    formattedValue = lastUpdateDurationStr,
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.last_library_update_attempt),
+                    formattedValue = libUpdateAttempt,
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.global_update_manga),
+                    formattedValue = numberFormat.format(globalUpdateCount),
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.average_score),
+                    formattedValue = averageMangaRating.toString(),
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.mean_score),
+                    formattedValue = userScoreStr,
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.trackers),
+                    formattedValue = trackerCount.toString(),
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.manga_tracked),
+                    formattedValue = numberFormat.format(trackedCount),
+                ),
+                SimpleStatMetricUiModel(
+                    title = UiText.StringResource(R.string.total_tags),
+                    formattedValue = numberFormat.format(tagCount),
+                ),
+            ) + mergeMetrics
+
         _simpleState.update {
             StatsConstants.SimpleState(
                 screenState = StatsConstants.ScreenState.Simple,
-                mangaCount = libraryList.count(),
-                chapterCount = libraryList.sumOf { it.totalChapters },
-                readCount = libraryList.sumOf { it.read },
-                bookmarkCount = libraryList.sumOf { it.bookmarkCount },
-                unavailableCount = libraryList.sumOf { it.unavailableCount },
-                trackedCount = getMangaByTrackCount(libraryList, tracks),
-                mergeCounts =
-                    mergedMangaList
-                        .groupBy { it.mergeType }
-                        .map { it.key to it.value.size }
-                        .toList(),
-                globalUpdateCount = getGlobalUpdateManga(libraryList, tracksByMangaId).count(),
-                downloadCount = libraryList.sumOf { getDownloadCount(it) },
-                tagCount =
-                    libraryList
-                        .mapNotNull { it.getGenres() }
-                        .flatten()
-                        .distinct()
-                        .count { !it.contains("content rating:", true) },
-                trackerCount = getLoggedTrackers().count(),
-                readDuration = getReadDuration(),
-                averageMangaRating = getAverageMangaRating(libraryList),
-                averageUserRating = getUserScore(tracks),
+                mangaCount = mangaCount,
+                chapterCount = chapterCount,
+                readCount = readCount,
+                bookmarkCount = bookmarkCount,
+                unavailableCount = unavailableCount,
+                trackedCount = trackedCount,
+                mergeCounts = mergeCounts,
+                globalUpdateCount = globalUpdateCount,
+                downloadCount = downloadCount,
+                tagCount = tagCount,
+                trackerCount = trackerCount,
+                readDuration = readDuration,
+                averageMangaRating = averageMangaRating,
+                averageUserRating = userScore,
                 lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
                 lastLibraryUpdateAttempt =
                     if (lastUpdateAttempt == 0L) "" else lastUpdateAttempt.timeSpanFromNow,
                 lastLibraryUpdateDuration = lastUpdateDuration,
+                simpleStatMetrics = simpleMetrics,
             )
         }
     }
@@ -206,14 +325,25 @@ class StatsViewModel() : ViewModel() {
                     )
                 }
                 .sortedBy { it.title }
+        val allCategories =
+            (categoryUseCases.getCategories.get().map { it.name } +
+                    listOf(prefs.context.getString(R.string.default_value)))
+                .toList()
+
+        val distribution =
+            aggregateDetailedStatsUseCase(
+                mangaList = detailedStatMangaList,
+                categories = allCategories,
+                defaultCategoryName = prefs.context.getString(R.string.default_value),
+                typeStringResolver = { prefs.context.getString(it.typeRes) },
+                statusStringResolver = { prefs.context.getString(it.statusRes) },
+            )
+
         _detailState.update {
             DetailedState(
                 isLoading = false,
                 manga = detailedStatMangaList.toList(),
-                categories =
-                    (categoryUseCases.getCategories.get().map { it.name } +
-                            listOf(prefs.context.getString(R.string.default_value)))
-                        .toList(),
+                categories = allCategories,
                 tags =
                     detailedStatMangaList
                         .asSequence()
@@ -223,31 +353,7 @@ class StatsViewModel() : ViewModel() {
                         .filter { !it.contains("content rating:", true) }
                         .sortedBy { it }
                         .toList(),
-            )
-        }
-
-        val tagToMangaMap = mutableMapOf<String, MutableList<DetailedStatManga>>()
-        for (m in detailedStatMangaList) {
-            for (tag in m.tags) {
-                tagToMangaMap.getOrPut(tag) { mutableListOf() }.add(m)
-            }
-        }
-
-        val sortedSeries =
-            _detailState.value.tags
-                .map { tag -> tag to (tagToMangaMap[tag]?.toList() ?: emptyList()) }
-                .sortedByDescending { it.second.size }
-        val totalCount = sortedSeries.sumOf { it.second.size }
-        val totalDuration = sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }
-
-        _detailState.update {
-            it.copy(
-                detailTagState =
-                    StatsConstants.DetailedTagState(
-                        totalReadDuration = totalDuration,
-                        totalChapters = totalCount,
-                        sortedTagPairs = sortedSeries,
-                    )
+                distribution = distribution,
             )
         }
     }

@@ -1,13 +1,13 @@
 # Technical Proposal: Decoupling Statistics Aggregation & Heavy Dataset Transformations from Jetpack Compose
 
-**Status:** Proposed / Under Review  
+**Status:** Completed / Landed  
 **Author:** Neko Development Team  
 **Date:** September 2026  
 **Target Milestone:** Neko 3.x Compose & Domain Decoupling  
 **Execution Order:** Phase 1 (Architectural Foundations & Isolated Wins) — Step 3 (Priority: Medium / Isolated Performance Win)  
 **Prerequisites:** None (Self-Contained Screen & ViewModel)  
 **Downstream Dependents:** None (Standalone Feature)  
-**Implementation State:** 🟡 Coupled Baseline (Heavy list grouping, $O(M \times C)$ filtering, and number formatting executed on UI thread in Composables)  
+**Implementation State:** 🟢 Decoupled & Landed (Heavy statistical aggregations, $O(M+C)$ inverted indexing, and number formatting moved to `AggregateDetailedStatsUseCase` on `Dispatchers.Default`; UI is purely stateless renderer)  
 
 ---
 
@@ -168,8 +168,8 @@ fun SimpleStats(
 >
 > Offloading heavy mathematical transformations and $O(M \times C)$ category aggregations to `AggregateDetailedStatsUseCase` on `Dispatchers.Default` provides an immediate frame-rate improvement for large libraries with zero blast radius or external dependencies on other screens.
 
-- [ ] **Step 1**: Implement `AggregateDetailedStatsUseCase` with optimized index mapping and unit tests.
-- [ ] **Step 2**: Update `StatsViewModel` to output pre-computed `SimpleStatMetricUiModel` and `DetailedDistributionUiModel`.
-- [ ] **Step 3**: Refactor `SimpleStats.kt` to consume the metric list and add `@Preview`.
-- [ ] **Step 4**: Refactor `DetailedStats.kt` to eliminate UI thread aggregations.
-- [ ] **Step 5**: Run `./gradlew ktfmtFormat` and verify silky-smooth 120Hz chart rendering.
+- [x] **Step 1**: Implement `AggregateDetailedStatsUseCase` with optimized index mapping and unit tests.
+- [x] **Step 2**: Update `StatsViewModel` to output pre-computed `SimpleStatMetricUiModel` and `DetailedDistributionUiModel`.
+- [x] **Step 3**: Refactor `SimpleStats.kt` to consume the metric list and add `@Preview`.
+- [x] **Step 4**: Refactor `DetailedStats.kt` to eliminate UI thread aggregations.
+- [x] **Step 5**: Run `./gradlew ktfmtFormat` and verify silky-smooth 120Hz chart rendering.

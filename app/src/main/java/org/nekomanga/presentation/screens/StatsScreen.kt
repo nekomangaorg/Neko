@@ -118,7 +118,7 @@ fun StatsWrapper(
         } else {
             if (isSimple) {
                 SimpleStats(
-                    statsState = statsState,
+                    metrics = statsState.simpleStatMetrics,
                     contentPadding = contentPadding,
                     windowSizeClass = windowSizeClass,
                 )

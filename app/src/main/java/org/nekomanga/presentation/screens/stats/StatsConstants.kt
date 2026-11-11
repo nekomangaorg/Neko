@@ -1,10 +1,13 @@
 package org.nekomanga.presentation.screens.stats
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.database.models.MergeType
+import org.nekomanga.R
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
+import org.nekomanga.presentation.components.UiText
 
 object StatsConstants {
     @Immutable
@@ -27,6 +30,13 @@ object StatsConstants {
         val lastLibraryUpdate: String = "",
         val lastLibraryUpdateAttempt: String = "",
         val lastLibraryUpdateDuration: String = "",
+        val simpleStatMetrics: List<SimpleStatMetricUiModel> = listOf(),
+    )
+
+    @Immutable
+    data class SimpleStatMetricUiModel(
+        val title: UiText,
+        val formattedValue: String,
     )
 
     @Immutable
@@ -36,7 +46,49 @@ object StatsConstants {
         val categories: List<String> = listOf(),
         val tags: List<String> = listOf(),
         val detailTagState: DetailedTagState = DetailedTagState(),
+        val distribution: DetailedDistributionUiModel = DetailedDistributionUiModel(),
     )
+
+    @Immutable
+    data class DetailedDistributionUiModel(
+        val categoryDistribution: DetailedStatDistribution = DetailedStatDistribution(),
+        val typeDistribution: DetailedStatDistribution = DetailedStatDistribution(),
+        val statusDistribution: DetailedStatDistribution = DetailedStatDistribution(),
+        val contentRatingDistribution: DetailedStatDistribution = DetailedStatDistribution(),
+        val tagDistribution: DetailedStatDistribution = DetailedStatDistribution(),
+        val startYearDistribution: DetailedStatDistribution = DetailedStatDistribution(),
+    )
+
+    @Immutable
+    data class DetailedStatDistribution(
+        val totalCount: Int = 0,
+        val totalChapters: Int = 0,
+        val totalReadDuration: Long = 0L,
+        val groups: List<DetailedStatGroup> = emptyList(),
+    ) {
+        fun sortedBy(sortType: Sort): List<DetailedStatGroup> {
+            return when (sortType) {
+                Sort.Entries -> groups.sortedByDescending { it.count }
+                Sort.Chapters -> groups.sortedByDescending { it.readChapters }
+                Sort.Duration -> groups.sortedByDescending { it.readDuration }
+            }
+        }
+    }
+
+    @Immutable
+    data class DetailedStatGroup(
+        val key: String,
+        val count: Int,
+        val readChapters: Int,
+        val totalChapters: Int,
+        val readDuration: Long,
+    )
+
+    enum class Sort(@param:StringRes val stringRes: Int) {
+        Entries(R.string.most_entries),
+        Chapters(R.string.chapters_read),
+        Duration(R.string.read_duration),
+    }
 
     @Immutable
     data class DetailedTagState(

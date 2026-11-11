@@ -94,6 +94,7 @@ import org.nekomanga.usecases.library.ShouldUpdateMangaUseCase
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.usecases.preferences.GetDateFormatUseCase
 import org.nekomanga.usecases.preferences.GetFormattedBuildTimeUseCase
+import org.nekomanga.usecases.stats.AggregateDetailedStatsUseCase
 import org.nekomanga.usecases.tracking.TrackUseCases
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
@@ -272,6 +273,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(CategoryUseCases())
 
         addSingleton(TrackUseCases())
+
+        addSingleton(AggregateDetailedStatsUseCase())
 
         addSingletonFactory<FeedRepository> { FeedRepositoryImpl() }
 
