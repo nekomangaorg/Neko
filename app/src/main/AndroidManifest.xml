@@ -309,6 +309,19 @@
             android:exported="false"
             tools:node="merge" />
 
+        <!-- WorkManager starts on first use, with the configuration from App, so no worker runs
+             before App.onCreate has set up Injekt. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
     </application>
 
 </manifest>
