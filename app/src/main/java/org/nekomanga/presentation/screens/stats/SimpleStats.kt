@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens.stats
 
-import android.icu.text.NumberFormat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,15 +16,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import org.nekomanga.R
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.screens.stats.StatsConstants.SimpleStatMetricUiModel
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.presentation.theme.ThemeConfig
+import org.nekomanga.presentation.theme.ThemeConfigProvider
+import org.nekomanga.presentation.theme.ThemedPreviews
 
 @Composable
 fun SimpleStats(
@@ -33,74 +37,19 @@ fun SimpleStats(
     contentPadding: PaddingValues,
     windowSizeClass: WindowSizeClass,
 ) {
-    val na = stringResource(id = R.string.n_a)
-    val never = stringResource(id = R.string.never)
+    SimpleStats(
+        metrics = statsState.simpleStatMetrics,
+        contentPadding = contentPadding,
+        windowSizeClass = windowSizeClass,
+    )
+}
 
-    val context = LocalContext.current
-
-    val numberFormat = NumberFormat.getInstance(NumberFormat.NUMBERSTYLE)
-
-    val stats = remember {
-        val userScore =
-            when (statsState.averageUserRating == 0.0) {
-                true -> na
-                false -> statsState.averageUserRating.toString()
-            }
-        val libUpdates =
-            when (statsState.lastLibraryUpdate.isEmpty()) {
-                true -> na
-                false -> statsState.lastLibraryUpdate
-            }
-
-        val libUpdateAttempt =
-            when (statsState.lastLibraryUpdateAttempt.isEmpty()) {
-                true -> never
-                false -> statsState.lastLibraryUpdateAttempt
-            }
-        val lastUpdateDuration =
-            when (statsState.lastLibraryUpdateDuration.isEmpty()) {
-                true -> never
-                false -> statsState.lastLibraryUpdateDuration
-            }
-
-        val mergeCounts =
-            statsState.mergeCounts.mapNotNull {
-                if (it.second > 0) {
-                    (it.first.scanlatorName + " merged") to it.second.toString()
-                } else {
-                    null
-                }
-            }
-
-        (listOf(
-                numberFormat.format(statsState.mangaCount).toString() to
-                    context.getString(R.string.total_manga),
-                numberFormat.format(statsState.chapterCount).toString() to
-                    context.getString(R.string.total_chapters),
-                numberFormat.format(statsState.readCount).toString() to
-                    context.getString(R.string.chapters_read),
-                numberFormat.format(statsState.bookmarkCount).toString() to
-                    context.getString(R.string.chapters_bookmarked),
-                numberFormat.format(statsState.unavailableCount).toString() to
-                    context.getString(R.string.chapters_unavailable),
-                statsState.readDuration to context.getString(R.string.read_duration),
-                libUpdates to context.getString(R.string.last_library_update),
-                lastUpdateDuration to context.getString(R.string.last_library_update_duration),
-                libUpdateAttempt to context.getString(R.string.last_library_update_attempt),
-                numberFormat.format(statsState.globalUpdateCount).toString() to
-                    context.getString(R.string.global_update_manga),
-                statsState.averageMangaRating.toString() to
-                    context.getString(R.string.average_score),
-                userScore to context.getString(R.string.mean_score),
-                statsState.trackerCount.toString() to context.getString(R.string.trackers),
-                numberFormat.format(statsState.trackedCount).toString() to
-                    context.getString(R.string.manga_tracked),
-                numberFormat.format(statsState.tagCount).toString() to
-                    context.getString(R.string.total_tags),
-            ) + mergeCounts)
-            .toList()
-    }
-
+@Composable
+fun SimpleStats(
+    metrics: List<SimpleStatMetricUiModel>,
+    contentPadding: PaddingValues,
+    windowSizeClass: WindowSizeClass,
+) {
     val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
     val verticalArrangement =
@@ -127,8 +76,12 @@ fun SimpleStats(
                     Arrangement.spacedBy(axisPadding, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(axisPadding, Alignment.CenterVertically),
             ) {
-                stats.forEach {
-                    BasicStat(value = it.first, label = it.second, isTablet = isTablet)
+                metrics.forEach { metric ->
+                    BasicStat(
+                        value = metric.formattedValue,
+                        label = metric.title.asString(),
+                        isTablet = isTablet,
+                    )
                 }
             }
         }
@@ -164,5 +117,69 @@ private fun BasicStat(value: String, label: String, isTablet: Boolean) {
                 Text(text = label, style = labelTypography)
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun SimpleStatsPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig,
+) {
+    ThemedPreviews(themeConfig) {
+        SimpleStats(
+            metrics =
+                listOf(
+                    SimpleStatMetricUiModel(
+                        title = UiText.StringResource(R.string.total_manga),
+                        formattedValue = "1,234",
+                    ),
+                    SimpleStatMetricUiModel(
+                        title = UiText.StringResource(R.string.total_chapters),
+                        formattedValue = "12,450",
+                    ),
+                    SimpleStatMetricUiModel(
+                        title = UiText.StringResource(R.string.chapters_read),
+                        formattedValue = "8,920",
+                    ),
+                    SimpleStatMetricUiModel(
+                        title = UiText.StringResource(R.string.read_duration),
+                        formattedValue = "12d 4h 30min",
+                    ),
+                ),
+            contentPadding = PaddingValues(),
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(400.dp, 800.dp)),
+        )
+    }
+}
+
+@Preview(name = "SimpleStats Tablet", device = "spec:width=1280dp,height=800dp,dpi=240")
+@Composable
+private fun SimpleStatsTabletPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig,
+) {
+    ThemedPreviews(themeConfig) {
+        SimpleStats(
+            metrics =
+                listOf(
+                    SimpleStatMetricUiModel(
+                        title = UiText.StringResource(R.string.total_manga),
+                        formattedValue = "1,234",
+                    ),
+                    SimpleStatMetricUiModel(
+                        title = UiText.StringResource(R.string.total_chapters),
+                        formattedValue = "12,450",
+                    ),
+                    SimpleStatMetricUiModel(
+                        title = UiText.StringResource(R.string.chapters_read),
+                        formattedValue = "8,920",
+                    ),
+                    SimpleStatMetricUiModel(
+                        title = UiText.StringResource(R.string.read_duration),
+                        formattedValue = "12d 4h 30min",
+                    ),
+                ),
+            contentPadding = PaddingValues(),
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(1280.dp, 800.dp)),
+        )
     }
 }

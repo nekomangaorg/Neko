@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens.stats
 
-import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,10 +56,12 @@ import com.himanshoe.charty.pie.config.PieData
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import jp.wasabeef.gap.Gap
-import kotlin.random.Random
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedStatDistribution
+import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedStatGroup
 import org.nekomanga.presentation.screens.stats.StatsConstants.DetailedState
+import org.nekomanga.presentation.screens.stats.StatsConstants.Sort
 import org.nekomanga.presentation.screens.stats.StatsHelper.getReadDuration
 import org.nekomanga.presentation.theme.Size
 
@@ -105,59 +105,67 @@ fun DetailedStats(
     Column(modifier = Modifier.fillMaxWidth().padding(top = contentPadding.calculateTopPadding())) {
         FilterChipHeader(filterState, filterStateClick)
 
-        val context = LocalContext.current
-
         when (filterState) {
             Filter.None -> {
                 DetailedCardView(detailedStats.manga, contentPadding = contentPadding, viewType)
             }
             Filter.Type -> {
                 TypeView(
-                    sortType,
-                    detailedStats,
-                    context,
-                    colors,
-                    contentPadding,
-                    viewType,
-                    sortChipClick,
+                    sortType = sortType,
+                    distribution = detailedStats.distribution.typeDistribution,
+                    colors = colors,
+                    contentPadding = contentPadding,
+                    viewType = viewType,
+                    sortChipClick = sortChipClick,
                 )
             }
             Filter.Status -> {
                 StatusView(
-                    sortType,
-                    detailedStats,
-                    context,
-                    colors,
-                    contentPadding,
-                    viewType,
-                    sortChipClick,
+                    sortType = sortType,
+                    distribution = detailedStats.distribution.statusDistribution,
+                    colors = colors,
+                    contentPadding = contentPadding,
+                    viewType = viewType,
+                    sortChipClick = sortChipClick,
                 )
             }
             Filter.ContentRating -> {
                 ContentRatingView(
-                    sortType,
-                    detailedStats,
-                    colors,
-                    contentPadding,
-                    viewType,
-                    sortChipClick,
+                    sortType = sortType,
+                    distribution = detailedStats.distribution.contentRatingDistribution,
+                    colors = colors,
+                    contentPadding = contentPadding,
+                    viewType = viewType,
+                    sortChipClick = sortChipClick,
                 )
             }
             Filter.Category -> {
                 CategoryView(
-                    sortType,
-                    detailedStats,
-                    colors,
-                    contentPadding,
-                    viewType,
-                    sortChipClick,
+                    sortType = sortType,
+                    distribution = detailedStats.distribution.categoryDistribution,
+                    colors = colors,
+                    contentPadding = contentPadding,
+                    viewType = viewType,
+                    sortChipClick = sortChipClick,
                 )
             }
             Filter.Tag -> {
-                TagView(sortType, detailedStats, colors, contentPadding, viewType, sortChipClick)
+                TagView(
+                    sortType = sortType,
+                    distribution = detailedStats.distribution.tagDistribution,
+                    colors = colors,
+                    contentPadding = contentPadding,
+                    viewType = viewType,
+                    sortChipClick = sortChipClick,
+                )
             }
             Filter.StartYear -> {
-                StartYearView(detailedStats, colors, contentPadding, viewType)
+                StartYearView(
+                    distribution = detailedStats.distribution.startYearDistribution,
+                    colors = colors,
+                    contentPadding = contentPadding,
+                    viewType = viewType,
+                )
             }
         }
     }
@@ -206,74 +214,50 @@ private fun FilterChipHeader(filterState: Filter, filterStateClick: (Filter) -> 
 @Composable
 private fun TagView(
     sortType: Sort,
-    detailedStats: DetailedState,
+    distribution: DetailedStatDistribution,
     colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
-    val tagStats = detailedStats.detailTagState
-    val sortedTagPairs =
-        remember(sortType) {
-            tagStats.sortedTagPairs.sortedWith { t, t2 ->
-                when (sortType) {
-                    Sort.Entries -> t2.second.size.compareTo(t.second.size)
-                    Sort.Chapters ->
-                        t2.second
-                            .sumOf { it.readChapters }
-                            .compareTo(t.second.sumOf { it.readChapters })
-                    Sort.Duration ->
-                        t2.second
-                            .sumOf { it.readDuration }
-                            .compareTo(t.second.sumOf { it.readDuration })
-                }
-            }
-        }
+    val sortedGroups = remember(sortType, distribution) { distribution.sortedBy(sortType) }
     StatCardView(
         contentPadding = contentPadding,
         viewType = viewType,
-        sortedSeries = sortedTagPairs,
+        sortedGroups = sortedGroups,
         sortType = sortType,
         sortChipClick = sortChipClick,
         showSortChip = true,
         color = colors[0],
-        totalCount = detailedStats.detailTagState.totalChapters,
-        totalReadDuration = detailedStats.detailTagState.totalReadDuration,
+        totalCount = distribution.totalCount,
+        totalReadDuration = distribution.totalReadDuration,
+        capitalizeHeader = true,
     )
 }
 
 @Composable
 private fun ContentRatingView(
     sortType: Sort,
-    detailedStats: DetailedState,
+    distribution: DetailedStatDistribution,
     colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
-    val sortedSeries =
-        remember(sortType) {
-            detailedStats.manga
-                .groupBy { it.contentRating.prettyPrint() }
-                .entries
-                .sortedWith(mapEntryComparator(sortType))
-        }
-    val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
-    val totalCount = remember { sortedSeries.sumOf { it.value.size } }
-    val totalDuration = remember {
-        sortedSeries.sumOf { values -> values.value.sumOf { it.readDuration } }
-    }
-    val pieData = remember(sortType) { pieData(sortedSeries, colorMap, sortType) }
+    val sortedGroups = remember(sortType, distribution) { distribution.sortedBy(sortType) }
+    val colorMap = remember(sortedGroups, colors) { colorMap(sortedGroups.map { it.key }, colors) }
+    val pieData =
+        remember(sortType, sortedGroups, colorMap) { pieData(sortedGroups, colorMap, sortType) }
 
     DefaultView(
         contentPadding = contentPadding,
         viewType = viewType,
         sortType = sortType,
         sortChipClick = sortChipClick,
-        sortedSeries = sortedSeries,
+        sortedGroups = sortedGroups,
         colorMap = colorMap,
-        totalCount = totalCount,
-        totalDuration = totalDuration,
+        totalCount = distribution.totalCount,
+        totalDuration = distribution.totalReadDuration,
     ) { modifier, chartWidth ->
         Pie(pieData = pieData, chartWidth = chartWidth, modifier = modifier)
     }
@@ -282,50 +266,36 @@ private fun ContentRatingView(
 @Composable
 private fun CategoryView(
     sortType: Sort,
-    detailedStats: DetailedState,
+    distribution: DetailedStatDistribution,
     colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
-    val defaultCategoryName = stringResource(id = R.string.default_value)
-
-    val sortedSeries =
-        remember(sortType) {
-            detailedStats.categories
-                .associateWith { category ->
-                    detailedStats.manga.filter { it.categories.contains(category) }
+    val sortedGroups = remember(sortType, distribution) { distribution.sortedBy(sortType) }
+    val colorMap =
+        remember(sortedGroups, colors) {
+            if (sortedGroups.size <= colors.size) {
+                colorMap(sortedGroups.map { it.key }, colors)
+            } else {
+                sortedGroups.associate { group ->
+                    val hue = (kotlin.math.abs(group.key.hashCode()) % 360).toFloat()
+                    group.key to Color.hsl(hue = hue, saturation = 0.65f, lightness = 0.55f)
                 }
-                .entries
-                .filter { it.key != defaultCategoryName || it.value.isNotEmpty() }
-                .sortedWith(mapEntryComparator(sortType))
+            }
         }
-    val colorsToUse = remember {
-        when (sortedSeries.size <= colors.size) {
-            true -> colors
-            false ->
-                sortedSeries.map {
-                    Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256))
-                }
-        }
-    }
-
-    val colorMap = remember { colorMap(sortedSeries.map { it.key }, colorsToUse) }
-    val totalCount = remember { sortedSeries.sumOf { it.value.size } }
-    val totalDuration = remember {
-        sortedSeries.sumOf { values -> values.value.sumOf { it.readDuration } }
-    }
-    val pieData = remember(sortType) { pieData(sortedSeries, colorMap, sortType) }
+    val pieData =
+        remember(sortType, sortedGroups, colorMap) { pieData(sortedGroups, colorMap, sortType) }
 
     DefaultView(
         contentPadding = contentPadding,
         viewType = viewType,
         sortType = sortType,
         sortChipClick = sortChipClick,
-        sortedSeries = sortedSeries,
+        sortedGroups = sortedGroups,
         colorMap = colorMap,
-        totalCount = totalCount,
-        totalDuration = totalDuration,
+        totalCount = distribution.totalCount,
+        totalDuration = distribution.totalReadDuration,
     ) { modifier, chartWidth ->
         Pie(pieData = pieData, chartWidth = chartWidth, modifier = modifier)
     }
@@ -333,35 +303,42 @@ private fun CategoryView(
 
 @Composable
 private fun StartYearView(
-    detailedStats: DetailedState,
+    distribution: DetailedStatDistribution,
     colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
 ) {
     val notStartedString = stringResource(id = R.string.not_started)
-    val sortedSeries = remember {
-        detailedStats.manga
-            .groupBy { it.startYear?.toString() ?: notStartedString }
-            .entries
-            .sortedBy { it.key }
-    }
-
-    val lineData = remember {
-        sortedSeries.mapNotNull {
-            if (it.key != notStartedString) {
-                LineData(xValue = it.key, yValue = it.value.size.toFloat())
-            } else {
-                null
+    val sortedGroups =
+        remember(distribution.groups, notStartedString) {
+            distribution.groups.map { group ->
+                if (group.key.isEmpty()) {
+                    group.copy(key = notStartedString)
+                } else {
+                    group
+                }
             }
         }
-    }
-    val colorMap = remember { sortedSeries.associate { it.key to colors[0] }.toMap() }
+
+    val lineData =
+        remember(distribution.groups) {
+            distribution.groups.mapNotNull {
+                if (it.key.isNotEmpty()) {
+                    LineData(xValue = it.key, yValue = it.count.toFloat())
+                } else {
+                    null
+                }
+            }
+        }
+    val colorMap = remember(sortedGroups, colors) { sortedGroups.associate { it.key to colors[0] } }
 
     DefaultView(
         contentPadding = contentPadding,
         viewType = viewType,
         colorMap = colorMap,
-        sortedSeries = sortedSeries,
+        sortedGroups = sortedGroups,
+        totalCount = distribution.totalCount,
+        totalDuration = distribution.totalReadDuration,
         showSortChip = false,
     ) { modifier, chartWidth ->
         Line(
@@ -376,36 +353,26 @@ private fun StartYearView(
 @Composable
 private fun StatusView(
     sortType: Sort,
-    detailedStats: DetailedState,
-    context: Context,
+    distribution: DetailedStatDistribution,
     colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
-    val sortedSeries =
-        remember(sortType) {
-            detailedStats.manga
-                .groupBy { context.getString(it.status.statusRes) }
-                .entries
-                .sortedWith(mapEntryComparator(sortType))
-        }
-    val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
-    val totalCount = remember { sortedSeries.sumOf { it.value.size } }
-    val totalDuration = remember {
-        sortedSeries.sumOf { values -> values.value.sumOf { it.readDuration } }
-    }
-    val pieData = remember(sortType) { pieData(sortedSeries, colorMap, sortType) }
+    val sortedGroups = remember(sortType, distribution) { distribution.sortedBy(sortType) }
+    val colorMap = remember(sortedGroups, colors) { colorMap(sortedGroups.map { it.key }, colors) }
+    val pieData =
+        remember(sortType, sortedGroups, colorMap) { pieData(sortedGroups, colorMap, sortType) }
 
     DefaultView(
         contentPadding = contentPadding,
         viewType = viewType,
         sortType = sortType,
         sortChipClick = sortChipClick,
-        sortedSeries = sortedSeries,
+        sortedGroups = sortedGroups,
         colorMap = colorMap,
-        totalCount = totalCount,
-        totalDuration = totalDuration,
+        totalCount = distribution.totalCount,
+        totalDuration = distribution.totalReadDuration,
     ) { modifier, chartWidth ->
         Pie(pieData = pieData, chartWidth = chartWidth, modifier = modifier)
     }
@@ -414,36 +381,26 @@ private fun StatusView(
 @Composable
 private fun TypeView(
     sortType: Sort,
-    detailedStats: DetailedState,
-    context: Context,
+    distribution: DetailedStatDistribution,
     colors: List<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
-    val sortedSeries =
-        remember(sortType) {
-            detailedStats.manga
-                .groupBy { context.getString(it.type.typeRes) }
-                .entries
-                .sortedWith(mapEntryComparator(sortType))
-        }
-    val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
-    val totalCount = remember { sortedSeries.sumOf { it.value.size } }
-    val totalDuration = remember {
-        sortedSeries.sumOf { values -> values.value.sumOf { it.readDuration } }
-    }
-    val pieData = remember(sortType) { pieData(sortedSeries, colorMap, sortType) }
+    val sortedGroups = remember(sortType, distribution) { distribution.sortedBy(sortType) }
+    val colorMap = remember(sortedGroups, colors) { colorMap(sortedGroups.map { it.key }, colors) }
+    val pieData =
+        remember(sortType, sortedGroups, colorMap) { pieData(sortedGroups, colorMap, sortType) }
 
     DefaultView(
         contentPadding = contentPadding,
         viewType = viewType,
         sortType = sortType,
         sortChipClick = sortChipClick,
-        sortedSeries = sortedSeries,
+        sortedGroups = sortedGroups,
         colorMap = colorMap,
-        totalCount = totalCount,
-        totalDuration = totalDuration,
+        totalCount = distribution.totalCount,
+        totalDuration = distribution.totalReadDuration,
     ) { modifier, chartWidth ->
         Pie(pieData = pieData, chartWidth = chartWidth, modifier = modifier)
     }
@@ -454,7 +411,7 @@ private fun DefaultView(
     contentPadding: PaddingValues,
     sortType: Sort = Sort.Entries,
     sortChipClick: () -> Unit = {},
-    sortedSeries: List<Map.Entry<String, List<StatsConstants.DetailedStatManga>>>,
+    sortedGroups: List<DetailedStatGroup>,
     colorMap: Map<String, Color>,
     totalCount: Int = 0,
     totalDuration: Long = 0L,
@@ -486,15 +443,16 @@ private fun DefaultView(
                 ) {
                     graph(Modifier, chartWidth)
                     Column(Modifier.fillMaxWidth(.9f).padding(Size.medium)) {
-                        sortedSeries.forEach { entry ->
+                        sortedGroups.forEach { group ->
                             StatCard(
-                                header = entry.key,
-                                headerColor = colorMap[entry.key]!!,
-                                count = entry.value.size,
+                                header = group.key,
+                                headerColor =
+                                    colorMap[group.key] ?: MaterialTheme.colorScheme.primary,
+                                count = group.count,
                                 totalCount = totalCount,
-                                readChapters = entry.value.sumOf { stat -> stat.readChapters },
-                                totalChapters = entry.value.sumOf { stat -> stat.totalChapters },
-                                readDuration = entry.value.sumOf { stat -> stat.readDuration },
+                                readChapters = group.readChapters,
+                                totalChapters = group.totalChapters,
+                                readDuration = group.readDuration,
                                 totalReadDuration = totalDuration,
                             )
                         }
@@ -504,15 +462,15 @@ private fun DefaultView(
         } else {
             item { graph(Modifier.fillMaxWidth(), chartWidth) }
             item { Gap(Size.small) }
-            items(sortedSeries, key = { it.key }) { entry ->
+            items(sortedGroups, key = { it.key }) { group ->
                 StatCard(
-                    header = entry.key,
-                    headerColor = colorMap[entry.key]!!,
-                    count = entry.value.size,
+                    header = group.key,
+                    headerColor = colorMap[group.key] ?: MaterialTheme.colorScheme.primary,
+                    count = group.count,
                     totalCount = totalCount,
-                    readChapters = entry.value.sumOf { stat -> stat.readChapters },
-                    totalChapters = entry.value.sumOf { stat -> stat.totalChapters },
-                    readDuration = entry.value.sumOf { stat -> stat.readDuration },
+                    readChapters = group.readChapters,
+                    totalChapters = group.totalChapters,
+                    readDuration = group.readDuration,
                     totalReadDuration = totalDuration,
                 )
             }
@@ -545,13 +503,14 @@ private fun DetailedCardView(
 private fun StatCardView(
     contentPadding: PaddingValues,
     viewType: ViewType,
-    sortedSeries: List<Pair<String, List<StatsConstants.DetailedStatManga>>>,
+    sortedGroups: List<DetailedStatGroup>,
     color: Color,
     totalCount: Int,
     totalReadDuration: Long,
     showSortChip: Boolean = false,
     sortType: Sort = Sort.Entries,
     sortChipClick: () -> Unit = {},
+    capitalizeHeader: Boolean = false,
 ) {
     if (viewType == ViewType.Split) {
         LazyGridWrapper(
@@ -560,15 +519,15 @@ private fun StatCardView(
             sortType = sortType,
             sortChipClick = sortChipClick,
         ) {
-            items(sortedSeries, key = { it.first }) { entry ->
+            items(sortedGroups, key = { it.key }) { group ->
                 StatCard(
-                    header = entry.first.capitalizeWords(),
+                    header = if (capitalizeHeader) group.key.capitalizeWords() else group.key,
                     headerColor = color,
-                    count = entry.second.size,
+                    count = group.count,
                     totalCount = totalCount,
-                    readChapters = entry.second.sumOf { stat -> stat.readChapters },
-                    totalChapters = entry.second.sumOf { stat -> stat.totalChapters },
-                    readDuration = entry.second.sumOf { stat -> stat.readDuration },
+                    readChapters = group.readChapters,
+                    totalChapters = group.totalChapters,
+                    readDuration = group.readDuration,
                     totalReadDuration = totalReadDuration,
                 )
             }
@@ -580,15 +539,15 @@ private fun StatCardView(
             sortType = sortType,
             sortChipClick = sortChipClick,
         ) {
-            items(sortedSeries, key = { it.first }) { entry ->
+            items(sortedGroups, key = { it.key }) { group ->
                 StatCard(
-                    header = entry.first.capitalizeWords(),
+                    header = if (capitalizeHeader) group.key.capitalizeWords() else group.key,
                     headerColor = color,
-                    count = entry.second.size,
+                    count = group.count,
                     totalCount = totalCount,
-                    readChapters = entry.second.sumOf { stat -> stat.readChapters },
-                    totalChapters = entry.second.sumOf { stat -> stat.totalChapters },
-                    readDuration = entry.second.sumOf { stat -> stat.readDuration },
+                    readChapters = group.readChapters,
+                    totalChapters = group.totalChapters,
+                    readDuration = group.readDuration,
                     totalReadDuration = totalReadDuration,
                 )
             }
@@ -677,7 +636,7 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
     ElevatedCard(modifier = modifier.padding(horizontal = Size.medium, vertical = Size.small)) {
         Column(
             modifier =
-                Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.tiny)
+                Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.tiny),
         ) {
             Text(
                 text = manga.title,
@@ -740,7 +699,7 @@ private fun Line(label: String, value: String) {
                     fontWeight = FontWeight.SemiBold,
                     color =
                         MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = NekoColors.mediumAlphaHighContrast
+                            alpha = NekoColors.mediumAlphaHighContrast,
                         ),
                 ),
         )
@@ -823,14 +782,14 @@ private fun StatCard(
     totalReadDuration: Long,
 ) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium, vertical = Size.small)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium, vertical = Size.small),
     ) {
         val labelStyle =
             MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.SemiBold,
                 color =
                     MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = NekoColors.mediumAlphaHighContrast
+                        alpha = NekoColors.mediumAlphaHighContrast,
                     ),
             )
         val valueStyle = MaterialTheme.typography.bodyMedium
@@ -885,37 +844,26 @@ private fun percentage(count: Int, total: Int): String {
     return percentage(count.toLong(), total.toLong())
 }
 
-/** Returns a comparator depending on the given sort type */
-private fun <T : Comparable<T>> mapEntryComparator(sortType: Sort) =
-    Comparator<Map.Entry<T, List<StatsConstants.DetailedStatManga>>> { a, b ->
-        when (sortType) {
-            Sort.Entries -> b.value.size.compareTo(a.value.size)
-            Sort.Duration ->
-                b.value.sumOf { it.readDuration }.compareTo(a.value.sumOf { it.readDuration })
-            Sort.Chapters ->
-                b.value.sumOf { it.readChapters }.compareTo(a.value.sumOf { it.readChapters })
-        }
-    }
-
 /** Creates the color map using the unique key so changing sort order doesnt change the color */
 private fun <T> colorMap(sortedSeries: List<T>, colors: List<Color>): Map<T, Color> {
-    return sortedSeries.mapIndexed { index, T -> T to colors[index] }.toMap().toMap()
+    if (colors.isEmpty()) return emptyMap()
+    return sortedSeries.mapIndexed { index, item -> item to colors[index % colors.size] }.toMap()
 }
 
-private fun <T> pieData(
-    sortedSeries: List<Map.Entry<T, List<StatsConstants.DetailedStatManga>>>,
-    colorMap: Map<T, Color>,
+private fun pieData(
+    sortedGroups: List<DetailedStatGroup>,
+    colorMap: Map<String, Color>,
     sortType: Sort,
 ): List<PieData> {
-    return sortedSeries.mapNotNull { entry ->
+    return sortedGroups.mapNotNull { group ->
         val data =
             when (sortType) {
-                Sort.Entries -> entry.value.size
-                Sort.Chapters -> entry.value.sumOf { it.readChapters }
-                Sort.Duration -> entry.value.sumOf { it.readDuration }
+                Sort.Entries -> group.count
+                Sort.Chapters -> group.readChapters
+                Sort.Duration -> group.readDuration
             }
         if (data.toFloat() > 0) {
-            PieData(data.toFloat(), colorMap[entry.key]!!)
+            PieData(data.toFloat(), colorMap[group.key] ?: Color.Gray)
         } else {
             null
         }
@@ -930,12 +878,6 @@ private enum class Filter {
     Category,
     Tag,
     StartYear,
-}
-
-private enum class Sort(@StringRes val stringRes: Int) {
-    Entries(R.string.most_entries),
-    Chapters(R.string.chapters_read),
-    Duration(R.string.read_duration),
 }
 
 private enum class ViewType {
