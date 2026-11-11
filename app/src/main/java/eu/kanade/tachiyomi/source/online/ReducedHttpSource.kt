@@ -44,10 +44,10 @@ abstract class ReducedHttpSource : HttpSource() {
 /**
  * Fetches a merged source's chapters and returns an empty list as an error when the manga has
  * stored chapters from that source. `syncChaptersWithSource` deletes the stored chapters of a
- * merged source that are missing from the fetched list unless `errorFromMerged` is set, so an empty
- * list would delete all of them and their read state. With none stored the empty list passes
- * through, so merging a source that has no chapters for the series reports nothing. Stored chapters
- * carry no merge URL, so two merges of the same type share this check.
+ * merged source that are missing from the fetched list unless `preserveMissingMergedChapters` is
+ * set, so an empty list would delete all of them and their read state. With none stored the empty
+ * list passes through, so merging a source that has no chapters for the series reports nothing.
+ * Stored chapters carry no merge URL, so two merges of the same type share this check.
  */
 suspend fun ReducedHttpSource.fetchMergedChapters(
     mergeManga: MergeMangaImpl,

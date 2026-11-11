@@ -30,8 +30,8 @@ import uy.kohesive.injekt.api.get
  * @param db the database.
  * @param rawSourceChapters a list of chapters from the source.
  * @param manga the manga of the chapters.
- * @param errorFromMerged whether merged chapters missing from [rawSourceChapters] stay in the db,
- *   for when a merged source failed or was not asked
+ * @param preserveMissingMergedChapters whether merged chapters missing from [rawSourceChapters]
+ *   stay in the db, for when a merged source failed or was not asked
  * @param readFromMerged a set of merged chapters that have a read status
  * @return a pair of new insertions and deletions.
  */
@@ -41,7 +41,7 @@ suspend fun syncChaptersWithSource(
     mangaRepository: MangaRepository,
     rawSourceChapters: List<SChapter>,
     manga: Manga,
-    errorFromMerged: Boolean = false,
+    preserveMissingMergedChapters: Boolean = false,
     readFromMerged: Set<String> = emptySet(),
 ): Pair<List<Chapter>, List<Chapter>> {
     val downloadManager: DownloadManager = Injekt.get()
@@ -205,7 +205,7 @@ suspend fun syncChaptersWithSource(
 
     // If merged source had an error, we need to get them from the db so the smart order is kept
     val allChapters = sourceChapters.toMutableList()
-    if (errorFromMerged)
+    if (preserveMissingMergedChapters)
         allChapters += dbChapters.filter { it.isMergedChapter() && it.url !in sourceChaptersByUrl }
     val sortedChapters = reorderChapters(allChapters)
     val (mergeErrorDbChapters, finalChapters) =
@@ -219,7 +219,11 @@ suspend fun syncChaptersWithSource(
                     smart_order = i
                 }
             }
-            .partition { errorFromMerged && it.isMergedChapter() && it.url !in sourceChaptersByUrl }
+            .partition {
+                preserveMissingMergedChapters &&
+                    it.isMergedChapter() &&
+                    it.url !in sourceChaptersByUrl
+            }
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
@@ -291,7 +295,7 @@ suspend fun syncChaptersWithSource(
     // Chapters from the db not in the source.
     var toDelete = dbChapters.filterNot { dbChapter ->
         // ignore to delete when there is a site error
-        if (dbChapter.isMergedChapter() && errorFromMerged) {
+        if (dbChapter.isMergedChapter() && preserveMissingMergedChapters) {
             true
         } else if (dbChapter.isLocalSource()) {
             downloadManager.isChapterDownloaded(dbChapter, manga, true)

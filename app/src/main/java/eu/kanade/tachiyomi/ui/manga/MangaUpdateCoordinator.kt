@@ -176,7 +176,7 @@ class MangaUpdateCoordinator {
                 mangaRepository = mangaRepository,
                 rawSourceChapters = allChapters,
                 manga = manga,
-                errorFromMerged = errorFromMerged,
+                preserveMissingMergedChapters = errorFromMerged,
                 readFromMerged = readFromMerged,
             )
 

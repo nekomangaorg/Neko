@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.ui.reader
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.room.withTransaction
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -29,11 +31,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
@@ -77,6 +81,10 @@ class ReaderViewModelChapterLinkTest {
         Injekt.addSingleton(libraryPreferences)
         Injekt.addSingleton(mangaDexPreferences)
         Injekt.addSingleton(storageManager)
+        val application: Application = mockk()
+        every { application.getString(R.string.chapter_not_found) } returns "Chapter not found"
+        every { application.getString(R.string.manga_not_found) } returns "Manga not found"
+        Injekt.addSingleton(application)
 
         mockkStatic("androidx.room.RoomDatabaseKt")
         val transaction = slot<suspend () -> Unit>()
@@ -189,6 +197,35 @@ class ReaderViewModelChapterLinkTest {
 
             assertEquals(listOf<Long?>(12L), deleted.map { it.id })
         }
+
+    @Test
+    fun `a chapter link whose fetch fails ends with the fetch error`() = runTest {
+        coEvery { mangaDex.fetchMangaAndChapterDetails(any(), false) } returns
+            Err(ResultError.HttpError(503, "HTTP error 503"))
+
+        val error = runCatching { viewModel.loadChapterURL(LINKED_UUID) }.exceptionOrNull()
+
+        assertEquals("HTTP error 503", error?.message)
+    }
+
+    @Test
+    fun `a chapter link to a manga with no chapters ends with Chapter not found`() = runTest {
+        mangaDexReturns()
+
+        val error = runCatching { viewModel.loadChapterURL(LINKED_UUID) }.exceptionOrNull()
+
+        assertEquals("Chapter not found", error?.message)
+    }
+
+    @Test
+    fun `a manga missing from the database after saving ends with Manga not found`() = runTest {
+        coEvery { mangaRepository.getMangaByUrl(manga.url) } returnsMany listOf(manga, null)
+        mangaDexReturns(mangaDexChapter(id = 0L, uuid = LINKED_UUID, number = "2"))
+
+        val error = runCatching { viewModel.loadChapterURL(LINKED_UUID) }.exceptionOrNull()
+
+        assertEquals("Manga not found", error?.message)
+    }
 
     private fun mangaDexReturns(vararg chapters: Chapter) {
         val site =
