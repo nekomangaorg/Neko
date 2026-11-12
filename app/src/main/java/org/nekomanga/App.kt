@@ -11,6 +11,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Looper
+import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.widget.Toast
@@ -23,6 +24,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.work.Configuration
 import coil3.SingletonImageLoader
 import eu.kanade.tachiyomi.AppModule
 import eu.kanade.tachiyomi.PreferenceModule
@@ -62,7 +64,8 @@ import uy.kohesive.injekt.injectLazy
 
 private const val ACTION_DISABLE_INCOGNITO_MODE = "tachi.action.DISABLE_INCOGNITO_MODE"
 
-open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factory {
+open class App :
+    Application(), DefaultLifecycleObserver, SingletonImageLoader.Factory, Configuration.Provider {
 
     val preferences: PreferencesHelper by injectLazy()
     val networkPreferences: NetworkPreferences by injectLazy()
@@ -257,6 +260,15 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
     }
 
     override fun newImageLoader(context: Context) = coilImageLoader(context)
+
+    // WorkManager starts on first use with this configuration, which comes after onCreate. Its
+    // startup initializer (removed in the manifest) runs before onCreate, so a worker resumed at
+    // process start could read Injekt before onCreate imports the modules.
+    override val workManagerConfiguration: Configuration by lazy {
+        Configuration.Builder()
+            .setMinimumLoggingLevel(if (BuildConfig.DEBUG) Log.DEBUG else Log.INFO)
+            .build()
+    }
 
     protected open fun setupNotificationChannels() {
         Notifications.createChannels(this)
