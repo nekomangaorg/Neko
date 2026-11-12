@@ -30,7 +30,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 /** WorkManager job that syncs FollowsList to and from Neko */
@@ -40,6 +43,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
     private val followsSyncProcessor: FollowsSyncProcessor by injectLazy()
     val source: SourceManager by injectLazy()
     private val loginHelper: MangaDexLoginHelper by injectLazy()
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
     private val progressNotification =
         applicationContext.notificationBuilder(Notifications.Channel.Status).apply {
@@ -65,24 +69,35 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
 
     override suspend fun doWork(): Result = coroutineScope {
         TimberKt.d { "Doing work" }
+        val selected = inputData.getBoolean(SELECTED_MANGA, false)
+        // A push queued behind another one finds no ids when that one already sent them
+        if (selected && mangaDexPreferences.followsPushIds().get().isBlank()) {
+            return@coroutineScope Result.success()
+        }
         tryToSetForeground()
         TimberKt.d { "Checking if logged in" }
         if (!loginHelper.isLoggedIn()) {
             context.notificationManager.cancel(Notifications.Id.Status.Complete)
             errorNotification()
+            // The pushes queued behind this job fail with it
+            clearPushIds()
             return@coroutineScope Result.failure()
         }
+        var failed = false
         try {
-            val selectedIds = inputData.getString(SELECTED_MANGA_IDS)
             val syncType = inputData.getString(SYNC_TYPE)
             when {
-                selectedIds != null -> {
+                selected -> {
                     TimberKt.d { "sync selected manga to MangaDex" }
+                    val ids = mangaDexPreferences.followsPushIds().get()
                     followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        selectedIds,
+                        ids,
                     )
+                    // Last, because WorkManager runs a stopped job again with the same input. Ids
+                    // selected during the push stay for the push queued behind this one.
+                    removePushIds(ids)
                 }
                 syncType == entireLibraryToDex -> {
                     TimberKt.d { "sync entire library to MangaDex" }
@@ -127,6 +142,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
             return@coroutineScope Result.success()
         } catch (e: Exception) {
             TimberKt.e(e) { "error syncing follows" }
+            failed = true
             return@coroutineScope Result.failure()
         } finally {
             withContext(NonCancellable + Dispatchers.IO) {
@@ -134,6 +150,9 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
                 context.notificationManager.cancel(Notifications.Id.Status.Progress)
                 context.notificationManager.cancel(Notifications.Id.Status.Complete)
             }
+            // A stopped job runs again and needs its ids. A failed one does not, and the pushes
+            // queued behind it fail with it, including any selected during the delay above.
+            if (failed && !isStopped) clearPushIds()
         }
     }
 
@@ -193,8 +212,9 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
         val TAG = "follow_sync_job"
         private const val SYNC_TYPE = "sync_type"
 
-        // Own key, because a selected manga with id 1 in SYNC_TYPE reads as followsFromDex
-        private const val SELECTED_MANGA_IDS = "selected_manga_ids"
+        // The ids wait in followsPushIds, since WorkManager refuses input over 10240 bytes, about
+        // 1500 ids
+        private const val SELECTED_MANGA = "selected_manga"
 
         const val entireLibraryToDex: String = "0"
         const val followsFromDex = "1"
@@ -206,25 +226,57 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
             )
         }
 
+        /** Guards the read, change and write of followsPushIds by the screen and the job */
+        private val pushIdsLock = Any()
+
         fun startSelectedNow(workManager: WorkManager, mangaIds: List<Long>) {
             if (mangaIds.isEmpty()) return
+            val pushIds = Injekt.get<MangaDexPreferences>().followsPushIds()
+            synchronized(pushIdsLock) {
+                pushIds.set((pushIds.get().toMangaIds() + mangaIds).distinct().joinToString(","))
+            }
+            // Queued behind a running or waiting sync, where KEEP would drop it
             enqueue(
                 workManager,
-                Data.Builder().putString(SELECTED_MANGA_IDS, mangaIds.joinToString()).build(),
+                Data.Builder().putBoolean(SELECTED_MANGA, true).build(),
+                ExistingWorkPolicy.APPEND_OR_REPLACE,
             )
         }
 
-        private fun enqueue(workManager: WorkManager, input: Data) {
+        private fun removePushIds(pushed: String) {
+            val pushIds = Injekt.get<MangaDexPreferences>().followsPushIds()
+            synchronized(pushIdsLock) {
+                val pushedIds = pushed.toMangaIds().toSet()
+                val left = pushIds.get().toMangaIds().filterNot { it in pushedIds }
+                if (left.isEmpty()) pushIds.delete() else pushIds.set(left.joinToString(","))
+            }
+        }
+
+        private fun clearPushIds() {
+            synchronized(pushIdsLock) {
+                Injekt.get<MangaDexPreferences>().followsPushIds().delete()
+            }
+        }
+
+        private fun String.toMangaIds() = split(",").mapNotNull { it.trim().toLongOrNull() }
+
+        private fun enqueue(
+            workManager: WorkManager,
+            input: Data,
+            policy: ExistingWorkPolicy = ExistingWorkPolicy.KEEP,
+        ) {
             val request =
                 OneTimeWorkRequestBuilder<StatusSyncJob>()
                     .addTag(TAG)
                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                     .setInputData(input)
                     .build()
-            workManager.enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
+            workManager.enqueueUniqueWork(TAG, policy, request)
         }
 
         fun stop(context: Context) {
+            // Cancelling also drops the pushes queued behind the running job
+            clearPushIds()
             WorkManager.getInstance(context).cancelUniqueWork(TAG)
         }
     }
