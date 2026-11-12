@@ -64,6 +64,7 @@ class BackupRestorerTest {
     private val insertedChapters = mutableListOf<Chapter>()
     private val insertedMerges = mutableListOf<MergeMangaImpl>()
     private var databaseRows = emptyList<Manga>()
+    private var storedMerges = emptyList<MergeMangaImpl>()
 
     @Before
     fun setup() {
@@ -104,7 +105,11 @@ class BackupRestorerTest {
         coEvery { categoryRepository.getCategories() } returns emptyList()
         coEvery { chapterRepository.getChaptersForMangaIds(any()) } returns emptyList()
         coEvery { historyRepository.getHistoryByMangaIds(any()) } returns emptyList()
-        coEvery { mergeMangaRepository.getMergeMangaList(any<List<Long>>()) } returns emptyList()
+        coEvery { mergeMangaRepository.getMergeMangaList(any<List<Long>>()) } answers
+            {
+                val mangaIds = firstArg<List<Long>>()
+                storedMerges.filter { it.mangaId in mangaIds }
+            }
         coEvery { trackRepository.getTracksForMangaByIds(any()) } returns emptyList()
         coEvery { mangaRepository.getMangaList() } answers { databaseRows }
         coEvery { mangaRepository.insertManga(capture(insertedManga)) } answers
@@ -193,6 +198,80 @@ class BackupRestorerTest {
     }
 
     @Test
+    fun `restoring over a stored title adds the Komga series it does not have`() {
+        databaseRows = listOf(storedRow(id = 7L, source = MANGADEX_SOURCE))
+        storedMerges =
+            listOf(
+                MergeMangaImpl(
+                    id = 1L,
+                    mangaId = 7L,
+                    url = "/api/v1/series/0A",
+                    mergeType = MergeType.Komga,
+                ),
+            )
+
+        restore(
+            backupRow(
+                source = MANGADEX_SOURCE,
+                merges =
+                    listOf(
+                        BackupMergeManga(url = "/api/v1/series/0A", mergeType = KOMGA),
+                        BackupMergeManga(url = "/api/v1/series/0B", mergeType = KOMGA),
+                    ),
+            ),
+        )
+
+        assertEquals(
+            listOf(Triple(7L, MergeType.Komga, "/api/v1/series/0B")),
+            insertedMerges.map { Triple(it.mangaId, it.mergeType, it.url) },
+        )
+    }
+
+    @Test
+    fun `restoring over a stored title does not add a second Toonily merge`() {
+        databaseRows = listOf(storedRow(id = 7L, source = MANGADEX_SOURCE))
+        storedMerges =
+            listOf(
+                MergeMangaImpl(
+                    id = 1L,
+                    mangaId = 7L,
+                    url = "/toonily/a",
+                    mergeType = MergeType.Toonily,
+                ),
+            )
+
+        restore(
+            backupRow(
+                source = MANGADEX_SOURCE,
+                merges = listOf(BackupMergeManga(url = "/toonily/b", mergeType = TOONILY)),
+            ),
+        )
+
+        assertEquals(emptyList<MergeMangaImpl>(), insertedMerges)
+    }
+
+    @Test
+    fun `a backup row that lists a merge twice restores it once`() {
+        restore(
+            backupRow(
+                source = MANGADEX_SOURCE,
+                merges =
+                    listOf(
+                        BackupMergeManga(url = "/api/v1/series/0A", mergeType = KOMGA),
+                        BackupMergeManga(url = "/toonily/a", mergeType = TOONILY),
+                        BackupMergeManga(url = "/api/v1/series/0A", mergeType = KOMGA),
+                        BackupMergeManga(url = "/toonily/b", mergeType = TOONILY),
+                    ),
+            ),
+        )
+
+        assertEquals(
+            listOf(MergeType.Komga to "/api/v1/series/0A", MergeType.Toonily to "/toonily/a"),
+            insertedMerges.map { it.mergeType to it.url },
+        )
+    }
+
+    @Test
     fun `row with source -1 and a url that is not MangaDex stays skipped`() {
         restore(backupRow(source = -1L, url = "/manga/12345"))
 
@@ -261,5 +340,6 @@ class BackupRestorerTest {
         const val UUID = "00000000-0000-4000-8000-000000000001"
         const val TITLE = "Title"
         val TOONILY = MergeType.Toonily.id
+        val KOMGA = MergeType.Komga.id
     }
 }

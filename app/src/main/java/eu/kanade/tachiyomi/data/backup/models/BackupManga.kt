@@ -138,10 +138,7 @@ internal fun List<BackupManga>.combineRows(): BackupManga {
         tracking = flatMap { it.tracking }.distinct(),
         mergeMangaList =
             flatMap { it.mergeMangaList }
-                .distinctBy { merge ->
-                    val type = MergeType.getById(merge.mergeType)
-                    type to merge.url.takeIf { type.multiMerge }
-                },
+                .distinctBy { merge -> MergeType.getById(merge.mergeType).mergeKey(merge.url) },
     )
 }
 

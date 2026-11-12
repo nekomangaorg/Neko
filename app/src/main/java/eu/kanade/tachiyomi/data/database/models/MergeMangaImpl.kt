@@ -95,6 +95,13 @@ enum class MergeType(
         multiMerge = true,
     );
 
+    /**
+     * Merges of one title with the same key are the same merge. A title holds one merge of each
+     * source, except [multiMerge] sources, which hold one per url. The url part of the key is null
+     * for every other source.
+     */
+    fun mergeKey(url: String): Pair<MergeType, String?> = this to url.takeIf { multiMerge }
+
     companion object {
         fun getById(id: Int): MergeType {
             return entries.firstOrNull { it.id == id } ?: Invalid
