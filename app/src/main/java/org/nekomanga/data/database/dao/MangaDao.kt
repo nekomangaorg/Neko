@@ -87,7 +87,7 @@ interface MangaDao {
 
     @Query(
         """
-        SELECT manga.*
+        SELECT manga.id
         FROM manga
         JOIN chapters ON manga.id = chapters.manga_id
         JOIN history ON chapters.id = history.chapter_id
@@ -96,11 +96,11 @@ interface MangaDao {
         ORDER BY MAX(history.last_read) DESC
     """
     )
-    fun observeLastReadManga(): Flow<List<MangaEntity>>
+    fun observeLastReadMangaIds(): Flow<List<Long>>
 
     @Query(
         """
-        SELECT manga.*
+        SELECT manga.id
         FROM manga
         JOIN chapters ON manga.id = chapters.manga_id
         WHERE manga.favorite = 1
@@ -108,18 +108,7 @@ interface MangaDao {
         ORDER BY MAX(chapters.date_fetch) DESC
     """
     )
-    fun observeLastFetchedManga(): Flow<List<MangaEntity>>
-
-    @Query(
-        """
-        SELECT manga.*
-        FROM manga
-        JOIN chapters ON manga.id = chapters.manga_id
-        GROUP BY manga.id
-        ORDER BY COUNT(*)
-    """
-    )
-    fun observeTotalChapterManga(): Flow<List<MangaEntity>>
+    fun observeLastFetchedMangaIds(): Flow<List<Long>>
 
     @Query("UPDATE manga SET favorite = :isFavorite WHERE id = :mangaId")
     suspend fun updateFavorite(mangaId: Long, isFavorite: Boolean)
