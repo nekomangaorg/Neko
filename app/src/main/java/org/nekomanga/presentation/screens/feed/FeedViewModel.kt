@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.map
+import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -131,9 +133,12 @@ class FeedViewModel() : ViewModel() {
                 _historyScreenPagingState.update { state -> state.copy(pageLoading = it) }
             },
             onRequest = {
+                val offset = _historyScreenPagingState.value.offset
                 val seenIds =
                     if (
-                        _historyScreenPagingState.value.historyGrouping == FeedHistoryGroup.Series
+                        offset > 0 &&
+                            _historyScreenPagingState.value.historyGrouping ==
+                                FeedHistoryGroup.Series
                     ) {
                         _historyScreenPagingState.value.historyFeedMangaList
                             .map { it.mangaId }
@@ -143,7 +148,7 @@ class FeedViewModel() : ViewModel() {
                     }
                 feedRepository
                     .getHistoryPage(
-                        offset = _historyScreenPagingState.value.offset,
+                        offset = offset,
                         limit = HISTORY_ENDLESS_LIMIT,
                         group = _historyScreenPagingState.value.historyGrouping,
                         seenMangaIds = seenIds,
@@ -180,6 +185,8 @@ class FeedViewModel() : ViewModel() {
     fun saveItems() {
         lastUpdatesFeedMangaList = _updatesScreenPagingState.value.updatesFeedMangaList
         lastHistoryFeedMangaList = _historyScreenPagingState.value.historyFeedMangaList
+        lastUpdatesOffset = _updatesScreenPagingState.value.offset
+        lastHistoryOffset = _historyScreenPagingState.value.offset
         lastSummaryUpdatesFeedMangaList = _summaryScreenPagingState.value.updatesFeedMangaList
         lastContinueReadingList = _summaryScreenPagingState.value.continueReadingList
         lastSummaryNewlyAddedFeedMangaList = _summaryScreenPagingState.value.newlyAddedFeedMangaList
@@ -211,7 +218,19 @@ class FeedViewModel() : ViewModel() {
 
         if (_feedScreenState.value.firstLoad) {
             _feedScreenState.update { state -> state.copy(firstLoad = false) }
-            viewModelScope.launchIO { loadNextPage() }
+            viewModelScope.launchIO {
+                val hasExistingItems =
+                    when (_feedScreenState.value.feedScreenType) {
+                        FeedScreenType.Summary -> false
+                        FeedScreenType.History ->
+                            _historyScreenPagingState.value.historyFeedMangaList.isNotEmpty()
+                        FeedScreenType.Updates ->
+                            _updatesScreenPagingState.value.updatesFeedMangaList.isNotEmpty()
+                    }
+                if (!hasExistingItems) {
+                    loadNextPage()
+                }
+            }
         }
 
         preferences.useVividColorHeaders().changes().observeAndUpdate(viewModelScope) { enabled ->
@@ -239,7 +258,7 @@ class FeedViewModel() : ViewModel() {
             _feedScreenState.update { state -> state.copy(groupUpdateChapters = it) }
         }
 
-        preferences.historyChapterGrouping().changes().observeAndUpdate(viewModelScope) {
+        preferences.historyChapterGrouping().changes().drop(1).observeAndUpdate(viewModelScope) {
             _historyScreenPagingState.update { state ->
                 state.copy(
                     historyGrouping = it,
@@ -251,41 +270,56 @@ class FeedViewModel() : ViewModel() {
             loadNextPage()
         }
 
-        preferences.feedViewType().changes().observeAndUpdate(viewModelScope) { type ->
+        preferences.feedViewType().changes().drop(1).observeAndUpdate(viewModelScope) { type ->
             when (type) {
                 FeedScreenType.Summary -> Unit
                 FeedScreenType.History -> {
                     _historyScreenPagingState.update { state ->
                         state.copy(
-                            offset = 0,
                             searchHistoryFeedMangaList = listOf(),
                             searchQuery = "",
                         )
                     }
-                    historyPaginator.reset()
                 }
                 FeedScreenType.Updates -> {
                     _updatesScreenPagingState.update { state ->
                         state.copy(
-                            offset = 0,
                             searchUpdatesFeedMangaList = listOf(),
                             searchQuery = "",
                         )
                     }
-                    updatesPaginator.reset()
-                    loadNextPage()
                 }
             }
 
             _feedScreenState.update { state -> state.copy(feedScreenType = type) }
-            loadNextPage()
+            when (type) {
+                FeedScreenType.Summary -> loadSummaryPage()
+                FeedScreenType.History -> {
+                    if (_historyScreenPagingState.value.historyFeedMangaList.isEmpty()) {
+                        _historyScreenPagingState.update { state -> state.copy(offset = 0) }
+                        historyPaginator.reset()
+                        loadNextPage()
+                    } else {
+                        refreshHistoryFeed()
+                    }
+                }
+                FeedScreenType.Updates -> {
+                    if (_updatesScreenPagingState.value.updatesFeedMangaList.isEmpty()) {
+                        _updatesScreenPagingState.update { state -> state.copy(offset = 0) }
+                        updatesPaginator.reset()
+                        loadNextPage()
+                    } else {
+                        refreshUpdatesFeed()
+                    }
+                }
+            }
         }
 
         preferences.swipeRefreshFeedScreen().changes().observeAndUpdate(viewModelScope) {
             _feedScreenState.update { state -> state.copy(swipeRefreshEnabled = it) }
         }
 
-        preferences.sortFetchedTime().changes().observeAndUpdate(viewModelScope) {
+        preferences.sortFetchedTime().changes().drop(1).observeAndUpdate(viewModelScope) {
             _updatesScreenPagingState.update { state ->
                 state.copy(
                     updatesSortedByFetch = it,
@@ -304,8 +338,16 @@ class FeedViewModel() : ViewModel() {
         viewModelScope.launchIO {
             when (_feedScreenState.value.feedScreenType) {
                 FeedScreenType.Summary -> loadSummaryPage()
-                FeedScreenType.History -> historyPaginator.loadNextItems()
-                FeedScreenType.Updates -> updatesPaginator.loadNextItems()
+                FeedScreenType.History -> {
+                    if (refreshHistoryJob?.isActive != true) {
+                        historyPaginator.loadNextItems()
+                    }
+                }
+                FeedScreenType.Updates -> {
+                    if (refreshUpdatesJob?.isActive != true) {
+                        updatesPaginator.loadNextItems()
+                    }
+                }
             }
         }
     }
@@ -704,6 +746,7 @@ class FeedViewModel() : ViewModel() {
                     _feedScreenState.update { it.copy(isRefreshing = true) }
                 }
                 else -> {
+                    _updatesScreenPagingState.update { state -> state.copy(offset = 0) }
                     updatesPaginator.reset()
                     updatesPaginator.loadNextItems()
                 }
@@ -711,18 +754,24 @@ class FeedViewModel() : ViewModel() {
         }
     }
 
+    private var refreshHistoryJob: Job? = null
+    private var refreshUpdatesJob: Job? = null
+
     private fun refreshUpdatesFeed() {
-        viewModelScope.launchIO {
-            if (
-                _updatesScreenPagingState.value.updatesFeedMangaList.isEmpty() &&
-                    _feedScreenState.value.firstLoad
-            )
+        refreshUpdatesJob?.cancel()
+        refreshUpdatesJob = viewModelScope.launchIO {
+            if (_updatesScreenPagingState.value.updatesFeedMangaList.isEmpty()) {
                 return@launchIO
+            }
 
             val currentOffset = _updatesScreenPagingState.value.offset
-            var mutableFeedManga = mutableListOf<FeedManga>()
+            val mutableFeedManga = mutableListOf<FeedManga>()
             val limit = UPDATES_ENDLESS_LIMIT
-            for (i in 0..currentOffset step limit) {
+            val targetOffset = maxOf(limit, currentOffset)
+            var fetchFailed = false
+            var lastHasNextPage = true
+
+            for (i in 0 until targetOffset step limit) {
                 feedRepository
                     .getUpdatesPage(
                         offset = i,
@@ -730,31 +779,48 @@ class FeedViewModel() : ViewModel() {
                         uploadsFetchSort = _updatesScreenPagingState.value.updatesSortedByFetch,
                     )
                     .onOk { page ->
-                        mutableFeedManga =
-                            (mutableFeedManga + page.items.toFeedMangaList()).toMutableList()
+                        mutableFeedManga.addAll(page.items.toFeedMangaList())
+                        lastHasNextPage = page.hasNextPage
                     }
+                    .onErr { error ->
+                        TimberKt.e { "Failed to refresh updates page at offset $i: $error" }
+                        fetchFailed = true
+                    }
+                if (fetchFailed) break
             }
-            _updatesScreenPagingState.update { state ->
-                state.copy(updatesFeedMangaList = mutableFeedManga.toList())
+
+            if (!fetchFailed) {
+                _updatesScreenPagingState.update { state ->
+                    state.copy(
+                        updatesFeedMangaList = mutableFeedManga.toList(),
+                        hasMoreResults = lastHasNextPage,
+                        offset = maxOf(state.offset, limit),
+                    )
+                }
             }
         }
     }
 
     private fun refreshHistoryFeed() {
-        viewModelScope.launchIO {
-            if (
-                _historyScreenPagingState.value.historyFeedMangaList.isEmpty() &&
-                    _feedScreenState.value.firstLoad
-            )
+        refreshHistoryJob?.cancel()
+        refreshHistoryJob = viewModelScope.launchIO {
+            if (_historyScreenPagingState.value.historyFeedMangaList.isEmpty()) {
                 return@launchIO
+            }
 
             val currentOffset = _historyScreenPagingState.value.offset
-            var mutableFeedManga = mutableListOf<FeedManga>()
+            val mutableFeedManga = mutableListOf<FeedManga>()
             val limit = HISTORY_ENDLESS_LIMIT
-            for (i in 0..currentOffset step limit) {
+            val targetOffset = maxOf(limit, currentOffset)
+            var fetchFailed = false
+            var lastHasNextPage = true
+
+            for (i in 0 until targetOffset step limit) {
                 val seenIds =
                     if (
-                        _historyScreenPagingState.value.historyGrouping == FeedHistoryGroup.Series
+                        i > 0 &&
+                            _historyScreenPagingState.value.historyGrouping ==
+                                FeedHistoryGroup.Series
                     ) {
                         mutableFeedManga.map { it.mangaId }.toSet()
                     } else {
@@ -768,12 +834,24 @@ class FeedViewModel() : ViewModel() {
                         seenMangaIds = seenIds,
                     )
                     .onOk { page ->
-                        mutableFeedManga =
-                            (mutableFeedManga + page.items.toFeedMangaList()).toMutableList()
+                        mutableFeedManga.addAll(page.items.toFeedMangaList())
+                        lastHasNextPage = page.hasNextPage
                     }
+                    .onErr { error ->
+                        TimberKt.e { "Failed to refresh history page at offset $i: $error" }
+                        fetchFailed = true
+                    }
+                if (fetchFailed) break
             }
-            _historyScreenPagingState.update { state ->
-                state.copy(historyFeedMangaList = mutableFeedManga.toList())
+
+            if (!fetchFailed) {
+                _historyScreenPagingState.update { state ->
+                    state.copy(
+                        historyFeedMangaList = mutableFeedManga.toList(),
+                        hasMoreResults = lastHasNextPage,
+                        offset = maxOf(state.offset, limit),
+                    )
+                }
             }
         }
     }
@@ -1098,37 +1176,65 @@ class FeedViewModel() : ViewModel() {
     }
 
     fun populateItems() {
-        viewModelScope.launchIO {
+        val cachedUpdates = lastUpdatesFeedMangaList
+        val cachedHistory = lastHistoryFeedMangaList
+        val cachedUpdatesOffset = lastUpdatesOffset
+        val cachedHistoryOffset = lastHistoryOffset
+        val cachedSummaryUpdates = lastSummaryUpdatesFeedMangaList
+        val cachedContinueReading = lastContinueReadingList
+        val cachedNewlyAdded = lastSummaryNewlyAddedFeedMangaList
+
+        lastUpdatesFeedMangaList = null
+        lastHistoryFeedMangaList = null
+        lastUpdatesOffset = null
+        lastHistoryOffset = null
+        lastSummaryUpdatesFeedMangaList = null
+        lastContinueReadingList = null
+        lastSummaryNewlyAddedFeedMangaList = null
+
+        if (cachedUpdates != null) {
             _updatesScreenPagingState.update {
-                it.copy(updatesFeedMangaList = lastUpdatesFeedMangaList ?: it.updatesFeedMangaList)
-            }
-            _historyScreenPagingState.update {
-                it.copy(historyFeedMangaList = lastHistoryFeedMangaList ?: it.historyFeedMangaList)
-            }
-            _summaryScreenPagingState.update {
                 it.copy(
-                    updatesFeedMangaList =
-                        lastSummaryUpdatesFeedMangaList ?: it.updatesFeedMangaList,
-                    continueReadingList = lastContinueReadingList ?: it.continueReadingList,
-                    newlyAddedFeedMangaList =
-                        lastSummaryNewlyAddedFeedMangaList ?: it.newlyAddedFeedMangaList,
+                    updatesFeedMangaList = cachedUpdates,
+                    offset = cachedUpdatesOffset ?: it.offset,
                 )
             }
-            lastUpdatesFeedMangaList = null
-            lastHistoryFeedMangaList = null
-            lastSummaryUpdatesFeedMangaList = null
-            lastContinueReadingList = null
-            lastSummaryNewlyAddedFeedMangaList = null
         }
-        viewModelScope.launchIO { loadSummaryPage() }
-        viewModelScope.launchIO { refreshUpdatesFeed() }
-        viewModelScope.launchIO { refreshHistoryFeed() }
+        if (cachedHistory != null) {
+            _historyScreenPagingState.update {
+                it.copy(
+                    historyFeedMangaList = cachedHistory,
+                    offset = cachedHistoryOffset ?: it.offset,
+                )
+            }
+        }
+        if (
+            cachedSummaryUpdates != null ||
+                cachedContinueReading != null ||
+                cachedNewlyAdded != null
+        ) {
+            _summaryScreenPagingState.update {
+                it.copy(
+                    updatesFeedMangaList = cachedSummaryUpdates ?: it.updatesFeedMangaList,
+                    continueReadingList = cachedContinueReading ?: it.continueReadingList,
+                    newlyAddedFeedMangaList = cachedNewlyAdded ?: it.newlyAddedFeedMangaList,
+                )
+            }
+        }
+
+        viewModelScope.launchIO {
+            loadSummaryPage()
+            refreshUpdatesFeed()
+            refreshHistoryFeed()
+        }
     }
 
     companion object {
 
         private var lastUpdatesFeedMangaList: List<FeedManga>? = null
         private var lastHistoryFeedMangaList: List<FeedManga>? = null
+        private var lastUpdatesOffset: Int? = null
+        private var lastHistoryOffset: Int? = null
         private var lastSummaryUpdatesFeedMangaList: List<FeedManga>? = null
         private var lastContinueReadingList: List<FeedManga>? = null
         private var lastSummaryNewlyAddedFeedMangaList: List<FeedManga>? = null
@@ -1136,6 +1242,8 @@ class FeedViewModel() : ViewModel() {
         fun onLowMemory() {
             lastUpdatesFeedMangaList = null
             lastHistoryFeedMangaList = null
+            lastUpdatesOffset = null
+            lastHistoryOffset = null
             lastSummaryUpdatesFeedMangaList = null
             lastContinueReadingList = null
             lastSummaryNewlyAddedFeedMangaList = null
