@@ -50,12 +50,37 @@ suspend fun Manga.shouldDownloadNewChapters(
     return categoriesForManga.any { it in includedCategories }
 }
 
+/**
+ * Returns the oldest library entry among the rows of one title, or the oldest row when none is in
+ * the library. Pull follows, MangaDex links and random manga used to add a second row when a
+ * library section refresh had set the first row's source to -1.
+ */
+internal fun List<Manga>.libraryEntryOrOldest(): Manga? = minWithOrNull(libraryEntryThenOldest)
+
+/** [libraryEntryOrOldest] for each url among these rows */
+internal fun List<Manga>.libraryEntryOrOldestByUrl(): Map<String, Manga> {
+    val byUrl = HashMap<String, Manga>()
+    for (manga in this) {
+        val kept = byUrl[manga.url]
+        if (kept == null || libraryEntryThenOldest.compare(manga, kept) < 0) {
+            byUrl[manga.url] = manga
+        }
+    }
+    return byUrl
+}
+
+private val libraryEntryThenOldest =
+    compareBy<Manga> { !it.favorite }.thenBy { it.id ?: Long.MAX_VALUE }
+
 /** Takes a SourceManga and converts to a display manga */
 suspend fun SourceManga.toDisplayManga(
     mangaRepository: MangaRepository,
     sourceId: Long,
 ): DisplayManga {
-    var localManga = mangaRepository.getMangaByUrlAndSource(this@toDisplayManga.url, sourceId)
+    // Looked up without the source: rows a library section refresh damaged have source -1, and a
+    // lookup by source missed them and inserted a second row for the same title
+    var localManga =
+        mangaRepository.getMangaByUrls(listOf(this@toDisplayManga.url)).libraryEntryOrOldest()
     if (localManga == null) {
         val newManga = Manga.create(this.url, this.title, sourceId)
         newManga.apply { this.thumbnail_url = currentThumbnail }
@@ -79,7 +104,7 @@ suspend fun Iterable<SourceManga>.toDisplayManga(
     val urls = sourceMangas.map { it.url }.distinct()
 
     // The repository chunks internally to respect the SQLite bind-variable limit.
-    val existingMangas = mangaRepository.getMangaByUrls(urls).associateBy { it.url }.toMutableMap()
+    val existingMangas = mangaRepository.getMangaByUrls(urls).libraryEntryOrOldestByUrl()
 
     val newMangasList = mutableListOf<Manga>()
     val updateMangasList = mutableListOf<Manga>()
