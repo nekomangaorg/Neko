@@ -110,17 +110,6 @@ interface MangaDao {
     )
     fun observeLastFetchedMangaIds(): Flow<List<Long>>
 
-    @Query(
-        """
-        SELECT manga.*
-        FROM manga
-        JOIN chapters ON manga.id = chapters.manga_id
-        GROUP BY manga.id
-        ORDER BY COUNT(*)
-    """
-    )
-    fun observeTotalChapterManga(): Flow<List<MangaEntity>>
-
     @Query("UPDATE manga SET favorite = :isFavorite WHERE id = :mangaId")
     suspend fun updateFavorite(mangaId: Long, isFavorite: Boolean)
 

@@ -137,9 +137,6 @@ class MangaRepositoryImpl(
     override fun observeLastFetchedMangaIds(): Flow<List<Long>> =
         mangaDao.observeLastFetchedMangaIds()
 
-    override fun observeTotalChapterManga(): Flow<List<Manga>> =
-        mangaDao.observeTotalChapterManga().map { it.map { m -> m.toManga() } }
-
     // --- Write Operations ---
 
     override suspend fun insertManga(manga: Manga): Long = mangaDao.insertManga(manga.toEntity())

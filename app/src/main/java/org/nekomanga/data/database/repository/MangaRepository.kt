@@ -49,8 +49,6 @@ interface MangaRepository {
 
     fun observeLastFetchedMangaIds(): Flow<List<Long>>
 
-    fun observeTotalChapterManga(): Flow<List<Manga>>
-
     // --- Write Operations ---
     suspend fun insertManga(manga: Manga): Long
 
