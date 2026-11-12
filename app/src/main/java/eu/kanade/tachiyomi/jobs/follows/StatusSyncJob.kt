@@ -69,26 +69,35 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
 
     override suspend fun doWork(): Result = coroutineScope {
         TimberKt.d { "Doing work" }
+        val selected = inputData.getBoolean(SELECTED_MANGA, false)
+        // A push queued behind another one finds no ids when that one already sent them
+        if (selected && mangaDexPreferences.followsPushIds().get().isBlank()) {
+            return@coroutineScope Result.success()
+        }
         tryToSetForeground()
         TimberKt.d { "Checking if logged in" }
         if (!loginHelper.isLoggedIn()) {
             context.notificationManager.cancel(Notifications.Id.Status.Complete)
             errorNotification()
+            // The pushes queued behind this job fail with it
+            clearPushIds()
             return@coroutineScope Result.failure()
         }
+        var failed = false
         try {
             val syncType = inputData.getString(SYNC_TYPE)
             when {
-                inputData.getBoolean(SELECTED_MANGA, false) -> {
+                selected -> {
                     TimberKt.d { "sync selected manga to MangaDex" }
-                    val pushIds = mangaDexPreferences.followsPushIds()
+                    val ids = mangaDexPreferences.followsPushIds().get()
                     followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        pushIds.get(),
+                        ids,
                     )
-                    // Last, because WorkManager runs a stopped job again with the same input
-                    pushIds.delete()
+                    // Last, because WorkManager runs a stopped job again with the same input. Ids
+                    // selected during the push stay for the push queued behind this one.
+                    removePushIds(ids)
                 }
                 syncType == entireLibraryToDex -> {
                     TimberKt.d { "sync entire library to MangaDex" }
@@ -133,6 +142,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
             return@coroutineScope Result.success()
         } catch (e: Exception) {
             TimberKt.e(e) { "error syncing follows" }
+            failed = true
             return@coroutineScope Result.failure()
         } finally {
             withContext(NonCancellable + Dispatchers.IO) {
@@ -140,6 +150,9 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
                 context.notificationManager.cancel(Notifications.Id.Status.Progress)
                 context.notificationManager.cancel(Notifications.Id.Status.Complete)
             }
+            // A stopped job runs again and needs its ids. A failed one does not, and the pushes
+            // queued behind it fail with it, including any selected during the delay above.
+            if (failed && !isStopped) clearPushIds()
         }
     }
 
@@ -213,23 +226,57 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
             )
         }
 
+        /** Guards the read, change and write of followsPushIds by the screen and the job */
+        private val pushIdsLock = Any()
+
         fun startSelectedNow(workManager: WorkManager, mangaIds: List<Long>) {
             if (mangaIds.isEmpty()) return
-            Injekt.get<MangaDexPreferences>().followsPushIds().set(mangaIds.joinToString(","))
-            enqueue(workManager, Data.Builder().putBoolean(SELECTED_MANGA, true).build())
+            val pushIds = Injekt.get<MangaDexPreferences>().followsPushIds()
+            synchronized(pushIdsLock) {
+                pushIds.set((pushIds.get().toMangaIds() + mangaIds).distinct().joinToString(","))
+            }
+            // Queued behind a running or waiting sync, where KEEP would drop it
+            enqueue(
+                workManager,
+                Data.Builder().putBoolean(SELECTED_MANGA, true).build(),
+                ExistingWorkPolicy.APPEND_OR_REPLACE,
+            )
         }
 
-        private fun enqueue(workManager: WorkManager, input: Data) {
+        private fun removePushIds(pushed: String) {
+            val pushIds = Injekt.get<MangaDexPreferences>().followsPushIds()
+            synchronized(pushIdsLock) {
+                val pushedIds = pushed.toMangaIds().toSet()
+                val left = pushIds.get().toMangaIds().filterNot { it in pushedIds }
+                if (left.isEmpty()) pushIds.delete() else pushIds.set(left.joinToString(","))
+            }
+        }
+
+        private fun clearPushIds() {
+            synchronized(pushIdsLock) {
+                Injekt.get<MangaDexPreferences>().followsPushIds().delete()
+            }
+        }
+
+        private fun String.toMangaIds() = split(",").mapNotNull { it.trim().toLongOrNull() }
+
+        private fun enqueue(
+            workManager: WorkManager,
+            input: Data,
+            policy: ExistingWorkPolicy = ExistingWorkPolicy.KEEP,
+        ) {
             val request =
                 OneTimeWorkRequestBuilder<StatusSyncJob>()
                     .addTag(TAG)
                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                     .setInputData(input)
                     .build()
-            workManager.enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
+            workManager.enqueueUniqueWork(TAG, policy, request)
         }
 
         fun stop(context: Context) {
+            // Cancelling also drops the pushes queued behind the running job
+            clearPushIds()
             WorkManager.getInstance(context).cancelUniqueWork(TAG)
         }
     }

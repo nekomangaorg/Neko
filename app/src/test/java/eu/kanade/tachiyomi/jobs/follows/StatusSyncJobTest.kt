@@ -1,15 +1,19 @@
 package eu.kanade.tachiyomi.jobs.follows
 
+import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
 import androidx.work.ListenableWorker.Result
 import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.github.michaelbull.result.Ok
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -28,6 +32,8 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
+import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -66,6 +72,7 @@ class StatusSyncJobTest {
         coEvery { getMangaByUrls(any()) } returns emptyList()
     }
     private val mangaDex: MangaDex = mockk { coEvery { fetchAllFollows() } returns Ok(emptyList()) }
+    private val loginHelper: MangaDexLoginHelper = mockk { every { isLoggedIn() } returns true }
 
     private var storedPushIds = ""
     private val followsPushIds: Preference<String> = mockk {
@@ -78,7 +85,7 @@ class StatusSyncJobTest {
     fun setup() {
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.addSingleton(FollowsSyncProcessor())
-        Injekt.addSingleton(mockk<MangaDexLoginHelper> { every { isLoggedIn() } returns true })
+        Injekt.addSingleton(loginHelper)
         Injekt.addSingleton(mangaRepository)
         Injekt.addSingleton(
             mockk<SourceManager> { every { mangaDex } returns this@StatusSyncJobTest.mangaDex }
@@ -187,13 +194,14 @@ class StatusSyncJobTest {
     }
 
     @Test
-    fun `a selected push with no stored ids pushes nothing and not the whole library`() = runTest {
+    fun `a selected push with no stored ids pushes nothing and shows no notification`() = runTest {
         val noStoredIds = Data.Builder().putBoolean("selected_manga", true).build()
 
         assertEquals(Result.success(), runJob(noStoredIds))
 
         coVerify(exactly = 0) { mangaRepository.getMangaByIds(any()) }
         coVerify(exactly = 0) { mangaRepository.getLibraryList() }
+        coVerify(exactly = 0) { any<CoroutineWorker>().tryToSetForeground() }
     }
 
     @Test
@@ -251,19 +259,53 @@ class StatusSyncJobTest {
     }
 
     @Test
-    fun `a new selection replaces the ids a cancelled push left behind`() = runTest {
+    fun `a selection made while a push waits is added to it`() = runTest {
         storedPushIds = "1,2,3"
         val pushed = mutableListOf<List<Long>>()
         coEvery { mangaRepository.getMangaByIds(capture(pushed)) } returns emptyList()
 
-        StatusSyncJob.startSelectedNow(workManager, listOf(5L))
+        StatusSyncJob.startSelectedNow(workManager, listOf(3L, 5L))
 
         assertEquals(Result.success(), runJob(queuedRequest.captured.workSpec.input))
-        assertEquals(listOf(5L), pushed.flatten())
+        assertEquals(listOf(1L, 2L, 3L, 5L), pushed.flatten())
     }
 
     @Test
-    fun `ids a cancelled push left behind are not pushed by a pull from settings`() = runTest {
+    fun `a selection made during a push is left for the push queued after it`() = runTest {
+        val pushed = mutableListOf<List<Long>>()
+        coEvery { mangaRepository.getMangaByIds(capture(pushed)) } answers
+            {
+                if (pushed.size == 1) StatusSyncJob.startSelectedNow(workManager, listOf(9L))
+                emptyList()
+            }
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L, 7L))
+
+        assertEquals(Result.success(), runJob(queuedRequest.captured.workSpec.input))
+        assertEquals("9", storedPushIds)
+
+        assertEquals(Result.success(), runJob(queuedRequest.captured.workSpec.input))
+        assertEquals(listOf(listOf(5L, 7L), listOf(9L)), pushed)
+        assertEquals("", storedPushIds)
+    }
+
+    @Test
+    fun `a selected push waits for a running sync and a sync from settings does not`() {
+        val policies = mutableListOf<ExistingWorkPolicy>()
+        every {
+            workManager.enqueueUniqueWork(any(), capture(policies), any<OneTimeWorkRequest>())
+        } returns mockk()
+
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L))
+        StatusSyncJob.startNow(context, StatusSyncJob.followsFromDex)
+
+        assertEquals(
+            listOf(ExistingWorkPolicy.APPEND_OR_REPLACE, ExistingWorkPolicy.KEEP),
+            policies,
+        )
+    }
+
+    @Test
+    fun `a pull from settings leaves the stored ids to the push queued after it`() = runTest {
         storedPushIds = "1,2,3"
 
         StatusSyncJob.startNow(context, StatusSyncJob.followsFromDex)
@@ -271,10 +313,84 @@ class StatusSyncJobTest {
         assertEquals(Result.success(), runJob(queuedRequest.captured.workSpec.input))
         coVerify(exactly = 1) { mangaDex.fetchAllFollows() }
         coVerify(exactly = 0) { mangaRepository.getMangaByIds(any()) }
+        assertEquals("1,2,3", storedPushIds)
     }
 
-    private suspend fun runJob(input: Data): Result {
+    @Test
+    fun `a push that fails drops the stored ids`() = runTest {
+        coEvery { mangaRepository.getMangaByIds(any()) } throws IllegalStateException("closed")
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L, 7L))
+
+        assertEquals(Result.failure(), runJob(queuedRequest.captured.workSpec.input))
+        assertEquals("", storedPushIds)
+    }
+
+    @Test
+    fun `a selection made before a failed push ends is dropped with it`() = runTest {
+        coEvery { mangaRepository.getMangaByIds(any()) } throws IllegalStateException("closed")
+        val notificationManager: NotificationManager = mockk(relaxed = true)
+        every { any<Context>().notificationManager } returns notificationManager
+        // The job's last call, made while WorkManager still has it running, so the push this
+        // selection queues waits behind the failed one
+        every { notificationManager.cancel(Notifications.Id.Status.Complete) } answers
+            {
+                StatusSyncJob.startSelectedNow(workManager, listOf(9L))
+            }
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L, 7L))
+
+        assertEquals(Result.failure(), runJob(queuedRequest.captured.workSpec.input))
+        assertEquals("", storedPushIds)
+    }
+
+    @Test
+    fun `a push that throws CancellationException without being stopped drops the stored ids`() =
+        runTest {
+            coEvery { mangaRepository.getMangaByIds(any()) } throws CancellationException("timeout")
+            StatusSyncJob.startSelectedNow(workManager, listOf(5L, 7L))
+
+            assertEquals(Result.failure(), runJob(queuedRequest.captured.workSpec.input))
+            assertEquals("", storedPushIds)
+        }
+
+    @Test
+    fun `a push that fails after WorkManager stopped it keeps its ids`() = runTest {
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L, 7L))
+        val job = newJob(queuedRequest.captured.workSpec.input)
+        coEvery { mangaRepository.getMangaByIds(any()) } answers
+            {
+                job.stop(WorkInfo.STOP_REASON_PREEMPT)
+                throw IOException("Canceled")
+            }
+
+        job.doWork()
+
+        assertEquals("5,7", storedPushIds)
+    }
+
+    @Test
+    fun `a push while logged out drops the stored ids`() = runTest {
+        every { loginHelper.isLoggedIn() } returns false
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L, 7L))
+
+        assertEquals(Result.failure(), runJob(queuedRequest.captured.workSpec.input))
+        assertEquals("", storedPushIds)
+    }
+
+    @Test
+    fun `cancelling the sync from its notification drops the stored ids`() {
+        every { workManager.cancelUniqueWork(any()) } returns mockk()
+        storedPushIds = "5,7"
+
+        StatusSyncJob.stop(context)
+
+        verify(exactly = 1) { workManager.cancelUniqueWork(StatusSyncJob.TAG) }
+        assertEquals("", storedPushIds)
+    }
+
+    private suspend fun runJob(input: Data): Result = newJob(input).doWork()
+
+    private fun newJob(input: Data): StatusSyncJob {
         val params = mockk<WorkerParameters>(relaxed = true) { every { inputData } returns input }
-        return StatusSyncJob(context, params).doWork()
+        return StatusSyncJob(context, params)
     }
 }
