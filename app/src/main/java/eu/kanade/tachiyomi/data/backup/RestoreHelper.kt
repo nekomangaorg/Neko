@@ -406,9 +406,10 @@ class RestoreHelper(val context: Context) {
     ) {
         val dbMergeMangaList =
             preFetchedDbMergeMangaList ?: mergeMangaRepository.getMergeMangaList(manga.id!!)
-        val dbMergeKeys = dbMergeMangaList.map { it.mergeType.mergeKey(it.url) }.toSet()
+        // Holds the backup's merges too, so a merge the backup lists twice goes in once
+        val seenMergeKeys = dbMergeMangaList.map { it.mergeType.mergeKey(it.url) }.toMutableSet()
         mergeMangaList.forEach { mergeManga ->
-            if (mergeManga.mergeType.mergeKey(mergeManga.url) !in dbMergeKeys) {
+            if (seenMergeKeys.add(mergeManga.mergeType.mergeKey(mergeManga.url))) {
                 val newMergeManga = mergeManga.copy(mangaId = manga.id!!)
                 mergeMangaRepository.insertMergeManga(newMergeManga)
             }

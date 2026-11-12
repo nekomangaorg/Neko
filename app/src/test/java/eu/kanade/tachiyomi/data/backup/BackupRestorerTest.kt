@@ -251,6 +251,27 @@ class BackupRestorerTest {
     }
 
     @Test
+    fun `a backup row that lists a merge twice restores it once`() {
+        restore(
+            backupRow(
+                source = MANGADEX_SOURCE,
+                merges =
+                    listOf(
+                        BackupMergeManga(url = "/api/v1/series/0A", mergeType = KOMGA),
+                        BackupMergeManga(url = "/toonily/a", mergeType = TOONILY),
+                        BackupMergeManga(url = "/api/v1/series/0A", mergeType = KOMGA),
+                        BackupMergeManga(url = "/toonily/b", mergeType = TOONILY),
+                    ),
+            ),
+        )
+
+        assertEquals(
+            listOf(MergeType.Komga to "/api/v1/series/0A", MergeType.Toonily to "/toonily/a"),
+            insertedMerges.map { it.mergeType to it.url },
+        )
+    }
+
+    @Test
     fun `row with source -1 and a url that is not MangaDex stays skipped`() {
         restore(backupRow(source = -1L, url = "/manga/12345"))
 
