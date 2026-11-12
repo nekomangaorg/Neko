@@ -1,21 +1,38 @@
 package org.nekomanga.presentation.screens.reader.viewer
 
+import androidx.compose.runtime.MonotonicFrameClock
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WebtoonZoomableModifierTest {
 
-    @Test
-    fun `calculateZoomScrollConsumption returns zero when scale is 1`() {
-        assertEquals(0f, calculateZoomScrollConsumption(100f, 1f), 0.001f)
+    private class TestFrameClock : MonotonicFrameClock {
+        override val key: CoroutineContext.Key<*> = MonotonicFrameClock
+        private var timeNanos = 0L
+
+        override suspend fun <R> withFrameNanos(onFrame: (frameTimeNanos: Long) -> R): R {
+            timeNanos += 16_000_000L
+            return onFrame(timeNanos)
+        }
     }
 
     @Test
-    fun `calculateZoomScrollConsumption returns zero when scale is less than 1`() {
+    fun `calculateZoomScrollConsumption returns zero when scale is 1 or at threshold`() {
+        assertEquals(0f, calculateZoomScrollConsumption(100f, 1f), 0.001f)
+        assertEquals(0f, calculateZoomScrollConsumption(100f, ZOOM_INTERACTION_THRESHOLD), 0.001f)
+    }
+
+    @Test
+    fun `calculateZoomScrollConsumption returns zero when scale is less than threshold`() {
+        assertEquals(0f, calculateZoomScrollConsumption(100f, 1.005f), 0.001f)
         assertEquals(0f, calculateZoomScrollConsumption(100f, 0.5f), 0.001f)
         assertEquals(0f, calculateZoomScrollConsumption(100f, 0f), 0.001f)
         assertEquals(0f, calculateZoomScrollConsumption(100f, -1f), 0.001f)
@@ -52,7 +69,7 @@ class WebtoonZoomableModifierTest {
     }
 
     @Test
-    fun `WebtoonZoomScrollConnection onPreScroll does not consume when scale is 1`() {
+    fun `WebtoonZoomScrollConnection onPreScroll does not consume when scale is 1 or at threshold`() {
         val state = WebtoonZoomState(initialScale = 1f)
         val connection = state.scrollConnection
 
@@ -60,6 +77,11 @@ class WebtoonZoomableModifierTest {
         val consumed = connection.onPreScroll(available, NestedScrollSource.UserInput)
 
         assertEquals(Offset.Zero, consumed)
+
+        val thresholdState = WebtoonZoomState(initialScale = ZOOM_INTERACTION_THRESHOLD)
+        val thresholdConsumed =
+            thresholdState.scrollConnection.onPreScroll(available, NestedScrollSource.UserInput)
+        assertEquals(Offset.Zero, thresholdConsumed)
     }
 
     @Test
@@ -105,4 +127,54 @@ class WebtoonZoomableModifierTest {
         assertEquals(1f, state.scale, 0.001f)
         assertEquals(0f, state.offsetX, 0.001f)
     }
+
+    @Test
+    fun `WebtoonZoomState flingHorizontal animates offset and cancelFling arrests animation`() =
+        runTest {
+            withContext(TestFrameClock()) {
+                val state = WebtoonZoomState(initialScale = 2f, initialOffsetX = 0f)
+                state.flingHorizontal(
+                    coroutineScope = this,
+                    velocityX = 1000f,
+                    maxOffsetX = 500f,
+                )
+
+                advanceTimeBy(150)
+                assertTrue(state.offsetX > 0f)
+
+                state.cancelFling()
+                val offsetAfterCancel = state.offsetX
+
+                advanceTimeBy(300)
+                // Offset should not advance further after fling is cancelled
+                assertEquals(offsetAfterCancel, state.offsetX, 0.001f)
+            }
+        }
+
+    @Test
+    fun `WebtoonZoomState successive flingHorizontal calls supersede previous fling cleanly`() =
+        runTest {
+            withContext(TestFrameClock()) {
+                val state = WebtoonZoomState(initialScale = 2f, initialOffsetX = 0f)
+                state.flingHorizontal(
+                    coroutineScope = this,
+                    velocityX = 1000f,
+                    maxOffsetX = 500f,
+                )
+
+                advanceTimeBy(100)
+                val intermediateOffset = state.offsetX
+
+                // Reverse fling
+                state.flingHorizontal(
+                    coroutineScope = this,
+                    velocityX = -2000f,
+                    maxOffsetX = 500f,
+                )
+
+                advanceTimeBy(300)
+                // Must have reversed direction past the intermediate offset
+                assertTrue(state.offsetX < intermediateOffset)
+            }
+        }
 }
