@@ -132,11 +132,10 @@ class MangaRepositoryImpl(
     override suspend fun getReadNotInLibraryManga(): List<Manga> =
         mangaDao.getReadNotInLibraryManga().map { it.toManga() }
 
-    override fun observeLastReadManga(): Flow<List<Manga>> =
-        mangaDao.observeLastReadManga().map { it.map { m -> m.toManga() } }
+    override fun observeLastReadMangaIds(): Flow<List<Long>> = mangaDao.observeLastReadMangaIds()
 
-    override fun observeLastFetchedManga(): Flow<List<Manga>> =
-        mangaDao.observeLastFetchedManga().map { it.map { m -> m.toManga() } }
+    override fun observeLastFetchedMangaIds(): Flow<List<Long>> =
+        mangaDao.observeLastFetchedMangaIds()
 
     override fun observeTotalChapterManga(): Flow<List<Manga>> =
         mangaDao.observeTotalChapterManga().map { it.map { m -> m.toManga() } }

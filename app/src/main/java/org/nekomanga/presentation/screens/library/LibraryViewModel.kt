@@ -351,7 +351,7 @@ class LibraryViewModel() : ViewModel() {
      */
     private fun getSortFlow(
         sortType: LibrarySort,
-        queryFlow: () -> Flow<List<Manga>>,
+        queryFlow: () -> Flow<List<Long>>,
     ): Flow<Map<Long, Int>> {
         return combine(libraryViewFlow, categoryListFlow) { viewPrefs, categories ->
                 if (viewPrefs.groupBy == LibraryGroup.ByCategory) {
@@ -363,10 +363,8 @@ class LibraryViewModel() : ViewModel() {
             .distinctUntilChanged()
             .flatMapLatest { needsSort ->
                 if (needsSort) {
-                    queryFlow().map { list ->
-                        list
-                            .mapIndexedNotNull { index, manga -> manga.id?.let { it to index } }
-                            .toMap()
+                    queryFlow().map { mangaIds ->
+                        mangaIds.withIndex().associate { (index, mangaId) -> mangaId to index }
                     }
                 } else {
                     kotlinx.coroutines.flow.flowOf(emptyMap())
@@ -377,7 +375,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     val lastReadMangaFlow =
-        getSortFlow(LibrarySort.LastRead) { mangaRepository.observeLastReadManga() }
+        getSortFlow(LibrarySort.LastRead) { mangaRepository.observeLastReadMangaIds() }
 
     /**
      * Flow that tracks the last fetched manga to be used for sorting.
@@ -387,7 +385,7 @@ class LibraryViewModel() : ViewModel() {
      * globally or by any category. This prevents massive blocking DB reads during UI state updates.
      */
     val lastFetchMangaFlow =
-        getSortFlow(LibrarySort.DateFetched) { mangaRepository.observeLastFetchedManga() }
+        getSortFlow(LibrarySort.DateFetched) { mangaRepository.observeLastFetchedMangaIds() }
 
     val filteredMangaListFlow =
         combine(

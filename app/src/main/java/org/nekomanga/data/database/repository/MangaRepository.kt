@@ -45,9 +45,9 @@ interface MangaRepository {
 
     suspend fun getReadNotInLibraryManga(): List<Manga>
 
-    fun observeLastReadManga(): Flow<List<Manga>>
+    fun observeLastReadMangaIds(): Flow<List<Long>>
 
-    fun observeLastFetchedManga(): Flow<List<Manga>>
+    fun observeLastFetchedMangaIds(): Flow<List<Long>>
 
     fun observeTotalChapterManga(): Flow<List<Manga>>
 
