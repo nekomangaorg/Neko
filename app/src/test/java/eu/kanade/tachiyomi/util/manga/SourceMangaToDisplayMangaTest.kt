@@ -168,6 +168,23 @@ class SourceMangaToDisplayMangaTest {
     }
 
     @Test
+    fun `browse list shows the library entry when it is the newer row`() = runTest {
+        table += row(id = 1, source = UNSET_SOURCE, favorite = false)
+        table += row(id = 2, source = MANGADEX_SOURCE, favorite = true)
+
+        assertEquals(listOf(2L), browse())
+    }
+
+    @Test
+    fun `browse list shows the oldest row when no row is in the library`() = runTest {
+        newestFirst = true
+        table += row(id = 1, source = UNSET_SOURCE, favorite = false)
+        table += row(id = 2, source = MANGADEX_SOURCE, favorite = false)
+
+        assertEquals(listOf(1L), browse())
+    }
+
+    @Test
     fun `browse list shows a damaged library entry and adds nothing`() = runTest {
         table += row(id = 1, source = UNSET_SOURCE, favorite = true)
 

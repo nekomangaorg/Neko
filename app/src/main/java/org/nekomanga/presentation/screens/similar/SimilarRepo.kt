@@ -5,7 +5,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.util.manga.libraryEntryOrOldest
+import eu.kanade.tachiyomi.util.manga.libraryEntryOrOldestByUrl
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import kotlinx.coroutines.Dispatchers
@@ -150,11 +150,7 @@ class SimilarRepo(
             // Fetch existing manga in one bulk query (chunked internally to respect SQLite
             // parameter limits)
             val existingMangas =
-                mangaRepository
-                    .getMangaByUrls(distinctUrls)
-                    .groupBy { it.url }
-                    .mapNotNull { (url, rows) -> rows.libraryEntryOrOldest()?.let { url to it } }
-                    .toMap()
+                mangaRepository.getMangaByUrls(distinctUrls).libraryEntryOrOldestByUrl()
 
             val newMangasList = mutableListOf<Manga>()
             val updateMangasList = mutableListOf<Manga>()

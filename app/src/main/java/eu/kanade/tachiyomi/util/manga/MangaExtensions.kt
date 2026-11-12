@@ -55,9 +55,22 @@ suspend fun Manga.shouldDownloadNewChapters(
  * the library. Pull follows, MangaDex links and random manga used to add a second row when a
  * library section refresh had set the first row's source to -1.
  */
-internal fun List<Manga>.libraryEntryOrOldest(): Manga? =
-    filter { it.favorite }.minByOrNull { it.id ?: Long.MAX_VALUE }
-        ?: minByOrNull { it.id ?: Long.MAX_VALUE }
+internal fun List<Manga>.libraryEntryOrOldest(): Manga? = minWithOrNull(libraryEntryThenOldest)
+
+/** [libraryEntryOrOldest] for each url among these rows */
+internal fun List<Manga>.libraryEntryOrOldestByUrl(): Map<String, Manga> {
+    val byUrl = HashMap<String, Manga>()
+    for (manga in this) {
+        val kept = byUrl[manga.url]
+        if (kept == null || libraryEntryThenOldest.compare(manga, kept) < 0) {
+            byUrl[manga.url] = manga
+        }
+    }
+    return byUrl
+}
+
+private val libraryEntryThenOldest =
+    compareBy<Manga> { !it.favorite }.thenBy { it.id ?: Long.MAX_VALUE }
 
 /** Takes a SourceManga and converts to a display manga */
 suspend fun SourceManga.toDisplayManga(
@@ -91,12 +104,7 @@ suspend fun Iterable<SourceManga>.toDisplayManga(
     val urls = sourceMangas.map { it.url }.distinct()
 
     // The repository chunks internally to respect the SQLite bind-variable limit.
-    val existingMangas =
-        mangaRepository
-            .getMangaByUrls(urls)
-            .groupBy { it.url }
-            .mapNotNull { (url, rows) -> rows.libraryEntryOrOldest()?.let { url to it } }
-            .toMap()
+    val existingMangas = mangaRepository.getMangaByUrls(urls).libraryEntryOrOldestByUrl()
 
     val newMangasList = mutableListOf<Manga>()
     val updateMangasList = mutableListOf<Manga>()
