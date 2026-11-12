@@ -11,6 +11,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Looper
+import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.widget.Toast
@@ -263,8 +264,11 @@ open class App :
     // WorkManager starts on first use with this configuration, which comes after onCreate. Its
     // startup initializer (removed in the manifest) runs before onCreate, so a worker resumed at
     // process start could read Injekt before onCreate imports the modules.
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder().build()
+    override val workManagerConfiguration: Configuration by lazy {
+        Configuration.Builder()
+            .setMinimumLoggingLevel(if (BuildConfig.DEBUG) Log.DEBUG else Log.INFO)
+            .build()
+    }
 
     protected open fun setupNotificationChannels() {
         Notifications.createChannels(this)
