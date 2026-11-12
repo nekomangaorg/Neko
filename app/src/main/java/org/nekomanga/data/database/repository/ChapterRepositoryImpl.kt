@@ -31,11 +31,9 @@ class ChapterRepositoryImpl(
     }
 
     override suspend fun getChaptersForMangaIds(mangaIds: List<Long>): List<Chapter> {
-        return mangaIds
-            .distinct()
-            .chunked(MAX_DB_QUERY_VARIABLES)
-            .flatMap { chunk -> chapterDao.getChaptersForMangaIds(chunk) }
-            .map { it.toChapter() }
+        return mangaIds.distinct().chunked(MAX_DB_QUERY_VARIABLES).flatMap { chunk ->
+            chapterDao.getChaptersForMangaIds(chunk).map { it.toChapter() }
+        }
     }
 
     override suspend fun getChapterById(id: Long): Chapter? {
