@@ -364,7 +364,9 @@ class LibraryViewModel() : ViewModel() {
             .flatMapLatest { needsSort ->
                 if (needsSort) {
                     queryFlow().map { mangaIds ->
-                        mangaIds.withIndex().associate { (index, mangaId) -> mangaId to index }
+                        buildMap(mangaIds.size) {
+                            mangaIds.forEachIndexed { index, mangaId -> put(mangaId, index) }
+                        }
                     }
                 } else {
                     kotlinx.coroutines.flow.flowOf(emptyMap())
