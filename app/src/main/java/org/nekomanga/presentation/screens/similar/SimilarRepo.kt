@@ -5,7 +5,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.util.manga.libraryEntryOrOldestByUrl
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.manga.libraryEntryOrOldestByUuid
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import kotlinx.coroutines.Dispatchers
@@ -150,22 +151,22 @@ class SimilarRepo(
             // Fetch existing manga in one bulk query (chunked internally to respect SQLite
             // parameter limits)
             val existingMangas =
-                mangaRepository.getMangaByUrls(distinctUrls).libraryEntryOrOldestByUrl()
+                mangaRepository.getMangaByUrls(distinctUrls).libraryEntryOrOldestByUuid()
 
             val newMangasList = mutableListOf<Manga>()
             val updateMangasList = mutableListOf<Manga>()
-            val newlyCreatedByUrl = mutableMapOf<String, Manga>()
+            val newlyCreatedByUuid = mutableMapOf<String, Manga>()
 
             for (sourceManga in allSourceMangas) {
-                val url = sourceManga.url
-                val localManga = existingMangas[url] ?: newlyCreatedByUrl[url]
+                val uuid = MdUtil.getMangaUUID(sourceManga.url)
+                val localManga = existingMangas[uuid] ?: newlyCreatedByUuid[uuid]
                 if (localManga == null) {
                     val newManga =
                         Manga.create(sourceManga.url, sourceManga.title, mangaDex.id).apply {
                             this.thumbnail_url = sourceManga.currentThumbnail
                         }
                     newMangasList.add(newManga)
-                    newlyCreatedByUrl[url] = newManga
+                    newlyCreatedByUuid[uuid] = newManga
                 } else if (localManga.title.isBlank() && sourceManga.title.isNotBlank()) {
                     localManga.title = sourceManga.title
                     updateMangasList.add(localManga)
@@ -180,11 +181,11 @@ class SimilarRepo(
                 mangaRepository.updateMangaList(updateMangasList)
             }
 
-            val allMangasByUrl = existingMangas + newlyCreatedByUrl
+            val allMangasByUuid = existingMangas + newlyCreatedByUuid
 
             rawGroups.mapNotNull { (groupId, sourceMangaList) ->
                 val groupDisplayManga = sourceMangaList.mapNotNull { sourceManga ->
-                    val localManga = allMangasByUrl[sourceManga.url]
+                    val localManga = allMangasByUuid[MdUtil.getMangaUUID(sourceManga.url)]
                     if (localManga == null) {
                         TimberKt.e { "Failed to resolve manga for url: ${sourceManga.url}" }
                         return@mapNotNull null

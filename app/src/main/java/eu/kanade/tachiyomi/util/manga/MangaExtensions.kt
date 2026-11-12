@@ -3,9 +3,11 @@ package eu.kanade.tachiyomi.util.manga
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import kotlin.math.roundToInt
 import org.nekomanga.constants.MdConstants
@@ -57,16 +59,21 @@ suspend fun Manga.shouldDownloadNewChapters(
  */
 internal fun List<Manga>.libraryEntryOrOldest(): Manga? = minWithOrNull(libraryEntryThenOldest)
 
-/** [libraryEntryOrOldest] for each url among these rows */
-internal fun List<Manga>.libraryEntryOrOldestByUrl(): Map<String, Manga> {
-    val byUrl = HashMap<String, Manga>()
+/**
+ * [libraryEntryOrOldest] for each title among these rows, keyed by MangaDex uuid, since a title can
+ * be stored as /manga/<uuid> or /title/<uuid> and [MangaRepository.getMangaByUrls] returns both
+ * forms.
+ */
+internal fun List<Manga>.libraryEntryOrOldestByUuid(): Map<String, Manga> {
+    val byUuid = HashMap<String, Manga>()
     for (manga in this) {
-        val kept = byUrl[manga.url]
+        val uuid = manga.uuid()
+        val kept = byUuid[uuid]
         if (kept == null || libraryEntryThenOldest.compare(manga, kept) < 0) {
-            byUrl[manga.url] = manga
+            byUuid[uuid] = manga
         }
     }
-    return byUrl
+    return byUuid
 }
 
 private val libraryEntryThenOldest =
@@ -104,22 +111,22 @@ suspend fun Iterable<SourceManga>.toDisplayManga(
     val urls = sourceMangas.map { it.url }.distinct()
 
     // The repository chunks internally to respect the SQLite bind-variable limit.
-    val existingMangas = mangaRepository.getMangaByUrls(urls).libraryEntryOrOldestByUrl()
+    val existingMangas = mangaRepository.getMangaByUrls(urls).libraryEntryOrOldestByUuid()
 
     val newMangasList = mutableListOf<Manga>()
     val updateMangasList = mutableListOf<Manga>()
-    val newlyCreatedByUrl = mutableMapOf<String, Manga>()
+    val newlyCreatedByUuid = mutableMapOf<String, Manga>()
 
     for (sourceManga in sourceMangas) {
-        val url = sourceManga.url
-        var localManga = existingMangas[url] ?: newlyCreatedByUrl[url]
+        val uuid = MdUtil.getMangaUUID(sourceManga.url)
+        var localManga = existingMangas[uuid] ?: newlyCreatedByUuid[uuid]
         if (localManga == null) {
             val newManga =
                 Manga.create(sourceManga.url, sourceManga.title, sourceId).apply {
                     this.thumbnail_url = sourceManga.currentThumbnail
                 }
             newMangasList.add(newManga)
-            newlyCreatedByUrl[url] = newManga
+            newlyCreatedByUuid[uuid] = newManga
         } else if (localManga.title.isBlank() && sourceManga.title.isNotBlank()) {
             localManga.title = sourceManga.title
             updateMangasList.add(localManga)
@@ -134,10 +141,10 @@ suspend fun Iterable<SourceManga>.toDisplayManga(
         mangaRepository.updateMangaList(updateMangasList)
     }
 
-    val allMangasByUrl = existingMangas + newlyCreatedByUrl
+    val allMangasByUuid = existingMangas + newlyCreatedByUuid
 
     return sourceMangas.mapNotNull { sourceManga ->
-        val localManga = allMangasByUrl[sourceManga.url]
+        val localManga = allMangasByUuid[MdUtil.getMangaUUID(sourceManga.url)]
         if (localManga == null) {
             TimberKt.e { "Manga not found for url: ${sourceManga.url}" }
             return@mapNotNull null
