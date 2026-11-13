@@ -134,8 +134,9 @@ internal fun List<BackupManga>.combineRows(): BackupManga {
         favorite = any { it.favorite },
         categories = flatMap { it.categories }.distinct(),
         chapters = flatMap { it.chapters }.groupBy { it.url }.values.map { it.combineProgress() },
-        history = flatMap { it.history }.distinct(),
-        tracking = flatMap { it.tracking }.distinct(),
+        history = flatMap { it.history }.groupBy { it.url }.values.map { it.combineReads() },
+        tracking =
+            flatMap { it.tracking }.groupBy { it.syncId }.values.map { it.combineTracking(base) },
         mergeMangaList =
             flatMap { it.mergeMangaList }
                 .distinctBy { merge -> MergeType.getById(merge.mergeType).mergeKey(merge.url) },
@@ -170,4 +171,35 @@ private fun List<BackupChapter>.combineProgress(): BackupChapter {
             lastPageRead = furthest.lastPageRead,
             pagesLeft = if (isRead) 0 else furthest.pagesLeft,
         )
+}
+
+/**
+ * A chapter holds one history entry, so the entries of one chapter become one with the latest read
+ * and the longest reading time, the same values `RestoreHelper.restoreHistoryForManga` keeps when
+ * the chapter already has history.
+ */
+private fun List<BackupHistory>.combineReads(): BackupHistory =
+    first().copy(lastRead = maxOf { it.lastRead }, readDuration = maxOf { it.readDuration })
+
+/**
+ * A manga holds one track per service, so the tracks of one service become one: the track of the
+ * row that gives the details, or the first one when that row has none, with the furthest chapter
+ * any row reached. A score or reading date left unset (0) on that track comes from the first track
+ * that has one.
+ */
+private fun List<BackupTracking>.combineTracking(base: BackupManga): BackupTracking {
+    val service = first().syncId
+    val details = base.tracking.firstOrNull { it.syncId == service } ?: first()
+    return details.copy(
+        lastChapterRead = maxOf { it.lastChapterRead },
+        score = details.score.takeIf { it > 0F } ?: map { it.score }.firstOrNull { it > 0F } ?: 0F,
+        startedReadingDate =
+            details.startedReadingDate.takeIf { it > 0L }
+                ?: map { it.startedReadingDate }.firstOrNull { it > 0L }
+                ?: 0L,
+        finishedReadingDate =
+            details.finishedReadingDate.takeIf { it > 0L }
+                ?: map { it.finishedReadingDate }.firstOrNull { it > 0L }
+                ?: 0L,
+    )
 }

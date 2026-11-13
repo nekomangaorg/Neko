@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.backup.models
 
 import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.data.track.TrackManager
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -245,6 +246,239 @@ class BackupMangaTest {
                 BackupHistory("/chapter/b", lastRead = 20L),
             ),
             combined.history,
+        )
+    }
+
+    private fun track(
+        syncId: Int = TrackManager.MDLIST,
+        title: String = "",
+        lastChapterRead: Float = 0f,
+        score: Float = 0f,
+        startedReadingDate: Long = 0L,
+        finishedReadingDate: Long = 0L,
+    ) =
+        BackupTracking(
+            syncId = syncId,
+            libraryId = -1L,
+            title = title,
+            lastChapterRead = lastChapterRead,
+            score = score,
+            startedReadingDate = startedReadingDate,
+            finishedReadingDate = finishedReadingDate,
+        )
+
+    @Test
+    fun `tracker on both rows takes the furthest chapter and the details of the row with a source`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking = listOf(track(title = "old", lastChapterRead = 12f)),
+                    ),
+                row().copy(tracking = listOf(track(title = "new"))),
+            )
+
+        assertEquals(
+            listOf(track(title = "new", lastChapterRead = 12f)),
+            rows.combineRows().tracking,
+        )
+    }
+
+    @Test
+    fun `tracker on both rows takes the details of the row with a source when it comes first`() {
+        val rows =
+            listOf(
+                row().copy(tracking = listOf(track(title = "new"))),
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking = listOf(track(title = "old", lastChapterRead = 12f)),
+                    ),
+            )
+
+        assertEquals(
+            listOf(track(title = "new", lastChapterRead = 12f)),
+            rows.combineRows().tracking,
+        )
+    }
+
+    @Test
+    fun `tracker the row with a source lacks takes the details of the first row that has it`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking = listOf(track(title = "first", lastChapterRead = 5f)),
+                    ),
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking = listOf(track(title = "second", lastChapterRead = 9f)),
+                    ),
+                row(),
+            )
+
+        assertEquals(
+            listOf(track(title = "first", lastChapterRead = 9f)),
+            rows.combineRows().tracking,
+        )
+    }
+
+    @Test
+    fun `trackers of different services on the rows are each kept`() {
+        val mal = track(syncId = TrackManager.MYANIMELIST, lastChapterRead = 7f)
+        val rows =
+            listOf(
+                row().copy(source = -1L, tracking = listOf(track(lastChapterRead = 3f))),
+                row().copy(tracking = listOf(mal)),
+            )
+
+        assertEquals(listOf(track(lastChapterRead = 3f), mal), rows.combineRows().tracking)
+    }
+
+    @Test
+    fun `tracker score and reading dates come from another row when the row with a source has none`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking =
+                            listOf(
+                                track(
+                                    title = "old",
+                                    lastChapterRead = 12f,
+                                    score = 8f,
+                                    startedReadingDate = 1000L,
+                                    finishedReadingDate = 2000L,
+                                ),
+                            ),
+                    ),
+                row().copy(tracking = listOf(track(title = "new"))),
+            )
+
+        assertEquals(
+            listOf(
+                track(
+                    title = "new",
+                    lastChapterRead = 12f,
+                    score = 8f,
+                    startedReadingDate = 1000L,
+                    finishedReadingDate = 2000L,
+                ),
+            ),
+            rows.combineRows().tracking,
+        )
+    }
+
+    @Test
+    fun `tracker score and reading dates come from the other row when the row with a source comes first`() {
+        val rows =
+            listOf(
+                row().copy(tracking = listOf(track(title = "new"))),
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking =
+                            listOf(
+                                track(
+                                    title = "old",
+                                    score = 8f,
+                                    startedReadingDate = 1000L,
+                                    finishedReadingDate = 2000L,
+                                ),
+                            ),
+                    ),
+            )
+
+        assertEquals(
+            listOf(
+                track(
+                    title = "new",
+                    score = 8f,
+                    startedReadingDate = 1000L,
+                    finishedReadingDate = 2000L,
+                ),
+            ),
+            rows.combineRows().tracking,
+        )
+    }
+
+    @Test
+    fun `tracker score and reading dates of the row with a source win when it has them`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking =
+                            listOf(
+                                track(
+                                    title = "old",
+                                    score = 8f,
+                                    startedReadingDate = 1000L,
+                                    finishedReadingDate = 2000L,
+                                ),
+                            ),
+                    ),
+                row()
+                    .copy(
+                        tracking =
+                            listOf(
+                                track(
+                                    title = "new",
+                                    score = 6f,
+                                    startedReadingDate = 3000L,
+                                    finishedReadingDate = 4000L,
+                                ),
+                            ),
+                    ),
+            )
+
+        assertEquals(
+            listOf(
+                track(
+                    title = "new",
+                    score = 6f,
+                    startedReadingDate = 3000L,
+                    finishedReadingDate = 4000L,
+                ),
+            ),
+            rows.combineRows().tracking,
+        )
+    }
+
+    @Test
+    fun `chapter read on both rows keeps the latest read and the longest reading time`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        source = -1L,
+                        history =
+                            listOf(
+                                BackupHistory("/chapter/a", lastRead = 200L, readDuration = 5L),
+                                BackupHistory("/chapter/b", lastRead = 100L, readDuration = 9L),
+                            ),
+                    ),
+                row()
+                    .copy(
+                        history =
+                            listOf(
+                                BackupHistory("/chapter/a", lastRead = 100L, readDuration = 9L),
+                                BackupHistory("/chapter/b", lastRead = 200L, readDuration = 5L),
+                            ),
+                    ),
+            )
+
+        assertEquals(
+            listOf(
+                BackupHistory("/chapter/a", lastRead = 200L, readDuration = 9L),
+                BackupHistory("/chapter/b", lastRead = 200L, readDuration = 9L),
+            ),
+            rows.combineRows().history,
         )
     }
 }
