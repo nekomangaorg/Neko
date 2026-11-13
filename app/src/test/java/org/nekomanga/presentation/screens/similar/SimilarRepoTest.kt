@@ -9,6 +9,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -253,6 +254,82 @@ class SimilarRepoTest {
             // Assert
             assertEquals(301L, result.single().manga.single().mangaId)
             coVerify(exactly = 0) { mangaRepository.insertMangaList(any()) }
+        }
+
+    @Test
+    fun `given a library entry stored with the other url form when fetchSimilar called then shows it instead of adding a copy`() =
+        runTest {
+            // Arrange
+            val mockSimilarDb = mockk<MangaSimilar>()
+            coEvery { similarRepository.getSimilar(dexId) } returns mockSimilarDb
+
+            val uuid = "00000000-0000-4000-8000-000000000002"
+            val similarManga =
+                listOf(
+                    SourceManga(
+                        url = "/title/$uuid",
+                        currentThumbnail = "https://thumb/old.jpg",
+                        title = "Old Form Manga",
+                        displayText = "90.00% match",
+                    ),
+                )
+
+            coEvery { similarHandler.fetchRelated(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchRecommended(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchSimilar(dexId, false) } returns similarManga
+            coEvery { similarHandler.fetchSimilarExternalMUManga(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchAnilist(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchSimilarExternalMalManga(dexId, false) } returns
+                emptyList()
+
+            // The repository also returns rows stored with the other url form
+            val libraryEntry =
+                Manga.create("/manga/$uuid", "Old Form Manga", sourceId).apply {
+                    id = 401L
+                    favorite = true
+                }
+            coEvery { mangaRepository.getMangaByUrls(listOf("/title/$uuid")) } returns
+                listOf(libraryEntry)
+            coEvery { mangaRepository.insertMangaList(any()) } returns listOf(402L)
+
+            // Act
+            val result = similarRepo.fetchSimilar(dexId, forceRefresh = false)
+
+            // Assert
+            assertEquals(401L, result.single().manga.single().mangaId)
+            coVerify(exactly = 0) { mangaRepository.insertMangaList(any()) }
+        }
+
+    @Test
+    fun `given one new title listed under both url forms when fetchSimilar called then adds one row`() =
+        runTest {
+            // Arrange
+            val mockSimilarDb = mockk<MangaSimilar>()
+            coEvery { similarRepository.getSimilar(dexId) } returns mockSimilarDb
+
+            val uuid = "00000000-0000-4000-8000-000000000003"
+            coEvery { similarHandler.fetchRelated(dexId, false) } returns
+                listOf(SourceManga(url = "/title/$uuid", currentThumbnail = "", title = "Twice"))
+            coEvery { similarHandler.fetchRecommended(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchSimilar(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchSimilarExternalMUManga(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchAnilist(dexId, false) } returns emptyList()
+            coEvery { similarHandler.fetchSimilarExternalMalManga(dexId, false) } returns
+                listOf(SourceManga(url = "/manga/$uuid", currentThumbnail = "", title = "Twice"))
+
+            coEvery { mangaRepository.getMangaByUrls(any()) } returns emptyList()
+            val inserted = slot<List<Manga>>()
+            coEvery { mangaRepository.insertMangaList(capture(inserted)) } answers
+                {
+                    inserted.captured.indices.map { 501L + it }
+                }
+
+            // Act
+            val result = similarRepo.fetchSimilar(dexId, forceRefresh = false)
+
+            // Assert
+            assertEquals(1, inserted.captured.size)
+            assertEquals(listOf(501L, 501L), result.map { it.manga.single().mangaId })
         }
 
     @Test

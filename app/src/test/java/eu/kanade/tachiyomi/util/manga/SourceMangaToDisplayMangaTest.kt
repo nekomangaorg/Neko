@@ -192,10 +192,38 @@ class SourceMangaToDisplayMangaTest {
         assertEquals(1, table.size)
     }
 
-    private fun sourceManga() = SourceManga(currentThumbnail = "", url = TITLE_URL, title = "Title")
+    @Test
+    fun `browse list shows a library entry stored with the other url form and adds nothing`() =
+        runTest {
+            table += row(id = 1, source = MANGADEX_SOURCE, favorite = true, url = MANGA_URL)
 
-    private suspend fun browse(): List<Long> =
-        listOf(sourceManga()).toDisplayManga(mangaRepository, MANGADEX_SOURCE).map { it.mangaId }
+            assertEquals(listOf(1L), browse())
+            assertEquals(1, table.size)
+        }
+
+    @Test
+    fun `browse list shows the library entry over a copy stored with the other url form`() =
+        runTest {
+            table += row(id = 1, source = MANGADEX_SOURCE, favorite = true, url = MANGA_URL)
+            table += row(id = 2, source = MANGADEX_SOURCE, favorite = false)
+
+            assertEquals(listOf(1L), browse())
+        }
+
+    @Test
+    fun `browse list adds one row for a new title listed under both url forms`() = runTest {
+        assertEquals(listOf(NEW_ROW_ID, NEW_ROW_ID), browse(listOf(TITLE_URL, MANGA_URL)))
+        assertEquals(1, table.size)
+    }
+
+    private fun sourceManga(url: String = TITLE_URL) =
+        SourceManga(currentThumbnail = "", url = url, title = "Title")
+
+    private suspend fun browse(urls: List<String> = listOf(TITLE_URL)): List<Long> =
+        urls
+            .map { sourceManga(it) }
+            .toDisplayManga(mangaRepository, MANGADEX_SOURCE)
+            .map { it.mangaId }
 
     private fun rows() = table.sortedBy { it.id }.map { Triple(it.id, it.source, it.favorite) }
 
