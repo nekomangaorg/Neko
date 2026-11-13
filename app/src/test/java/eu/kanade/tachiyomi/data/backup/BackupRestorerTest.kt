@@ -5,12 +5,18 @@ import android.net.Uri
 import androidx.room.withTransaction
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.BackupChapter
+import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupMergeManga
+import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.notificationManager
 import io.mockk.coEvery
@@ -57,12 +63,15 @@ class BackupRestorerTest {
     private val mangaRepository = mockk<MangaRepository>(relaxed = true)
     private val mergeMangaRepository = mockk<MergeMangaRepository>(relaxed = true)
     private val trackRepository = mockk<TrackRepository>(relaxed = true)
+    private val trackManager = mockk<TrackManager>()
     private val sourceManager = mockk<SourceManager>()
 
     private val insertedManga = mutableListOf<Manga>()
     private val updatedManga = mutableListOf<Manga>()
     private val insertedChapters = mutableListOf<Chapter>()
     private val insertedMerges = mutableListOf<MergeMangaImpl>()
+    private val insertedTracks = mutableListOf<List<Track>>()
+    private val upsertedHistory = mutableListOf<List<History>>()
     private var databaseRows = emptyList<Manga>()
     private var storedMerges = emptyList<MergeMangaImpl>()
 
@@ -124,6 +133,9 @@ class BackupRestorerTest {
                 chapters.indices.map { it + 1_000L }
             }
         coEvery { mergeMangaRepository.insertMergeManga(capture(insertedMerges)) } returns 1L
+        coEvery { trackRepository.insertTracks(capture(insertedTracks)) } just runs
+        coEvery { historyRepository.upsertHistoryList(capture(upsertedHistory)) } just runs
+        every { trackManager.getService(any()) } returns mockk<TrackService>(relaxed = true)
 
         Injekt.addSingleton(appDatabase)
         Injekt.addSingleton(categoryRepository)
@@ -132,6 +144,7 @@ class BackupRestorerTest {
         Injekt.addSingleton(mangaRepository)
         Injekt.addSingleton(mergeMangaRepository)
         Injekt.addSingleton(trackRepository)
+        Injekt.addSingleton(trackManager)
         Injekt.addSingleton(sourceManager)
     }
 
@@ -163,6 +176,43 @@ class BackupRestorerTest {
         )
         assertEquals(3, insertedChapters.size)
         assertResult(restored = 1, restoreAmount = 1, skipped = 0, total = 1)
+    }
+
+    @Test
+    fun `row with source -1 and its copy restore one tracker with the furthest chapter`() {
+        restore(
+            backupRow(
+                source = -1L,
+                tracking = listOf(track(title = "old", lastChapterRead = 12f)),
+            ),
+            backupRow(source = MANGADEX_SOURCE, tracking = listOf(track(title = "new"))),
+        )
+
+        assertEquals(
+            listOf(Triple(TrackManager.MDLIST, "new", 12f)),
+            insertedTracks.flatten().map { Triple(it.sync_id, it.title, it.last_chapter_read) },
+        )
+    }
+
+    @Test
+    fun `row with source -1 and its copy restore one history entry per chapter`() {
+        restore(
+            backupRow(
+                source = -1L,
+                chapters = listOf(chapter("/chapter/a")),
+                history = listOf(BackupHistory("/chapter/a", lastRead = 200L, readDuration = 5L)),
+            ),
+            backupRow(
+                source = MANGADEX_SOURCE,
+                chapters = listOf(chapter("/chapter/a")),
+                history = listOf(BackupHistory("/chapter/a", lastRead = 100L, readDuration = 9L)),
+            ),
+        )
+
+        assertEquals(
+            listOf(Triple(1_000L, 200L, 9L)),
+            upsertedHistory.flatten().map { Triple(it.chapter_id, it.last_read, it.time_read) },
+        )
     }
 
     @Test
@@ -320,6 +370,8 @@ class BackupRestorerTest {
         dateAdded: Long = 0L,
         merges: List<BackupMergeManga> = emptyList(),
         chapters: List<BackupChapter> = emptyList(),
+        tracking: List<BackupTracking> = emptyList(),
+        history: List<BackupHistory> = emptyList(),
     ) =
         BackupManga(
             source = source,
@@ -327,10 +379,20 @@ class BackupRestorerTest {
             title = TITLE,
             dateAdded = dateAdded,
             chapters = chapters,
+            tracking = tracking,
+            history = history,
             mergeMangaList = merges,
         )
 
     private fun chapter(url: String) = BackupChapter(url = url, name = url)
+
+    private fun track(title: String, lastChapterRead: Float = 0f) =
+        BackupTracking(
+            syncId = TrackManager.MDLIST,
+            libraryId = -1L,
+            title = title,
+            lastChapterRead = lastChapterRead,
+        )
 
     private fun storedRow(id: Long, source: Long) =
         Manga.create("/title/$UUID", TITLE, source).apply { this.id = id }
