@@ -64,8 +64,8 @@ internal fun List<Manga>.libraryEntryOrOldest(): Manga? = minWithOrNull(libraryE
  * be stored as /manga/<uuid> or /title/<uuid> and [MangaRepository.getMangaByUrls] returns both
  * forms.
  */
-internal fun List<Manga>.libraryEntryOrOldestByUuid(): Map<String, Manga> {
-    val byUuid = HashMap<String, Manga>()
+internal fun List<Manga>.libraryEntryOrOldestByUuid(): MutableMap<String, Manga> {
+    val byUuid = HashMap<String, Manga>(size)
     for (manga in this) {
         val uuid = manga.uuid()
         val kept = byUuid[uuid]
@@ -141,7 +141,8 @@ suspend fun Iterable<SourceManga>.toDisplayManga(
         mangaRepository.updateMangaList(updateMangasList)
     }
 
-    val allMangasByUuid = existingMangas + newlyCreatedByUuid
+    existingMangas.putAll(newlyCreatedByUuid)
+    val allMangasByUuid = existingMangas
 
     return sourceMangas.mapNotNull { sourceManga ->
         val localManga = allMangasByUuid[MdUtil.getMangaUUID(sourceManga.url)]

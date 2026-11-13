@@ -181,7 +181,8 @@ class SimilarRepo(
                 mangaRepository.updateMangaList(updateMangasList)
             }
 
-            val allMangasByUuid = existingMangas + newlyCreatedByUuid
+            existingMangas.putAll(newlyCreatedByUuid)
+            val allMangasByUuid = existingMangas
 
             rawGroups.mapNotNull { (groupId, sourceMangaList) ->
                 val groupDisplayManga = sourceMangaList.mapNotNull { sourceManga ->
