@@ -9,6 +9,7 @@ import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.retrofit.statusCode
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
@@ -108,7 +109,10 @@ class FollowsHandler {
             .toList()
     }
 
-    /** Change the status of a manga */
+    /**
+     * Change the status of a manga. Returns true only when MangaDex ends up with the wanted follow
+     * and the new status.
+     */
     suspend fun updateFollowStatus(mangaId: String, followStatus: FollowStatus): Boolean {
         return withContext(Dispatchers.IO) {
             val status =
@@ -117,11 +121,11 @@ class FollowsHandler {
                     false -> followStatus.toDex()
                 }
             val readingStatusDto = ReadingStatusDto(status)
+            val unfollow =
+                followStatus == FollowStatus.UNFOLLOWED || followStatus == FollowStatus.DROPPED
 
-            withIOContext {
-                if (
-                    followStatus == FollowStatus.UNFOLLOWED || followStatus == FollowStatus.DROPPED
-                ) {
+            val followResponse = withIOContext {
+                if (unfollow) {
                     authService.unfollowManga(mangaId).onFailure {
                         this.log("trying to unfollow manga $mangaId")
                     }
@@ -130,6 +134,12 @@ class FollowsHandler {
                         this.log("trying to follow manga $mangaId")
                     }
                 }
+            }
+
+            // The API docs list a 404 for unfollow without saying when it happens, so after a
+            // failed request the follow list decides whether the status is sent
+            if (followResponse !is ApiResponse.Success && !followListMatches(mangaId, !unfollow)) {
+                return@withContext false
             }
 
             return@withContext when (
@@ -141,6 +151,22 @@ class FollowsHandler {
                     false
                 }
                 else -> true
+            }
+        }
+    }
+
+    /**
+     * Whether MangaDex's follow list has the manga when [followed] is true, or lacks it when false.
+     * A failed check counts as no match.
+     */
+    private suspend fun followListMatches(mangaId: String, followed: Boolean): Boolean {
+        val response = authService.userFollowsManga(mangaId)
+        return when {
+            response is ApiResponse.Success -> followed
+            response is ApiResponse.Failure.Error && response.statusCode.code == 404 -> !followed
+            else -> {
+                response.log("trying to check the follow of manga $mangaId")
+                false
             }
         }
     }
