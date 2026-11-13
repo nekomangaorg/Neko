@@ -3,8 +3,12 @@ package eu.kanade.tachiyomi.jobs.follows
 import com.github.michaelbull.result.Ok
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -24,6 +28,7 @@ import org.nekomanga.data.database.mapper.toEntity
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -49,6 +54,10 @@ class FollowsSyncProcessorTest {
             {
                 table.filter { it.url in firstArg<List<String>>() }.sortedByDescending { it.id }
             }
+        coEvery { getMangaByIds(any()) } answers
+            {
+                table.filter { it.id in firstArg<List<Long>>() }
+            }
         coEvery { insertManga(any()) } answers
             {
                 table += firstArg<MangaEntity>().copy(id = NEW_ROW_ID)
@@ -70,6 +79,30 @@ class FollowsSyncProcessorTest {
 
     private var idsSentToUpdate: List<Long>? = null
 
+    /** The MangaDex tracker status of each manga in the track table. */
+    private val trackTable = mutableMapOf<Long, Int>()
+
+    private val trackRepository: TrackRepository = mockk {
+        coEvery { getTracksForMangaByIds(any()) } answers
+            {
+                firstArg<List<Long>>().mapNotNull { mangaId ->
+                    trackTable[mangaId]?.let { status -> mdListTrack(mangaId, status) }
+                }
+            }
+        coEvery { insertTrack(any()) } answers { saveTrack(firstArg()) }
+    }
+
+    private val mdListService: MdList = mockk {
+        every { createInitialTracker(any()) } answers { callOriginal() }
+        // MdList.update saves the track it is given
+        coEvery { update(any(), any(), any(), any()) } answers
+            {
+                firstArg<Track>().also { saveTrack(it) }
+            }
+    }
+
+    private val followsHandler: FollowsHandler = mockk()
+
     @Before
     fun setup() {
         Injekt = InjektScope(DefaultRegistrar())
@@ -88,8 +121,12 @@ class FollowsSyncProcessorTest {
             mockk<MangaDexPreferences> {
                 every { mangaDexPullToLibraryIndices().get() } returns
                     setOf(FollowStatus.READING.int.toString())
+                every { readingSync().get() } returns false
             }
         )
+        Injekt.addSingleton(trackRepository)
+        Injekt.addSingleton(mockk<TrackManager> { every { mdList } returns mdListService })
+        Injekt.addSingleton(followsHandler)
         Injekt.addSingleton(
             mockk<LibraryPreferences> { every { defaultCategory().get() } returns DEFAULT_CATEGORY }
         )
@@ -250,6 +287,40 @@ class FollowsSyncProcessorTest {
         assertEquals(1, added)
     }
 
+    @Test
+    fun `push sends a title again after MangaDex refused it`() = runTest {
+        table += row(id = 1, source = MANGADEX_SOURCE, favorite = true)
+        coEvery { followsHandler.updateFollowStatus(any(), any()) } returnsMany listOf(false, true)
+
+        val firstPush = push("1")
+        val secondPush = push("1")
+
+        assertEquals(0, firstPush)
+        assertEquals(1, secondPush)
+        coVerify(exactly = 2) {
+            followsHandler.updateFollowStatus(TITLE_UUID, FollowStatus.READING)
+        }
+        assertEquals(mapOf(1L to FollowStatus.READING.int), trackTable)
+    }
+
+    @Test
+    fun `push counts and marks as reading only the titles MangaDex followed`() = runTest {
+        table += row(id = 1, source = MANGADEX_SOURCE, favorite = true)
+        table += row(id = 2, source = MANGADEX_SOURCE, favorite = true, url = OTHER_URL)
+        trackTable[1] = FollowStatus.UNFOLLOWED.int
+        trackTable[2] = FollowStatus.UNFOLLOWED.int
+        coEvery { followsHandler.updateFollowStatus(TITLE_UUID, any()) } returns false
+        coEvery { followsHandler.updateFollowStatus(OTHER_UUID, any()) } returns true
+
+        val pushed = push("1,2")
+
+        assertEquals(1, pushed)
+        assertEquals(
+            mapOf(1L to FollowStatus.UNFOLLOWED.int, 2L to FollowStatus.READING.int),
+            trackTable,
+        )
+    }
+
     private fun follow(url: String) =
         SourceManga(
             currentThumbnail = "",
@@ -266,6 +337,30 @@ class FollowsSyncProcessorTest {
                 completeNotification = {},
                 updateManga = { idsSentToUpdate = it },
             )
+
+    /** Runs a push of the given manga ids and returns the count it reports. */
+    private suspend fun push(ids: String): Int {
+        var pushed = -1
+        FollowsSyncProcessor()
+            .toMangaDex(
+                updateNotification = { _, _, _ -> },
+                completeNotification = { pushed = it },
+                ids = ids,
+            )
+        return pushed
+    }
+
+    private fun mdListTrack(mangaId: Long, status: Int) =
+        Track.create(TrackManager.MDLIST).apply {
+            id = mangaId
+            manga_id = mangaId
+            this.status = status
+        }
+
+    private fun saveTrack(track: Track): Long {
+        trackTable[track.manga_id] = track.status
+        return track.manga_id
+    }
 
     private fun rows() = table.sortedBy { it.id }.map { Triple(it.id, it.source, it.favorite) }
 
@@ -288,5 +383,7 @@ class FollowsSyncProcessorTest {
         const val TITLE_URL = "/title/00000000-0000-4000-8000-000000000001"
         const val MANGA_URL = "/manga/00000000-0000-4000-8000-000000000001"
         const val OTHER_URL = "/title/00000000-0000-4000-8000-000000000002"
+        const val TITLE_UUID = "00000000-0000-4000-8000-000000000001"
+        const val OTHER_UUID = "00000000-0000-4000-8000-000000000002"
     }
 }

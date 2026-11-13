@@ -199,16 +199,19 @@ class FollowsSyncProcessor {
 
                     if (mdListTrack.status == FollowStatus.UNFOLLOWED.int) {
                         withIOContext {
-                            followsHandler.updateFollowStatus(
-                                MdUtil.getMangaUUID(manga.url),
-                                FollowStatus.READING,
-                            )
+                            val followed =
+                                followsHandler.updateFollowStatus(
+                                    MdUtil.getMangaUUID(manga.url),
+                                    FollowStatus.READING,
+                                )
+                            // Refused titles stay unfollowed, so the next push sends them again
+                            if (!followed) return@withIOContext
 
                             mdListTrack.status = FollowStatus.READING.int
                             val returnedTracker = trackManager.mdList.update(mdListTrack)
                             trackRepository.insertTrack(returnedTracker)
+                            countNew.incrementAndGet()
                         }
-                        countNew.incrementAndGet()
                     }
 
                     if (mangaDexPreferences.readingSync().get()) {
