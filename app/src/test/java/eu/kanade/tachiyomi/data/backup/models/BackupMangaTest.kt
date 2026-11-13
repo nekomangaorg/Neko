@@ -253,12 +253,18 @@ class BackupMangaTest {
         syncId: Int = TrackManager.MDLIST,
         title: String = "",
         lastChapterRead: Float = 0f,
+        score: Float = 0f,
+        startedReadingDate: Long = 0L,
+        finishedReadingDate: Long = 0L,
     ) =
         BackupTracking(
             syncId = syncId,
             libraryId = -1L,
             title = title,
             lastChapterRead = lastChapterRead,
+            score = score,
+            startedReadingDate = startedReadingDate,
+            finishedReadingDate = finishedReadingDate,
         )
 
     @Test
@@ -330,6 +336,118 @@ class BackupMangaTest {
             )
 
         assertEquals(listOf(track(lastChapterRead = 3f), mal), rows.combineRows().tracking)
+    }
+
+    @Test
+    fun `tracker score and reading dates come from another row when the row with a source has none`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking =
+                            listOf(
+                                track(
+                                    title = "old",
+                                    lastChapterRead = 12f,
+                                    score = 8f,
+                                    startedReadingDate = 1000L,
+                                    finishedReadingDate = 2000L,
+                                ),
+                            ),
+                    ),
+                row().copy(tracking = listOf(track(title = "new"))),
+            )
+
+        assertEquals(
+            listOf(
+                track(
+                    title = "new",
+                    lastChapterRead = 12f,
+                    score = 8f,
+                    startedReadingDate = 1000L,
+                    finishedReadingDate = 2000L,
+                ),
+            ),
+            rows.combineRows().tracking,
+        )
+    }
+
+    @Test
+    fun `tracker score and reading dates come from the other row when the row with a source comes first`() {
+        val rows =
+            listOf(
+                row().copy(tracking = listOf(track(title = "new"))),
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking =
+                            listOf(
+                                track(
+                                    title = "old",
+                                    score = 8f,
+                                    startedReadingDate = 1000L,
+                                    finishedReadingDate = 2000L,
+                                ),
+                            ),
+                    ),
+            )
+
+        assertEquals(
+            listOf(
+                track(
+                    title = "new",
+                    score = 8f,
+                    startedReadingDate = 1000L,
+                    finishedReadingDate = 2000L,
+                ),
+            ),
+            rows.combineRows().tracking,
+        )
+    }
+
+    @Test
+    fun `tracker score and reading dates of the row with a source win when it has them`() {
+        val rows =
+            listOf(
+                row()
+                    .copy(
+                        source = -1L,
+                        tracking =
+                            listOf(
+                                track(
+                                    title = "old",
+                                    score = 8f,
+                                    startedReadingDate = 1000L,
+                                    finishedReadingDate = 2000L,
+                                ),
+                            ),
+                    ),
+                row()
+                    .copy(
+                        tracking =
+                            listOf(
+                                track(
+                                    title = "new",
+                                    score = 6f,
+                                    startedReadingDate = 3000L,
+                                    finishedReadingDate = 4000L,
+                                ),
+                            ),
+                    ),
+            )
+
+        assertEquals(
+            listOf(
+                track(
+                    title = "new",
+                    score = 6f,
+                    startedReadingDate = 3000L,
+                    finishedReadingDate = 4000L,
+                ),
+            ),
+            rows.combineRows().tracking,
+        )
     }
 
     @Test

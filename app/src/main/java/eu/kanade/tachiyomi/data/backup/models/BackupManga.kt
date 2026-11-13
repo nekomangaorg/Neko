@@ -175,7 +175,8 @@ private fun List<BackupChapter>.combineProgress(): BackupChapter {
 
 /**
  * A chapter holds one history entry, so the entries of one chapter become one with the latest read
- * and the longest reading time.
+ * and the longest reading time, the same values `RestoreHelper.restoreHistoryForManga` keeps when
+ * the chapter already has history.
  */
 private fun List<BackupHistory>.combineReads(): BackupHistory =
     first().copy(lastRead = maxOf { it.lastRead }, readDuration = maxOf { it.readDuration })
@@ -183,10 +184,22 @@ private fun List<BackupHistory>.combineReads(): BackupHistory =
 /**
  * A manga holds one track per service, so the tracks of one service become one: the track of the
  * row that gives the details, or the first one when that row has none, with the furthest chapter
- * any row reached.
+ * any row reached. A score or reading date left unset (0) on that track comes from the first track
+ * that has one.
  */
 private fun List<BackupTracking>.combineTracking(base: BackupManga): BackupTracking {
     val service = first().syncId
     val details = base.tracking.firstOrNull { it.syncId == service } ?: first()
-    return details.copy(lastChapterRead = maxOf { it.lastChapterRead })
+    return details.copy(
+        lastChapterRead = maxOf { it.lastChapterRead },
+        score = details.score.takeIf { it > 0F } ?: map { it.score }.firstOrNull { it > 0F } ?: 0F,
+        startedReadingDate =
+            details.startedReadingDate.takeIf { it > 0L }
+                ?: map { it.startedReadingDate }.firstOrNull { it > 0L }
+                ?: 0L,
+        finishedReadingDate =
+            details.finishedReadingDate.takeIf { it > 0L }
+                ?: map { it.finishedReadingDate }.firstOrNull { it > 0L }
+                ?: 0L,
+    )
 }
