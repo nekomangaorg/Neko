@@ -88,14 +88,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
             val followStatus = FollowStatus.fromInt(track.status)
 
             if (followStatus != FollowStatus.UNFOLLOWED) {
-                if (
-                    !mdex.updateFollowStatus(
-                        MdUtil.getMangaUUID(track.tracking_url),
-                        followStatus,
-                    )
-                ) {
-                    throw MdListStatusUpdateFailed()
-                }
+                sendFollowStatus(track, followStatus)
                 mangaDb.follow_status = followStatus
                 mangaRepository.updateManga(mangaDb)
                 mdex.updateReadingProgress(track)
@@ -117,14 +110,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
      */
     suspend fun unfollow(track: Track): Track {
         return withContext(Dispatchers.IO) {
-            if (
-                !mdex.updateFollowStatus(
-                    MdUtil.getMangaUUID(track.tracking_url),
-                    FollowStatus.UNFOLLOWED,
-                )
-            ) {
-                throw MdListStatusUpdateFailed()
-            }
+            sendFollowStatus(track, FollowStatus.UNFOLLOWED)
             track.status = FollowStatus.UNFOLLOWED.int
             // update also clears last_chapter_read for an Unfollowed track
             track.last_chapter_read = 0f
@@ -132,6 +118,23 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
             track
         }
     }
+
+    /**
+     * Sends [status] to MangaDex and throws [MdListStatusUpdateFailed] when MangaDex does not save
+     * it. For a title still on a numeric v3 id it sends nothing, because MangaDex rejects those
+     * ids, and the caller saves the status in Neko only.
+     */
+    private suspend fun sendFollowStatus(track: Track, status: FollowStatus) {
+        if (isV3Id(track)) {
+            TimberKt.i { "v3 tracking ${track.tracking_url} not sent to MangaDex" }
+            return
+        }
+        if (!mdex.updateFollowStatus(MdUtil.getMangaUUID(track.tracking_url), status)) {
+            throw MdListStatusUpdateFailed()
+        }
+    }
+
+    private fun isV3Id(track: Track) = MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()
 
     override fun isCompletedStatus(index: Int) =
         getStatusList()[index] == FollowStatus.COMPLETED.int
@@ -143,7 +146,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun planningStatus() = FollowStatus.PLAN_TO_READ.int
 
     override suspend fun bind(track: Track): Track {
-        if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
+        if (isV3Id(track)) {
             TimberKt.i { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }
@@ -160,7 +163,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun refresh(track: Track): Track {
-        if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
+        if (isV3Id(track)) {
             TimberKt.i { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }

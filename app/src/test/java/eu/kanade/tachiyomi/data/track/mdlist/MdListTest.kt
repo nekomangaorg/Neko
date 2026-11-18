@@ -211,6 +211,57 @@ class MdListTest {
             coVerify(exactly = 0) { trackRepository.insertTrack(any()) }
         }
 
+    @Test
+    fun `given a v3 id when mdList update is called then the status is saved without a send`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns false
+            val track = mdListTrack(FollowStatus.ON_HOLD).apply { tracking_url = V3_TRACKING_URL }
+
+            mdList.update(
+                track,
+                setToRead = false,
+                manga = MangaImpl().apply { id = 1L },
+                chapters = emptyList(),
+            )
+
+            coVerify(exactly = 0) { mangaDex.updateFollowStatus(any(), any()) }
+            coVerify { trackRepository.insertTrack(track) }
+        }
+
+    @Test
+    fun `given a v3 id when mdList unfollow is called then Unfollowed is saved without a send`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns false
+            val saved = mutableListOf<Pair<Int, Float>>()
+            coEvery { trackRepository.insertTrack(any()) } answers
+                {
+                    val track = firstArg<Track>()
+                    saved += track.status to track.last_chapter_read
+                    1L
+                }
+
+            mdList.unfollow(
+                mdListTrack(FollowStatus.READING).apply {
+                    tracking_url = V3_TRACKING_URL
+                    last_chapter_read = 5f
+                },
+            )
+
+            coVerify(exactly = 0) { mangaDex.updateFollowStatus(any(), any()) }
+            assertEquals(listOf(FollowStatus.UNFOLLOWED.int to 0f), saved)
+        }
+
+    @Test
+    fun `given a v3 id when mdList bind and refresh are called then nothing is fetched`() =
+        runTest {
+            mdList.bind(mdListTrack(FollowStatus.READING).apply { tracking_url = V3_TRACKING_URL })
+            mdList.refresh(
+                mdListTrack(FollowStatus.READING).apply { tracking_url = V3_TRACKING_URL },
+            )
+
+            coVerify(exactly = 0) { mangaDex.fetchTrackingInfo(any()) }
+        }
+
     private fun mdListTrack(status: FollowStatus) =
         Track.create(TrackManager.MDLIST).apply {
             manga_id = 1L
@@ -221,5 +272,6 @@ class MdListTest {
     private companion object {
         const val MANGA_UUID = "00000000-0000-0000-0000-000000000001"
         const val TRACKING_URL = "https://mangadex.org/title/$MANGA_UUID"
+        const val V3_TRACKING_URL = "https://mangadex.org/manga/12345"
     }
 }
