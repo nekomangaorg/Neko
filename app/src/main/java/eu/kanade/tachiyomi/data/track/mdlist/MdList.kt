@@ -89,14 +89,15 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
             if (followStatus != FollowStatus.UNFOLLOWED) {
                 if (
-                    mdex.updateFollowStatus(
+                    !mdex.updateFollowStatus(
                         MdUtil.getMangaUUID(track.tracking_url),
                         followStatus,
                     )
                 ) {
-                    mangaDb.follow_status = followStatus
-                    mangaRepository.updateManga(mangaDb)
+                    throw MdListStatusUpdateFailed()
                 }
+                mangaDb.follow_status = followStatus
+                mangaRepository.updateManga(mangaDb)
                 mdex.updateReadingProgress(track)
             } else if (track.last_chapter_read != 0f) {
                 // When followStatus has been changed to unfollowed 0 out read chapters since
@@ -125,7 +126,14 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
         track.copyPersonalFrom(remoteTrack)
-        return update(track)
+        return try {
+            update(track)
+        } catch (_: MdListStatusUpdateFailed) {
+            // MangaDex still has the fetched status, so save that one
+            track.status = remoteTrack.status
+            trackRepository.insertTrack(track)
+            track
+        }
     }
 
     override suspend fun refresh(track: Track): Track {
@@ -179,3 +187,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     fun isUnfollowed(track: Track) = track.status == 0
 }
+
+/** MangaDex did not save the status [MdList.update] sent, and update saved nothing. */
+class MdListStatusUpdateFailed : Exception("MangaDex did not save the reading status")

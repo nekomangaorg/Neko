@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.mdlist.MdListStatusUpdateFailed
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
@@ -208,7 +209,13 @@ class FollowsSyncProcessor {
                             if (!followed) return@withIOContext
 
                             mdListTrack.status = FollowStatus.READING.int
-                            val returnedTracker = trackManager.mdList.update(mdListTrack)
+                            val returnedTracker =
+                                try {
+                                    trackManager.mdList.update(mdListTrack)
+                                } catch (_: MdListStatusUpdateFailed) {
+                                    // updateFollowStatus above already set Reading on MangaDex
+                                    mdListTrack.apply { status = FollowStatus.READING.int }
+                                }
                             trackRepository.insertTrack(returnedTracker)
                             countNew.incrementAndGet()
                         }
