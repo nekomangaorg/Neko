@@ -110,6 +110,29 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
+    /**
+     * Unfollows the title on MangaDex and saves the track as Unfollowed. [update] sends nothing for
+     * Unfollowed. [bind] and chapter reads call [update] with Unfollowed for a title MangaDex
+     * follows without a reading status, and sending it from there would drop the follow.
+     */
+    suspend fun unfollow(track: Track): Track {
+        return withContext(Dispatchers.IO) {
+            if (
+                !mdex.updateFollowStatus(
+                    MdUtil.getMangaUUID(track.tracking_url),
+                    FollowStatus.UNFOLLOWED,
+                )
+            ) {
+                throw MdListStatusUpdateFailed()
+            }
+            track.status = FollowStatus.UNFOLLOWED.int
+            // update also clears last_chapter_read for an Unfollowed track
+            track.last_chapter_read = 0f
+            trackRepository.insertTrack(track)
+            track
+        }
+    }
+
     override fun isCompletedStatus(index: Int) =
         getStatusList()[index] == FollowStatus.COMPLETED.int
 
@@ -188,5 +211,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     fun isUnfollowed(track: Track) = track.status == 0
 }
 
-/** MangaDex did not save the status [MdList.update] sent, and update saved nothing. */
+/**
+ * MangaDex did not save the status that [MdList.update] or [MdList.unfollow] sent, and the method
+ * saved nothing.
+ */
 class MdListStatusUpdateFailed : Exception("MangaDex did not save the reading status")

@@ -175,6 +175,42 @@ class MdListTest {
             assertEquals(listOf(FollowStatus.READING.int), savedStatuses)
         }
 
+    @Test
+    fun `given MangaDex unfollows the title when mdList unfollow is called then the track is saved as unfollowed`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns true
+            val saved = mutableListOf<Pair<Int, Float>>()
+            coEvery { trackRepository.insertTrack(any()) } answers
+                {
+                    val track = firstArg<Track>()
+                    saved += track.status to track.last_chapter_read
+                    1L
+                }
+
+            val unfollowed =
+                mdList.unfollow(mdListTrack(FollowStatus.READING).apply { last_chapter_read = 5f })
+
+            coVerify { mangaDex.updateFollowStatus(MANGA_UUID, FollowStatus.UNFOLLOWED) }
+            assertEquals(listOf(FollowStatus.UNFOLLOWED.int to 0f), saved)
+            assertEquals(FollowStatus.UNFOLLOWED.int, unfollowed.status)
+        }
+
+    @Test
+    fun `given MangaDex refuses the unfollow when mdList unfollow is called then nothing is saved`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns false
+
+            var caught = false
+            try {
+                mdList.unfollow(mdListTrack(FollowStatus.READING))
+            } catch (_: MdListStatusUpdateFailed) {
+                caught = true
+            }
+
+            assertTrue("Expected MdListStatusUpdateFailed to be thrown", caught)
+            coVerify(exactly = 0) { trackRepository.insertTrack(any()) }
+        }
+
     private fun mdListTrack(status: FollowStatus) =
         Track.create(TrackManager.MDLIST).apply {
             manga_id = 1L
@@ -183,6 +219,7 @@ class MdListTest {
         }
 
     private companion object {
-        const val TRACKING_URL = "https://mangadex.org/title/00000000-0000-0000-0000-000000000001"
+        const val MANGA_UUID = "00000000-0000-0000-0000-000000000001"
+        const val TRACKING_URL = "https://mangadex.org/title/$MANGA_UUID"
     }
 }
