@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.io.File
 import java.lang.ref.WeakReference
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -152,7 +153,15 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
 
             try {
                 // Download the new update.
-                val call = network.client.newCachelessCallWithProgress(GET(url), progressListener)
+                // The shared client's one-minute call timeout spans the whole response body, which
+                // cuts off this download of about 40 MB below about 5 Mbit/s. The read timeout
+                // still ends a stalled download.
+                val call =
+                    network.client
+                        .newBuilder()
+                        .callTimeout(0, TimeUnit.MILLISECONDS)
+                        .build()
+                        .newCachelessCallWithProgress(GET(url), progressListener)
                 runningCall = call
                 val response = call.await()
                 if (isStopped) {
