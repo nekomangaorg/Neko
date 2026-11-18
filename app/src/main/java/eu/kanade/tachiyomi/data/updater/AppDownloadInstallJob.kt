@@ -185,9 +185,12 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
                 }
             } catch (error: Exception) {
                 TimberKt.e(error)
+                // stop() cancels the call before WorkManager marks this job stopped. The call has
+                // no call timeout, so only a stopping job cancels it.
                 if (
                     error is CancellationException ||
                         isStopped ||
+                        runningCall?.isCanceled() == true ||
                         (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
                 ) {
                     notifier.cancel()

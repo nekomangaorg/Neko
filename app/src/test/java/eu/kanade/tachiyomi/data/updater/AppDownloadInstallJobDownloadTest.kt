@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.Data
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -15,6 +16,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkConstructor
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkAll
@@ -23,8 +25,11 @@ import java.io.Closeable
 import java.io.File
 import java.net.InetAddress
 import java.net.ServerSocket
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.After
@@ -98,6 +103,34 @@ class AppDownloadInstallJobDownloadTest {
             verify(exactly = 1) { anyConstructed<AppUpdateNotifier>().onDownloadFinished(any()) }
             assertEquals(APK_SIZE.toLong(), File(folder.root, "update.apk").length())
             assertTrue("the download ended within the call timeout", elapsedMs > CALL_TIMEOUT_MS)
+        }
+
+    @Test
+    fun `given stop cancels the download when doWork then no download error is shown`() =
+        runBlocking {
+            val server = SlowApkServer(APK_SIZE, BODY_DURATION_MS).also { server = it }
+            val downloading = CountDownLatch(1)
+            every { anyConstructed<AppUpdateNotifier>().onProgressChange(any()) } answers
+                {
+                    downloading.countDown()
+                }
+            mockkObject(WorkManager.Companion)
+            every { WorkManager.getInstance(any<Context>()) } returns mockk(relaxed = true)
+
+            val download =
+                async(Dispatchers.IO) {
+                    AppDownloadInstallJob(context, workerParams(server.url)).doWork()
+                }
+            assertTrue("the download did not start", downloading.await(5, TimeUnit.SECONDS))
+            // The Cancel action on the download notification calls stop(), which cancels the call
+            // before WorkManager stops the job
+            AppDownloadInstallJob.stop(context)
+            download.await()
+
+            verify(exactly = 0) {
+                anyConstructed<AppUpdateNotifier>().onDownloadError(any(), any())
+            }
+            verify { anyConstructed<AppUpdateNotifier>().cancel() }
         }
 
     private fun workerParams(url: String) =
