@@ -25,7 +25,6 @@ import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -124,7 +123,7 @@ class FollowsHandler {
             val unfollow =
                 followStatus == FollowStatus.UNFOLLOWED || followStatus == FollowStatus.DROPPED
 
-            val followResponse = withIOContext {
+            val followResponse =
                 if (unfollow) {
                     authService.unfollowManga(mangaId).onFailure {
                         this.log("trying to unfollow manga $mangaId")
@@ -134,7 +133,6 @@ class FollowsHandler {
                         this.log("trying to follow manga $mangaId")
                     }
                 }
-            }
 
             // The API docs list a 404 for unfollow without saying when it happens, so after a
             // failed request the follow list decides whether the status is sent
@@ -157,7 +155,8 @@ class FollowsHandler {
 
     /**
      * Whether MangaDex's follow list has the manga when [followed] is true, or lacks it when false.
-     * A failed check counts as no match.
+     * A failed check counts as no match. The API docs (https://api.mangadex.org/docs/swagger.html)
+     * describe a 404 from GET /user/follows/manga/{id} as "The User doesn't follow that Manga".
      */
     private suspend fun followListMatches(mangaId: String, followed: Boolean): Boolean {
         val response = authService.userFollowsManga(mangaId)
