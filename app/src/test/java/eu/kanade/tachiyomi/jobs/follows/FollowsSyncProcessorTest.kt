@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
+import eu.kanade.tachiyomi.data.track.mdlist.MdListStatusUpdateFailed
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
@@ -317,6 +318,27 @@ class FollowsSyncProcessorTest {
         assertEquals(1, pushed)
         assertEquals(
             mapOf(1L to FollowStatus.UNFOLLOWED.int, 2L to FollowStatus.READING.int),
+            trackTable,
+        )
+    }
+
+    @Test
+    fun `push keeps a followed title as reading when sending its status again fails`() = runTest {
+        table += row(id = 1, source = MANGADEX_SOURCE, favorite = true)
+        table += row(id = 2, source = MANGADEX_SOURCE, favorite = true, url = OTHER_URL)
+        coEvery { followsHandler.updateFollowStatus(any(), any()) } returns true
+        // MdList.update can complete the track before the send that fails
+        coEvery { mdListService.update(match { it.manga_id == 1L }, any(), any(), any()) } answers
+            {
+                firstArg<Track>().status = FollowStatus.COMPLETED.int
+                throw MdListStatusUpdateFailed()
+            }
+
+        val pushed = push("1,2")
+
+        assertEquals(2, pushed)
+        assertEquals(
+            mapOf(1L to FollowStatus.READING.int, 2L to FollowStatus.READING.int),
             trackTable,
         )
     }

@@ -1,15 +1,23 @@
 package eu.kanade.tachiyomi.data.track.mdlist
 
 import android.content.Context
+import android.text.TextUtils
+import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import java.io.IOException
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -56,6 +64,13 @@ class MdListTest {
 
         coEvery { sourceManager.mangaDex } returns mangaDex
 
+        // bind skips v3 ids with TextUtils.isDigitsOnly, which the android.jar stub does not run.
+        mockkStatic(TextUtils::class)
+        every { TextUtils.isDigitsOnly(any()) } answers
+            {
+                firstArg<CharSequence>().all(Char::isDigit)
+            }
+
         Injekt.addSingleton(preferences)
         Injekt.addSingleton(networkService)
         Injekt.addSingleton(chapterRepository)
@@ -70,6 +85,7 @@ class MdListTest {
 
     @After
     fun tearDown() {
+        unmockkStatic(TextUtils::class)
         Injekt = InjektScope(DefaultRegistrar())
     }
 
@@ -96,4 +112,189 @@ class MdListTest {
             }
             assertTrue("Expected IOException to be thrown", caught)
         }
+
+    @Test
+    fun `given MangaDex saves the status when mdList update is called then the track and manga are saved`() =
+        runTest {
+            val track = mdListTrack(FollowStatus.ON_HOLD)
+            val manga = MangaImpl().apply { id = 1L }
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns true
+
+            mdList.update(track, setToRead = false, manga = manga, chapters = emptyList())
+
+            assertEquals(FollowStatus.ON_HOLD, manga.follow_status)
+            coVerify { mangaRepository.updateManga(manga) }
+            coVerify { trackRepository.insertTrack(track) }
+        }
+
+    @Test
+    fun `given MangaDex refuses the status when mdList update is called then nothing is saved`() =
+        runTest {
+            val track = mdListTrack(FollowStatus.ON_HOLD)
+            val manga = MangaImpl().apply { id = 1L }
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns false
+
+            var caught = false
+            try {
+                mdList.update(track, setToRead = false, manga = manga, chapters = emptyList())
+            } catch (_: MdListStatusUpdateFailed) {
+                caught = true
+            }
+
+            assertTrue("Expected MdListStatusUpdateFailed to be thrown", caught)
+            coVerify(exactly = 0) { mangaRepository.updateManga(any()) }
+            coVerify(exactly = 0) { trackRepository.insertTrack(any()) }
+        }
+
+    @Test
+    fun `given MangaDex refuses the completed status when mdList bind is called then its own status is saved`() =
+        runTest {
+            coEvery { mangaDex.fetchTrackingInfo(TRACKING_URL) } returns
+                mdListTrack(FollowStatus.READING)
+            // Every chapter is read and the last one is marked [END], so update completes the track
+            coEvery { mangaRepository.getMangaById(1L) } returns MangaImpl().apply { id = 1L }
+            coEvery { chapterRepository.getChaptersForManga(1L) } returns
+                listOf(
+                    Chapter.create().apply {
+                        name = "Chapter 10 [END]"
+                        read = true
+                    },
+                )
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns false
+            val savedStatuses = mutableListOf<Int>()
+            coEvery { trackRepository.insertTrack(any()) } answers
+                {
+                    savedStatuses += firstArg<Track>().status
+                    1L
+                }
+
+            val bound = mdList.bind(mdListTrack(FollowStatus.UNFOLLOWED))
+
+            coVerify { mangaDex.updateFollowStatus(any(), FollowStatus.COMPLETED) }
+            assertEquals(FollowStatus.READING.int, bound.status)
+            assertEquals(listOf(FollowStatus.READING.int), savedStatuses)
+        }
+
+    @Test
+    fun `given MangaDex unfollows the title when mdList unfollow is called then the track is saved as unfollowed`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns true
+            val saved = mutableListOf<Pair<Int, Float>>()
+            coEvery { trackRepository.insertTrack(any()) } answers
+                {
+                    val track = firstArg<Track>()
+                    saved += track.status to track.last_chapter_read
+                    1L
+                }
+
+            val unfollowed =
+                mdList.unfollow(mdListTrack(FollowStatus.READING).apply { last_chapter_read = 5f })
+
+            coVerify { mangaDex.updateFollowStatus(MANGA_UUID, FollowStatus.UNFOLLOWED) }
+            assertEquals(listOf(FollowStatus.UNFOLLOWED.int to 0f), saved)
+            assertEquals(FollowStatus.UNFOLLOWED.int, unfollowed.status)
+        }
+
+    @Test
+    fun `given MangaDex unfollows the title when mdList unfollow is called then the manga is saved as unfollowed`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns true
+            val manga =
+                MangaImpl().apply {
+                    id = 1L
+                    follow_status = FollowStatus.READING
+                }
+            coEvery { mangaRepository.getMangaById(1L) } returns manga
+
+            mdList.unfollow(mdListTrack(FollowStatus.READING))
+
+            assertEquals(FollowStatus.UNFOLLOWED, manga.follow_status)
+            coVerify { mangaRepository.updateManga(manga) }
+        }
+
+    @Test
+    fun `given MangaDex refuses the unfollow when mdList unfollow is called then nothing is saved`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns false
+            coEvery { mangaRepository.getMangaById(1L) } returns
+                MangaImpl().apply {
+                    id = 1L
+                    follow_status = FollowStatus.READING
+                }
+
+            var caught = false
+            try {
+                mdList.unfollow(mdListTrack(FollowStatus.READING))
+            } catch (_: MdListStatusUpdateFailed) {
+                caught = true
+            }
+
+            assertTrue("Expected MdListStatusUpdateFailed to be thrown", caught)
+            coVerify(exactly = 0) { trackRepository.insertTrack(any()) }
+            coVerify(exactly = 0) { mangaRepository.updateManga(any()) }
+        }
+
+    @Test
+    fun `given a v3 id when mdList update is called then the status is saved without a send`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns false
+            val track = mdListTrack(FollowStatus.ON_HOLD).apply { tracking_url = V3_TRACKING_URL }
+
+            mdList.update(
+                track,
+                setToRead = false,
+                manga = MangaImpl().apply { id = 1L },
+                chapters = emptyList(),
+            )
+
+            coVerify(exactly = 0) { mangaDex.updateFollowStatus(any(), any()) }
+            coVerify { trackRepository.insertTrack(track) }
+        }
+
+    @Test
+    fun `given a v3 id when mdList unfollow is called then Unfollowed is saved without a send`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns false
+            val saved = mutableListOf<Pair<Int, Float>>()
+            coEvery { trackRepository.insertTrack(any()) } answers
+                {
+                    val track = firstArg<Track>()
+                    saved += track.status to track.last_chapter_read
+                    1L
+                }
+
+            mdList.unfollow(
+                mdListTrack(FollowStatus.READING).apply {
+                    tracking_url = V3_TRACKING_URL
+                    last_chapter_read = 5f
+                },
+            )
+
+            coVerify(exactly = 0) { mangaDex.updateFollowStatus(any(), any()) }
+            assertEquals(listOf(FollowStatus.UNFOLLOWED.int to 0f), saved)
+        }
+
+    @Test
+    fun `given a v3 id when mdList bind and refresh are called then nothing is fetched`() =
+        runTest {
+            mdList.bind(mdListTrack(FollowStatus.READING).apply { tracking_url = V3_TRACKING_URL })
+            mdList.refresh(
+                mdListTrack(FollowStatus.READING).apply { tracking_url = V3_TRACKING_URL },
+            )
+
+            coVerify(exactly = 0) { mangaDex.fetchTrackingInfo(any()) }
+        }
+
+    private fun mdListTrack(status: FollowStatus) =
+        Track.create(TrackManager.MDLIST).apply {
+            manga_id = 1L
+            tracking_url = TRACKING_URL
+            this.status = status.int
+        }
+
+    private companion object {
+        const val MANGA_UUID = "00000000-0000-0000-0000-000000000001"
+        const val TRACKING_URL = "https://mangadex.org/title/$MANGA_UUID"
+        const val V3_TRACKING_URL = "https://mangadex.org/manga/12345"
+    }
 }
