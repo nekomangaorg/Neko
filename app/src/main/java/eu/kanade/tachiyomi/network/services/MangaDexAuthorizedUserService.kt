@@ -30,6 +30,10 @@ interface MangaDexAuthorizedUserService {
     suspend fun userFollowList(@Query("offset") offset: Int): ApiResponse<MangaListDto>
 
     @Headers("Cache-Control: no-cache")
+    @GET("${MdConstants.Api.userFollows}/{id}")
+    suspend fun userFollowsManga(@Path("id") mangaId: String): ApiResponse<ResultDto>
+
+    @Headers("Cache-Control: no-cache")
     @GET("${MdConstants.Api.manga}/{id}/status")
     suspend fun readingStatusForManga(
         @Path("id") mangaId: String,
