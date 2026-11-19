@@ -58,8 +58,20 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         throw Exception("Not Used")
     }
 
+    /**
+     * Sends the score on [track] to MangaDex and saves the track. Throws when MangaDex does not
+     * save the score, and saves nothing then. A title still on a numeric v3 id gets the score in
+     * Neko only, because MangaDex rejects those ids.
+     */
     suspend fun updateScore(track: Track) {
-        withContext(Dispatchers.IO) { mdex.updateRating(track) }
+        withContext(Dispatchers.IO) {
+            if (isV3Id(track)) {
+                TimberKt.i { "v3 tracking ${track.tracking_url} score not sent to MangaDex" }
+            } else if (!mdex.updateRating(track)) {
+                throw Exception("MangaDex did not save the score")
+            }
+            trackRepository.insertTrack(track)
+        }
     }
 
     override suspend fun update(

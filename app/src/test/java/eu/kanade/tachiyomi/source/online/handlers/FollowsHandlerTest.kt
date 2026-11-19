@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.skydoves.sandwich.ApiResponse
+import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
@@ -121,6 +123,40 @@ class FollowsHandlerTest {
 
         assertFalse(FollowsHandler().updateFollowStatus(MANGA_ID, FollowStatus.READING))
     }
+
+    @Test
+    fun `removing a score answered with 404 counts as removed`() = runTest {
+        coEvery { authService.removeRating(MANGA_ID) } returns httpError(404)
+
+        assertTrue(FollowsHandler().updateRating(track(score = 0f)))
+    }
+
+    @Test
+    fun `a failed score removal returns false`() = runTest {
+        coEvery { authService.removeRating(MANGA_ID) } returns httpError(500)
+
+        assertFalse(FollowsHandler().updateRating(track(score = 0f)))
+    }
+
+    @Test
+    fun `a removed score returns true`() = runTest {
+        coEvery { authService.removeRating(MANGA_ID) } returns ok()
+
+        assertTrue(FollowsHandler().updateRating(track(score = 0f)))
+    }
+
+    @Test
+    fun `a score answered with 404 returns false`() = runTest {
+        coEvery { authService.updateRating(MANGA_ID, any()) } returns httpError(404)
+
+        assertFalse(FollowsHandler().updateRating(track(score = 7f)))
+    }
+
+    private fun track(score: Float) =
+        Track.create(TrackManager.MDLIST).apply {
+            tracking_url = "https://mangadex.org/title/$MANGA_ID"
+            this.score = score
+        }
 
     private fun ok(): ApiResponse<ResultDto> = ApiResponse.Success(ResultDto("ok"))
 

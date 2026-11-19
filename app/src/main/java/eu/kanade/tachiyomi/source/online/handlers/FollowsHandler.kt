@@ -174,17 +174,28 @@ class FollowsHandler {
         return true
     }
 
+    /**
+     * Sends the score on [track] to MangaDex, and removes the rating for a score of 0. Returns true
+     * only when MangaDex ends up with the score. The API docs
+     * (https://api.mangadex.org/docs/swagger.html) list a 404 for DELETE /rating/{mangaId} without
+     * saying when it happens. Whether the title or its rating is missing, the title has no rating
+     * on MangaDex, so a 404 on removal counts as removed.
+     */
     suspend fun updateRating(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
             val mangaID = getMangaUUID(track.tracking_url)
+            val removing = track.score == 0f
             val response =
-                if (track.score == 0f) {
+                if (removing) {
                     authService.removeRating(mangaID)
                 } else {
                     authService.updateRating(mangaID, RatingDto(track.score.toInt()))
                 }
 
-            response.getOrNull()?.result == "ok"
+            response.getOrNull()?.result == "ok" ||
+                (removing &&
+                    response is ApiResponse.Failure.Error &&
+                    response.statusCode.code == 404)
         }
     }
 
