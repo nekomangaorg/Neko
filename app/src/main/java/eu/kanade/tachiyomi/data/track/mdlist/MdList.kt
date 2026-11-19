@@ -104,9 +104,10 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     /**
-     * Unfollows the title on MangaDex and saves the track as Unfollowed. [update] sends nothing for
-     * Unfollowed. [bind] and chapter reads call [update] with Unfollowed for a title MangaDex
-     * follows without a reading status, and sending it from there would drop the follow.
+     * Unfollows the title on MangaDex and saves the track and the manga as Unfollowed. [update]
+     * sends nothing for Unfollowed. [bind] and chapter reads call [update] with Unfollowed for a
+     * title MangaDex follows without a reading status, and sending it from there would drop the
+     * follow.
      */
     suspend fun unfollow(track: Track): Track {
         return withContext(Dispatchers.IO) {
@@ -115,6 +116,11 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
             // update also clears last_chapter_read for an Unfollowed track
             track.last_chapter_read = 0f
             trackRepository.insertTrack(track)
+            val mangaDb = mangaRepository.getMangaById(track.manga_id)
+            if (mangaDb != null && mangaDb.follow_status != FollowStatus.UNFOLLOWED) {
+                mangaDb.follow_status = FollowStatus.UNFOLLOWED
+                mangaRepository.updateManga(mangaDb)
+            }
             track
         }
     }

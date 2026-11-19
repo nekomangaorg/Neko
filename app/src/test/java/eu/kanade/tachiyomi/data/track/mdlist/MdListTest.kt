@@ -196,9 +196,31 @@ class MdListTest {
         }
 
     @Test
+    fun `given MangaDex unfollows the title when mdList unfollow is called then the manga is saved as unfollowed`() =
+        runTest {
+            coEvery { mangaDex.updateFollowStatus(any(), any()) } returns true
+            val manga =
+                MangaImpl().apply {
+                    id = 1L
+                    follow_status = FollowStatus.READING
+                }
+            coEvery { mangaRepository.getMangaById(1L) } returns manga
+
+            mdList.unfollow(mdListTrack(FollowStatus.READING))
+
+            assertEquals(FollowStatus.UNFOLLOWED, manga.follow_status)
+            coVerify { mangaRepository.updateManga(manga) }
+        }
+
+    @Test
     fun `given MangaDex refuses the unfollow when mdList unfollow is called then nothing is saved`() =
         runTest {
             coEvery { mangaDex.updateFollowStatus(any(), any()) } returns false
+            coEvery { mangaRepository.getMangaById(1L) } returns
+                MangaImpl().apply {
+                    id = 1L
+                    follow_status = FollowStatus.READING
+                }
 
             var caught = false
             try {
@@ -209,6 +231,7 @@ class MdListTest {
 
             assertTrue("Expected MdListStatusUpdateFailed to be thrown", caught)
             coVerify(exactly = 0) { trackRepository.insertTrack(any()) }
+            coVerify(exactly = 0) { mangaRepository.updateManga(any()) }
         }
 
     @Test
