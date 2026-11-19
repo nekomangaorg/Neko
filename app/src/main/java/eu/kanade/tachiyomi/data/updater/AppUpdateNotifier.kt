@@ -91,6 +91,9 @@ internal class AppUpdateNotifier(private val context: Context) {
      * @param title tile of notification.
      */
     fun onDownloadStarted(): NotificationCompat.Builder {
+        // Clear the last download's result. Its error is out of date once a retry starts, and its
+        // Install action opens the APK this download overwrites.
+        cancelInstallNotification()
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.app_name))
             setContentText(context.getString(R.string.downloading))
@@ -235,12 +238,14 @@ internal class AppUpdateNotifier(private val context: Context) {
                 context.getString(R.string.cancel),
                 NotificationReceiver.dismissNotificationPendingBroadcast(
                     context,
-                    Notifications.ID_UPDATER,
+                    Notifications.ID_INSTALL,
                 ),
             )
             addReleasePageAction()
         }
-        notificationBuilder.show(Notifications.ID_UPDATER)
+        // WorkManager cancels ID_UPDATER, the download job's foreground notification, when the job
+        // ends
+        notificationBuilder.show(Notifications.ID_INSTALL)
     }
 
     fun onInstallError(uri: Uri) {
