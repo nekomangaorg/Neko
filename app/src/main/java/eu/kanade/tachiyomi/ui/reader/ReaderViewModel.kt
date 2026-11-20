@@ -1065,7 +1065,6 @@ constructor(
      * mode isn't on or has at least 1 tracker
      */
     private suspend fun saveChapterProgress(readerChapter: ReaderChapter) {
-        readerChapter.requestedPage = readerChapter.chapter.last_page_read
         chapterRepository.getChapterById(readerChapter.chapter.id!!)?.let { dbChapter ->
             readerChapter.chapter.bookmark = dbChapter.bookmark
         }
