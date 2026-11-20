@@ -156,6 +156,8 @@ internal class AppUpdateNotifier(private val context: Context) {
             setContentText(context.getString(R.string.download_complete))
             setSmallIcon(android.R.drawable.stat_sys_download_done)
             setAutoCancel(false)
+            // onDownloadStarted set this shared builder ongoing
+            setOngoing(false)
             setOnlyAlertOnce(false)
             setProgress(0, 0, false)
             // Install action
@@ -223,6 +225,8 @@ internal class AppUpdateNotifier(private val context: Context) {
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setOnlyAlertOnce(false)
             setAutoCancel(false)
+            // onDownloadStarted set this shared builder ongoing
+            setOngoing(false)
             setProgress(0, 0, false)
             color = ContextCompat.getColor(context, R.color.colorSecondary)
             clearActions()
