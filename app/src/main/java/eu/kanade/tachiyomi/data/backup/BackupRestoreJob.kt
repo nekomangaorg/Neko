@@ -61,7 +61,7 @@ class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) :
     }
 
     companion object {
-        private const val TAG = "BackupRestorer"
+        const val TAG = "BackupRestorer"
 
         fun start(context: Context, uri: Uri) {
             val request =

@@ -75,7 +75,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
     }
 
     companion object {
-        private const val TAG = "DelayedTrackingUpdate"
+        const val TAG = "DelayedTrackingUpdate"
 
         fun setupTask(context: Context) {
             val constraints =

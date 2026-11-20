@@ -142,6 +142,13 @@
         <item quantity="one">%d duplicate category removed</item>
         <item quantity="other">%d duplicate categories removed</item>
     </plurals>
+    <string name="library_repair_running">Repair library is running. Try again when it finishes.</string>
+    <string name="library_repair_blocked">Repair library can\'t start while these run: %1$s</string>
+    <string name="library_repair_work_update">library update</string>
+    <string name="library_repair_work_restore">restore</string>
+    <string name="library_repair_work_sync">MangaDex sync</string>
+    <string name="library_repair_work_tracking">tracking sync</string>
+    <string name="library_repair_work_downloads">downloads</string>
     <string name="long_press_category">Press and hold to edit a category</string>
     <string name="jump_to_category">Jump to category</string>
 

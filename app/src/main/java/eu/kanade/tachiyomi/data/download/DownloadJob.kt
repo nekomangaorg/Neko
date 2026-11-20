@@ -127,7 +127,7 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
     }
 
     companion object {
-        private const val TAG = "Downloader"
+        const val TAG = "Downloader"
 
         fun start(context: Context) {
             val request =
