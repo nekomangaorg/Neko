@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import io.mockk.coEvery
@@ -58,10 +59,12 @@ class DownloaderQueueChaptersTest {
     @Volatile private var onSaveQueue: () -> Unit = {}
 
     private val manga = Manga.create("/title/1", "Manga").apply { id = 1L }
+    private val gate = LibraryRepairGate(mockk(relaxed = true), showToast = {})
 
     @Before
     fun setup() {
         Injekt = InjektScope(DefaultRegistrar())
+        Injekt.addSingleton(gate)
         Injekt.addSingleton<Json>(Json)
         Injekt.addSingleton(mockk<ChapterItemFilter>())
         Injekt.addSingleton(mockk<PreferencesHelper>())
@@ -129,6 +132,16 @@ class DownloaderQueueChaptersTest {
         downloader.pause()
         unmockkAll()
         Injekt = InjektScope(DefaultRegistrar())
+    }
+
+    @Test
+    fun `given the repair runs when queueChapters then nothing is queued or started`() {
+        gate.tryAcquire()
+
+        downloader.queueChapters(manga, listOf(chapter(1)), autoStart = true)
+
+        assertTrue(downloader.queueState.value.isEmpty())
+        verify(exactly = 0) { DownloadJob.start(any()) }
     }
 
     @Test

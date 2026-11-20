@@ -68,6 +68,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.activity.BaseMainActivity
@@ -201,6 +202,7 @@ class ReaderActivity : BaseMainActivity() {
     val networkPreferences: NetworkPreferences by injectLazy()
     val libraryPreferences: LibraryPreferences by injectLazy()
     val mangaDetailsPreferences: MangaDetailsPreferences by injectLazy()
+    private val libraryRepairGate: LibraryRepairGate by injectLazy()
 
     val viewModel by viewModels<ReaderViewModel>()
 
@@ -1269,6 +1271,11 @@ class ReaderActivity : BaseMainActivity() {
 
         backPressedCallback = onBackPressedDispatcher.addCallback(this) { backCallback() }
         if (viewModel.needsInit()) {
+            if (libraryRepairGate.isRunning) {
+                toast(R.string.library_repair_running)
+                finish()
+                return
+            }
             fromUrl = handleIntentAction(intent)
             if (!fromUrl) {
                 val manga = intent.extras!!.getLong("manga", -1)

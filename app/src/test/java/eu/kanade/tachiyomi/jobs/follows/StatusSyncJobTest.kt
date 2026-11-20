@@ -14,6 +14,7 @@ import androidx.work.WorkerParameters
 import com.github.michaelbull.result.Ok
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -65,6 +66,7 @@ class StatusSyncJobTest {
     private val context: Context = mockk(relaxed = true)
     private val workManager: WorkManager = mockk()
     private val queuedRequest = slot<OneTimeWorkRequest>()
+    private val gate = LibraryRepairGate(context, showToast = {})
 
     private val mangaRepository: MangaRepository = mockk {
         coEvery { getMangaByIds(any()) } returns emptyList()
@@ -84,6 +86,7 @@ class StatusSyncJobTest {
     @Before
     fun setup() {
         Injekt = InjektScope(DefaultRegistrar())
+        Injekt.addSingleton(gate)
         Injekt.addSingleton(FollowsSyncProcessor())
         Injekt.addSingleton(loginHelper)
         Injekt.addSingleton(mangaRepository)
@@ -385,6 +388,40 @@ class StatusSyncJobTest {
 
         verify(exactly = 1) { workManager.cancelUniqueWork(StatusSyncJob.TAG) }
         assertEquals("", storedPushIds)
+    }
+
+    @Test
+    fun `given the repair runs when doWork then it returns retry`() = runTest {
+        gate.tryAcquire()
+        val input = Data.Builder().putString("sync_type", StatusSyncJob.followsFromDex).build()
+
+        val result = runCatching { runJob(input) }.getOrNull()
+
+        assertEquals(Result.retry(), result)
+        coVerify(exactly = 0) { mangaDex.fetchAllFollows() }
+    }
+
+    @Test
+    fun `given the repair runs when startNow then nothing is enqueued`() {
+        gate.tryAcquire()
+
+        StatusSyncJob.startNow(context, StatusSyncJob.followsFromDex)
+
+        verify(exactly = 0) {
+            workManager.enqueueUniqueWork(any(), any(), any<OneTimeWorkRequest>())
+        }
+    }
+
+    @Test
+    fun `given the repair runs when startSelectedNow then it stores no ids and enqueues nothing`() {
+        gate.tryAcquire()
+
+        StatusSyncJob.startSelectedNow(workManager, listOf(5L, 7L))
+
+        assertEquals("", storedPushIds)
+        verify(exactly = 0) {
+            workManager.enqueueUniqueWork(any(), any(), any<OneTimeWorkRequest>())
+        }
     }
 
     private suspend fun runJob(input: Data): Result = newJob(input).doWork()

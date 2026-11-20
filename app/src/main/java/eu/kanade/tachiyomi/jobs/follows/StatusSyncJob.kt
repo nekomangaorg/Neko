@@ -16,6 +16,7 @@ import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.notificationBuilder
@@ -68,6 +69,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
     }
 
     override suspend fun doWork(): Result = coroutineScope {
+        if (Injekt.get<LibraryRepairGate>().isRunning) return@coroutineScope Result.retry()
         TimberKt.d { "Doing work" }
         val selected = inputData.getBoolean(SELECTED_MANGA, false)
         // A push queued behind another one finds no ids when that one already sent them
@@ -220,6 +222,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
         const val followsFromDex = "1"
 
         fun startNow(context: Context, syncType: String) {
+            if (Injekt.get<LibraryRepairGate>().refuseStart()) return
             enqueue(
                 WorkManager.getInstance(context),
                 Data.Builder().putString(SYNC_TYPE, syncType).build(),
@@ -230,6 +233,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
         private val pushIdsLock = Any()
 
         fun startSelectedNow(workManager: WorkManager, mangaIds: List<Long>) {
+            if (Injekt.get<LibraryRepairGate>().refuseStart()) return
             if (mangaIds.isEmpty()) return
             val pushIds = Injekt.get<MangaDexPreferences>().followsPushIds()
             synchronized(pushIdsLock) {

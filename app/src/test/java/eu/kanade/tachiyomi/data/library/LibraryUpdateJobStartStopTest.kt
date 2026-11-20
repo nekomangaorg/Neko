@@ -7,6 +7,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.common.util.concurrent.ListenableFuture
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -27,6 +28,10 @@ import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.InjektScope
+import uy.kohesive.injekt.api.addSingleton
+import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
 /**
  * Pull-to-refresh, the category refresh button and the Cancel action on the update notification end
@@ -41,6 +46,8 @@ class LibraryUpdateJobStartStopTest {
 
     @Before
     fun setup() {
+        Injekt = InjektScope(DefaultRegistrar())
+        Injekt.addSingleton(LibraryRepairGate(context, showToast = {}))
         mockkObject(WorkManager.Companion)
         every { WorkManager.getInstance(any<Context>()) } returns workManager
     }
@@ -49,6 +56,7 @@ class LibraryUpdateJobStartStopTest {
     fun tearDown() {
         workInfoReleased.countDown()
         unmockkAll()
+        Injekt = InjektScope(DefaultRegistrar())
     }
 
     @Test(timeout = 10_000)

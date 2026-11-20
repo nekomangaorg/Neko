@@ -6,6 +6,7 @@ import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -35,6 +36,7 @@ class DelayedTrackingUpdateJobTest {
     private lateinit var delayedTrackingStore: DelayedTrackingStore
     private lateinit var context: Context
     private lateinit var workerParams: WorkerParameters
+    private val gate = LibraryRepairGate(mockk(relaxed = true), showToast = {})
 
     @Before
     fun setup() {
@@ -49,6 +51,7 @@ class DelayedTrackingUpdateJobTest {
         Injekt.addSingleton(mockTrackRepository)
         Injekt.addSingleton(trackManager)
         Injekt.addSingleton(delayedTrackingStore)
+        Injekt.addSingleton(gate)
     }
 
     @After
@@ -66,6 +69,17 @@ class DelayedTrackingUpdateJobTest {
 
         assertEquals(Result.failure(), result)
     }
+
+    @Test
+    fun `given the repair runs when doWork then it returns retry even after four attempts`() =
+        runTest {
+            gate.tryAcquire()
+            every { workerParams.runAttemptCount } returns 4
+
+            val result = runCatching { DelayedTrackingUpdateJob(context, workerParams).doWork() }
+
+            assertEquals(Result.retry(), result.getOrNull())
+        }
 
     @Test
     fun `given empty store when doWork then returns success without actions`() = runTest {

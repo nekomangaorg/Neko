@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import io.mockk.coEvery
@@ -52,6 +53,7 @@ class DownloaderUpdateQueueTest {
     @Before
     fun setup() {
         Injekt = InjektScope(DefaultRegistrar())
+        Injekt.addSingleton(LibraryRepairGate(mockk(relaxed = true), showToast = {}))
         Injekt.addSingleton<Json>(Json)
         Injekt.addSingleton(mockk<ChapterItemFilter>())
         Injekt.addSingleton(mockk<PreferencesHelper>())

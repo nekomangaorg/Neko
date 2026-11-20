@@ -5,6 +5,7 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.system.NetworkState
@@ -63,6 +64,8 @@ class DownloadManager(
     private val sourceManager by injectLazy<SourceManager>()
 
     private val mangaRepository: MangaRepository = Injekt.get()
+
+    private val libraryRepairGate: LibraryRepairGate by injectLazy()
 
     /**
      * Downloads provider, used to retrieve the folders where the chapters are or should be stored.
@@ -183,6 +186,7 @@ class DownloadManager(
      * @param downloads the list of downloads to enqueue.
      */
     fun addDownloadsToStartOfQueue(downloads: List<Download>) {
+        if (libraryRepairGate.refuseStart()) return
         if (downloads.isEmpty()) return
         reorderQueue { queue -> queue.withDownloadsFirst(downloads) }
         startDownloads()

@@ -3,9 +3,12 @@ package eu.kanade.tachiyomi.data.download
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker.Result
+import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.util.system.NetworkState
 import eu.kanade.tachiyomi.util.system.activeNetworkState
 import eu.kanade.tachiyomi.util.system.networkStateFlow
@@ -14,6 +17,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkAll
@@ -52,6 +56,7 @@ class DownloadJobTest {
     private lateinit var downloadManager: DownloadManager
     private lateinit var preferences: PreferencesHelper
     private val networkState = MutableStateFlow(online)
+    private val gate = LibraryRepairGate(mockk(relaxed = true), showToast = {})
 
     private val runningFlow = MutableStateFlow(false)
     private var downloaderRunning: Boolean
@@ -86,6 +91,7 @@ class DownloadJobTest {
             every { downloadOnlyOverUnmetered().changes() } returns flowOf(false)
         }
         Injekt.addSingleton(preferences)
+        Injekt.addSingleton(gate)
 
         mockkStatic("eu.kanade.tachiyomi.util.system.NetworkStateTrackerKt")
         every { any<Context>().activeNetworkState() } answers { networkState.value }
@@ -277,4 +283,28 @@ class DownloadJobTest {
             assertEquals(Result.success(), result)
             assertTrue(currentTime >= 5_000L)
         }
+
+    @Test
+    fun `given the repair runs when doWork then it returns retry`() = runTest {
+        gate.tryAcquire()
+
+        val result = withTimeoutOrNull(1.minutes) { DownloadJob(context, workerParams).doWork() }
+
+        assertEquals(Result.retry(), result)
+        verify(exactly = 0) { downloadManager.downloaderStart() }
+    }
+
+    @Test
+    fun `given the repair runs when start then nothing is enqueued`() {
+        gate.tryAcquire()
+        val workManager = mockk<WorkManager>(relaxed = true)
+        mockkObject(WorkManager.Companion)
+        every { WorkManager.getInstance(any<Context>()) } returns workManager
+
+        DownloadJob.start(context)
+
+        verify(exactly = 0) {
+            workManager.enqueueUniqueWork(any<String>(), any(), any<OneTimeWorkRequest>())
+        }
+    }
 }

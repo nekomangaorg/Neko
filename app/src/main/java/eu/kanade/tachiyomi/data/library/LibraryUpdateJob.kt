@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -167,6 +168,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val notifier = LibraryUpdateNotifier(context)
 
     override suspend fun doWork(): Result {
+        if (Injekt.get<LibraryRepairGate>().isRunning) return Result.retry()
 
         libraryPreferences.lastUpdateAttemptTimestamp().set(Date().time)
 
@@ -928,6 +930,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             category: Category? = null,
             mangaIdsToUse: List<Long>? = null,
         ): Boolean {
+            if (Injekt.get<LibraryRepairGate>().refuseStart()) return false
             if (mangaIdsToUse?.isEmpty() == true) return false
 
             if (withIOContext { isRunning(context) }) {

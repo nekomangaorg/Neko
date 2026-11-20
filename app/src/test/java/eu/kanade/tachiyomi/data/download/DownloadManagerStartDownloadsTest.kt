@@ -5,6 +5,8 @@ import android.content.SharedPreferences
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.common.util.concurrent.ListenableFuture
+import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.source.SourceManager
 import io.mockk.coEvery
 import io.mockk.every
@@ -38,10 +40,12 @@ class DownloadManagerStartDownloadsTest {
 
     private lateinit var context: Context
     private lateinit var downloadManager: DownloadManager
+    private val gate = LibraryRepairGate(mockk(relaxed = true), showToast = {})
 
     @Before
     fun setup() {
         Injekt = InjektScope(DefaultRegistrar())
+        Injekt.addSingleton(gate)
         Injekt.addSingleton(mockk<SourceManager> { every { mangaDex } returns mockk() })
         Injekt.addSingleton(
             mockk<StorageManager> { every { baseDirChanges } returns MutableSharedFlow() }
@@ -109,6 +113,17 @@ class DownloadManagerStartDownloadsTest {
 
         downloadManager.startDownloads()
 
+        verify(exactly = 0) { DownloadJob.start(any()) }
+    }
+
+    @Test
+    fun `given the repair runs when addDownloadsToStartOfQueue then nothing moves or starts`() {
+        gate.tryAcquire()
+        every { anyConstructed<Downloader>().updateQueue(any()) } just runs
+
+        downloadManager.addDownloadsToStartOfQueue(listOf(mockk<Download>()))
+
+        verify(exactly = 0) { anyConstructed<Downloader>().updateQueue(any()) }
         verify(exactly = 0) { DownloadJob.start(any()) }
     }
 
