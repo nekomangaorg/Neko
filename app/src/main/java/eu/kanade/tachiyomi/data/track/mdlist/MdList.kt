@@ -59,16 +59,16 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     /**
-     * Sends the score on [track] to MangaDex and saves the track. Throws when MangaDex does not
-     * save the score, and saves nothing then. A title still on a numeric v3 id gets the score in
-     * Neko only, because MangaDex rejects those ids.
+     * Sends the score on [track] to MangaDex and saves the track. Throws [MdListScoreUpdateFailed]
+     * when MangaDex does not save the score, and saves nothing then. A title still on a numeric v3
+     * id gets the score in Neko only, because MangaDex rejects those ids.
      */
     suspend fun updateScore(track: Track) {
         withContext(Dispatchers.IO) {
             if (isV3Id(track)) {
                 TimberKt.i { "v3 tracking ${track.tracking_url} score not sent to MangaDex" }
             } else if (!mdex.updateRating(track)) {
-                throw Exception("MangaDex did not save the score")
+                throw MdListScoreUpdateFailed()
             }
             trackRepository.insertTrack(track)
         }
@@ -237,3 +237,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
  * saved nothing.
  */
 class MdListStatusUpdateFailed : Exception("MangaDex did not save the reading status")
+
+/** MangaDex did not save the score that [MdList.updateScore] sent, and the method saved nothing. */
+class MdListScoreUpdateFailed : Exception("MangaDex did not save the score")

@@ -192,10 +192,15 @@ class FollowsHandler {
                     authService.updateRating(mangaID, RatingDto(track.score.toInt()))
                 }
 
-            response.getOrNull()?.result == "ok" ||
-                (removing &&
-                    response is ApiResponse.Failure.Error &&
-                    response.statusCode.code == 404)
+            val saved =
+                response.getOrNull()?.result == "ok" ||
+                    (removing &&
+                        response is ApiResponse.Failure.Error &&
+                        response.statusCode.code == 404)
+            if (!saved) {
+                response.log("trying to update rating for manga $mangaID")
+            }
+            saved
         }
     }
 

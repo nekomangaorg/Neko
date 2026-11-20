@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import android.util.Log
 import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -22,6 +23,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
+import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.api.addSingleton
@@ -30,9 +32,17 @@ import uy.kohesive.injekt.registry.default.DefaultRegistrar
 class FollowsHandlerTest {
 
     private val authService = mockk<MangaDexAuthorizedUserService>()
+    private val errors = mutableListOf<String>()
 
     @Before
     fun setup() {
+        Timber.plant(
+            object : Timber.Tree() {
+                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                    if (priority == Log.ERROR) errors += message
+                }
+            },
+        )
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.addSingleton(
             mockk<NetworkServices> {
@@ -44,6 +54,7 @@ class FollowsHandlerTest {
 
     @After
     fun tearDown() {
+        Timber.uprootAll()
         Injekt = InjektScope(DefaultRegistrar())
     }
 
@@ -129,6 +140,7 @@ class FollowsHandlerTest {
         coEvery { authService.removeRating(MANGA_ID) } returns httpError(404)
 
         assertTrue(FollowsHandler().updateRating(track(score = 0f)))
+        assertTrue("Expected no error log, got $errors", errors.isEmpty())
     }
 
     @Test
@@ -150,6 +162,17 @@ class FollowsHandlerTest {
         coEvery { authService.updateRating(MANGA_ID, any()) } returns httpError(404)
 
         assertFalse(FollowsHandler().updateRating(track(score = 7f)))
+    }
+
+    @Test
+    fun `a refused score is logged`() = runTest {
+        coEvery { authService.updateRating(MANGA_ID, any()) } returns httpError(500)
+
+        assertFalse(FollowsHandler().updateRating(track(score = 7f)))
+        assertTrue(
+            "Expected an error log for $MANGA_ID, got $errors",
+            errors.any { MANGA_ID in it },
+        )
     }
 
     private fun track(score: Float) =

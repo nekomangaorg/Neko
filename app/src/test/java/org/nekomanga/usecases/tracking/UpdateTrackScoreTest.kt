@@ -5,6 +5,7 @@ import android.text.TextUtils
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
+import eu.kanade.tachiyomi.data.track.mdlist.MdListScoreUpdateFailed
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
@@ -99,6 +100,7 @@ class UpdateTrackScoreTest {
             val result = useCase.await(7, trackAndService(UUID_URL))
 
             assertTrue("Expected TrackingUpdate.Error, got $result", result is TrackingUpdate.Error)
+            assertTrue((result as TrackingUpdate.Error).exception is MdListScoreUpdateFailed)
             coVerify(exactly = 0) { trackRepository.insertTrack(any()) }
         }
 
