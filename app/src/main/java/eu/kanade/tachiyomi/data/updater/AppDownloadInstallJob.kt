@@ -141,6 +141,13 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
                     var lastTick = 0L
 
                     override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
+                        // WorkManager stops a job that a newer start() replaced, or that lost its
+                        // constraints, without calling stop(). The blocking body read ignores the
+                        // cancelled coroutine and has no call timeout, so cancel the call here.
+                        if (isStopped) {
+                            runningCall?.cancel()
+                            return
+                        }
                         val progress = (100 * (bytesRead.toFloat() / contentLength)).toInt()
                         val currentTime = System.currentTimeMillis()
                         if (progress > savedProgress && currentTime - 200 > lastTick) {
