@@ -11,7 +11,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,11 +61,11 @@ fun ComposePagerViewer(
     isNavigating: Boolean = false,
 ) {
     val initialPage = config.initialIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
-    val pagerState =
-        rememberPagerState(
-            initialPage = initialPage,
-            pageCount = { items.size },
-        )
+    val currentItems by rememberUpdatedState(items)
+    // rememberPagerState would restore the old index after the activity is recreated and ignore
+    // initialPage. A rotation with the Automatic layout rebuilds the list as single pages or pairs,
+    // so the old index points at a different page. initialPage holds the page the reader asked for.
+    val pagerState = remember { PagerState(currentPage = initialPage) { currentItems.size } }
 
     val layoutAnchor = remember {
         PagerLayoutSyncAnchor(
@@ -77,7 +76,6 @@ fun ComposePagerViewer(
     }
     var pendingNavCommand by remember { mutableStateOf<ReaderNavCommand?>(null) }
 
-    val currentItems by rememberUpdatedState(items)
     val currentConfig by rememberUpdatedState(config)
     val currentIsNavigating by rememberUpdatedState(isNavigating)
 
