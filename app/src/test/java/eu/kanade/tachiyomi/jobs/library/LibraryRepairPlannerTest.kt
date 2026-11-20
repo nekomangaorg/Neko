@@ -1,10 +1,17 @@
 package eu.kanade.tachiyomi.jobs.library
 
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import io.kotest.matchers.shouldBe
 import org.junit.Test
+import org.nekomanga.data.database.entity.ArtworkEntity
 import org.nekomanga.data.database.entity.ChapterEntity
+import org.nekomanga.data.database.entity.HistoryEntity
+import org.nekomanga.data.database.entity.MangaAggregateEntity
+import org.nekomanga.data.database.entity.MangaCategoryEntity
 import org.nekomanga.data.database.entity.MangaEntity
+import org.nekomanga.data.database.entity.MergeMangaEntity
+import org.nekomanga.data.database.entity.TrackEntity
 
 class LibraryRepairPlannerTest {
 
@@ -195,6 +202,255 @@ class LibraryRepairPlannerTest {
             GroupPlan.Skip(SkipReason.DownloadFolders(listOf("New", "Old")))
     }
 
+    @Test
+    fun `given read and bookmark only on the copy when planGroup then the keeper chapter gets them`() {
+        val ch10 = chapter(1, id = 10L, url = "/chapter/a").copy(lastPageRead = 3, pagesLeft = 7)
+        val ch20 =
+            chapter(2, id = 20L, url = "/chapter/a")
+                .copy(read = true, bookmark = true, lastPageRead = 9, pagesLeft = 1)
+
+        changes(chapters = listOf(ch10, ch20)).chapterUpdates shouldBe
+            listOf(ch10.copy(read = true, bookmark = true, lastPageRead = 9, pagesLeft = 0))
+    }
+
+    @Test
+    fun `given a chapter only on the copy when planGroup then it moves to the keeper`() {
+        val ch21 = chapter(2, id = 21L, url = "/chapter/b")
+
+        changes(chapters = listOf(ch21)).chapterUpdates shouldBe listOf(ch21.copy(mangaId = 1L))
+    }
+
+    @Test
+    fun `given one chapter url on two copies and not the keeper when planGroup then the lower row's chapter moves`() {
+        val rows = listOf(manga(1, source = -1L), manga(2, "/manga/$U"), manga(3, "/title/$U/"))
+        val ch21 = chapter(2, id = 21L, url = "/chapter/c").copy(pagesLeft = 5)
+        val ch31 = chapter(3, id = 31L, url = "/chapter/c").copy(read = true)
+
+        changes(rows = rows, chapters = listOf(ch31, ch21)).chapterUpdates shouldBe
+            listOf(ch21.copy(mangaId = 1L, read = true, pagesLeft = 0))
+    }
+
+    @Test
+    fun `given equal progress on both copies when planGroup then no chapter update`() {
+        val ch10 = chapter(1, id = 10L, url = "/chapter/a").copy(read = true, lastPageRead = 4)
+        val ch20 = chapter(2, id = 20L, url = "/chapter/a").copy(read = true, lastPageRead = 4)
+
+        changes(chapters = listOf(ch10, ch20)).chapterUpdates shouldBe emptyList()
+    }
+
+    @Test
+    fun `given history on both copies of a chapter when planGroup then one entry with the latest read and longest time`() {
+        val history =
+            listOf(
+                HistoryEntity(id = 100L, chapterId = 10L, lastRead = 1000L, timeRead = 50L),
+                HistoryEntity(id = 200L, chapterId = 20L, lastRead = 2000L, timeRead = 30L),
+            )
+
+        changes(chapters = sharedChapter(), history = history).historyUpserts shouldBe
+            listOf(HistoryEntity(id = 100L, chapterId = 10L, lastRead = 2000L, timeRead = 50L))
+    }
+
+    @Test
+    fun `given history only on the copy's chapter when planGroup then it moves to the surviving chapter`() {
+        val history =
+            listOf(HistoryEntity(id = 200L, chapterId = 20L, lastRead = 2000L, timeRead = 30L))
+
+        changes(chapters = sharedChapter(), history = history).historyUpserts shouldBe
+            listOf(HistoryEntity(id = 0L, chapterId = 10L, lastRead = 2000L, timeRead = 30L))
+    }
+
+    @Test
+    fun `given tracks on both rows for one service when planGroup then one track with the furthest chapter and a conflict`() {
+        val t7 = track(7L, mangaId = 1L, mediaId = 11L, lastChapterRead = 5f)
+        val t8 = track(8L, mangaId = 2L, mediaId = 12L, lastChapterRead = 9f, score = 7f)
+
+        val changes = changes(tracks = listOf(t7, t8))
+
+        changes.trackUpserts shouldBe listOf(t8.copy(id = 7L, mangaId = 1L, lastChapterRead = 9f))
+        changes.trackIdMoves shouldBe mapOf(8L to 7L)
+        changes.trackConflictServices shouldBe listOf(1)
+    }
+
+    @Test
+    fun `given a track only on the copy when planGroup then it moves to the keeper`() {
+        val t8 = track(8L, mangaId = 2L, mediaId = 12L, lastChapterRead = 9f)
+
+        val changes = changes(tracks = listOf(t8))
+
+        changes.trackUpserts shouldBe listOf(t8.copy(mangaId = 1L))
+        changes.trackIdMoves shouldBe emptyMap()
+    }
+
+    @Test
+    fun `given two Komga merges with different urls when planGroup then both stay`() {
+        val keeperMerge = merge(3L, mangaId = 1L, url = "a", type = MergeType.Komga)
+        val copyMerge = merge(4L, mangaId = 2L, url = "b", type = MergeType.Komga)
+
+        changes(merges = listOf(keeperMerge, copyMerge)).mergeUpserts shouldBe
+            listOf(copyMerge.copy(mangaId = 1L))
+    }
+
+    @Test
+    fun `given one MangaBall merge on each row when planGroup then only the keeper's stays`() {
+        val merges =
+            listOf(
+                merge(3L, mangaId = 1L, url = "a", type = MergeType.MangaBall),
+                merge(4L, mangaId = 2L, url = "b", type = MergeType.MangaBall),
+            )
+
+        changes(merges = merges).mergeUpserts shouldBe emptyList()
+    }
+
+    @Test
+    fun `given a category only on the copy when planGroup then the keeper gets it`() {
+        val categories = listOf(MangaCategoryEntity(id = 40L, mangaId = 2L, categoryId = 5))
+
+        changes(categories = categories).categoryInserts shouldBe
+            listOf(MangaCategoryEntity(mangaId = 1L, categoryId = 5))
+    }
+
+    @Test
+    fun `given the same category on both rows when planGroup then no category insert`() {
+        val categories =
+            listOf(
+                MangaCategoryEntity(id = 40L, mangaId = 1L, categoryId = 5),
+                MangaCategoryEntity(id = 41L, mangaId = 2L, categoryId = 5),
+            )
+
+        changes(categories = categories).categoryInserts shouldBe emptyList()
+    }
+
+    @Test
+    fun `given artwork only on the copy when planGroup then it moves`() {
+        val art = artwork(51L, mangaId = 2L)
+
+        changes(artwork = listOf(art)).artworkUpserts shouldBe listOf(art.copy(mangaId = 1L))
+    }
+
+    @Test
+    fun `given artwork on both rows when planGroup then nothing moves`() {
+        val artwork = listOf(artwork(50L, mangaId = 1L), artwork(51L, mangaId = 2L))
+
+        changes(artwork = artwork).artworkUpserts shouldBe emptyList()
+    }
+
+    @Test
+    fun `given an aggregate only on the copy when planGroup then the keeper gets it`() {
+        val agg2 = MangaAggregateEntity(mangaId = 2L, volumes = "{}")
+
+        changes(aggregates = listOf(agg2)).aggregateInsert shouldBe agg2.copy(mangaId = 1L)
+    }
+
+    @Test
+    fun `given a score and reading dates only on the keeper's track when planGroup then the combined track keeps them`() {
+        val t7 =
+            track(7L, mangaId = 1L, mediaId = 11L, lastChapterRead = 5f, score = 6f)
+                .copy(startedReadingDate = 100L, finishedReadingDate = 200L)
+        val t8 = track(8L, mangaId = 2L, mediaId = 11L, lastChapterRead = 9f)
+
+        changes(tracks = listOf(t7, t8)).trackUpserts shouldBe
+            listOf(
+                t8.copy(
+                    id = 7L,
+                    mangaId = 1L,
+                    score = 6f,
+                    startedReadingDate = 100L,
+                    finishedReadingDate = 200L,
+                ),
+            )
+    }
+
+    @Test
+    fun `given an aggregate on both rows when planGroup then no aggregate insert`() {
+        val aggregates =
+            listOf(
+                MangaAggregateEntity(mangaId = 1L, volumes = "a"),
+                MangaAggregateEntity(mangaId = 2L, volumes = "b"),
+            )
+
+        changes(aggregates = aggregates).aggregateInsert shouldBe null
+    }
+
+    @Test
+    fun `given two keeper chapters with one url when planGroup then neither changes`() {
+        val ch10 = chapter(1, id = 10L, url = "/chapter/a")
+        val ch11 = chapter(1, id = 11L, url = "/chapter/a").copy(read = true)
+
+        changes(chapters = listOf(ch10, ch11)).chapterUpdates shouldBe emptyList()
+    }
+
+    /** Planned changes for the damaged keeper (row 1) and its healthy copy (row 2). */
+    private fun changes(
+        rows: List<MangaEntity> = listOf(manga(1, source = -1L), manga(2, "/manga/$U")),
+        chapters: List<ChapterEntity> = emptyList(),
+        history: List<HistoryEntity> = emptyList(),
+        tracks: List<TrackEntity> = emptyList(),
+        merges: List<MergeMangaEntity> = emptyList(),
+        categories: List<MangaCategoryEntity> = emptyList(),
+        artwork: List<ArtworkEntity> = emptyList(),
+        aggregates: List<MangaAggregateEntity> = emptyList(),
+    ): GroupChanges {
+        val data =
+            RepairGroupData(
+                rows,
+                chapters,
+                history,
+                tracks,
+                merges,
+                categories,
+                artwork,
+                aggregates,
+            )
+        return (planner.planGroup(data, emptySet()) as GroupPlan.Apply).changes
+    }
+
+    /** Chapter "/chapter/a" as id 10 on the keeper and id 20 on the copy. */
+    private fun sharedChapter() =
+        listOf(chapter(1, id = 10L, url = "/chapter/a"), chapter(2, id = 20L, url = "/chapter/a"))
+
+    private fun track(
+        id: Long,
+        mangaId: Long,
+        mediaId: Long,
+        lastChapterRead: Float,
+        score: Float = 0f,
+    ) =
+        TrackEntity(
+            id = id,
+            mangaId = mangaId,
+            trackServiceId = 1,
+            mediaId = mediaId,
+            libraryId = null,
+            title = "Track $id",
+            lastChapterRead = lastChapterRead,
+            totalChapters = 0,
+            status = 0,
+            score = score,
+            trackingUrl = "",
+            startedReadingDate = 0L,
+            finishedReadingDate = 0L,
+        )
+
+    private fun merge(id: Long, mangaId: Long, url: String, type: MergeType) =
+        MergeMangaEntity(
+            id = id,
+            mangaId = mangaId,
+            coverUrl = "",
+            title = "Merge $id",
+            url = url,
+            mergeType = type,
+        )
+
+    private fun artwork(id: Long, mangaId: Long) =
+        ArtworkEntity(
+            id = id,
+            mangaId = mangaId,
+            fileName = "$id.jpg",
+            volume = "1",
+            locale = "en",
+            description = "",
+        )
+
     private fun keeperOf(data: RepairGroupData, folders: Set<String> = emptySet()): MangaEntity =
         (planner.planGroup(data, folders) as GroupPlan.Apply).changes.keeper
 
@@ -259,10 +515,16 @@ class LibraryRepairPlannerTest {
             dynamicCover = null,
         )
 
-    private fun chapter(mangaId: Long, dateFetch: Long) =
+    private fun chapter(
+        mangaId: Long,
+        dateFetch: Long = 0L,
+        id: Long = 0L,
+        url: String = "/chapter/$dateFetch",
+    ) =
         ChapterEntity(
+            id = id,
             mangaId = mangaId,
-            url = "/chapter/$dateFetch",
+            url = url,
             name = "Ch. 1",
             chapterTxt = "Ch. 1",
             chapterTitle = "",

@@ -3,8 +3,14 @@ package eu.kanade.tachiyomi.jobs.library
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import org.nekomanga.data.database.entity.ArtworkEntity
 import org.nekomanga.data.database.entity.ChapterEntity
+import org.nekomanga.data.database.entity.HistoryEntity
+import org.nekomanga.data.database.entity.MangaAggregateEntity
+import org.nekomanga.data.database.entity.MangaCategoryEntity
 import org.nekomanga.data.database.entity.MangaEntity
+import org.nekomanga.data.database.entity.MergeMangaEntity
+import org.nekomanga.data.database.entity.TrackEntity
 
 /**
  * Decides how the rows of one MangaDex title fold into one. It reads nothing and writes nothing:
@@ -52,8 +58,7 @@ class LibraryRepairPlanner(
         if (rows.isEmpty() || isHealthy(rows)) return GroupPlan.Untouched
         return when (val folded = fold(rows, data.chapters, existingFolders)) {
             is Folded.Skipped -> GroupPlan.Skip(folded.reason)
-            is Folded.Kept ->
-                GroupPlan.Apply(GroupChanges(keeper = folded.keeper, deletedRows = rows.drop(1)))
+            is Folded.Kept -> GroupPlan.Apply(foldRecords(rows, folded.keeper, data))
         }
     }
 
@@ -95,7 +100,7 @@ class LibraryRepairPlanner(
      */
     private fun mergeRows(rows: List<MangaEntity>, chapters: List<ChapterEntity>): MangaEntity {
         val keeper = rows.first()
-        val donor = rows.firstOrNull { isMangadex(it.source) } ?: keeper
+        val donor = donorOf(rows)
         return keeper.copy(
             source = if (isMangadex(keeper.source)) keeper.source else mangaDexSourceId,
             title = donor.title,
@@ -158,6 +163,191 @@ class LibraryRepairPlanner(
         field: (MangaEntity) -> String?,
     ): String? =
         firstNotNullOfOrNull { row -> field(row)?.takeIf { it.isNotBlank() } } ?: field(keeper)
+
+    private fun donorOf(rows: List<MangaEntity>): MangaEntity =
+        rows.firstOrNull { isMangadex(it.source) } ?: rows.first()
+
+    /**
+     * Moves the records of the other rows to [keeper] and combines the ones both sides hold. Only
+     * records whose values change are listed; the cascade deletes the rest with their rows.
+     */
+    private fun foldRecords(
+        rows: List<MangaEntity>,
+        keeper: MangaEntity,
+        data: RepairGroupData,
+    ): GroupChanges {
+        val order = rows.withIndex().associate { (index, row) -> row.id to index }
+        val chapters = data.chapters.inRowOrder(order, ChapterEntity::mangaId, ChapterEntity::id)
+        val survivors =
+            chapters
+                .groupBy { it.url }
+                .values
+                .map { sameUrl ->
+                    Survivor(sameUrl.first(), sameUrl.drop(1).filter { it.mangaId != keeper.id })
+                }
+        val history = data.history.associateBy { it.chapterId }
+        val tracks =
+            foldTracks(
+                keeper.id,
+                donorOf(rows).id,
+                data.tracks.inRowOrder(order, TrackEntity::mangaId, TrackEntity::id),
+            )
+        val merges = data.merges.inRowOrder(order, MergeMangaEntity::mangaId, MergeMangaEntity::id)
+        val categories =
+            data.categories.inRowOrder(order, MangaCategoryEntity::mangaId, MangaCategoryEntity::id)
+        val keeperCategories =
+            categories.filter { it.mangaId == keeper.id }.map { it.categoryId }.toSet()
+        val artwork = data.artwork.inRowOrder(order, ArtworkEntity::mangaId, ArtworkEntity::id)
+        val aggregates =
+            data.aggregates.inRowOrder(
+                order,
+                MangaAggregateEntity::mangaId,
+                MangaAggregateEntity::mangaId,
+            )
+        return GroupChanges(
+            keeper = keeper,
+            deletedRows = rows.drop(1),
+            chapterUpdates = survivors.mapNotNull { it.update(keeper.id) },
+            historyUpserts = survivors.mapNotNull { it.history(history) },
+            trackUpserts = tracks.upserts,
+            mergeUpserts =
+                merges
+                    .distinctBy { it.mergeType.mergeKey(it.url) }
+                    .filter { it.mangaId != keeper.id }
+                    .map { it.copy(mangaId = keeper.id) },
+            categoryInserts =
+                categories
+                    .filter { it.mangaId != keeper.id }
+                    .map { it.categoryId }
+                    .distinct()
+                    .filter { it !in keeperCategories }
+                    .map { MangaCategoryEntity(mangaId = keeper.id, categoryId = it) },
+            artworkUpserts =
+                if (artwork.any { it.mangaId == keeper.id }) emptyList()
+                else
+                    artwork
+                        .groupBy { it.mangaId }
+                        .values
+                        .firstOrNull()
+                        .orEmpty()
+                        .map { it.copy(mangaId = keeper.id) },
+            aggregateInsert =
+                if (aggregates.any { it.mangaId == keeper.id }) null
+                else aggregates.firstOrNull()?.copy(mangaId = keeper.id),
+            trackIdMoves = tracks.moves,
+            trackConflictServices = tracks.conflicts,
+        )
+    }
+
+    /**
+     * One track per service, built the way restore's `combineTracking` does: the details donor's
+     * track, or the first one, with the furthest chapter of any track. It is written into the
+     * keeper's track for that service, or moves over when the keeper has none. The other tracks of
+     * the service map to that track id in [TrackFold.moves].
+     */
+    private fun foldTracks(keeperId: Long, donorId: Long, tracks: List<TrackEntity>): TrackFold {
+        val upserts = mutableListOf<TrackEntity>()
+        val moves = mutableMapOf<Long, Long>()
+        val conflicts = mutableListOf<Int>()
+        tracks
+            .groupBy { it.trackServiceId }
+            .forEach { (service, sameService) ->
+                val details =
+                    sameService.firstOrNull { it.mangaId == donorId } ?: sameService.first()
+                val keeperTrack = sameService.firstOrNull { it.mangaId == keeperId }
+                val target = keeperTrack?.id ?: details.id
+                val combined =
+                    details.combinedWith(sameService).copy(id = target, mangaId = keeperId)
+                if (combined != keeperTrack) upserts += combined
+                sameService.filter { it.id != target }.forEach { moves[it.id] = target }
+                if (sameService.map { it.mediaId }.distinct().size > 1) conflicts += service
+            }
+        return TrackFold(upserts, moves, conflicts)
+    }
+
+    /** A score or reading date left at 0 comes from the first of [tracks] that has one. */
+    private fun TrackEntity.combinedWith(tracks: List<TrackEntity>): TrackEntity =
+        copy(
+            lastChapterRead = tracks.maxOf { it.lastChapterRead },
+            score =
+                score.takeIf { it > 0f } ?: tracks.map { it.score }.firstOrNull { it > 0f } ?: 0f,
+            startedReadingDate =
+                startedReadingDate.takeIf { it > 0L }
+                    ?: tracks.map { it.startedReadingDate }.firstOrNull { it > 0L }
+                    ?: 0L,
+            finishedReadingDate =
+                finishedReadingDate.takeIf { it > 0L }
+                    ?: tracks.map { it.finishedReadingDate }.firstOrNull { it > 0L }
+                    ?: 0L,
+        )
+
+    /**
+     * Sorts records by the row they belong to, then by their own id. Records of rows outside
+     * [order] are dropped.
+     */
+    private fun <T> List<T>.inRowOrder(
+        order: Map<Long, Int>,
+        mangaId: (T) -> Long,
+        id: (T) -> Long,
+    ): List<T> {
+        val ofGroup = filter { mangaId(it) in order }
+        return ofGroup.sortedWith(compareBy({ order.getValue(mangaId(it)) }, { id(it) }))
+    }
+
+    /**
+     * The chapter that stays for one url: the keeper's, or else the first copy's. [copies] are the
+     * other rows' chapters with that url; the keeper's own chapters never fold.
+     */
+    private class Survivor(val chapter: ChapterEntity, val copies: List<ChapterEntity>) {
+
+        /**
+         * The chapter on the keeper with restore's `combineProgress` over it and [copies], or null
+         * when nothing changes.
+         */
+        fun update(keeperId: Long): ChapterEntity? {
+            val updated =
+                if (copies.isEmpty()) {
+                    chapter.copy(mangaId = keeperId)
+                } else {
+                    val all = listOf(chapter) + copies
+                    val isRead = all.any { it.read }
+                    val furthest = all.maxBy { it.lastPageRead }
+                    chapter.copy(
+                        mangaId = keeperId,
+                        read = isRead,
+                        bookmark = all.any { it.bookmark },
+                        lastPageRead = furthest.lastPageRead,
+                        pagesLeft = if (isRead) 0 else furthest.pagesLeft,
+                    )
+                }
+            return updated.takeIf { it != chapter }
+        }
+
+        /**
+         * One history entry for the chapter with the latest read and the longest reading time, or
+         * null when there is nothing to combine. Id 0 inserts a new entry.
+         */
+        fun history(entries: Map<Long, HistoryEntity>): HistoryEntity? {
+            if (copies.isEmpty()) return null
+            val own = entries[chapter.id]
+            val all = (listOf(chapter) + copies).mapNotNull { entries[it.id] }
+            if (all.isEmpty()) return null
+            val combined =
+                HistoryEntity(
+                    id = own?.id ?: 0L,
+                    chapterId = chapter.id,
+                    lastRead = all.maxOf { it.lastRead },
+                    timeRead = all.maxOf { it.timeRead },
+                )
+            return combined.takeIf { it != own }
+        }
+    }
+
+    private class TrackFold(
+        val upserts: List<TrackEntity>,
+        val moves: Map<Long, Long>,
+        val conflicts: List<Int>,
+    )
 
     private sealed interface Folded {
         data class Kept(val keeper: MangaEntity) : Folded
