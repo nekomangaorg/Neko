@@ -27,9 +27,11 @@ class RepairResult {
     val skipped = mutableListOf<SkippedEntry>()
     /** "<title>: <message>" for each title whose transaction failed. */
     val failed = mutableListOf<String>()
-    /** "<title>: service <id>" for each service whose tracks pointed at different media ids. */
-    val trackingConflicts = mutableListOf<String>()
+    val trackingConflicts = mutableListOf<TrackingConflict>()
 }
+
+/** A title whose tracks for one service pointed at different media ids. */
+data class TrackingConflict(val title: String, val serviceId: Int)
 
 /**
  * Applies the [LibraryRepairPlanner] plans. Each title is read and written in its own transaction,
@@ -129,7 +131,7 @@ class LibraryRepairer(
                 if (changes.deletedRows.isEmpty()) result.fixed++ else result.merged++
                 moveDelayedTracking(changes.trackIdMoves)
                 changes.trackConflictServices.forEach {
-                    result.trackingConflicts += "${group.title}: service $it"
+                    result.trackingConflicts += TrackingConflict(group.title, it)
                 }
             }
         }

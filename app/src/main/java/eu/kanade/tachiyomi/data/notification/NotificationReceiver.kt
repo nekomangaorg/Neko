@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -108,6 +109,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_CANCEL_FOLLOW_SYNC -> cancelFollowSync(context)
             ACTION_CANCEL_UPDATE_DOWNLOAD -> cancelDownloadUpdate(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
+            ACTION_CANCEL_LIBRARY_REPAIR -> LibraryRepairJob.stop(context)
             ACTION_START_APP_UPDATE -> {
                 val url = intent.getStringExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL) ?: return
                 val version = intent.getStringExtra(AppDownloadInstallJob.EXTRA_VERSION) ?: return
@@ -431,6 +433,9 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to cancel restore
         private const val ACTION_CANCEL_RESTORE = "$ID.$NAME.CANCEL_RESTORE"
+
+        // Called to stop the library repair
+        private const val ACTION_CANCEL_LIBRARY_REPAIR = "$ID.$NAME.CANCEL_LIBRARY_REPAIR"
 
         // Called to open chapter
         private const val ACTION_OPEN_CHAPTER = "$ID.$NAME.ACTION_OPEN_CHAPTER"
@@ -1014,6 +1019,20 @@ class NotificationReceiver : BroadcastReceiver() {
                 Intent(context, NotificationReceiver::class.java).apply {
                     action = ACTION_CANCEL_RESTORE
                     putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+                }
+            return PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        }
+
+        /** Returns [PendingIntent] that stops the library repair job. */
+        internal fun cancelLibraryRepairPendingBroadcast(context: Context): PendingIntent {
+            val intent =
+                Intent(context, NotificationReceiver::class.java).apply {
+                    action = ACTION_CANCEL_LIBRARY_REPAIR
                 }
             return PendingIntent.getBroadcast(
                 context,

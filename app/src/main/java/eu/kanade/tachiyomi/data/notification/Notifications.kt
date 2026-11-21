@@ -65,6 +65,11 @@ object Notifications {
             const val Error = -2003
         }
 
+        object LibraryRepair {
+            const val Progress = -3001
+            const val Complete = -3002
+        }
+
         object Updated {
             const val Installed = -6
         }

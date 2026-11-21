@@ -454,7 +454,7 @@ class LibraryRepairerTest {
 
             repairer.repair(result) { _, _ -> }
 
-            result.trackingConflicts shouldBe listOf("Real: service 1")
+            result.trackingConflicts shouldBe listOf(TrackingConflict("Real", serviceId = 1))
         }
 
     @Test
