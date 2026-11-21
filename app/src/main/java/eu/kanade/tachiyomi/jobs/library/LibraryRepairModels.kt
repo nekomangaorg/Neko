@@ -26,6 +26,19 @@ data class RepairInventory(
         get() = work.isNotEmpty()
 }
 
+/** What tapping Repair library leads to: a toast, or the confirmation dialog for [Confirm]. */
+sealed interface RepairCheck {
+    /** The repair job holds the gate. */
+    data object Running : RepairCheck
+
+    /** Work that writes the same rows is running. */
+    data class Blocked(val work: List<BlockingWork>) : RepairCheck
+
+    data object NothingToRepair : RepairCheck
+
+    data class Confirm(val inventory: RepairInventory) : RepairCheck
+}
+
 data class SkippedEntry(val title: String, val reason: SkipReason)
 
 sealed interface SkipReason {

@@ -54,10 +54,9 @@ class LibraryRepairNotifier(private val context: Context) {
     }
 
     fun showBlocked(work: List<BlockingWork>) {
-        val names = work.map { context.getString(it.label) }.distinct().joinToString(", ")
         showResult(
             R.string.library_repair_not_started,
-            context.getString(R.string.library_repair_blocked, names),
+            context.getString(R.string.library_repair_blocked, work.names(context)),
             logFile = null,
         )
     }

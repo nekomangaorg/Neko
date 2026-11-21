@@ -155,6 +155,22 @@
     <string name="library_repair_stopped">Library repair stopped</string>
     <string name="library_repair_error">Library repair failed</string>
     <string name="library_repair_not_started">Library repair did not start</string>
+    <string name="library_repair">Repair library</string>
+    <string name="library_repair_summary">Merge titles listed more than once and fix damaged library entries</string>
+    <string name="library_repair_nothing">Nothing to repair</string>
+    <string name="library_repair_backup_hint">Make a backup first. The repair can\'t be undone.</string>
+    <plurals name="library_repair_duplicates">
+        <item quantity="one">%d title is listed more than once</item>
+        <item quantity="other">%d titles are listed more than once</item>
+    </plurals>
+    <plurals name="library_repair_damaged">
+        <item quantity="one">%d damaged entry has no copy</item>
+        <item quantity="other">%d damaged entries have no copy</item>
+    </plurals>
+    <plurals name="library_repair_skipped">
+        <item quantity="one">%d entry will be skipped</item>
+        <item quantity="other">%d entries will be skipped</item>
+    </plurals>
     <string name="long_press_category">Press and hold to edit a category</string>
     <string name="jump_to_category">Jump to category</string>
 

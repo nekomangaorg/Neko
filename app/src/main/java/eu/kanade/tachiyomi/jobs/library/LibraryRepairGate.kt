@@ -70,3 +70,8 @@ enum class BlockingWork(val tag: String, @StringRes val label: Int) {
     DELAYED_TRACKING(DelayedTrackingUpdateJob.TAG, R.string.library_repair_work_tracking),
     DOWNLOADS(DownloadJob.TAG, R.string.library_repair_work_downloads),
 }
+
+/** The names the user sees for this work, joined by commas. Both tracking jobs show as one name. */
+fun List<BlockingWork>.names(context: Context): String {
+    return map { context.getString(it.label) }.distinct().joinToString(", ")
+}

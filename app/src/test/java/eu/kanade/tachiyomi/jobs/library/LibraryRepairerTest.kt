@@ -202,6 +202,11 @@ class LibraryRepairerTest {
 
     private val store: DelayedTrackingStore = mockk(relaxed = true)
 
+    private val gate: LibraryRepairGate = mockk {
+        every { isRunning } returns false
+        coEvery { blockingWork() } returns emptyList()
+    }
+
     private val repairer =
         LibraryRepairer(
             appDatabase = appDatabase,
@@ -465,6 +470,47 @@ class LibraryRepairerTest {
             repairer.inventory()
 
             readsInTransaction shouldBe listOf(true)
+        }
+
+    @Test
+    fun `given the gate is held when check then Running`() = runTest {
+        every { gate.isRunning } returns true
+
+        repairer.check(gate) shouldBe RepairCheck.Running
+
+        coVerify(exactly = 0) { mangaDao.getMangaList() }
+    }
+
+    @Test
+    fun `given a running restore when check then Blocked with RESTORE`() = runTest {
+        coEvery { gate.blockingWork() } returns listOf(BlockingWork.RESTORE)
+
+        repairer.check(gate) shouldBe RepairCheck.Blocked(listOf(BlockingWork.RESTORE))
+
+        coVerify(exactly = 0) { mangaDao.getMangaList() }
+    }
+
+    @Test
+    fun `given a healthy library when check then NothingToRepair`() = runTest {
+        manga += manga(1, "/title/$U")
+
+        repairer.check(gate) shouldBe RepairCheck.NothingToRepair
+    }
+
+    @Test
+    fun `given a doubled title when check then Confirm with one duplicate title`() = runTest {
+        seedDoubledTitle()
+
+        (repairer.check(gate) as RepairCheck.Confirm).inventory.duplicateTitles shouldBe 1
+    }
+
+    @Test
+    fun `given only a row that is not a MangaDex title when check then Confirm lists it as skipped`() =
+        runTest {
+            manga += manga(5, "/title/$U2", source = 123L, title = "Other")
+
+            (repairer.check(gate) as RepairCheck.Confirm).inventory.skipped shouldBe
+                listOf(SkippedEntry("Other", SkipReason.NotMangaDex))
         }
 
     private fun verifyNothingWritten() {

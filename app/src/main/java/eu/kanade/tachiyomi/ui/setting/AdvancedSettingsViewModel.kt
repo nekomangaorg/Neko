@@ -1,18 +1,28 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairJob
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairer
+import eu.kanade.tachiyomi.jobs.library.RepairCheck
+import eu.kanade.tachiyomi.jobs.library.RepairInventory
+import eu.kanade.tachiyomi.jobs.library.names
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.data.database.repository.CategoryRepository
@@ -21,6 +31,7 @@ import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import uy.kohesive.injekt.injectLazy
 
@@ -44,8 +55,19 @@ class AdvancedSettingsViewModel : ViewModel() {
 
     val mangaRepository: MangaRepository by injectLazy()
 
+    private val application: Application by injectLazy()
+
+    private val libraryRepairer: LibraryRepairer by injectLazy()
+
+    private val libraryRepairGate: LibraryRepairGate by injectLazy()
+
     private val _toastEvent = MutableSharedFlow<UiText>()
     val toastEvent = _toastEvent.asSharedFlow()
+
+    private val _libraryRepairConfirm = MutableStateFlow<RepairInventory?>(null)
+
+    /** What a repair would do, while the confirmation dialog shows. */
+    val libraryRepairConfirm = _libraryRepairConfirm.asStateFlow()
 
     fun clearNetworkCookies() {
         viewModelScope.launchUI {
@@ -174,5 +196,41 @@ class AdvancedSettingsViewModel : ViewModel() {
                 _toastEvent.emit(stringResource)
             }
         }
+    }
+
+    /** Counts what a repair would do and asks for confirmation, or says why it can't start. */
+    fun checkLibraryRepair(): Job = viewModelScope.launchIO {
+        val toast =
+            try {
+                when (val check = libraryRepairer.check(libraryRepairGate)) {
+                    RepairCheck.Running -> UiText.StringResource(R.string.library_repair_running)
+                    is RepairCheck.Blocked ->
+                        UiText.StringResource(
+                            R.string.library_repair_blocked,
+                            check.work.names(application),
+                        )
+                    RepairCheck.NothingToRepair ->
+                        UiText.StringResource(R.string.library_repair_nothing)
+                    is RepairCheck.Confirm -> {
+                        _libraryRepairConfirm.value = check.inventory
+                        null
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Library repair check failed" }
+                UiText.StringResource(R.string.library_repair_error)
+            }
+        toast?.let { _toastEvent.emit(it) }
+    }
+
+    fun startLibraryRepair() {
+        _libraryRepairConfirm.value = null
+        LibraryRepairJob.start(application)
+    }
+
+    fun dismissLibraryRepair() {
+        _libraryRepairConfirm.value = null
     }
 }

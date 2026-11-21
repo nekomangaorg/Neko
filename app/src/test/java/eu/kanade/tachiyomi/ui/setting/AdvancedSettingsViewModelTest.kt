@@ -1,18 +1,31 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.app.Application
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.jobs.library.BlockingWork
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairJob
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairer
+import eu.kanade.tachiyomi.jobs.library.RepairCheck
+import eu.kanade.tachiyomi.jobs.library.RepairGroup
+import eu.kanade.tachiyomi.jobs.library.RepairInventory
 import eu.kanade.tachiyomi.network.NetworkHelper
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import io.mockk.verify
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -50,6 +63,17 @@ class AdvancedSettingsViewModelTest {
     private lateinit var chapterRepository: ChapterRepository
     private lateinit var categoryRepository: CategoryRepository
     private lateinit var historyRepository: HistoryRepository
+    private lateinit var application: Application
+    private lateinit var libraryRepairer: LibraryRepairer
+    private lateinit var libraryRepairGate: LibraryRepairGate
+
+    private val doubledTitle =
+        RepairInventory(
+            work = listOf(RepairGroup("uuid", listOf(1L, 2L), "Title")),
+            duplicateTitles = 1,
+            damagedEntries = 0,
+            skipped = emptyList(),
+        )
 
     @Before
     fun setup() {
@@ -66,6 +90,9 @@ class AdvancedSettingsViewModelTest {
         chapterRepository = mockk(relaxed = true)
         categoryRepository = mockk(relaxed = true)
         historyRepository = mockk(relaxed = true)
+        application = mockk(relaxed = true)
+        libraryRepairer = mockk()
+        libraryRepairGate = mockk(relaxed = true)
 
         Injekt.addSingleton(preferences)
         Injekt.addSingleton(readerPreferences)
@@ -77,6 +104,11 @@ class AdvancedSettingsViewModelTest {
         Injekt.addSingleton(chapterRepository)
         Injekt.addSingleton(categoryRepository)
         Injekt.addSingleton(historyRepository)
+        Injekt.addSingleton(application)
+        Injekt.addSingleton(libraryRepairer)
+        Injekt.addSingleton(libraryRepairGate)
+        mockkObject(LibraryRepairJob.Companion)
+        justRun { LibraryRepairJob.start(any()) }
     }
 
     @After
@@ -162,4 +194,144 @@ class AdvancedSettingsViewModelTest {
 
             job.cancel()
         }
+
+    @Test
+    fun `given nothing to repair when checkLibraryRepair then a toast and no confirmation`() =
+        runTest(testDispatcher) {
+            coEvery { libraryRepairer.check(libraryRepairGate) } returns RepairCheck.NothingToRepair
+            val viewModel = AdvancedSettingsViewModel()
+
+            val toasts = toastsDuring(viewModel) { viewModel.checkLibraryRepair().join() }
+
+            assertEquals(listOf(UiText.StringResource(R.string.library_repair_nothing)), toasts)
+            assertEquals(null, viewModel.libraryRepairConfirm.value)
+        }
+
+    @Test
+    fun `given a doubled title when checkLibraryRepair then the confirmation holds the inventory`() =
+        runTest(testDispatcher) {
+            coEvery { libraryRepairer.check(libraryRepairGate) } returns
+                RepairCheck.Confirm(doubledTitle)
+            val viewModel = AdvancedSettingsViewModel()
+
+            val toasts = toastsDuring(viewModel) { viewModel.checkLibraryRepair().join() }
+
+            assertEquals(doubledTitle, viewModel.libraryRepairConfirm.value)
+            assertEquals(emptyList<UiText>(), toasts)
+        }
+
+    @Test
+    fun `given a confirmation when startLibraryRepair then the job starts and the confirmation clears`() =
+        runTest(testDispatcher) {
+            coEvery { libraryRepairer.check(libraryRepairGate) } returns
+                RepairCheck.Confirm(doubledTitle)
+            val viewModel = AdvancedSettingsViewModel()
+            viewModel.checkLibraryRepair().join()
+
+            viewModel.startLibraryRepair()
+
+            verify(exactly = 1) { LibraryRepairJob.start(application) }
+            assertEquals(null, viewModel.libraryRepairConfirm.value)
+        }
+
+    @Test
+    fun `given a confirmation when dismissLibraryRepair then it clears and no job starts`() =
+        runTest(testDispatcher) {
+            coEvery { libraryRepairer.check(libraryRepairGate) } returns
+                RepairCheck.Confirm(doubledTitle)
+            val viewModel = AdvancedSettingsViewModel()
+            viewModel.checkLibraryRepair().join()
+
+            viewModel.dismissLibraryRepair()
+
+            verify(exactly = 0) { LibraryRepairJob.start(any()) }
+            assertEquals(null, viewModel.libraryRepairConfirm.value)
+        }
+
+    @Test
+    fun `given the repair is running when checkLibraryRepair then the running toast shows`() =
+        runTest(testDispatcher) {
+            coEvery { libraryRepairer.check(libraryRepairGate) } returns RepairCheck.Running
+            val viewModel = AdvancedSettingsViewModel()
+
+            val toasts = toastsDuring(viewModel) { viewModel.checkLibraryRepair().join() }
+
+            assertEquals(listOf(UiText.StringResource(R.string.library_repair_running)), toasts)
+            assertEquals(null, viewModel.libraryRepairConfirm.value)
+        }
+
+    @Test
+    fun `given running work when checkLibraryRepair then the toast names each kind of work once`() =
+        runTest(testDispatcher) {
+            every { application.getString(R.string.library_repair_work_tracking) } returns
+                "tracking sync"
+            every { application.getString(R.string.library_repair_work_restore) } returns "restore"
+            coEvery { libraryRepairer.check(libraryRepairGate) } returns
+                RepairCheck.Blocked(
+                    listOf(
+                        BlockingWork.TRACKING_SYNC,
+                        BlockingWork.DELAYED_TRACKING,
+                        BlockingWork.RESTORE,
+                    ),
+                )
+            val viewModel = AdvancedSettingsViewModel()
+
+            val toasts = toastsDuring(viewModel) { viewModel.checkLibraryRepair().join() }
+
+            assertEquals(
+                listOf(
+                    UiText.StringResource(
+                        R.string.library_repair_blocked,
+                        "tracking sync, restore",
+                    ),
+                ),
+                toasts,
+            )
+            assertEquals(null, viewModel.libraryRepairConfirm.value)
+        }
+
+    @Test
+    fun `given the check fails when checkLibraryRepair then an error toast and no confirmation`() =
+        runTest(testDispatcher) {
+            coEvery { libraryRepairer.check(libraryRepairGate) } throws
+                IllegalStateException("disk")
+            val viewModel = AdvancedSettingsViewModel()
+
+            val toasts = toastsDuring(viewModel) { viewModel.checkLibraryRepair().join() }
+
+            assertEquals(listOf(UiText.StringResource(R.string.library_repair_error)), toasts)
+            assertEquals(null, viewModel.libraryRepairConfirm.value)
+        }
+
+    @Test
+    fun `given the check is cancelled when checkLibraryRepair then it ends cancelled with no toast`() =
+        runTest(testDispatcher) {
+            coEvery { libraryRepairer.check(libraryRepairGate) } throws
+                CancellationException("left the screen")
+            val viewModel = AdvancedSettingsViewModel()
+            var cancelled = false
+
+            val toasts =
+                toastsDuring(viewModel) {
+                    val job = viewModel.checkLibraryRepair()
+                    job.join()
+                    cancelled = job.isCancelled
+                }
+
+            assertEquals(emptyList<UiText>(), toasts)
+            assertEquals(true, cancelled)
+        }
+
+    /** The toasts [viewModel] sends while [action] runs. */
+    private suspend fun TestScope.toastsDuring(
+        viewModel: AdvancedSettingsViewModel,
+        action: suspend () -> Unit,
+    ): List<UiText> {
+        val toasts = mutableListOf<UiText>()
+        val collector =
+            launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.toastEvent.toList(toasts) }
+        action()
+        collector.cancel()
+        return toasts
+    }
 }

@@ -380,6 +380,10 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     cleanupDownloads = vm::cleanupDownloads,
                     reindexDownloads = vm::reindexDownloads,
                     dedupeCategories = vm::dedupeCategories,
+                    libraryRepairConfirm = vm.libraryRepairConfirm,
+                    checkLibraryRepair = vm::checkLibraryRepair,
+                    startLibraryRepair = vm::startLibraryRepair,
+                    dismissLibraryRepair = vm::dismissLibraryRepair,
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {

@@ -55,6 +55,23 @@ class LibraryRepairer(
 
     suspend fun inventory(): RepairInventory = withIOContext { inventory(folderNames()) }
 
+    /**
+     * Says whether a repair can start now. The library is read only once the gate is free and no
+     * work that writes the same rows is running. Skipped entries alone still lead to the dialog,
+     * because only the job's log names them.
+     */
+    suspend fun check(gate: LibraryRepairGate): RepairCheck {
+        if (gate.isRunning) return RepairCheck.Running
+        val blocking = gate.blockingWork()
+        if (blocking.isNotEmpty()) return RepairCheck.Blocked(blocking)
+        val inventory = inventory()
+        return if (inventory.hasWork || inventory.skipped.isNotEmpty()) {
+            RepairCheck.Confirm(inventory)
+        } else {
+            RepairCheck.NothingToRepair
+        }
+    }
+
     suspend fun repair(result: RepairResult, onProgress: (done: Int, total: Int) -> Unit) {
         try {
             withIOContext {
