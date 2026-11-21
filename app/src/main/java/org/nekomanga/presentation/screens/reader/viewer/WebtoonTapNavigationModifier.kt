@@ -15,6 +15,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlin.math.hypot
@@ -66,10 +67,12 @@ fun Modifier.webtoonTapNavigation(
                     pass = PointerEventPass.Initial,
                 )
             heldPointer = down.id
-            val downPos = down.position
             val downTime = System.currentTimeMillis()
             var pointerUp: PointerInputChange? = null
             var isMovementPastSlop = false
+            // Summed from each event's own movement. A zoomed page pans with the finger, so
+            // the finger stays near the down point on the page while it moves on screen.
+            var travel = Offset.Zero
 
             while (true) {
                 val event = awaitPointerEvent(pass = PointerEventPass.Initial)
@@ -78,11 +81,8 @@ fun Modifier.webtoonTapNavigation(
                     pointerUp = change
                     break
                 }
-                val moveDistance =
-                    hypot(
-                        (change.position.x - downPos.x).toDouble(),
-                        (change.position.y - downPos.y).toDouble(),
-                    ) * zoomState.scale
+                travel += change.positionChangeIgnoreConsumed()
+                val moveDistance = travel.getDistance() * zoomState.scale
                 if (moveDistance > touchSlopPx) {
                     isMovementPastSlop = true
                     break
@@ -105,11 +105,7 @@ fun Modifier.webtoonTapNavigation(
                 val up = pointerUp
                 val upPos = up.position
                 val upTime = System.currentTimeMillis()
-                val distance =
-                    hypot(
-                        (upPos.x - downPos.x).toDouble(),
-                        (upPos.y - downPos.y).toDouble(),
-                    )
+                val distance = (travel + up.positionChangeIgnoreConsumed()).getDistance()
 
                 if (
                     distance < touchSlopPx &&
