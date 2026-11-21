@@ -5,7 +5,9 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.dao.ArtworkDao
 import org.nekomanga.data.database.dao.ChapterDao
@@ -81,8 +83,12 @@ class LibraryRepairer(
                 inventory.work.forEachIndexed { index, group ->
                     ensureActive()
                     try {
-                        val plan = appDatabase.withTransaction { applyGroup(group, folders) }
-                        record(group, plan, result)
+                        // Room commits a group whose last write is done even when this job is
+                        // cancelled, so a stop lets the group finish and be recorded
+                        withContext(NonCancellable) {
+                            val plan = appDatabase.withTransaction { applyGroup(group, folders) }
+                            record(group, plan, result)
+                        }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {

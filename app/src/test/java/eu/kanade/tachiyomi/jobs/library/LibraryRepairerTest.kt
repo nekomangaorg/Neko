@@ -13,9 +13,14 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verifyOrder
+import java.util.Collections
+import kotlin.concurrent.thread
+import kotlin.coroutines.ContinuationInterceptor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -345,7 +350,7 @@ class LibraryRepairerTest {
         }
 
     @Test
-    fun `given cancellation inside a group's transaction when repair then the group rolls back and repair stops`() =
+    fun `given a CancellationException thrown inside a group's transaction when repair then the group rolls back and repair stops`() =
         runTest {
             seedTwoDoubledTitles()
             val before = manga.toList()
@@ -436,6 +441,34 @@ class LibraryRepairerTest {
                 store.add(7L, 9f)
                 store.remove(8L)
             }
+        }
+
+    @Test
+    fun `given a stop while a group commits when repair then the group is counted and its delayed tracking moves`() =
+        runTest {
+            manga += manga(1, "/title/$U", source = -1L)
+            manga += manga(2, "/manga/$U", title = "Real")
+            tracks += track(7L, mangaId = 1L, mediaId = 11L)
+            tracks += track(8L, mangaId = 2L, mediaId = 11L)
+            every { store.getItems() } returns
+                listOf(DelayedTrackingStore.DelayedTrackingItem(trackId = 8L, lastChapterRead = 9f))
+            val result = RepairResult()
+            lateinit var job: Job
+            // The stop lands after the group's last write, while it commits
+            val transactions =
+                roomTransactions(beforeCommit = { if (manga.size == 1) job.cancel() })
+
+            job = launch { repairer.repair(result) { _, _ -> } }
+            job.join()
+            transactions.toList().forEach { it.join(5_000) }
+
+            manga.map { it.id } shouldBe listOf(1L)
+            result.merged shouldBe 1
+            verifyOrder {
+                store.add(7L, 9f)
+                store.remove(8L)
+            }
+            cacheRefreshes shouldBe 1
         }
 
     @Test
@@ -569,6 +602,38 @@ class LibraryRepairerTest {
         manga += manga(3, "/title/$U2", source = -1L, title = "Old two")
         manga += manga(4, "/manga/$U2", title = "Real two")
         chapters += chapter(41L, mangaId = 4L, url = "/chapter/c")
+    }
+
+    /**
+     * Runs transactions the way Room's withTransaction does: the block runs on a thread of its own
+     * in a child of the caller's job while the caller waits in a cancellable continuation, and the
+     * commit follows the block's last write with no suspension point between them. [beforeCommit]
+     * runs between the two. Returns the threads it starts, so a test can wait for them.
+     */
+    private fun roomTransactions(beforeCommit: () -> Unit): List<Thread> {
+        val threads = Collections.synchronizedList(mutableListOf<Thread>())
+        val transaction = slot<suspend () -> Any?>()
+        coEvery { appDatabase.withTransaction(capture(transaction)) } coAnswers
+            {
+                val block = transaction.captured
+                suspendCancellableCoroutine { continuation ->
+                    threads += thread {
+                        val outcome = runCatching {
+                            runBlocking(continuation.context.minusKey(ContinuationInterceptor)) {
+                                val snapshot = snapshot()
+                                try {
+                                    block().also { beforeCommit() }
+                                } catch (e: Throwable) {
+                                    restore(snapshot)
+                                    throw e
+                                }
+                            }
+                        }
+                        continuation.resumeWith(outcome)
+                    }
+                }
+            }
+        return threads
     }
 
     private fun snapshot(): List<List<Any>> =
