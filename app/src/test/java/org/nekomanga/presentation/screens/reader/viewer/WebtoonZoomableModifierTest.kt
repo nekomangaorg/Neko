@@ -129,6 +129,26 @@ class WebtoonZoomableModifierTest {
     }
 
     @Test
+    fun `panBy moves the page as far as the finger moved on screen`() {
+        // At 2.5x a finger that moves 250 px on screen reports 100 px inside the zoomed layer
+        val state = WebtoonZoomState(initialScale = 2.5f)
+
+        state.panBy(deltaX = -100f, viewportWidth = 1080f)
+
+        assertEquals(-250f, state.offsetX, 0.001f)
+    }
+
+    @Test
+    fun `panBy stops at the page edge`() {
+        // 2.5x on a 1080 px viewport leaves 1080 * 1.5 / 2 = 810 px to each side
+        val state = WebtoonZoomState(initialScale = 2.5f, initialOffsetX = 800f)
+
+        state.panBy(deltaX = 100f, viewportWidth = 1080f)
+
+        assertEquals(810f, state.offsetX, 0.001f)
+    }
+
+    @Test
     fun `WebtoonZoomState flingHorizontal animates offset and cancelFling arrests animation`() =
         runTest {
             withContext(TestFrameClock()) {

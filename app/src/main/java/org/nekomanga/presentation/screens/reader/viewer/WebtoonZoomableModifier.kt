@@ -20,9 +20,11 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.unit.Velocity
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
@@ -57,6 +59,17 @@ class WebtoonZoomState(
         cancelFling()
         scale = 1f
         offsetX = 0f
+    }
+
+    /**
+     * Moves the page sideways by [deltaX], a pointer movement as seen inside the zoomed layer, and
+     * keeps it within the page edges for [viewportWidth]. The layer reports movement divided by
+     * [scale] while [offsetX] is in screen pixels, so [deltaX] is multiplied by [scale] to keep the
+     * page under the finger.
+     */
+    fun panBy(deltaX: Float, viewportWidth: Float) {
+        val maxOffsetX = (viewportWidth * (scale - 1f)) / 2f
+        offsetX = (offsetX + deltaX * scale).coerceIn(-maxOffsetX, maxOffsetX)
     }
 
     fun flingHorizontal(
@@ -137,8 +150,11 @@ fun Modifier.webtoonZoomable(
 
                 val down = awaitFirstDown(requireUnconsumed = false)
                 state.cancelFling()
+                // The positions in this layer are divided by the scale and move with the page.
+                // addPointerInputChange tracks the event's screen position, so the fling velocity
+                // is in screen pixels like offsetX.
                 velocityTracker.resetTracking()
-                velocityTracker.addPosition(down.uptimeMillis, down.position)
+                velocityTracker.addPointerInputChange(down)
 
                 do {
                     val event = awaitPointerEvent(PointerEventPass.Initial)
@@ -169,14 +185,20 @@ fun Modifier.webtoonZoomable(
                         }
                     } else if (activePointers.size == 1) {
                         val change = activePointers.first()
-                        velocityTracker.addPosition(change.uptimeMillis, change.position)
+                        velocityTracker.addPointerInputChange(change)
 
                         if (state.scale > ZOOM_INTERACTION_THRESHOLD) {
                             val panX = change.position.x - change.previousPosition.x
                             if (panX != 0f) {
-                                val maxOffsetX = (size.width * (state.scale - 1f)) / 2f
-                                state.offsetX =
-                                    (state.offsetX + panX).coerceIn(-maxOffsetX, maxOffsetX)
+                                state.panBy(panX, size.width.toFloat())
+                            }
+                        }
+                    } else {
+                        // The tracker resets on a lift that comes over 40 ms after the
+                        // last move, so a finger that stopped before lifting does not fling.
+                        event.changes.forEach {
+                            if (it.changedToUpIgnoreConsumed()) {
+                                velocityTracker.addPointerInputChange(it)
                             }
                         }
                     }
