@@ -56,41 +56,16 @@ class WebtoonZoomableModifierTest {
     }
 
     @Test
-    fun `WebtoonZoomScrollConnection onPreScroll consumes vertical delta for UserInput when zoomed in`() {
-        val state = WebtoonZoomState(initialScale = 2f)
-        val connection = state.scrollConnection
-
-        val available = Offset(x = 25f, y = 100f)
-        val consumed = connection.onPreScroll(available, NestedScrollSource.UserInput)
-
-        // Only Y delta is consumed; X is unconsumed so horizontal pan gestures handle it
-        assertEquals(0f, consumed.x, 0.001f)
-        assertEquals(50f, consumed.y, 0.001f)
-    }
-
-    @Test
-    fun `WebtoonZoomScrollConnection onPreScroll does not consume when scale is 1 or at threshold`() {
-        val state = WebtoonZoomState(initialScale = 1f)
-        val connection = state.scrollConnection
-
-        val available = Offset(x = 25f, y = 100f)
-        val consumed = connection.onPreScroll(available, NestedScrollSource.UserInput)
-
-        assertEquals(Offset.Zero, consumed)
-
-        val thresholdState = WebtoonZoomState(initialScale = ZOOM_INTERACTION_THRESHOLD)
-        val thresholdConsumed =
-            thresholdState.scrollConnection.onPreScroll(available, NestedScrollSource.UserInput)
-        assertEquals(Offset.Zero, thresholdConsumed)
-    }
-
-    @Test
-    fun `WebtoonZoomScrollConnection onPreScroll does not consume when source is not UserInput`() {
+    fun `WebtoonZoomScrollConnection leaves a zoomed drag to the LazyColumn`() {
+        // The LazyColumn sits inside the zoom layer, so a drag reaches it already divided by the
+        // scale and moves the page as far as the finger
         val state = WebtoonZoomState(initialScale = 2.5f)
-        val connection = state.scrollConnection
 
-        val available = Offset(x = 0f, y = 100f)
-        val consumed = connection.onPreScroll(available, NestedScrollSource.SideEffect)
+        val consumed =
+            state.scrollConnection.onPreScroll(
+                Offset(x = 25f, y = 100f),
+                NestedScrollSource.UserInput,
+            )
 
         assertEquals(Offset.Zero, consumed)
     }

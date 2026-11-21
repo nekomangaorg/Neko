@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
@@ -223,21 +222,14 @@ fun Modifier.webtoonZoomable(
         }
 
 /**
- * NestedScrollConnection that scales vertical user dragging and fling velocities by (1 / scale)
- * when zoomed in, ensuring that vertical content movement directly tracks the finger 1:1 on screen
- * and maintains the same touch sensitivity as horizontal panning.
+ * NestedScrollConnection that scales vertical fling velocities by (1 / scale) when zoomed in. The
+ * LazyColumn sits inside the zoom layer, so a drag reaches it already divided by the scale and
+ * tracks the finger 1:1 on screen, like horizontal panning. Its fling velocity is tracked from
+ * screen positions, so only the fling needs scaling.
  */
 internal class WebtoonZoomScrollConnection(
     private val state: WebtoonZoomState,
 ) : NestedScrollConnection {
-
-    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        if (source == NestedScrollSource.UserInput && state.scale > ZOOM_INTERACTION_THRESHOLD) {
-            val consumedY = calculateZoomScrollConsumption(available.y, state.scale)
-            return Offset(0f, consumedY)
-        }
-        return Offset.Zero
-    }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
         if (state.scale > ZOOM_INTERACTION_THRESHOLD) {
@@ -249,9 +241,9 @@ internal class WebtoonZoomScrollConnection(
 }
 
 /**
- * Calculates the amount of scroll delta to consume before passing to LazyColumn so that when
- * LazyColumn is rendered with [scale], the visual movement on screen matches the user's finger
- * movement 1:1 (rather than moving [scale] times faster).
+ * Calculates the amount of fling velocity to consume before passing to LazyColumn so that when
+ * LazyColumn is rendered with [scale], the fling starts at the finger's speed on screen (rather
+ * than [scale] times faster).
  */
 internal fun calculateZoomScrollConsumption(availableDelta: Float, scale: Float): Float =
     if (scale > ZOOM_INTERACTION_THRESHOLD) availableDelta * (1f - 1f / scale) else 0f
