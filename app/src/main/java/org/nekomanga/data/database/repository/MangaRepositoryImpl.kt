@@ -87,18 +87,16 @@ class MangaRepositoryImpl(
             .map { it.toManga() }
 
     override suspend fun getMangaByUrlAndSource(url: String, sourceId: Long): Manga? {
-        val altUrl = getAltUrl(url)
-        val manga =
-            mangaDao.getMangaByUrlAndSourceSync(url, sourceId)
-                ?: altUrl?.let { mangaDao.getMangaByUrlAndSourceSync(it, sourceId) }
-        return manga?.toManga()
+        return urlForms(url)
+            .firstNotNullOfOrNull { mangaDao.getMangaByUrlAndSourceSync(it, sourceId) }
+            ?.toManga()
     }
 
     override suspend fun getMangaByUrls(urls: List<String>): List<Manga> {
-        // Distinct guards against the input containing both a "/title/x" and its
-        // "/manga/x" counterpart: each expands into the same pair, which would otherwise
+        // Distinct guards against the input containing two forms of the same url, such as
+        // "/title/x" and "/manga/x": each expands into the same forms, which would otherwise
         // be queried twice and waste bind variables.
-        val allUrls = urls.flatMap { url -> listOfNotNull(url, getAltUrl(url)) }.distinct()
+        val allUrls = urls.flatMap { url -> urlForms(url) }.distinct()
         return allUrls
             .chunked(MAX_DB_QUERY_VARIABLES)
             .flatMap { chunk -> mangaDao.getMangaByUrls(chunk) }
@@ -106,17 +104,23 @@ class MangaRepositoryImpl(
     }
 
     override suspend fun getMangaByUrl(url: String): Manga? {
-        val altUrl = getAltUrl(url)
-        val manga = mangaDao.getMangaByUrl(url) ?: altUrl?.let { mangaDao.getMangaByUrl(it) }
-        return manga?.toManga()
+        return urlForms(url).firstNotNullOfOrNull { mangaDao.getMangaByUrl(it) }?.toManga()
     }
 
-    private fun getAltUrl(url: String): String? {
-        return when {
-            url.startsWith("/title/") -> url.replaceFirst("/title/", "/manga/")
-            url.startsWith("/manga/") -> url.replaceFirst("/manga/", "/title/")
-            else -> null
-        }
+    /**
+     * The forms a stored MangaDex url can take, [url] first: the "/title/" and "/manga/" prefixes,
+     * each with and without a trailing slash. Neko 2.4 to 2.5.2 stored titles from its cached
+     * source as "/manga/<uuid>/".
+     */
+    private fun urlForms(url: String): List<String> {
+        val path = url.trimEnd('/')
+        val twin =
+            when {
+                path.startsWith("/title/") -> path.replaceFirst("/title/", "/manga/")
+                path.startsWith("/manga/") -> path.replaceFirst("/manga/", "/title/")
+                else -> return listOf(url)
+            }
+        return listOf(url, path, twin, "$path/", "$twin/").distinct()
     }
 
     override suspend fun getMangaById(id: Long): Manga? = mangaDao.getMangaById(id)?.toManga()

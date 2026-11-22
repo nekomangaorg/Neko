@@ -3,6 +3,7 @@ package org.nekomanga.data.database.repository
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveAtMostSize
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -17,6 +18,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.nekomanga.data.database.dao.LibraryDao
 import org.nekomanga.data.database.dao.MangaDao
+import org.nekomanga.data.database.entity.MangaEntity
 import org.nekomanga.data.database.mapper.toEntity
 import org.nekomanga.data.database.model.LibraryMangaRaw
 import org.nekomanga.domain.library.LibraryPreferences
@@ -46,11 +48,13 @@ class MangaRepositoryImplTest {
     @Test
     fun `getMangaByUrls splits expanded url list so no query exceeds the SQLite variable limit`() =
         runTest {
-            // Each "/title/..." url is expanded by the repository into url + "/manga/..." alt url,
-            // so 900 inputs become 1800 bind variables in a single query unless chunked.
+            // Each "/title/..." url is expanded by the repository into its "/manga/..." form and
+            // both with a trailing slash, so 900 inputs become 3600 bind variables in a single
+            // query unless chunked.
             val inputUrls = (1..900).map { "/title/uuid-$it" }
             val expectedExpanded = inputUrls.flatMap {
-                listOf(it, it.replaceFirst("/title/", "/manga/"))
+                val twin = it.replaceFirst("/title/", "/manga/")
+                listOf(it, twin, "$it/", "$twin/")
             }
 
             val capturedQueries = mutableListOf<List<String>>()
@@ -60,16 +64,15 @@ class MangaRepositoryImplTest {
 
             // No single DAO query may exceed the SQLite bind-variable limit.
             capturedQueries.forEach { query -> query shouldHaveAtMostSize sqliteMaxVariables }
-            // Every url (and its alt url) must still be queried across the chunks - nothing
+            // Every url (and its other forms) must still be queried across the chunks - nothing
             // dropped.
             capturedQueries.flatten() shouldContainExactlyInAnyOrder expectedExpanded
         }
 
     @Test
     fun `getMangaByUrls deduplicates urls so the same manga is not queried twice`() = runTest {
-        // Input contains both forms of the SAME manga. Without distinct(), the alt-url
-        // expansion would query ["/title/uuid-1", "/manga/uuid-1", "/manga/uuid-1",
-        // "/title/uuid-1"], doubling the bind variables and repeating the lookup.
+        // Input contains both forms of the SAME manga. Without distinct(), both expand into the
+        // same four forms, doubling the bind variables and repeating the lookup.
         val inputUrls = listOf("/title/uuid-1", "/manga/uuid-1")
 
         val capturedQueries = mutableListOf<List<String>>()
@@ -78,8 +81,63 @@ class MangaRepositoryImplTest {
         repository.getMangaByUrls(inputUrls)
 
         capturedQueries.flatten() shouldContainExactlyInAnyOrder
-            listOf("/title/uuid-1", "/manga/uuid-1")
+            listOf("/title/uuid-1", "/manga/uuid-1", "/title/uuid-1/", "/manga/uuid-1/")
     }
+
+    @Test
+    fun `getMangaByUrls finds a title stored with a trailing slash`() = runTest {
+        storedRows(manga(7L, "/manga/uuid-7/"))
+
+        repository.getMangaByUrls(listOf("/title/uuid-7")).map { it.id } shouldBe listOf(7L)
+    }
+
+    @Test
+    fun `getMangaByUrl finds a title stored with a trailing slash`() = runTest {
+        storedRows(manga(7L, "/title/uuid-7/"))
+
+        repository.getMangaByUrl("/title/uuid-7")?.id shouldBe 7L
+    }
+
+    @Test
+    fun `getMangaByUrlAndSource finds a title stored with a trailing slash`() = runTest {
+        storedRows(manga(7L, "/manga/uuid-7/"))
+
+        repository.getMangaByUrlAndSource("/title/uuid-7", MANGADEX)?.id shouldBe 7L
+    }
+
+    @Test
+    fun `getMangaByUrlAndSource finds a title looked up with a trailing slash`() = runTest {
+        // An MDList track's url was once built from the manga url, slash included.
+        storedRows(manga(7L, "/title/uuid-7"))
+
+        repository.getMangaByUrlAndSource("/manga/uuid-7/", MANGADEX)?.id shouldBe 7L
+    }
+
+    /** Answers the url queries the way SQLite would for [rows]. */
+    private fun storedRows(vararg rows: MangaEntity) {
+        coEvery { mangaDao.getMangaByUrls(any()) } answers
+            {
+                rows.filter { it.url in firstArg<List<String>>() }
+            }
+        coEvery { mangaDao.getMangaByUrl(any()) } answers
+            {
+                rows.firstOrNull { it.url == firstArg<String>() }
+            }
+        coEvery { mangaDao.getMangaByUrlAndSourceSync(any(), any()) } answers
+            {
+                rows.firstOrNull { it.url == firstArg<String>() && it.source == secondArg<Long>() }
+            }
+    }
+
+    private fun manga(id: Long, url: String) =
+        MangaImpl()
+            .apply {
+                this.id = id
+                this.url = url
+                title = "Title $id"
+                source = MANGADEX
+            }
+            .toEntity()
 
     @Test
     fun `observeLibrary gives a slow collector the latest library and skips the lists between`() =
@@ -147,5 +205,9 @@ class MangaRepositoryImplTest {
 
         capturedQueries.forEach { query -> query shouldHaveAtMostSize sqliteMaxVariables }
         capturedQueries.flatten() shouldContainExactlyInAnyOrder inputIds
+    }
+
+    private companion object {
+        const val MANGADEX = 2L
     }
 }
