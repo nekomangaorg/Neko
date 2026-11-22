@@ -319,7 +319,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 },
             )
 
-            notifications.forEach { notify(it.second, it.first) }
+            notifications.forEach { notify(Notifications.TAG_NEW_CHAPTERS, it.second, it.first) }
         }
     }
 

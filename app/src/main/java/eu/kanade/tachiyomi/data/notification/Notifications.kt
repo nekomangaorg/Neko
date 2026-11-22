@@ -83,6 +83,9 @@ object Notifications {
     const val CHANNEL_NEW_CHAPTERS = "new_chapters_channel"
     const val ID_NEW_CHAPTERS = -301
     const val GROUP_NEW_CHAPTERS = "org.nekomanga.NEW_CHAPTERS"
+    // Each manga's notification uses the manga id as its id. The tag keeps manga 1-3 apart from
+    // ID_UPDATER, ID_DOWNLOAD_IMAGE and ID_INSTALL, which have no tag.
+    const val TAG_NEW_CHAPTERS = "new_chapters"
 
     /** Notification channel and ids used for backup and restore. */
     private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
