@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.Data
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -131,6 +132,35 @@ class AppDownloadInstallJobDownloadTest {
                 anyConstructed<AppUpdateNotifier>().onDownloadError(any(), any())
             }
             verify { anyConstructed<AppUpdateNotifier>().cancel() }
+        }
+
+    @Test
+    fun `given WorkManager stops the job during the download when doWork then the download stops`() =
+        runBlocking {
+            val server = SlowApkServer(APK_SIZE, BODY_DURATION_MS).also { server = it }
+            val downloading = CountDownLatch(1)
+            every { anyConstructed<AppUpdateNotifier>().onProgressChange(any()) } answers
+                {
+                    downloading.countDown()
+                }
+            val job = AppDownloadInstallJob(context, workerParams(server.url))
+
+            val download = async(Dispatchers.IO) { job.doWork() }
+            assertTrue("the download did not start", downloading.await(5, TimeUnit.SECONDS))
+            // How WorkManager stops a job that a newer start() replaced or that lost its
+            // constraints. AppDownloadInstallJob.stop() does not run.
+            job.stop(WorkInfo.STOP_REASON_CANCELLED_BY_APP)
+            download.cancel()
+            download.join()
+
+            verify(exactly = 0) { anyConstructed<AppUpdateNotifier>().onDownloadFinished(any()) }
+            verify(exactly = 0) {
+                anyConstructed<AppUpdateNotifier>().onDownloadError(any(), any())
+            }
+            assertTrue(
+                "the stopped job downloaded the whole apk",
+                File(folder.root, "update.apk").length() < APK_SIZE,
+            )
         }
 
     private fun workerParams(url: String) =
