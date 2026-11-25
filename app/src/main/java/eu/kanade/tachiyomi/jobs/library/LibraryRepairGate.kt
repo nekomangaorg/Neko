@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.flow.first
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
 import uy.kohesive.injekt.Injekt
@@ -52,7 +53,7 @@ class LibraryRepairGate(
         val workManager = Injekt.get<WorkManager>()
         val runningJobs =
             BlockingWork.entries.filter { work ->
-                workManager.getWorkInfosByTag(work.tag).get().any {
+                workManager.getWorkInfosByTagFlow(work.tag).first().any {
                     it.state == WorkInfo.State.RUNNING
                 }
             }

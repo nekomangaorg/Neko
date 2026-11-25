@@ -6,10 +6,20 @@ import com.google.common.util.concurrent.ListenableFuture
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -34,10 +44,9 @@ class LibraryRepairGateTest {
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.addSingleton(
             mockk<WorkManager> {
-                every { getWorkInfosByTag(any()) } answers
+                every { getWorkInfosByTagFlow(any()) } answers
                     {
-                        val infos = workByTag[firstArg()].orEmpty().map { workInfo(it) }
-                        mockk<ListenableFuture<List<WorkInfo>>> { every { get() } returns infos }
+                        flowOf(workByTag[firstArg()].orEmpty().map { workInfo(it) })
                     }
             },
         )
@@ -100,6 +109,43 @@ class LibraryRepairGateTest {
 
         gate.blockingWork() shouldBe listOf(BlockingWork.DOWNLOADS)
     }
+
+    @Test
+    fun `given WorkManager has not answered when the caller is cancelled then blockingWork ends`() =
+        runBlocking<Unit> {
+            val asked = CountDownLatch(1)
+            val answer = CountDownLatch(1)
+            Injekt = InjektScope(DefaultRegistrar())
+            Injekt.addSingleton(
+                mockk<WorkManager> {
+                    every { getWorkInfosByTag(any()) } answers
+                        {
+                            mockk<ListenableFuture<List<WorkInfo>>> {
+                                every { get() } answers
+                                    {
+                                        asked.countDown()
+                                        answer.await()
+                                        emptyList()
+                                    }
+                            }
+                        }
+                    every { getWorkInfosByTagFlow(any()) } returns
+                        flow<List<WorkInfo>> {
+                            asked.countDown()
+                            awaitCancellation()
+                        }
+                },
+            )
+            Injekt.addSingleton(mockk<DownloadManager> { every { queueState } returns queue })
+
+            val check = launch(Dispatchers.Default) { gate.blockingWork() }
+            asked.await(5, TimeUnit.SECONDS) shouldBe true
+            check.cancel()
+            val ended = withTimeoutOrNull(2_000) { check.join() }
+            answer.countDown()
+
+            ended shouldNotBe null
+        }
 
     private fun workInfo(workState: WorkInfo.State) =
         mockk<WorkInfo> { every { state } returns workState }

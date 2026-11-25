@@ -5,7 +5,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker.Result
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.google.common.util.concurrent.ListenableFuture
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -30,6 +29,7 @@ import io.mockk.verify
 import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -63,11 +63,9 @@ class LibraryRepairJobTest {
     @Before
     fun setUp() {
         Injekt = InjektScope(DefaultRegistrar())
-        every { workManager.getWorkInfosByTag(any()) } answers
+        every { workManager.getWorkInfosByTagFlow(any()) } answers
             {
-                val infos =
-                    if (firstArg<String>() in runningTags) listOf(running()) else emptyList()
-                mockk<ListenableFuture<List<WorkInfo>>> { every { get() } returns infos }
+                flowOf(if (firstArg<String>() in runningTags) listOf(running()) else emptyList())
             }
         Injekt.addSingleton(workManager)
         Injekt.addSingleton(
