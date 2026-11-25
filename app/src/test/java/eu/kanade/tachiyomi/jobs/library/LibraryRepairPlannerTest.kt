@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.jobs.library
 
 import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import io.kotest.matchers.shouldBe
 import org.junit.Test
@@ -16,7 +18,12 @@ import org.nekomanga.data.database.entity.TrackEntity
 class LibraryRepairPlannerTest {
 
     private val planner =
-        LibraryRepairPlanner(MANGADEX, { it == MANGADEX }, { it.userTitle ?: it.title })
+        LibraryRepairPlanner(
+            MANGADEX,
+            { it == MANGADEX },
+            ::trackStatuses,
+            { it.userTitle ?: it.title },
+        )
 
     @Test
     fun `given title and manga urls of one uuid when inventory then one group of two rows`() {
@@ -282,6 +289,61 @@ class LibraryRepairPlannerTest {
     }
 
     @Test
+    fun `given a completed MDList track on the keeper and a reading one on the copy when planGroup then the combined track is completed`() {
+        val completed = FollowStatus.COMPLETED.int
+        val t7 = mdListTrack(7L, mangaId = 1L, lastChapterRead = 5f, status = completed)
+        val t8 = mdListTrack(8L, mangaId = 2L, lastChapterRead = 0f, FollowStatus.READING.int)
+
+        changes(tracks = listOf(t7, t8)).trackUpserts shouldBe
+            listOf(t8.copy(id = 7L, mangaId = 1L, lastChapterRead = 5f, status = completed))
+    }
+
+    @Test
+    fun `given a reading MDList track on the keeper and a planned one on the copy when planGroup then the combined track is reading`() {
+        val reading = FollowStatus.READING.int
+        val t7 = mdListTrack(7L, mangaId = 1L, lastChapterRead = 5f, status = reading)
+        val t8 = mdListTrack(8L, mangaId = 2L, lastChapterRead = 0f, FollowStatus.PLAN_TO_READ.int)
+
+        changes(tracks = listOf(t7, t8)).trackUpserts shouldBe
+            listOf(t8.copy(id = 7L, mangaId = 1L, lastChapterRead = 5f, status = reading))
+    }
+
+    @Test
+    fun `given a MangaUpdates reading list track on the keeper and a wish list one on the copy when planGroup then the combined track is on the reading list`() {
+        val service = TrackManager.MANGA_UPDATES
+        val t7 = track(7L, 1L, 11L, 5f, service = service, status = MangaUpdates.READING_LIST)
+        val t8 = track(8L, 2L, 11L, 0f, service = service, status = MangaUpdates.WISH_LIST)
+
+        changes(tracks = listOf(t7, t8)).trackUpserts shouldBe
+            listOf(
+                t8.copy(
+                    id = 7L,
+                    mangaId = 1L,
+                    lastChapterRead = 5f,
+                    status = MangaUpdates.READING_LIST,
+                ),
+            )
+    }
+
+    @Test
+    fun `given MDList tracks neither completed nor reading when planGroup then the combined track has the copy's status`() {
+        val t7 = mdListTrack(7L, mangaId = 1L, lastChapterRead = 5f, FollowStatus.ON_HOLD.int)
+        val t8 = mdListTrack(8L, mangaId = 2L, lastChapterRead = 0f, FollowStatus.PLAN_TO_READ.int)
+
+        changes(tracks = listOf(t7, t8)).trackUpserts shouldBe
+            listOf(t8.copy(id = 7L, mangaId = 1L, lastChapterRead = 5f))
+    }
+
+    @Test
+    fun `given tracks of a service without known statuses when planGroup then the combined track has the copy's status`() {
+        val t7 = track(7L, mangaId = 1L, mediaId = 11L, lastChapterRead = 5f, status = 2)
+        val t8 = track(8L, mangaId = 2L, mediaId = 11L, lastChapterRead = 0f, status = 1)
+
+        changes(tracks = listOf(t7, t8)).trackUpserts shouldBe
+            listOf(t8.copy(id = 7L, mangaId = 1L, lastChapterRead = 5f))
+    }
+
+    @Test
     fun `given two Komga merges with different urls when planGroup then both stay`() {
         val keeperMerge = merge(3L, mangaId = 1L, url = "a", type = MergeType.Komga)
         val copyMerge = merge(4L, mangaId = 2L, url = "b", type = MergeType.Komga)
@@ -414,22 +476,27 @@ class LibraryRepairPlannerTest {
         mediaId: Long,
         lastChapterRead: Float,
         score: Float = 0f,
+        service: Int = TrackManager.MYANIMELIST,
+        status: Int = 0,
     ) =
         TrackEntity(
             id = id,
             mangaId = mangaId,
-            trackServiceId = 1,
+            trackServiceId = service,
             mediaId = mediaId,
             libraryId = null,
             title = "Track $id",
             lastChapterRead = lastChapterRead,
             totalChapters = 0,
-            status = 0,
+            status = status,
             score = score,
             trackingUrl = "",
             startedReadingDate = 0L,
             finishedReadingDate = 0L,
         )
+
+    private fun mdListTrack(id: Long, mangaId: Long, lastChapterRead: Float, status: Int) =
+        track(id, mangaId, 11L, lastChapterRead, service = TrackManager.MDLIST, status = status)
 
     private fun merge(id: Long, mangaId: Long, url: String, type: MergeType) =
         MergeMangaEntity(
@@ -549,5 +616,15 @@ class LibraryRepairPlannerTest {
         const val MANGADEX = 2499283573021220255L
         const val U = "f9c33607-9180-4ba6-b85c-e4b5faee7192"
         const val U2 = "a1b2c3d4-0000-4abc-8def-1234567890ab"
+
+        /** The completed and reading values of MDList and MangaUpdates, as their services give. */
+        fun trackStatuses(service: Int): TrackStatuses? =
+            when (service) {
+                TrackManager.MDLIST ->
+                    TrackStatuses(FollowStatus.COMPLETED.int, FollowStatus.READING.int)
+                TrackManager.MANGA_UPDATES ->
+                    TrackStatuses(MangaUpdates.COMPLETE_LIST, MangaUpdates.READING_LIST)
+                else -> null
+            }
     }
 }

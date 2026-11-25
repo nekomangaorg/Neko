@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.jobs.library
 
 import androidx.room.withTransaction
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.CancellationException
@@ -177,6 +178,7 @@ class LibraryRepairer(
             val appDatabase = Injekt.get<AppDatabase>()
             val sourceManager = Injekt.get<SourceManager>()
             val downloadManager = Injekt.get<DownloadManager>()
+            val trackManager = Injekt.get<TrackManager>()
             return LibraryRepairer(
                 appDatabase = appDatabase,
                 mangaDao = appDatabase.mangaDao(),
@@ -188,9 +190,16 @@ class LibraryRepairer(
                 artworkDao = appDatabase.artworkDao(),
                 mangaAggregateDao = appDatabase.mangaAggregateDao(),
                 planner =
-                    LibraryRepairPlanner(sourceManager.mangaDex.id, sourceManager::isMangadex) {
-                        DiskUtil.buildValidFilename(it.displayTitle())
-                    },
+                    LibraryRepairPlanner(
+                        mangaDexSourceId = sourceManager.mangaDex.id,
+                        isMangadex = sourceManager::isMangadex,
+                        trackStatuses = { id ->
+                            trackManager.getService(id)?.let {
+                                TrackStatuses(it.completedStatus(), it.readingStatus())
+                            }
+                        },
+                        folderName = { DiskUtil.buildValidFilename(it.displayTitle()) },
+                    ),
                 folderNames = { downloadManager.getMangaFolders().mapNotNull { it.name }.toSet() },
                 delayedTrackingStore = Injekt.get(),
                 refreshDownloadCache = downloadManager::refreshCache,

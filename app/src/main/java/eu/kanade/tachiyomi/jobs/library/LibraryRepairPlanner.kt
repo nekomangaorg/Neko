@@ -15,11 +15,13 @@ import org.nekomanga.data.database.entity.TrackEntity
 /**
  * Decides how the rows of one MangaDex title fold into one. It reads nothing and writes nothing:
  * [LibraryRepairer] hands it rows and applies the plan. [folderName] gives the download folder name
- * of a row, and a row's folder is found only by that name.
+ * of a row, and a row's folder is found only by that name. [trackStatuses] gives a tracker's
+ * completed and reading values by service id, since each tracker numbers its statuses its own way.
  */
 class LibraryRepairPlanner(
     private val mangaDexSourceId: Long,
     private val isMangadex: (Long) -> Boolean,
+    private val trackStatuses: (Int) -> TrackStatuses?,
     private val folderName: (MangaEntity) -> String,
 ) {
 
@@ -241,9 +243,10 @@ class LibraryRepairPlanner(
 
     /**
      * One track per service, built the way restore's `combineTracking` does: the details donor's
-     * track, or the first one, with the furthest chapter of any track. It is written into the
-     * keeper's track for that service, or moves over when the keeper has none. The other tracks of
-     * the service map to that track id in [TrackFold.moves].
+     * track, or the first one, with the furthest chapter of any track. Unlike restore, a completed
+     * or reading status on any track of the service wins over the donor's. The track is written
+     * into the keeper's track for that service, or moves over when the keeper has none. The other
+     * tracks of the service map to that track id in [TrackFold.moves].
      */
     private fun foldTracks(keeperId: Long, donorId: Long, tracks: List<TrackEntity>): TrackFold {
         val upserts = mutableListOf<TrackEntity>()
@@ -265,9 +268,22 @@ class LibraryRepairPlanner(
         return TrackFold(upserts, moves, conflicts)
     }
 
-    /** A score or reading date left at 0 comes from the first of [tracks] that has one. */
-    private fun TrackEntity.combinedWith(tracks: List<TrackEntity>): TrackEntity =
-        copy(
+    /**
+     * A score or reading date left at 0 comes from the first of [tracks] that has one. The status
+     * is completed when any of [tracks] is, else reading when any is, else this track's own, with
+     * the values [trackStatuses] gives for the service.
+     */
+    private fun TrackEntity.combinedWith(tracks: List<TrackEntity>): TrackEntity {
+        val statuses = tracks.map { it.status }
+        val known = trackStatuses(trackServiceId)
+        return copy(
+            status =
+                when {
+                    known == null -> status
+                    known.completed in statuses -> known.completed
+                    known.reading in statuses -> known.reading
+                    else -> status
+                },
             lastChapterRead = tracks.maxOf { it.lastChapterRead },
             score =
                 score.takeIf { it > 0f } ?: tracks.map { it.score }.firstOrNull { it > 0f } ?: 0f,
@@ -280,6 +296,7 @@ class LibraryRepairPlanner(
                     ?: tracks.map { it.finishedReadingDate }.firstOrNull { it > 0L }
                     ?: 0L,
         )
+    }
 
     /**
      * Sorts records by the row they belong to, then by their own id. Records of rows outside

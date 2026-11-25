@@ -12,6 +12,9 @@ import org.nekomanga.data.database.entity.TrackEntity
 /** The rows of one MangaDex title that the repair writes, keyed by the lowercase UUID. */
 data class RepairGroup(val key: String, val rowIds: List<Long>, val title: String)
 
+/** The status values one tracker uses for completed and reading. */
+data class TrackStatuses(val completed: Int, val reading: Int)
+
 /**
  * What a repair would do. [duplicateTitles] counts groups of two or more rows, [damagedEntries]
  * single rows that lost their source.

@@ -224,7 +224,12 @@ class LibraryRepairerTest {
             artworkDao = artworkDao,
             mangaAggregateDao = mangaAggregateDao,
             planner =
-                LibraryRepairPlanner(MANGADEX, { it == MANGADEX }, { it.userTitle ?: it.title }),
+                LibraryRepairPlanner(
+                    MANGADEX,
+                    { it == MANGADEX },
+                    { null },
+                    { it.userTitle ?: it.title },
+                ),
             folderNames = { folders },
             delayedTrackingStore = store,
             refreshDownloadCache = { cacheRefreshes++ },
