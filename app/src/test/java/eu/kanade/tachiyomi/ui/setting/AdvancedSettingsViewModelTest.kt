@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Application
+import android.util.Log
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.jobs.library.BlockingWork
@@ -10,6 +11,8 @@ import eu.kanade.tachiyomi.jobs.library.LibraryRepairer
 import eu.kanade.tachiyomi.jobs.library.RepairCheck
 import eu.kanade.tachiyomi.jobs.library.RepairGroup
 import eu.kanade.tachiyomi.jobs.library.RepairInventory
+import eu.kanade.tachiyomi.jobs.library.SkipReason
+import eu.kanade.tachiyomi.jobs.library.SkippedEntry
 import eu.kanade.tachiyomi.network.NetworkHelper
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -43,6 +46,7 @@ import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.components.UiText
+import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.api.addSingleton
@@ -218,6 +222,42 @@ class AdvancedSettingsViewModelTest {
 
             assertEquals(doubledTitle, viewModel.libraryRepairConfirm.value)
             assertEquals(emptyList<UiText>(), toasts)
+        }
+
+    @Test
+    fun `given titles to repair when checkLibraryRepair then the counts are logged`() =
+        runTest(testDispatcher) {
+            val logs = mutableListOf<String>()
+            val tree =
+                object : Timber.Tree() {
+                    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                        if (priority == Log.INFO) logs += message
+                    }
+                }
+            coEvery { libraryRepairer.check(libraryRepairGate) } returns
+                RepairCheck.Confirm(
+                    RepairInventory(
+                        work = listOf(RepairGroup("uuid", listOf(1L, 2L), "Title")),
+                        duplicateTitles = 3,
+                        damagedEntries = 2,
+                        skipped = listOf(SkippedEntry("Other", SkipReason.NotMangaDex)),
+                    ),
+                )
+            val viewModel = AdvancedSettingsViewModel()
+
+            Timber.plant(tree)
+            try {
+                viewModel.checkLibraryRepair().join()
+            } finally {
+                Timber.uproot(tree)
+            }
+
+            assertEquals(
+                listOf(
+                    "Library repair check found 3 duplicate titles, 2 damaged entries, 1 skipped",
+                ),
+                logs,
+            )
         }
 
     @Test

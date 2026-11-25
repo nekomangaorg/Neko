@@ -212,7 +212,13 @@ class AdvancedSettingsViewModel : ViewModel() {
                     RepairCheck.NothingToRepair ->
                         UiText.StringResource(R.string.library_repair_nothing)
                     is RepairCheck.Confirm -> {
-                        _libraryRepairConfirm.value = check.inventory
+                        val inventory = check.inventory
+                        TimberKt.i {
+                            "Library repair check found ${inventory.duplicateTitles} duplicate " +
+                                "titles, ${inventory.damagedEntries} damaged entries, " +
+                                "${inventory.skipped.size} skipped"
+                        }
+                        _libraryRepairConfirm.value = inventory
                         null
                     }
                 }
