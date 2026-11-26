@@ -19,12 +19,14 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,7 +43,6 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPageSplit
 import eu.kanade.tachiyomi.util.system.GLUtil
-import kotlin.math.hypot
 import kotlinx.coroutines.withTimeout
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.theme.Size
@@ -200,20 +201,18 @@ private fun WebtoonPageContent(
                 awaitEachGesture {
                     val down =
                         awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
-                    val downPos = down.position
                     var triggered = false
+                    // Summed from each event's own movement. A zoomed page pans with the finger,
+                    // so the finger stays near the down point on the page while it moves.
+                    var travel = Offset.Zero
                     try {
                         withTimeout(longPressTimeout) {
                             while (true) {
                                 val event = awaitPointerEvent(pass = PointerEventPass.Main)
                                 val change = event.changes.firstOrNull { it.id == down.id } ?: break
                                 if (!change.pressed) break
-                                val distance =
-                                    hypot(
-                                        (change.position.x - downPos.x).toDouble(),
-                                        (change.position.y - downPos.y).toDouble(),
-                                    )
-                                if (distance > touchSlop) break
+                                travel += change.positionChangeIgnoreConsumed()
+                                if (travel.getDistance() > touchSlop) break
                             }
                         }
                     } catch (_: PointerEventTimeoutCancellationException) {

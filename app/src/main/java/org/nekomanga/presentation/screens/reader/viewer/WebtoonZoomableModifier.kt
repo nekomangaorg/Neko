@@ -17,12 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.unit.Velocity
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
@@ -57,6 +58,17 @@ class WebtoonZoomState(
         cancelFling()
         scale = 1f
         offsetX = 0f
+    }
+
+    /**
+     * Moves the page sideways by [deltaX], a pointer movement as seen inside the zoomed layer, and
+     * keeps it within the page edges for [viewportWidth]. The layer reports movement divided by
+     * [scale] while [offsetX] is in screen pixels, so [deltaX] is multiplied by [scale] to keep the
+     * page under the finger.
+     */
+    fun panBy(deltaX: Float, viewportWidth: Float) {
+        val maxOffsetX = (viewportWidth * (scale - 1f)) / 2f
+        offsetX = (offsetX + deltaX * scale).coerceIn(-maxOffsetX, maxOffsetX)
     }
 
     fun flingHorizontal(
@@ -137,8 +149,11 @@ fun Modifier.webtoonZoomable(
 
                 val down = awaitFirstDown(requireUnconsumed = false)
                 state.cancelFling()
+                // The positions in this layer are divided by the scale and move with the page.
+                // addPointerInputChange tracks the event's screen position, so the fling velocity
+                // is in screen pixels like offsetX.
                 velocityTracker.resetTracking()
-                velocityTracker.addPosition(down.uptimeMillis, down.position)
+                velocityTracker.addPointerInputChange(down)
 
                 do {
                     val event = awaitPointerEvent(PointerEventPass.Initial)
@@ -169,14 +184,20 @@ fun Modifier.webtoonZoomable(
                         }
                     } else if (activePointers.size == 1) {
                         val change = activePointers.first()
-                        velocityTracker.addPosition(change.uptimeMillis, change.position)
+                        velocityTracker.addPointerInputChange(change)
 
                         if (state.scale > ZOOM_INTERACTION_THRESHOLD) {
                             val panX = change.position.x - change.previousPosition.x
                             if (panX != 0f) {
-                                val maxOffsetX = (size.width * (state.scale - 1f)) / 2f
-                                state.offsetX =
-                                    (state.offsetX + panX).coerceIn(-maxOffsetX, maxOffsetX)
+                                state.panBy(panX, size.width.toFloat())
+                            }
+                        }
+                    } else {
+                        // The tracker resets on a lift that comes over 40 ms after the
+                        // last move, so a finger that stopped before lifting does not fling.
+                        event.changes.forEach {
+                            if (it.changedToUpIgnoreConsumed()) {
+                                velocityTracker.addPointerInputChange(it)
                             }
                         }
                     }
@@ -201,21 +222,14 @@ fun Modifier.webtoonZoomable(
         }
 
 /**
- * NestedScrollConnection that scales vertical user dragging and fling velocities by (1 / scale)
- * when zoomed in, ensuring that vertical content movement directly tracks the finger 1:1 on screen
- * and maintains the same touch sensitivity as horizontal panning.
+ * NestedScrollConnection that scales vertical fling velocities by (1 / scale) when zoomed in. The
+ * LazyColumn sits inside the zoom layer, so a drag reaches it already divided by the scale and
+ * tracks the finger 1:1 on screen, like horizontal panning. Its fling velocity is tracked from
+ * screen positions, so only the fling needs scaling.
  */
 internal class WebtoonZoomScrollConnection(
     private val state: WebtoonZoomState,
 ) : NestedScrollConnection {
-
-    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        if (source == NestedScrollSource.UserInput && state.scale > ZOOM_INTERACTION_THRESHOLD) {
-            val consumedY = calculateZoomScrollConsumption(available.y, state.scale)
-            return Offset(0f, consumedY)
-        }
-        return Offset.Zero
-    }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
         if (state.scale > ZOOM_INTERACTION_THRESHOLD) {
@@ -227,9 +241,9 @@ internal class WebtoonZoomScrollConnection(
 }
 
 /**
- * Calculates the amount of scroll delta to consume before passing to LazyColumn so that when
- * LazyColumn is rendered with [scale], the visual movement on screen matches the user's finger
- * movement 1:1 (rather than moving [scale] times faster).
+ * Calculates the amount of fling velocity to consume before passing to LazyColumn so that when
+ * LazyColumn is rendered with [scale], the fling starts at the finger's speed on screen (rather
+ * than [scale] times faster).
  */
 internal fun calculateZoomScrollConsumption(availableDelta: Float, scale: Float): Float =
     if (scale > ZOOM_INTERACTION_THRESHOLD) availableDelta * (1f - 1f / scale) else 0f
