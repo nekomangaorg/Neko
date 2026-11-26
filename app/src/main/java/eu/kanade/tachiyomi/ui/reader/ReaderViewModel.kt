@@ -1065,7 +1065,8 @@ constructor(
      * mode isn't on or has at least 1 tracker
      */
     private suspend fun saveChapterProgress(readerChapter: ReaderChapter) {
-        readerChapter.requestedPage = readerChapter.chapter.last_page_read
+        // Don't copy last_page_read into requestedPage here. onPageSelected keeps requestedPage
+        // current, while incognito mode leaves last_page_read stale.
         chapterRepository.getChapterById(readerChapter.chapter.id!!)?.let { dbChapter ->
             readerChapter.chapter.bookmark = dbChapter.bookmark
         }
