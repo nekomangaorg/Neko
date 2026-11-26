@@ -553,20 +553,25 @@ class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that starts a service which dismissed the notification
+         * Dismisses the notification with [notificationId]. When it is the last one in its group,
+         * dismisses the group summary [groupId] instead.
          *
          * @param context context of application
          * @param notificationId id of notification
-         * @return [PendingIntent]
+         * @param groupId id of the group summary; null or 0 for a notification outside a group.
+         *   With [Notifications.ID_NEW_CHAPTERS] the notification is a manga's, which is posted
+         *   with [Notifications.TAG_NEW_CHAPTERS].
          */
         internal fun dismissNotification(
             context: Context,
             notificationId: Int,
             groupId: Int? = null,
         ) {
+            val tag =
+                Notifications.TAG_NEW_CHAPTERS.takeIf { groupId == Notifications.ID_NEW_CHAPTERS }
             val groupKey =
                 context.notificationManager.activeNotifications
-                    .find { it.id == notificationId }
+                    .find { it.id == notificationId && it.tag == tag }
                     ?.groupKey
             if (groupId != null && groupId != 0 && groupKey != null && groupKey.isNotEmpty()) {
                 val notifications =
@@ -578,7 +583,7 @@ class NotificationReceiver : BroadcastReceiver() {
                     return
                 }
             }
-            context.notificationManager.cancel(notificationId)
+            context.notificationManager.cancel(tag, notificationId)
         }
 
         /**
