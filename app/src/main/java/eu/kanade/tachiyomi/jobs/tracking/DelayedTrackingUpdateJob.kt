@@ -10,6 +10,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.concurrent.TimeUnit
@@ -23,6 +24,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
     CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
+        if (Injekt.get<LibraryRepairGate>().isRunning) return Result.retry()
         TimberKt.d { "Starting Delayed Tracking Update Job" }
         if (runAttemptCount > 3) {
             return Result.failure()
@@ -75,7 +77,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
     }
 
     companion object {
-        private const val TAG = "DelayedTrackingUpdate"
+        const val TAG = "DelayedTrackingUpdate"
 
         fun setupTask(context: Context) {
             val constraints =

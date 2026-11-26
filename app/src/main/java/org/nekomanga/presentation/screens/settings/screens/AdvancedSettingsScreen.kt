@@ -17,10 +17,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.jobs.library.RepairInventory
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.getActivity
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -28,6 +31,7 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.nekomanga.R
 import org.nekomanga.constants.Constants.DONT_KILL_MY_APP_URL
 import org.nekomanga.core.network.NetworkPreferences
@@ -64,6 +68,10 @@ internal class AdvancedSettingsScreen(
     val reindexDownloads: () -> Unit,
     val clearDatabase: (Boolean) -> Unit,
     val dedupeCategories: () -> Unit,
+    val libraryRepairConfirm: StateFlow<RepairInventory?>,
+    val checkLibraryRepair: () -> Unit,
+    val startLibraryRepair: () -> Unit,
+    val dismissLibraryRepair: () -> Unit,
     onNavigationIconClick: (() -> Unit)?,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
@@ -107,7 +115,16 @@ internal class AdvancedSettingsScreen(
             backgroundActivityGroup(context),
             systemGroup(context),
             networkGroup(context, clearNetworkCookies),
-            dataGroup(cleanupDownloads, clearDatabase, reindexDownloads, dedupeCategories),
+            dataGroup(
+                cleanupDownloads,
+                clearDatabase,
+                reindexDownloads,
+                dedupeCategories,
+                libraryRepairConfirm,
+                checkLibraryRepair,
+                startLibraryRepair,
+                dismissLibraryRepair,
+            ),
             getReaderGroup(readerPreferences),
         )
     }
@@ -268,11 +285,16 @@ internal class AdvancedSettingsScreen(
         clearDatabase: (Boolean) -> Unit,
         reindexDownloads: () -> Unit,
         dedupeCategories: () -> Unit,
+        libraryRepairConfirm: StateFlow<RepairInventory?>,
+        checkLibraryRepair: () -> Unit,
+        startLibraryRepair: () -> Unit,
+        dismissLibraryRepair: () -> Unit,
     ): Preference.PreferenceGroup {
 
         var showCleanDownloadsDialog by rememberSaveable { mutableStateOf(false) }
         var showClearDatabaseDialog by rememberSaveable { mutableStateOf(false) }
         var showDedupeCategoriesDialog by rememberSaveable { mutableStateOf(false) }
+        val libraryRepairInventory by libraryRepairConfirm.collectAsStateWithLifecycle()
 
         if (showCleanDownloadsDialog) {
             CleanDownloadsDialog(
@@ -294,6 +316,15 @@ internal class AdvancedSettingsScreen(
                 body = stringResource(R.string.dedupe_categories_confirmation),
                 onDismiss = { showDedupeCategoriesDialog = false },
                 onConfirm = { dedupeCategories() },
+            )
+        }
+
+        libraryRepairInventory?.let { inventory ->
+            ConfirmationDialog(
+                title = stringResource(R.string.library_repair),
+                body = libraryRepairBody(inventory),
+                onDismiss = dismissLibraryRepair,
+                onConfirm = startLibraryRepair,
             )
         }
 
@@ -321,8 +352,28 @@ internal class AdvancedSettingsScreen(
                         subtitle = stringResource(R.string.dedupe_categories_summary),
                         onClick = { showDedupeCategoriesDialog = true },
                     ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.library_repair),
+                        subtitle = stringResource(R.string.library_repair_summary),
+                        onClick = checkLibraryRepair,
+                    ),
                 ),
         )
+    }
+
+    /** One line per non-zero count, then the backup hint. */
+    @Composable
+    private fun libraryRepairBody(inventory: RepairInventory): String {
+        val counts =
+            listOf(
+                    R.plurals.library_repair_duplicates to inventory.duplicateTitles,
+                    R.plurals.library_repair_damaged to inventory.damagedEntries,
+                    R.plurals.library_repair_skipped to inventory.skipped.size,
+                )
+                .filter { (_, count) -> count > 0 }
+                .map { (plural, count) -> pluralStringResource(plural, count, count) }
+        val hint = stringResource(R.string.library_repair_backup_hint)
+        return counts.joinToString("\n") + "\n\n" + hint
     }
 
     companion object : SearchTermProvider {
@@ -386,6 +437,11 @@ internal class AdvancedSettingsScreen(
                 SearchTerm(
                     title = stringResource(R.string.dedupe_categories),
                     subtitle = stringResource(R.string.dedupe_categories_summary),
+                    group = stringResource(R.string.data_management),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.library_repair),
+                    subtitle = stringResource(R.string.library_repair_summary),
                     group = stringResource(R.string.data_management),
                 ),
                 SearchTerm(

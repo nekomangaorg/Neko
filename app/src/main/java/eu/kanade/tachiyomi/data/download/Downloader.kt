@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.network.httpErrorMessage
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
@@ -80,6 +81,8 @@ class Downloader(
     private val chapterRepository: ChapterRepository by injectLazy()
 
     private val mangaRepository: MangaRepository by injectLazy()
+
+    private val libraryRepairGate: LibraryRepairGate by injectLazy()
 
     /** Store for persisting downloads across restarts. */
     private val store = DownloadStore(context, sourceManager)
@@ -334,6 +337,7 @@ class Downloader(
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
     fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) {
+        if (libraryRepairGate.refuseStart()) return
         if (chapters.isEmpty()) return
 
         val chapterDirFiles = provider.findMangaDir(manga)?.listFiles()?.asList() ?: emptyList()

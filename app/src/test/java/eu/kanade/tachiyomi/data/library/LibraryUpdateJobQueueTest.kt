@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
@@ -82,6 +83,7 @@ class LibraryUpdateJobQueueTest {
     private val trackRepository = mockk<TrackRepository>(relaxed = true)
     private val mangaDex = mockk<MangaDex>()
     private val libraryPreferences = mockk<LibraryPreferences>(relaxed = true)
+    private val gate = LibraryRepairGate(context, showToast = {})
 
     private val jobRunning = CompletableDeferred<Unit>()
     private val finishJob = CompletableDeferred<Unit>()
@@ -174,6 +176,7 @@ class LibraryUpdateJobQueueTest {
         Injekt.addSingleton(mockk<MangaUseCases>(relaxed = true))
         Injekt.addSingleton(mockk<MangaDexLoginHelper>(relaxed = true))
         Injekt.addSingleton(ShouldUpdateMangaUseCase(trackManager))
+        Injekt.addSingleton(gate)
     }
 
     @After
@@ -300,6 +303,33 @@ class LibraryUpdateJobQueueTest {
 
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify(exactly = 0) { mangaRepository.updateManga(any()) }
+        }
+
+    @Test
+    fun `given the repair runs when doWork then it returns retry`() =
+        runBlocking<Unit> {
+            gate.tryAcquire()
+            finishJob.complete(Unit)
+
+            val result = runCatching { LibraryUpdateJob(context, workerParams).doWork() }
+
+            assertEquals(ListenableWorker.Result.retry(), result.getOrNull())
+            coVerify(exactly = 0) { mangaRepository.getLibraryList() }
+        }
+
+    @Test
+    fun `given the repair runs when startNow then it returns false and enqueues nothing`() =
+        runBlocking<Unit> {
+            gate.tryAcquire()
+            every { workManager.getWorkInfosByTag(LibraryUpdateJob.TAG) } returns
+                mockk<ListenableFuture<List<WorkInfo>>> { every { get() } returns emptyList() }
+
+            val started = LibraryUpdateJob.startNow(context)
+
+            assertFalse(started)
+            verify(exactly = 0) {
+                workManager.enqueueUniqueWork(any<String>(), any(), any<OneTimeWorkRequest>())
+            }
         }
 
     private fun duringRunningUpdate(block: suspend () -> Unit) = runBlocking {

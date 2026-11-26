@@ -13,6 +13,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
@@ -22,6 +23,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 /** WorkManager job that syncs tracking from trackers to Neko */
@@ -59,6 +62,7 @@ class TrackingSyncJob(val context: Context, params: WorkerParameters) :
     }
 
     override suspend fun doWork(): Result = coroutineScope {
+        if (Injekt.get<LibraryRepairGate>().isRunning) return@coroutineScope Result.retry()
         tryToSetForeground()
 
         try {
@@ -97,6 +101,7 @@ class TrackingSyncJob(val context: Context, params: WorkerParameters) :
         val TAG = "tracking_sync_job"
 
         fun doWorkNow(context: Context) {
+            if (Injekt.get<LibraryRepairGate>().refuseStart()) return
             val constraints =
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)

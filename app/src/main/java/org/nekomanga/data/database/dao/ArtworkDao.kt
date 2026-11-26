@@ -16,6 +16,9 @@ interface ArtworkDao {
     @Query("SELECT * FROM artwork WHERE manga_id = :mangaId")
     fun getArtworkForManga(mangaId: Long): List<ArtworkEntity>
 
+    @Query("SELECT * FROM artwork WHERE manga_id IN (:mangaIds)")
+    suspend fun getArtworkForMangaIds(mangaIds: List<Long>): List<ArtworkEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArtwork(artwork: ArtworkEntity): Long
 

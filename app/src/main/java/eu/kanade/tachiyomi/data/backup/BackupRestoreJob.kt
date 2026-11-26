@@ -13,12 +13,15 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.nekomanga.R
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -37,6 +40,7 @@ class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) :
     }
 
     override suspend fun doWork(): Result {
+        if (Injekt.get<LibraryRepairGate>().isRunning) return Result.retry()
         tryToSetForeground()
 
         val uriPath = inputData.getString(BackupConst.EXTRA_URI) ?: return Result.failure()
@@ -61,9 +65,10 @@ class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) :
     }
 
     companion object {
-        private const val TAG = "BackupRestorer"
+        const val TAG = "BackupRestorer"
 
         fun start(context: Context, uri: Uri) {
+            if (Injekt.get<LibraryRepairGate>().refuseStart()) return
             val request =
                 OneTimeWorkRequestBuilder<BackupRestoreJob>()
                     .addTag(TAG)

@@ -11,6 +11,8 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.FollowsSyncProcessor
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairer
 import eu.kanade.tachiyomi.jobs.tracking.TrackSyncProcessor
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -250,6 +252,10 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(TrackSyncProcessor())
 
         addSingleton(DelayedTrackingStore(app))
+
+        addSingleton(LibraryRepairGate(app))
+
+        addSingletonFactory { LibraryRepairer.create() }
 
         addSingleton(SimilarRepo())
 

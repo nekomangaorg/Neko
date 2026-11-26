@@ -15,6 +15,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.jobs.library.LibraryRepairGate
 import eu.kanade.tachiyomi.util.system.NetworkState
 import eu.kanade.tachiyomi.util.system.activeNetworkState
 import eu.kanade.tachiyomi.util.system.networkStateFlow
@@ -27,6 +28,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import org.nekomanga.R
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
@@ -46,6 +49,7 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
     }
 
     override suspend fun doWork(): Result {
+        if (Injekt.get<LibraryRepairGate>().isRunning) return Result.retry()
 
         val networkCheck =
             checkNetworkState(
@@ -127,9 +131,10 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
     }
 
     companion object {
-        private const val TAG = "Downloader"
+        const val TAG = "Downloader"
 
         fun start(context: Context) {
+            if (Injekt.get<LibraryRepairGate>().refuseStart()) return
             val request =
                 OneTimeWorkRequestBuilder<DownloadJob>()
                     .addTag(TAG)
